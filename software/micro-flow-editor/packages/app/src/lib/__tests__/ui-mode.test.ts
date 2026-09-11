@@ -60,6 +60,10 @@ describe("isScreenVisibleInMode", () => {
     expect(isScreenVisibleInMode("deploy-diff", "base")).toBe(true);
     expect(isScreenVisibleInMode("runtime-diagnostics", "base")).toBe(true);
     expect(isScreenVisibleInMode("settings-security", "base")).toBe(true);
+    expect(isScreenVisibleInMode("market", "base")).toBe(true);
+    expect(isScreenVisibleInMode("generate-schematic-pcb", "base")).toBe(true);
+    expect(isScreenVisibleInMode("education", "base")).toBe(true);
+    expect(isScreenVisibleInMode("datasheets", "base")).toBe(true);
   });
 
   it("shows every screen in advanced", () => {

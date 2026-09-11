@@ -1,9 +1,12 @@
 import {
   Activity,
+  BookOpen,
   Boxes,
   Cable,
+  CircuitBoard,
   FileCode,
   GitCompareArrows,
+  GraduationCap,
   Network,
   Redo2,
   Save,
@@ -11,6 +14,7 @@ import {
   Settings,
   Share2,
   Shield,
+  ShoppingBag,
   SlidersHorizontal,
   Store,
   Undo2,
@@ -108,6 +112,10 @@ export function CommandPalette() {
         ["capability-marketplace", "Capability Marketplace & OTA", Store],
         ["cross-core-automation", "Automazioni", Share2],
         ["settings-security", "Sicurezza e recupero", Shield],
+        ["market", "Market", ShoppingBag],
+        ["generate-schematic-pcb", "Genera schematico e PCB", CircuitBoard],
+        ["education", "Formazione", GraduationCap],
+        ["datasheets", "Datasheet e istruzioni", BookOpen],
       ] as const
     )
       .filter(([id]) => isScreenVisibleInMode(id, mode))

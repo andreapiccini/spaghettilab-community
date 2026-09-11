@@ -186,13 +186,22 @@ make down    # stop the editor and the USB bridge
 
 ## Open the editor
 
+```sh
+make open
+```
+
+Starts `make up-d` if the Vite server is not already listening, then opens
+`http://127.0.0.1:5173` in the default browser. Same path via `npm run open`
+when Node is available on the host.
+
 ```text
 http://127.0.0.1:5173
 ```
 
 Published on `127.0.0.1` (loopback) only, same policy as the Node-RED
 environment — reachable from this computer, not from other devices on the
-LAN.
+LAN. Electron/Tauri are not wrapped yet: the app uses Web Serial and the
+Docker Vite workflow, so a native shell would slow development.
 
 ## Development workflow
 

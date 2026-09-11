@@ -1,0 +1,69 @@
+#pragma once
+
+// ST25R100 reader/writer configuration for BACKBONE.  Keep listen/card
+// emulation and NFC-F disabled to reduce RAM/flash use on the ESP32-C3.
+#define RFAL_FEATURE_LISTEN_MODE false
+#define RFAL_FEATURE_WAKEUP_MODE true
+#define RFAL_FEATURE_LOWPOWER_MODE true
+#define RFAL_FEATURE_NFCA true
+#define RFAL_FEATURE_NFCB true
+#define RFAL_FEATURE_NFCF false
+#define RFAL_FEATURE_NFCV true
+#define RFAL_FEATURE_T1T true
+#define RFAL_FEATURE_T2T true
+#define RFAL_FEATURE_T4T true
+#define RFAL_FEATURE_ST25TB true
+#define RFAL_FEATURE_ST25xV true
+#define RFAL_FEATURE_DYNAMIC_ANALOG_CONFIG false
+#define RFAL_FEATURE_DPO false
+#define RFAL_FEATURE_ISO_DEP true
+#define RFAL_FEATURE_ISO_DEP_POLL true
+#define RFAL_FEATURE_ISO_DEP_LISTEN false
+#define RFAL_FEATURE_NFC_DEP false
+
+#define RFAL_FEATURE_ISO_DEP_IBLOCK_MAX_LEN 256U
+#define RFAL_FEATURE_NFC_DEP_BLOCK_MAX_LEN 254U
+#define RFAL_FEATURE_NFC_RF_BUF_LEN 258U
+#define RFAL_FEATURE_ISO_DEP_APDU_MAX_LEN 512U
+#define RFAL_FEATURE_NFC_DEP_PDU_MAX_LEN 512U
+
+#define RFAL_SUPPORT_MODE_POLL_NFCA true
+#define RFAL_SUPPORT_MODE_POLL_NFCB true
+#define RFAL_SUPPORT_MODE_POLL_NFCF false
+#define RFAL_SUPPORT_MODE_POLL_NFCV true
+#define RFAL_SUPPORT_MODE_POLL_ACTIVE_P2P false
+#define RFAL_SUPPORT_MODE_LISTEN_NFCA false
+#define RFAL_SUPPORT_MODE_LISTEN_NFCB false
+#define RFAL_SUPPORT_MODE_LISTEN_NFCF false
+#define RFAL_SUPPORT_MODE_LISTEN_ACTIVE_P2P false
+
+#define RFAL_SUPPORT_CE false
+#define RFAL_SUPPORT_RW true
+#define RFAL_SUPPORT_AP2P false
+
+#define RFAL_SUPPORT_BR_RW_53 true
+#define RFAL_SUPPORT_BR_RW_106 true
+#define RFAL_SUPPORT_BR_RW_212 false
+#define RFAL_SUPPORT_BR_RW_424 false
+#define RFAL_SUPPORT_BR_RW_848 false
+#define RFAL_SUPPORT_BR_RW_1695 false
+#define RFAL_SUPPORT_BR_RW_3390 false
+#define RFAL_SUPPORT_BR_RW_6780 false
+#define RFAL_SUPPORT_BR_RW_13560 false
+#define RFAL_SUPPORT_BR_AP2P_106 false
+#define RFAL_SUPPORT_BR_AP2P_212 false
+#define RFAL_SUPPORT_BR_AP2P_424 false
+#define RFAL_SUPPORT_BR_AP2P_848 false
+#define RFAL_SUPPORT_BR_CE_A_106 false
+#define RFAL_SUPPORT_BR_CE_A_212 false
+#define RFAL_SUPPORT_BR_CE_A_424 false
+#define RFAL_SUPPORT_BR_CE_A_848 false
+#define RFAL_SUPPORT_BR_CE_B_106 false
+#define RFAL_SUPPORT_BR_CE_B_212 false
+#define RFAL_SUPPORT_BR_CE_B_424 false
+#define RFAL_SUPPORT_BR_CE_B_848 false
+#define RFAL_SUPPORT_BR_CE_F_212 false
+#define RFAL_SUPPORT_BR_CE_F_424 false
+
+// Use the analog table shipped with the ST25R200/ST25R100 driver.
+#define RFAL_ANALOG_CONFIG_CUSTOM

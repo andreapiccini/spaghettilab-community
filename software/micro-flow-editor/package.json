@@ -10,6 +10,7 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "dev": "npm run dev -w @spaghettilab/app",
+    "open": "sh scripts/open-app.sh",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "tsc -b",
     "lint": "eslint .",

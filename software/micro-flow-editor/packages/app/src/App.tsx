@@ -12,6 +12,10 @@ import { RuntimeDiagnosticsScreen } from "./components/runtime-diagnostics/Runti
 import { CapabilityMarketplaceScreen } from "./components/capability-marketplace/CapabilityMarketplaceScreen.js";
 import { CrossCoreAutomationScreen } from "./components/cross-core-automation/CrossCoreAutomationScreen.js";
 import { SettingsSecurityScreen } from "./components/settings-security/SettingsSecurityScreen.js";
+import { MarketScreen } from "./components/coming-soon/MarketScreen.js";
+import { SchematicPcbScreen } from "./components/coming-soon/SchematicPcbScreen.js";
+import { EducationScreen } from "./components/coming-soon/EducationScreen.js";
+import { DatasheetsScreen } from "./components/coming-soon/DatasheetsScreen.js";
 import { SettingsModal } from "./components/settings-modal/SettingsModal.js";
 import { NextStepHint } from "./components/shell/NextStepHint.js";
 import { TourOverlay } from "./components/shell/TourOverlay.js";
@@ -125,6 +129,38 @@ function AppContent() {
     return (
       <AppShell>
         <SettingsSecurityScreen />
+      </AppShell>
+    );
+  }
+
+  if (activeScreen === "market") {
+    return (
+      <AppShell>
+        <MarketScreen />
+      </AppShell>
+    );
+  }
+
+  if (activeScreen === "generate-schematic-pcb") {
+    return (
+      <AppShell>
+        <SchematicPcbScreen />
+      </AppShell>
+    );
+  }
+
+  if (activeScreen === "education") {
+    return (
+      <AppShell>
+        <EducationScreen />
+      </AppShell>
+    );
+  }
+
+  if (activeScreen === "datasheets") {
+    return (
+      <AppShell>
+        <DatasheetsScreen />
       </AppShell>
     );
   }

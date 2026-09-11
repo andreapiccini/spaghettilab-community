@@ -1,15 +1,19 @@
 import {
   Activity,
   Blocks,
+  BookOpen,
   Boxes,
   Cable,
+  CircuitBoard,
   Cpu,
   GitCompareArrows,
+  GraduationCap,
   PanelLeftClose,
   PanelLeftOpen,
   Puzzle,
   Share2,
   Shield,
+  ShoppingBag,
   Store,
   Workflow,
 } from "lucide-react";
@@ -50,9 +54,21 @@ const GROUPS: readonly { readonly items: readonly RailItem[] }[] = [
       { id: "settings-security", label: "Sicurezza", icon: Shield },
     ],
   },
+  {
+    items: [
+      { id: "market", label: "Market", icon: ShoppingBag },
+      {
+        id: "generate-schematic-pcb",
+        label: "Genera schematico e PCB",
+        icon: CircuitBoard,
+      },
+      { id: "education", label: "Formazione", icon: GraduationCap },
+      { id: "datasheets", label: "Datasheet e istruzioni", icon: BookOpen },
+    ],
+  },
 ];
 
-/** `UX_ARCHITECTURE.md` § Shell applicativa — 64px collapsed / 240px expanded, three groups separated by a thin divider. */
+/** `UX_ARCHITECTURE.md` § Shell applicativa — 64px collapsed / 240px expanded, groups separated by a thin divider. */
 export function LeftRail() {
   const { activeScreen, navigate } = useSession();
   const { mode } = useUiMode();

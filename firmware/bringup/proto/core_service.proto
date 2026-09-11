@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package sl.core;
+
+// USB (PC <-> CORE ESP32-S3 only): COBS(protobuf) + 0x00 delimiter.
+// Flash/update C3: UART 115200 on the CAN PHY; TWAI uninstalled for the session.
+// Runtime ping/reboot: TWAI after the C3 app is running.
+//
+// Max protobuf payload 320 bytes. Chunk data max 256 bytes.
+
+message Ping {}
+
+message GetStatus {}
+
+message RebootC3 {
+  bool enter_update = 1;  // TWAI reboot, then C3 listens UART SLUP
+  bool rom_download = 2;  // TWAI: software jump to ROM UART download
+}
+
+message FlashC3Begin {
+  uint32 size = 1;
+  uint32 crc32 = 2;
+  uint32 offset = 3;  // flash offset; 0 for merged ROM image or app OTA
+  // 0 = auto (UART SLUP if C3 in window, else ROM UART)
+  // 1 = force ROM UART-over-CAN (blank chip / merged.bin)
+  // 2 = force app SLUP UART-over-CAN (firmware.bin)
+  uint32 mode = 4;
+  // Invert UART TX+RX on the S3 (GPIO5/4). Use if the CANH/CANL pair is swapped
+  // on the cable: swapped diffs invert UART and the C3 ROM stays silent.
+  bool uart_invert = 5;
+}
+
+message FlashC3Chunk {
+  uint32 offset = 1;
+  bytes data = 2;
+}
+
+message FlashC3Finish {}
+
+message NfcRequest {
+  uint32 command = 1;  // 0x20..0x26, see src/common/slup.h
+  bytes payload = 2;   // up to 7 bytes; forwarded in one classic CAN frame
+}
+
+message DiscoverNodes {}
+
+message HostToCore {
+  uint32 nonce = 1;
+  uint32 node_id = 2;       // low 24 bits derived from the C3 factory MAC
+  bool node_addressed = 3;  // false = legacy standard CAN IDs 0x10/0x11
+  oneof op {
+    Ping ping = 10;
+    GetStatus status = 11;
+    RebootC3 reboot_c3 = 12;
+    FlashC3Begin flash_begin = 13;
+    FlashC3Chunk flash_chunk = 14;
+    FlashC3Finish flash_finish = 15;
+    NfcRequest nfc = 16;
+    DiscoverNodes discover_nodes = 17;
+  }
+}
+
+message Pong {
+  string version = 1;
+}
+
+message Ack {
+  bool ok = 1;
+  string message = 2;
+  uint32 progress_pct = 3;
+  uint32 mode_used = 4;  // 1 = ROM UART, 2 = SLUP UART, 3 = ESP-NOW OTA
+}
+
+message Status {
+  bool c3_twai_alive = 1;
+  bool uart_busy = 2;  // flash in progress (UART active, TWAI off)
+  uint32 last_error = 3;
+  string detail = 4;
+}
+
+message NfcResponse {
+  bool ok = 1;
+  uint32 status = 2;   // 0 = OK, otherwise RFAL/status code
+  uint32 command = 3;  // response opcode 0xA0..0xA6
+  bytes data = 4;      // response payload after status
+  string detail = 5;
+}
+
+message NodeList {
+  // Repeated packed records: node_id LE32 + factory MAC[6] = 10 bytes each.
+  bytes records = 1;
+}
+
+message CoreToHost {
+  uint32 nonce = 1;
+  oneof op {
+    Pong pong = 10;
+    Ack ack = 11;
+    Status status = 12;
+    NfcResponse nfc = 13;
+    NodeList nodes = 14;
+  }
+}
