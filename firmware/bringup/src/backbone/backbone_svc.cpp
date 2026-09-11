@@ -352,7 +352,8 @@ void backbone_twai_poll() {
         }
         case kTwaiNfcRegRead: {
             uint8_t value = 0;
-            const bool ok = msg.data_length_code >= 2 && nfc_reg_read(msg.data[1], &value);
+            const uint8_t ant = (msg.data_length_code >= 3 && msg.data[2] == 2) ? 2 : 1;
+            const bool ok = msg.data_length_code >= 2 && nfc_reg_read(msg.data[1], &value, ant);
             rsp.data[0] = kTwaiNfcRegReadRsp;
             rsp.data[1] = ok ? 0 : (nfc_last_error() ? nfc_last_error() : 1);
             rsp.data[2] = msg.data[1];

@@ -106,7 +106,8 @@ def interpret_register(address: int, value: int) -> str:
     if address == 0x01:
         antenna = "RFO2/RFI2" if value & 0x10 else "RFO1/RFI1"
         mode = "single-ended" if value & 0x20 else "differential"
-        return f"antenna {antenna}, mode {mode}"
+        hint = " (ANT1 expects 0x3C)" if (value & 0x30) != 0x30 else " (ANT1 RFO2 OK)"
+        return f"antenna {antenna}, mode {mode}{hint}"
     if address == 0x11:
         names = ((7, "subcarrier"), (6, "GPT"), (5, "NRT"), (4, "MRT"), (3, "RX active"), (2, "RX on"), (1, "TX on"))
         active = [name for bit, name in names if value & (1 << bit)]
@@ -608,8 +609,8 @@ class CoreClient:
             "wakeup_irq_count": irq_count,
         }
 
-    def nfc_reg_read(self, address: int) -> int:
-        reply = self.nfc(NFC_REG_READ, bytes([address]))
+    def nfc_reg_read(self, address: int, antenna: int = 1) -> int:
+        reply = self.nfc(NFC_REG_READ, bytes([address, 1 if antenna != 2 else 2]))
         if not reply.get("ok") or len(reply.get("data", b"")) < 2:
             raise FlashError(f"register read 0x{address:02X}: {reply.get('detail')} (status {reply.get('status')})")
         return reply["data"][1]
@@ -1010,6 +1011,8 @@ def main() -> int:
     sub.add_parser("nfc-info", help="check ST25R100 SPI communication and identity")
     rr = sub.add_parser("nfc-reg-read", help="read one or all ST25R100 registers")
     rr.add_argument("address", nargs="?", default="all", help="address (e.g. 0x3f) or all")
+    rr.add_argument("--antenna", type=int, choices=(1, 2), default=1,
+                    help="select coil first (1 = ANT1/RFO2, default)")
     rw = sub.add_parser("nfc-reg-write", help="write an ST25R100 RW register")
     rw.add_argument("address", type=parse_int)
     rw.add_argument("value", type=parse_int)
@@ -1132,7 +1135,7 @@ def main() -> int:
                 if not 0 <= address <= 0x3F:
                     raise ValueError("register address outside range 0x00..0x3F")
                 addresses = (address,)
-            rows = [(address, cli.nfc_reg_read(address)) for address in addresses]
+            rows = [(address, cli.nfc_reg_read(address, args.antenna)) for address in addresses]
             if args.json:
                 cli.emit("nfc_registers", registers=[{
                     "address": address, "name": ST25R100_REGISTERS[address], "value": value,

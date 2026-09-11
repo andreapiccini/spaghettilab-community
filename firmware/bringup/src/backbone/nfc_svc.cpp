@@ -168,19 +168,24 @@ static bool start_wakeup(uint8_t antenna) {
 // (single=0): both RFO drivers on, RX combines RFI1+RFI2 → TX on ANT1, RX deaf.
 // KiCad ANT1 matching is RFO2_C7_ANT / RFI2_C7_ANT; ANT2 is RFO1.
 static ReturnCode apply_antenna(uint8_t antenna) {
-    const bool rfo2 = (antenna == 1);
-    ReturnCode rc = s_rf.st25r200SetAntennaMode(true, rfo2);
-    if (rc != ERR_NONE) return rc;
+    // Datasheet GENERAL 0x01: bit5 single, bit4 rfo2.
+    // 0x2C = 00101100 = single + MISO pull-downs, rfo2=0 → RFO1/RFI1 (ANT2).
+    // ANT1 must be 0x3C = 00111100 (same + rfo2). Do not use SetAntennaMode
+    // alone: RFAL analog/field-on left bit4 clear on the running image.
     uint8_t general = 0;
-    rc = s_rf.st25r200ReadRegister(ST25R200_REG_GENERAL, &general);
+    ReturnCode rc = s_rf.st25r200ReadRegister(ST25R200_REG_GENERAL, &general);
     if (rc != ERR_NONE) return rc;
-    const uint8_t expect = ST25R200_REG_GENERAL_single | (rfo2 ? ST25R200_REG_GENERAL_rfo2 : 0);
-    if ((general & (ST25R200_REG_GENERAL_single | ST25R200_REG_GENERAL_rfo2)) != expect) {
-        rc = s_rf.st25r200ChangeRegisterBits(ST25R200_REG_GENERAL,
-                                             ST25R200_REG_GENERAL_single | ST25R200_REG_GENERAL_rfo2,
-                                             expect);
-    }
-    return rc;
+    general = (uint8_t)((general & (uint8_t)~(ST25R200_REG_GENERAL_single | ST25R200_REG_GENERAL_rfo2))
+                        | ST25R200_REG_GENERAL_single
+                        | ((antenna == 1) ? ST25R200_REG_GENERAL_rfo2 : 0));
+    rc = s_rf.st25r200WriteRegister(ST25R200_REG_GENERAL, general);
+    if (rc != ERR_NONE) return rc;
+    uint8_t check = 0;
+    rc = s_rf.st25r200ReadRegister(ST25R200_REG_GENERAL, &check);
+    if (rc != ERR_NONE) return rc;
+    const uint8_t pair = ST25R200_REG_GENERAL_single | ST25R200_REG_GENERAL_rfo2;
+    const uint8_t expect = ST25R200_REG_GENERAL_single | ((antenna == 1) ? ST25R200_REG_GENERAL_rfo2 : 0);
+    return ((check & pair) == expect) ? ERR_NONE : ERR_IO;
 }
 
 static void apply_rx_gain() {
@@ -197,6 +202,7 @@ static ReturnCode prepare_poll_antenna(uint8_t antenna) {
     if (rc == ERR_NONE) rc = s_rf.rfalFieldOnAndStartGT();
     if (rc == ERR_NONE) rc = apply_antenna(antenna);
     if (rc == ERR_NONE) apply_rx_gain();
+    if (rc == ERR_NONE) rc = apply_antenna(antenna);
     if (rc == ERR_NONE) delay(40);
     return rc;
 }
@@ -259,6 +265,10 @@ static bool select_nfca(uint8_t antenna, rfalNfcaListenDevice *device) {
         if (attempt > 0) {
             s_rf.rfalFieldOnAndStartGT();
             delay(15);
+        }
+        if (apply_antenna(antenna) != ERR_NONE) {
+            rc = ERR_IO;
+            break;
         }
         rc = nfca_short_frame(RFAL_14443A_SHORTFRAME_CMD_WUPA, &sens, 5);
         if (rc != ERR_NONE) delay(8);
@@ -409,6 +419,7 @@ void nfc_probe(uint8_t antenna, bool wupa, uint8_t result[6]) {
     ctx.fwt = rfalConvMsTo1fc(5U);
     ctx.flags = RFAL_TXRX_FLAGS_CRC_TX_MANUAL | RFAL_TXRX_FLAGS_PAR_TX_NONE |
                 RFAL_TXRX_FLAGS_CRC_RX_KEEP | RFAL_TXRX_FLAGS_CRC_RX_MANUAL;
+    if (rc == ERR_NONE) rc = apply_antenna(antenna);
     if (rc == ERR_NONE) rc = s_rf.rfalStartTransceive(&ctx);
     if (rc == ERR_NONE) {
         result[1] |= 1;  // Transceive accepted
@@ -444,10 +455,12 @@ bool nfc_irq_wakeup_enabled() { return s_wakeup_enabled; }
 uint8_t nfc_wakeup_antenna() { return s_wakeup_antenna; }
 uint16_t nfc_wakeup_irq_count() { return s_wakeup_irq_count; }
 
-bool nfc_reg_read(uint8_t address, uint8_t *value) {
+bool nfc_reg_read(uint8_t address, uint8_t *value, uint8_t antenna) {
+    if (antenna != 2) antenna = 1;
     if (!nfc_ensure_rfal() || !value || address > 0x3F) return false;
     stop_wakeup();
     s_rf.rfalFieldOff();
+    if (apply_antenna(antenna) != ERR_NONE) return false;
     const ReturnCode rc = s_rf.st25r200ReadRegister(address, value);
     s_error = (uint8_t)rc;
     return rc == ERR_NONE;

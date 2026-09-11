@@ -18,7 +18,7 @@ bool nfc_irq_wakeup_enabled();
 uint8_t nfc_wakeup_antenna();
 uint16_t nfc_wakeup_irq_count();
 
-bool nfc_reg_read(uint8_t address, uint8_t *value);
+bool nfc_reg_read(uint8_t address, uint8_t *value, uint8_t antenna = 1);
 bool nfc_reg_write(uint8_t address, uint8_t value);
 
 // antenna: 0 or 1 = physical ANT1 (silkscreen ANT1 = ST25R100 RFO2/RFI2),
