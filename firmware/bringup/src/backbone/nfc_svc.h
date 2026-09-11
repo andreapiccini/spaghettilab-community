@@ -13,7 +13,10 @@ uint8_t nfc_last_error();
 uint8_t nfc_scan_stage();
 uint8_t nfc_scan_antenna();
 // Raw 7-bit NFC-A probe: version, flags, RFAL status, RX bits, ATQA[2].
-void nfc_probe(uint8_t antenna, bool wupa, uint8_t result[6]);
+// baseline=true bypasses every manual register override (antcl/flags/fwt/RX
+// gain) and calls the unmodified rfalNfcaPollerCheckPresence() instead, for
+// a diagnostic run against the stock RFAL behavior.
+void nfc_probe(uint8_t antenna, bool wupa, uint8_t result[6], bool baseline = false);
 bool nfc_irq_wakeup_enabled();
 uint8_t nfc_wakeup_antenna();
 uint16_t nfc_wakeup_irq_count();

@@ -188,11 +188,15 @@ static ReturnCode apply_antenna(uint8_t antenna) {
     return ((check & pair) == expect) ? ERR_NONE : ERR_IO;
 }
 
-static void apply_rx_gain() {
-    s_rf.st25r200ChangeRegisterBits(ST25R200_REG_RX_ANA2,
-                                    ST25R200_REG_RX_ANA2_afe_gain_rw_mask,
-                                    (uint8_t)(0x0FU << ST25R200_REG_RX_ANA2_afe_gain_rw_shift));
-}
+// afe_gain_rw is never touched by the official RFAL analog-config table for
+// any POLL+NFCA mode (rfal_rfst25r200_analogConfigTbl.h): the validated
+// baseline leaves it at the chip's POR default. The sibling field in the
+// same register, afe_gain_td, is documented by ST's own driver
+// (st25r200.cpp, st25r200IsExtFieldOn()) as "Reduce measurement sensitivity"
+// when driven to a *higher* value, i.e. this field is inversely related to
+// receiver sensitivity. Forcing afe_gain_rw to 0x0F (max value) very likely
+// desensitized the RX chain to the point of missing ATQA entirely. Removed;
+// let RFAL/POR own this register field.
 
 static ReturnCode prepare_poll_antenna(uint8_t antenna) {
     s_rf.rfalFieldOff();
@@ -200,8 +204,6 @@ static ReturnCode prepare_poll_antenna(uint8_t antenna) {
     ReturnCode rc = s_nfc.rfalNfcaPollerInitialize();
     if (rc == ERR_NONE) rc = apply_antenna(antenna);
     if (rc == ERR_NONE) rc = s_rf.rfalFieldOnAndStartGT();
-    if (rc == ERR_NONE) rc = apply_antenna(antenna);
-    if (rc == ERR_NONE) apply_rx_gain();
     if (rc == ERR_NONE) rc = apply_antenna(antenna);
     if (rc == ERR_NONE) delay(40);
     return rc;
@@ -221,7 +223,7 @@ static ReturnCode wait_transceive(uint32_t timeout_ms) {
     }
 }
 
-static ReturnCode nfca_short_frame(uint8_t cmd7, rfalNfcaSensRes *sens, uint32_t fwt_ms) {
+static ReturnCode nfca_short_frame(uint8_t cmd7, rfalNfcaSensRes *sens) {
     uint8_t command = cmd7;
     uint16_t bits = 0;
     rfalTransceiveContext ctx = {};
@@ -231,7 +233,11 @@ static ReturnCode nfca_short_frame(uint8_t cmd7, rfalNfcaSensRes *sens, uint32_t
     ctx.rxBuf = reinterpret_cast<uint8_t *>(sens);
     ctx.rxBufLen = 16;
     ctx.rxRcvdLen = &bits;
-    ctx.fwt = rfalConvMsTo1fc(fwt_ms);
+    // RFAL's own rfalNfcaPollerCheckPresence() always uses RFAL_NFCA_FDTMIN
+    // (~120us) here, not an arbitrary ms value: fwt only feeds the NRT
+    // (max wait), never the MRT/FDTListen (min wait) that actually gates
+    // when the receiver unmasks. Match the official baseline exactly.
+    ctx.fwt = RFAL_NFCA_FDTMIN;
     ctx.flags = RFAL_TXRX_FLAGS_CRC_TX_MANUAL | RFAL_TXRX_FLAGS_PAR_TX_NONE |
                 RFAL_TXRX_FLAGS_CRC_RX_KEEP | RFAL_TXRX_FLAGS_CRC_RX_MANUAL;
     ReturnCode rc = s_rf.rfalStartTransceive(&ctx);
@@ -270,7 +276,7 @@ static bool select_nfca(uint8_t antenna, rfalNfcaListenDevice *device) {
             rc = ERR_IO;
             break;
         }
-        rc = nfca_short_frame(RFAL_14443A_SHORTFRAME_CMD_WUPA, &sens, 5);
+        rc = nfca_short_frame(RFAL_14443A_SHORTFRAME_CMD_WUPA, &sens);
         if (rc != ERR_NONE) delay(8);
     }
     if (rc != ERR_NONE) {
@@ -385,7 +391,7 @@ bool nfc_ready() {
     // Do not initialize RFAL here: nfc-info used to block TWAI/USB (COBS timeout).
     return s_probe_ok && ((s_ic_id & 0xF8U) == 0xA8U);
 }
-void nfc_probe(uint8_t antenna, bool wupa, uint8_t result[6]) {
+void nfc_probe(uint8_t antenna, bool wupa, uint8_t result[6], bool baseline) {
     memset(result, 0, 6);
     result[0] = 0xD2;
     result[2] = ERR_PARAM;
@@ -398,6 +404,33 @@ void nfc_probe(uint8_t antenna, bool wupa, uint8_t result[6]) {
     s_rf.rfalFieldOff();
     delay(5);
     ReturnCode rc = prepare_poll_antenna(antenna);
+
+    if (baseline) {
+        // Pure RFAL baseline: rfalNfcaPollerInitialize() + antenna select +
+        // rfalFieldOnAndStartGT() already ran above (in prepare_poll_antenna,
+        // with the RX-gain override removed). From here on this path makes
+        // *zero* manual register writes: it calls the unmodified official
+        // rfalNfcaPollerCheckPresence(), which owns antcl/flags/fwt itself.
+        rfalNfcaSensRes sens = {};
+        if (rc == ERR_NONE) rc = apply_antenna(antenna);
+        bool attempted = false;
+        if (rc == ERR_NONE) {
+            attempted = true;
+            rc = s_nfc.rfalNfcaPollerCheckPresence(
+                wupa ? RFAL_14443A_SHORTFRAME_CMD_WUPA : RFAL_14443A_SHORTFRAME_CMD_REQA, &sens);
+        }
+        // rfalNfcaPollerCheckPresence() only returns a ReturnCode, it does
+        // not expose bit-level TxRx status like the manual path below, so
+        // flags/bit-count are approximated from rc.
+        result[1] = attempted ? 3 : 0;  // started + reached RX
+        result[3] = (rc == ERR_NONE) ? 16 : 0;
+        memcpy(&result[4], &sens, sizeof(sens));
+        s_rf.rfalFieldOff();
+        result[2] = (uint8_t)rc;
+        s_error = (uint8_t)rc;
+        return;
+    }
+
     uint8_t rx_config = 0;
     bool restore_rx = false;
     if (rc == ERR_NONE) {
@@ -416,7 +449,9 @@ void nfc_probe(uint8_t antenna, bool wupa, uint8_t result[6]) {
     ctx.rxBuf = rx;
     ctx.rxBufLen = 16;
     ctx.rxRcvdLen = &bits;
-    ctx.fwt = rfalConvMsTo1fc(5U);
+    // Match RFAL_NFCA_FDTMIN used internally by rfalNfcaPollerCheckPresence()
+    // instead of an arbitrary ms value (see nfca_short_frame()).
+    ctx.fwt = RFAL_NFCA_FDTMIN;
     ctx.flags = RFAL_TXRX_FLAGS_CRC_TX_MANUAL | RFAL_TXRX_FLAGS_PAR_TX_NONE |
                 RFAL_TXRX_FLAGS_CRC_RX_KEEP | RFAL_TXRX_FLAGS_CRC_RX_MANUAL;
     if (rc == ERR_NONE) rc = apply_antenna(antenna);

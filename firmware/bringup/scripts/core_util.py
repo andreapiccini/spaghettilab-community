@@ -620,8 +620,12 @@ class CoreClient:
         if not reply.get("ok"):
             raise FlashError(f"register write 0x{address:02X}: {reply.get('detail')} (status {reply.get('status')})")
 
-    def nfc_probe(self, antenna: int, wupa: bool = False) -> dict:
-        reply = self.nfc(NFC_SCAN, bytes([antenna, 0xD2, int(wupa)]), timeout=10)
+    def nfc_probe(self, antenna: int, wupa: bool = False, baseline: bool = False) -> dict:
+        # baseline=True runs the diagnostic through the unmodified
+        # rfalNfcaPollerCheckPresence() (no manual antcl/flags/fwt/RX-gain
+        # overrides) instead of the manual short-frame reimplementation.
+        mode = (1 if wupa else 0) | (2 if baseline else 0)
+        reply = self.nfc(NFC_SCAN, bytes([antenna, 0xD2, mode]), timeout=10)
         data = reply.get("data", b"")
         if not reply.get("ok") or len(data) != 6 or data[0] != 0xD2:
             raise FlashError("NFC probe unavailable: install the nfc-probe recovery image on C3")
@@ -630,6 +634,7 @@ class CoreClient:
         deadline = bool(flags & 4)
         valid = tx_done and rc == 0 and bits == 16
         return {"antenna": antenna, "command": "WUPA" if wupa else "REQA",
+                "baseline": baseline,
                 "started": bool(flags & 1), "tx_complete": tx_done,
                 "software_deadline": deadline, "rfal_error": rc, "rx_bits": bits,
                 "atqa_hex": data[4:6].hex(" ").upper() if bits else "",
@@ -1033,6 +1038,8 @@ def main() -> int:
     probe.add_argument("--request", choices=("reqa", "wupa"), default="wupa")
     probe.add_argument("--count", type=int, default=20, help="number of probes; 0 repeats until Ctrl+C")
     probe.add_argument("--interval-ms", type=int, default=500, help="minimum host start-to-start interval")
+    probe.add_argument("--baseline", action="store_true",
+                        help="use unmodified rfalNfcaPollerCheckPresence() instead of the manual short-frame path")
     tr = sub.add_parser("tag-read", help="read pages from an NFC-A Type 2 tag")
     tr.add_argument("--antenna", type=int, choices=(1, 2), required=True)
     tr.add_argument("--page", type=parse_int, default=0)
@@ -1166,7 +1173,7 @@ def main() -> int:
             try:
                 while args.count == 0 or index < args.count:
                     started = time.monotonic()
-                    result = cli.nfc_probe(args.antenna, args.request == "wupa")
+                    result = cli.nfc_probe(args.antenna, args.request == "wupa", args.baseline)
                     index += 1
                     result.update(probe=index, elapsed_ms=round((time.monotonic() - started) * 1000, 1))
                     if args.json:

@@ -374,7 +374,10 @@ void backbone_twai_poll() {
             if (msg.data_length_code >= 4 && msg.data[2] == 0xD2) {
                 rsp.data[0] = kTwaiNfcScanRsp;
                 rsp.data[1] = 0;  // Diagnostic delivered; RFAL status is in payload.
-                nfc_probe(msg.data[1], msg.data[3] != 0, &rsp.data[2]);
+                // data[3] bit0 = WUPA vs REQA, bit1 = baseline (pure RFAL,
+                // no manual register overrides). Old callers sending 0/1
+                // keep the existing manual-diagnostic path unchanged.
+                nfc_probe(msg.data[1], (msg.data[3] & 1U) != 0, &rsp.data[2], (msg.data[3] & 2U) != 0);
                 send_rsp();
                 break;
             }
