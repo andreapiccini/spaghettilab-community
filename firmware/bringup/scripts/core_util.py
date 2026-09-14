@@ -121,25 +121,196 @@ def interpret_register(address: int, value: int) -> str:
     return f"set bits: {', '.join(str(bit) for bit in range(7, -1, -1) if value & (1 << bit)) or 'none'}"
 
 
-def interpret_t2t_page(page: int, data: bytes) -> str:
+def t2t_model_from_cc(cc: bytes) -> str:
+    if len(cc) != 4 or cc[0] != 0xE1:
+        return "NFC-A Type 2"
+    # CC[2] is NDEF area size in 8-byte units.
+    return {
+        0x06: "NTAG210 / 48 B",
+        0x12: "NTAG213 / 144 B",
+        0x3E: "NTAG215 / 496 B",
+        0x6D: "NTAG216 / 872 B",
+        0x08: "ST25TN512",
+        0x14: "ST25TN01K",
+    }.get(cc[2], f"T2T / {cc[2] * 8} B")
+
+
+def t2t_user_pages(cc: bytes) -> tuple[int, int]:
+    """Inclusive user-memory page range for write checks."""
+    model = t2t_model_from_cc(cc)
+    if "NTAG213" in model:
+        return (4, 39)
+    if "NTAG215" in model:
+        return (4, 129)
+    if "NTAG216" in model:
+        return (4, 225)
+    if "ST25TN512" in model:
+        return (4, 19)
+    if "ST25TN01K" in model:
+        return (4, 43)
+    return (4, 39)
+
+
+def ntag_model_name(model: str) -> str | None:
+    for name in ("NTAG216", "NTAG215", "NTAG213", "NTAG210"):
+        if name in model:
+            return name
+    return None
+
+
+def ntag_dynlock_page(model: str) -> int | None:
+    name = ntag_model_name(model)
+    return {"NTAG213": 40, "NTAG215": 130, "NTAG216": 226}.get(name or "")
+
+
+def ntag_static_lock_mask(lock_cc: bool, lock_user: bool, freeze: bool) -> tuple[int, int]:
+    """OR-mask for NTAG21x page 2 lock bytes (NXP §8.5.2). Bits only go 0→1."""
+    lock0 = 0
+    lock1 = 0
+    if lock_cc:
+        lock0 |= 0x08  # L_CC
+        if freeze:
+            lock0 |= 0x01  # BL_CC
+    if lock_user:
+        lock0 |= 0xF0  # L4..L7
+        lock1 |= 0xFF  # L8..L15
+        if freeze:
+            lock0 |= 0x06  # BL 4-9 and 10-15
+    return lock0, lock1
+
+
+def ntag_dynamic_lock_mask(model: str, freeze: bool) -> bytes | None:
+    """OR-mask for the NTAG21x dynamic-lock page. Byte 3 is RFUI (write 0, reads 0xBD)."""
+    name = ntag_model_name(model)
+    if name == "NTAG213":
+        # 2-page groups 16-39, then optional block-locks. RFUI bits stay 0.
+        return bytes((0xFF, 0x0F, 0x3F if freeze else 0x00, 0x00))
+    if name == "NTAG215":
+        return bytes((0xFF, 0x00, 0x0F if freeze else 0x00, 0x00))
+    if name == "NTAG216":
+        return bytes((0xFF, 0x3F, 0x7F if freeze else 0x00, 0x00))
+    return None
+
+
+def describe_ntag_locks(lock0: int, lock1: int, dyn: bytes | None = None) -> str:
+    cc = "RO" if lock0 & 0x08 else "RW"
+    static_user = "RO" if (lock0 & 0xF0) == 0xF0 and lock1 == 0xFF else "open/partial"
+    parts = [f"CC {cc}", f"pages 4-15 {static_user}"]
+    if dyn and len(dyn) >= 2:
+        dyn_locked = dyn[0] == 0xFF and (dyn[1] & 0x0F) == 0x0F
+        parts.append(f"pages 16+ {'RO' if dyn_locked else 'open/partial'}")
+    return ", ".join(parts)
+
+
+NDEF_URI_PREFIXES = (
+    "", "http://www.", "https://www.", "http://", "https://", "tel:", "mailto:",
+    "ftp://anonymous:anonymous@", "ftp://ftp.", "ftps://", "sftp://", "smb://",
+    "nfs://", "ftp://", "dav://", "news:", "telnet://", "imap:", "rtsp://", "urn:",
+    "pop:", "sip:", "sips:", "tftp:", "btspp://", "btl2cap://", "btgoep://",
+    "tcpobex://", "irdaobex://", "file://", "urn:epc:id:", "urn:epc:tag:",
+    "urn:epc:pat:", "urn:epc:raw:", "urn:epc:", "urn:nfc:",
+)
+
+
+def encode_ndef_text(text: str) -> bytes:
+    payload = bytes([0x02]) + b"en" + text.encode("utf-8")
+    if len(payload) > 255:
+        raise ValueError("NDEF text is too long for a short record")
+    record = bytes((0xD1, 0x01, len(payload), 0x54)) + payload
+    return bytes((0x03, len(record))) + record + bytes((0xFE,))
+
+
+def encode_ndef_uri(uri: str) -> bytes:
+    code, rest = 0, uri
+    for index, prefix in enumerate(NDEF_URI_PREFIXES):
+        if prefix and uri.startswith(prefix) and len(prefix) > len(NDEF_URI_PREFIXES[code]):
+            code, rest = index, uri[len(prefix):]
+    payload = bytes((code,)) + rest.encode("utf-8")
+    if len(payload) > 255:
+        raise ValueError("NDEF URI is too long for a short record")
+    record = bytes((0xD1, 0x01, len(payload), 0x55)) + payload
+    return bytes((0x03, len(record))) + record + bytes((0xFE,))
+
+
+def ndef_prefix_len(user_head: bytes) -> int:
+    """Keep the factory Lock Control TLV (01 03 A0 0C 34 on NTAG213)."""
+    if len(user_head) >= 5 and user_head[0] == 0x01 and user_head[1] == 0x03:
+        return 2 + user_head[1]
+    return 0
+
+
+def pages_from_bytes(start_page: int, payload: bytes) -> list[tuple[int, bytes]]:
+    padded = payload + bytes((4 - len(payload) % 4) % 4)
+    return [(start_page + index, padded[index * 4:(index + 1) * 4]) for index in range(len(padded) // 4)]
+
+
+def write_tag_pages(cli: "CoreClient", antenna: int, rows: list[tuple[int, bytes]]) -> list[tuple[int, bytes]]:
+    verified: list[tuple[int, bytes]] = []
+    for page, data in rows:
+        cli.nfc_tag_write(antenna, page, data)
+        verify = cli.nfc_tag_read(antenna, page)
+        verified.append((page, verify))
+        if verify != data:
+            raise FlashError(f"page {page} verify failed: wrote {data.hex()} read {verify.hex()}")
+    return verified
+
+
+def apply_ntag_lock(cli: "CoreClient", antenna: int, model: str, *, lock_cc: bool, freeze: bool = True) -> dict:
+    if not ntag_model_name(model):
+        raise ValueError(f"{model} lock map is not implemented; only NTAG21x")
+    page2 = cli.nfc_tag_read(antenna, 2)
+    lock0, lock1 = ntag_static_lock_mask(lock_cc, True, freeze)
+    static = bytes((page2[0], page2[1], page2[2] | lock0, page2[3] | lock1))
+    cli.nfc_tag_write(antenna, 2, static)
+    page2 = cli.nfc_tag_read(antenna, 2)
+    dyn_page = ntag_dynlock_page(model)
+    dyn_mask = ntag_dynamic_lock_mask(model, freeze)
+    dyn = None
+    if dyn_page is not None and dyn_mask is not None:
+        current = cli.nfc_tag_read(antenna, dyn_page)
+        written = bytes(a | b for a, b in zip(current[:3], dyn_mask[:3])) + bytes((0x00,))
+        cli.nfc_tag_write(antenna, dyn_page, written)
+        dyn = cli.nfc_tag_read(antenna, dyn_page)
+        if (dyn[0] & dyn_mask[0]) != dyn_mask[0] or (dyn[1] & dyn_mask[1]) != dyn_mask[1]:
+            raise FlashError(f"dynamic lock verify failed on page {dyn_page}")
+    if (page2[2] & lock0) != lock0 or (page2[3] & lock1) != lock1:
+        raise FlashError("static lock verify failed on page 2")
+    return {
+        "model": model,
+        "page2": page2.hex(" ").upper(),
+        "dynlock_page": dyn_page,
+        "dynlock": None if dyn is None else dyn.hex(" ").upper(),
+        "locks": describe_ntag_locks(page2[2], page2[3], dyn),
+        "irreversible": True,
+    }
+
+
+def interpret_t2t_page(page: int, data: bytes, model: str = "Type 2") -> str:
     if page == 0:
         uid = data[:3].hex(":").upper()
-        return f"ST25TN01K: UID0..2 {uid} + BCC1 0x{data[3]:02X} (RO)"
+        return f"{model}: UID0..2 {uid} + BCC1 0x{data[3]:02X} (RO)"
     if page == 1:
-        return f"ST25TN01K: UID3..6 {data.hex(':').upper()} (RO)"
+        return f"{model}: UID3..6 {data.hex(':').upper()} (RO)"
     if page == 2:
-        return f"ST25TN01K: internal 0x{data[0]:02X}, SYSBLOCK 0x{data[1]:02X}, STATLOCK_0=0x{data[2]:02X}, STATLOCK_1=0x{data[3]:02X} (OTP lock)"
+        if ntag_model_name(model):
+            return (f"{model}: internal 0x{data[0]:02X} 0x{data[1]:02X}, "
+                    f"static lock {data[2]:02X} {data[3]:02X} · "
+                    f"{describe_ntag_locks(data[2], data[3])}")
+        return (f"{model}: lock/OTP 0x{data[0]:02X} 0x{data[1]:02X}, "
+                f"STATLOCK_0=0x{data[2]:02X}, STATLOCK_1=0x{data[3]:02X}")
     if page == 3:
         if len(data) == 4 and data[0] == 0xE1:
-            model = "ST25TN01K" if data[2] == 0x14 else "ST25TN512" if data[2] == 0x08 else "T2T"
-            return f"{model} CC (OTP): NDEF v{data[1] >> 4}.{data[1] & 0x0F}, area {data[2] * 8} B, access 0x{data[3]:02X}"
+            return (f"{t2t_model_from_cc(data)} CC (OTP): NDEF v{data[1] >> 4}.{data[1] & 0x0F}, "
+                    f"area {data[2] * 8} B, access 0x{data[3]:02X}")
         return "Non-standard Capability Container"
+    if ntag_dynlock_page(model) == page:
+        return f"{model} dynamic lock {data[:3].hex(' ').upper()} · RFUI 0x{data[3]:02X}"
     if 4 <= page <= 43:
         ascii_text = "".join(chr(b) if 32 <= b < 127 else "." for b in data)
         if page == 4 and data:
             tlv = {0x00: "NULL", 0x01: "Lock Control", 0x02: "Memory Control", 0x03: "NDEF", 0xFD: "Proprietary", 0xFE: "Terminator"}.get(data[0], "unknown")
-            return f"ST25TN01K user memory · TLV {tlv} · ASCII {ascii_text}"
-        return f"ST25TN01K user memory · ASCII {ascii_text}"
+            return f"{model} user memory · TLV {tlv} · ASCII {ascii_text}"
+        return f"{model} user memory · ASCII {ascii_text}"
     if page == 44:
         return f"ST25TN01K lock OTP: DYNLOCK_0=0x{data[0]:02X}, DYNLOCK_1=0x{data[1]:02X}, DYNLOCK_2=0x{data[2]:02X}, SYSLOCK=0x{data[3]:02X}"
     if page == 45:
@@ -419,14 +590,14 @@ def show_registers(console: Console, rows: list[tuple[int, int]]) -> None:
     console.print(table)
 
 
-def show_tag_pages(console: Console, antenna: int, rows: list[tuple[int, bytes]]) -> None:
-    table = Table(title=f"ST25TN01K · Type 2 memory · antenna {antenna}", box=box.ROUNDED, border_style="green")
+def show_tag_pages(console: Console, antenna: int, rows: list[tuple[int, bytes]], model: str = "Type 2") -> None:
+    table = Table(title=f"{model} · Type 2 memory · antenna {antenna}", box=box.ROUNDED, border_style="green")
     table.add_column("Page", style="cyan", justify="right")
     table.add_column("Address", style="dim")
     table.add_column("Hex", style="bright_magenta")
     table.add_column("Interpretation")
     for page, data in rows:
-        table.add_row(str(page), f"0x{page * 4:04X}", data.hex(" ").upper(), interpret_t2t_page(page, data))
+        table.add_row(str(page), f"0x{page * 4:04X}", data.hex(" ").upper(), interpret_t2t_page(page, data, model))
     console.print(table)
 
 
@@ -1050,6 +1221,20 @@ def main() -> int:
     tw.add_argument("--data", required=True, help='4 hex bytes, e.g. "DE AD BE EF"')
     tw.add_argument("--force", action="store_true", help="allow ST25TN01K system/OTP areas")
     tw.add_argument("--allow-kill", action="store_true", help="explicitly allow page 0x30 (irreversible KILL)")
+    tn = sub.add_parser("tag-ndef", help="write an NDEF text or URI into Type 2 user memory")
+    tn.add_argument("--antenna", type=int, choices=(1, 2), required=True)
+    ndef_what = tn.add_mutually_exclusive_group(required=True)
+    ndef_what.add_argument("--text", help="plain-text NDEF record (lang en)")
+    ndef_what.add_argument("--uri", help="URI NDEF record, e.g. https://spaghettilab.com")
+    tn.add_argument("--lock", action="store_true",
+                    help="after write, permanently lock user memory + CC (OTP, irreversible)")
+    tn.add_argument("--confirm", action="store_true", help="required together with --lock")
+    tl = sub.add_parser("tag-lock", help="permanently lock an NTAG21x (OTP, irreversible)")
+    tl.add_argument("--antenna", type=int, choices=(1, 2), required=True)
+    tl.add_argument("--confirm", action="store_true",
+                    help="required: lock bits can never be cleared")
+    tl.add_argument("--keep-cc", action="store_true",
+                    help="lock user pages only; leave the Capability Container writable")
     args = ap.parse_args()
 
     port = find_port(args.port)
@@ -1197,16 +1382,23 @@ def main() -> int:
             result = cli.nfc_scan(args.antenna)
             if result.get("found") and result.get("tag_type_code") == 1:
                 try:
+                    cc = cli.nfc_tag_read(result["antenna"], 3)
+                    result["model"] = t2t_model_from_cc(cc)
+                    result["ndef_area"] = f"{cc[2] * 8} B" if len(cc) == 4 else ""
+                except FlashError:
+                    result["model"] = "NFC-A Type 2"
+                try:
                     product = cli.nfc_tag_read(result["antenna"], 45)
                     pc = product[0] | (product[1] << 8)
-                    result.update(
-                        product_code=f"0x{pc:04X}",
-                        model="ST25TN01K" if pc == 0x9090 else "ST25TN512" if pc == 0x9091 else "unknown Type 2",
-                        product_revision=f"0x{product[2]:02X}",
-                        key_id=f"0x{product[3]:02X}",
-                    )
+                    if pc in (0x9090, 0x9091):
+                        result.update(
+                            product_code=f"0x{pc:04X}",
+                            model="ST25TN01K" if pc == 0x9090 else "ST25TN512",
+                            product_revision=f"0x{product[2]:02X}",
+                            key_id=f"0x{product[3]:02X}",
+                        )
                 except FlashError:
-                    result["model"] = "NFC-A Type 2 (Product ID unreadable)"
+                    pass
             if args.json:
                 cli.emit("nfc_scan", **result)
             elif result["found"]:
@@ -1220,44 +1412,93 @@ def main() -> int:
                     "Try ANT2 only with [bold]--antenna 2[/]."
                 )
         elif args.cmd == "tag-read":
-            if not 0 <= args.page <= 0x3F or not 1 <= args.count <= 64 or args.page + args.count > 64:
-                raise ValueError("ST25TN01K exposes 64 pages: page 0..63 and a valid count are required")
+            if not 0 <= args.page <= 0xE1 or not 1 <= args.count <= 226 or args.page + args.count > 226:
+                raise ValueError("page and count must stay inside Type 2 memory (page 0 plus count)")
+            cc = cli.nfc_tag_read(args.antenna, 3)
+            model = t2t_model_from_cc(cc)
             rows = [(page, cli.nfc_tag_read(args.antenna, page)) for page in range(args.page, args.page + args.count)]
             if args.json:
-                cli.emit("tag_pages", antenna=args.antenna, pages=[{
+                cli.emit("tag_pages", antenna=args.antenna, model=model, pages=[{
                     "page": page, "address": page * 4, "hex": data.hex().upper(),
-                    "bytes": list(data), "interpretation": interpret_t2t_page(page, data),
+                    "bytes": list(data), "interpretation": interpret_t2t_page(page, data, model),
                 } for page, data in rows])
             else:
-                show_tag_pages(console, args.antenna, rows)
+                show_tag_pages(console, args.antenna, rows, model)
         elif args.cmd == "tag-write":
             compact = args.data.replace("0x", "").replace(" ", "").replace(":", "").replace("-", "")
             try:
                 data = bytes.fromhex(compact)
             except ValueError as exc:
                 raise ValueError("--data must contain hexadecimal bytes") from exc
-            if len(data) != 4 or not 0 <= args.page <= 0x3F:
-                raise ValueError("exactly 4 bytes and an ST25TN01K page from 0 to 63 are required")
-            if args.page in (0, 1, 45) or 49 <= args.page <= 59:
-                raise ValueError("ST25TN01K identification/internal-area page is not writable")
-            if args.page == 48 and not (args.force and args.allow_kill):
-                raise ValueError("page 0x30 is the irreversible KILL keyhole: --force and --allow-kill are required")
-            if not 4 <= args.page <= 43 and not args.force:
-                raise ValueError("outside user memory 0x04..0x2B; use --force for system/OTP areas")
-            product = cli.nfc_tag_read(args.antenna, 45)
-            product_code = product[0] | (product[1] << 8)
-            if product_code != 0x9090 and not args.force:
-                raise ValueError(f"tag is not identified as ST25TN01K (PC=0x{product_code:04X}); use --force if intentional")
+            if len(data) != 4:
+                raise ValueError("exactly 4 hex bytes are required")
+            cc = cli.nfc_tag_read(args.antenna, 3)
+            model = t2t_model_from_cc(cc)
+            first_user, last_user = t2t_user_pages(cc)
+            if args.page in (0, 1):
+                raise ValueError("UID pages 0-1 are read-only")
+            if args.page == 48 and "ST25TN" in model and not (args.force and args.allow_kill):
+                raise ValueError("page 0x30 is the ST25TN KILL keyhole: --force and --allow-kill are required")
+            if not first_user <= args.page <= last_user and not args.force:
+                raise ValueError(
+                    f"{model} user memory is pages {first_user}..{last_user}; "
+                    "use --force only for lock/OTP/config"
+                )
             cli.nfc_tag_write(args.antenna, args.page, data)
             verify = cli.nfc_tag_read(args.antenna, args.page)
-            result = {"antenna": args.antenna, "model": "ST25TN01K" if product_code == 0x9090 else "unknown",
-                      "product_code": f"0x{product_code:04X}", "page": args.page, "hex": verify.hex().upper(),
-                      "verified": verify == data, "interpretation": interpret_t2t_page(args.page, verify)}
+            result = {"antenna": args.antenna, "model": model,
+                      "page": args.page, "hex": verify.hex().upper(),
+                      "verified": verify == data, "interpretation": interpret_t2t_page(args.page, verify, model)}
             if args.json:
                 cli.emit("tag_page_written", **result)
             else:
-                show_tag_pages(console, args.antenna, [(args.page, verify)])
+                show_tag_pages(console, args.antenna, [(args.page, verify)], model)
                 console.print("[green]● Write verified[/]" if verify == data else "[red]● Verification failed[/]")
+        elif args.cmd == "tag-ndef":
+            if args.lock and not args.confirm:
+                raise ValueError("--lock is irreversible OTP; pass --confirm to proceed")
+            cc = cli.nfc_tag_read(args.antenna, 3)
+            model = t2t_model_from_cc(cc)
+            first_user, last_user = t2t_user_pages(cc)
+            ndef = encode_ndef_text(args.text) if args.text is not None else encode_ndef_uri(args.uri)
+            head = cli.nfc_tag_read(args.antenna, first_user) + cli.nfc_tag_read(args.antenna, first_user + 1)
+            prefix = head[:ndef_prefix_len(head)]
+            payload = prefix + ndef
+            user_bytes = (last_user - first_user + 1) * 4
+            if len(payload) > user_bytes:
+                raise ValueError(f"NDEF is {len(payload)} B; {model} user memory is {user_bytes} B")
+            rows = pages_from_bytes(first_user, payload)
+            if rows[-1][0] > last_user:
+                raise ValueError(f"NDEF does not fit in {model} pages {first_user}..{last_user}")
+            verified = write_tag_pages(cli, args.antenna, rows)
+            result = {"antenna": args.antenna, "model": model, "ndef_hex": ndef.hex().upper(),
+                      "pages": [{"page": page, "hex": data.hex().upper()} for page, data in verified]}
+            if args.lock:
+                result["lock"] = apply_ntag_lock(cli, args.antenna, model, lock_cc=True)
+            if args.json:
+                cli.emit("tag_ndef_written", **result)
+            else:
+                show_tag_pages(console, args.antenna, verified, model)
+                console.print("[green]● NDEF write verified[/]")
+                if args.lock:
+                    response_panel(console, "Tag locked (OTP)", result["lock"])
+        elif args.cmd == "tag-lock":
+            if not args.confirm:
+                raise ValueError("tag-lock is irreversible OTP; pass --confirm after the user memory is written")
+            cc = cli.nfc_tag_read(args.antenna, 3)
+            model = t2t_model_from_cc(cc)
+            result = apply_ntag_lock(cli, args.antenna, model, lock_cc=not args.keep_cc)
+            result["antenna"] = args.antenna
+            if args.json:
+                cli.emit("tag_locked", **result)
+            else:
+                page2 = bytes.fromhex(result["page2"].replace(" ", ""))
+                rows = [(2, page2)]
+                if result.get("dynlock_page") is not None and result.get("dynlock"):
+                    rows.append((result["dynlock_page"], bytes.fromhex(result["dynlock"].replace(" ", ""))))
+                show_tag_pages(console, args.antenna, rows, model)
+                response_panel(console, "Tag locked (OTP)", result)
+                console.print("[yellow]● Lock bits cannot be cleared. The tag is read-only.[/]")
         return 0
     except (TimeoutError, FlashError, ValueError, serial.SerialException) as exc:
         error_context = dict(cli.flash_context)

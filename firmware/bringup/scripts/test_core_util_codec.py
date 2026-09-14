@@ -34,6 +34,19 @@ def main() -> None:
     assert fields[3][0][1] == 1
     assert core_util.decode_fields(fields[13][0][1])[1][0][1] == 1_025_000
 
+    assert core_util.ntag_static_lock_mask(True, True, True) == (0xFF, 0xFF)
+    assert core_util.ntag_static_lock_mask(False, True, False) == (0xF0, 0xFF)
+    assert core_util.ntag_dynamic_lock_mask("NTAG213 / 144 B", True) == bytes((0xFF, 0x0F, 0x3F, 0x00))
+    assert core_util.ndef_prefix_len(bytes.fromhex("01 03 A0 0C 34 03 00 FE")) == 5
+    uri = core_util.encode_ndef_uri("https://spaghettilab.com")
+    assert uri[0] == 0x03 and uri[-1] == 0xFE
+    assert uri[5] == 0x55 and uri[6] == 0x04  # URI record, prefix https://
+    text = core_util.encode_ndef_text("ciao")
+    assert text[5] == 0x54
+    pages = core_util.pages_from_bytes(4, bytes.fromhex("01 03 A0 0C 34") + text)
+    assert pages[0] == (4, bytes.fromhex("01 03 A0 0C"))
+    assert pages[1][0] == 5
+
     print("core_util codec tests passed")
 
 
