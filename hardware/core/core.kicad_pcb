@@ -4629,6 +4629,7 @@
 		(property "Reference" "USBC1"
 			(at 0 -6.474 90)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "b5d29570-87c3-4049-aeab-f1dde5158b61")
 			(effects
 				(font
