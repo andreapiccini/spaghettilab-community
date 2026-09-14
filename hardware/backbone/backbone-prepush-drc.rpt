@@ -1,0 +1,634 @@
+** Drc report for backbone.kicad_pcb **
+** Created on 2026-09-14T15:33:54 **
+** Report includes: Errors, Warnings **
+
+** Found 172 DRC violations **
+[items_not_allowed]: Items not allowed
+    Local override; error
+    @(166.5100 mm, 114.7352 mm): Pista [Net-(ANT1-Pad2)] su B.Cu, lung. 1.6052 mm
+[items_not_allowed]: Items not allowed
+    Local override; error
+    @(166.5104 mm, 114.7356 mm): Pista [Net-(ANT1-Pad2)] su B.Cu, lung. 0.0006 mm
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(163.6500 mm, 113.2800 mm): Impronta J7
+[items_not_allowed]: Elementi non permessi (area proibita 'ANT_KEEPOUT' di ANT2)
+    Rule: area proibita 'ANT_KEEPOUT' di ANT2; error
+    @(177.4000 mm, 88.0250 mm): Impronta J15
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(176.3500 mm, 113.2800 mm): Impronta J5
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(167.4000 mm, 77.3800 mm): Piazzola NPTH di ANT2
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(166.3960 mm, 84.4671 mm): Piazzola 1 [GND] di ANT2 su B.Cu
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(167.4000 mm, 71.1300 mm): Piazzola PTH  2 [Net-(ANT2-Pad2)] di ANT2
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(167.4000 mm, 71.1300 mm): Piazzola 2 [Net-(ANT2-Pad2)] di ANT2 su B.Cu
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(167.4000 mm, 74.1300 mm): Piazzola PTH  2 [Net-(ANT2-Pad2)] di ANT2
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(167.4000 mm, 74.1300 mm): Piazzola 2 [Net-(ANT2-Pad2)] di ANT2 su F.Cu
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(167.4000 mm, 74.1300 mm): Piazzola 2 [Net-(ANT2-Pad2)] di ANT2 su B.Cu
+[items_not_allowed]: Elementi non permessi (area proibita 'keepout_nfc')
+    Rule: area proibita 'keepout_nfc'; error
+    @(168.3960 mm, 84.4771 mm): Piazzola 2 [Net-(ANT2-Pad2)] di ANT2 su B.Cu
+[clearance]: Violazione clearance ( clearance 0.2000 mm; reale 0.1400 mm)
+    Local override; error
+    @(163.8400 mm, 91.6600 mm): Piazzola 2 [VCORE] di C9 su F.Cu
+    @(165.4000 mm, 92.3000 mm): Pista [A0] su F.Cu, lung. 2.1686 mm
+[clearance]: Violazione clearance ( clearance 0.2000 mm; reale 0.1819 mm)
+    Local override; error
+    @(163.8400 mm, 91.6600 mm): Piazzola 2 [VCORE] di C9 su F.Cu
+    @(163.2314 mm, 92.3000 mm): Pista [A0] su F.Cu, lung. 0.4525 mm
+[courtyards_overlap]: Courtyards overlap
+    Rule: vincoli impostazioni scheda ingombri; error
+    @(163.6500 mm, 108.2000 mm): Impronta J13
+    @(156.3700 mm, 106.2700 mm): Impronta TP10
+[missing_courtyard]: Footprint has no courtyard defined
+    Local override; warning
+    @(153.4800 mm, 78.2200 mm): Impronta J9
+[missing_courtyard]: Footprint has no courtyard defined
+    Local override; warning
+    @(153.4800 mm, 126.0000 mm): Impronta J11
+[missing_courtyard]: Footprint has no courtyard defined
+    Local override; warning
+    @(167.2460 mm, 63.1171 mm): Impronta ANT2
+[missing_courtyard]: Footprint has no courtyard defined
+    Local override; warning
+    @(167.6604 mm, 136.0956 mm): Impronta ANT1
+[footprint_type_mismatch]: Tipo impronta non corrispondente con le sue piazzole (atteso 'SMD'; effettivo 'Fori passanti')
+    Local override; warning
+    @(168.4100 mm, 104.1800 mm): Impronta U11
+[footprint_type_mismatch]: Tipo impronta non corrispondente con le sue piazzole (atteso 'SMD'; effettivo 'Fori passanti')
+    Local override; warning
+    @(166.2000 mm, 94.6300 mm): Impronta U13
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(174.6500 mm, 89.1300 mm): Impronta C7
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(163.8400 mm, 90.9600 mm): Impronta C9
+[lib_footprint_mismatch]: I'impronta 'PinSocket_1x05_P2.54mm_Horizontal' non corrisponde alla copia nella libreria 'Connector_PinSocket_2.54mm'
+    Local override; warning
+    @(181.4200 mm, 78.2200 mm): Impronta J2
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(169.1000 mm, 89.1300 mm): Impronta C3
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(156.1000 mm, 93.6000 mm): Impronta R9
+[lib_footprint_mismatch]: I'impronta 'PinHeader_1x05_P2.54mm_Horizontal' non corrisponde alla copia nella libreria 'Connector_PinHeader_2.54mm'
+    Local override; warning
+    @(153.4800 mm, 78.2200 mm): Impronta J9
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(172.1000 mm, 87.3800 mm): Impronta R1
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(161.3300 mm, 99.3800 mm): Impronta U9
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(161.1500 mm, 92.3800 mm): Impronta U4
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(171.7000 mm, 110.7900 mm): Impronta C22
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(161.8000 mm, 97.1300 mm): Impronta C12
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(160.4000 mm, 89.1300 mm): Impronta C5
+[lib_footprint_mismatch]: I'impronta 'PinHeader_1x05_P2.54mm_Horizontal' non corrisponde alla copia nella libreria 'Connector_PinHeader_2.54mm'
+    Local override; warning
+    @(153.4800 mm, 126.0000 mm): Impronta J11
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(167.3400 mm, 110.9900 mm): Impronta LED1
+[lib_footprint_mismatch]: I'impronta 'PinSocket_1x05_P2.54mm_Horizontal' non corrisponde alla copia nella libreria 'Connector_PinSocket_2.54mm'
+    Local override; warning
+    @(181.4200 mm, 126.0000 mm): Impronta J4
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(170.9000 mm, 87.8800 mm): Impronta C48
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(167.6500 mm, 86.1300 mm): Impronta R11
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(159.8000 mm, 93.8800 mm): Impronta C37
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(167.0100 mm, 112.8800 mm): Impronta R14
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(154.1500 mm, 103.6300 mm): Impronta C33
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(154.1500 mm, 100.6300 mm): Impronta C39
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(166.1500 mm, 89.5000 mm): Impronta C43
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(168.3700 mm, 107.5400 mm): Impronta C32
+[lib_footprint_mismatch]: I'impronta 'ST25Rxxx-ANT-12x12mm' non corrisponde alla copia nella libreria 'SpaghettiLAB'
+    Local override; warning
+    @(167.2460 mm, 63.1171 mm): Impronta ANT2
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(165.7000 mm, 100.5000 mm): Impronta C18
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(156.9000 mm, 96.3800 mm): Impronta C63
+[lib_footprint_mismatch]: I'impronta 'ST25Rxxx-ANT-12x12mm' non corrisponde alla copia nella libreria 'SpaghettiLAB'
+    Local override; warning
+    @(167.6604 mm, 136.0956 mm): Impronta ANT1
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(166.1500 mm, 93.1300 mm): Impronta C16
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(168.4600 mm, 111.1000 mm): Impronta C54
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(162.9000 mm, 93.8800 mm): Impronta C60
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(171.7500 mm, 111.1100 mm): Impronta C51
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(168.4500 mm, 109.3000 mm): Impronta C55
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(175.0000 mm, 102.0000 mm): Impronta C1
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(154.6500 mm, 98.1300 mm): Impronta C58
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(171.8000 mm, 90.6000 mm): Impronta R5
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(162.3000 mm, 104.1000 mm): Impronta C20
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(167.6100 mm, 87.8800 mm): Impronta C46
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(157.9000 mm, 103.6300 mm): Impronta C23
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(155.9000 mm, 103.6300 mm): Impronta C30
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(159.6500 mm, 92.1300 mm): Impronta C41
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(168.3000 mm, 105.8100 mm): Impronta C13
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(155.9000 mm, 100.6300 mm): Impronta C35
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(181.0000 mm, 87.2500 mm): Impronta R8
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(162.9000 mm, 92.1300 mm): Impronta C65
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(166.1000 mm, 91.3800 mm): Impronta C28
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(154.1500 mm, 92.8800 mm): Impronta C72
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(153.9000 mm, 96.3800 mm): Impronta C62
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(156.9000 mm, 94.6300 mm): Impronta C70
+[lib_footprint_issues]: La libreria impronte 'SpaghettiLAB2' non è abilitata nella configurazione corrente
+    Local override; warning
+    @(173.6500 mm, 86.1300 mm): Impronta R4
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.8600 mm, 79.3800 mm): Rettangolo su F.Silkscreen
+    @(165.8200 mm, 80.7600 mm): Testo C.S. 'NFC' su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.9519 mm, 79.4450 mm): Rettangolo su F.Silkscreen
+    @(165.8200 mm, 80.7600 mm): Testo C.S. 'NFC' su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(168.8419 mm, 79.4550 mm): Rettangolo su F.Silkscreen
+    @(165.8200 mm, 80.7600 mm): Testo C.S. 'NFC' su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(175.7300 mm, 89.5300 mm): Arco di C7 su F.Silkscreen
+    @(176.0000 mm, 89.8800 mm): Cerchio di U5 su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.8950 mm, 90.2600 mm): Rettangolo su F.Silkscreen
+    @(166.4000 mm, 90.2800 mm): Segmento di U5 su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.9300 mm, 92.6600 mm): Testo C.S. 'ESP32-C3' su F.Silkscreen
+    @(164.8950 mm, 90.2600 mm): Rettangolo su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(166.4000 mm, 90.2800 mm): Segmento di U5 su F.Silkscreen
+    @(164.8950 mm, 90.2600 mm): Rettangolo su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.8200 mm, 90.1800 mm): Rettangolo su F.Silkscreen
+    @(166.4000 mm, 90.2800 mm): Segmento di U5 su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.8200 mm, 90.1800 mm): Rettangolo su F.Silkscreen
+    @(177.6000 mm, 103.4800 mm): Segmento di U5 su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(183.0000 mm, 90.2800 mm): Segmento di U5 su F.Silkscreen
+    @(164.8200 mm, 90.1800 mm): Rettangolo su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.8200 mm, 90.1800 mm): Rettangolo su F.Silkscreen
+    @(166.4000 mm, 90.2800 mm): Segmento di U5 su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.9300 mm, 92.6600 mm): Testo C.S. 'ESP32-C3' su F.Silkscreen
+    @(164.8850 mm, 100.7700 mm): Rettangolo su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(166.4000 mm, 90.2800 mm): Segmento di U5 su F.Silkscreen
+    @(164.8850 mm, 100.7700 mm): Rettangolo su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.8200 mm, 90.1800 mm): Rettangolo su F.Silkscreen
+    @(166.4000 mm, 103.4800 mm): Segmento di U5 su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.8200 mm, 90.1800 mm): Rettangolo su F.Silkscreen
+    @(164.9300 mm, 92.6600 mm): Testo C.S. 'ESP32-C3' su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(166.4000 mm, 103.4800 mm): Segmento di U5 su F.Silkscreen
+    @(164.8850 mm, 100.7700 mm): Rettangolo su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(165.9900 mm, 125.2000 mm): Testo C.S. 'NFC' su F.Silkscreen
+    @(164.0300 mm, 123.8200 mm): Rettangolo su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(165.9900 mm, 125.2000 mm): Testo C.S. 'NFC' su F.Silkscreen
+    @(164.1219 mm, 123.8850 mm): Rettangolo su F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(165.9900 mm, 125.2000 mm): Testo C.S. 'NFC' su F.Silkscreen
+    @(169.0119 mm, 123.8950 mm): Rettangolo su F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(164.0300 mm, 123.8200 mm): Rettangolo su F.Silkscreen
+    @(167.5064 mm, 125.0828 mm): Piazzola PTH  2 [Net-(ANT1-Pad2)] di ANT1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(165.9900 mm, 125.2000 mm): Testo C.S. 'NFC' su F.Silkscreen
+    @(167.5064 mm, 125.0828 mm): Piazzola PTH  2 [Net-(ANT1-Pad2)] di ANT1
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.6500 mm, 74.1300 mm): Segmento di ANT2 su B.Silkscreen
+    @(163.8857 mm, 79.3965 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.1500 mm, 80.6300 mm): Arco di ANT2 su B.Silkscreen
+    @(163.8857 mm, 79.3965 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.8857 mm, 79.4715 mm): Rettangolo su B.Silkscreen
+    @(163.6500 mm, 74.1300 mm): Segmento di ANT2 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(168.9257 mm, 80.7765 mm): Testo C.S. 'NFC' su B.Silkscreen
+    @(163.8857 mm, 79.4715 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.8857 mm, 79.4715 mm): Rettangolo su B.Silkscreen
+    @(164.1500 mm, 80.6300 mm): Arco di ANT2 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(168.9257 mm, 80.7765 mm): Testo C.S. 'NFC' su B.Silkscreen
+    @(163.8857 mm, 79.3965 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(171.1500 mm, 74.1300 mm): Segmento di ANT2 su B.Silkscreen
+    @(163.8857 mm, 79.3965 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(170.6500 mm, 80.6300 mm): Arco di ANT2 su B.Silkscreen
+    @(163.8857 mm, 79.3965 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(168.0000 mm, 81.1300 mm): Segmento di ANT2 su B.Silkscreen
+    @(163.8857 mm, 79.3965 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.1500 mm, 81.1300 mm): Segmento di ANT2 su B.Silkscreen
+    @(163.8857 mm, 79.3965 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(168.9257 mm, 80.7765 mm): Testo C.S. 'NFC' su B.Silkscreen
+    @(168.7757 mm, 79.4615 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(170.6500 mm, 80.6300 mm): Arco di ANT2 su B.Silkscreen
+    @(168.7757 mm, 79.4615 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(167.3300 mm, 88.5900 mm): Segmento di C46 su B.Silkscreen
+    @(167.2300 mm, 89.1000 mm): Arco di C43 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(167.3300 mm, 88.5900 mm): Segmento di C46 su B.Silkscreen
+    @(166.4300 mm, 88.7900 mm): Segmento di C43 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(166.5300 mm, 88.2800 mm): Arco di C46 su B.Silkscreen
+    @(166.4300 mm, 88.7900 mm): Segmento di C43 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(166.4300 mm, 93.8400 mm): Segmento di C16 su B.Silkscreen
+    @(167.4600 mm, 93.9800 mm): Segmento di U13 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(167.2300 mm, 93.5300 mm): Arco di C16 su B.Silkscreen
+    @(167.4600 mm, 93.9800 mm): Segmento di U13 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(167.2300 mm, 93.5300 mm): Arco di C16 su B.Silkscreen
+    @(167.6100 mm, 94.1300 mm): Segmento di U13 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.9300 mm, 93.9800 mm): Segmento di U13 su B.Silkscreen
+    @(165.8700 mm, 93.8400 mm): Segmento di C16 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(165.8700 mm, 93.8400 mm): Segmento di C16 su B.Silkscreen
+    @(164.9300 mm, 93.9800 mm): Segmento di U13 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(164.9300 mm, 93.9800 mm): Segmento di U13 su B.Silkscreen
+    @(165.0700 mm, 93.5300 mm): Arco di C16 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(165.0700 mm, 93.5300 mm): Arco di C16 su B.Silkscreen
+    @(164.9300 mm, 93.9800 mm): Segmento di U13 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(158.4100 mm, 93.4800 mm): Segmento di C37 su B.Silkscreen
+    @(158.2900 mm, 95.0300 mm): Segmento di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(158.4100 mm, 93.4800 mm): Segmento di C37 su B.Silkscreen
+    @(157.9800 mm, 94.2300 mm): Arco di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(158.7200 mm, 94.2800 mm): Arco di C37 su B.Silkscreen
+    @(158.2900 mm, 95.0300 mm): Segmento di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(158.7200 mm, 94.2800 mm): Arco di C37 su B.Silkscreen
+    @(157.9800 mm, 94.2300 mm): Arco di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(159.9300 mm, 91.4200 mm): Segmento di C41 su B.Silkscreen
+    @(161.0000 mm, 90.7000 mm): Cerchio di TP17 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(160.7300 mm, 91.7300 mm): Arco di C41 su B.Silkscreen
+    @(161.0000 mm, 90.7000 mm): Cerchio di TP17 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.9957 mm, 123.8065 mm): Rettangolo su B.Silkscreen
+    @(164.2564 mm, 125.0827 mm): Arco di ANT1 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.7564 mm, 125.0828 mm): Segmento di ANT1 su B.Silkscreen
+    @(163.9957 mm, 123.8065 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.9957 mm, 123.8815 mm): Rettangolo su B.Silkscreen
+    @(164.2564 mm, 125.0827 mm): Arco di ANT1 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.9957 mm, 123.8815 mm): Rettangolo su B.Silkscreen
+    @(169.0357 mm, 125.1865 mm): Testo C.S. 'NFC' su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.9957 mm, 123.8815 mm): Rettangolo su B.Silkscreen
+    @(163.7564 mm, 125.0828 mm): Segmento di ANT1 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(170.7564 mm, 125.0828 mm): Arco di ANT1 su B.Silkscreen
+    @(163.9957 mm, 123.8065 mm): Rettangolo su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(168.8857 mm, 123.8715 mm): Rettangolo su B.Silkscreen
+    @(170.7564 mm, 125.0828 mm): Arco di ANT1 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.9957 mm, 123.8065 mm): Rettangolo su B.Silkscreen
+    @(171.2564 mm, 125.0828 mm): Segmento di ANT1 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(168.8857 mm, 123.8715 mm): Rettangolo su B.Silkscreen
+    @(169.0357 mm, 125.1865 mm): Testo C.S. 'NFC' su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.9957 mm, 123.8065 mm): Rettangolo su B.Silkscreen
+    @(169.0357 mm, 125.1865 mm): Testo C.S. 'NFC' su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(163.9957 mm, 123.8065 mm): Rettangolo su B.Silkscreen
+    @(170.7564 mm, 125.5828 mm): Segmento di ANT1 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.2900 mm, 96.7800 mm): Segmento di C62 su B.Silkscreen
+    @(155.5100 mm, 95.9800 mm): Segmento di C63 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(154.9800 mm, 95.9800 mm): Arco di C62 su B.Silkscreen
+    @(155.5100 mm, 95.9800 mm): Segmento di C63 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(154.9800 mm, 96.7800 mm): Arco di C62 su B.Silkscreen
+    @(155.5100 mm, 95.9800 mm): Segmento di C63 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.2900 mm, 96.7800 mm): Segmento di C62 su B.Silkscreen
+    @(155.8200 mm, 95.9800 mm): Arco di C63 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(154.9800 mm, 95.9800 mm): Arco di C62 su B.Silkscreen
+    @(155.8200 mm, 95.9800 mm): Arco di C63 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.2900 mm, 96.7800 mm): Segmento di C62 su B.Silkscreen
+    @(155.8200 mm, 96.7800 mm): Arco di C63 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(154.9800 mm, 96.7800 mm): Arco di C62 su B.Silkscreen
+    @(155.8200 mm, 96.7800 mm): Arco di C63 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(162.7272 mm, 103.3607 mm): Segmento di X1 su B.Silkscreen
+    @(161.8192 mm, 103.0535 mm): Arco di C20 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(162.7272 mm, 103.3607 mm): Segmento di X1 su B.Silkscreen
+    @(162.6041 mm, 103.4000 mm): Segmento di C20 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(154.5500 mm, 102.2400 mm): Segmento di C33 su B.Silkscreen
+    @(153.7500 mm, 102.0200 mm): Segmento di C39 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(154.5500 mm, 102.2400 mm): Segmento di C33 su B.Silkscreen
+    @(153.7500 mm, 101.7100 mm): Arco di C39 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(154.5500 mm, 102.2400 mm): Segmento di C33 su B.Silkscreen
+    @(154.5500 mm, 101.7100 mm): Arco di C39 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(153.7500 mm, 102.0200 mm): Segmento di C39 su B.Silkscreen
+    @(153.7500 mm, 102.5500 mm): Arco di C33 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(153.7500 mm, 101.7100 mm): Arco di C39 su B.Silkscreen
+    @(153.7500 mm, 102.5500 mm): Arco di C33 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(153.7500 mm, 102.0200 mm): Segmento di C39 su B.Silkscreen
+    @(154.5500 mm, 102.5500 mm): Arco di C33 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(154.5500 mm, 102.5500 mm): Arco di C33 su B.Silkscreen
+    @(154.5500 mm, 101.7100 mm): Arco di C39 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.5000 mm, 102.0200 mm): Segmento di C35 su B.Silkscreen
+    @(156.3000 mm, 102.5500 mm): Arco di C30 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(156.3000 mm, 101.7100 mm): Arco di C35 su B.Silkscreen
+    @(156.3000 mm, 102.5500 mm): Arco di C30 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.5000 mm, 102.0200 mm): Segmento di C35 su B.Silkscreen
+    @(156.3000 mm, 102.2400 mm): Segmento di C30 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.5000 mm, 101.7100 mm): Arco di C35 su B.Silkscreen
+    @(156.3000 mm, 102.2400 mm): Segmento di C30 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(156.3000 mm, 101.7100 mm): Arco di C35 su B.Silkscreen
+    @(156.3000 mm, 102.2400 mm): Segmento di C30 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.5000 mm, 102.5500 mm): Arco di C30 su B.Silkscreen
+    @(155.5000 mm, 102.0200 mm): Segmento di C35 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.5000 mm, 102.5500 mm): Arco di C30 su B.Silkscreen
+    @(155.5000 mm, 101.7100 mm): Arco di C35 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.4200 mm, 95.2800 mm): Segmento di U17 su B.Silkscreen
+    @(155.8200 mm, 95.0300 mm): Arco di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.8200 mm, 94.2300 mm): Arco di C70 su B.Silkscreen
+    @(155.4200 mm, 93.9800 mm): Segmento di U17 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.4200 mm, 95.2800 mm): Segmento di U17 su B.Silkscreen
+    @(155.5100 mm, 94.2300 mm): Segmento di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.4200 mm, 95.2800 mm): Segmento di U17 su B.Silkscreen
+    @(155.8200 mm, 95.0300 mm): Arco di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.5700 mm, 95.1300 mm): Segmento di U17 su B.Silkscreen
+    @(155.5100 mm, 94.2300 mm): Segmento di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.8200 mm, 94.2300 mm): Arco di C70 su B.Silkscreen
+    @(155.5700 mm, 95.1300 mm): Segmento di U17 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.5700 mm, 95.1300 mm): Segmento di U17 su B.Silkscreen
+    @(155.8200 mm, 95.0300 mm): Arco di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.5700 mm, 94.1100 mm): Segmento di U17 su B.Silkscreen
+    @(155.5100 mm, 94.2300 mm): Segmento di C70 su B.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: vincoli impostazioni scheda serigrafia; warning
+    @(155.8200 mm, 94.2300 mm): Arco di C70 su B.Silkscreen
+    @(155.5700 mm, 94.1100 mm): Segmento di U17 su B.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(164.1500 mm, 73.6300 mm): Segmento di ANT2 su B.Silkscreen
+    @(167.4000 mm, 74.1300 mm): Piazzola PTH  2 [Net-(ANT2-Pad2)] di ANT2
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(164.1646 mm, 71.6300 mm): Segmento di ANT2 su B.Silkscreen
+    @(167.4000 mm, 71.1300 mm): Piazzola PTH  2 [Net-(ANT2-Pad2)] di ANT2
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(163.9957 mm, 123.8065 mm): Rettangolo su B.Silkscreen
+    @(167.5064 mm, 125.0828 mm): Piazzola PTH  2 [Net-(ANT1-Pad2)] di ANT1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(169.0357 mm, 125.1865 mm): Testo C.S. 'NFC' su B.Silkscreen
+    @(167.5064 mm, 125.0828 mm): Piazzola PTH  2 [Net-(ANT1-Pad2)] di ANT1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(170.7418 mm, 127.5828 mm): Segmento di ANT1 su B.Silkscreen
+    @(167.5064 mm, 128.0828 mm): Piazzola PTH  2 [Net-(ANT1-Pad2)] di ANT1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(170.7564 mm, 125.5828 mm): Segmento di ANT1 su B.Silkscreen
+    @(167.5064 mm, 125.0828 mm): Piazzola PTH  2 [Net-(ANT1-Pad2)] di ANT1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(162.7272 mm, 102.4414 mm): Cerchio di X1 su B.Silkscreen
+    @(163.1161 mm, 102.4061 mm): Piazzola 1 [/XTO] di X1 su B.Cu
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(162.5828 mm, 104.9485 mm): Cerchio di C20 su B.Silkscreen
+    @(162.7950 mm, 104.5950 mm): Piazzola 1 [GND] di C20 su B.Cu
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(165.4172 mm, 99.6515 mm): Cerchio di C18 su B.Silkscreen
+    @(165.2050 mm, 100.0050 mm): Piazzola 1 [GND] di C18 su B.Cu
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Tuning profile track geometries
+
+** End of Report **
