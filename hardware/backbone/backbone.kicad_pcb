@@ -10287,6 +10287,7 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -34754,6 +34755,18 @@
 			(font
 				(size 1 0.9)
 				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "REV B"
+		(at 158.64 105.83 0)
+		(layer "F.SilkS" knockout)
+		(uuid "0fec6077-18d2-433a-90bf-33481cc5e650")
+		(effects
+			(font
+				(size 1 1)
 				(bold yes)
 			)
 			(justify left bottom)
