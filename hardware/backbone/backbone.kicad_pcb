@@ -34832,7 +34832,7 @@
 		(uuid "c4890512-1bda-49e2-beba-75b61e420c47")
 	)
 	(gr_text "CANRX\n"
-		(at 178.88 85.11 0)
+		(at 179.75 85.43 45)
 		(layer "F.SilkS" knockout)
 		(uuid "4adf8c91-2c7c-4249-b969-167833c188fe")
 		(effects
@@ -34845,7 +34845,7 @@
 		)
 	)
 	(gr_text "CANTX"
-		(at 178.91 88.19 0)
+		(at 179.86 88.51 45)
 		(layer "F.SilkS" knockout)
 		(uuid "f08601f1-9f10-4c48-9dc3-6e2971d0addd")
 		(effects
@@ -34897,7 +34897,7 @@
 		)
 	)
 	(gr_text "BOOT"
-		(at 158.59 84.46 0)
+		(at 154.58 86.19 0)
 		(layer "F.SilkS" knockout)
 		(uuid "faf35c6d-5761-4bc6-b197-1e84df9c103d")
 		(effects
@@ -35235,7 +35235,7 @@
 		)
 	)
 	(gr_text "ANT1"
-		(at 169.62 130.02 0)
+		(at 169.6 130.01 0)
 		(layer "F.SilkS" knockout)
 		(uuid "4dd42394-7db6-45ea-bc84-64aeb7cee3a5")
 		(effects
