@@ -76,20 +76,7 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [
-        [
-          "courtyards_overlap|157481735|106435000|64e154a5-f1c7-4c74-89a9-e9b6a966248b|d9be1033-2a44-4fe5-b916-b87c3c255498",
-          "TP10 è un test pad SMD piatto sotto il margine del connettore J13; nessun volume componente in collisione. Accessibilità limitata dopo il montaggio di J13."
-        ],
-        [
-          "items_not_allowed|176246000|84105000|7e2dec0a-61a6-4bd3-812d-a4279c8676b4|00000000-0000-0000-0000-000000000000",
-          "Il corpo/courtyard di J15 sfiora il keepout ANT2 di circa 0,1 mm; i pad e il rame restano fuori. Verificare la portata NFC sul primo prototipo."
-        ],
-        [
-          "shorting_items|166756392|115282765|1270c9d3-df45-40b8-9918-5def443bada0|bf258333-635b-4f44-9966-20504042a098",
-          "Connessione intenzionale tra pad 2 e poligono della bobina NFC ANT1; impronta configurata come Net Tie 1,2."
-        ]
-      ],
+      "drc_exclusions": [],
       "meta": {
         "version": 2
       },
@@ -766,7 +753,7 @@
         "uuid": "9de6ddb4-2647-4876-90a9-c16e585eea03"
       }
     ],
-    "used_designators": "#PWR69,J3,J16",
+    "used_designators": "",
     "variants": []
   },
   "sheets": [
