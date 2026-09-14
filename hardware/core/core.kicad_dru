@@ -1,0 +1,11 @@
+(version 1)
+
+(rule "USBC1 CC2 escape past B4A9"
+	(condition "A.Reference == 'USBC1' && A.Pad_Number == 'B4A9' && B.NetName == 'Net-(USBC1-CC2)'")
+	(constraint clearance (min 0mm))
+)
+
+(rule "USBC1 VBUS escape past B1A12"
+	(condition "A.Reference == 'USBC1' && A.Pad_Number == 'B1A12' && B.NetName == 'VBUS'")
+	(constraint clearance (min 0mm))
+)
