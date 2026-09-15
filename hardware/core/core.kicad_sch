@@ -5,6 +5,228 @@
 	(uuid "37443791-4e95-4f9c-a466-b3bd02bfd108")
 	(paper "A2")
 	(lib_symbols
+		(symbol "Connector:Conn_01x03_Pin"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x03_Pin"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x03, script generated"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Conn_01x03_Pin_1_1"
+				(rectangle
+					(start 0.8636 2.667)
+					(end 0 2.413)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 2.54) (xy 0.8636 2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 5.08 2.54 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Connector:Conn_01x04_Socket"
 			(pin_names
 				(offset 1.016)
@@ -5609,10 +5831,6 @@
 		(uuid "0e37b8a1-cd3a-48d3-9344-ad8647507a21")
 	)
 	(no_connect
-		(at 495.3 179.07)
-		(uuid "4d6b1701-773d-44cb-88dd-afebab768ded")
-	)
-	(no_connect
 		(at 297.815 229.87)
 		(uuid "54af08ac-3c95-49cc-a64c-60e609c29301")
 	)
@@ -5643,6 +5861,16 @@
 	(no_connect
 		(at 392.43 189.23)
 		(uuid "fd7b7649-19f8-4707-8485-8ccf8ad56803")
+	)
+	(wire
+		(pts
+			(xy 495.3 179.07) (xy 502.92 179.07)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "01456f7e-d339-48e6-8df5-12bf0559a4f0")
 	)
 	(wire
 		(pts
@@ -5966,6 +6194,16 @@
 	)
 	(wire
 		(pts
+			(xy 502.92 153.67) (xy 450.85 153.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "26581d93-8d18-4eb1-b401-4c920da28b1d")
+	)
+	(wire
+		(pts
 			(xy 196.85 201.93) (xy 185.42 201.93)
 		)
 		(stroke
@@ -6086,6 +6324,16 @@
 	)
 	(wire
 		(pts
+			(xy 455.93 149.86) (xy 455.93 151.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3145aedd-c5ff-4a97-8da2-7ae9b3fc0128")
+	)
+	(wire
+		(pts
 			(xy 207.01 167.64) (xy 222.25 167.64)
 		)
 		(stroke
@@ -6146,16 +6394,6 @@
 	)
 	(wire
 		(pts
-			(xy 302.26 168.91) (xy 316.23 168.91)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3b060573-3094-41a2-be0f-bdb03e4dc8cf")
-	)
-	(wire
-		(pts
 			(xy 97.79 186.69) (xy 97.79 193.04)
 		)
 		(stroke
@@ -6163,6 +6401,16 @@
 			(type default)
 		)
 		(uuid "3e7c3f4b-34ed-4f17-b6c6-96e20ca6415b")
+	)
+	(wire
+		(pts
+			(xy 302.26 168.91) (xy 316.23 168.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3ea4c820-52b2-4e32-a12a-6f4777790b1f")
 	)
 	(wire
 		(pts
@@ -6406,6 +6654,16 @@
 	)
 	(wire
 		(pts
+			(xy 455.93 151.13) (xy 450.85 151.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6b2fa3c5-39cc-435c-bb4b-aaf9e59b1e52")
+	)
+	(wire
+		(pts
 			(xy 170.18 157.48) (xy 170.18 176.53)
 		)
 		(stroke
@@ -6533,6 +6791,16 @@
 			(type default)
 		)
 		(uuid "783f8519-6321-462d-ac14-2e4dbf8fcfba")
+	)
+	(wire
+		(pts
+			(xy 455.93 157.48) (xy 455.93 156.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7b0837c2-ff16-48f1-8543-66c318a8a725")
 	)
 	(wire
 		(pts
@@ -7106,6 +7374,16 @@
 	)
 	(wire
 		(pts
+			(xy 455.93 156.21) (xy 450.85 156.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c23a2a63-48fc-45a5-9969-f61cbca650a2")
+	)
+	(wire
+		(pts
 			(xy 397.51 228.6) (xy 397.51 232.41)
 		)
 		(stroke
@@ -7356,6 +7634,16 @@
 	)
 	(wire
 		(pts
+			(xy 502.92 179.07) (xy 502.92 153.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e5d2c409-b107-4c5d-a3f6-5837289123ec")
+	)
+	(wire
+		(pts
 			(xy 134.62 232.41) (xy 154.94 232.41)
 		)
 		(stroke
@@ -7543,6 +7831,56 @@
 			(type default)
 		)
 		(uuid "ffd48f0f-7bd0-4036-97a0-af0069e88d47")
+	)
+	(label "PROG_TX"
+		(at 191.77 181.61 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "5ce69c80-74eb-4e7b-8ad9-68d88379f7bc")
+	)
+	(label "CC1"
+		(at 307.34 168.91 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "63ca5d14-52bc-4aaa-9e82-59cf306e8b4b")
+	)
+	(label "DOUT"
+		(at 461.01 153.67 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "adb3c7e0-0811-41b1-aa93-7f8f23689dec")
+	)
+	(label "PROG_RX"
+		(at 191.77 184.15 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "b9ab248b-2c23-4c23-b46a-16a1436a6b0a")
+	)
+	(label "CC2"
+		(at 307.34 184.15 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "c41602e7-9172-4b74-88c5-6b4635a612b8")
 	)
 	(global_label "CORE_CANH"
 		(shape passive)
@@ -9013,7 +9351,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:SW-SMD_4P-L5.1-W5.1-P3.70-LS6.5-TL_H1.5"
+		(property "Footprint" "SpaghettiLAB:SW-SMD_4P-L5.1-W5.1-P3.70-LS6.5-TL_H1.5"
 			(at 106.68 181.61 0)
 			(hide yes)
 			(show_name no)
@@ -9780,6 +10118,83 @@
 		)
 	)
 	(symbol
+		(lib_id "USBC_PD_mo-easyedapro:Power-VCC")
+		(at 455.93 149.86 0)
+		(unit 1)
+		(body_style 0)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2f2d4f7d-3fcf-4754-9b83-35c5d4f99fa5")
+		(property "Reference" "#PWR068"
+			(at 455.93 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "5V"
+			(at 455.93 146.05 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.5748 1.5748)
+				)
+			)
+		)
+		(property "Footprint" "USBC_PD_mo-easyedapro:"
+			(at 455.93 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 455.93 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 455.93 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9f6a93a2-32ec-4c49-b050-65b6333caa8d")
+		)
+		(instances
+			(project "core"
+				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
+					(reference "#PWR068")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 285.75 185.42 0)
 		(unit 1)
@@ -10404,7 +10819,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:SOT-353_L2.2-W1.4-P0.65-LS2.4-BR"
+		(property "Footprint" "SpaghettiLAB:SOT-353_L2.2-W1.4-P0.65-LS2.4-BR"
 			(at 453.39 173.99 0)
 			(hide yes)
 			(show_name no)
@@ -10638,7 +11053,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 141.732 175.26 90)
 			(hide yes)
 			(show_name no)
@@ -10973,7 +11388,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 434.34 180.34 0)
 			(hide yes)
 			(show_name no)
@@ -11259,7 +11674,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 310.2102 228.6 0)
 			(hide yes)
 			(show_name no)
@@ -11352,7 +11767,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 132.842 175.26 90)
 			(hide yes)
 			(show_name no)
@@ -11603,7 +12018,7 @@
 				(justify left top)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:LED-SMD_4P-L3.2-W2.8-LS5.9_SK6812MINI-E"
+		(property "Footprint" "SpaghettiLAB:LED-SMD_4P-L3.2-W2.8-LS5.9_SK6812MINI-E"
 			(at 485.14 177.8 0)
 			(hide yes)
 			(show_name no)
@@ -11910,7 +12325,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 496.57 187.96 0)
 			(hide yes)
 			(show_name no)
@@ -12118,7 +12533,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:LED0603-RD"
+		(property "Footprint" "SpaghettiLAB:LED0603-RD"
 			(at 360.68 170.18 0)
 			(hide yes)
 			(show_name no)
@@ -12219,7 +12634,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 298.45 185.928 90)
 			(hide yes)
 			(show_name no)
@@ -12279,6 +12694,179 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector:Conn_01x03_Pin")
+		(at 445.77 153.67 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "958e1866-a160-4616-97d3-de8adb95f767")
+		(property "Reference" "J1"
+			(at 446.405 146.05 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "ARGB"
+			(at 446.405 148.59 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
+			(at 445.77 153.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 445.77 153.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x03, script generated"
+			(at 445.77 153.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "3"
+			(uuid "41a97018-0352-4f33-b2a3-6b01ccc25302")
+		)
+		(pin "1"
+			(uuid "88eece67-bf34-4f02-928e-eb4fba5783e9")
+		)
+		(pin "2"
+			(uuid "a1ee4fde-202f-46a2-af04-9aa5e7fe17b5")
+		)
+		(instances
+			(project "core"
+				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
+					(reference "J1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 298.45 168.91 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "95f76b47-f1b2-4b1c-be42-70c604db0c3e")
+		(property "Reference" "R23"
+			(at 298.45 171.45 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "5.1k"
+			(at 298.704 168.91 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "SpaghettiLAB:R0603"
+			(at 298.45 170.688 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 298.45 168.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 298.45 168.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C2907044"
+			(at 298.45 168.91 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "2d32562c-72e7-44c1-9212-8437be5e8419")
+		)
+		(pin "1"
+			(uuid "58612d42-eb82-4356-a782-43202ca94816")
+		)
+		(instances
+			(project "core"
+				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
+					(reference "R23")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:LED")
 		(at 350.52 170.18 90)
 		(unit 1)
@@ -12312,7 +12900,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:LED0603-RD"
+		(property "Footprint" "SpaghettiLAB:LED0603-RD"
 			(at 350.52 170.18 0)
 			(hide yes)
 			(show_name no)
@@ -12529,7 +13117,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 358.902 160.02 90)
 			(hide yes)
 			(show_name no)
@@ -12861,7 +13449,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 259.4102 228.6 0)
 			(hide yes)
 			(show_name no)
@@ -13031,7 +13619,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 115.2652 198.12 0)
 			(hide yes)
 			(show_name no)
@@ -13121,7 +13709,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 298.45 175.768 90)
 			(hide yes)
 			(show_name no)
@@ -13289,7 +13877,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 166.37 156.5148 0)
 			(hide yes)
 			(show_name no)
@@ -13461,7 +14049,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 465.582 167.64 90)
 			(hide yes)
 			(show_name no)
@@ -13554,7 +14142,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 199.6948 168.91 0)
 			(hide yes)
 			(show_name no)
@@ -13721,7 +14309,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:SOT-25-5_L2.9-W1.6-P0.95-LS2.8-BL"
+		(property "Footprint" "SpaghettiLAB:SOT-25-5_L2.9-W1.6-P0.95-LS2.8-BL"
 			(at 285.115 237.49 0)
 			(hide yes)
 			(show_name no)
@@ -14000,7 +14588,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 298.45 178.308 90)
 			(hide yes)
 			(show_name no)
@@ -14224,7 +14812,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 398.4752 240.03 0)
 			(hide yes)
 			(show_name no)
@@ -14856,7 +15444,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 348.742 160.02 90)
 			(hide yes)
 			(show_name no)
@@ -14947,7 +15535,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:SW-SMD_4P-L5.1-W5.1-P3.70-LS6.5-TL_H1.5"
+		(property "Footprint" "SpaghettiLAB:SW-SMD_4P-L5.1-W5.1-P3.70-LS6.5-TL_H1.5"
 			(at 106.68 176.53 0)
 			(hide yes)
 			(show_name no)
@@ -15097,6 +15685,85 @@
 			(project "core"
 				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
 					(reference "J5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 455.93 157.48 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f37332c9-c0c6-47d0-bf15-692fffb89e95")
+		(property "Reference" "#PWR071"
+			(at 455.93 163.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 458.47 158.7499 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 455.93 157.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 455.93 157.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 455.93 157.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "52d791e1-eea2-4759-b9a9-505b76a3a20e")
+		)
+		(instances
+			(project "core"
+				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
+					(reference "#PWR071")
 					(unit 1)
 				)
 			)
@@ -15346,96 +16013,6 @@
 			(project "core"
 				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
 					(reference "#PWR059")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 298.45 168.91 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "fe569583-736c-4b19-90d3-0ec52a7cc201")
-		(property "Reference" "R19"
-			(at 298.45 166.624 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5.1k"
-			(at 298.704 168.91 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
-			(at 298.45 170.688 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 298.45 168.91 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 298.45 168.91 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C2907044"
-			(at 298.45 168.91 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "ba3fc16e-a56a-4eff-b5c6-0050b502da23")
-		)
-		(pin "1"
-			(uuid "16bebde7-2567-4425-861c-8fd7f229069e")
-		)
-		(instances
-			(project "core"
-				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
-					(reference "R19")
 					(unit 1)
 				)
 			)
