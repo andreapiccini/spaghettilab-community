@@ -20,7 +20,7 @@ The full texts are stored at `hardware/LICENSE`, `firmware/LICENSE`,
 
 Open-source and open-hardware licences do not certify a product, provide warranty,
 grant support, or grant rights to present a third-party product as official
-SpaghettiLAB hardware. See `COMMERCIAL.md` and `TRADEMARKS.md`.
+SpaghettiLAB hardware. See `COMMERCIAL.md` and `TRADEMARK.md`.
 
 Revisions published before the copyleft transition retain the permissions already
 granted under Apache-2.0. The transition applies to the new repository generation and

@@ -1,18 +1,51 @@
-# Production and commercial use
+# Commercial manufacturing and production
 
-The open licenses in this repository permit commercial use subject to their
-respective terms. SpaghettiLAB Community is not represented as a qualified,
-certified, or supported production system merely because its sources can be
-built and run.
+## Public Community materials
 
-SpaghettiLAB Production is the separate commercial path for organizations that
-need controlled releases, qualified hardware, secure provisioning, signed
-updates, manufacturing support, fleet operations, lifecycle maintenance, or
-contractual support.
+The open licences in this repository permit commercial use subject to their
+respective terms. In particular, public hardware sources may be used to make and
+sell products when the requirements of CERN-OHL-S-2.0 are met. No separate
+commercial fee or permission is imposed on rights already granted by an
+applicable open licence.
 
-Commercial licensing may also be offered for future dual-licensed components
-when an organization needs proprietary integration terms. Availability and
-scope must be established by a separate written agreement.
+SpaghettiLAB Community is not represented as a qualified, certified, tested, or
+supported production system merely because its sources can be built and run.
+Third-party products based on Community materials must use their own branding
+and must not imply official origin, certification, warranty, endorsement, or
+partnership.
+
+## Separately licensed Production package
+
+SpaghettiLAB Production is a separate, non-public commercial path for authorized
+manufacturing and fulfillment partners. Depending on the product and agreement,
+the Production package may include:
+
+- reviewed and validated Gerber, drill, panelization, and fabrication outputs;
+- approved BOMs, alternates, sourcing data, and pick-and-place files;
+- assembly profiles, factory instructions, test fixtures, test procedures, and
+  acceptance criteria;
+- production firmware, secure provisioning, device identity, signing, and release
+  traceability material;
+- final enclosure, mechanical, labeling, packaging, and fulfillment specifications;
+- controlled engineering changes, quality processes, lifecycle maintenance, and
+  commercial support; and
+- permission to use the SpaghettiLAB brand and describe products as official or
+  partner-manufactured.
+
+Those non-public materials and permissions are not supplied or granted by this
+repository. Access and use require a separate written manufacturing or commercial
+agreement. Typical agreements may define approved products and territories,
+quality and compliance responsibilities, reporting, royalties or fees, support,
+confidentiality, duration, and termination. No partnership, exclusivity, or right
+to manufacture an official SpaghettiLAB product is implied until such an agreement
+is signed.
+
+Community users remain free to create their own BOM, Gerber, pick-and-place, test,
+enclosure, or packaging materials from the public sources under the applicable
+licences. Independently generated materials do not become the official validated
+Production package and do not grant brand or partner status.
+
+## Software and earlier releases
 
 Current firmware is offered under GPL-3.0-or-later and current public applications
 and services under AGPL-3.0-or-later, except for the explicitly Apache-2.0 integration
@@ -20,12 +53,12 @@ contracts and SDKs listed in `LICENSES.md`. The CERN-OHL-S-2.0 hardware remains
 strongly reciprocal. Consult the actual licence text for a specific product or
 distribution model.
 
-No future licence change can withdraw permissions already granted for a published
-revision. Relicensing contributions also requires the necessary rights from their
-copyright holders. A proprietary alternative may be offered only for code whose
-necessary rights are held by the licensor. Support subscriptions and Production
-services require a separate written agreement; none is implied by this repository.
+Commercial licensing may be offered for components where the necessary rights are
+held, including future dual-licensed components. No future licence change can
+withdraw permissions already granted for a published revision, and contributions
+cannot be relicensed without the necessary rights. Availability and scope must be
+established by a separate written agreement.
 
-The SpaghettiLAB name and logo are not granted by the source-code and hardware
-licenses except for reasonable attribution. Products made by third parties must
-not imply official origin, certification, warranty, or endorsement.
+See [LICENSES.md](LICENSES.md) for the licence map and
+[TRADEMARK.md](TRADEMARK.md) for brand rules. This document is a project policy,
+not legal advice or a substitute for a signed agreement.

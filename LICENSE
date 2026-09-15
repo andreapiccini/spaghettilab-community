@@ -1,0 +1,27 @@
+# SpaghettiLAB Community licensing
+
+SpaghettiLAB Community is a multi-license repository. There is no single licence
+that applies to every file. The licence closest to a file controls that file.
+
+| Content | Licence |
+|---|---|
+| `hardware/` | CERN-OHL-S-2.0 |
+| `firmware/` | GPL-3.0-or-later |
+| `software/` | AGPL-3.0-or-later, except where a nearer licence says otherwise |
+| `contracts/` and designated integration SDKs | Apache-2.0 |
+| `docs/` | CC-BY-4.0 |
+| Root project metadata, unless marked otherwise | Apache-2.0 |
+
+The complete licence texts and the authoritative path-by-path map are provided
+in the relevant directories and in [LICENSES.md](LICENSES.md).
+
+The licences above allow commercial use of the material published in this
+repository, subject to their respective conditions. They do not grant rights to
+the SpaghettiLAB name, logo, visual identity, official-product status, or any
+non-public commercial manufacturing package. See [TRADEMARK.md](TRADEMARK.md)
+and [COMMERCIAL.md](COMMERCIAL.md).
+
+No permission beyond the applicable open licence is required to use the public
+sources within its terms. A separate written agreement is required only for
+rights or assets not granted or supplied here, including official brand use and
+access to the non-public Production package.

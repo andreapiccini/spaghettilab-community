@@ -39,6 +39,20 @@ manufacturing allocations, unapproved production packages or confidential materi
 Security reports should use the applicable private reporting channel rather than a
 public issue.
 
+Do not submit release-ready Gerber or drill packages, validated production BOM or
+pick-and-place data, panelization files, factory profiles, test-jig materials,
+production test or provisioning procedures, final enclosure or packaging assets,
+or other controlled Production materials unless a maintainer has explicitly asked
+for them through an approved private channel. Public contributors may still submit
+source-level improvements, reference designs, reproducible build instructions, and
+community-created manufacturing outputs when they have the necessary rights and the
+contribution is appropriate for the Community layer.
+
+Accepted Community contributions remain governed by the applicable public licence.
+Contributing does not grant official-product status, trademark permission, access to
+the non-public Production package, or manufacturing-partner status. See
+`COMMERCIAL.md` and `TRADEMARK.md`.
+
 ## Dual licensing
 
 The DCO does not automatically grant permission to relicense a contribution under

@@ -37,6 +37,31 @@ generated manufacturing packages. Official production files, factory tooling,
 secure provisioning infrastructure, managed cloud services, and commercial
 support are maintained separately.
 
+## Open-core model
+
+SpaghettiLAB follows an open-core hardware model with a clear boundary:
+
+- **Community layer:** the source files actually published in this repository,
+  licensed under the open-source and open-hardware licences listed below. These
+  licences permit commercial use when their conditions are followed.
+- **Production layer:** the separately maintained, release-specific package used
+  for official commercial products and authorized manufacturing partners.
+
+The Production layer is not part of this repository. It may include validated
+Gerber and drill outputs, approved BOM and alternate-part data, pick-and-place
+files, panelization and assembly profiles, test fixtures and procedures,
+production firmware or provisioning material, enclosure and packaging files,
+quality-control criteria, release traceability, and supplier-specific data.
+Access to those materials, use of official SpaghettiLAB branding, and the right
+to present a product as official or partner-produced require prior written
+authorization under a separate commercial or manufacturing agreement.
+
+Anyone may generate their own manufacturing outputs from the public hardware
+sources and make or sell products as permitted by CERN-OHL-S-2.0. Such products
+must comply with that licence and must not imply official manufacture,
+certification, warranty, endorsement, or partnership. See
+[`COMMERCIAL.md`](COMMERCIAL.md) and [`TRADEMARK.md`](TRADEMARK.md).
+
 ## Hardware projects
 
 - `hardware/core/core.kicad_pro`
@@ -85,5 +110,5 @@ components:
 
 See [`LICENSES.md`](LICENSES.md) for the exact repository map,
 [`CONTRIBUTING.md`](CONTRIBUTING.md) for DCO contribution requirements, and
-[`TRADEMARKS.md`](TRADEMARKS.md) for product identity rules. The copyleft transition
+[`TRADEMARK.md`](TRADEMARK.md) for product identity rules. The copyleft transition
 does not alter rights granted for earlier versions.
