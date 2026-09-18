@@ -4770,207 +4770,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "USBC_PD_mo-easyedapro:SK6812MINI-E_C5149201"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "LED"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" "USBC_PD_mo-easyedapro:LED-SMD_4P-L3.2-W2.8-LS5.9_SK6812MINI-E"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" "https://item.szlcsc.com/datasheet/SK6812MINI-E/5773397.html"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Manufacturer Part" "SK6812MINI-E"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Manufacturer" "欧思科光电"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Supplier Part" "C5149201"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Supplier" "LCSC"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "LCSC Part Name" "工作电压5V、发光角度120°、灰度调节256级的RGB LED"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "SK6812MINI-E_C5149201_1_0"
-				(rectangle
-					(start -7.62 3.81)
-					(end 7.62 -3.81)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin unspecified line
-					(at -10.16 1.27 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin unspecified line
-					(at -10.16 -1.27 0)
-					(length 2.54)
-					(name "DIN"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin unspecified line
-					(at 10.16 -1.27 180)
-					(length 2.54)
-					(name "VDD"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin unspecified line
-					(at 10.16 1.27 180)
-					(length 2.54)
-					(name "DOUT"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "USBC_PD_mo-easyedapro:SN74AHCT1G14DCKR"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -5697,12 +5496,6 @@
 		(uuid "15172750-15f0-4cfc-b881-08e7064b2646")
 	)
 	(junction
-		(at 496.57 176.53)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "1845153e-1df8-4d04-b31b-af4be0dbe9d8")
-	)
-	(junction
 		(at 312.42 195.58)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5755,12 +5548,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "57847416-dd9c-4e48-8289-6e9ef9b195c6")
-	)
-	(junction
-		(at 471.17 179.07)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "8ebdde9e-90dd-4eb6-9ae2-7f362bfd502c")
 	)
 	(junction
 		(at 340.36 189.23)
@@ -5861,16 +5648,6 @@
 	(no_connect
 		(at 392.43 189.23)
 		(uuid "fd7b7649-19f8-4707-8485-8ccf8ad56803")
-	)
-	(wire
-		(pts
-			(xy 495.3 179.07) (xy 502.92 179.07)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "01456f7e-d339-48e6-8df5-12bf0559a4f0")
 	)
 	(wire
 		(pts
@@ -6074,6 +5851,16 @@
 	)
 	(wire
 		(pts
+			(xy 450.85 153.67) (xy 494.03 153.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1b961333-64ce-44d5-96f5-72f620309ac4")
+	)
+	(wire
+		(pts
 			(xy 312.42 189.23) (xy 316.23 189.23)
 		)
 		(stroke
@@ -6191,16 +5978,6 @@
 			(type default)
 		)
 		(uuid "25d49e3d-ecee-4dbf-a8de-923560e765ca")
-	)
-	(wire
-		(pts
-			(xy 502.92 153.67) (xy 450.85 153.67)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "26581d93-8d18-4eb1-b401-4c920da28b1d")
 	)
 	(wire
 		(pts
@@ -6374,7 +6151,7 @@
 	)
 	(wire
 		(pts
-			(xy 463.55 176.53) (xy 474.98 176.53)
+			(xy 463.55 176.53) (xy 494.03 176.53)
 		)
 		(stroke
 			(width 0)
@@ -6621,16 +6398,6 @@
 			(type default)
 		)
 		(uuid "677e1a14-3e02-42c2-b766-df034b246c06")
-	)
-	(wire
-		(pts
-			(xy 471.17 179.07) (xy 474.98 179.07)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "67fed2d9-6cae-4222-a93c-aef75aa15ea2")
 	)
 	(wire
 		(pts
@@ -7304,16 +7071,6 @@
 	)
 	(wire
 		(pts
-			(xy 496.57 191.77) (xy 496.57 187.96)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c09101ea-2c65-42a7-98bf-6f9faa31ee60")
-	)
-	(wire
-		(pts
 			(xy 196.85 224.79) (xy 185.42 224.79)
 		)
 		(stroke
@@ -7334,13 +7091,13 @@
 	)
 	(wire
 		(pts
-			(xy 496.57 176.53) (xy 496.57 180.34)
+			(xy 494.03 176.53) (xy 494.03 153.67)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "c186f52c-8243-4374-a014-55be3ac89a0a")
+		(uuid "c10fa368-3922-4df4-99a0-ada58d857c26")
 	)
 	(wire
 		(pts
@@ -7361,16 +7118,6 @@
 			(type default)
 		)
 		(uuid "c196f366-ce32-4714-a54b-30bfc5af03a1")
-	)
-	(wire
-		(pts
-			(xy 496.57 176.53) (xy 496.57 171.45)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c1fda6ee-3381-4244-a323-7fe6715eef33")
 	)
 	(wire
 		(pts
@@ -7634,16 +7381,6 @@
 	)
 	(wire
 		(pts
-			(xy 502.92 179.07) (xy 502.92 153.67)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e5d2c409-b107-4c5d-a3f6-5837289123ec")
-	)
-	(wire
-		(pts
 			(xy 134.62 232.41) (xy 154.94 232.41)
 		)
 		(stroke
@@ -7801,16 +7538,6 @@
 			(type default)
 		)
 		(uuid "f9098dcf-db21-4798-8454-a3df170509cc")
-	)
-	(wire
-		(pts
-			(xy 495.3 176.53) (xy 496.57 176.53)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fd8ac6ee-8e65-4e18-b61c-29fb2142935a")
 	)
 	(wire
 		(pts
@@ -9411,83 +9138,6 @@
 			(project "core"
 				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
 					(reference "SW2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "USBC_PD_mo-easyedapro:Power-VCC")
-		(at 496.57 171.45 0)
-		(unit 1)
-		(body_style 0)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "0f9c4bfb-b24c-4081-beb7-4c6f47470d0f")
-		(property "Reference" "#PWR067"
-			(at 496.57 171.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V"
-			(at 496.57 167.64 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.5748 1.5748)
-				)
-			)
-		)
-		(property "Footprint" "USBC_PD_mo-easyedapro:"
-			(at 496.57 171.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 496.57 171.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 496.57 171.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "beaf64ca-84cb-4f2c-9263-d2b5d05e1965")
-		)
-		(instances
-			(project "core"
-				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
-					(reference "#PWR067")
 					(unit 1)
 				)
 			)
@@ -11985,160 +11635,6 @@
 		)
 	)
 	(symbol
-		(lib_id "USBC_PD_mo-easyedapro:SK6812MINI-E_C5149201")
-		(at 485.14 177.8 0)
-		(mirror x)
-		(unit 1)
-		(body_style 0)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "73a6e070-299b-43ef-89d5-0eb25ff47e71")
-		(property "Reference" "LED2"
-			(at 477.266 172.212 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.2446 1.2446)
-				)
-				(justify left top)
-			)
-		)
-		(property "Value" "SK6812MINI-E"
-			(at 479.806 184.15 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.2446 1.2446)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "SpaghettiLAB:LED-SMD_4P-L3.2-W2.8-LS5.9_SK6812MINI-E"
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://item.szlcsc.com/datasheet/SK6812MINI-E/5773397.html"
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer Part" "SK6812MINI-E"
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "欧思科光电"
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Supplier Part" "C5149201"
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Supplier" "LCSC"
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part Name" "工作电压5V、发光角度120°、灰度调节256级的RGB LED"
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C5149201"
-			(at 485.14 177.8 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "3"
-			(uuid "e6885b61-39e8-456b-9ef7-136224cc5d22")
-		)
-		(pin "2"
-			(uuid "5fe0f63e-3d00-40ee-90c5-b0a503142f7d")
-		)
-		(pin "4"
-			(uuid "df98a35e-f047-4c8a-be31-9ad07fa1e2e6")
-		)
-		(pin "1"
-			(uuid "9665fa80-e78d-42c2-a3a5-fef37be74066")
-		)
-		(instances
-			(project "core"
-				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
-					(reference "LED2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 149.86 160.02 0)
 		(unit 1)
@@ -12287,134 +11783,6 @@
 			(project "core"
 				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
 					(reference "#PWR0140")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "STMICRO:root_1_GRM033C71A104KE14D_STMICRO.SchLib")
-		(at 496.57 187.96 180)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "831f685e-c219-4b87-ba7f-77a8ad824f4f")
-		(property "Reference" "C24"
-			(at 501.65 185.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right bottom)
-			)
-		)
-		(property "Value" "100nF"
-			(at 499.11 187.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right bottom)
-			)
-		)
-		(property "Footprint" "SpaghettiLAB:C0603"
-			(at 496.57 187.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 496.57 187.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Cap GRM033C71A104KE14D 100nF 0201"
-			(at 496.57 187.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "MURATA"
-			(at 496.824 182.372 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right bottom)
-			)
-		)
-		(property "NOT-FITTED" ""
-			(at 493.522 185.674 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right bottom)
-			)
-		)
-		(property "PICKPLACE" "Yes"
-			(at 494.284 191.008 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right bottom)
-			)
-		)
-		(property "LCSC Part" "C1591"
-			(at 496.57 187.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "d93d095d-610c-44a2-9dde-ee543c4731ff")
-		)
-		(pin "1"
-			(uuid "56a86e53-8a30-4daf-84a8-00b2d9b39658")
-		)
-		(instances
-			(project "core"
-				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
-					(reference "C24")
 					(unit 1)
 				)
 			)
@@ -13931,85 +13299,6 @@
 			(project "core"
 				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
 					(reference "C74")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 496.57 191.77 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "bc96b5ee-c90c-4bca-b5bb-5a188df734cc")
-		(property "Reference" "#PWR070"
-			(at 496.57 198.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 499.11 193.0399 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 496.57 191.77 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 496.57 191.77 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 496.57 191.77 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "051a3449-e191-4a0a-98a2-4ea757287df5")
-		)
-		(instances
-			(project "core"
-				(path "/37443791-4e95-4f9c-a466-b3bd02bfd108"
-					(reference "#PWR070")
 					(unit 1)
 				)
 			)
