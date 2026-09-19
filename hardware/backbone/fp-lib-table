@@ -1,4 +1,3 @@
 (fp_lib_table
   (lib (name "SpaghettiLAB")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB.pretty")(options "")(descr "Community hardware footprints"))
-  (lib (name "SpaghettiLAB2")(type "KiCad")(uri "${KIPRJMOD}/../../../SpaghettiLAB.pretty")(options "")(descr "Legacy SpaghettiLAB footprints"))
 )

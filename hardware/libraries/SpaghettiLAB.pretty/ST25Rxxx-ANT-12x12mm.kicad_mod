@@ -1239,7 +1239,7 @@
 		(uuid "4ea1ae0d-0cc5-49da-a46f-4e931500f523")
 	)
 	(zone
-		(layers "F.Cu" "B.Cu")
+		(layers "F.Cu" "In1.Cu" "In2.Cu" "B.Cu")
 		(uuid "4e04d7a7-f748-4b0a-be10-0c2d6c88c37b")
 		(name "ANT_KEEPOUT")
 		(hatch edge 0.5)

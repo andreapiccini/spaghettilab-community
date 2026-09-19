@@ -1,0 +1,5 @@
+(version 1)
+(rule "Keepout ESP32 - eccezioni necessarie"
+  (condition "A.intersectsArea('Antenna') && A.NetName != 'A0' && A.NetName != 'A1' && A.NetName != 'A2' && A.NetName != 'A3' && A.NetName != 'CAN_H' && A.NetName != '5V'")
+  (constraint disallow track via pad)
+)
