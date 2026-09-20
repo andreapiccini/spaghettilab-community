@@ -6815,7 +6815,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "F.Cu")
 		(uuid "1e705062-7722-479f-9edf-dcd3fb82dc14")
 		(at 180.63 112.81)
@@ -28205,7 +28205,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "F.Cu")
 		(uuid "7412c476-cbfa-419a-8932-bebe6d1089b8")
 		(at 179.73 90.63 180)
@@ -28792,7 +28792,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:R0603"
+	(footprint "SpaghettiLAB:R0603"
 		(layer "F.Cu")
 		(uuid "78d48cbe-a317-4fbb-8d6e-53aeeb329407")
 		(at 159.09 86.58)
@@ -42026,7 +42026,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:SOT-25-5_L2.9-W1.6-P0.95-LS2.8-BL"
+	(footprint "SpaghettiLAB:SOT-25-5_L2.9-W1.6-P0.95-LS2.8-BL"
 		(layer "F.Cu")
 		(uuid "92962cc6-77f6-4a7f-98b8-c26b6cc228bc")
 		(at 180.56 109.58 180)
@@ -49271,7 +49271,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "F.Cu")
 		(uuid "b2985951-c597-419b-ba3f-d756b5e222f7")
 		(at 180.94 106.1 180)
@@ -49806,7 +49806,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:R0603"
+	(footprint "SpaghettiLAB:R0603"
 		(layer "F.Cu")
 		(uuid "c4b4054b-5fd7-4642-86ab-3bd93ee7d4aa")
 		(at 176.34 86.44 -90)
@@ -53589,7 +53589,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:R0603"
+	(footprint "SpaghettiLAB:R0603"
 		(layer "F.Cu")
 		(uuid "fad2f6d4-0ea7-4792-9666-48445059fed2")
 		(at 159.32 85)
@@ -53898,7 +53898,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "011f4e4b-8f95-4bcd-a896-2c2699324b2f")
 		(at 170.45 88.02 180)
@@ -54295,7 +54295,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:R0603"
+	(footprint "SpaghettiLAB:R0603"
 		(layer "B.Cu")
 		(uuid "05254afe-2203-452f-88f7-311986f42129")
 		(at 167.368898 86.464408)
@@ -55098,7 +55098,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "0769e9a0-2642-4dfa-9fc2-bb33cc145d66")
 		(at 170.11 98.7 -90)
@@ -55465,7 +55465,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:R0603"
+	(footprint "SpaghettiLAB:R0603"
 		(layer "B.Cu")
 		(uuid "07afa63f-b33a-4b3b-9ffd-8b35f29c9fae")
 		(at 167.42 112.88 180)
@@ -55804,7 +55804,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "0a122c47-56ea-45a2-bf7c-5b6fa28a40ca")
 		(at 158.12 94.37 -90)
@@ -56235,7 +56235,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "0ea3cd43-15a0-4d56-a463-73822d2d1de7")
 		(at 160.89 91.89 -90)
@@ -56910,7 +56910,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "1c2bf6a5-32d6-499e-b84e-00ceebee43e2")
 		(at 167.38 89.666645 180)
@@ -57311,7 +57311,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "23c21974-4040-4891-9dcf-80c92231f42f")
 		(at 167.46 107.868 180)
@@ -59261,7 +59261,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "31a3fa17-29da-456b-911b-5191633e20b1")
 		(at 162.79 105.29 -135)
@@ -60258,7 +60258,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "40feed05-c7ce-4966-909e-7b2cab6341d5")
 		(at 165.26 93.78 -90)
@@ -62401,7 +62401,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "577ee91a-5012-43dc-96d1-b32bc5beacf9")
 		(at 167.52 92.85)
@@ -62823,7 +62823,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "5a5e4854-768e-417b-a295-b57b292d150d")
 		(at 167.44 111.276 180)
@@ -63217,7 +63217,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "5aaabd4a-cafd-4516-8ab0-0bf64310b0c8")
 		(at 168.12 101.9 90)
@@ -63607,7 +63607,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "5ab8cb3b-2c52-4b12-a23f-fa75eabd0c0e")
 		(at 164.31 110.83 180)
@@ -64004,7 +64004,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "73f678a6-ab7a-4fc8-ba90-f4dda0e4b15f")
 		(at 167.46 109.572 180)
@@ -64405,7 +64405,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "775914f7-b89c-424d-bca4-739cbe89bd19")
 		(at 163.09 92.69)
@@ -64772,7 +64772,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "7f9f11b9-f8d5-4bff-abf7-54e1c53d855e")
 		(at 159.1 101.98 45)
@@ -65139,7 +65139,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "88fc7022-41b9-45c2-bb34-0bf67b4320a0")
 		(at 167.38 88.015526 180)
@@ -65533,7 +65533,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "9300ff41-04b1-4c5d-9761-0f031bd7442c")
 		(at 158.88 97.14)
@@ -66176,7 +66176,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "adee4be5-f955-4d29-86c2-a7ca24532f1c")
 		(at 159.58 94.34 -90)
@@ -66543,7 +66543,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "b458184b-ec50-4cdd-aa35-8ec8cfc02e8d")
 		(at 168.42 98.7 -90)
@@ -66961,7 +66961,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "b4d0cb4a-7eac-4522-81d8-d17c92a5b80c")
 		(at 167.47 106.164)
@@ -67383,7 +67383,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "bca7ef94-0bf5-460b-a400-e97e31111920")
 		(at 161.1 94.66 -90)
@@ -68209,7 +68209,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "c55dc169-236b-4704-910d-ddf7a4815468")
 		(at 169.65 101.85 90)
@@ -68735,7 +68735,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "d1123e95-5b6e-4071-8679-ad41f7393974")
 		(at 167.47 91.317763)
@@ -69153,7 +69153,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "d5f9404d-5ebc-4079-a85e-cd39bd9fbbf8")
 		(at 163.11 89.8 180)
@@ -69543,7 +69543,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "df17239b-a147-4984-84c1-076f72d8b365")
 		(at 163.05 94.24)
@@ -70879,7 +70879,7 @@
 			)
 		)
 	)
-	(footprint "SpaghettiLAB2:C0603"
+	(footprint "SpaghettiLAB:C0603"
 		(layer "B.Cu")
 		(uuid "f245330a-8ab6-451b-828f-25a415355360")
 		(at 165.24 91 -90)

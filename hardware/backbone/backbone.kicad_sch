@@ -9707,7 +9707,122 @@
 			)
 			(embedded_fonts no)
 		)
-	)
+	
+		(symbol "power:PWR_FLAG"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#FLG"
+				(at 0 1.905 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "PWR_FLAG"
+				(at 0 3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Special symbol for telling ERC where power comes from"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "flag power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "PWR_FLAG_0_0"
+				(pin power_out line
+					(at 0 0 90)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "PWR_FLAG_0_1"
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(embedded_fonts no)
+		))
 	(rectangle
 		(start 270.51 223.52)
 		(end 454.025 341.63)
@@ -15847,7 +15962,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 388.62 144.78 0)
 			(hide yes)
 			(show_name no)
@@ -16066,7 +16181,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 391.16 64.77 0)
 			(hide yes)
 			(show_name no)
@@ -16416,7 +16531,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 427.99 71.12 0)
 			(hide yes)
 			(show_name no)
@@ -16932,7 +17047,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 420.37 259.08 0)
 			(hide yes)
 			(show_name no)
@@ -17161,7 +17276,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 402.59 243.84 0)
 			(hide yes)
 			(show_name no)
@@ -18588,7 +18703,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 321.31 88.9 0)
 			(hide yes)
 			(show_name no)
@@ -19028,7 +19143,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 85.09 257.81 0)
 			(hide yes)
 			(show_name no)
@@ -19464,7 +19579,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 379.73 152.4 0)
 			(hide yes)
 			(show_name no)
@@ -19875,7 +19990,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 347.98 151.13 0)
 			(hide yes)
 			(show_name no)
@@ -21220,7 +21335,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 76.2 255.27 0)
 			(hide yes)
 			(show_name no)
@@ -21491,7 +21606,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 434.34 125.73 0)
 			(hide yes)
 			(show_name no)
@@ -21892,7 +22007,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 411.48 149.86 0)
 			(hide yes)
 			(show_name no)
@@ -22099,7 +22214,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 316.23 289.56 0)
 			(hide yes)
 			(show_name no)
@@ -22555,7 +22670,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 419.1 304.8 0)
 			(hide yes)
 			(show_name no)
@@ -22811,7 +22926,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 369.57 259.08 0)
 			(hide yes)
 			(show_name no)
@@ -23027,7 +23142,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 321.31 57.15 0)
 			(hide yes)
 			(show_name no)
@@ -23539,7 +23654,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:R0603"
+		(property "Footprint" "SpaghettiLAB:R0603"
 			(at 119.38 273.05 0)
 			(hide yes)
 			(show_name no)
@@ -23804,7 +23919,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:SOT-25-5_L2.9-W1.6-P0.95-LS2.8-BL"
+		(property "Footprint" "SpaghettiLAB:SOT-25-5_L2.9-W1.6-P0.95-LS2.8-BL"
 			(at 70.485 326.39 0)
 			(hide yes)
 			(show_name no)
@@ -24143,7 +24258,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 422.91 125.73 0)
 			(hide yes)
 			(show_name no)
@@ -24348,7 +24463,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 444.5 149.86 0)
 			(hide yes)
 			(show_name no)
@@ -24887,7 +25002,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 372.11 152.4 0)
 			(hide yes)
 			(show_name no)
@@ -25015,7 +25130,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 398.78 144.78 0)
 			(hide yes)
 			(show_name no)
@@ -25848,7 +25963,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 44.7802 317.5 0)
 			(hide yes)
 			(show_name no)
@@ -26228,7 +26343,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 316.23 276.86 0)
 			(hide yes)
 			(show_name no)
@@ -26367,7 +26482,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 401.32 327.66 0)
 			(hide yes)
 			(show_name no)
@@ -27650,7 +27765,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 402.59 64.77 0)
 			(hide yes)
 			(show_name no)
@@ -27778,7 +27893,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 368.3 304.8 0)
 			(hide yes)
 			(show_name no)
@@ -28108,7 +28223,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 401.32 314.96 0)
 			(hide yes)
 			(show_name no)
@@ -28351,7 +28466,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 421.64 149.86 0)
 			(hide yes)
 			(show_name no)
@@ -28635,7 +28750,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 401.32 303.53 0)
 			(hide yes)
 			(show_name no)
@@ -29510,7 +29625,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 45.4152 384.81 0)
 			(hide yes)
 			(show_name no)
@@ -29702,7 +29817,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 95.5802 317.5 0)
 			(hide yes)
 			(show_name no)
@@ -30352,7 +30467,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 420.37 71.12 0)
 			(hide yes)
 			(show_name no)
@@ -30635,7 +30750,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 402.59 267.97 0)
 			(hide yes)
 			(show_name no)
@@ -30774,7 +30889,7 @@
 				(justify right bottom)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB2:C0603"
+		(property "Footprint" "SpaghettiLAB:C0603"
 			(at 402.59 256.54 0)
 			(hide yes)
 			(show_name no)
@@ -31514,6 +31629,203 @@
 					(reference "#PWR022")
 					(unit 1)
 				)
+			)
+		)
+	)
+	(global_label "Net-(Q2-D)"
+		(shape bidirectional)
+		(at 85.09 254.635 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "82e27ed0-60c4-4998-a6ab-bda6eb24ccb5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 85.09 254.635 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(R5-Pad1)"
+		(shape bidirectional)
+		(at 87.63 262.89 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "36c2ad8b-81f5-424b-93bc-cebe00e34d9c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 87.63 262.89 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(R8-Pad2)"
+		(shape bidirectional)
+		(at 116.205 273.05 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "dd5d40df-ab57-4994-9dd5-d9e9bfbc16ad")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 116.205 273.05 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(U19-USB_D-)"
+		(shape bidirectional)
+		(at 127.635 152.4 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "aaff9f5f-82a7-44b3-ac81-cf0cf4de5c38")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 127.635 152.4 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(U19-USB_D+)"
+		(shape bidirectional)
+		(at 127.635 154.94 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "2a89353f-cbd4-4771-8fa4-d4e2bef13289")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 127.635 154.94 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(USB1-CC1)"
+		(shape bidirectional)
+		(at 164.465 358.14 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "9da8568c-9953-4bdf-8239-107cf272dd51")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 164.465 358.14 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(USB1-CC2)"
+		(shape bidirectional)
+		(at 196.215 365.76 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "892f740d-113f-4076-8495-cbfc24c7038d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 196.215 365.76 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(D2-A)"
+		(shape bidirectional)
+		(at 247.65 367.03 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "b3cf7b35-cfcd-4cd4-a6c8-2e6ea1e46267")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 247.65 367.03 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(D3-A)"
+		(shape bidirectional)
+		(at 257.81 367.03 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "949d8ba5-12cf-49ff-bfd1-00191c462fde")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 257.81 367.03 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(D5-A)"
+		(shape bidirectional)
+		(at 267.97 367.03 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "2fec927d-7206-4e17-a867-506020fc2c49")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 267.97 367.03 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(C28-Pad2)"
+		(shape bidirectional)
+		(at 388.62 304.8 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "4c836735-36e5-4d12-be3c-643850d7603f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 388.62 304.8 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(C32-Pad2)"
+		(shape bidirectional)
+		(at 389.89 259.08 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "a6c42968-b5c3-4da0-b8b3-dd7bf69c7802")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 389.89 259.08 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(U15-VDD)"
+		(shape bidirectional)
+		(at 423.545 140.97 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "4db82b6a-0164-4f9d-a4d7-e437e9719a80")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 423.545 140.97 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(ANT2-Pad2)"
+		(shape bidirectional)
+		(at 430.53 304.8 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "1ead9c40-6689-494f-92a1-27b620301ac4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 430.53 304.8 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(global_label "Net-(ANT1-Pad2)"
+		(shape bidirectional)
+		(at 445.77 250.19 0)
+		(effects (font (size 1.27 1.27)) (justify left) (hide yes))
+		(uuid "28ba67bb-f71f-4f66-9a25-607b9bf06890")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}" (at 445.77 250.19 0) (hide yes) (effects (font (size 1.27 1.27))))
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 49.53 234.95 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "24d17310-2025-4cbe-88c6-2c87a77f6ce8")
+		(property "Reference" "#FLG0101" (at 49.53 233.045 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Value" "PWR_FLAG" (at 49.53 231.14 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Footprint" "" (at 49.53 234.95 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Datasheet" "" (at 49.53 234.95 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Description" "Special symbol for telling ERC where power comes from" (at 49.53 234.95 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(pin "1" (uuid "e255158d-9eda-42b0-9bbd-b7b47452611c"))
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03" (reference "#FLG0101") (unit 1))
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 106.68 139.7 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f4f8816c-fde9-470b-bbde-37e228bb37a6")
+		(property "Reference" "#FLG0102" (at 106.68 137.795 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Value" "PWR_FLAG" (at 106.68 135.89 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Footprint" "" (at 106.68 139.7 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Datasheet" "" (at 106.68 139.7 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Description" "Special symbol for telling ERC where power comes from" (at 106.68 139.7 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(pin "1" (uuid "42fccf17-d225-4988-94d2-3a41f28b9e89"))
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03" (reference "#FLG0102") (unit 1))
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 106.68 200.66 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "bed189b3-a9f6-4296-9027-66fa5551107b")
+		(property "Reference" "#FLG0103" (at 106.68 202.565 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Value" "PWR_FLAG" (at 106.68 204.47 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Footprint" "" (at 106.68 200.66 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Datasheet" "" (at 106.68 200.66 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Description" "Special symbol for telling ERC where power comes from" (at 106.68 200.66 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(pin "1" (uuid "3c6dd2ba-b7e6-474b-a714-8953c12253d3"))
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03" (reference "#FLG0103") (unit 1))
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 137.16 351.79 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f444926a-f3b4-4e7a-bdf5-c72ce469499c")
+		(property "Reference" "#FLG0104" (at 137.16 349.885 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Value" "PWR_FLAG" (at 137.16 347.98 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Footprint" "" (at 137.16 351.79 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Datasheet" "" (at 137.16 351.79 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(property "Description" "Special symbol for telling ERC where power comes from" (at 137.16 351.79 0) (hide yes) (effects (font (size 1.27 1.27))))
+		(pin "1" (uuid "ca5299d5-09b5-4319-a500-e9b461c1d3e7"))
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03" (reference "#FLG0104") (unit 1))
 			)
 		)
 	)
