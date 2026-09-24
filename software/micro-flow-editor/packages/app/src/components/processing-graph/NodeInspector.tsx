@@ -201,10 +201,8 @@ export function NodeInspector({
     data.kind === "block" && isBlockNodeData(data) && isRgbLedBlock(data)
       ? (() => {
           const cfg = parseRgbLedConfig(data.properties);
-          // Don't show leftover Solid color while Color cycle / breathe / blink is selected.
-          if (cfg.mode === "preset" && (cfg.preset === "color_cycle" || cfg.preset === "breathe" || cfg.preset === "blink")) {
-            return rgbLedVisualAt(performance.now(), cfg, true).color;
-          }
+          // Identity swatch only — RGB stays off until the input trigger drives it.
+          if (cfg.mode === "preset" && cfg.preset === "color_cycle") return rgbLedVisualAt(0, cfg, true).color;
           return cfg.color;
         })()
       : data.kind === "block" && isBlockNodeData(data) && isLedBlock(data)

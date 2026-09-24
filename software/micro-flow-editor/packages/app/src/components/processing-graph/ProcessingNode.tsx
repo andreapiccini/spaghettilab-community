@@ -1,6 +1,5 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Cable, Cpu, Palette, Power, ToggleLeft } from "lucide-react";
-import { useEffect, useState } from "react";
 import { FLOW_START_COLOR } from "./block-visuals.js";
 import { lineHighAtElapsed, lineHighAtTick, waveformPlateaus, type ToggleMode } from "./dry-run-preview.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
@@ -12,7 +11,6 @@ import {
   stackedHandleTop,
   TARGET_HANDLE_STYLE,
 } from "./node-ports.js";
-import { parseRgbLedConfig, rgbLedVisualAt } from "./rgb-led-model.js";
 import type { ProcessingNodeUiData } from "./to-nodes.js";
 
 /** Slate chrome for hardware bay endpoints — distinct from solid functionality cards. */
@@ -43,57 +41,16 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
   const ports = { hasInput: inputHandles.length > 0, hasOutput: outputHandles.length > 0 };
   const multiChannel = outputHandles.length > 1 || inputHandles.length > 1;
   const previewOn = data.previewActive === true;
-  const isLed = data.ledColor !== undefined || data.rgbSwatch !== undefined;
+  const isRgb = data.rgbSwatch !== undefined;
+  const isLed = data.ledColor !== undefined || isRgb;
   const isToggle = data.toggleWave !== undefined;
   const isTick = data.circular === true;
   const isBay = data.bay === true;
-  const rgbSwatch = data.rgbSwatch;
-  const rgbPreset = rgbSwatch?.mode === "preset" ? rgbSwatch.preset : undefined;
-  const shouldAnimateRgb =
-    rgbPreset === "color_cycle" || rgbPreset === "breathe" || rgbPreset === "blink";
-  // Dry-run drives the swatch while the LED is lit; otherwise animate dynamic presets
-  // from the latest props every frame (avoid stale color after solid → color_cycle).
-  const dryRunLit = data.previewing === true && (data.ledIntensity ?? 0) > 0.08;
-  const [animFrame, setAnimFrame] = useState(0);
-  useEffect(() => {
-    if (!shouldAnimateRgb || dryRunLit) return;
-    let raf = 0;
-    const loop = () => {
-      setAnimFrame((n) => n + 1);
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [shouldAnimateRgb, dryRunLit, rgbPreset, rgbSwatch?.speedMs, rgbSwatch?.intensity, rgbSwatch?.color]);
-
-  const idleVisual =
-    shouldAnimateRgb && !dryRunLit && rgbSwatch
-      ? rgbLedVisualAt(
-          // animFrame keeps this expression tied to the rAF loop
-          performance.now() + animFrame * 0,
-          parseRgbLedConfig({
-            mode: "preset",
-            preset: rgbSwatch.preset,
-            color: rgbSwatch.color,
-            intensity: rgbSwatch.intensity,
-            speedMs: rgbSwatch.speedMs,
-          }),
-          true,
-        )
-      : null;
-
-  // Dynamic presets must never fall back to properties.color (leftover from Solid).
-  const ledColor = dryRunLit
-    ? (data.ledColor ?? rgbSwatch?.color ?? "#FF3366")
-    : (idleVisual?.color ?? data.ledColor ?? "#F5C518");
+  // RGB is trigger-gated: off unless dry-run reports a driven intensity.
+  // Never idle-animate color_cycle / breathe / blink — that looked "on" with no input.
+  const ledColor = data.ledColor ?? data.rgbSwatch?.color ?? "#F5C518";
   const accent = data.accentColor ?? config.colorVar;
-  const intensity = dryRunLit
-    ? (data.ledIntensity ?? (previewOn ? 1 : 0))
-    : idleVisual !== null
-      ? idleVisual.intensity
-      : isLed && data.previewing
-        ? (data.ledIntensity ?? (previewOn ? 1 : 0))
-        : undefined;
+  const intensity = isLed && data.previewing ? (data.ledIntensity ?? (previewOn && !isRgb ? 1 : 0)) : isRgb ? 0 : undefined;
   const ledLit = intensity !== undefined && intensity > 0.08;
   const tileColor = data.hasError
     ? "var(--color-error)"
