@@ -4,8 +4,17 @@ import { formatFieldsSubtitle } from "@spaghettilab/processing-block-catalog";
 import type { Node } from "@xyflow/react";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
+import { visualForCatalogEntryId } from "./block-visuals.js";
+import { hysteresisTicksFromProperties, initialHighFromProperties, isDigitalOutToggle, isLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
 import { NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
+import { portsForNode } from "./node-ports.js";
+
+export type ToggleWaveUi = {
+  readonly highTicks: number;
+  readonly lowTicks: number;
+  readonly initialHigh: boolean;
+};
 
 export type ProcessingNodeUiData = {
   readonly domainId: string;
@@ -13,6 +22,35 @@ export type ProcessingNodeUiData = {
   readonly label: string;
   readonly subtitle: string;
   readonly hasError: boolean;
+  readonly hasInput: boolean;
+  readonly hasOutput: boolean;
+  /** Dry-run: LED / toggle line currently HIGH. */
+  readonly previewActive?: boolean;
+  /** Dry-run: this node is part of an active preview channel. */
+  readonly previewing?: boolean;
+  /** LED block: solid swatch color from Inspector (no glyph inside the tile). */
+  readonly ledColor?: string;
+  /** Dry-run: continuous LED brightness 0..1 (soglia + soft start/stop). */
+  readonly ledIntensity?: number;
+  /** Catalog override: tile accent (e.g. Digital Out Toggle orange). */
+  readonly accentColor?: string;
+  /** Catalog override: use toggle glyph instead of kind default. */
+  readonly toggleIcon?: boolean;
+  /** Flow Start: render as a circular entry node. */
+  readonly circular?: boolean;
+  /**
+   * Direct target of a Schedule / Event-source — shows a feed chip on the
+   * input (clock + period) instead of a separate Start node.
+   */
+  readonly triggerFeed?: {
+    readonly kind: "schedule" | "event-source";
+    readonly label: string;
+    readonly periodMs?: number;
+  };
+  /** Digital Out Toggle: duty-cycle waveform on the output handle. */
+  readonly toggleWave?: ToggleWaveUi;
+  /** Dry-run: scroll the toggle waveform with the live clock. */
+  readonly waveLive?: { readonly elapsedMs: number; readonly periodMs: number };
 };
 
 /**
@@ -27,6 +65,7 @@ export function toProcessingNodes(
   errorNodeIds: ReadonlySet<string>,
   moduleLabel: (moduleNodeId: string) => string,
   fieldLabel: (moduleNodeId: string, fieldId: number) => string = (_moduleNodeId, fieldId) => String(fieldId),
+  previewActiveIds: ReadonlySet<string> = new Set(),
 ): Node<ProcessingNodeUiData>[] {
   const titles = new Map<string, string>();
   for (const node of graphState.nodes) {
@@ -55,9 +94,42 @@ export function toProcessingNodes(
         label: titles.get(node.id) ?? PROCESSING_NODE_KIND_CONFIG[data.kind].label,
         subtitle: subtitleFor(node.id, data, graphState, titles, moduleLabel, fieldLabel),
         hasError: errorNodeIds.has(node.id),
+        ...portsForNode(data),
+        previewActive: previewActiveIds.has(node.id),
+        ...(isBlockNodeData(data) && isLedBlock(data) ? { ledColor: ledColorFromProperties(data.properties) } : {}),
+        ...blockAccentFields(data),
+        ...toggleWaveFields(data),
       },
     };
   });
+}
+
+function toggleWaveFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiData, "toggleWave"> {
+  if (!isDigitalOutToggle(data) || !isBlockNodeData(data)) return {};
+  const hyst = hysteresisTicksFromProperties(data.properties);
+  return {
+    toggleWave: {
+      highTicks: hyst.highTicks,
+      lowTicks: hyst.lowTicks,
+      initialHigh: initialHighFromProperties(data.properties),
+    },
+  };
+}
+
+function blockAccentFields(
+  data: DeviceProcessingNodeData,
+): Pick<ProcessingNodeUiData, "accentColor" | "toggleIcon" | "circular"> {
+  if (!isBlockNodeData(data)) return {};
+  const visual = visualForCatalogEntryId(data.catalogEntryId) ?? visualForCatalogEntryId(data.blockTypeId);
+  if (!visual) return {};
+  if (visual.solidSwatch) return {};
+  if (visual.circular) {
+    return { accentColor: visual.colorVar, circular: true };
+  }
+  return {
+    accentColor: visual.colorVar,
+    toggleIcon: true,
+  };
 }
 
 function canvasTitle(data: DeviceProcessingNodeData, meta: AuthoringMetadata | undefined): string {

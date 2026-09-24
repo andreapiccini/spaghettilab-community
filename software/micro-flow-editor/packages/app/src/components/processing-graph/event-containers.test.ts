@@ -1,6 +1,6 @@
 import type { GraphState } from "@spaghettilab/domain";
 import { describe, expect, it } from "vitest";
-import { computeEventContainers, detachMemberEdges, memberEscapesContainer, overlappingPeerContainer, peerContainerObstacles, planMembershipDrop } from "./event-containers.js";
+import { computeEventContainers, detachMemberEdges, formatSchedulePeriod, memberEscapesContainer, overlappingPeerContainer, peerContainerObstacles, planMembershipDrop } from "./event-containers.js";
 import { EVENT_CONTAINER_HEADER_HEIGHT, NODE_HEIGHT, NODE_PADDING, NODE_WIDTH } from "./layout-constants.js";
 
 describe("memberEscapesContainer", () => {
@@ -59,6 +59,32 @@ describe("computeEventContainers size preview", () => {
 });
 
 describe("computeEventContainers nesting", () => {
+  it("nests Flow Start and its chain inside the Schedule box", () => {
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [
+        { layer: "device-processing", id: "sched", data: { kind: "schedule", moduleNodeId: "m1", periodMs: 1000, enabled: true } },
+        {
+          layer: "device-processing",
+          id: "start",
+          data: { kind: "block", blockTypeId: "ab.flow_start", catalogEntryId: "native.flow_start", moduleNodeId: "m1", properties: {} },
+        },
+        { layer: "device-processing", id: "toggle", data: { kind: "block", blockTypeId: "appblocks.digital_out_toggle", moduleNodeId: "m1", properties: {} } },
+      ],
+      edges: [
+        { layer: "device-processing", id: "e1", source: "sched", target: "start" },
+        { layer: "device-processing", id: "e2", source: "start", target: "toggle" },
+      ],
+    };
+    const meta = {
+      sched: { position: { x: 40, y: 100 } },
+      start: { position: { x: 80, y: 160 } },
+      toggle: { position: { x: 220, y: 160 } },
+    };
+    const boxes = computeEventContainers(graphState, meta);
+    expect(boxes.find((c) => c.triggerId === "sched")?.memberIds).toEqual(["start", "toggle"]);
+  });
+
   it("nests an event-source inside a schedule without stealing the inner chain", () => {
     const graphState: GraphState<"device-processing"> = {
       layer: "device-processing",
@@ -184,5 +210,24 @@ describe("computeEventContainers labels", () => {
     };
     const boxes = computeEventContainers(graphState, { boot: { position: { x: 100, y: 100 } } });
     expect(boxes[0]!.label).toBe("On Boot");
+  });
+
+  it("keeps the schedule period on the container for the header badge", () => {
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [{ layer: "device-processing", id: "sched", data: { kind: "schedule", moduleNodeId: "m1", periodMs: 250, enabled: true } }],
+      edges: [],
+    };
+    const boxes = computeEventContainers(graphState, { sched: { comment: "Schedule", position: { x: 40, y: 40 } } });
+    expect(boxes[0]!.label).toBe("Schedule");
+    expect(boxes[0]!.periodMs).toBe(250);
+  });
+});
+
+describe("formatSchedulePeriod", () => {
+  it("formats whole seconds and milliseconds", () => {
+    expect(formatSchedulePeriod(1000)).toBe("ogni 1s");
+    expect(formatSchedulePeriod(250)).toBe("ogni 250ms");
+    expect(formatSchedulePeriod(1500)).toBe("ogni 1.5s");
   });
 });

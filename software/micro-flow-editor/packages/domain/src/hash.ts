@@ -19,8 +19,17 @@ function fnv1a(input: string): string {
   return (hash >>> 0).toString(16).padStart(8, "0");
 }
 
-/** Recursively sorts object keys so two structurally-equal values with keys in a different order hash identically. */
+/**
+ * Recursively sorts object keys so two structurally-equal values with keys in
+ * a different order hash identically. `bigint` becomes a decimal string — the
+ * same lossless JSON boundary used by firmware int64 fields — because
+ * `JSON.stringify` cannot serialize `bigint` natively, and graph node
+ * properties routinely carry `bigint` defaults from the processing catalog.
+ */
 function canonicalize(value: unknown): unknown {
+  if (typeof value === "bigint") {
+    return value.toString();
+  }
   if (Array.isArray(value)) {
     return value.map(canonicalize);
   }

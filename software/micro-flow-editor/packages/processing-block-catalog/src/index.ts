@@ -7,10 +7,28 @@ export type {
   ProcessingCatalogEntry,
   ProcessingNodeKind,
   ProcessingRuntime,
+  BlockPort,
+  PortType,
+  SignalDomain,
+  SignalRole,
 } from "./types.js";
 export { PROCESSING_CATALOG_CATEGORIES, catalogCategory } from "./categories.js";
 export { PROCESSING_BLOCK_CATALOG } from "./entries.js";
 export { defaultPropertiesFromFields, formatFieldsSubtitle } from "./fields.js";
+export {
+  SIGNAL_DOMAINS,
+  SIGNAL_ROLES,
+  T,
+  catalogPortsCompatible,
+  findPort,
+  inPort,
+  outPort,
+  portTypeKey,
+  portTypesCompatible,
+  portsCompatible,
+  resolvePortTypes,
+  rolesCompatible,
+} from "./ports.js";
 export {
   catalogEntriesForNodeKind,
   findCatalogEntriesByTypeId,

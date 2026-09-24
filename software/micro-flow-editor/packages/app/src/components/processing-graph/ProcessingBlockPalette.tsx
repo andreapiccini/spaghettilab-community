@@ -29,6 +29,7 @@ import {
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
+import { visualForCatalogEntryId } from "./block-visuals.js";
 import { beginPaletteDrag, endPaletteDrag, PROCESSING_BLOCK_MIME } from "./catalog-to-node.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 
@@ -134,12 +135,22 @@ export function ProcessingBlockPalette() {
                     >
                       {entries.map((entry, entryIndex) => {
                         const kindConfig = entry.nodeKind ? PROCESSING_NODE_KIND_CONFIG[entry.nodeKind] : undefined;
+                        const catalogVisual = visualForCatalogEntryId(entry.id);
+                        const isLed = catalogVisual?.solidSwatch === true;
+                        const isCircular = catalogVisual?.circular === true;
+                        const ledDefault = entry.fields?.find((f) => f.id === "color")?.default;
                         return (
                         <PaletteRow
                           key={entry.id}
                           entry={entry}
-                          color={kindConfig?.colorVar ?? "#8A8F99"}
-                          icon={kindConfig?.icon ?? Icon}
+                          color={
+                            isLed && typeof ledDefault === "string"
+                              ? ledDefault
+                              : (catalogVisual?.colorVar ?? kindConfig?.colorVar ?? "#8A8F99")
+                          }
+                          icon={catalogVisual?.icon ?? kindConfig?.icon ?? Icon}
+                          solidSwatch={isLed}
+                          circular={isCircular}
                           delay={index * 0 + entryIndex * motionTokens.stagger.list}
                           portsConfigured={portsConfigured}
                           onClickRemind={() => setDragReminder(true)}
@@ -168,6 +179,8 @@ function PaletteRow({
   entry,
   color,
   icon: Icon,
+  solidSwatch = false,
+  circular = false,
   delay,
   portsConfigured,
   onClickRemind,
@@ -176,6 +189,8 @@ function PaletteRow({
   readonly entry: ProcessingCatalogEntry;
   readonly color: string;
   readonly icon: LucideIcon;
+  readonly solidSwatch?: boolean;
+  readonly circular?: boolean;
   readonly delay: number;
   readonly portsConfigured: boolean;
   readonly onClickRemind: () => void;
@@ -217,10 +232,10 @@ function PaletteRow({
         className={`flex h-11 w-full items-center gap-2.5 rounded-lg px-2 text-left ${placeable ? "cursor-grab hover:bg-surface-raised active:cursor-grabbing" : "cursor-not-allowed"}`}
       >
         <div
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
+          className={`flex h-7 w-7 shrink-0 items-center justify-center ${circular ? "rounded-full" : "rounded-md"}`}
           style={{ backgroundColor: placeable ? color : "#E1E4EB" }}
         >
-          <Icon size={14} color={placeable ? "#fff" : "#8A8F99"} />
+          {solidSwatch ? null : <Icon size={14} color={placeable ? "#fff" : "#8A8F99"} />}
         </div>
         <div className="min-w-0 flex-1">
           <div className="truncate font-body text-sm text-ink">{entry.label}</div>

@@ -506,25 +506,27 @@ function PinSignalEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="font-body text-sm text-ink-muted">
-        {capabilities === undefined
-          ? fromCore
-            ? "Il Core ha questa Porta ma non ha inviato le periferiche del connettore. Aggiorna il firmware (GET_TOPOLOGY chiave 5) e rileggi. VCC e GND restano disponibili."
-            : "Le periferiche MCU arrivano dal firmware di questa Porta. VCC e GND restano disponibili."
-          : focus
-            ? `Clicca un pin libero per assegnarlo, o un segnale già messo per toglierlo. ${signalCount} linee dal Core.`
-            : `Scegli una periferica che il Core espone su questa Porta, poi assegna i segnali. ${signalCount} linee dal Core.`}
-      {capabilities !== undefined && (
-        <p className="font-body text-xs text-ink-faint">
-          Su questa Porta: {available.filter((key) => key !== "vcc" && key !== "gnd").map((key) => PERIPHERAL_LABEL[key]).join(", ") || "nessuna periferica MCU"}
+      <div className="font-body text-sm text-ink-muted">
+        <p>
+          {capabilities === undefined
+            ? fromCore
+              ? "Il Core ha questa Porta ma non ha inviato le periferiche del connettore. Aggiorna il firmware (GET_TOPOLOGY chiave 5) e rileggi. VCC e GND restano disponibili."
+              : "Le periferiche MCU arrivano dal firmware di questa Porta. VCC e GND restano disponibili."
+            : focus
+              ? `Clicca un pin libero per assegnarlo, o un segnale già messo per toglierlo. ${signalCount} linee dal Core.`
+              : `Scegli una periferica che il Core espone su questa Porta, poi assegna i segnali. ${signalCount} linee dal Core.`}
         </p>
-      )}
-      {capabilities === undefined && onReload && (
-        <button type="button" onClick={onReload} className="h-8 rounded-slsm border border-border-strong font-body text-xs text-ink hover:bg-surface-raised">
-          Rileggi periferiche dal Core
-        </button>
-      )}
-      </p>
+        {capabilities !== undefined && (
+          <p className="mt-1 font-body text-xs text-ink-faint">
+            Su questa Porta: {available.filter((key) => key !== "vcc" && key !== "gnd").map((key) => PERIPHERAL_LABEL[key]).join(", ") || "nessuna periferica MCU"}
+          </p>
+        )}
+        {capabilities === undefined && onReload && (
+          <button type="button" onClick={onReload} className="mt-2 h-8 rounded-slsm border border-border-strong font-body text-xs text-ink hover:bg-surface-raised">
+            Rileggi periferiche dal Core
+          </button>
+        )}
+      </div>
       {pendingPeripheral && exclusive && (
         <div className="rounded-slmd border border-border bg-surface-sunken p-3">
           <p className="font-body text-sm text-ink">
@@ -573,12 +575,11 @@ function PinSignalEditor({
         </div>
       </div>
 
-      {!focus ? (
       <div>
         <p className="mb-2 font-body text-xs font-semibold text-ink-muted">Funzione — {pinLetter(pin.pinIndex)}</p>
         <div className="flex flex-wrap gap-1.5">
           {offered.map((key) => {
-            const selected = pin.peripheral === key;
+            const selected = focus === key || (!focus && pin.peripheral === key);
             const color = PERIPHERAL_COLOR[key];
             return (
               <button
@@ -597,15 +598,21 @@ function PinSignalEditor({
             );
           })}
         </div>
+        {offered.length <= 1 && (
+          <p className="mt-2 font-body text-xs text-ink-faint">
+            Nessuna periferica MCU disponibile su questa Porta. Rileggi le capacità dal Core o assegna VCC/GND.
+          </p>
+        )}
       </div>
-      ) : (
+
+      {focus && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <p className="font-body text-xs font-semibold text-ink-muted">
               {PERIPHERAL_LABEL[focus]} — {pinLetter(pin.pinIndex)}
             </p>
             <button type="button" onClick={() => setFocus(null)} className="font-body text-xs text-brand-blue hover:underline">
-              Cambia periferica
+              Chiudi dettaglio
             </button>
           </div>
           {exclusive && (

@@ -4,7 +4,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { buildDemoProject } from "../../lib/demo-project.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
-import { projectRepository } from "../../lib/repository.js";
+import { localStorageAdapter, projectRepository } from "../../lib/repository.js";
+import { saveTourSeen } from "../../lib/tour.js";
 import { useSession } from "../../state/session-context.js";
 import { useSettingsModal } from "../../state/settings-modal-context.js";
 import { ChromeStatus } from "../shell/ChromeStatus.js";
@@ -39,7 +40,7 @@ async function loadSummaries(): Promise<LoadState> {
 }
 
 export function ProjectPicker() {
-  const { openProject } = useSession();
+  const { openProject, navigate } = useSession();
   const { openSettings } = useSettingsModal();
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [search, setSearch] = useState("");
@@ -69,21 +70,30 @@ export function ProjectPicker() {
     [openProject],
   );
 
-  // Reopens the existing demo instead of piling up a new "Demo" project on every click.
+  // Always rebuilds the Demo project so catalog/preview changes ship to the
+  // user on the next "Prova la demo", then opens Processing Graph where Dry-run
+  // can blink the LED without Deploy. Marks the shell tour seen so it does not
+  // yank navigation back to Core Connections over the graph we just opened.
   const openDemo = useCallback(async () => {
-    const existing = state.kind === "loaded" ? state.projects.find((p) => p.name === DEMO_PROJECT_NAME) : undefined;
-    if (existing) {
-      await openById(existing.projectId);
-      return;
+    try {
+      const existing = state.kind === "loaded" ? state.projects.find((p) => p.name === DEMO_PROJECT_NAME) : undefined;
+      if (existing) {
+        await projectRepository.remove(existing.projectId);
+      }
+      const demo = buildDemoProject(DEMO_PROJECT_NAME);
+      if (!demo) {
+        setState({ kind: "error", message: "Non è stato possibile creare il progetto demo." });
+        return;
+      }
+      await projectRepository.save(demo);
+      await saveTourSeen(localStorageAdapter, true);
+      openProject(demo.projectId, demo);
+      navigate("processing-graph");
+    } catch (cause) {
+      const detail = cause instanceof Error ? cause.message : "errore sconosciuto";
+      setState({ kind: "error", message: `Non è stato possibile creare il progetto demo: ${detail}` });
     }
-    const demo = buildDemoProject(DEMO_PROJECT_NAME);
-    if (!demo) {
-      setState({ kind: "error", message: "Non è stato possibile creare il progetto demo." });
-      return;
-    }
-    await projectRepository.save(demo);
-    openProject(demo.projectId, demo);
-  }, [openProject, openById, state]);
+  }, [openProject, navigate, state]);
 
   const handleImportFile = useCallback(
     async (file: File) => {
@@ -175,7 +185,15 @@ export function ProjectPicker() {
               <AnimatePresence>
                 {filtered.map((project) => (
                   <motion.div key={project.projectId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={motionTokens.duration.fast}>
-                    <ProjectCard project={project} onOpen={() => void openById(project.projectId)} />
+                    <ProjectCard
+                      project={project}
+                      onOpen={() => {
+                        // Old "Demo" cards still in storage must rebuild — otherwise users
+                        // reopen a stale Schedule→LED graph without Digital Out Toggle / swatch.
+                        if (project.name === DEMO_PROJECT_NAME) void openDemo();
+                        else void openById(project.projectId);
+                      }}
+                    />
                   </motion.div>
                 ))}
               </AnimatePresence>

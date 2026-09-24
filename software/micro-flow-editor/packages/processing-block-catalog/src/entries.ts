@@ -1,4 +1,5 @@
 import type { CatalogField, ProcessingCatalogEntry, ProcessingNodeKind, ProcessingRuntime } from "./types.js";
+import { inPort, outPort, T } from "./ports.js";
 
 function nodeKindFromRuntime(runtime: ProcessingRuntime): ProcessingNodeKind | undefined {
   switch (runtime) {
@@ -21,11 +22,17 @@ function e(entry: Omit<ProcessingCatalogEntry, "nodeKind">): ProcessingCatalogEn
 
 const AUTHORING = "Authoring visibile sul blocco; il Config/firmware si aggancia in un passo successivo.";
 
+/** Firmware entry-point: Schedule / Event emit jolly `activation` to start a chain. */
+const ENTRY_OUTPUTS = [outPort("0", [T.activationTrigger, T.eventTrigger], "Attivazione")];
+
 function sel(id: string, label: string, options: readonly { value: string; label: string }[], def?: string): CatalogField {
   return { id, label, type: "select", options, default: def };
 }
 function num(id: string, label: string, def?: number, placeholder?: string): CatalogField {
   return { id, label, type: "number", default: def, placeholder };
+}
+function chk(id: string, label: string, def = false): CatalogField {
+  return { id, label, type: "checkbox", default: def, placeholder: label };
 }
 function txt(id: string, label: string, def?: string, placeholder?: string): CatalogField {
   return { id, label, type: "text", default: def, placeholder };
@@ -47,7 +54,10 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     category: "trigger",
     runtime: "core-schedule",
     availability: "shipped",
-    notes: "struct spaghetti_runtime_schedule_config: period_ms su un Module. Equivalente AppBlocks: On Time Period.",
+    inputs: [],
+    outputs: ENTRY_OUTPUTS,
+    notes:
+      "Entry point firmware (`spaghetti_runtime_schedule_config`): a ogni periodo emette attivazione (jolly). Equivalente AppBlocks: On Time Period. Se disabilitato non viene eseguito.",
   }),
   e({
     id: "native.event-source",
@@ -56,7 +66,28 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     category: "trigger",
     runtime: "core-event",
     availability: "shipped",
-    notes: "Module che pubblica eventi (`spaghetti_module_manager_start_events`), non uno schedule.",
+    inputs: [],
+    outputs: ENTRY_OUTPUTS,
+    notes: "Entry point firmware: Module che pubblica eventi (`spaghetti_module_manager_start_events`). Output = attivazione (jolly).",
+  }),
+  e({
+    id: "native.flow_start",
+    label: "Start",
+    subtitle: "Entry point del flusso",
+    category: "trigger",
+    runtime: "core-block",
+    availability: "shipped",
+    typeId: "ab.flow_start",
+    needsModule: false,
+    inputs: [
+      inPort("0", [T.activationTrigger, T.eventTrigger], {
+        label: "Da Schedule / Event",
+        required: true,
+      }),
+    ],
+    outputs: [outPort("0", [T.activationTrigger], "Attivazione")],
+    notes:
+      "Opzionale. Di solito basta collegare lo Schedule/Event direttamente al primo blocco (chip orologio sull’ingresso). Usa Start solo se ti serve un nodo di attivazione intermedio.",
   }),
   e({
     id: "appblocks.system",
@@ -67,6 +98,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     availability: "planned",
     appblocksId: "system",
     needsModule: false,
+    inputs: [],
+    outputs: ENTRY_OUTPUTS,
     notes: AUTHORING,
   }),
   e({
@@ -580,20 +613,97 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
   e({
     id: "appblocks.digital_line_set",
     label: "Digital Line Set",
-    subtitle: "Scrivi GPIO",
+    subtitle: "Scrivi GPIO HIGH/LOW",
     category: "io",
     runtime: "core-block",
-    availability: "planned",
+    availability: "shipped",
     appblocksId: "digital_line_set",
     typeId: "ab.digital_line_set",
     fields: [
-      txt("line", "Linea"),
+      txt("line", "Linea", "LED"),
       sel("state", "Stato", [
         { value: "high", label: "HIGH" },
         { value: "low", label: "LOW" },
       ], "high"),
     ],
     notes: AUTHORING,
+  }),
+  e({
+    id: "appblocks.digital_out_toggle",
+    label: "Digital Out Toggle",
+    subtitle: "Inverti uscita digitale",
+    category: "io",
+    runtime: "core-block",
+    availability: "shipped",
+    appblocksId: "digital_out_toggle",
+    typeId: "ab.digital_out_toggle",
+    inputs: [
+      inPort("0", [T.activationTrigger, T.eventTrigger, T.digitalComando], {
+        label: "Trigger / comando",
+        required: true,
+      }),
+    ],
+    outputs: [outPort("0", [T.digitalComando], "Comando digitale")],
+    fields: [
+      txt("line", "Linea", "LED"),
+      sel("initial", "Stato iniziale", [
+        { value: "high", label: "ON (dopo rising edge)" },
+        { value: "low", label: "OFF (dopo falling edge)" },
+      ], "high"),
+      num(
+        "lowToHigh",
+        "Contatore impulsi ON → rising edge",
+        1,
+        "Quanti trigger Schedule (impulsi) restare OFF prima del rising edge / ON",
+      ),
+      num(
+        "highToLow",
+        "Contatore impulsi OFF → falling edge",
+        1,
+        "Quanti trigger Schedule (impulsi) restare ON prima del falling edge / OFF",
+      ),
+    ],
+    notes:
+      "Input: attivazione dallo Start (o jolly da Schedule). Output: comando digitale (0/1) per LED e attuatori. I contatori di impulsi regolano ON/OFF.",
+  }),
+  e({
+    id: "appblocks.led",
+    label: "LED",
+    subtitle: "Indicatore luminoso",
+    category: "io",
+    runtime: "core-block",
+    availability: "shipped",
+    appblocksId: "led",
+    typeId: "ab.led",
+    needsModule: false,
+    inputs: [
+      inPort("0", [T.digitalComando, T.analogComando], {
+        label: "Comando",
+        required: true,
+      }),
+    ],
+    outputs: [],
+    fields: [
+      { id: "color", label: "Colore", type: "color", default: "#F5C518" },
+      num("threshold", "Soglia (0–100)", 50, "Accende se il comando ≥ soglia"),
+      chk("negated", "Negato", false),
+      num(
+        "delayOnMs",
+        "Ritardo ON (ms)",
+        0,
+        "Attesa dopo il segnale ON (comando ≥ soglia) prima di soft start",
+      ),
+      num(
+        "delayOffMs",
+        "Ritardo OFF (ms)",
+        0,
+        "Attesa dopo il segnale OFF (comando < soglia) prima di soft stop",
+      ),
+      num("softOnMs", "Soft start ON (ms)", 0, "Velocità di salita 0→100% (0 = istantaneo)"),
+      num("softOffMs", "Soft stop OFF (ms)", 0, "Velocità di decadimento 100%→0 (0 = istantaneo)"),
+    ],
+    notes:
+      "Sink su comando digitale (0/100) o analogico (0–100). Acceso se livello ≥ soglia. Ritardi ON/OFF rispetto al segnale, poi soft start/stop.",
   }),
 
   e({

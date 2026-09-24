@@ -48,6 +48,29 @@ describe("export/import round-trip", () => {
     expect(imported).toEqual({ ok: true, value: project });
   });
 
+  it("serializes bigint graph properties as decimal strings instead of throwing", () => {
+    const id = mustOk(projectId("bbbbbbbb-0000-4000-8000-0000000000b1"));
+    const project: ProjectV1 = {
+      ...createEmptyProject(id, "bigint-demo"),
+      deviceGraphs: [
+        {
+          layer: "device-processing",
+          nodes: [{ layer: "device-processing", id: "n1", data: { kind: "block", properties: { threshold: 42n } } }],
+          edges: [],
+        },
+      ],
+    };
+    const json = exportProjectV1(project);
+    expect(json).toContain('"threshold": "42"');
+    expect(() => canonicalProjectHash(project)).not.toThrow();
+    const imported = importProjectV1(json);
+    expect(imported.ok).toBe(true);
+    if (imported.ok) {
+      const data = imported.value.deviceGraphs[0]?.nodes[0]?.data as { properties: { threshold: string } };
+      expect(data.properties.threshold).toBe("42");
+    }
+  });
+
   it("importProjectV1 rejects malformed JSON with a structured error, not a thrown SyntaxError", () => {
     const result = importProjectV1("{not json");
     expect(result.ok).toBe(false);

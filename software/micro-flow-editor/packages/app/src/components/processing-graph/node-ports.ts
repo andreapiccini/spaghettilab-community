@@ -1,13 +1,10 @@
-import type { CSSProperties } from "react";
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
+import type { CSSProperties } from "react";
+import { catalogEntryForNode } from "./catalog-entry-for-node.js";
 
 /**
- * Port layout for a processing-graph card. The canvas shape (which sides are
- * closed/rounded) and which handles render both come from this — add a future
- * kind here and the node picks up the n8n-style shell without a one-off branch
- * in ProcessingNode.
- *
- * The card shell is sharp on three corners; only bottom-left is rounded.
+ * Port layout for a processing-graph card. Prefer catalog `inputs`/`outputs`
+ * when declared; otherwise fall back to kind defaults.
  */
 export type NodePortLayout = {
   readonly hasInput: boolean;
@@ -24,6 +21,17 @@ export function portsForKind(kind: DeviceProcessingNodeData["kind"]): NodePortLa
     case "rule":
       return { hasInput: false, hasOutput: false };
   }
+}
+
+export function portsForNode(data: DeviceProcessingNodeData): NodePortLayout {
+  const entry = catalogEntryForNode(data);
+  if (entry && (entry.inputs !== undefined || entry.outputs !== undefined)) {
+    return {
+      hasInput: (entry.inputs?.length ?? 0) > 0,
+      hasOutput: (entry.outputs?.length ?? 0) > 0,
+    };
+  }
+  return portsForKind(data.kind);
 }
 
 const CLOSED = 28;

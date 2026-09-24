@@ -1,24 +1,29 @@
-import type { NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
+import { formatSchedulePeriod } from "./event-containers.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
+import { SOURCE_HANDLE_STYLE, TARGET_HANDLE_STYLE } from "./node-ports.js";
 
 export type EventContainerNodeData = {
   readonly label: string;
   readonly kind: "schedule" | "event-source";
+  /** Schedule period in ms — shown as a non-truncating badge beside the title. */
+  readonly periodMs?: number;
   /** A member is being dragged past the top/left dashed edge — release outside detaches it. */
   readonly rejecting?: boolean;
   /** A free block is being dragged into this dashed box — release inside attaches it. */
   readonly accepting?: boolean;
+  /** Dry-run: brief tick pulse — shown as a pallino, not a full-box highlight. */
+  readonly previewActive?: boolean;
 };
 
 /**
  * A real React Flow parent node representing "everything that runs when this
  * event fires" — a dashed rectangle whose members are true React Flow
- * children (`parentId`, set in ProcessingGraphScreen), not a decorative box
- * drawn behind independently-positioned nodes. This node's own id is the
- * trigger's real domain id, so onNodeClick's existing
- * `domainNodes.find(n => n.id === node.id)` lookup already opens the right
- * Inspector when the dashed area is clicked.
+ * children (`parentId`, set in ProcessingGraphScreen). This node's id is the
+ * trigger's domain id. The wire into the entry block stays in the domain but
+ * is hidden on canvas; the entry block shows a schedule/event feed chip on
+ * its input instead.
  */
 export function EventContainerNode({ id, data, selected }: NodeProps & { readonly data: EventContainerNodeData }) {
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
@@ -26,8 +31,10 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
 
   const rejecting = data.rejecting === true;
   const accepting = data.accepting === true;
+  const tickPulse = data.previewActive === true;
   const highlight = rejecting ? "var(--color-error)" : accepting ? "var(--color-success)" : undefined;
   const idle = highlight === undefined && !selected;
+  const periodLabel = data.kind === "schedule" && data.periodMs !== undefined ? formatSchedulePeriod(data.periodMs) : undefined;
   return (
     <div
       className={`group relative flex h-full w-full cursor-pointer flex-col overflow-visible rounded-slmd border-2 border-dashed transition-colors ${idle ? "border-border-strong hover:border-brand-blue" : ""}`}
@@ -41,9 +48,39 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
       }}
     >
       <HoverDeleteButton id={id} label="Elimina contenitore" forceVisible={selected} />
+      {data.kind === "event-source" && (
+        <Handle type="target" position={Position.Left} id="0" style={{ ...TARGET_HANDLE_STYLE, top: 16 }} />
+      )}
+      <Handle type="source" position={Position.Right} id="0" style={{ ...SOURCE_HANDLE_STYLE, top: 16 }} />
       <div className="flex h-8 shrink-0 items-center gap-1.5 px-2">
-        <Icon size={13} style={{ color: config.colorVar }} />
-        <span className="truncate font-body text-xs font-semibold text-ink-muted group-hover:text-brand-blue">{data.label}</span>
+        <Icon size={13} className="shrink-0" style={{ color: config.colorVar }} />
+        <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted group-hover:text-brand-blue">
+          {data.label}
+        </span>
+        {periodLabel && (
+          <span
+            className="ml-auto shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums"
+            style={{
+              color: config.colorVar,
+              backgroundColor: `color-mix(in srgb, ${config.colorVar} 12%, transparent)`,
+            }}
+          >
+            {periodLabel}
+          </span>
+        )}
+        {data.kind === "schedule" && (
+          <span
+            className="h-1.5 w-1.5 shrink-0 rounded-full transition-[opacity,box-shadow,background-color] duration-75"
+            style={{
+              marginLeft: periodLabel ? 4 : "auto",
+              backgroundColor: tickPulse ? config.colorVar : "color-mix(in srgb, var(--color-ink-faint) 35%, transparent)",
+              opacity: tickPulse ? 1 : 0.45,
+              boxShadow: tickPulse ? `0 0 0 3px color-mix(in srgb, ${config.colorVar} 35%, transparent)` : undefined,
+            }}
+            title="Tick Schedule"
+            aria-hidden
+          />
+        )}
       </div>
     </div>
   );
