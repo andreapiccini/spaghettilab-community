@@ -1,18 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { nodeShellRadius, portsForKind, portsForNode } from "./node-ports.js";
+import { nodeHeightForPorts, nodeShellRadius, portsForKind, portsForNode } from "./node-ports.js";
+import { NODE_HEIGHT } from "./layout-constants.js";
 
 describe("portsForKind", () => {
   it("schedules and event-sources only have an output", () => {
-    expect(portsForKind("schedule")).toEqual({ hasInput: false, hasOutput: true });
-    expect(portsForKind("event-source")).toEqual({ hasInput: false, hasOutput: true });
+    expect(portsForKind("schedule")).toEqual({
+      hasInput: false,
+      hasOutput: true,
+      inputs: [],
+      outputs: [{ id: "0" }],
+    });
+    expect(portsForKind("event-source")).toEqual({
+      hasInput: false,
+      hasOutput: true,
+      inputs: [],
+      outputs: [{ id: "0" }],
+    });
   });
 
   it("blocks have both input and output by default", () => {
-    expect(portsForKind("block")).toEqual({ hasInput: true, hasOutput: true });
+    expect(portsForKind("block")).toEqual({
+      hasInput: true,
+      hasOutput: true,
+      inputs: [{ id: "0" }],
+      outputs: [{ id: "0" }],
+    });
   });
 
   it("rules have no canvas ports (commands are not edges)", () => {
-    expect(portsForKind("rule")).toEqual({ hasInput: false, hasOutput: false });
+    expect(portsForKind("rule")).toEqual({ hasInput: false, hasOutput: false, inputs: [], outputs: [] });
   });
 });
 
@@ -25,7 +41,7 @@ describe("portsForNode", () => {
         catalogEntryId: "appblocks.led",
         properties: {},
       }),
-    ).toEqual({ hasInput: true, hasOutput: false });
+    ).toMatchObject({ hasInput: true, hasOutput: false, inputs: [{ id: "0" }], outputs: [] });
   });
 
   it("Schedule is an entry source from catalog ports", () => {
@@ -36,7 +52,20 @@ describe("portsForNode", () => {
         periodMs: 1000,
         enabled: true,
       }),
-    ).toEqual({ hasInput: false, hasOutput: true });
+    ).toMatchObject({ hasInput: false, hasOutput: true });
+  });
+
+  it("Terminal block exposes six channel outputs", () => {
+    const ports = portsForNode({
+      kind: "block",
+      blockTypeId: "ab.terminal_block",
+      catalogEntryId: "appblocks.terminal_block",
+      properties: { ch3Name: "Sensore A" },
+    });
+    expect(ports.hasInput).toBe(false);
+    expect(ports.outputs).toHaveLength(6);
+    expect(ports.outputs.map((p) => p.label)).toEqual(["CH1", "CH2", "Sensore A", "CH4", "CH5", "CH6"]);
+    expect(nodeHeightForPorts(ports)).toBeGreaterThan(NODE_HEIGHT);
   });
 });
 

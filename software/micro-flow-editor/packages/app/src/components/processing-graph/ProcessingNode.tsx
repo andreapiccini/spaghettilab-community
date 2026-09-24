@@ -1,26 +1,50 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { CirclePlay, Clock, Radio, ToggleLeft } from "lucide-react";
+import { Cable, Cpu, Palette, Power, ToggleLeft } from "lucide-react";
+import { FLOW_START_COLOR } from "./block-visuals.js";
 import { lineHighAtTick, waveformPlateaus } from "./dry-run-preview.js";
-import { formatSchedulePeriod } from "./event-containers.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
+import { FLOW_START_SIZE, NODE_WIDTH } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
-import { nodeShellRadius, SOURCE_HANDLE_STYLE, TARGET_HANDLE_STYLE } from "./node-ports.js";
+import {
+  nodeShellRadius,
+  SOURCE_HANDLE_STYLE,
+  stackedHandleTop,
+  TARGET_HANDLE_STYLE,
+} from "./node-ports.js";
 import type { ProcessingNodeUiData } from "./to-nodes.js";
 
+/** Slate chrome for hardware bay endpoints — distinct from solid functionality cards. */
+const BAY_EDGE = "#64748B";
+const CHANNEL_ROW_H = 22;
+
 /**
- * Canvas card: n8n-like (solid icon tile + title/subtitle, no category stripe).
- * LED: filled swatch + soglia/soft. Toggle: waveform. Schedule/Event feed:
- * clock chip on the input instead of a separate Start circle.
+ * Canvas card: n8n-like (solid icon tile + title/subtitle).
+ * LED: filled swatch. Toggle: waveform. Flow Start: bare dark-violet disc —
+ * the movable Schedule tick plug you wire to the first block inside the box.
+ * Bay hardware: dashed slate shell + CPU badge (vs solid functionality blocks).
+ * Multi-channel (Terminal block): named rows with a handle beside each label.
  */
 export function ProcessingNode({ id, data, selected }: NodeProps & { readonly data: ProcessingNodeUiData }) {
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
-  const Icon = data.circular ? CirclePlay : data.toggleIcon ? ToggleLeft : config.icon;
-  const ports = { hasInput: data.hasInput, hasOutput: data.hasOutput };
+  const Icon =
+    data.tileGlyph === "toggle"
+      ? ToggleLeft
+      : data.tileGlyph === "palette"
+        ? Palette
+        : data.tileGlyph === "power"
+          ? Power
+          : data.tileGlyph === "cable"
+            ? Cable
+            : config.icon;
+  const inputHandles = data.inputHandles ?? (data.hasInput ? [{ id: "0" }] : []);
+  const outputHandles = data.outputHandles ?? (data.hasOutput ? [{ id: "0" }] : []);
+  const ports = { hasInput: inputHandles.length > 0, hasOutput: outputHandles.length > 0 };
+  const multiChannel = outputHandles.length > 1 || inputHandles.length > 1;
   const previewOn = data.previewActive === true;
   const isLed = data.ledColor !== undefined;
   const isToggle = data.toggleWave !== undefined;
-  const isStart = data.circular === true;
-  const feed = data.triggerFeed;
+  const isTick = data.circular === true;
+  const isBay = data.bay === true;
   const ledColor = data.ledColor ?? "#F5C518";
   const accent = data.accentColor ?? config.colorVar;
   const intensity = isLed && data.previewing ? (data.ledIntensity ?? (previewOn ? 1 : 0)) : undefined;
@@ -32,6 +56,8 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         ? `color-mix(in srgb, ${ledColor} ${Math.round(22 + intensity * 78)}%, #2A2E38)`
         : ledColor
       : accent;
+  const cardHeight = data.cardHeight;
+  const cardWidth = data.cardWidth ?? NODE_WIDTH;
 
   const subtitle =
     isLed && data.previewing && intensity !== undefined
@@ -42,99 +68,216 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           : `${Math.round(intensity * 100)}%`
       : data.subtitle;
 
-  if (isStart) {
+  if (isTick) {
+    const fill = data.hasError ? "var(--color-error)" : (data.accentColor ?? FLOW_START_COLOR);
     return (
-      <div className="group relative">
-        <HoverDeleteButton id={id} label="Elimina blocco" forceVisible={selected} />
+      <div className="group relative" style={{ width: FLOW_START_SIZE, height: FLOW_START_SIZE }}>
         <div
-          className="relative flex h-16 w-16 items-center justify-center bg-surface shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2"
+          className="relative h-full w-full rounded-full shadow-e1 transition-[box-shadow,outline]"
           style={{
-            borderRadius: 9999,
+            backgroundColor: fill,
             outline: selected
               ? "2px solid var(--color-brand-blue)"
               : previewOn
-                ? `2px solid ${accent}`
-                : "1px solid var(--color-border)",
+                ? `2px solid color-mix(in srgb, ${fill} 70%, white)`
+                : "1px solid color-mix(in srgb, #000 22%, transparent)",
             boxShadow: previewOn
-              ? `0 0 0 4px color-mix(in srgb, ${accent} 28%, transparent), var(--shadow-e1)`
+              ? `0 0 0 4px color-mix(in srgb, ${fill} 35%, transparent), var(--shadow-e1)`
               : undefined,
+            cursor: "default",
           }}
-          title={data.label}
+          title="Attivazione Schedule — collega al primo blocco"
         >
-          {ports.hasInput && <Handle type="target" position={Position.Left} id="0" style={TARGET_HANDLE_STYLE} />}
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-full"
-            style={{ backgroundColor: tileColor }}
-            aria-hidden
-          >
-            <Icon size={18} color="#fff" />
-          </div>
-          {ports.hasOutput && <Handle type="source" position={Position.Right} id="0" style={SOURCE_HANDLE_STYLE} />}
-        </div>
-        <div className="pointer-events-none absolute left-1/2 top-full mt-1 w-24 -translate-x-1/2 text-center font-body text-[10px] font-semibold text-ink-muted">
-          {data.label}
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="0"
+            style={{
+              ...SOURCE_HANDLE_STYLE,
+              width: 8,
+              height: 8,
+              right: -2,
+              border: `1.5px solid ${fill}`,
+              background: "var(--color-surface)",
+            }}
+          />
         </div>
       </div>
     );
   }
 
+  const shellRadius = isBay ? "2px" : nodeShellRadius(ports);
+  const idleOutline = isBay
+    ? `1.5px dashed color-mix(in srgb, ${BAY_EDGE} 75%, transparent)`
+    : "1px solid var(--color-border)";
+  const selectedOutline = selected
+    ? "2px solid var(--color-brand-blue)"
+    : ledLit
+      ? `2px solid ${ledColor}`
+      : undefined;
+
   return (
-    <div className="group relative">
-      <HoverDeleteButton id={id} label="Elimina blocco" forceVisible={selected} />
-      {feed && <TriggerFeedChip feed={feed} previewActive={previewOn} />}
+    <div className="group relative" style={{ width: cardWidth }}>
+      <HoverDeleteButton
+        id={id}
+        label="Elimina blocco"
+        forceVisible={selected}
+        corner={multiChannel ? "left" : "right"}
+      />
+      {isBay && !multiChannel && (
+        <span
+          className="pointer-events-none absolute -top-2 right-1 z-10 inline-flex items-center gap-0.5 rounded-[3px] px-1 py-px font-mono text-[9px] font-semibold uppercase tracking-wide"
+          style={{
+            color: BAY_EDGE,
+            backgroundColor: "var(--color-surface)",
+            outline: `1px solid color-mix(in srgb, ${BAY_EDGE} 45%, transparent)`,
+          }}
+          title="Modulo hardware (bay)"
+        >
+          <Cpu size={9} strokeWidth={2.5} aria-hidden />
+          Bay
+        </span>
+      )}
       <div
-        className={`relative flex w-56 items-center gap-3 bg-surface px-3 py-2.5 shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${selected ? "" : "outline outline-1 outline-[var(--color-border)] group-hover:outline-2 group-hover:outline-[var(--color-brand-blue)]"}`}
+        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
         style={{
-          borderRadius: nodeShellRadius(ports),
-          outline: selected ? "2px solid var(--color-brand-blue)" : ledLit ? `2px solid ${ledColor}` : undefined,
+          width: cardWidth,
+          minHeight: cardHeight,
+          borderRadius: shellRadius,
+          backgroundColor: isBay
+            ? `color-mix(in srgb, ${BAY_EDGE} 6%, var(--color-surface))`
+            : "var(--color-surface)",
+          outline: selectedOutline ?? idleOutline,
+          // LED glow must not be clipped by the card / bay chrome.
+          overflow: isLed ? "visible" : undefined,
           boxShadow: ledLit
             ? `0 0 0 4px color-mix(in srgb, ${ledColor} ${Math.round(12 + (intensity ?? 1) * 20)}%, transparent), var(--shadow-e1)`
             : undefined,
         }}
       >
-        {ports.hasInput && (
-          <Handle
-            type="target"
-            position={Position.Left}
-            id="0"
-            style={
-              feed
-                ? {
-                    ...TARGET_HANDLE_STYLE,
-                    width: 12,
-                    height: 12,
-                    borderRadius: 9999,
-                    border: `2px solid ${PROCESSING_NODE_KIND_CONFIG[feed.kind].colorVar}`,
-                    background: "var(--color-surface)",
-                  }
-                : TARGET_HANDLE_STYLE
-            }
+        {isBay && (
+          <span
+            className="absolute inset-y-1.5 left-0 w-0.5 rounded-full"
+            style={{ backgroundColor: `color-mix(in srgb, ${BAY_EDGE} 70%, transparent)` }}
+            aria-hidden
           />
         )}
-        <div
-          className="h-8 w-8 shrink-0 rounded-slsm transition-[background-color,box-shadow] duration-75"
-          style={{
-            backgroundColor: tileColor,
-            boxShadow: ledLit
-              ? `0 0 ${Math.round(4 + (intensity ?? 1) * 10)}px ${Math.round(1 + (intensity ?? 1) * 2)}px color-mix(in srgb, ${ledColor} ${Math.round(40 + (intensity ?? 1) * 40)}%, transparent)`
-              : undefined,
-          }}
-          aria-hidden
-        >
-          {!isLed && (
-            <div className="flex h-full w-full items-center justify-center">
-              <Icon size={16} color="#fff" />
+
+        {!multiChannel &&
+          inputHandles.map((handle, index) => (
+            <Handle
+              key={`in-${handle.id}`}
+              type="target"
+              position={Position.Left}
+              id={handle.id}
+              title={handle.label}
+              style={{
+                ...TARGET_HANDLE_STYLE,
+                top: stackedHandleTop(index, inputHandles.length),
+              }}
+            />
+          ))}
+
+        {/* No overflow-hidden on LED: tile box-shadow (glow) would get clipped on the left. */}
+        <div className={`flex min-w-0 flex-1 items-center gap-2 ${multiChannel ? "w-full pr-1" : isLed ? "" : "overflow-hidden"}`}>
+          <div
+            className={`h-7 w-7 shrink-0 transition-[background-color,box-shadow] duration-75 ${isBay ? "rounded-[3px]" : "rounded-slsm"}`}
+            style={{
+              backgroundColor: tileColor,
+              boxShadow: ledLit
+                ? `0 0 ${Math.round(4 + (intensity ?? 1) * 10)}px ${Math.round(1 + (intensity ?? 1) * 2)}px color-mix(in srgb, ${ledColor} ${Math.round(40 + (intensity ?? 1) * 40)}%, transparent)`
+                : undefined,
+            }}
+            aria-hidden
+          >
+            {!isLed && (
+              <div className="flex h-full w-full items-center justify-center">
+                <Icon size={14} color="#fff" />
+              </div>
+            )}
+          </div>
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <div className="min-w-0 truncate font-body text-sm font-semibold text-ink" title={data.label}>
+                {data.label}
+              </div>
+              {isBay && multiChannel && (
+                <span
+                  className="inline-flex shrink-0 items-center gap-0.5 rounded-[3px] px-1 py-px font-mono text-[9px] font-semibold uppercase tracking-wide"
+                  style={{
+                    color: BAY_EDGE,
+                    outline: `1px solid color-mix(in srgb, ${BAY_EDGE} 45%, transparent)`,
+                  }}
+                  title="Modulo hardware (bay)"
+                >
+                  <Cpu size={9} strokeWidth={2.5} aria-hidden />
+                  Bay
+                </span>
+              )}
             </div>
-          )}
+            <div className="truncate font-body text-xs text-ink-faint" title={subtitle}>
+              {subtitle}
+            </div>
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="truncate font-body text-sm font-semibold text-ink">{data.label}</div>
-          <div className="truncate font-body text-xs text-ink-faint">{subtitle}</div>
-        </div>
-        {ports.hasOutput && (
+
+        {multiChannel ? (
+          <div className="relative flex flex-col">
+            {outputHandles.map((handle) => (
+              <div
+                key={`out-row-${handle.id}`}
+                className="relative flex items-center justify-end gap-1.5 pr-3"
+                style={{ height: CHANNEL_ROW_H }}
+              >
+                <span className="min-w-0 truncate text-right font-mono text-[10px] font-medium text-ink-muted" title={handle.label}>
+                  {handle.label ?? handle.id}
+                </span>
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id={handle.id}
+                  title={handle.label}
+                  style={{
+                    ...SOURCE_HANDLE_STYLE,
+                    width: 10,
+                    height: 10,
+                    right: -2,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }}
+                />
+              </div>
+            ))}
+            {inputHandles.map((handle, index) => (
+              <Handle
+                key={`in-${handle.id}`}
+                type="target"
+                position={Position.Left}
+                id={handle.id}
+                title={handle.label}
+                style={{
+                  ...TARGET_HANDLE_STYLE,
+                  top: stackedHandleTop(index, Math.max(inputHandles.length, outputHandles.length)),
+                }}
+              />
+            ))}
+          </div>
+        ) : (
           <>
-            <Handle type="source" position={Position.Right} id="0" style={SOURCE_HANDLE_STYLE} />
-            {isToggle && data.toggleWave && (
+            {outputHandles.map((handle, index) => (
+              <Handle
+                key={`out-${handle.id}`}
+                type="source"
+                position={Position.Right}
+                id={handle.id}
+                title={handle.label}
+                style={{
+                  ...SOURCE_HANDLE_STYLE,
+                  top: stackedHandleTop(index, outputHandles.length),
+                }}
+              />
+            ))}
+            {isToggle && data.toggleWave && ports.hasOutput && (
               <ToggleOutputWaveform
                 highTicks={data.toggleWave.highTicks}
                 lowTicks={data.toggleWave.lowTicks}
@@ -147,42 +290,6 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           </>
         )}
       </div>
-    </div>
-  );
-}
-
-/** Clock/radio chip: this block’s input is driven by the enclosing trigger. */
-function TriggerFeedChip({
-  feed,
-  previewActive,
-}: {
-  readonly feed: NonNullable<ProcessingNodeUiData["triggerFeed"]>;
-  readonly previewActive: boolean;
-}) {
-  const kindConfig = PROCESSING_NODE_KIND_CONFIG[feed.kind];
-  const FeedIcon = feed.kind === "schedule" ? Clock : Radio;
-  const text =
-    feed.kind === "schedule" && feed.periodMs !== undefined ? formatSchedulePeriod(feed.periodMs) : feed.label;
-  const color = kindConfig.colorVar;
-
-  return (
-    <div
-      className="pointer-events-none absolute left-0 top-1/2 z-10 flex -translate-x-[calc(100%+10px)] -translate-y-1/2 items-center gap-1"
-      title={`${feed.label} → ingresso di questo blocco`}
-    >
-      <span
-        className="flex items-center gap-1 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums"
-        style={{
-          color,
-          backgroundColor: "var(--color-surface)",
-          outline: `1px solid color-mix(in srgb, ${color} 40%, var(--color-border))`,
-          boxShadow: previewActive ? `0 0 0 3px color-mix(in srgb, ${color} 28%, transparent)` : "var(--shadow-e1)",
-        }}
-      >
-        <FeedIcon size={11} strokeWidth={2.25} aria-hidden />
-        {text}
-      </span>
-      <span className="h-px w-2.5" style={{ backgroundColor: color }} aria-hidden />
     </div>
   );
 }

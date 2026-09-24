@@ -1,6 +1,6 @@
 import type { AuthoringMetadata, GraphState } from "@spaghettilab/domain";
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
-import { formatFieldsSubtitle } from "@spaghettilab/processing-block-catalog";
+import { formatFieldsSubtitle, isBayEntry } from "@spaghettilab/processing-block-catalog";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { EVENT_CONTAINER_HEADER_HEIGHT, NODE_HEIGHT, NODE_PADDING, NODE_WIDTH } from "./layout-constants.js";
 
@@ -146,9 +146,13 @@ export function computeEventContainers(
     while (queue.length > 0) {
       const id = queue.shift()!;
       if (memberIds.has(id) || id === node.id) continue;
-      memberIds.add(id);
       const child = nodesById.get(id);
-      const childKind = child ? (child.data as DeviceProcessingNodeData).kind : undefined;
+      const childData = child ? (child.data as DeviceProcessingNodeData) : undefined;
+      const childEntry = childData ? catalogEntryForNode(childData) : undefined;
+      // Bay hardware endpoints sit outside the dashed box (left in / right out).
+      if (childEntry && isBayEntry(childEntry)) continue;
+      memberIds.add(id);
+      const childKind = childData?.kind;
       // Nested trigger keeps its own dashed box; don't steal its chain as outer members.
       if (childKind && isTriggerKind(childKind)) continue;
       for (const next of outgoing.get(id) ?? []) queue.push(next);

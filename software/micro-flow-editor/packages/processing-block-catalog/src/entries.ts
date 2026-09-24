@@ -54,6 +54,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     category: "trigger",
     runtime: "core-schedule",
     availability: "shipped",
+    family: "functionality",
     inputs: [],
     outputs: ENTRY_OUTPUTS,
     notes:
@@ -72,22 +73,17 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
   }),
   e({
     id: "native.flow_start",
-    label: "Start",
-    subtitle: "Entry point del flusso",
+    label: "Attivazione",
+    subtitle: "Pallino Schedule → primo blocco",
     category: "trigger",
     runtime: "core-block",
     availability: "shipped",
     typeId: "ab.flow_start",
     needsModule: false,
-    inputs: [
-      inPort("0", [T.activationTrigger, T.eventTrigger], {
-        label: "Da Schedule / Event",
-        required: true,
-      }),
-    ],
+    inputs: [],
     outputs: [outPort("0", [T.activationTrigger], "Attivazione")],
     notes:
-      "Opzionale. Di solito basta collegare lo Schedule/Event direttamente al primo blocco (chip orologio sull’ingresso). Usa Start solo se ti serve un nodo di attivazione intermedio.",
+      "Pallino violetto fisso dentro ogni Schedule (non dalla palette). Solo uscita a destra: collega al Digital Out Toggle o a un altro blocco per scegliere l’entry.",
   }),
   e({
     id: "appblocks.system",
@@ -635,6 +631,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     category: "io",
     runtime: "core-block",
     availability: "shipped",
+    family: "functionality",
     appblocksId: "digital_out_toggle",
     typeId: "ab.digital_out_toggle",
     inputs: [
@@ -673,6 +670,9 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     category: "io",
     runtime: "core-block",
     availability: "shipped",
+    family: "bay",
+    bayIo: "output",
+    bayFamilyId: "bay.led",
     appblocksId: "led",
     typeId: "ab.led",
     needsModule: false,
@@ -704,6 +704,152 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     ],
     notes:
       "Sink su comando digitale (0/100) o analogico (0–100). Acceso se livello ≥ soglia. Ritardi ON/OFF rispetto al segnale, poi soft start/stop.",
+  }),
+  e({
+    id: "appblocks.rgb_led",
+    label: "RGB LED",
+    subtitle: "Sequenze colore · trigger in ingresso",
+    category: "io",
+    runtime: "core-block",
+    availability: "planned",
+    family: "bay",
+    bayIo: "output",
+    bayFamilyId: "bay.rgb_led",
+    appblocksId: "rgb_led",
+    typeId: "ab.rgb_led",
+    needsModule: false,
+    inputs: [
+      inPort("0", [T.activationTrigger, T.eventTrigger, T.digitalComando], {
+        label: "Trigger",
+        required: true,
+      }),
+    ],
+    outputs: [],
+    fields: [
+      sel(
+        "mode",
+        "Modalità",
+        [
+          { value: "preset", label: "Effetto pronto" },
+          { value: "sequence", label: "Sequenza mia" },
+        ],
+        "preset",
+      ),
+      {
+        ...sel(
+          "preset",
+          "Effetto",
+          [
+            { value: "solid", label: "Solid" },
+            { value: "breathe", label: "Breathe" },
+            { value: "blink", label: "Blink" },
+            { value: "color_cycle", label: "Color cycle" },
+          ],
+          "solid",
+        ),
+        when: { field: "mode", equals: "preset" },
+      },
+      {
+        id: "color",
+        label: "Colore",
+        type: "color",
+        default: "#FF3366",
+        when: { field: "preset", in: ["solid", "breathe", "blink"] },
+      },
+      {
+        ...num("intensity", "Intensità (0–100)", 100),
+        when: { field: "mode", equals: "preset" },
+      },
+      {
+        ...num("speedMs", "Velocità / periodo (ms)", 1200, "Breathe, blink, color cycle"),
+        when: { field: "preset", in: ["breathe", "blink", "color_cycle"] },
+      },
+      chk("loop", "Loop", true),
+      num("ledCount", "N LED (stub bay)", 1, "Dal bay/NFC quando disponibile"),
+    ],
+    notes:
+      AUTHORING +
+      " Player di sequenze: il trigger in ingresso avvia l’effetto. La strip (N LED dal bay) si comporta come un unico LED. Effetti pronti = sequenze parametriche; in «Sequenza mia» componi azioni solid/fade/wait.",
+  }),
+  e({
+    id: "appblocks.relay",
+    label: "Relay",
+    subtitle: "Uscita relè",
+    category: "io",
+    runtime: "core-block",
+    availability: "planned",
+    family: "bay",
+    bayIo: "output",
+    bayFamilyId: "bay.relay",
+    appblocksId: "relay",
+    typeId: "ab.relay",
+    needsModule: false,
+    inputs: [
+      inPort("0", [T.digitalComando, T.activationTrigger], {
+        label: "Comando",
+        required: true,
+      }),
+    ],
+    outputs: [],
+    fields: [
+      txt("line", "Linea", "RELAY"),
+      sel("initial", "Stato iniziale", [
+        { value: "open", label: "Aperto (OFF)" },
+        { value: "closed", label: "Chiuso (ON)" },
+      ], "open"),
+    ],
+    notes: AUTHORING + " Comportamento relè (contatto, debounce, fail-safe) da definire.",
+  }),
+  e({
+    id: "appblocks.terminal_block",
+    label: "Terminal block",
+    subtitle: "6 canali digital / analog / alimentazione",
+    category: "io",
+    runtime: "core-block",
+    availability: "planned",
+    family: "bay",
+    bayIo: "input",
+    bayFamilyId: "bay.terminal_block",
+    appblocksId: "terminal_block",
+    typeId: "ab.terminal_block",
+    needsModule: false,
+    inputs: [],
+    outputs: [1, 2, 3, 4, 5, 6].map((n) =>
+      outPort(String(n - 1), [T.digitalMisura, T.analogMisura, T.powerMisura], `CH${n}`),
+    ),
+    fields: [1, 2, 3, 4, 5, 6].flatMap((n) => [
+      txt(`ch${n}Name`, `Nome canale ${n}`, `CH${n}`, `Es. Sensore A`),
+      sel(
+        `ch${n}Mode`,
+        `Tipo CH${n}`,
+        [
+          { value: "digital", label: "Digitale" },
+          { value: "analog", label: "Analogico" },
+          { value: "alimentazione", label: "Alimentazione" },
+        ],
+        "digital",
+      ),
+      chk(`ch${n}Enabled`, `Canale ${n} attivo`, true),
+      {
+        ...num(`ch${n}Voltage`, `Tensione CH${n} (V)`, 24, "Valore di alimentazione"),
+        when: { field: `ch${n}Mode`, equals: "alimentazione" },
+      },
+      {
+        ...sel(
+          `ch${n}PowerDir`,
+          `Direzione CH${n}`,
+          [
+            { value: "input", label: "Ingresso — alimentato dall'esterno" },
+            { value: "output", label: "Uscita — alimento il device" },
+          ],
+          "input",
+        ),
+        when: { field: `ch${n}Mode`, equals: "alimentazione" },
+      },
+    ]),
+    notes:
+      AUTHORING +
+      " Morsettiera bay: fino a 6 canali digital, analog o alimentazione (tensione + direzione ingresso/uscita). Nomi editabili; sul canvas ogni nome sta accanto al pallino.",
   }),
 
   e({

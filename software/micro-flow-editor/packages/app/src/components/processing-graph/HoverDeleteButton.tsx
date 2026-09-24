@@ -9,7 +9,18 @@ import type { MouseEvent } from "react";
  * Nested members of a dashed box are included so deleting the box does not
  * leave orphan parentId children on the pane.
  */
-export function HoverDeleteButton({ id, label, forceVisible = false }: { readonly id: string; readonly label: string; readonly forceVisible?: boolean }) {
+export function HoverDeleteButton({
+  id,
+  label,
+  forceVisible = false,
+  corner = "right",
+}: {
+  readonly id: string;
+  readonly label: string;
+  readonly forceVisible?: boolean;
+  /** Multi-output cards keep the trash on the left so it doesn't cover channel handles. */
+  readonly corner?: "left" | "right";
+}) {
   const { deleteElements, getNodes } = useReactFlow();
 
   function handleClick(event: MouseEvent<HTMLButtonElement>) {
@@ -30,11 +41,13 @@ export function HoverDeleteButton({ id, label, forceVisible = false }: { readonl
     void deleteElements({ nodes: [...ids].map((nodeId) => ({ id: nodeId })) });
   }
 
+  const cornerClass = corner === "left" ? "-left-3 -top-3" : "-right-3 -top-3";
+
   return (
     <button
       type="button"
       aria-label={label}
-      className={`nodrag nopan absolute -right-3 -top-3 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-border-strong bg-surface text-ink-muted shadow-e1 hover:border-error hover:text-error ${forceVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
+      className={`nodrag nopan absolute ${cornerClass} z-20 flex h-7 w-7 items-center justify-center rounded-full border border-border-strong bg-surface text-ink-muted shadow-e1 hover:border-error hover:text-error ${forceVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
       onMouseDown={(event) => event.stopPropagation()}
       onClick={handleClick}
     >

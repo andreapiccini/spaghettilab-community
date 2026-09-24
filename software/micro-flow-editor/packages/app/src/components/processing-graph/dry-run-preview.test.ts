@@ -9,11 +9,13 @@ import {
   initialHighFromProperties,
   isDigitalOutToggle,
   isLedBlock,
+  isRgbLedBlock,
   ledBindingFromProperties,
   ledIntensityAt,
   ledLitAt,
   ledWantedOn,
   lineHighAtTick,
+  rgbVisualsAt,
   waveformPlateaus,
   type DryRunPreviewChannel,
   type LedActuatorBinding,
@@ -40,6 +42,13 @@ const led = (id: string, properties: Record<string, unknown> = { color: "#F5C518
     data: { kind: "block" as const, blockTypeId: "ab.led", catalogEntryId: "appblocks.led", properties },
   });
 
+const rgbLed = (id: string, properties: Record<string, unknown> = { mode: "preset", preset: "solid", color: "#FF3366", intensity: 100 }) =>
+  ({
+    layer: "device-processing" as const,
+    id,
+    data: { kind: "block" as const, blockTypeId: "ab.rgb_led", catalogEntryId: "appblocks.rgb_led", properties },
+  });
+
 const defaultLed = (over: Partial<LedActuatorBinding> = {}): LedActuatorBinding => ({
   id: "led",
   threshold: 50,
@@ -60,6 +69,7 @@ const baseChannel = (over: Partial<DryRunPreviewChannel> = {}): DryRunPreviewCha
   toggleIds: ["t1"],
   startIds: [],
   actuators: [defaultLed()],
+  rgbActuators: [],
   ...over,
 });
 
@@ -236,6 +246,52 @@ describe("LED soglia + soft start/stop", () => {
   });
 });
 
+describe("RGB LED dry-run", () => {
+  it("builds Schedule → Toggle → RGB as line-driven", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [schedule("s1", 500), toggle("t1"), rgbLed("rgb")],
+        [
+          { layer: "device-processing", id: "e1", source: "s1", target: "t1" },
+          { layer: "device-processing", id: "e2", source: "t1", target: "rgb" },
+        ],
+      ),
+    );
+    expect(channels).toHaveLength(1);
+    expect(channels[0]).toMatchObject({
+      rgbDrive: "line",
+      toggleIds: ["t1"],
+      rgbActuators: [{ id: "rgb" }],
+    });
+  });
+
+  it("builds Schedule → RGB without toggle as trigger-driven", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [schedule("s1", 800), rgbLed("rgb", { mode: "preset", preset: "blink", speedMs: 200, color: "#00FF00", intensity: 100 })],
+        [{ layer: "device-processing", id: "e1", source: "s1", target: "rgb" }],
+      ),
+    );
+    expect(channels).toHaveLength(1);
+    expect(channels[0]?.rgbDrive).toBe("trigger");
+    expect(channels[0]?.toggleIds).toEqual([]);
+    expect(channels[0]?.actuators).toEqual([]);
+    const visuals = rgbVisualsAt(0, channels);
+    expect(visuals.get("rgb")?.intensity).toBeCloseTo(1, 2);
+    expect(rgbVisualsAt(100, channels).get("rgb")?.intensity).toBe(0);
+  });
+
+  it("activeActuatorsAt includes lit RGB while line HIGH", () => {
+    const ch = baseChannel({
+      actuators: [],
+      rgbActuators: [{ id: "rgb", properties: { mode: "preset", preset: "solid", color: "#FF0000", intensity: 100 } }],
+      rgbDrive: "line",
+    });
+    expect(activeActuatorsAt(0, [ch]).has("rgb")).toBe(true);
+    expect(activeActuatorsAt(1000, [ch]).has("rgb")).toBe(false);
+  });
+});
+
 describe("helpers", () => {
   it("hysteresis / initial / plateaus", () => {
     expect(hysteresisTicksFromProperties({ highToLow: 2n, lowToHigh: 5 })).toEqual({ highTicks: 2, lowTicks: 5 });
@@ -247,17 +303,22 @@ describe("helpers", () => {
   it("classifiers", () => {
     expect(isDigitalOutToggle(toggle("t").data)).toBe(true);
     expect(isLedBlock(led("l").data)).toBe(true);
+    expect(isRgbLedBlock(rgbLed("r").data)).toBe(true);
   });
 
-  it("catalog declares ports for Schedule / Toggle / LED", () => {
+  it("catalog declares ports for Schedule / Toggle / LED / RGB LED", () => {
     const scheduleEntry = findCatalogEntryById("native.schedule");
     const toggleEntry = findCatalogEntryById("appblocks.digital_out_toggle");
     const ledEntry = findCatalogEntryById("appblocks.led");
+    const rgbEntry = findCatalogEntryById("appblocks.rgb_led");
     expect(scheduleEntry?.outputs?.[0]?.types.some((t) => t.domain === "activation")).toBe(true);
     expect(toggleEntry?.outputs?.[0]?.types[0]).toMatchObject({ domain: "digital", role: "comando" });
     expect(ledEntry?.inputs?.[0]?.types.some((t) => t.role === "comando")).toBe(true);
     expect(ledEntry?.outputs).toEqual([]);
     expect(ledEntry?.fields?.some((f) => f.id === "threshold")).toBe(true);
     expect(ledEntry?.fields?.some((f) => f.id === "effect")).toBe(false);
+    expect(rgbEntry?.inputs?.[0]?.types.some((t) => t.role === "trigger")).toBe(true);
+    expect(rgbEntry?.fields?.some((f) => f.id === "mode")).toBe(true);
+    expect(rgbEntry?.family).toBe("bay");
   });
 });

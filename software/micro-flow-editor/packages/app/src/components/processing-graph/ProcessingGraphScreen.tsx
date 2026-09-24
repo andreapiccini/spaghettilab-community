@@ -3,7 +3,7 @@ import { dryRunConfig, type DryRunResult } from "@spaghettilab/config-decompiler
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import type { CoreBindingRecord, GraphNode, GraphState } from "@spaghettilab/domain";
 import { isModuleNodeData, type PhysicalCompositionNodeData } from "@spaghettilab/physical-composition-model";
-import { findCatalogEntryById, shippedTypeIds, type ProcessingCatalogEntry } from "@spaghettilab/processing-block-catalog";
+import { findCatalogEntryById, isBayEntry, shippedTypeIds, type ProcessingCatalogEntry } from "@spaghettilab/processing-block-catalog";
 import { addGraphEdgeCommand, addGraphNodeCommand, deviceGraphLens, edgeChangesToCommands, nodeChangesToCommands, removeGraphEdgeCommand, removeGraphNodeCommand, toReactFlowEdges, updateGraphNodeCommand } from "@spaghettilab/react-flow-adapter";
 import { applyEdgeChanges, applyNodeChanges, Background, Controls, MiniMap, Position, ReactFlow, ReactFlowProvider, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type ReactFlowInstance } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -15,8 +15,17 @@ import { useSession } from "../../state/session-context.js";
 import { portCardId } from "../physical-composition/ConfiguredPortNode.js";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
-import { PROCESSING_BLOCK_MIME, nextSpawnPosition, nodeDataFromCatalogEntry, peekPaletteDragKind, snapToGrid } from "./catalog-to-node.js";
+import {
+  PROCESSING_BLOCK_MIME,
+  decodePaletteDrag,
+  nextSpawnPosition,
+  nodeDataFromCatalogEntry,
+  peekPaletteDragBaySide,
+  peekPaletteDragKind,
+  snapToGrid,
+} from "./catalog-to-node.js";
 import { catalogEntryForNode } from "./catalog-entry-for-node.js";
+import { positionForBayDrop } from "./bay-layout.js";
 import { isValidProcessingConnection } from "./connection-rules.js";
 import { PROCESSING_EDGE_TYPES } from "./DeletableEdge.js";
 import { NodeInspector, type ProcessingInspectorMode } from "./NodeInspector.js";
@@ -37,8 +46,8 @@ import {
   triggerToContainerOrigin,
   type EventContainer,
 } from "./event-containers.js";
-import { activeActuatorsAt, activeTriggersAt, buildDryRunPreviewChannels, ledIntensitiesAt, previewParticipantIds, type DryRunPreviewChannel } from "./dry-run-preview.js";
-import { NODE_HEIGHT, NODE_PADDING, NODE_WIDTH, ENTRY_FEED_INSET, EVENT_CONTAINER_HEADER_HEIGHT } from "./layout-constants.js";
+import { activeActuatorsAt, activeTriggersAt, buildDryRunPreviewChannels, isFlowStartBlock, ledIntensitiesAt, previewParticipantIds, rgbVisualsAt, type DryRunPreviewChannel } from "./dry-run-preview.js";
+import { NODE_HEIGHT, NODE_PADDING, NODE_WIDTH, ENTRY_FEED_INSET, EVENT_CONTAINER_HEADER_HEIGHT, FLOW_START_SIZE, fixedTickAbsolute, fixedTickRelativePosition } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { containerAtPosition, resolveRectOverlap, resolveSiblingOverlap, type SizedRect } from "./node-overlap.js";
 import { ProcessingBlockPalette } from "./ProcessingBlockPalette.js";
@@ -53,6 +62,11 @@ function chainTailId(container: EventContainer, edges: GraphState<"device-proces
     if (!hasDownstreamMember) return id;
   }
   return container.triggerId;
+}
+
+function layoutSizeForUiNode(node: Node<ProcessingNodeUiData>): { w: number; h: number } {
+  if (node.data.circular) return { w: FLOW_START_SIZE, h: FLOW_START_SIZE };
+  return { w: node.data.cardWidth ?? NODE_WIDTH, h: node.data.cardHeight ?? NODE_HEIGHT };
 }
 
 const NODE_TYPES = { ...PROCESSING_NODE_TYPES, ...EVENT_CONTAINER_NODE_TYPES };
@@ -91,6 +105,7 @@ function ProcessingGraphScreenInner() {
   const [previewActiveIds, setPreviewActiveIds] = useState<ReadonlySet<string>>(() => new Set());
   const [previewElapsedMs, setPreviewElapsedMs] = useState(0);
   const [previewLedIntensity, setPreviewLedIntensity] = useState<ReadonlyMap<string, number>>(() => new Map());
+  const [previewRgbVisual, setPreviewRgbVisual] = useState<ReadonlyMap<string, { readonly color: string; readonly intensity: number }>>(() => new Map());
   const [previewTriggerIds, setPreviewTriggerIds] = useState<ReadonlySet<string>>(() => new Set());
   const [previewActuatorIds, setPreviewActuatorIds] = useState<ReadonlySet<string>>(() => new Set());
   const [hashHex, setHashHex] = useState<string | null>(null);
@@ -120,6 +135,7 @@ function ProcessingGraphScreenInner() {
     setPreviewTriggerIds(new Set());
     setPreviewActuatorIds(new Set());
     setPreviewLedIntensity(new Map());
+    setPreviewRgbVisual(new Map());
     setPreviewElapsedMs(0);
   }, []);
 
@@ -142,6 +158,7 @@ function ProcessingGraphScreenInner() {
       setPreviewActiveIds(activeActuatorsAt(elapsed, channels));
       setPreviewTriggerIds(activeTriggersAt(elapsed, channels));
       setPreviewLedIntensity(ledIntensitiesAt(elapsed, channels));
+      setPreviewRgbVisual(rgbVisualsAt(elapsed, channels));
     };
     tick();
     const id = window.setInterval(tick, 50);
@@ -276,13 +293,14 @@ function ProcessingGraphScreenInner() {
           const parent = container.parentTriggerId ? containerByTriggerId.get(container.parentTriggerId) : undefined;
           const kind = triggerData?.kind === "schedule" ? "schedule" : "event-source";
           const handleY = 16;
+          // Schedule wires to the tick are domain-only (hidden) — no canvas handles.
           const handles =
             kind === "event-source"
               ? [
                   { id: "0", type: "target" as const, position: Position.Left, x: -5, y: handleY, width: 10, height: 14 },
                   { id: "0", type: "source" as const, position: Position.Right, x: container.width - 14, y: handleY, width: 14, height: 14 },
                 ]
-              : [{ id: "0", type: "source" as const, position: Position.Right, x: container.width - 14, y: handleY, width: 14, height: 14 }];
+              : [];
           return {
             id: container.triggerId,
             type: "event-container",
@@ -294,7 +312,7 @@ function ProcessingGraphScreenInner() {
             handles,
             draggable: true,
             selectable: true,
-            connectable: true,
+            connectable: kind === "event-source",
             focusable: true,
             zIndex: parent ? 0 : -1,
             data: {
@@ -323,43 +341,35 @@ function ProcessingGraphScreenInner() {
   // localNodes itself always stays absolute (synced from authoringMetadata via
   // domainRfNodes) — the relative conversion only happens here, at render
   // time, never stored.
-  // First block linked from Schedule/Event gets a feed chip on its input
-  // (clock + period). Domain keeps the Schedule→entry edge for membership /
-  // dry-run; the canvas hides that wire — the chip carries the meaning.
-  const triggerFeedById = useMemo(() => {
-    const map = new Map<string, NonNullable<ProcessingNodeUiData["triggerFeed"]>>();
-    for (const edge of graphState.edges) {
-      const container = containerByTriggerId.get(edge.source);
-      if (!container) continue;
-      map.set(edge.target, {
-        kind: container.periodMs !== undefined ? "schedule" : "event-source",
-        label: container.label,
-        periodMs: container.periodMs,
-      });
-    }
-    return map;
-  }, [graphState.edges, containerByTriggerId]);
-
+  // Flow Start (violet tick disc) is a fixed Schedule plug: not palette-placed,
+  // not draggable. Schedule → tick is domain-only (hidden); tick → first block
+  // is the rewirable entry. Relative position is pinned inside the dashed box.
   const renderedNodes = useMemo<Node<ProcessingNodeUiData>[]>(() => {
     const periodByToggleId = new Map<string, number>();
     for (const channel of previewChannelsRef.current) {
       for (const toggleId of channel.toggleIds) periodByToggleId.set(toggleId, channel.periodMs);
     }
+    const tickRel = fixedTickRelativePosition();
     const rest = localNodes
       .filter((n) => !containerByTriggerId.has(n.id))
       .map((n) => {
         const container = containerByMemberId.get(n.id);
         const previewing = previewActuatorIds.has(n.id);
         const wavePeriodMs = periodByToggleId.get(n.id);
-        const feed = triggerFeedById.get(n.id);
+        const isTick = n.data.circular === true;
         const withPreview = {
           ...n,
+          draggable: isTick ? false : n.draggable !== false,
           data: {
             ...n.data,
             previewActive: previewActiveIds.has(n.id) || previewTriggerIds.has(n.id),
             previewing,
-            triggerFeed: feed,
-            ...(previewLedIntensity.has(n.id) ? { ledIntensity: previewLedIntensity.get(n.id) } : { ledIntensity: undefined }),
+            ...(previewLedIntensity.has(n.id)
+              ? { ledIntensity: previewLedIntensity.get(n.id) }
+              : previewRgbVisual.has(n.id)
+                ? { ledIntensity: previewRgbVisual.get(n.id)!.intensity }
+                : { ledIntensity: undefined }),
+            ...(previewRgbVisual.has(n.id) ? { ledColor: previewRgbVisual.get(n.id)!.color } : {}),
             ...(previewing && n.data.toggleWave && wavePeriodMs !== undefined
               ? { waveLive: { elapsedMs: previewElapsedMs, periodMs: wavePeriodMs } }
               : { waveLive: undefined }),
@@ -369,11 +379,11 @@ function ProcessingGraphScreenInner() {
         return {
           ...withPreview,
           parentId: container.triggerId,
-          position: { x: n.position.x - container.x, y: n.position.y - container.y },
+          position: isTick ? { x: tickRel.x, y: tickRel.y } : { x: n.position.x - container.x, y: n.position.y - container.y },
         };
       });
     return [...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
-  }, [containerNodes, localNodes, containerByTriggerId, containerByMemberId, previewActiveIds, previewActuatorIds, previewTriggerIds, previewElapsedMs, previewLedIntensity, triggerFeedById]);
+  }, [containerNodes, localNodes, containerByTriggerId, containerByMemberId, previewActiveIds, previewActuatorIds, previewTriggerIds, previewElapsedMs, previewLedIntensity, previewRgbVisual]);
 
   // Domain keeps Schedule → entry edges for membership/dry-run; the canvas hides
   // them so the dashed box + “entry” badge carry that meaning instead of a
@@ -410,6 +420,67 @@ function ProcessingGraphScreenInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bindingIndex, session?.stack.current.deviceGraphs.length]);
 
+  // Every Schedule gets a fixed violet tick disc (not palette-placed). Insert
+  // one when missing and rewire any direct Schedule → block edges through it.
+  useEffect(() => {
+    if (!execute || bindingIndex < 0) return;
+    const startEntry = findCatalogEntryById("native.flow_start");
+    if (!startEntry) return;
+    const lens = deviceGraphLens(bindingIndex);
+    for (const node of domainNodes) {
+      if (node.data.kind !== "schedule") continue;
+      const scheduleId = node.id;
+      const outs = graphState.edges.filter((e) => e.source === scheduleId);
+      const tickEdge = outs.find((e) => {
+        const target = domainNodes.find((n) => n.id === e.target);
+        return target ? isFlowStartBlock(target.data) : false;
+      });
+      if (tickEdge) continue;
+      const startData = nodeDataFromCatalogEntry(startEntry, moduleOptions[0]?.id);
+      if (!startData || startData.kind !== "block") continue;
+      const tickId = `dp-tick-${scheduleId}`;
+      if (domainNodes.some((n) => n.id === tickId)) continue;
+      const schedulePos = authoringMetadata[scheduleId]?.position ?? { x: 40, y: 100 };
+      const tickPos = fixedTickAbsolute(triggerToContainerOrigin(schedulePos));
+      execute(addGraphNodeCommand(lens, { layer: "device-processing", id: tickId, data: startData }));
+      for (const edge of outs) {
+        execute(removeGraphEdgeCommand(lens, edge.id));
+        execute(
+          addGraphEdgeCommand(lens, {
+            id: `dpe-rewire-${edge.id}`,
+            source: tickId,
+            target: edge.target,
+            sourceHandle: edge.sourceHandle ?? "0",
+            targetHandle: edge.targetHandle ?? "0",
+          }),
+        );
+      }
+      execute(
+        addGraphEdgeCommand(lens, {
+          id: `dpe-tick-${scheduleId}`,
+          source: scheduleId,
+          target: tickId,
+          sourceHandle: "0",
+          targetHandle: "0",
+        }),
+      );
+      execute({
+        kind: "UpdateAuthoringMetadata",
+        apply: (project) => ({
+          ok: true,
+          value: {
+            ...project,
+            authoringMetadata: {
+              ...project.authoringMetadata,
+              [tickId]: { comment: "", position: tickPos },
+            },
+          },
+        }),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bindingIndex, domainNodes.map((n) => n.id).join(","), graphState.edges.map((e) => e.id).join(",")]);
+
   function overlapObstaclesFor(draggedId: string, extraExclude: ReadonlySet<string> = new Set()): SizedRect[] {
     const skip = new Set(extraExclude);
     skip.add(draggedId);
@@ -420,7 +491,10 @@ function ProcessingGraphScreenInner() {
     const containers = peerContainerObstacles(draggedId, eventContainers, containerByTriggerId).filter((o) => !skip.has(o.id));
     const cards = localNodes
       .filter((n) => !containerByTriggerId.has(n.id) && !skip.has(n.id))
-      .map((n) => ({ id: n.id, position: n.position, w: NODE_WIDTH, h: NODE_HEIGHT }));
+      .map((n) => {
+        const size = layoutSizeForUiNode(n);
+        return { id: n.id, position: n.position, w: size.w, h: size.h };
+      });
     return [...containers, ...cards];
   }
 
@@ -435,10 +509,17 @@ function ProcessingGraphScreenInner() {
     // container), never for the children it's visually moving with it.
     const carriedChanges: NodeChange<Node<ProcessingNodeUiData>>[] = [];
 
+    // Tick discs are system-owned: never drag, detach, or delete from the canvas.
+    const gatedChanges = changes.filter((change) => {
+      const data = domainNodes.find((n) => n.id === change.id)?.data;
+      if (!data || !isFlowStartBlock(data)) return true;
+      return change.type !== "position" && change.type !== "remove";
+    });
+
     // React Flow reports a member's dragged position relative to its container
     // (parentId); localNodes/authoringMetadata always store absolute canvas
     // positions, so translate back before either touches them.
-    const absoluteChanges = changes.map((change) => {
+    const absoluteChanges = gatedChanges.map((change) => {
       if (change.type !== "position" || !change.position) return change;
       const isContainer = containerByTriggerId.has(change.id);
       const container = containerByMemberId.get(change.id);
@@ -452,7 +533,7 @@ function ProcessingGraphScreenInner() {
         const parent = containerByMemberId.get(change.id);
         const boxOrigin = parent ? { x: change.position.x + parent.x, y: change.position.y + parent.y } : change.position;
         let triggerPosition = {
-          x: boxOrigin.x + NODE_PADDING + ENTRY_FEED_INSET,
+          x: boxOrigin.x + NODE_PADDING,
           y: boxOrigin.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
         };
         const draggedKind = domainNodes.find((n) => n.id === change.id)?.data.kind;
@@ -531,7 +612,18 @@ function ProcessingGraphScreenInner() {
         if (info && oldPos) {
           const delta = { x: triggerPosition.x - oldPos.x, y: triggerPosition.y - oldPos.y };
           const moved = delta.x !== 0 || delta.y !== 0;
+          const newOrigin = triggerToContainerOrigin(triggerPosition);
           for (const memberId of collectDescendantMemberIds(info, containerByTriggerId)) {
+            const memberData = domainNodes.find((n) => n.id === memberId)?.data;
+            if (memberData && isFlowStartBlock(memberData)) {
+              carriedChanges.push({
+                id: memberId,
+                type: "position",
+                position: fixedTickAbsolute(newOrigin),
+                dragging: change.dragging,
+              });
+              continue;
+            }
             const memberPos = livePositions.get(memberId);
             if (!memberPos) continue;
             if (!moved && change.dragging !== false) continue;
@@ -613,10 +705,15 @@ function ProcessingGraphScreenInner() {
         }
       }
       const insideIds = container && escaping ? new Set([container.triggerId, ...container.memberIds]) : null;
+      const draggedNode = localNodes.find((n) => n.id === change.id);
+      const selfSize = draggedNode ? layoutSizeForUiNode(draggedNode) : { w: NODE_WIDTH, h: NODE_HEIGHT };
       const siblings = localNodes
         .filter((n) => !containerByTriggerId.has(n.id) && !insideIds?.has(n.id))
-        .map((n) => ({ id: n.id, position: n.id === change.id ? position : n.position }));
-      position = resolveSiblingOverlap(change.id, position, siblings, attachLowerBound);
+        .map((n) => {
+          const size = layoutSizeForUiNode(n);
+          return { id: n.id, position: n.id === change.id ? position : n.position, w: size.w, h: size.h };
+        });
+      position = resolveSiblingOverlap(change.id, position, siblings, attachLowerBound, selfSize);
 
       return { ...change, position };
     });
@@ -657,21 +754,32 @@ function ProcessingGraphScreenInner() {
     if (domainNode) setInspector({ kind: "edit", nodeId: node.id, data: domainNode.data, comment: meta?.comment ?? "" });
   }
 
-  function placeFromCatalog(entry: ProcessingCatalogEntry, requestedPosition = nextSpawnPosition(domainNodes.length)) {
+  function placeFromCatalog(
+    entry: ProcessingCatalogEntry,
+    requestedPosition = nextSpawnPosition(domainNodes.length),
+    baySide = peekPaletteDragBaySide(),
+  ) {
     if (!execute || bindingIndex < 0) return;
-    const data = nodeDataFromCatalogEntry(entry, moduleOptions[0]?.id);
+    // Tick discs are spawned with each Schedule — never from the palette.
+    if (entry.id === "native.flow_start" || entry.typeId === "ab.flow_start") return;
+    const data = nodeDataFromCatalogEntry(entry, moduleOptions[0]?.id, baySide);
     if (!data) return;
 
     const id = `dp-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+    const bay = isBayEntry(entry);
+    const resolvedBaySide = baySide ?? (bay ? "output" : undefined);
 
     // Same attachment handling as an existing block being dragged (onNodesChange):
     // a new Block dropped inside a dashed container has no edge yet, so chain it
     // onto that trigger (or its last member) instead of leaving it merely
     // overlapping. Only a Block can be chained this way — see onNodesChange.
+    // Bay endpoints stay outside the box (left = ingresso, right = uscita).
     let position = requestedPosition;
     let attachEdgeCommand: ReturnType<typeof addGraphEdgeCommand> | undefined;
     let attachLowerBound: { x: number; y: number } | undefined;
-    if (data.kind === "block") {
+    if (bay && resolvedBaySide) {
+      position = positionForBayDrop(resolvedBaySide, requestedPosition, eventContainers);
+    } else if (data.kind === "block") {
       const target = containerAtPosition(position, eventContainers);
       if (target) {
         attachEdgeCommand = addGraphEdgeCommand(deviceGraphLens(bindingIndex), {
@@ -712,7 +820,12 @@ function ProcessingGraphScreenInner() {
       position = resolveSiblingOverlap(
         "",
         position,
-        localNodes.filter((n) => !containerByTriggerId.has(n.id)).map((n) => ({ id: n.id, position: n.position })),
+        localNodes
+          .filter((n) => !containerByTriggerId.has(n.id))
+          .map((n) => {
+            const size = layoutSizeForUiNode(n);
+            return { id: n.id, position: n.position, w: size.w, h: size.h };
+          }),
         attachLowerBound,
       );
     }
@@ -720,6 +833,8 @@ function ProcessingGraphScreenInner() {
     // The node must exist before an edge can reference its id as a target.
     execute(addGraphNodeCommand(deviceGraphLens(bindingIndex), { layer: "device-processing", id, data }));
     if (attachEdgeCommand) execute(attachEdgeCommand);
+    const comment =
+      bay && resolvedBaySide ? `${entry.label} · ${resolvedBaySide === "input" ? "ingresso" : "uscita"}` : entry.label;
     execute({
       kind: "UpdateAuthoringMetadata",
       apply: (project) => ({
@@ -728,12 +843,54 @@ function ProcessingGraphScreenInner() {
           ...project,
           authoringMetadata: {
             ...project.authoringMetadata,
-            [id]: { comment: entry.label, position },
+            [id]: { comment, position },
           },
         },
       }),
     });
-    setInspector({ kind: "edit", nodeId: id, data, comment: entry.label });
+
+    if (data.kind === "schedule") {
+      spawnScheduleTick(id, position);
+    }
+
+    setInspector({ kind: "edit", nodeId: id, data, comment });
+  }
+
+  /** Creates the fixed violet tick disc for a Schedule and wires Schedule → tick. */
+  function spawnScheduleTick(scheduleId: string, schedulePosition: { readonly x: number; readonly y: number }) {
+    if (!execute || bindingIndex < 0) return;
+    const startEntry = findCatalogEntryById("native.flow_start");
+    if (!startEntry) return;
+    const startData = nodeDataFromCatalogEntry(startEntry, moduleOptions[0]?.id);
+    if (!startData || startData.kind !== "block") return;
+    const tickId = `dp-tick-${scheduleId}`;
+    if (domainNodes.some((n) => n.id === tickId)) return;
+    const origin = triggerToContainerOrigin(schedulePosition);
+    const tickPos = fixedTickAbsolute(origin);
+    const lens = deviceGraphLens(bindingIndex);
+    execute(addGraphNodeCommand(lens, { layer: "device-processing", id: tickId, data: startData }));
+    execute(
+      addGraphEdgeCommand(lens, {
+        id: `dpe-tick-${scheduleId}`,
+        source: scheduleId,
+        target: tickId,
+        sourceHandle: "0",
+        targetHandle: "0",
+      }),
+    );
+    execute({
+      kind: "UpdateAuthoringMetadata",
+      apply: (project) => ({
+        ok: true,
+        value: {
+          ...project,
+          authoringMetadata: {
+            ...project.authoringMetadata,
+            [tickId]: { comment: "", position: tickPos },
+          },
+        },
+      }),
+    });
   }
 
   function persistNode(nodeId: string, data: DeviceProcessingNodeData, comment: string) {
@@ -802,6 +959,11 @@ function ProcessingGraphScreenInner() {
       setContainerHint({ triggerId: target.triggerId, kind: "rejecting" });
       return;
     }
+    // Bay hardware stays outside the dashed box — no nest accept highlight.
+    if (peekPaletteDragBaySide() !== undefined) {
+      setContainerHint(null);
+      return;
+    }
     setContainerHint({ triggerId: target.triggerId, kind: "accepting", previewPosition: flowPos });
   }
 
@@ -809,11 +971,12 @@ function ProcessingGraphScreenInner() {
     event.preventDefault();
     setDropPreview(null);
     setContainerHint(null);
-    const id = event.dataTransfer.getData(PROCESSING_BLOCK_MIME);
-    const entry = findCatalogEntryById(id);
+    const payload = decodePaletteDrag(event.dataTransfer.getData(PROCESSING_BLOCK_MIME));
+    if (!payload) return;
+    const entry = findCatalogEntryById(payload.entryId);
     if (!entry) return;
     const flowPos = rf?.screenToFlowPosition({ x: event.clientX, y: event.clientY }) ?? { x: 80, y: 80 };
-    placeFromCatalog(entry, { x: snapToGrid(flowPos.x), y: snapToGrid(flowPos.y) });
+    placeFromCatalog(entry, { x: snapToGrid(flowPos.x), y: snapToGrid(flowPos.y) }, payload.baySide);
   }
 
   async function handleDryRun() {
@@ -840,6 +1003,7 @@ function ProcessingGraphScreenInner() {
           setPreviewActiveIds(activeActuatorsAt(0, channels));
           setPreviewTriggerIds(activeTriggersAt(0, channels));
           setPreviewLedIntensity(ledIntensitiesAt(0, channels));
+          setPreviewRgbVisual(rgbVisualsAt(0, channels));
         } else {
           stopPreview();
         }
@@ -952,7 +1116,7 @@ function ProcessingGraphScreenInner() {
               <div
                 className="pointer-events-none absolute rounded-slmd border-2 border-dashed border-brand-blue"
                 style={{
-                  width: 224,
+                  width: 176,
                   height: 48,
                   left: dropPreview.x,
                   top: dropPreview.y,

@@ -1,14 +1,15 @@
 import type { AuthoringMetadata, GraphState } from "@spaghettilab/domain";
 import { isBlockNodeData, isRuleNodeData, moduleReferenceOf, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
-import { formatFieldsSubtitle } from "@spaghettilab/processing-block-catalog";
+import { baySideLabel, formatFieldsSubtitle, isBayEntry, type BaySide } from "@spaghettilab/processing-block-catalog";
 import type { Node } from "@xyflow/react";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
-import { visualForCatalogEntryId } from "./block-visuals.js";
-import { hysteresisTicksFromProperties, initialHighFromProperties, isDigitalOutToggle, isLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
-import { NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
+import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
+import { hysteresisTicksFromProperties, initialHighFromProperties, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
+import { parseRgbLedConfig, rgbLedSubtitle } from "./rgb-led-model.js";
+import { FLOW_START_SIZE } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
-import { portsForNode } from "./node-ports.js";
+import { portsForNode, nodeHeightForPorts, nodeWidthForPorts } from "./node-ports.js";
 
 export type ToggleWaveUi = {
   readonly highTicks: number;
@@ -34,23 +35,26 @@ export type ProcessingNodeUiData = {
   readonly ledIntensity?: number;
   /** Catalog override: tile accent (e.g. Digital Out Toggle orange). */
   readonly accentColor?: string;
-  /** Catalog override: use toggle glyph instead of kind default. */
-  readonly toggleIcon?: boolean;
-  /** Flow Start: render as a circular entry node. */
+  /** Catalog override glyph: toggle | palette | power (see block-visuals). */
+  readonly tileGlyph?: CatalogTileGlyph;
+  /** Flow Start: bare dark-violet disc (Schedule tick plug). */
   readonly circular?: boolean;
-  /**
-   * Direct target of a Schedule / Event-source — shows a feed chip on the
-   * input (clock + period) instead of a separate Start node.
-   */
-  readonly triggerFeed?: {
-    readonly kind: "schedule" | "event-source";
-    readonly label: string;
-    readonly periodMs?: number;
-  };
   /** Digital Out Toggle: duty-cycle waveform on the output handle. */
   readonly toggleWave?: ToggleWaveUi;
   /** Dry-run: scroll the toggle waveform with the live clock. */
   readonly waveLive?: { readonly elapsedMs: number; readonly periodMs: number };
+  /** Hardware bay endpoint (LED, Relay, …) — distinct chrome from functionality blocks. */
+  readonly bay?: boolean;
+  /** Bay I/O side when `bay` is true. */
+  readonly baySide?: BaySide;
+  /** Catalog input handles (multi-port cards). */
+  readonly inputHandles?: readonly { readonly id: string; readonly label?: string }[];
+  /** Catalog output handles (multi-port cards). */
+  readonly outputHandles?: readonly { readonly id: string; readonly label?: string }[];
+  /** Measured card height when stacked handles need more than NODE_HEIGHT. */
+  readonly cardHeight?: number;
+  /** Measured card width for multi-channel bay cards. */
+  readonly cardWidth?: number;
 };
 
 /**
@@ -75,6 +79,11 @@ export function toProcessingNodes(
   return graphState.nodes.map((node) => {
     const meta = authoringMetadata[node.id];
     const data = node.data as DeviceProcessingNodeData;
+    const accent = blockAccentFields(data);
+    const isTick = accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
+    const ports = portsForNode(data);
+    const cardHeight = isTick ? FLOW_START_SIZE : nodeHeightForPorts(ports);
+    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports);
     return {
       id: node.id,
       type: "processing",
@@ -86,22 +95,42 @@ export function toProcessingNodes(
       // React Flow considers it measured; a plain top-level node never hits that
       // gate, which is why this went unnoticed until blocks started getting
       // reparented into event containers.
-      width: NODE_WIDTH,
-      height: NODE_HEIGHT,
+      width: cardWidth,
+      height: cardHeight,
       data: {
         domainId: node.id,
         kind: data.kind,
         label: titles.get(node.id) ?? PROCESSING_NODE_KIND_CONFIG[data.kind].label,
         subtitle: subtitleFor(node.id, data, graphState, titles, moduleLabel, fieldLabel),
         hasError: errorNodeIds.has(node.id),
-        ...portsForNode(data),
+        hasInput: ports.hasInput,
+        hasOutput: ports.hasOutput,
+        inputHandles: ports.inputs,
+        outputHandles: ports.outputs,
+        cardHeight,
+        cardWidth,
         previewActive: previewActiveIds.has(node.id),
-        ...(isBlockNodeData(data) && isLedBlock(data) ? { ledColor: ledColorFromProperties(data.properties) } : {}),
-        ...blockAccentFields(data),
+        ...(isBlockNodeData(data) && (isLedBlock(data) || isRgbLedBlock(data))
+          ? {
+              ledColor: isRgbLedBlock(data)
+                ? parseRgbLedConfig(data.properties).color
+                : ledColorFromProperties(data.properties, "#F5C518"),
+            }
+          : {}),
+        ...accent,
         ...toggleWaveFields(data),
+        ...bayChromeFields(data),
       },
     };
   });
+}
+
+function bayChromeFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiData, "bay" | "baySide"> {
+  const entry = catalogEntryForNode(data);
+  if (!entry || !isBayEntry(entry)) return {};
+  const raw = isBlockNodeData(data) ? data.properties.bayRole : undefined;
+  const baySide: BaySide | undefined = raw === "input" || raw === "output" ? raw : entry.bayIo === "input" ? "input" : "output";
+  return { bay: true, baySide };
 }
 
 function toggleWaveFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiData, "toggleWave"> {
@@ -118,7 +147,7 @@ function toggleWaveFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUi
 
 function blockAccentFields(
   data: DeviceProcessingNodeData,
-): Pick<ProcessingNodeUiData, "accentColor" | "toggleIcon" | "circular"> {
+): Pick<ProcessingNodeUiData, "accentColor" | "tileGlyph" | "circular"> {
   if (!isBlockNodeData(data)) return {};
   const visual = visualForCatalogEntryId(data.catalogEntryId) ?? visualForCatalogEntryId(data.blockTypeId);
   if (!visual) return {};
@@ -128,7 +157,7 @@ function blockAccentFields(
   }
   return {
     accentColor: visual.colorVar,
-    toggleIcon: true,
+    ...(visual.tileGlyph ? { tileGlyph: visual.tileGlyph } : {}),
   };
 }
 
@@ -159,8 +188,27 @@ function subtitleFor(
   }
   if (isBlockNodeData(data)) {
     const input = incomingLabel(nodeId, graphState, titles);
-    if (fromFields) return input ? `${input} ${fromFields}` : fromFields;
-    return formatConfiguredSubtitle("block", data.blockTypeId, data.properties, input) ?? entry?.subtitle ?? entry?.label ?? (data.blockTypeId !== "" ? data.blockTypeId : "—");
+    const bay = entry && isBayEntry(entry);
+    const rawRole = data.properties.bayRole;
+    const baySide: BaySide | undefined = rawRole === "input" || rawRole === "output" ? rawRole : entry?.bayIo === "input" ? "input" : bay ? "output" : undefined;
+    const bayPrefix = bay && baySide ? `Bay · ${baySideLabel(baySide)}` : undefined;
+    // Terminal / RGB: keep subtitle short (details live in inspector / handles).
+    if (entry?.id === "appblocks.terminal_block" || entry?.typeId === "ab.terminal_block") {
+      return bayPrefix ? `${bayPrefix} · 6 canali` : "6 canali";
+    }
+    if (entry?.id === "appblocks.rgb_led" || entry?.typeId === "ab.rgb_led") {
+      return rgbLedSubtitle(parseRgbLedConfig(data.properties));
+    }
+    if (fromFields) {
+      const body = input ? `${input} ${fromFields}` : fromFields;
+      return bayPrefix ? `${bayPrefix} · ${body}` : body;
+    }
+    const fallback =
+      formatConfiguredSubtitle("block", data.blockTypeId, data.properties, input) ??
+      entry?.subtitle ??
+      entry?.label ??
+      (data.blockTypeId !== "" ? data.blockTypeId : "—");
+    return bayPrefix ? `${bayPrefix} · ${fallback}` : fallback;
   }
   if (isRuleNodeData(data)) {
     const source = data.sourceReference

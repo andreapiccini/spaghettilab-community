@@ -1,29 +1,62 @@
-import { CirclePlay, ToggleLeft, type LucideIcon } from "lucide-react";
-import { DIGITAL_OUT_TOGGLE_IDS, FLOW_START_IDS, LED_BLOCK_IDS } from "./dry-run-preview.js";
+import { Cable, Palette, Power, ToggleLeft, type LucideIcon } from "lucide-react";
+import {
+  DIGITAL_OUT_TOGGLE_IDS,
+  FLOW_START_IDS,
+  LED_BLOCK_IDS,
+  RELAY_BLOCK_IDS,
+  RGB_LED_BLOCK_IDS,
+  TERMINAL_BLOCK_IDS,
+} from "./dry-run-preview.js";
 
 /**
  * Per-catalog accent colors / icons that override the generic `block` kind
  * (teal + SlidersHorizontal). LED keeps a solid swatch; Digital Out Toggle
- * gets a toggle glyph; Flow Start is a circular entry node.
+ * gets a toggle glyph; Flow Start is a bare dark-violet disc (Schedule tick).
  */
+export type CatalogTileGlyph = "toggle" | "palette" | "power" | "cable";
+
 export type CatalogBlockVisual = {
   readonly colorVar: string;
   readonly icon: LucideIcon;
   /** LED: filled swatch, no glyph. */
   readonly solidSwatch?: boolean;
-  /** Flow Start: circular canvas node. */
+  /** Flow Start: small circular canvas node, no label. */
   readonly circular?: boolean;
+  /** Canvas tile glyph override (when not solidSwatch / circular). */
+  readonly tileGlyph?: CatalogTileGlyph;
 };
+
+/** Darker than Schedule `#7C5CFC` — the movable tick plug inside the box. */
+export const FLOW_START_COLOR = "#4C2FB8";
 
 const DIGITAL_OUT_TOGGLE_VISUAL: CatalogBlockVisual = {
   colorVar: "#EA580C",
   icon: ToggleLeft,
+  tileGlyph: "toggle",
 };
 
 const FLOW_START_VISUAL: CatalogBlockVisual = {
-  colorVar: "#16A34A",
-  icon: CirclePlay,
+  colorVar: FLOW_START_COLOR,
+  icon: ToggleLeft,
   circular: true,
+};
+
+const RGB_LED_VISUAL: CatalogBlockVisual = {
+  colorVar: "#E11D48",
+  icon: Palette,
+  solidSwatch: true,
+};
+
+const RELAY_VISUAL: CatalogBlockVisual = {
+  colorVar: "#64748B",
+  icon: Power,
+  tileGlyph: "power",
+};
+
+const TERMINAL_BLOCK_VISUAL: CatalogBlockVisual = {
+  colorVar: "#0F766E",
+  icon: Cable,
+  tileGlyph: "cable",
 };
 
 export function visualForCatalogEntryId(entryId: string | undefined): CatalogBlockVisual | undefined {
@@ -33,5 +66,8 @@ export function visualForCatalogEntryId(entryId: string | undefined): CatalogBlo
   if (LED_BLOCK_IDS.has(entryId)) {
     return { colorVar: "#F5C518", icon: ToggleLeft, solidSwatch: true };
   }
+  if (RGB_LED_BLOCK_IDS.has(entryId)) return RGB_LED_VISUAL;
+  if (RELAY_BLOCK_IDS.has(entryId)) return RELAY_VISUAL;
+  if (TERMINAL_BLOCK_IDS.has(entryId)) return TERMINAL_BLOCK_VISUAL;
   return undefined;
 }

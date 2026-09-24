@@ -22,6 +22,13 @@ describe("resolveSiblingOverlap", () => {
       expect(nodesOverlap(resolved, sibling.position)).toBe(false);
     }
   });
+
+  it("treats a small tick disc as its real size so a card can sit close beside it", () => {
+    const tick = { id: "tick", position: { x: 100, y: 178 }, w: 28, h: 28 };
+    const beside = { x: 160, y: 160 };
+    const resolved = resolveSiblingOverlap("toggle", beside, [tick]);
+    expect(resolved).toEqual(beside);
+  });
 });
 
 describe("resolveRectOverlap", () => {

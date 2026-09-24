@@ -59,15 +59,30 @@ export function resolveRectOverlap(id: string, position: Point, size: { readonly
  * `NODE_GAP`). If the local push still collides — a packed cluster — scans
  * right then down from the drop point for the first free slot.
  *
+ * Sibling entries may carry `w`/`h` (e.g. the 28px Schedule tick disc);
+ * missing sizes default to a full card. `selfSize` does the same for the
+ * node being resolved.
+ *
  * `lowerBound`, when given, re-clamps after every push so a block just
  * attached to a container cannot be shoved above/left of the trigger.
  */
-export function resolveSiblingOverlap(id: string, position: Point, siblings: readonly { readonly id: string; readonly position: Point }[], lowerBound?: Point): Point {
+export function resolveSiblingOverlap(
+  id: string,
+  position: Point,
+  siblings: readonly { readonly id: string; readonly position: Point; readonly w?: number; readonly h?: number }[],
+  lowerBound?: Point,
+  selfSize?: { readonly w: number; readonly h: number },
+): Point {
   return resolveRectOverlap(
     id,
     position,
-    { w: NODE_WIDTH, h: NODE_HEIGHT },
-    siblings.map((sibling) => ({ ...sibling, w: NODE_WIDTH, h: NODE_HEIGHT })),
+    selfSize ?? { w: NODE_WIDTH, h: NODE_HEIGHT },
+    siblings.map((sibling) => ({
+      id: sibling.id,
+      position: sibling.position,
+      w: sibling.w ?? NODE_WIDTH,
+      h: sibling.h ?? NODE_HEIGHT,
+    })),
     lowerBound,
   );
 }

@@ -1,7 +1,9 @@
 export type {
+  BayIoRole,
   CatalogField,
   CatalogFieldType,
   ProcessingAvailability,
+  ProcessingBlockFamily,
   ProcessingCatalogCategory,
   ProcessingCatalogCategoryId,
   ProcessingCatalogEntry,
@@ -14,6 +16,15 @@ export type {
 } from "./types.js";
 export { PROCESSING_CATALOG_CATEGORIES, catalogCategory } from "./categories.js";
 export { PROCESSING_BLOCK_CATALOG } from "./entries.js";
+export {
+  bayChoiceHint,
+  bayFamilyIdOf,
+  baySideLabel,
+  baySidesForEntry,
+  blockFamilyOf,
+  isBayEntry,
+  type BaySide,
+} from "./bay.js";
 export { defaultPropertiesFromFields, formatFieldsSubtitle } from "./fields.js";
 export {
   SIGNAL_DOMAINS,

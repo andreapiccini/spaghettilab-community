@@ -17,9 +17,10 @@ import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { visualForCatalogEntryId } from "./block-visuals.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { commentAfterCatalogChange } from "./catalog-to-node.js";
-import { isLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
+import { isLedBlock, isRgbLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { withThresholdFirmwareFields } from "./threshold-rule-fields.js";
+import { RgbLedSequenceEditor } from "./RgbLedSequenceEditor.js";
 
 function TypeIdSelect({
   id,
@@ -196,11 +197,11 @@ export function NodeInspector({
   const headerTitle =
     (comment.trim() !== "" ? comment.trim() : undefined) ?? catalogEntry?.label ?? config.label;
   const headerColor =
-    data.kind === "block" && isBlockNodeData(data) && isLedBlock(data)
+    data.kind === "block" && isBlockNodeData(data) && (isLedBlock(data) || isRgbLedBlock(data))
       ? ledColorFromProperties(data.properties, catalogVisual?.colorVar ?? "#F5C518")
       : (catalogVisual?.colorVar ?? config.colorVar);
   const HeaderIcon = catalogVisual?.icon ?? config.icon;
-  const headerSolid = catalogVisual?.solidSwatch === true;
+  const headerSolid = catalogVisual?.solidSwatch === true || (data.kind === "block" && isBlockNodeData(data) && isRgbLedBlock(data));
 
   return (
     <motion.div initial={{ x: 320, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 320, opacity: 0 }} transition={motionTokens.spring.smooth} className="flex h-full w-80 flex-col border-l border-border bg-surface shadow-e2">
@@ -355,6 +356,9 @@ export function NodeInspector({
                 <PropertiesEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
               </>
             )}
+            {isRgbLedBlock(data) && (
+              <RgbLedSequenceEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
+            )}
           </>
         )}
 
@@ -482,6 +486,13 @@ function CatalogFieldsEditor({
 
 function fieldVisible(field: CatalogField, properties: Readonly<Record<string, unknown>>): boolean {
   if (!field.when) return true;
+  // Preset-only fields (color, speed) must not appear in «Sequenza mia».
+  if (field.when.field === "preset") {
+    const modeRaw = properties.mode;
+    const mode =
+      typeof modeRaw === "string" ? modeRaw : modeRaw === undefined ? "preset" : String(modeRaw);
+    if (mode !== "preset") return false;
+  }
   const raw = properties[field.when.field];
   const current =
     typeof raw === "string"
@@ -490,9 +501,13 @@ function fieldVisible(field: CatalogField, properties: Readonly<Record<string, u
         ? "follow"
         : raw === undefined && field.when.field === "activeOn"
           ? "rising"
-          : raw === undefined
-            ? undefined
-            : String(raw);
+          : raw === undefined && field.when.field === "mode"
+            ? "preset"
+            : raw === undefined && field.when.field === "preset"
+              ? "solid"
+              : raw === undefined
+                ? undefined
+                : String(raw);
   if (current === undefined) return false;
   if (field.when.in) return field.when.in.includes(current);
   if (field.when.equals !== undefined) return current === field.when.equals;

@@ -15,9 +15,11 @@ export const DEMO_LED_PERIOD_MS = 1000;
  * around Physical Composition/Processing Graph and see the UI with actual
  * data instead of empty states.
  *
- * Processing Graph: Schedule contains Digital Out Toggle → LED. The Toggle is
- * the schedule entry (clock chip “ogni 1s” on its input); Schedule → Toggle
- * stays in the domain but is not drawn. Dry-run toggles the line each period.
+ * Processing Graph: Schedule contains a fixed violet tick disc → Digital Out
+ * Toggle (funzionalità). LED sits as a bay uscita to the right of the box.
+ * The disc is system-owned (not from the palette, not movable); rewire its
+ * output to any block inside the box to choose the entry. Dry-run toggles
+ * the line each period.
  */
 export function buildDemoProject(name: string): ProjectV1 | null {
   const idResult = projectId(crypto.randomUUID());
@@ -49,24 +51,27 @@ export function buildDemoProject(name: string): ProjectV1 | null {
   if (!placePhysical(moduleId, { kind: "module", driverTypeId: "", portId: -1, bayId: -1, railId: -1, electricalMode: "input-output", properties: {} }, "Module", { x: 340, y: 200 })) return null;
 
   const scheduleEntry = findCatalogEntryById("native.schedule");
+  const startEntry = findCatalogEntryById("native.flow_start");
   const toggleEntry = findCatalogEntryById("appblocks.digital_out_toggle");
   const ledEntry = findCatalogEntryById("appblocks.led");
-  if (!scheduleEntry || !toggleEntry || !ledEntry) return null;
+  if (!scheduleEntry || !startEntry || !toggleEntry || !ledEntry) return null;
 
   const scheduleBase = nodeDataFromCatalogEntry(scheduleEntry, moduleId);
+  const startBase = nodeDataFromCatalogEntry(startEntry, moduleId);
   const toggleBase = nodeDataFromCatalogEntry(toggleEntry, moduleId);
   const ledBase = nodeDataFromCatalogEntry(ledEntry, moduleId);
-  if (!scheduleBase || !toggleBase || !ledBase) return null;
-  if (scheduleBase.kind !== "schedule" || toggleBase.kind !== "block" || ledBase.kind !== "block") return null;
+  if (!scheduleBase || !startBase || !toggleBase || !ledBase) return null;
+  if (scheduleBase.kind !== "schedule" || startBase.kind !== "block" || toggleBase.kind !== "block" || ledBase.kind !== "block") return null;
 
   const scheduleData: DeviceProcessingNodeData = { ...scheduleBase, periodMs: DEMO_LED_PERIOD_MS, enabled: true };
+  const startData: DeviceProcessingNodeData = startBase;
   const toggleData: DeviceProcessingNodeData = {
     ...toggleBase,
     properties: { ...toggleBase.properties, line: "LED" },
   };
   const ledData: DeviceProcessingNodeData = {
     ...ledBase,
-    properties: { ...ledBase.properties, color: "#F5C518" },
+    properties: { ...ledBase.properties, color: "#F5C518", bayRole: "output", bayFamilyId: "bay.led" },
   };
 
   function placeDevice(id: string, data: DeviceProcessingNodeData, comment: string, position: { x: number; y: number }): boolean {
@@ -77,14 +82,17 @@ export function buildDemoProject(name: string): ProjectV1 | null {
   }
 
   const scheduleId = "demo-schedule";
+  const startId = "dp-tick-demo-schedule";
   const toggleId = "demo-toggle";
   const ledId = "demo-led";
   if (!placeDevice(scheduleId, scheduleData, "Schedule", { x: 40, y: 100 })) return null;
-  // Inset enough for the schedule-feed chip on the Toggle’s left input.
-  if (!placeDevice(toggleId, toggleData, "Digital Out Toggle", { x: 130, y: 160 })) return null;
-  if (!placeDevice(ledId, ledData, "LED", { x: 420, y: 160 })) return null;
-  if (!stack.execute(addGraphEdgeCommand(device, { id: "demo-edge-1", source: scheduleId, target: toggleId, sourceHandle: "0", targetHandle: "0" })).ok) return null;
-  if (!stack.execute(addGraphEdgeCommand(device, { id: "demo-edge-2", source: toggleId, target: ledId, sourceHandle: "0", targetHandle: "0" })).ok) return null;
+  // Fixed tick + Toggle inside Schedule; LED bay uscita outside to the right.
+  if (!placeDevice(startId, startData, "", { x: 40, y: 86 })) return null;
+  if (!placeDevice(toggleId, toggleData, "Digital Out Toggle", { x: 160, y: 160 })) return null;
+  if (!placeDevice(ledId, ledData, "LED · uscita", { x: 420, y: 160 })) return null;
+  if (!stack.execute(addGraphEdgeCommand(device, { id: "demo-edge-1", source: scheduleId, target: startId, sourceHandle: "0", targetHandle: "0" })).ok) return null;
+  if (!stack.execute(addGraphEdgeCommand(device, { id: "demo-edge-2", source: startId, target: toggleId, sourceHandle: "0", targetHandle: "0" })).ok) return null;
+  if (!stack.execute(addGraphEdgeCommand(device, { id: "demo-edge-3", source: toggleId, target: ledId, sourceHandle: "0", targetHandle: "0" })).ok) return null;
 
   return stack.current;
 }

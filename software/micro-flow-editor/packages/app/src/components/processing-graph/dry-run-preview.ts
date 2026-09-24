@@ -1,12 +1,22 @@
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import { isBlockNodeData } from "@spaghettilab/device-processing-graph-model";
 import type { GraphState } from "@spaghettilab/domain";
+import { parseRgbLedConfig, rgbLedVisualAt } from "./rgb-led-model.js";
 
 /** Catalog / type ids for Digital Out Toggle — flips the line after hysteresis ticks. */
 export const DIGITAL_OUT_TOGGLE_IDS = new Set(["appblocks.digital_out_toggle", "ab.digital_out_toggle"]);
 
 /** Catalog / type ids for the visual LED indicator (solid color swatch). */
 export const LED_BLOCK_IDS = new Set(["appblocks.led", "ab.led"]);
+
+/** RGB LED bay — sequence player (solid / breathe / blink / cycle / custom). */
+export const RGB_LED_BLOCK_IDS = new Set(["appblocks.rgb_led", "ab.rgb_led"]);
+
+/** Relay actuator — authoring stub; behavior TBD. */
+export const RELAY_BLOCK_IDS = new Set(["appblocks.relay", "ab.relay"]);
+
+/** Terminal block bay input — 6 analog/digital channels. */
+export const TERMINAL_BLOCK_IDS = new Set(["appblocks.terminal_block", "ab.terminal_block"]);
 
 /** Circular flow Start — authoring entry that enables blocks downstream of Schedule. */
 export const FLOW_START_IDS = new Set(["native.flow_start", "ab.flow_start"]);
@@ -38,17 +48,32 @@ export type DryRunPreviewChannel = {
   readonly lowTicks: number;
   /** Start the cycle HIGH (`initial` property, default true). */
   readonly initialHigh: boolean;
-  /** Digital Out Toggle nodes whose output follows this channel's line state. */
-  readonly toggleIds: readonly string[];
-  /** Flow Start nodes on the path (entry point that enables the toggle). */
-  readonly startIds: readonly string[];
-  /** LED nodes driven by this channel. */
+  /** LED actuators downstream of Digital Out Toggle on this channel. */
   readonly actuators: readonly LedActuatorBinding[];
+  /** RGB LED sequence players on this channel. */
+  readonly rgbActuators: readonly RgbActuatorBinding[];
+  /** Digital Out Toggle node ids on this channel (line HIGH during their ON phase). */
+  readonly toggleIds: readonly string[];
+  /** Flow Start discs on this channel (pulse with Schedule). */
+  readonly startIds: readonly string[];
+  /**
+   * How RGB LEDs are driven on this channel:
+   * - `line` — while Digital Out Toggle is HIGH (phase = time since rising edge)
+   * - `trigger` — each Schedule period restarts the sequence (no toggle required)
+   */
+  readonly rgbDrive?: "line" | "trigger";
+};
+
+export type RgbActuatorBinding = {
+  readonly id: string;
+  readonly properties: Readonly<Record<string, unknown>>;
 };
 
 /**
- * Builds local Dry-run preview channels: Schedule → Start → Digital Out Toggle → LED.
- * Start is a transparent entry that enables the toggle; LED alone does not blink.
+ * Builds local Dry-run preview channels:
+ * - Schedule → Start → Digital Out Toggle → LED / RGB (line-driven)
+ * - Schedule → Start → RGB (trigger-driven, no toggle)
+ * Start is a transparent entry; mono LED alone does not blink without a toggle.
  */
 export function buildDryRunPreviewChannels(
   graph: GraphState<"device-processing">,
@@ -67,7 +92,8 @@ export function buildDryRunPreviewChannels(
     if (data.kind !== "schedule" || !data.enabled) continue;
     const periodMs = Number.isFinite(data.periodMs) && data.periodMs > 0 ? data.periodMs : 1000;
     const reach = reachableViaToggle(node.id, outgoing, nodesById);
-    if (reach.toggleIds.length === 0) continue;
+    const hasToggle = reach.toggleIds.length > 0;
+    if (!hasToggle && reach.rgbActuators.length === 0) continue;
     channels.push({
       triggerId: node.id,
       periodMs,
@@ -76,7 +102,10 @@ export function buildDryRunPreviewChannels(
       initialHigh: reach.initialHigh,
       toggleIds: reach.toggleIds,
       startIds: reach.startIds,
-      actuators: reach.actuators,
+      // Mono LEDs still require a toggle; drop them on trigger-only channels.
+      actuators: hasToggle ? reach.actuators : [],
+      rgbActuators: reach.rgbActuators,
+      rgbDrive: hasToggle ? "line" : "trigger",
     });
   }
   return channels;
@@ -88,6 +117,7 @@ function reachableViaToggle(
   nodesById: ReadonlyMap<string, DeviceProcessingNodeData>,
 ): {
   actuators: LedActuatorBinding[];
+  rgbActuators: RgbActuatorBinding[];
   toggleIds: string[];
   startIds: string[];
   highTicks: number;
@@ -95,6 +125,7 @@ function reachableViaToggle(
   initialHigh: boolean;
 } {
   const foundLeds: LedActuatorBinding[] = [];
+  const foundRgb: RgbActuatorBinding[] = [];
   const foundToggles: string[] = [];
   const foundStarts: string[] = [];
   let highTicks = 1;
@@ -131,6 +162,13 @@ function reachableViaToggle(
         }
         continue;
       }
+      if (isRgbLedBlock(data)) {
+        // Trigger player: reachable from Schedule (with or without a Toggle).
+        if (isBlockNodeData(data)) {
+          foundRgb.push({ id: nextId, properties: data.properties });
+        }
+        continue;
+      }
       queue.push({ id: nextId, passedToggle });
     }
   }
@@ -140,8 +178,15 @@ function reachableViaToggle(
     seenLed.add(a.id);
     return true;
   });
+  const seenRgb = new Set<string>();
+  const rgbActuators = foundRgb.filter((a) => {
+    if (seenRgb.has(a.id)) return false;
+    seenRgb.add(a.id);
+    return true;
+  });
   return {
     actuators,
+    rgbActuators,
     toggleIds: [...new Set(foundToggles)],
     startIds: [...new Set(foundStarts)],
     highTicks,
@@ -161,6 +206,12 @@ export function isLedBlock(data: DeviceProcessingNodeData): boolean {
   if (data.catalogEntryId && LED_BLOCK_IDS.has(data.catalogEntryId)) return true;
   if (LED_BLOCK_IDS.has(data.blockTypeId)) return true;
   return typeof data.properties.color === "string" && data.blockTypeId === "ab.led";
+}
+
+export function isRgbLedBlock(data: DeviceProcessingNodeData): boolean {
+  if (!isBlockNodeData(data)) return false;
+  if (data.catalogEntryId && RGB_LED_BLOCK_IDS.has(data.catalogEntryId)) return true;
+  return RGB_LED_BLOCK_IDS.has(data.blockTypeId);
 }
 
 export function isFlowStartBlock(data: DeviceProcessingNodeData): boolean {
@@ -391,6 +442,46 @@ export function ledIntensitiesAt(
   return out;
 }
 
+/** RGB swatch color + intensity while driven (line HIGH or trigger period). */
+export function rgbVisualsAt(
+  elapsedMs: number,
+  channels: readonly DryRunPreviewChannel[],
+): ReadonlyMap<string, { readonly color: string; readonly intensity: number }> {
+  const out = new Map<string, { readonly color: string; readonly intensity: number }>();
+  for (const channel of channels) {
+    const [phaseMs, driven] = rgbDriveArgs(elapsedMs, channel);
+    for (const rgb of channel.rgbActuators ?? []) {
+      out.set(rgb.id, rgbLedVisualAt(phaseMs, parseRgbLedConfig(rgb.properties), driven));
+    }
+  }
+  return out;
+}
+
+function rgbDriveArgs(
+  elapsedMs: number,
+  channel: DryRunPreviewChannel,
+): [phaseMs: number, driven: boolean] {
+  if (channel.rgbDrive === "trigger" || channel.toggleIds.length === 0) {
+    const phaseMs = ((elapsedMs % channel.periodMs) + channel.periodMs) % channel.periodMs;
+    return [phaseMs, true];
+  }
+  const tick = Math.floor(Math.max(0, elapsedMs) / channel.periodMs);
+  const lineHigh = lineHighAtTick(tick, channel.highTicks, channel.lowTicks, channel.initialHigh);
+  return [highPhaseMs(elapsedMs, channel), lineHigh];
+}
+
+function highPhaseMs(elapsedMs: number, channel: DryRunPreviewChannel): number {
+  const tick = Math.floor(Math.max(0, elapsedMs) / channel.periodMs);
+  if (!lineHighAtTick(tick, channel.highTicks, channel.lowTicks, channel.initialHigh)) return 0;
+  let startTick = tick;
+  while (startTick > 0) {
+    if (!lineHighAtTick(startTick - 1, channel.highTicks, channel.lowTicks, channel.initialHigh)) break;
+    startTick -= 1;
+  }
+  const phaseInPeriod = ((elapsedMs % channel.periodMs) + channel.periodMs) % channel.periodMs;
+  return (tick - startTick) * channel.periodMs + phaseInPeriod;
+}
+
 /**
  * Nodes currently "active": toggles while line HIGH; LEDs when intensity > threshold.
  */
@@ -405,6 +496,12 @@ export function activeActuatorsAt(elapsedMs: number, channels: readonly DryRunPr
     for (const led of channel.actuators) {
       if (ledIntensityAt(elapsedMs, channel, led) > 0.08) on.add(led.id);
     }
+    for (const rgb of channel.rgbActuators ?? []) {
+      const [phaseMs, driven] = rgbDriveArgs(elapsedMs, channel);
+      if (!driven) continue;
+      const visual = rgbLedVisualAt(phaseMs, parseRgbLedConfig(rgb.properties), true);
+      if (visual.intensity > 0.08) on.add(rgb.id);
+    }
   }
   return on;
 }
@@ -415,6 +512,7 @@ export function previewParticipantIds(channels: readonly DryRunPreviewChannel[])
     for (const id of channel.toggleIds) ids.add(id);
     for (const id of channel.startIds) ids.add(id);
     for (const led of channel.actuators) ids.add(led.id);
+    for (const rgb of channel.rgbActuators ?? []) ids.add(rgb.id);
   }
   return ids;
 }

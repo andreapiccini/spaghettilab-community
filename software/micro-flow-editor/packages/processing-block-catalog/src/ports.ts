@@ -9,6 +9,7 @@
 export const SIGNAL_DOMAINS = [
   "digital",
   "analog",
+  "power",
   "event",
   "quantity",
   "text",
@@ -158,4 +159,8 @@ export const T = {
   eventTrigger: { domain: "event", role: "trigger" } satisfies PortType,
   digitalComando: { domain: "digital", role: "comando" } satisfies PortType,
   analogComando: { domain: "analog", role: "comando", range: { min: 0, max: 100 } } satisfies PortType,
+  digitalMisura: { domain: "digital", role: "misura" } satisfies PortType,
+  analogMisura: { domain: "analog", role: "misura", range: { min: 0, max: 100 } } satisfies PortType,
+  /** Tensioni / rail di alimentazione (V). */
+  powerMisura: { domain: "power", role: "misura", unit: "V", range: { min: 0, max: 60 } } satisfies PortType,
 };

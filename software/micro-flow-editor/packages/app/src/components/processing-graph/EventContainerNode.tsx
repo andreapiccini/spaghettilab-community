@@ -20,10 +20,8 @@ export type EventContainerNodeData = {
 /**
  * A real React Flow parent node representing "everything that runs when this
  * event fires" — a dashed rectangle whose members are true React Flow
- * children (`parentId`, set in ProcessingGraphScreen). This node's id is the
- * trigger's domain id. The wire into the entry block stays in the domain but
- * is hidden on canvas; the entry block shows a schedule/event feed chip on
- * its input instead.
+ * children (`parentId`, set in ProcessingGraphScreen). Schedule has no canvas
+ * handles — activation goes via the fixed violet tick disc; event-source keeps ports.
  */
 export function EventContainerNode({ id, data, selected }: NodeProps & { readonly data: EventContainerNodeData }) {
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
@@ -49,9 +47,11 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
     >
       <HoverDeleteButton id={id} label="Elimina contenitore" forceVisible={selected} />
       {data.kind === "event-source" && (
-        <Handle type="target" position={Position.Left} id="0" style={{ ...TARGET_HANDLE_STYLE, top: 16 }} />
+        <>
+          <Handle type="target" position={Position.Left} id="0" style={{ ...TARGET_HANDLE_STYLE, top: 16 }} />
+          <Handle type="source" position={Position.Right} id="0" style={{ ...SOURCE_HANDLE_STYLE, top: 16 }} />
+        </>
       )}
-      <Handle type="source" position={Position.Right} id="0" style={{ ...SOURCE_HANDLE_STYLE, top: 16 }} />
       <div className="flex h-8 shrink-0 items-center gap-1.5 px-2">
         <Icon size={13} className="shrink-0" style={{ color: config.colorVar }} />
         <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted group-hover:text-brand-blue">

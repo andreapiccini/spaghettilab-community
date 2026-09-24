@@ -34,13 +34,12 @@ describe("isValidProcessingConnection", () => {
     expect(isValidProcessingConnection({ source: "led", target: "t" }, resolve)).toBe(false);
   });
 
-  it("allows Start → Toggle and Schedule → Start", () => {
+  it("allows Start → Toggle (Schedule → Start is domain-only, no tick input)", () => {
     const resolve = (id: string) => {
       if (id === "s") return findCatalogEntryById("native.schedule");
       if (id === "start") return findCatalogEntryById("native.flow_start");
       return findCatalogEntryById("appblocks.digital_out_toggle");
     };
-    expect(isValidProcessingConnection({ source: "s", target: "start" }, resolve)).toBe(true);
     expect(isValidProcessingConnection({ source: "start", target: "t" }, resolve)).toBe(true);
   });
 });
