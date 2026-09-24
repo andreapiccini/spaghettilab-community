@@ -354,9 +354,10 @@ function ProcessingGraphScreenInner() {
       .filter((n) => !containerByTriggerId.has(n.id))
       .map((n) => {
         const container = containerByMemberId.get(n.id);
-        const previewing = previewActuatorIds.has(n.id);
+        const previewing = previewActuatorIds.has(n.id) || previewRgbVisual.has(n.id);
         const wavePeriodMs = periodByToggleId.get(n.id);
         const isTick = n.data.circular === true;
+        const rgb = previewRgbVisual.get(n.id);
         const withPreview = {
           ...n,
           draggable: isTick ? false : n.draggable !== false,
@@ -366,10 +367,10 @@ function ProcessingGraphScreenInner() {
             previewing,
             ...(previewLedIntensity.has(n.id)
               ? { ledIntensity: previewLedIntensity.get(n.id) }
-              : previewRgbVisual.has(n.id)
-                ? { ledIntensity: previewRgbVisual.get(n.id)!.intensity }
+              : rgb
+                ? { ledIntensity: rgb.intensity }
                 : { ledIntensity: undefined }),
-            ...(previewRgbVisual.has(n.id) ? { ledColor: previewRgbVisual.get(n.id)!.color } : {}),
+            ...(rgb ? { ledColor: rgb.color } : {}),
             ...(previewing && n.data.toggleWave && wavePeriodMs !== undefined
               ? { waveLive: { elapsedMs: previewElapsedMs, periodMs: wavePeriodMs } }
               : { waveLive: undefined }),

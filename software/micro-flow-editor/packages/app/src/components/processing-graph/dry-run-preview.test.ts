@@ -14,6 +14,7 @@ import {
   ledIntensityAt,
   ledLitAt,
   ledWantedOn,
+  lineHighAtElapsed,
   lineHighAtTick,
   rgbVisualsAt,
   waveformPlateaus,
@@ -66,6 +67,8 @@ const baseChannel = (over: Partial<DryRunPreviewChannel> = {}): DryRunPreviewCha
   highTicks: 1,
   lowTicks: 1,
   initialHigh: true,
+  toggleMode: "astable",
+  pulseMs: 100,
   toggleIds: ["t1"],
   startIds: [],
   actuators: [defaultLed()],
@@ -276,6 +279,7 @@ describe("RGB LED dry-run", () => {
     expect(channels[0]?.rgbDrive).toBe("trigger");
     expect(channels[0]?.toggleIds).toEqual([]);
     expect(channels[0]?.actuators).toEqual([]);
+    // Default follow+rising: HIGH on even ticks — blink runs during first period.
     const visuals = rgbVisualsAt(0, channels);
     expect(visuals.get("rgb")?.intensity).toBeCloseTo(1, 2);
     expect(rgbVisualsAt(100, channels).get("rgb")?.intensity).toBe(0);
@@ -289,6 +293,99 @@ describe("RGB LED dry-run", () => {
     });
     expect(activeActuatorsAt(0, [ch]).has("rgb")).toBe(true);
     expect(activeActuatorsAt(1000, [ch]).has("rgb")).toBe(false);
+  });
+
+  it("follow falling lights RGB while line LOW", () => {
+    const ch = baseChannel({
+      actuators: [],
+      rgbActuators: [
+        {
+          id: "rgb",
+          properties: {
+            mode: "preset",
+            preset: "solid",
+            color: "#FF0000",
+            intensity: 100,
+            triggerEdge: "falling",
+            triggerAction: "follow",
+          },
+        },
+      ],
+      rgbDrive: "line",
+    });
+    expect(activeActuatorsAt(0, [ch]).has("rgb")).toBe(false);
+    expect(activeActuatorsAt(1000, [ch]).has("rgb")).toBe(true);
+  });
+
+  it("start rising keeps RGB lit after falling edge", () => {
+    const ch = baseChannel({
+      actuators: [],
+      rgbActuators: [
+        {
+          id: "rgb",
+          properties: {
+            mode: "preset",
+            preset: "solid",
+            color: "#FF0000",
+            intensity: 100,
+            triggerEdge: "rising",
+            triggerAction: "start",
+          },
+        },
+      ],
+      rgbDrive: "line",
+    });
+    expect(rgbVisualsAt(0, [ch]).get("rgb")?.intensity).toBeCloseTo(1, 2);
+    expect(rgbVisualsAt(1000, [ch]).get("rgb")?.intensity).toBeCloseTo(1, 2);
+  });
+});
+
+describe("Digital Out Toggle modes", () => {
+  it("reads pulse_high from the graph", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [schedule("s1", 500), toggle("t1", { line: "LED", toggleMode: "pulse_high", pulseMs: 80n }), led("led")],
+        [
+          { layer: "device-processing", id: "e1", source: "s1", target: "t1" },
+          { layer: "device-processing", id: "e2", source: "t1", target: "led" },
+        ],
+      ),
+    );
+    expect(channels[0]).toMatchObject({ toggleMode: "pulse_high", pulseMs: 80, periodMs: 500 });
+  });
+
+  it("pulse_high: HIGH only during the pulse, then LOW until next period", () => {
+    const ch = baseChannel({
+      toggleMode: "pulse_high",
+      pulseMs: 100,
+      periodMs: 1000,
+      actuators: [],
+    });
+    expect(lineHighAtElapsed(0, ch)).toBe(true);
+    expect(lineHighAtElapsed(50, ch)).toBe(true);
+    expect(lineHighAtElapsed(100, ch)).toBe(false);
+    expect(lineHighAtElapsed(500, ch)).toBe(false);
+    expect(lineHighAtElapsed(1000, ch)).toBe(true);
+  });
+
+  it("pulse_low: LOW during the pulse, HIGH at rest", () => {
+    const ch = baseChannel({
+      toggleMode: "pulse_low",
+      pulseMs: 100,
+      periodMs: 1000,
+      actuators: [],
+    });
+    expect(lineHighAtElapsed(0, ch)).toBe(false);
+    expect(lineHighAtElapsed(50, ch)).toBe(false);
+    expect(lineHighAtElapsed(100, ch)).toBe(true);
+    expect(lineHighAtElapsed(800, ch)).toBe(true);
+  });
+
+  it("astable still toggles each tick", () => {
+    const ch = baseChannel({ toggleMode: "astable", actuators: [] });
+    expect(lineHighAtElapsed(0, ch)).toBe(true);
+    expect(lineHighAtElapsed(1000, ch)).toBe(false);
+    expect(lineHighAtElapsed(2000, ch)).toBe(true);
   });
 });
 

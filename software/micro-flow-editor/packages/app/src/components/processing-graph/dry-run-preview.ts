@@ -1,7 +1,7 @@
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import { isBlockNodeData } from "@spaghettilab/device-processing-graph-model";
 import type { GraphState } from "@spaghettilab/domain";
-import { parseRgbLedConfig, rgbLedVisualAt } from "./rgb-led-model.js";
+import { parseRgbLedConfig, rgbLedPlaybackAt, type RgbLineSignal } from "./rgb-led-model.js";
 
 /** Catalog / type ids for Digital Out Toggle — flips the line after hysteresis ticks. */
 export const DIGITAL_OUT_TOGGLE_IDS = new Set(["appblocks.digital_out_toggle", "ab.digital_out_toggle"]);
@@ -48,6 +48,10 @@ export type DryRunPreviewChannel = {
   readonly lowTicks: number;
   /** Start the cycle HIGH (`initial` property, default true). */
   readonly initialHigh: boolean;
+  /** Digital Out Toggle mode (astable square vs monostable pulse). */
+  readonly toggleMode: ToggleMode;
+  /** Pulse width for `pulse_high` / `pulse_low` (ms within each Schedule period). */
+  readonly pulseMs: number;
   /** LED actuators downstream of Digital Out Toggle on this channel. */
   readonly actuators: readonly LedActuatorBinding[];
   /** RGB LED sequence players on this channel. */
@@ -63,6 +67,9 @@ export type DryRunPreviewChannel = {
    */
   readonly rgbDrive?: "line" | "trigger";
 };
+
+/** Digital Out Toggle behaviour on each Schedule impulse. */
+export type ToggleMode = "astable" | "pulse_high" | "pulse_low";
 
 export type RgbActuatorBinding = {
   readonly id: string;
@@ -100,6 +107,8 @@ export function buildDryRunPreviewChannels(
       highTicks: reach.highTicks,
       lowTicks: reach.lowTicks,
       initialHigh: reach.initialHigh,
+      toggleMode: reach.toggleMode,
+      pulseMs: reach.pulseMs,
       toggleIds: reach.toggleIds,
       startIds: reach.startIds,
       // Mono LEDs still require a toggle; drop them on trigger-only channels.
@@ -123,6 +132,8 @@ function reachableViaToggle(
   highTicks: number;
   lowTicks: number;
   initialHigh: boolean;
+  toggleMode: ToggleMode;
+  pulseMs: number;
 } {
   const foundLeds: LedActuatorBinding[] = [];
   const foundRgb: RgbActuatorBinding[] = [];
@@ -131,6 +142,8 @@ function reachableViaToggle(
   let highTicks = 1;
   let lowTicks = 1;
   let initialHigh = true;
+  let toggleMode: ToggleMode = "astable";
+  let pulseMs = 100;
   let hysteresisTaken = false;
   const seen = new Set<string>();
   const queue: { readonly id: string; readonly passedToggle: boolean }[] = [{ id: startId, passedToggle: false }];
@@ -152,6 +165,8 @@ function reachableViaToggle(
           highTicks = hyst.highTicks;
           lowTicks = hyst.lowTicks;
           initialHigh = initialHighFromProperties(props);
+          toggleMode = toggleModeFromProperties(props);
+          pulseMs = pulseMsFromProperties(props);
           hysteresisTaken = true;
         }
       }
@@ -192,6 +207,8 @@ function reachableViaToggle(
     highTicks,
     lowTicks,
     initialHigh,
+    toggleMode,
+    pulseMs,
   };
 }
 
@@ -239,6 +256,23 @@ export function initialHighFromProperties(properties: Readonly<Record<string, un
   const raw = properties.initial;
   if (typeof raw === "string" && raw.trim().toLowerCase() === "low") return false;
   return true;
+}
+
+export function toggleModeFromProperties(properties: Readonly<Record<string, unknown>>): ToggleMode {
+  const raw = properties.toggleMode;
+  if (raw === "pulse_high" || raw === "pulse_low") return raw;
+  return "astable";
+}
+
+export function pulseMsFromProperties(properties: Readonly<Record<string, unknown>>, fallback = 100): number {
+  const n =
+    typeof properties.pulseMs === "bigint"
+      ? Number(properties.pulseMs)
+      : typeof properties.pulseMs === "number"
+        ? properties.pulseMs
+        : Number(properties.pulseMs);
+  if (!Number.isFinite(n) || n < 1) return fallback;
+  return Math.min(Math.trunc(n), 60_000);
 }
 
 export function ledNegatedFromProperties(properties: Readonly<Record<string, unknown>>): boolean {
@@ -305,6 +339,23 @@ export function lineHighAtTick(
   return phase >= lowTicks;
 }
 
+/**
+ * Digital Out line level at continuous time — supports astable (tick hysteresis)
+ * and monostable pulses (HIGH or LOW notch at the start of each Schedule period).
+ */
+export function lineHighAtElapsed(elapsedMs: number, channel: DryRunPreviewChannel): boolean {
+  const period = Math.max(1, channel.periodMs);
+  const mode = channel.toggleMode ?? "astable";
+  if (mode === "pulse_high" || mode === "pulse_low") {
+    const phase = ((elapsedMs % period) + period) % period;
+    const pulse = Math.min(Math.max(1, channel.pulseMs ?? 100), period);
+    const inPulse = phase < pulse;
+    return mode === "pulse_high" ? inPulse : !inPulse;
+  }
+  const tick = Math.floor(Math.max(0, elapsedMs) / period);
+  return lineHighAtTick(tick, channel.highTicks, channel.lowTicks, channel.initialHigh);
+}
+
 export function waveformPlateaus(
   highTicks: number,
   lowTicks: number,
@@ -330,7 +381,11 @@ function clamp01(n: number): number {
 
 /** Digital Out Toggle line → comando 0–100. */
 export function commandLevelAtTick(tick: number, channel: DryRunPreviewChannel): number {
-  return lineHighAtTick(tick, channel.highTicks, channel.lowTicks, channel.initialHigh) ? 100 : 0;
+  return lineHighAtElapsed(tick * channel.periodMs, channel) ? 100 : 0;
+}
+
+export function commandLevelAtElapsed(elapsedMs: number, channel: DryRunPreviewChannel): number {
+  return lineHighAtElapsed(elapsedMs, channel) ? 100 : 0;
 }
 
 export function ledWantedOn(level: number, led: LedActuatorBinding): boolean {
@@ -338,8 +393,8 @@ export function ledWantedOn(level: number, led: LedActuatorBinding): boolean {
   return v >= led.threshold;
 }
 
-function ledActiveAtTick(tick: number, channel: DryRunPreviewChannel, led: LedActuatorBinding): boolean {
-  return ledWantedOn(commandLevelAtTick(tick, channel), led);
+function ledActiveAtElapsed(elapsedMs: number, channel: DryRunPreviewChannel, led: LedActuatorBinding): boolean {
+  return ledWantedOn(commandLevelAtElapsed(elapsedMs, channel), led);
 }
 
 /** Time spent continuously in the LED's active phase, or null if inactive. */
@@ -348,19 +403,31 @@ export function activePhaseProgress(
   channel: DryRunPreviewChannel,
   led: LedActuatorBinding,
 ): { readonly sinceMs: number; readonly plateauMs: number } | null {
-  const tick = Math.floor(Math.max(0, elapsedMs) / channel.periodMs);
-  if (!ledActiveAtTick(tick, channel, led)) return null;
+  if (!ledActiveAtElapsed(elapsedMs, channel, led)) return null;
 
+  const period = Math.max(1, channel.periodMs);
+  const mode = channel.toggleMode ?? "astable";
+  if (mode === "pulse_high" || mode === "pulse_low") {
+    const phase = ((elapsedMs % period) + period) % period;
+    const pulse = Math.min(Math.max(1, channel.pulseMs ?? 100), period);
+    // Active notch within the period: pulse_high → [0, pulse); pulse_low → [pulse, period).
+    if (mode === "pulse_high") {
+      return { sinceMs: phase, plateauMs: pulse };
+    }
+    return { sinceMs: phase - pulse, plateauMs: period - pulse };
+  }
+
+  const tick = Math.floor(Math.max(0, elapsedMs) / period);
   let startTick = tick;
   while (startTick > 0) {
-    if (!ledActiveAtTick(startTick - 1, channel, led)) break;
+    if (!ledActiveAtElapsed((startTick - 1) * period, channel, led)) break;
     startTick -= 1;
   }
-  const phaseInPeriod = ((elapsedMs % channel.periodMs) + channel.periodMs) % channel.periodMs;
-  const sinceMs = (tick - startTick) * channel.periodMs + phaseInPeriod;
-  const lineHigh = lineHighAtTick(tick, channel.highTicks, channel.lowTicks, channel.initialHigh);
+  const phaseInPeriod = ((elapsedMs % period) + period) % period;
+  const sinceMs = (tick - startTick) * period + phaseInPeriod;
+  const lineHigh = lineHighAtElapsed(elapsedMs, channel);
   const plateauTicks = lineHigh ? channel.highTicks : channel.lowTicks;
-  return { sinceMs, plateauMs: plateauTicks * channel.periodMs };
+  return { sinceMs, plateauMs: plateauTicks * period };
 }
 
 /** Time since the LED left its active phase, or null if currently active / never was. */
@@ -369,19 +436,33 @@ export function inactivePhaseProgress(
   channel: DryRunPreviewChannel,
   led: LedActuatorBinding,
 ): { readonly sinceMs: number; readonly plateauMs: number } | null {
-  const tick = Math.floor(Math.max(0, elapsedMs) / channel.periodMs);
-  if (ledActiveAtTick(tick, channel, led)) return null;
+  if (ledActiveAtElapsed(elapsedMs, channel, led)) return null;
 
+  const period = Math.max(1, channel.periodMs);
+  const mode = channel.toggleMode ?? "astable";
+  if (mode === "pulse_high" || mode === "pulse_low") {
+    const phase = ((elapsedMs % period) + period) % period;
+    const pulse = Math.min(Math.max(1, channel.pulseMs ?? 100), period);
+    if (mode === "pulse_high") {
+      // Inactive for [pulse, period)
+      if (phase < pulse) return null;
+      return { sinceMs: phase - pulse, plateauMs: period - pulse };
+    }
+    // pulse_low: inactive during [0, pulse)
+    return { sinceMs: phase, plateauMs: pulse };
+  }
+
+  const tick = Math.floor(Math.max(0, elapsedMs) / period);
   let firstInactiveTick = tick;
   while (firstInactiveTick > 0) {
-    if (ledActiveAtTick(firstInactiveTick - 1, channel, led)) break;
+    if (ledActiveAtElapsed((firstInactiveTick - 1) * period, channel, led)) break;
     firstInactiveTick -= 1;
   }
-  if (firstInactiveTick === 0 && !ledActiveAtTick(0, channel, led)) return null;
+  if (firstInactiveTick === 0 && !ledActiveAtElapsed(0, channel, led)) return null;
 
-  const phaseInPeriod = ((elapsedMs % channel.periodMs) + channel.periodMs) % channel.periodMs;
-  const sinceMs = (tick - firstInactiveTick) * channel.periodMs + phaseInPeriod;
-  return { sinceMs, plateauMs: channel.periodMs };
+  const phaseInPeriod = ((elapsedMs % period) + period) % period;
+  const sinceMs = (tick - firstInactiveTick) * period + phaseInPeriod;
+  return { sinceMs, plateauMs: period };
 }
 
 /** Raw intensity 0..1: comando vs soglia, ritardi ON/OFF, soft start/stop. */
@@ -442,44 +523,111 @@ export function ledIntensitiesAt(
   return out;
 }
 
-/** RGB swatch color + intensity while driven (line HIGH or trigger period). */
+/** RGB swatch color + intensity from trigger edge / action on the drive line. */
 export function rgbVisualsAt(
   elapsedMs: number,
   channels: readonly DryRunPreviewChannel[],
 ): ReadonlyMap<string, { readonly color: string; readonly intensity: number }> {
   const out = new Map<string, { readonly color: string; readonly intensity: number }>();
   for (const channel of channels) {
-    const [phaseMs, driven] = rgbDriveArgs(elapsedMs, channel);
+    const signal = rgbLineSignalAt(elapsedMs, channel);
     for (const rgb of channel.rgbActuators ?? []) {
-      out.set(rgb.id, rgbLedVisualAt(phaseMs, parseRgbLedConfig(rgb.properties), driven));
+      out.set(rgb.id, rgbLedPlaybackAt(signal, parseRgbLedConfig(rgb.properties), elapsedMs));
     }
   }
   return out;
 }
 
-function rgbDriveArgs(
-  elapsedMs: number,
-  channel: DryRunPreviewChannel,
-): [phaseMs: number, driven: boolean] {
-  if (channel.rgbDrive === "trigger" || channel.toggleIds.length === 0) {
-    const phaseMs = ((elapsedMs % channel.periodMs) + channel.periodMs) % channel.periodMs;
-    return [phaseMs, true];
+/**
+ * Digital line sample for RGB trigger semantics.
+ * Uses Toggle hysteresis / pulse mode when present; otherwise the same 1/1
+ * waveform defaults so Schedule→RGB still has rising/falling edges each period.
+ */
+export function rgbLineSignalAt(elapsedMs: number, channel: DryRunPreviewChannel): RgbLineSignal {
+  const period = Math.max(1, channel.periodMs);
+  const lineHigh = lineHighAtElapsed(elapsedMs, channel);
+  const sampleStep = Math.max(1, Math.min(20, Math.floor(period / 40)));
+
+  let lastRisingAt: number | null = null;
+  let lastFallingAt: number | null = null;
+  const tNow = Math.max(0, elapsedMs);
+  // Walk backward to find the most recent edges (sub-period for pulse modes).
+  let prev = lineHighAtElapsed(Math.max(0, tNow - sampleStep), channel);
+  for (let t = tNow; t >= 0; t -= sampleStep) {
+    const high = lineHighAtElapsed(t, channel);
+    const earlier = t <= 0 ? false : lineHighAtElapsed(Math.max(0, t - sampleStep), channel);
+    if (lastRisingAt === null && high && !earlier) lastRisingAt = t;
+    if (lastFallingAt === null && !high && (t <= 0 || earlier)) lastFallingAt = t;
+    if (lastRisingAt !== null && lastFallingAt !== null) break;
+    prev = high;
   }
-  const tick = Math.floor(Math.max(0, elapsedMs) / channel.periodMs);
-  const lineHigh = lineHighAtTick(tick, channel.highTicks, channel.lowTicks, channel.initialHigh);
-  return [highPhaseMs(elapsedMs, channel), lineHigh];
+  void prev;
+
+  // Exact edges for pulse modes at period boundaries.
+  const mode = channel.toggleMode ?? "astable";
+  if (mode === "pulse_high" || mode === "pulse_low") {
+    const pulse = Math.min(Math.max(1, channel.pulseMs ?? 100), period);
+    const periodIndex = Math.floor(tNow / period);
+    const phase = ((tNow % period) + period) % period;
+    if (mode === "pulse_high") {
+      lastRisingAt = periodIndex * period;
+      lastFallingAt = phase >= pulse ? periodIndex * period + pulse : periodIndex > 0 ? (periodIndex - 1) * period + pulse : null;
+    } else {
+      lastFallingAt = periodIndex * period;
+      lastRisingAt = phase >= pulse ? periodIndex * period + pulse : periodIndex > 0 ? (periodIndex - 1) * period + pulse : null;
+    }
+  }
+
+  const msSinceRising = lastRisingAt === null ? Number.POSITIVE_INFINITY : tNow - lastRisingAt;
+  const msSinceFalling = lastFallingAt === null ? Number.POSITIVE_INFINITY : tNow - lastFallingAt;
+
+  return {
+    lineHigh,
+    msSinceRising,
+    msSinceFalling,
+    highPhaseMs: lineHigh ? highPhaseMs(elapsedMs, channel) : 0,
+    lowPhaseMs: !lineHigh ? lowPhaseMs(elapsedMs, channel) : 0,
+  };
+}
+
+function lowPhaseMs(elapsedMs: number, channel: DryRunPreviewChannel): number {
+  if (lineHighAtElapsed(elapsedMs, channel)) return 0;
+  const period = Math.max(1, channel.periodMs);
+  const mode = channel.toggleMode ?? "astable";
+  if (mode === "pulse_high" || mode === "pulse_low") {
+    const phase = ((elapsedMs % period) + period) % period;
+    const pulse = Math.min(Math.max(1, channel.pulseMs ?? 100), period);
+    if (mode === "pulse_high") return Math.max(0, phase - pulse);
+    return phase; // pulse_low: low during [0, pulse)
+  }
+  const tick = Math.floor(Math.max(0, elapsedMs) / period);
+  let startTick = tick;
+  while (startTick > 0) {
+    if (lineHighAtElapsed((startTick - 1) * period, channel)) break;
+    startTick -= 1;
+  }
+  const phaseInPeriod = ((elapsedMs % period) + period) % period;
+  return (tick - startTick) * period + phaseInPeriod;
 }
 
 function highPhaseMs(elapsedMs: number, channel: DryRunPreviewChannel): number {
-  const tick = Math.floor(Math.max(0, elapsedMs) / channel.periodMs);
-  if (!lineHighAtTick(tick, channel.highTicks, channel.lowTicks, channel.initialHigh)) return 0;
+  if (!lineHighAtElapsed(elapsedMs, channel)) return 0;
+  const period = Math.max(1, channel.periodMs);
+  const mode = channel.toggleMode ?? "astable";
+  if (mode === "pulse_high" || mode === "pulse_low") {
+    const phase = ((elapsedMs % period) + period) % period;
+    const pulse = Math.min(Math.max(1, channel.pulseMs ?? 100), period);
+    if (mode === "pulse_high") return phase;
+    return Math.max(0, phase - pulse);
+  }
+  const tick = Math.floor(Math.max(0, elapsedMs) / period);
   let startTick = tick;
   while (startTick > 0) {
-    if (!lineHighAtTick(startTick - 1, channel.highTicks, channel.lowTicks, channel.initialHigh)) break;
+    if (!lineHighAtElapsed((startTick - 1) * period, channel)) break;
     startTick -= 1;
   }
-  const phaseInPeriod = ((elapsedMs % channel.periodMs) + channel.periodMs) % channel.periodMs;
-  return (tick - startTick) * channel.periodMs + phaseInPeriod;
+  const phaseInPeriod = ((elapsedMs % period) + period) % period;
+  return (tick - startTick) * period + phaseInPeriod;
 }
 
 /**
@@ -488,8 +636,7 @@ function highPhaseMs(elapsedMs: number, channel: DryRunPreviewChannel): number {
 export function activeActuatorsAt(elapsedMs: number, channels: readonly DryRunPreviewChannel[]): ReadonlySet<string> {
   const on = new Set<string>();
   for (const channel of channels) {
-    const tick = Math.floor(Math.max(0, elapsedMs) / channel.periodMs);
-    const lineHigh = lineHighAtTick(tick, channel.highTicks, channel.lowTicks, channel.initialHigh);
+    const lineHigh = lineHighAtElapsed(elapsedMs, channel);
     if (lineHigh) {
       for (const id of channel.toggleIds) on.add(id);
     }
@@ -497,9 +644,7 @@ export function activeActuatorsAt(elapsedMs: number, channels: readonly DryRunPr
       if (ledIntensityAt(elapsedMs, channel, led) > 0.08) on.add(led.id);
     }
     for (const rgb of channel.rgbActuators ?? []) {
-      const [phaseMs, driven] = rgbDriveArgs(elapsedMs, channel);
-      if (!driven) continue;
-      const visual = rgbLedVisualAt(phaseMs, parseRgbLedConfig(rgb.properties), true);
+      const visual = rgbLedPlaybackAt(rgbLineSignalAt(elapsedMs, channel), parseRgbLedConfig(rgb.properties), elapsedMs);
       if (visual.intensity > 0.08) on.add(rgb.id);
     }
   }

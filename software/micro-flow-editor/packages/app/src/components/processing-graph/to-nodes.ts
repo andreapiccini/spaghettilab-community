@@ -5,16 +5,18 @@ import type { Node } from "@xyflow/react";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
-import { hysteresisTicksFromProperties, initialHighFromProperties, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
+import { hysteresisTicksFromProperties, initialHighFromProperties, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, pulseMsFromProperties, toggleModeFromProperties } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle } from "./rgb-led-model.js";
 import { FLOW_START_SIZE } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { portsForNode, nodeHeightForPorts, nodeWidthForPorts } from "./node-ports.js";
 
 export type ToggleWaveUi = {
+  readonly mode: "astable" | "pulse_high" | "pulse_low";
   readonly highTicks: number;
   readonly lowTicks: number;
   readonly initialHigh: boolean;
+  readonly pulseMs: number;
 };
 
 export type ProcessingNodeUiData = {
@@ -33,6 +35,18 @@ export type ProcessingNodeUiData = {
   readonly ledColor?: string;
   /** Dry-run: continuous LED brightness 0..1 (soglia + soft start/stop). */
   readonly ledIntensity?: number;
+  /**
+   * RGB LED: authoring config for the canvas swatch. Dynamic presets
+   * (color_cycle / breathe / blink) animate locally; dry-run overrides via
+   * ledColor + ledIntensity while previewing.
+   */
+  readonly rgbSwatch?: {
+    readonly mode: "preset" | "sequence";
+    readonly preset: "solid" | "breathe" | "blink" | "color_cycle";
+    readonly color: string;
+    readonly intensity: number;
+    readonly speedMs: number;
+  };
   /** Catalog override: tile accent (e.g. Digital Out Toggle orange). */
   readonly accentColor?: string;
   /** Catalog override glyph: toggle | palette | power (see block-visuals). */
@@ -111,11 +125,22 @@ export function toProcessingNodes(
         cardWidth,
         previewActive: previewActiveIds.has(node.id),
         ...(isBlockNodeData(data) && (isLedBlock(data) || isRgbLedBlock(data))
-          ? {
-              ledColor: isRgbLedBlock(data)
-                ? parseRgbLedConfig(data.properties).color
-                : ledColorFromProperties(data.properties, "#F5C518"),
-            }
+          ? (() => {
+              if (isRgbLedBlock(data)) {
+                const cfg = parseRgbLedConfig(data.properties);
+                return {
+                  ledColor: cfg.color,
+                  rgbSwatch: {
+                    mode: cfg.mode,
+                    preset: cfg.preset,
+                    color: cfg.color,
+                    intensity: cfg.intensity,
+                    speedMs: cfg.speedMs,
+                  },
+                };
+              }
+              return { ledColor: ledColorFromProperties(data.properties, "#F5C518") };
+            })()
           : {}),
         ...accent,
         ...toggleWaveFields(data),
@@ -138,9 +163,11 @@ function toggleWaveFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUi
   const hyst = hysteresisTicksFromProperties(data.properties);
   return {
     toggleWave: {
+      mode: toggleModeFromProperties(data.properties),
       highTicks: hyst.highTicks,
       lowTicks: hyst.lowTicks,
       initialHigh: initialHighFromProperties(data.properties),
+      pulseMs: pulseMsFromProperties(data.properties),
     },
   };
 }

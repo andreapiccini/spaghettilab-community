@@ -505,9 +505,11 @@ function fieldVisible(field: CatalogField, properties: Readonly<Record<string, u
             ? "preset"
             : raw === undefined && field.when.field === "preset"
               ? "solid"
-              : raw === undefined
-                ? undefined
-                : String(raw);
+              : raw === undefined && field.when.field === "toggleMode"
+                ? "astable"
+                : raw === undefined
+                  ? undefined
+                  : String(raw);
   if (current === undefined) return false;
   if (field.when.in) return field.when.in.includes(current);
   if (field.when.equals !== undefined) return current === field.when.equals;

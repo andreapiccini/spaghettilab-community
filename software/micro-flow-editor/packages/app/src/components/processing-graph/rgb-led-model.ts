@@ -1,6 +1,7 @@
 /**
  * RGB LED bay block — sequence player. The strip (N LEDs from bay, stubbed)
- * is driven as one. Input is a trigger; presets are ready-made sequences;
+ * is driven as one. Input is a digital trigger with rising/falling edge and
+ * follow vs fire-and-forget action; presets are ready-made sequences;
  * custom mode stores ordered actions.
  */
 
@@ -9,6 +10,15 @@ export type RgbLedMode = "preset" | "sequence";
 export type RgbLedPreset = "solid" | "breathe" | "blink" | "color_cycle";
 
 export type RgbLedActionKind = "solid" | "fade" | "wait";
+
+/** Which edge starts (or gates) the sequence. */
+export type RgbTriggerEdge = "rising" | "falling";
+
+/**
+ * - `follow` — active after the chosen edge; opposite edge stops and turns LED off
+ * - `start` — chosen edge starts playback; opposite edge does not stop it
+ */
+export type RgbTriggerAction = "follow" | "start";
 
 export type RgbLedAction = {
   readonly kind: RgbLedActionKind;
@@ -27,9 +37,24 @@ export type RgbLedConfig = {
   readonly intensity: number;
   readonly speedMs: number;
   readonly loop: boolean;
+  readonly triggerEdge: RgbTriggerEdge;
+  readonly triggerAction: RgbTriggerAction;
   /** Stub until bay/NFC reports the strip length. */
   readonly ledCount: number;
   readonly actions: readonly RgbLedAction[];
+};
+
+/** Digital line sample used to resolve trigger edge / action. */
+export type RgbLineSignal = {
+  readonly lineHigh: boolean;
+  /** Continuous ms since last rising edge; `Infinity` if none yet. */
+  readonly msSinceRising: number;
+  /** Continuous ms since last falling edge; `Infinity` if none yet. */
+  readonly msSinceFalling: number;
+  /** Ms in the current HIGH plateau (0 while LOW). */
+  readonly highPhaseMs: number;
+  /** Ms in the current LOW plateau (0 while HIGH). */
+  readonly lowPhaseMs: number;
 };
 
 export const RGB_LED_PRESET_OPTIONS = [
@@ -52,6 +77,8 @@ export function parseRgbLedConfig(properties: Readonly<Record<string, unknown>>)
     presetRaw === "breathe" || presetRaw === "blink" || presetRaw === "color_cycle" || presetRaw === "solid"
       ? presetRaw
       : "solid";
+  const triggerEdge: RgbTriggerEdge = properties.triggerEdge === "falling" ? "falling" : "rising";
+  const triggerAction: RgbTriggerAction = properties.triggerAction === "start" ? "start" : "follow";
   return {
     mode,
     preset,
@@ -59,6 +86,8 @@ export function parseRgbLedConfig(properties: Readonly<Record<string, unknown>>)
     intensity: clampInt(properties.intensity, 0, 100, 100),
     speedMs: clampInt(properties.speedMs, 50, 60_000, 1200),
     loop: properties.loop !== false && properties.loop !== "false",
+    triggerEdge,
+    triggerAction,
     ledCount: clampInt(properties.ledCount, 1, 512, 1),
     actions: parseActions(properties.sequenceJson) ?? DEFAULT_ACTIONS,
   };
@@ -102,8 +131,39 @@ export type RgbLedVisual = {
 };
 
 /**
- * Visual state while dry-run / live preview. `phaseMs` is time since the last
- * trigger rising edge (or continuous elapsed when the drive line is HIGH).
+ * Resolve playback from a digital line + trigger edge/action.
+ * `elapsedMs` advances color_cycle / breathe / blink while driven so the
+ * canvas swatch isn't stuck on hue 0 (red) when the HIGH plateau is short
+ * or highPhaseMs resets each edge.
+ */
+export function rgbLedPlaybackAt(
+  signal: RgbLineSignal,
+  config: RgbLedConfig,
+  elapsedMs = 0,
+): RgbLedVisual {
+  if (config.triggerAction === "follow") {
+    const driven = config.triggerEdge === "rising" ? signal.lineHigh : !signal.lineHigh;
+    const phaseMs = config.triggerEdge === "rising" ? signal.highPhaseMs : signal.lowPhaseMs;
+    return rgbLedVisualAt(effectPhaseMs(config, phaseMs, elapsedMs, driven), config, driven);
+  }
+  // start: chosen edge begins playback; opposite edge ignored
+  const since = config.triggerEdge === "rising" ? signal.msSinceRising : signal.msSinceFalling;
+  if (!Number.isFinite(since) || since < 0) return rgbLedVisualAt(0, config, false);
+  return rgbLedVisualAt(effectPhaseMs(config, since, elapsedMs, true), config, true);
+}
+
+/** Dynamic presets keep a continuous clock while ON so color_cycle visibly cycles. */
+function effectPhaseMs(config: RgbLedConfig, edgePhaseMs: number, elapsedMs: number, driven: boolean): number {
+  if (!driven) return edgePhaseMs;
+  if (config.mode === "preset" && (config.preset === "color_cycle" || config.preset === "breathe" || config.preset === "blink")) {
+    return Math.max(0, elapsedMs);
+  }
+  return edgePhaseMs;
+}
+
+/**
+ * Visual state while driven. `phaseMs` is time since the activating edge
+ * (or since the start of the active plateau in follow mode).
  */
 export function rgbLedVisualAt(phaseMs: number, config: RgbLedConfig, driven: boolean): RgbLedVisual {
   if (!driven) return { color: config.color, intensity: 0 };
@@ -223,7 +283,10 @@ function parseHex(hex: string): { r: number; g: number; b: number } | undefined 
 
 export function rgbLedSubtitle(config: RgbLedConfig): string {
   const n = `×${config.ledCount}`;
-  if (config.mode === "sequence") return `Bay · uscita · sequenza (${config.actions.length}) ${n}`;
+  const edge = config.triggerEdge === "falling" ? "falling" : "rising";
+  const action = config.triggerAction === "start" ? "avvia" : "segue";
+  const trigger = `${edge} · ${action}`;
+  if (config.mode === "sequence") return `Bay · uscita · sequenza (${config.actions.length}) · ${trigger} ${n}`;
   const label = RGB_LED_PRESET_OPTIONS.find((o) => o.value === config.preset)?.label ?? config.preset;
-  return `Bay · uscita · ${label} ${n}`;
+  return `Bay · uscita · ${label} · ${trigger} ${n}`;
 }

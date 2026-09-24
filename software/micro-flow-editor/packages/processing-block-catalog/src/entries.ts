@@ -643,25 +643,53 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     outputs: [outPort("0", [T.digitalComando], "Comando digitale")],
     fields: [
       txt("line", "Linea", "LED"),
-      sel("initial", "Stato iniziale", [
-        { value: "high", label: "ON (dopo rising edge)" },
-        { value: "low", label: "OFF (dopo falling edge)" },
-      ], "high"),
-      num(
-        "lowToHigh",
-        "Contatore impulsi ON → rising edge",
-        1,
-        "Quanti trigger Schedule (impulsi) restare OFF prima del rising edge / ON",
+      sel(
+        "toggleMode",
+        "Tipo di toggle",
+        [
+          { value: "astable", label: "Astable (toggle a ogni impulso)" },
+          { value: "pulse_high", label: "Impulso HIGH (riposo LOW)" },
+          { value: "pulse_low", label: "Impulso LOW (riposo HIGH)" },
+        ],
+        "astable",
       ),
-      num(
-        "highToLow",
-        "Contatore impulsi OFF → falling edge",
-        1,
-        "Quanti trigger Schedule (impulsi) restare ON prima del falling edge / OFF",
-      ),
+      {
+        ...sel("initial", "Stato iniziale", [
+          { value: "high", label: "ON (dopo rising edge)" },
+          { value: "low", label: "OFF (dopo falling edge)" },
+        ], "high"),
+        when: { field: "toggleMode", equals: "astable" },
+      },
+      {
+        ...num(
+          "lowToHigh",
+          "Contatore impulsi ON → rising edge",
+          1,
+          "Quanti trigger Schedule (impulsi) restare OFF prima del rising edge / ON",
+        ),
+        when: { field: "toggleMode", equals: "astable" },
+      },
+      {
+        ...num(
+          "highToLow",
+          "Contatore impulsi OFF → falling edge",
+          1,
+          "Quanti trigger Schedule (impulsi) restare ON prima del falling edge / OFF",
+        ),
+        when: { field: "toggleMode", equals: "astable" },
+      },
+      {
+        ...num(
+          "pulseMs",
+          "Durata impulso (ms)",
+          100,
+          "Larghezza dell’impulso dopo ogni trigger Schedule",
+        ),
+        when: { field: "toggleMode", in: ["pulse_high", "pulse_low"] },
+      },
     ],
     notes:
-      "Input: attivazione dallo Start (o jolly da Schedule). Output: comando digitale (0/1) per LED e attuatori. I contatori di impulsi regolano ON/OFF.",
+      "Input: attivazione dallo Start (o jolly da Schedule). Output: comando digitale (0/1). Astabile = cambia stato a ogni impulso; impulso HIGH/LOW = monostabile (riposo + impulso sulla durata impostata).",
   }),
   e({
     id: "appblocks.led",
@@ -735,6 +763,30 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
         ],
         "preset",
       ),
+      sel(
+        "triggerEdge",
+        "Trigger",
+        [
+          { value: "rising", label: "Rising edge" },
+          { value: "falling", label: "Falling edge" },
+        ],
+        "rising",
+      ),
+      sel(
+        "triggerAction",
+        "Azione sul trigger",
+        [
+          {
+            value: "follow",
+            label: "Segue il trigger (stop sul bordo opposto)",
+          },
+          {
+            value: "start",
+            label: "Avvia e non ferma sul bordo opposto",
+          },
+        ],
+        "follow",
+      ),
       {
         ...sel(
           "preset",
@@ -769,7 +821,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     ],
     notes:
       AUTHORING +
-      " Player di sequenze: il trigger in ingresso avvia l’effetto. La strip (N LED dal bay) si comporta come un unico LED. Effetti pronti = sequenze parametriche; in «Sequenza mia» componi azioni solid/fade/wait.",
+      " Player di sequenze: rising/falling sceglie il bordo che avvia. «Segue il trigger» spegne sul bordo opposto; «Avvia e non ferma» lascia correre la sequenza. Effetti pronti = sequenze parametriche; in «Sequenza mia» componi solid/fade/wait. Strip (N LED) = un unico player.",
   }),
   e({
     id: "appblocks.relay",

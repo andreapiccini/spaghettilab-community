@@ -1,7 +1,8 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Cable, Cpu, Palette, Power, ToggleLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import { FLOW_START_COLOR } from "./block-visuals.js";
-import { lineHighAtTick, waveformPlateaus } from "./dry-run-preview.js";
+import { lineHighAtElapsed, lineHighAtTick, waveformPlateaus, type ToggleMode } from "./dry-run-preview.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
 import { FLOW_START_SIZE, NODE_WIDTH } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -11,6 +12,7 @@ import {
   stackedHandleTop,
   TARGET_HANDLE_STYLE,
 } from "./node-ports.js";
+import { parseRgbLedConfig, rgbLedVisualAt } from "./rgb-led-model.js";
 import type { ProcessingNodeUiData } from "./to-nodes.js";
 
 /** Slate chrome for hardware bay endpoints — distinct from solid functionality cards. */
@@ -45,15 +47,53 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
   const isToggle = data.toggleWave !== undefined;
   const isTick = data.circular === true;
   const isBay = data.bay === true;
-  const ledColor = data.ledColor ?? "#F5C518";
+  const rgbSwatch = data.rgbSwatch;
+  const dynamicRgb =
+    rgbSwatch !== undefined &&
+    rgbSwatch.mode === "preset" &&
+    (rgbSwatch.preset === "color_cycle" || rgbSwatch.preset === "breathe" || rgbSwatch.preset === "blink");
+  // Dry-run drives the swatch while the LED is lit; otherwise animate dynamic presets locally
+  // so color_cycle isn't stuck on the static authoring color (#FF3366).
+  const dryRunLit = data.previewing === true && (data.ledIntensity ?? 0) > 0.08;
+  const [idleVisual, setIdleVisual] = useState<{ color: string; intensity: number } | null>(null);
+  useEffect(() => {
+    if (!dynamicRgb || !rgbSwatch || dryRunLit) {
+      setIdleVisual(null);
+      return;
+    }
+    const cfg = parseRgbLedConfig({
+      mode: "preset",
+      preset: rgbSwatch.preset,
+      color: rgbSwatch.color,
+      intensity: rgbSwatch.intensity,
+      speedMs: rgbSwatch.speedMs,
+    });
+    const started = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      setIdleVisual(rgbLedVisualAt(now - started, cfg, true));
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [dynamicRgb, dryRunLit, rgbSwatch?.preset, rgbSwatch?.color, rgbSwatch?.intensity, rgbSwatch?.speedMs]);
+
+  const ledColor = idleVisual?.color ?? data.ledColor ?? "#F5C518";
   const accent = data.accentColor ?? config.colorVar;
-  const intensity = isLed && data.previewing ? (data.ledIntensity ?? (previewOn ? 1 : 0)) : undefined;
+  const intensity =
+    idleVisual !== null
+      ? idleVisual.intensity
+      : isLed && data.previewing
+        ? (data.ledIntensity ?? (previewOn ? 1 : 0))
+        : undefined;
   const ledLit = intensity !== undefined && intensity > 0.08;
+  // Swatch must track the live color (RGB sequence / color cycle). Use the same
+  // hex for fill + glow — dim by mixing toward black, never a separate accent.
   const tileColor = data.hasError
     ? "var(--color-error)"
     : isLed
       ? intensity !== undefined
-        ? `color-mix(in srgb, ${ledColor} ${Math.round(22 + intensity * 78)}%, #2A2E38)`
+        ? mixLedTowardBlack(ledColor, intensity)
         : ledColor
       : accent;
   const cardHeight = data.cardHeight;
@@ -151,7 +191,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           // LED glow must not be clipped by the card / bay chrome.
           overflow: isLed ? "visible" : undefined,
           boxShadow: ledLit
-            ? `0 0 0 4px color-mix(in srgb, ${ledColor} ${Math.round(12 + (intensity ?? 1) * 20)}%, transparent), var(--shadow-e1)`
+            ? `0 0 0 4px ${ledGlowRgba(ledColor, 0.12 + (intensity ?? 1) * 0.2)}, var(--shadow-e1)`
             : undefined,
         }}
       >
@@ -181,11 +221,12 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         {/* No overflow-hidden on LED: tile box-shadow (glow) would get clipped on the left. */}
         <div className={`flex min-w-0 flex-1 items-center gap-2 ${multiChannel ? "w-full pr-1" : isLed ? "" : "overflow-hidden"}`}>
           <div
-            className={`h-7 w-7 shrink-0 transition-[background-color,box-shadow] duration-75 ${isBay ? "rounded-[3px]" : "rounded-slsm"}`}
+            key={`led-${ledColor}-${Math.round((intensity ?? 1) * 100)}`}
+            className={`h-7 w-7 shrink-0 ${isBay ? "rounded-[3px]" : "rounded-slsm"}`}
             style={{
               backgroundColor: tileColor,
               boxShadow: ledLit
-                ? `0 0 ${Math.round(4 + (intensity ?? 1) * 10)}px ${Math.round(1 + (intensity ?? 1) * 2)}px color-mix(in srgb, ${ledColor} ${Math.round(40 + (intensity ?? 1) * 40)}%, transparent)`
+                ? `0 0 ${Math.round(4 + (intensity ?? 1) * 10)}px ${Math.round(1 + (intensity ?? 1) * 2)}px ${ledGlowRgba(ledColor, 0.35 + (intensity ?? 1) * 0.45)}`
                 : undefined,
             }}
             aria-hidden
@@ -279,9 +320,11 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             ))}
             {isToggle && data.toggleWave && ports.hasOutput && (
               <ToggleOutputWaveform
+                mode={data.toggleWave.mode}
                 highTicks={data.toggleWave.highTicks}
                 lowTicks={data.toggleWave.lowTicks}
                 initialHigh={data.toggleWave.initialHigh}
+                pulseMs={data.toggleWave.pulseMs}
                 live={data.waveLive}
                 lineHigh={previewOn}
                 color={accent}
@@ -295,16 +338,20 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
 }
 
 function ToggleOutputWaveform({
+  mode,
   highTicks,
   lowTicks,
   initialHigh,
+  pulseMs,
   live,
   lineHigh,
   color,
 }: {
+  readonly mode: ToggleMode;
   readonly highTicks: number;
   readonly lowTicks: number;
   readonly initialHigh: boolean;
+  readonly pulseMs: number;
   readonly live: ProcessingNodeUiData["waveLive"];
   readonly lineHigh: boolean;
   readonly color: string;
@@ -314,8 +361,8 @@ function ToggleOutputWaveform({
   const highY = 3;
   const lowY = 13;
   const path = live
-    ? scrollingWavePath(live.elapsedMs, live.periodMs, highTicks, lowTicks, initialHigh, w, highY, lowY)
-    : staticWavePath(highTicks, lowTicks, initialHigh, w, highY, lowY);
+    ? scrollingWavePath(live.elapsedMs, live.periodMs, mode, highTicks, lowTicks, initialHigh, pulseMs, w, highY, lowY)
+    : staticWavePath(mode, highTicks, lowTicks, initialHigh, pulseMs, w, highY, lowY);
   const stroke = live ? (lineHigh ? color : "color-mix(in srgb, var(--color-ink-faint) 65%, transparent)") : color;
   const opacity = live ? 1 : 0.72;
 
@@ -340,13 +387,23 @@ function ToggleOutputWaveform({
 }
 
 function staticWavePath(
+  mode: ToggleMode,
   highTicks: number,
   lowTicks: number,
   initialHigh: boolean,
+  pulseMs: number,
   w: number,
   highY: number,
   lowY: number,
 ): string {
+  if (mode === "pulse_high" || mode === "pulse_low") {
+    const pulseFrac = Math.min(0.45, Math.max(0.12, pulseMs / 1000));
+    const xPulse = Math.max(4, w * pulseFrac);
+    if (mode === "pulse_high") {
+      return `M 1 ${lowY} L 1 ${highY} L ${xPulse.toFixed(1)} ${highY} L ${xPulse.toFixed(1)} ${lowY} L ${(w - 1).toFixed(1)} ${lowY}`;
+    }
+    return `M 1 ${highY} L 1 ${lowY} L ${xPulse.toFixed(1)} ${lowY} L ${xPulse.toFixed(1)} ${highY} L ${(w - 1).toFixed(1)} ${highY}`;
+  }
   const plateaus = waveformPlateaus(highTicks, lowTicks, initialHigh);
   const total = Math.max(1, highTicks + lowTicks);
   const padX = 1;
@@ -372,29 +429,46 @@ function staticWavePath(
 function scrollingWavePath(
   elapsedMs: number,
   periodMs: number,
+  mode: ToggleMode,
   highTicks: number,
   lowTicks: number,
   initialHigh: boolean,
+  pulseMs: number,
   w: number,
   highY: number,
   lowY: number,
 ): string {
   const safePeriod = Math.max(1, periodMs);
-  const cycleMs = safePeriod * Math.max(1, highTicks + lowTicks);
+  const cycleMs = mode === "astable" ? safePeriod * Math.max(1, highTicks + lowTicks) : safePeriod;
   const windowMs = Math.max(cycleMs * 2, safePeriod * 2);
   const samples = 48;
   const padX = 1;
   const usable = w - padX * 2;
   let d = "";
   let prevY: number | null = null;
+  const channel = {
+    triggerId: "",
+    periodMs: safePeriod,
+    highTicks,
+    lowTicks,
+    initialHigh,
+    toggleMode: mode,
+    pulseMs,
+    actuators: [] as const,
+    rgbActuators: [] as const,
+    toggleIds: [] as const,
+    startIds: [] as const,
+  };
   for (let i = 0; i <= samples; i++) {
     const t = elapsedMs - windowMs + (i / samples) * windowMs;
     const x = padX + (i / samples) * usable;
     let high: boolean;
     if (t < 0) {
-      high = initialHigh;
-    } else {
+      high = mode === "pulse_low" ? true : mode === "pulse_high" ? false : initialHigh;
+    } else if (mode === "astable") {
       high = lineHighAtTick(Math.floor(t / safePeriod), highTicks, lowTicks, initialHigh);
+    } else {
+      high = lineHighAtElapsed(t, channel);
     }
     const y = high ? highY : lowY;
     if (prevY === null) {
@@ -407,6 +481,30 @@ function scrollingWavePath(
     prevY = y;
   }
   return d;
+}
+
+/** Dim an LED hex toward black by intensity (0–1), keeping the same hue. */
+function mixLedTowardBlack(hex: string, intensity: number): string {
+  const rgb = parseCssHex(hex);
+  if (!rgb) return hex;
+  const t = Math.min(1, Math.max(0, intensity));
+  // Keep a visible floor so the swatch never collapses to pure black while "on".
+  const gain = 0.18 + t * 0.82;
+  const to = (v: number) => Math.round(v * gain).toString(16).padStart(2, "0");
+  return `#${to(rgb.r)}${to(rgb.g)}${to(rgb.b)}`;
+}
+
+function ledGlowRgba(hex: string, alpha: number): string {
+  const rgb = parseCssHex(hex);
+  if (!rgb) return `rgba(245, 197, 24, ${alpha})`;
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${Math.min(1, Math.max(0, alpha))})`;
+}
+
+function parseCssHex(hex: string): { r: number; g: number; b: number } | undefined {
+  const m = /^#([0-9a-fA-F]{6})$/.exec(hex.trim());
+  if (!m) return undefined;
+  const n = Number.parseInt(m[1]!, 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
 
 export const PROCESSING_NODE_TYPES = { processing: ProcessingNode };
