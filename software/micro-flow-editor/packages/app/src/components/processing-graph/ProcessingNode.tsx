@@ -43,52 +43,58 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
   const ports = { hasInput: inputHandles.length > 0, hasOutput: outputHandles.length > 0 };
   const multiChannel = outputHandles.length > 1 || inputHandles.length > 1;
   const previewOn = data.previewActive === true;
-  const isLed = data.ledColor !== undefined;
+  const isLed = data.ledColor !== undefined || data.rgbSwatch !== undefined;
   const isToggle = data.toggleWave !== undefined;
   const isTick = data.circular === true;
   const isBay = data.bay === true;
   const rgbSwatch = data.rgbSwatch;
-  const dynamicRgb =
-    rgbSwatch !== undefined &&
-    rgbSwatch.mode === "preset" &&
-    (rgbSwatch.preset === "color_cycle" || rgbSwatch.preset === "breathe" || rgbSwatch.preset === "blink");
-  // Dry-run drives the swatch while the LED is lit; otherwise animate dynamic presets locally
-  // so color_cycle isn't stuck on the static authoring color (#FF3366).
+  const rgbPreset = rgbSwatch?.mode === "preset" ? rgbSwatch.preset : undefined;
+  const shouldAnimateRgb =
+    rgbPreset === "color_cycle" || rgbPreset === "breathe" || rgbPreset === "blink";
+  // Dry-run drives the swatch while the LED is lit; otherwise animate dynamic presets
+  // from the latest props every frame (avoid stale color after solid → color_cycle).
   const dryRunLit = data.previewing === true && (data.ledIntensity ?? 0) > 0.08;
-  const [idleVisual, setIdleVisual] = useState<{ color: string; intensity: number } | null>(null);
+  const [animFrame, setAnimFrame] = useState(0);
   useEffect(() => {
-    if (!dynamicRgb || !rgbSwatch || dryRunLit) {
-      setIdleVisual(null);
-      return;
-    }
-    const cfg = parseRgbLedConfig({
-      mode: "preset",
-      preset: rgbSwatch.preset,
-      color: rgbSwatch.color,
-      intensity: rgbSwatch.intensity,
-      speedMs: rgbSwatch.speedMs,
-    });
-    const started = performance.now();
+    if (!shouldAnimateRgb || dryRunLit) return;
     let raf = 0;
-    const tick = (now: number) => {
-      setIdleVisual(rgbLedVisualAt(now - started, cfg, true));
-      raf = requestAnimationFrame(tick);
+    const loop = () => {
+      setAnimFrame((n) => n + 1);
+      raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(tick);
+    raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [dynamicRgb, dryRunLit, rgbSwatch?.preset, rgbSwatch?.color, rgbSwatch?.intensity, rgbSwatch?.speedMs]);
+  }, [shouldAnimateRgb, dryRunLit, rgbPreset, rgbSwatch?.speedMs, rgbSwatch?.intensity, rgbSwatch?.color]);
 
-  const ledColor = idleVisual?.color ?? data.ledColor ?? "#F5C518";
+  const idleVisual =
+    shouldAnimateRgb && !dryRunLit && rgbSwatch
+      ? rgbLedVisualAt(
+          // animFrame keeps this expression tied to the rAF loop
+          performance.now() + animFrame * 0,
+          parseRgbLedConfig({
+            mode: "preset",
+            preset: rgbSwatch.preset,
+            color: rgbSwatch.color,
+            intensity: rgbSwatch.intensity,
+            speedMs: rgbSwatch.speedMs,
+          }),
+          true,
+        )
+      : null;
+
+  // Dynamic presets must never fall back to properties.color (leftover from Solid).
+  const ledColor = dryRunLit
+    ? (data.ledColor ?? rgbSwatch?.color ?? "#FF3366")
+    : (idleVisual?.color ?? data.ledColor ?? "#F5C518");
   const accent = data.accentColor ?? config.colorVar;
-  const intensity =
-    idleVisual !== null
+  const intensity = dryRunLit
+    ? (data.ledIntensity ?? (previewOn ? 1 : 0))
+    : idleVisual !== null
       ? idleVisual.intensity
       : isLed && data.previewing
         ? (data.ledIntensity ?? (previewOn ? 1 : 0))
         : undefined;
   const ledLit = intensity !== undefined && intensity > 0.08;
-  // Swatch must track the live color (RGB sequence / color cycle). Use the same
-  // hex for fill + glow — dim by mixing toward black, never a separate accent.
   const tileColor = data.hasError
     ? "var(--color-error)"
     : isLed

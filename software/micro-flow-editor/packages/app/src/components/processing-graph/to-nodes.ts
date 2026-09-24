@@ -6,7 +6,7 @@ import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
 import { hysteresisTicksFromProperties, initialHighFromProperties, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, pulseMsFromProperties, toggleModeFromProperties } from "./dry-run-preview.js";
-import { parseRgbLedConfig, rgbLedSubtitle } from "./rgb-led-model.js";
+import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
 import { FLOW_START_SIZE } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { portsForNode, nodeHeightForPorts, nodeWidthForPorts } from "./node-ports.js";
@@ -128,8 +128,13 @@ export function toProcessingNodes(
           ? (() => {
               if (isRgbLedBlock(data)) {
                 const cfg = parseRgbLedConfig(data.properties);
+                const dynamic =
+                  cfg.mode === "preset" &&
+                  (cfg.preset === "color_cycle" || cfg.preset === "breathe" || cfg.preset === "blink");
+                // Avoid baking Solid's properties.color into ledColor for dynamic presets —
+                // leftover solid color made solid→color_cycle look stuck.
                 return {
-                  ledColor: cfg.color,
+                  ledColor: dynamic ? rgbLedVisualAt(0, cfg, true).color : cfg.color,
                   rgbSwatch: {
                     mode: cfg.mode,
                     preset: cfg.preset,

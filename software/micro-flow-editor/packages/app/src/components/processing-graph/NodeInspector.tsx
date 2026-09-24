@@ -20,6 +20,7 @@ import { commentAfterCatalogChange } from "./catalog-to-node.js";
 import { isLedBlock, isRgbLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { withThresholdFirmwareFields } from "./threshold-rule-fields.js";
+import { parseRgbLedConfig, rgbLedVisualAt } from "./rgb-led-model.js";
 import { RgbLedSequenceEditor } from "./RgbLedSequenceEditor.js";
 
 function TypeIdSelect({
@@ -197,9 +198,18 @@ export function NodeInspector({
   const headerTitle =
     (comment.trim() !== "" ? comment.trim() : undefined) ?? catalogEntry?.label ?? config.label;
   const headerColor =
-    data.kind === "block" && isBlockNodeData(data) && (isLedBlock(data) || isRgbLedBlock(data))
-      ? ledColorFromProperties(data.properties, catalogVisual?.colorVar ?? "#F5C518")
-      : (catalogVisual?.colorVar ?? config.colorVar);
+    data.kind === "block" && isBlockNodeData(data) && isRgbLedBlock(data)
+      ? (() => {
+          const cfg = parseRgbLedConfig(data.properties);
+          // Don't show leftover Solid color while Color cycle / breathe / blink is selected.
+          if (cfg.mode === "preset" && (cfg.preset === "color_cycle" || cfg.preset === "breathe" || cfg.preset === "blink")) {
+            return rgbLedVisualAt(performance.now(), cfg, true).color;
+          }
+          return cfg.color;
+        })()
+      : data.kind === "block" && isBlockNodeData(data) && isLedBlock(data)
+        ? ledColorFromProperties(data.properties, catalogVisual?.colorVar ?? "#F5C518")
+        : (catalogVisual?.colorVar ?? config.colorVar);
   const HeaderIcon = catalogVisual?.icon ?? config.icon;
   const headerSolid = catalogVisual?.solidSwatch === true || (data.kind === "block" && isBlockNodeData(data) && isRgbLedBlock(data));
 
