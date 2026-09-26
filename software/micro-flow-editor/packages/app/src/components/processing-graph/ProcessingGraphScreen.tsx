@@ -1141,6 +1141,7 @@ function ProcessingGraphScreenInner() {
               onNodeClick={onNodeClick}
               onInit={setRf}
               deleteKeyCode={demoOnly ? null : ["Backspace", "Delete"]}
+              proOptions={demoOnly ? { hideAttribution: true } : undefined}
               defaultEdgeOptions={{ type: "deletable", interactionWidth: 24, style: { stroke: "var(--color-ink-faint)", strokeWidth: 1.75 } }}
               fitView
             >
