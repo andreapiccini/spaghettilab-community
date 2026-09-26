@@ -1,6 +1,7 @@
 import type { AuthoringMetadata, GraphState } from "@spaghettilab/domain";
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import { formatFieldsSubtitle, isBayEntry } from "@spaghettilab/processing-block-catalog";
+import { compactSchedulePeriod } from "../../lib/processing-graph-copy.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { EVENT_CONTAINER_HEADER_HEIGHT, NODE_HEIGHT, NODE_PADDING, NODE_WIDTH } from "./layout-constants.js";
 
@@ -76,16 +77,9 @@ function containerLabel(data: DeviceProcessingNodeData, meta: AuthoringMetadata 
   return parts.join(" · ") || "Event source";
 }
 
-/** Compact period for the Schedule container header (e.g. `ogni 1s`, `ogni 500ms`). */
-export function formatSchedulePeriod(periodMs: number): string {
-  if (!Number.isFinite(periodMs) || periodMs <= 0) return "ogni —";
-  if (periodMs >= 1000 && periodMs % 1000 === 0) return `ogni ${periodMs / 1000}s`;
-  if (periodMs >= 1000) {
-    const seconds = periodMs / 1000;
-    const rounded = Math.round(seconds * 10) / 10;
-    return `ogni ${rounded}s`;
-  }
-  return `ogni ${Math.round(periodMs)}ms`;
+/** Compact period for the Schedule container header (e.g. `every 1s`, `ogni 500ms`). */
+export function formatSchedulePeriod(periodMs: number, everyWord = "every"): string {
+  return `${everyWord} ${compactSchedulePeriod(periodMs)}`;
 }
 
 export type ContainerSizePreview = {

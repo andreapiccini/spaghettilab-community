@@ -2,7 +2,6 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
-import { formatSchedulePeriod } from "./event-containers.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { SOURCE_HANDLE_STYLE, TARGET_HANDLE_STYLE } from "./node-ports.js";
 
@@ -36,7 +35,7 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
   const tickPulse = data.previewActive === true;
   const highlight = rejecting ? "var(--color-error)" : accepting ? "var(--color-success)" : undefined;
   const idle = highlight === undefined && !selected;
-  const periodLabel = data.kind === "schedule" && data.periodMs !== undefined ? formatSchedulePeriod(data.periodMs) : undefined;
+  const periodLabel = data.kind === "schedule" && data.periodMs !== undefined ? copy.everyMs(data.periodMs) : undefined;
   return (
     <div
       className={`group relative flex h-full w-full cursor-pointer flex-col overflow-visible rounded-slmd border-2 border-dashed transition-colors ${idle ? "border-border-strong hover:border-brand-blue" : ""}`}

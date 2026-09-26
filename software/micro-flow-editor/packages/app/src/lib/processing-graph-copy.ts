@@ -67,12 +67,25 @@ type ProcessingGraphCopy = {
   readonly deleteBlock: string;
   readonly deleteContainer: string;
   readonly scheduleActivation: string;
+  /** Compact Schedule period chip, e.g. `every 1s` / `ogni 1s`. */
   readonly everyMs: (periodMs: number) => string;
   readonly disabledSuffix: string;
   readonly sixChannels: string;
   readonly samples: (count: string) => string;
   readonly nodesEdges: (nodes: number, edges: number) => string;
 };
+
+/** Compact duration for Schedule chips (`1s`, `1.5s`, `250ms`, or `—`). */
+export function compactSchedulePeriod(periodMs: number): string {
+  if (!Number.isFinite(periodMs) || periodMs <= 0) return "—";
+  if (periodMs >= 1000 && periodMs % 1000 === 0) return `${periodMs / 1000}s`;
+  if (periodMs >= 1000) {
+    const seconds = periodMs / 1000;
+    const rounded = Math.round(seconds * 10) / 10;
+    return `${rounded}s`;
+  }
+  return `${Math.round(periodMs)}ms`;
+}
 
 const IT: ProcessingGraphCopy = {
   title: "Processing Graph",
@@ -143,7 +156,7 @@ const IT: ProcessingGraphCopy = {
   deleteBlock: "Elimina blocco",
   deleteContainer: "Elimina contenitore",
   scheduleActivation: "Attivazione Schedule — collega al primo blocco",
-  everyMs: (periodMs) => `ogni ${periodMs}ms`,
+  everyMs: (periodMs) => `ogni ${compactSchedulePeriod(periodMs)}`,
   disabledSuffix: "disabilitato",
   sixChannels: "6 canali",
   samples: (count) => `${count} campioni`,
@@ -219,7 +232,7 @@ const EN: ProcessingGraphCopy = {
   deleteBlock: "Delete block",
   deleteContainer: "Delete container",
   scheduleActivation: "Schedule activation — connect to the first block",
-  everyMs: (periodMs) => `every ${periodMs}ms`,
+  everyMs: (periodMs) => `every ${compactSchedulePeriod(periodMs)}`,
   disabledSuffix: "disabled",
   sixChannels: "6 channels",
   samples: (count) => `${count} sample${count === "1" ? "" : "s"}`,

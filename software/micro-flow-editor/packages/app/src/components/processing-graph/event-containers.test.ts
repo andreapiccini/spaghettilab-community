@@ -225,9 +225,14 @@ describe("computeEventContainers labels", () => {
 });
 
 describe("formatSchedulePeriod", () => {
-  it("formats whole seconds and milliseconds", () => {
-    expect(formatSchedulePeriod(1000)).toBe("ogni 1s");
-    expect(formatSchedulePeriod(250)).toBe("ogni 250ms");
-    expect(formatSchedulePeriod(1500)).toBe("ogni 1.5s");
+  it("formats whole seconds and milliseconds in English by default", () => {
+    expect(formatSchedulePeriod(1000)).toBe("every 1s");
+    expect(formatSchedulePeriod(250)).toBe("every 250ms");
+    expect(formatSchedulePeriod(1500)).toBe("every 1.5s");
+  });
+
+  it("keeps the Italian adverb when requested", () => {
+    expect(formatSchedulePeriod(1000, "ogni")).toBe("ogni 1s");
+    expect(formatSchedulePeriod(250, "ogni")).toBe("ogni 250ms");
   });
 });
