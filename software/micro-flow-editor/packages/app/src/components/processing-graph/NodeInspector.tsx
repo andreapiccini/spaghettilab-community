@@ -297,7 +297,7 @@ export function NodeInspector({
             <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-module">
               Module
             </label>
-            <select id="ni-module" value={data.kind === "schedule" || data.kind === "event-source" ? data.moduleNodeId : ""} onChange={(e) => patch({ moduleNodeId: e.target.value })} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none">
+            <select id="ni-module" value={data.kind === "event-source" ? data.moduleNodeId : ""} onChange={(e) => patch({ moduleNodeId: e.target.value })} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none">
               <option value="">—</option>
               {moduleOptions.map((m) => (
                 <option key={m.id} value={m.id}>
