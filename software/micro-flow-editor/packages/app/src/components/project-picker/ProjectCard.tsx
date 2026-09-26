@@ -3,7 +3,15 @@ import { motionTokens } from "../../lib/motion-tokens.js";
 import type { ProjectSummary } from "./ProjectPicker.js";
 
 /** `ux/screens/S010-workspace-shell/visual.md` § Griglia progetti + `ui-behavior.md` § Hover e selezione di una card progetto. */
-export function ProjectCard({ project, onOpen }: { readonly project: ProjectSummary; readonly onOpen: () => void }) {
+export function ProjectCard({
+  project,
+  coresLabel,
+  onOpen,
+}: {
+  readonly project: ProjectSummary;
+  readonly coresLabel: string;
+  readonly onOpen: () => void;
+}) {
   return (
     <motion.button
       type="button"
@@ -14,7 +22,7 @@ export function ProjectCard({ project, onOpen }: { readonly project: ProjectSumm
     >
       <span className="font-body text-sm font-semibold text-ink">{project.name}</span>
       <span className="w-fit rounded-slpill bg-surface-raised px-2 py-0.5 font-body text-xs text-ink-muted">
-        {project.coreBindingCount} Core collegat{project.coreBindingCount === 1 ? "o" : "i"}
+        {coresLabel}
       </span>
     </motion.button>
   );

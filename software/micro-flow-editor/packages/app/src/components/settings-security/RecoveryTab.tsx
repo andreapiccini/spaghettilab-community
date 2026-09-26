@@ -9,15 +9,8 @@ import {
 } from "@spaghettilab/security-recovery";
 import { AlertTriangle, ChevronRight, LifeBuoy, X } from "lucide-react";
 import { useState } from "react";
-
-const SCENARIOS: { readonly label: string; readonly build: () => RecoveryPlan }[] = [
-  { label: "Core sostituito", build: () => coreReplacedRecoveryPlan("Core", "—", "—") },
-  { label: "Device ID mismatch", build: () => deviceIdMismatchRecoveryPlan("Core", "—", "—") },
-  { label: "Config corrotto/assente", build: () => configCorruptOrAbsentRecoveryPlan() },
-  { label: "Catalogo incompatibile", build: () => catalogIncompatibleRecoveryPlan() },
-  { label: "OTA rollback", build: () => otaRollbackRecoveryPlan("—", "—") },
-  { label: "Node-RED irraggiungibile", build: () => nodeRedUnreachableRecoveryPlan() },
-];
+import { settingsSecurityCopy } from "../../lib/settings-security-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 
 /**
  * `ux/screens/S120-settings-security/visual.md` § Recovery — 6 card fisse,
@@ -33,13 +26,23 @@ const SCENARIOS: { readonly label: string; readonly build: () => RecoveryPlan }[
  * chiamata wire).
  */
 export function RecoveryTab() {
+  const { locale } = useLocale();
+  const copy = settingsSecurityCopy(locale);
+  const scenarios: { readonly label: string; readonly build: () => RecoveryPlan }[] = [
+    { label: copy.recovery.coreReplaced, build: () => coreReplacedRecoveryPlan("Core", "—", "—") },
+    { label: copy.recovery.deviceIdMismatch, build: () => deviceIdMismatchRecoveryPlan("Core", "—", "—") },
+    { label: copy.recovery.configCorrupt, build: () => configCorruptOrAbsentRecoveryPlan() },
+    { label: copy.recovery.catalogIncompatible, build: () => catalogIncompatibleRecoveryPlan() },
+    { label: copy.recovery.otaRollback, build: () => otaRollbackRecoveryPlan("—", "—") },
+    { label: copy.recovery.nodeRedUnreachable, build: () => nodeRedUnreachableRecoveryPlan() },
+  ];
   const [open, setOpen] = useState<RecoveryPlan | null>(null);
   const [done, setDone] = useState<ReadonlySet<number>>(new Set());
 
   return (
     <div className="flex flex-col gap-4 p-6">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {SCENARIOS.map((s) => (
+        {scenarios.map((s) => (
           <button
             key={s.label}
             type="button"
@@ -73,7 +76,7 @@ export function RecoveryTab() {
                   {step.destructive && (
                     <span className="flex shrink-0 items-center gap-1 rounded-slpill px-2 py-0.5 font-body text-xs text-error" style={{ backgroundColor: "color-mix(in srgb, var(--color-error) 12%, transparent)" }}>
                       <AlertTriangle size={10} />
-                      distruttivo
+                      {copy.destructive}
                     </span>
                   )}
                 </label>

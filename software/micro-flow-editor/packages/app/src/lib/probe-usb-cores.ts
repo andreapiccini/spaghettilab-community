@@ -117,12 +117,12 @@ export async function probeGrantedUsbCores(): Promise<readonly FoundUsbCore[]> {
 export async function requestUsbCorePort(): Promise<FoundUsbCore | null> {
   const serial = browserSerial();
   if (!serial) {
-    throw new Error("Web Serial non è disponibile in questo browser. Usa Chrome o Edge su HTTPS o localhost.");
+    throw new Error("usb-serial-unavailable");
   }
   const port = await serial.requestPort();
   const core = await identifyUsbCore(port);
   if (core) return core;
-  throw new Error("La porta risponde, ma non è un Core Spaghetti (Protocol V1).");
+  throw new Error("usb-not-a-core");
 }
 
 export async function findGrantedUsbPort(deviceIdHex: string): Promise<UsbSerialPort | null> {

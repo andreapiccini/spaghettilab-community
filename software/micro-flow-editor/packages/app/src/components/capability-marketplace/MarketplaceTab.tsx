@@ -16,22 +16,14 @@ import type { PhysicalCompositionNodeData } from "@spaghettilab/physical-composi
 import type { DeviceProfileSummary, FeaturePack } from "@spaghettilab/protocol-sdk";
 import { Package, Search, ShieldCheck, ShieldQuestion, Upload } from "lucide-react";
 import { useRef, useState } from "react";
+import { marketplaceCopy } from "../../lib/marketplace-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { ARTIFACT_KINDS, type ArtifactKindId } from "./artifact-kind.js";
 
-const TRUST_LABEL: Record<PackTrustKind, { readonly label: string; readonly icon: typeof ShieldCheck; readonly colorVar: string }> = {
-  TRUSTED: { label: "Verificato", icon: ShieldCheck, colorVar: "var(--color-success)" },
-  UNTRUSTED: { label: "Non fidato", icon: ShieldQuestion, colorVar: "var(--color-error)" },
-  UNVERIFIABLE: { label: "Locale", icon: ShieldQuestion, colorVar: "var(--color-ink-faint)" },
-};
-
-const SUB_TABS = [
-  { id: "disponibili", label: "Disponibili" },
-  { id: "installati", label: "Installati" },
-  { id: "richiesti", label: "Richiesti" },
-] as const;
-type SubTabId = (typeof SUB_TABS)[number]["id"];
+const SUB_TAB_IDS = ["disponibili", "installati", "richiesti"] as const;
+type SubTabId = (typeof SUB_TAB_IDS)[number];
 
 /**
  * `ux/screens/S100-capability-marketplace/visual.md` § Marketplace. Tre
@@ -48,6 +40,18 @@ type SubTabId = (typeof SUB_TABS)[number]["id"];
 export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingId }) {
   const { session } = useSession();
   const { getSnapshot, listDeviceProfiles } = useCoreSessions();
+  const { locale } = useLocale();
+  const copy = marketplaceCopy(locale);
+  const trustLabel: Record<PackTrustKind, { readonly label: string; readonly icon: typeof ShieldCheck; readonly colorVar: string }> = {
+    TRUSTED: { label: copy.trusted, icon: ShieldCheck, colorVar: "var(--color-success)" },
+    UNTRUSTED: { label: copy.untrusted, icon: ShieldQuestion, colorVar: "var(--color-error)" },
+    UNVERIFIABLE: { label: copy.local, icon: ShieldQuestion, colorVar: "var(--color-ink-faint)" },
+  };
+  const subTabs = [
+    { id: "disponibili" as const, label: copy.available },
+    { id: "installati" as const, label: copy.installed },
+    { id: "richiesti" as const, label: copy.required },
+  ];
   const [subTab, setSubTab] = useState<SubTabId>("disponibili");
   const [catalog, setCatalog] = useState<MarketplaceCatalog | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -112,7 +116,7 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
     <div className="flex h-full">
       <div className="flex flex-1 flex-col gap-4 overflow-auto p-6">
         <div className="flex flex-wrap items-center gap-2">
-          {SUB_TABS.map((t) => (
+          {subTabs.map((t) => (
             <button
               key={t.id}
               type="button"
@@ -133,7 +137,7 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
             <div className="flex items-center gap-2">
               <div className="flex flex-1 items-center gap-2 rounded-slsm border border-border-strong px-3 py-1.5">
                 <Search size={14} className="text-ink-faint" />
-                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cerca pack…" className="flex-1 font-body text-sm outline-none" />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={copy.searchPacks} className="flex-1 font-body text-sm outline-none" />
               </div>
               {ARTIFACT_KINDS.map((k) => (
                 <button
@@ -148,7 +152,7 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
               ))}
               <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 rounded-slpill bg-brand-blue px-3 py-1.5 font-body-strong text-xs text-white hover:bg-brand-blue-dark">
                 <Upload size={12} />
-                Importa indice
+                {copy.importIndex}
               </button>
               <input
                 ref={fileInputRef}
@@ -163,19 +167,19 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
               />
             </div>
             <p className="font-body text-xs text-ink-muted">
-              Gap onesto: nessuna operazione wire elenca artifact scaricabili — importa un indice JSON del marketplace. Il kind "Device Profile" non ha una fonte marketplace: autora/importa in Device Profile Studio.
+              {copy.availableGap}
             </p>
             {importError && <p className="font-body text-xs text-error">{importError}</p>}
 
             {!catalog ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">
                 <Package size={40} className="text-ink-faint" />
-                <p className="font-body text-sm text-ink-muted">Nessun indice marketplace importato.</p>
+                <p className="font-body text-sm text-ink-muted">{copy.noIndex}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-2">
                 {filteredPacks.map((p) => {
-                  const trust = TRUST_LABEL[checkPackTrust(p)];
+                  const trust = trustLabel[checkPackTrust(p)];
                   const Icon = trust.icon;
                   return (
                     <button
@@ -209,7 +213,7 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
             <div>
               <h2 className="font-heading text-sm font-semibold text-ink">Capability Pack</h2>
               <div className="mt-2 flex flex-col gap-1.5">
-                {installedPacks.length === 0 && <p className="font-body text-sm text-ink-faint">Nessuno.</p>}
+                {installedPacks.length === 0 && <p className="font-body text-sm text-ink-faint">{copy.none}</p>}
                 {installedPacks.map((p) => (
                   <div key={p.id} className="flex items-center gap-3 rounded-slsm border border-border p-2 font-mono text-xs">
                     <span className="text-ink">{p.id}</span>
@@ -223,11 +227,11 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
               <div className="flex items-center gap-2">
                 <h2 className="font-heading text-sm font-semibold text-ink">Device Profile</h2>
                 <button type="button" onClick={loadInstalledProfiles} className="rounded-slsm border border-border-strong px-2 py-1 font-body text-xs text-ink hover:bg-surface-raised">
-                  Aggiorna
+                  {copy.refresh}
                 </button>
               </div>
               <div className="mt-2 flex flex-col gap-1.5">
-                {(installedProfiles ?? []).length === 0 && <p className="font-body text-sm text-ink-faint">{installedProfiles ? "Nessuno." : "Non ancora richiesto."}</p>}
+                {(installedProfiles ?? []).length === 0 && <p className="font-body text-sm text-ink-faint">{installedProfiles ? copy.none : copy.notRequested}</p>}
                 {(installedProfiles ?? []).map((p) => (
                   <div key={p.profileId} className="flex items-center gap-3 rounded-slsm border border-border p-2 font-mono text-xs">
                     <span className="text-ink">{p.profileId}</span>
@@ -242,18 +246,18 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
         {subTab === "richiesti" && (
           <div className="flex flex-col gap-1.5">
             {required.length === 0 ? (
-              <p className="font-body text-sm text-ink-faint">Nessun tipo richiesto mancante — tutto ciò che i grafi di questo Core usano risulta installato o non verificabile via wire.</p>
+              <p className="font-body text-sm text-ink-faint">{copy.noMissingTypes}</p>
             ) : (
               required.map((r) => (
                 <div key={`${r.kind}:${r.typeId}`} className="flex items-center gap-3 rounded-slsm border border-warning p-2 font-mono text-xs" style={{ backgroundColor: "color-mix(in srgb, var(--color-warning) 6%, transparent)" }}>
                   <span className="rounded-slpill bg-surface px-2 py-0.5">{r.kind}</span>
                   <span className="text-ink">{r.typeId}</span>
-                  <span className="ml-auto text-ink-faint">usato da {r.requiredBy.length}</span>
+                  <span className="ml-auto text-ink-faint">{copy.usedBy(r.requiredBy.length)}</span>
                 </div>
               ))
             )}
             <p className="mt-2 font-body text-xs text-ink-muted">
-              Gap onesto: solo `module-driver` è verificabile contro dati wire reali (`GET_CATALOG`). `block`/`rule` non hanno un elenco tipi installati sul wire (`GET_FEATURES` riporta solo un conteggio) — qui sono trattati sempre come "non confermati installati".
+              {copy.requiredGap}
             </p>
           </div>
         )}
@@ -266,15 +270,15 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
             {selectedPack.packId} · v{selectedPack.version}
           </p>
           <div className="mt-3 flex flex-col gap-1 font-body text-xs text-ink-muted">
-            <p>Flash: {selectedPack.resourceManifest.flashBytes} B</p>
-            <p>RAM statica: {selectedPack.resourceManifest.staticRamBytes} B</p>
-            <p>Rule usate: {selectedPack.resourceManifest.rulesUsed}</p>
-            <p>Block usati: {selectedPack.resourceManifest.blocksUsed}</p>
+            <p>{copy.flash}: {selectedPack.resourceManifest.flashBytes} B</p>
+            <p>{copy.staticRam}: {selectedPack.resourceManifest.staticRamBytes} B</p>
+            <p>{copy.rulesUsed}: {selectedPack.resourceManifest.rulesUsed}</p>
+            <p>{copy.blocksUsed}: {selectedPack.resourceManifest.blocksUsed}</p>
           </div>
 
           {resolution && (
             <div className="mt-4">
-              <h3 className="font-body text-xs font-semibold text-ink-muted">Dipendenze</h3>
+              <h3 className="font-body text-xs font-semibold text-ink-muted">{copy.dependencies}</h3>
               {resolution.kind === "RESOLVED" ? (
                 <div className="mt-1 flex flex-col gap-1">
                   {resolution.selections.map((s) => (
@@ -296,7 +300,7 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
           )}
 
           <p className="mt-4 font-body text-xs text-ink-muted">
-            Gap onesto: un Capability Pack non è installabile da solo — arriva solo dentro un'immagine firmware OTA. Importa nel tab Preflight il manifest di un'immagine OTA che include questo pack.
+            {copy.packInstallGap}
           </p>
         </div>
       )}

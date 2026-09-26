@@ -1,6 +1,8 @@
 import type { CoreBindingRecord } from "@spaghettilab/domain";
 import { checkFieldCompatibility, LinkCompatibility } from "@spaghettilab/system-automation-graph";
 import { ArrowRight } from "lucide-react";
+import { automationsCopy } from "../../lib/automations-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import type { AppLink } from "./link-meta.js";
 import type { CrossCoreNodeData } from "./node-data.js";
 
@@ -18,17 +20,19 @@ import type { CrossCoreNodeData } from "./node-data.js";
  * che resterebbero altrimenti sempre a zero in modo fuorviante.
  */
 export function DiagnosticsTab({ links, bindings }: { readonly links: readonly AppLink[]; readonly bindings: readonly CoreBindingRecord[] }) {
+  const { locale } = useLocale();
+  const copy = automationsCopy(locale);
   return (
     <div className="flex h-full flex-col gap-4 overflow-auto p-6">
       <div className="rounded-slmd border-l-4 border-brand-purple-glow p-3" style={{ backgroundColor: "color-mix(in srgb, var(--color-brand-purple-glow) 6%, transparent)" }}>
-        <p className="font-body text-sm text-ink">Percorso end-to-end per ciascun link — struttura e compatibilità, non eventi live.</p>
+        <p className="font-body text-sm text-ink">{copy.pathBody}</p>
         <p className="mt-0.5 font-body text-xs text-ink-muted">
           Gap onesto: gli eventi di runtime (record ricevuti, comandi instradati) vengono generati dentro Node-RED, non in questa app — nessun canale li porta qui, quindi non c'è un log/conteggio live da mostrare.
         </p>
       </div>
 
       {links.length === 0 ? (
-        <p className="font-body text-sm text-ink-faint">Nessun link nel grafo.</p>
+        <p className="font-body text-sm text-ink-faint">{copy.noLinks}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {links.map((link) => {

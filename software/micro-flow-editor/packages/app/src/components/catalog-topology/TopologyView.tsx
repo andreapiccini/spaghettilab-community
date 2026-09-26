@@ -2,7 +2,9 @@ import type { FlowEntry, FunctionBayEntry, TopologyIndex } from "@spaghettilab/c
 import { ChevronDown, Layers, Plug, Waypoints } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { catalogTopologyCopy } from "../../lib/catalog-topology-copy.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { useLocale } from "../../state/locale-context.js";
 
 /**
  * `ux/screens/S040-catalog-topology/visual.md` § Vista Topologia. La gerarchia reale
@@ -16,8 +18,10 @@ import { motionTokens } from "../../lib/motion-tokens.js";
  * etichettati, non li traduce in un vocabolario che il protocollo non fornisce.
  */
 export function TopologyView({ topology }: { readonly topology: TopologyIndex }) {
+  const { locale } = useLocale();
+  const copy = catalogTopologyCopy(locale);
   if (topology.flows.length === 0) {
-    return <p className="p-6 font-body text-sm text-ink-faint">Nessun Flow riportato da questo Core.</p>;
+    return <p className="p-6 font-body text-sm text-ink-faint">{copy.noFlow}</p>;
   }
 
   return (
@@ -30,6 +34,8 @@ export function TopologyView({ topology }: { readonly topology: TopologyIndex })
 }
 
 function FlowRow({ flow }: { readonly flow: FlowEntry }) {
+  const { locale } = useLocale();
+  const copy = catalogTopologyCopy(locale);
   const [open, setOpen] = useState(true);
   return (
     <div>
@@ -39,14 +45,14 @@ function FlowRow({ flow }: { readonly flow: FlowEntry }) {
         </motion.span>
         <Waypoints size={16} className="text-ink-muted" />
         <span className="font-body text-sm font-semibold text-ink">Flow {flow.flowId}</span>
-        <span className="font-mono text-xs text-ink-faint">port {flow.portId} · direzione {flow.direction} · {flow.signalCount} segnali</span>
+        <span className="font-mono text-xs text-ink-faint">port {flow.portId} · {copy.directionPrefix} {flow.direction} · {copy.signals(flow.signalCount)}</span>
         <span className="ml-auto font-body text-xs text-ink-faint">{flow.bays.length} Bay</span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={motionTokens.duration.base} className="overflow-hidden border-l border-border pl-4" style={{ marginLeft: 20 }}>
             {flow.bays.length === 0 ? (
-              <p className="py-2 font-body text-xs text-ink-faint">Nessuna Function Bay.</p>
+              <p className="py-2 font-body text-xs text-ink-faint">{copy.noFunctionBay}</p>
             ) : (
               flow.bays.map((bay) => <BayRow key={bay.bayId} bay={bay} />)
             )}
@@ -58,6 +64,8 @@ function FlowRow({ flow }: { readonly flow: FlowEntry }) {
 }
 
 function BayRow({ bay }: { readonly bay: FunctionBayEntry }) {
+  const { locale } = useLocale();
+  const copy = catalogTopologyCopy(locale);
   const [open, setOpen] = useState(true);
   return (
     <div>
@@ -68,14 +76,14 @@ function BayRow({ bay }: { readonly bay: FunctionBayEntry }) {
         <Layers size={14} className="text-ink-muted" />
         <span className="font-body text-sm text-ink">Bay {bay.ordinal}</span>
         <span className="font-mono text-xs text-ink-faint">
-          modulo {bay.moduleKey === 0 ? "nessuno" : bay.moduleKey} · admission {bay.admission}
+          modulo {bay.moduleKey === 0 ? copy.moduleNone : bay.moduleKey} · admission {bay.admission}
         </span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={motionTokens.duration.base} className="overflow-hidden border-l border-border pl-4" style={{ marginLeft: 18 }}>
             {bay.rails.length === 0 ? (
-              <p className="py-2 font-body text-xs text-ink-faint">Nessuna rail.</p>
+              <p className="py-2 font-body text-xs text-ink-faint">{copy.noRail}</p>
             ) : (
               bay.rails.map((rail) => (
                 <div key={rail.railId} className="flex h-9 items-center gap-2 px-2">

@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { comingSoonCopy } from "../../lib/coming-soon-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 
 /**
  * Intentional reserved section — title, purpose, and a "Coming soon" badge.
@@ -16,6 +18,9 @@ export function ComingSoonScreen({
   readonly description: string;
   readonly children?: ReactNode;
 }) {
+  const { locale } = useLocale();
+  const copy = comingSoonCopy(locale);
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-4">
@@ -29,7 +34,7 @@ export function ComingSoonScreen({
             color: "var(--color-brand-purple-glow)",
           }}
         >
-          Coming soon
+          {copy.badge}
         </span>
       </div>
       <div className="flex-1 overflow-auto p-6">

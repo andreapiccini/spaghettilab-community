@@ -12,6 +12,9 @@ import { Plus, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { localizeCatalogEntry, localizeCatalogEntries } from "../../lib/processing-catalog-copy.js";
+import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { pinCaption, pinLetter, selectableSignalsForPort, signalsForRole, type CustomProtocol, type PortPinMap } from "../../lib/port-protocol-mock.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { visualForCatalogEntryId } from "./block-visuals.js";
@@ -36,7 +39,9 @@ function TypeIdSelect({
   readonly catalogEntryId?: string;
   readonly onChange: (typeId: string, entry: ProcessingCatalogEntry | undefined) => void;
 }) {
-  const options = uniqueTypeOptions(kind);
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
+  const options = uniqueTypeOptions(kind, locale);
   const known = options.some((o) => o.typeId === value);
   const selected =
     catalogEntryId && options.some((o) => o.entryId === catalogEntryId)
@@ -53,18 +58,21 @@ function TypeIdSelect({
       className="mb-2 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
     >
       <option value="">—</option>
-      {!known && value !== "" && <option value={value}>{value} (non in catalogo)</option>}
+      {!known && value !== "" && <option value={value}>{value} ({copy.notInCatalog})</option>}
       {options.map((o) => (
         <option key={o.entryId} value={o.entryId}>
-          {o.label} ({o.typeId}){o.planned ? " · pianificato" : ""}
+          {o.label} ({o.typeId}){o.planned ? ` · ${copy.plannedSuffix}` : ""}
         </option>
       ))}
     </select>
   );
 }
 
-function uniqueTypeOptions(kind: "block" | "rule"): readonly { readonly entryId: string; readonly typeId: string; readonly label: string; readonly planned: boolean }[] {
-  return catalogEntriesForNodeKind(kind)
+function uniqueTypeOptions(
+  kind: "block" | "rule",
+  locale: "it" | "en" = "it",
+): readonly { readonly entryId: string; readonly typeId: string; readonly label: string; readonly planned: boolean }[] {
+  return localizeCatalogEntries(catalogEntriesForNodeKind(kind), locale)
     .filter((entry): entry is ProcessingCatalogEntry & { typeId: string } => Boolean(entry.typeId))
     .map((entry) => ({
       entryId: entry.id,
@@ -128,6 +136,8 @@ export function NodeInspector({
   readonly onDelete?: () => void;
   readonly onClose: () => void;
 }) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const [comment, setComment] = useState(mode.kind === "edit" ? mode.comment : "");
   const [data, setData] = useState<DeviceProcessingNodeData>(() =>
     withFieldDefaults(mode.kind === "edit" ? mode.data : defaultDataFor(mode.nodeKind, moduleOptions[0]?.id)),
@@ -135,10 +145,11 @@ export function NodeInspector({
   const nodeId = mode.kind === "edit" ? mode.nodeId : "__draft__";
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
   const catalogEntry = catalogEntryForNode(data);
+  const localizedEntry = catalogEntry ? localizeCatalogEntry(catalogEntry, locale) : undefined;
   const namedFields =
     data.kind === "rule" && data.ruleTypeId === "threshold"
-      ? (catalogEntry?.fields ?? findCatalogEntryById("rule.threshold")?.fields ?? [])
-      : (catalogEntry?.fields ?? []);
+      ? (localizeCatalogEntry(catalogEntry ?? findCatalogEntryById("rule.threshold")!, locale).fields ?? [])
+      : (localizedEntry?.fields ?? []);
   const showModulePicker = data.kind === "schedule" || (data.kind === "event-source" && catalogEntry?.needsModule !== false);
   const authoringType = Boolean(data.kind === "block" && data.blockTypeId.startsWith("ab."));
   const { protocolFor, pinMapOf } = usePortProtocol();
@@ -154,7 +165,7 @@ export function NodeInspector({
       .pins.filter((pin) => pin.peripheral === "gpio")
       .map((pin) => ({
         value: linePortIds.length === 1 ? String(pin.pinIndex) : `${portId}:${pin.pinIndex}`,
-        label: pinCaption(pin) || `Porta ${portId} · GPIO ${pin.signal} · ${pinLetter(pin.pinIndex)}`,
+        label: pinCaption(pin) || `${copy.portPrefix} ${portId} · GPIO ${pin.signal} · ${pinLetter(pin.pinIndex)}`,
       })),
   );
 
@@ -196,7 +207,7 @@ export function NodeInspector({
   const catalogVisual =
     visualForCatalogEntryId(catalogEntry?.id) ?? visualForCatalogEntryId(blockTypeId);
   const headerTitle =
-    (comment.trim() !== "" ? comment.trim() : undefined) ?? catalogEntry?.label ?? config.label;
+    (comment.trim() !== "" ? comment.trim() : undefined) ?? localizedEntry?.label ?? config.label;
   const headerColor =
     data.kind === "block" && isBlockNodeData(data) && isRgbLedBlock(data)
       ? (() => {
@@ -239,12 +250,12 @@ export function NodeInspector({
         </AnimatePresence>
 
         <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-name">
-          Nome (etichetta)
+          {copy.nameLabel}
         </label>
         <input id="ni-name" value={comment} onChange={(e) => setCommentAndMaybeApply(e.target.value)} placeholder={config.label} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none" />
 
         {mode.kind === "edit" && (
-          <EdgeList title="Input" edges={incoming.map((e) => ({ id: e.id, label: nodeLabel(e.source) }))} empty="Nessun collegamento in ingresso." />
+          <EdgeList title="Input" edges={incoming.map((e) => ({ id: e.id, label: nodeLabel(e.source) }))} empty={copy.noIncoming} />
         )}
 
         {data.kind === "event-source" && (
@@ -269,13 +280,13 @@ export function NodeInspector({
               }}
               className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none"
             >
-              {catalogEntriesForNodeKind("event-source").map((entry) => (
+              {localizeCatalogEntries(catalogEntriesForNodeKind("event-source"), locale).map((entry) => (
                 <option key={entry.id} value={entry.id}>
                   {entry.label}
                 </option>
               ))}
             </select>
-            <CatalogNotes entry={catalogEntry} />
+            <CatalogNotes entry={localizedEntry} />
           </>
         )}
 
@@ -307,12 +318,12 @@ export function NodeInspector({
         {data.kind === "schedule" && (
           <>
             <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-period">
-              Periodo (ms)
+              {copy.periodMs}
             </label>
             <input id="ni-period" type="number" value={data.periodMs} onChange={(e) => patch({ periodMs: Number(e.target.value) })} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
             <label className="mb-4 flex items-center gap-2 font-body text-sm text-ink">
               <input type="checkbox" checked={data.enabled} onChange={(e) => patch({ enabled: e.target.checked })} />
-              Abilitato
+              {copy.enabled}
             </label>
           </>
         )}
@@ -339,18 +350,18 @@ export function NodeInspector({
                 )
               }
             />
-            <CatalogNotes entry={catalogEntry} />
+            <CatalogNotes entry={localizedEntry} />
             {!authoringType && (
               <div className="mb-4 flex gap-2">
                 <div className="flex-1">
                   <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-minver">
-                    Versione minima
+                    {copy.minVersion}
                   </label>
                   <input id="ni-minver" type="number" value={data.minVersion ?? ""} onChange={(e) => patch({ minVersion: e.target.value === "" ? undefined : Number(e.target.value) })} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
                 </div>
                 <div className="flex-1">
                   <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-exactver">
-                    Versione esatta
+                    {copy.exactVersion}
                   </label>
                   <input id="ni-exactver" type="number" value={data.exactVersion ?? ""} onChange={(e) => patch({ exactVersion: e.target.value === "" ? undefined : Number(e.target.value) })} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
                 </div>
@@ -360,7 +371,7 @@ export function NodeInspector({
               <CatalogFieldsEditor fields={namedFields} properties={data.properties} lineOptions={lineOptions} onChange={(properties) => patch({ properties })} />
             ) : (
               <>
-                <p className="mb-2 font-body text-xs text-ink-faint">GET_CATALOG non espone ancora lo schema proprietà del Block, quindi qui sotto sono per field_id numerico (`struct spaghetti_block_config`), non per nome — consulta la documentazione del tipo scelto per sapere quali usare.</p>
+                <p className="mb-2 font-body text-xs text-ink-faint">{copy.blockSchemaGap}</p>
                 <PropertiesEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
               </>
             )}
@@ -393,10 +404,10 @@ export function NodeInspector({
                 )
               }
             />
-            <CatalogNotes entry={catalogEntry} />
+            <CatalogNotes entry={localizedEntry} />
 
             <NamedOrNumericModuleRef
-              title="Sorgente (quale Module/campo legge)"
+              title={copy.sourceTitle}
               moduleOptions={moduleOptions}
               moduleNodeId={data.sourceReference?.moduleNodeId ?? ""}
               numericId={data.sourceReference?.fieldId}
@@ -407,7 +418,7 @@ export function NodeInspector({
             />
 
             <NamedOrNumericModuleRef
-              title="Comando (quale Module/comando aziona)"
+              title={copy.commandTitle}
               moduleOptions={moduleOptions}
               moduleNodeId={data.commandTarget?.moduleNodeId ?? ""}
               numericId={data.commandTarget?.commandId}
@@ -430,7 +441,7 @@ export function NodeInspector({
               />
             ) : data.ruleTypeId === "threshold" ? null : (
               <>
-                <p className="mb-2 font-body text-xs text-ink-faint">Proprietà per field_id numerico, stessa limitazione del Block: nessuno schema per nome esiste ancora.</p>
+                <p className="mb-2 font-body text-xs text-ink-faint">{copy.ruleSchemaGap}</p>
                 <PropertiesEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
               </>
             )}
@@ -438,18 +449,18 @@ export function NodeInspector({
         )}
 
         {mode.kind === "edit" && (
-          <EdgeList title="Output" edges={outgoing.map((e) => ({ id: e.id, label: nodeLabel(e.target) }))} empty={isRuleNodeData(data) ? "Le Rule non hanno un edge di uscita: l'azione è il Comando qui sopra." : "Nessun collegamento in uscita."} />
+          <EdgeList title="Output" edges={outgoing.map((e) => ({ id: e.id, label: nodeLabel(e.target) }))} empty={isRuleNodeData(data) ? copy.ruleNoOutgoing : copy.noOutgoing} />
         )}
       </div>
 
       <div className="flex shrink-0 items-center gap-2 border-t border-border p-3">
         {onDelete && (
           <button type="button" onClick={onDelete} className="rounded-slsm border border-border-strong px-3 py-1.5 font-body text-sm text-error hover:bg-surface-raised">
-            Elimina
+            {copy.delete}
           </button>
         )}
         <button type="button" onClick={() => onSave(data, comment)} disabled={!canSave} className="ml-auto rounded-slsm bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-          Salva
+          {copy.save}
         </button>
       </div>
     </motion.div>
@@ -533,6 +544,8 @@ function CatalogFieldInput({
   readonly value: unknown;
   readonly onChange: (value: unknown) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const id = `ni-field-${field.id}`;
   return (
     <div>
@@ -555,7 +568,7 @@ function CatalogFieldInput({
       ) : field.type === "checkbox" ? (
         <label className="flex items-center gap-2 font-body text-sm text-ink">
           <input id={id} type="checkbox" checked={value === true} onChange={(e) => onChange(e.target.checked)} />
-          {field.placeholder ?? "Attivo"}
+          {field.placeholder ?? copy.active}
         </label>
       ) : field.type === "number" ? (
         <input
@@ -654,6 +667,8 @@ function defaultForKind(kind: PropertyValueKind): boolean | bigint | string {
  * the raw mechanism, not a guess at what any given field_id means.
  */
 function PropertiesEditor({ properties, onChange }: { readonly properties: Readonly<Record<string, unknown>>; readonly onChange: (next: Record<string, unknown>) => void }) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const rows = Object.entries(properties);
 
   function updateRow(oldKey: string, newKey: string, value: boolean | bigint | string) {
@@ -676,7 +691,7 @@ function PropertiesEditor({ properties, onChange }: { readonly properties: Reado
 
   return (
     <div className="mb-4">
-      <p className="mb-1 font-body text-xs font-semibold text-ink-muted">Proprietà (field_id → valore)</p>
+      <p className="mb-1 font-body text-xs font-semibold text-ink-muted">{copy.propertiesTitle}</p>
       <div className="flex flex-col gap-1.5">
         {rows.map(([key, value]) => {
           const kind = valueKindOf(value);
@@ -694,9 +709,9 @@ function PropertiesEditor({ properties, onChange }: { readonly properties: Reado
                 onChange={(e) => updateRow(key, key, defaultForKind(e.target.value as PropertyValueKind))}
                 className="rounded-slsm border border-border-strong px-1 py-1 font-mono text-xs outline-none"
               >
-                <option value="bigint">intero</option>
+                <option value="bigint">{copy.integer}</option>
                 <option value="boolean">bool</option>
-                <option value="string">stringa</option>
+                <option value="string">{copy.stringType}</option>
               </select>
               {kind === "boolean" ? (
                 <input type="checkbox" checked={value as boolean} onChange={(e) => updateRow(key, key, e.target.checked)} className="mx-1" />
@@ -710,7 +725,7 @@ function PropertiesEditor({ properties, onChange }: { readonly properties: Reado
               ) : (
                 <input type="text" value={value as string} onChange={(e) => updateRow(key, key, e.target.value)} className="min-w-0 flex-1 rounded-slsm border border-border-strong px-1.5 py-1 font-mono text-xs outline-none" />
               )}
-              <button type="button" onClick={() => removeRow(key)} className="shrink-0 text-ink-faint hover:text-error" aria-label="Rimuovi">
+              <button type="button" onClick={() => removeRow(key)} className="shrink-0 text-ink-faint hover:text-error" aria-label={copy.delete}>
                 <Trash2 size={13} />
               </button>
             </div>
@@ -718,7 +733,7 @@ function PropertiesEditor({ properties, onChange }: { readonly properties: Reado
         })}
       </div>
       <button type="button" onClick={addRow} className="mt-1.5 flex items-center gap-1 font-body text-xs font-semibold text-brand-blue hover:underline">
-        <Plus size={12} /> Aggiungi proprietà
+        <Plus size={12} /> {copy.addProperty}
       </button>
     </div>
   );
@@ -743,6 +758,8 @@ function NamedOrNumericModuleRef({
   readonly mode: "source" | "command";
   readonly onChange: (moduleNodeId: string, numericId: number) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const selected = moduleOptions.find((m) => m.id === moduleNodeId);
   const protocol = selected ? protocolFor({ moduleNodeId: selected.id, portId: selected.portId }) : undefined;
   const pinMap = selected?.portId !== undefined ? pinMapOf(selected.portId) : undefined;
@@ -796,9 +813,7 @@ function NamedOrNumericModuleRef({
       </div>
       {showNamed && named.length === 0 && moduleNodeId !== "" && (
         <p className="mb-4 font-body text-xs text-ink-faint">
-          {mode === "source"
-            ? "Nessun segnale di lettura su questa Porta — assegna GPIO, ADC o una grandezza dalla Composizione fisica."
-            : "Nessun comando su questa Porta — assegna GPIO, PWM o un mapping in scrittura."}
+          {mode === "source" ? copy.noReadSignal : copy.noWriteCommand}
         </p>
       )}
       {!(showNamed && named.length === 0 && moduleNodeId !== "") && <div className="mb-3" />}

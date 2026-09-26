@@ -1,18 +1,16 @@
 import type { CoreBindingId } from "@spaghettilab/domain";
 import type { OtaCandidateManifest, PreflightResult } from "@spaghettilab/ota-preflight";
 import { useMemo, useState } from "react";
+import { marketplaceCopy } from "../../lib/marketplace-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { MarketplaceTab } from "./MarketplaceTab.js";
 import { PreflightTab } from "./PreflightTab.js";
 import { UpdateTab } from "./UpdateTab.js";
 
-const TABS = [
-  { id: "marketplace", label: "Marketplace" },
-  { id: "preflight", label: "Preflight" },
-  { id: "aggiornamento", label: "Aggiornamento" },
-] as const;
-type TabId = (typeof TABS)[number]["id"];
+const TAB_IDS = ["marketplace", "preflight", "aggiornamento"] as const;
+type TabId = (typeof TAB_IDS)[number];
 
 /**
  * `ux/screens/S100-capability-marketplace/{visual,ui-behavior,backend-behavior}.md`,
@@ -27,6 +25,13 @@ type TabId = (typeof TABS)[number]["id"];
 export function CapabilityMarketplaceScreen() {
   const { session } = useSession();
   const { rows } = useCoreSessions();
+  const { locale } = useLocale();
+  const copy = marketplaceCopy(locale);
+  const tabs = [
+    { id: "marketplace" as const, label: copy.tabMarketplace },
+    { id: "preflight" as const, label: copy.tabPreflight },
+    { id: "aggiornamento" as const, label: copy.tabUpdate },
+  ];
   const bindings = session?.stack.current.coreBindings ?? [];
 
   const readyRows = useMemo(() => rows.filter((r) => r.sessionState === "READY"), [rows]);
@@ -40,15 +45,15 @@ export function CapabilityMarketplaceScreen() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-4">
-        <h1 className="font-heading text-lg font-semibold text-ink">Capability Marketplace & OTA</h1>
+        <h1 className="font-heading text-lg font-semibold text-ink">{copy.title}</h1>
         <span className="ml-auto flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink-muted">
-          {bindings.length} Core · {readyRows.length} pronti
+          {copy.coresReady(bindings.length, readyRows.length)}
         </span>
       </div>
 
       {readyRows.length === 0 ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-body text-sm text-ink-faint">Nessun Core connesso e pronto — connetti un Core (Core Connections) per sfogliare pack, profili e OTA.</p>
+          <p className="font-body text-sm text-ink-faint">{copy.noCore}</p>
         </div>
       ) : (
         <>
@@ -70,7 +75,7 @@ export function CapabilityMarketplaceScreen() {
           </div>
 
           <div className="flex shrink-0 gap-1 border-b border-border bg-surface px-4">
-            {TABS.map((t) => {
+            {tabs.map((t) => {
               const activeTab = tab === t.id;
               return (
                 <button

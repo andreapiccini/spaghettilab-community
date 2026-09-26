@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect } from "react";
+import { chromeCopy } from "../../lib/chrome-copy.js";
 import { tourSteps } from "../../lib/tour-steps.js";
 import { useTargetRect } from "../../lib/use-target-rect.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -17,6 +18,7 @@ const PADDING = 12;
 export function TourOverlay() {
   const { active, stepIndex, next, prev, close } = useTour();
   const { locale } = useLocale();
+  const copy = chromeCopy(locale);
   const steps = tourSteps(locale);
   const step = active ? steps[stepIndex] : undefined;
   const rect = useTargetRect(step?.target);
@@ -70,7 +72,7 @@ export function TourOverlay() {
       <div className="absolute rounded-slmd bg-surface p-4 shadow-e2" style={{ left: cardLeft, top: cardTop, width: cardWidth }}>
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-heading text-base font-semibold text-ink">{step.title}</h3>
-          <button type="button" onClick={close} className="shrink-0 rounded-slsm p-1 text-ink-faint hover:bg-surface-raised" aria-label="Chiudi">
+          <button type="button" onClick={close} className="shrink-0 rounded-slsm p-1 text-ink-faint hover:bg-surface-raised" aria-label={copy.close}>
             <X size={16} />
           </button>
         </div>
@@ -88,7 +90,7 @@ export function TourOverlay() {
               </button>
             )}
             <button type="button" onClick={isLast ? close : next} className="flex h-8 items-center gap-1 rounded-slsm bg-brand-blue px-3 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
-              {isLast ? "Fine" : "Avanti"}
+              {isLast ? copy.tourDone : copy.tourNext}
               {!isLast && <ChevronRight size={14} />}
             </button>
           </div>

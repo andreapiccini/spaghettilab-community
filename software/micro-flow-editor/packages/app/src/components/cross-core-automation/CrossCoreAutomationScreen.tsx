@@ -1,5 +1,7 @@
 import type { GraphState } from "@spaghettilab/domain";
 import { useMemo, useState } from "react";
+import { automationsCopy } from "../../lib/automations-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { DeployTab } from "./DeployTab.js";
 import { DiagnosticsTab } from "./DiagnosticsTab.js";
@@ -8,12 +10,8 @@ import { NodeRedRuntimeBar } from "./NodeRedRuntimeBar.js";
 import type { AppLink, LinkMeta } from "./link-meta.js";
 import type { CrossCoreNodeData } from "./node-data.js";
 
-const TABS = [
-  { id: "grafo", label: "Grafo" },
-  { id: "deploy", label: "Deploy Node-RED" },
-  { id: "diagnostica", label: "Diagnostica" },
-] as const;
-type TabId = (typeof TABS)[number]["id"];
+const TAB_IDS = ["grafo", "deploy", "diagnostica"] as const;
+type TabId = (typeof TAB_IDS)[number];
 
 const EMPTY_GRAPH: GraphState<"system-automation"> = { layer: "system-automation", nodes: [], edges: [] };
 
@@ -27,6 +25,8 @@ const EMPTY_GRAPH: GraphState<"system-automation"> = { layer: "system-automation
  * sollevato qui e condiviso fra i tre tab.
  */
 export function CrossCoreAutomationScreen() {
+  const { locale } = useLocale();
+  const copy = automationsCopy(locale);
   const { session } = useSession();
   const [tab, setTab] = useState<TabId>("grafo");
   const [linkMeta, setLinkMeta] = useState<Map<string, LinkMeta>>(new Map());
@@ -49,15 +49,19 @@ export function CrossCoreAutomationScreen() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex min-h-14 shrink-0 flex-wrap items-center gap-3 border-b border-border bg-surface px-4 py-2">
-        <h1 className="font-heading text-lg font-semibold text-ink">Automazioni</h1>
+        <h1 className="font-heading text-lg font-semibold text-ink">{copy.title}</h1>
         <NodeRedRuntimeBar />
         <span className="ml-auto flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink-muted">
-          {graphState.nodes.length} nodi · {graphState.edges.length} link
+          {copy.nodesLinks(graphState.nodes.length, graphState.edges.length)}
         </span>
       </div>
 
       <div className="flex shrink-0 gap-1 border-b border-border bg-surface px-4">
-        {TABS.map((t) => {
+        {TAB_IDS.map((id) => {
+          const t = {
+            id,
+            label: id === "grafo" ? copy.graph : id === "deploy" ? copy.deploy : copy.diagnostics,
+          };
           const active = tab === t.id;
           return (
             <button key={t.id} type="button" onClick={() => setTab(t.id)} className="flex items-center gap-1.5 border-b-2 px-3 py-2.5 font-body text-sm" style={{ borderColor: active ? "var(--color-brand-blue)" : "transparent", color: active ? "var(--color-brand-blue)" : "var(--color-ink-muted)" }}>

@@ -7,6 +7,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { Boxes, Cpu, Search, Zap, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { FLOW_START_IDS } from "./dry-run-preview.js";
 import { visualForCatalogEntryId } from "./block-visuals.js";
@@ -32,14 +34,16 @@ function catalogEntryNeedsConfiguredPort(entry: ProcessingCatalogEntry): boolean
 
 type FamilySectionId = "functionality" | "bay";
 
-const FAMILY_META: Record<FamilySectionId, { label: string; icon: LucideIcon; hint: string }> = {
-  functionality: { label: "Funzionalità", icon: Zap, hint: "Azioni e logica del flusso" },
-  bay: { label: "Bay", icon: Boxes, hint: "Moduli hardware · ingresso a sinistra, uscita a destra" },
+const FAMILY_ICONS: Record<FamilySectionId, LucideIcon> = {
+  functionality: Zap,
+  bay: Boxes,
 };
 
 const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "bay"]);
 
 export function ProcessingBlockPalette() {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const { configuredPorts } = usePortProtocol();
   const portsConfigured = configuredPorts.length > 0;
   const [query, setQuery] = useState("");
@@ -63,7 +67,7 @@ export function ProcessingBlockPalette() {
       ),
     [query],
   );
-  const placeables = useMemo(() => expandPalettePlaceables(filtered), [filtered]);
+  const placeables = useMemo(() => expandPalettePlaceables(filtered, locale), [filtered, locale]);
   const groups = useMemo(() => groupPlaceablesByFamily(placeables), [placeables]);
   const searching = query.trim() !== "";
 
@@ -89,19 +93,20 @@ export function ProcessingBlockPalette() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cerca blocchi"
+            placeholder={copy.searchBlocks}
             className="w-full bg-transparent font-body text-sm outline-none placeholder:text-ink-faint"
           />
         </label>
       </div>
       <div className="min-h-0 flex-1 overflow-auto px-2 pb-3">
         {placeables.length === 0 ? (
-          <p className="px-2 py-6 text-center font-body text-sm text-ink-faint">Nessun risultato.</p>
+          <p className="px-2 py-6 text-center font-body text-sm text-ink-faint">{copy.noResults}</p>
         ) : (
           sections.map(({ id, rows }, index) => {
             if (rows.length === 0 && searching) return null;
-            const meta = FAMILY_META[id];
-            const Icon = meta.icon;
+            const Icon = FAMILY_ICONS[id];
+            const label = id === "functionality" ? copy.functionality : copy.bay;
+            const hint = id === "functionality" ? copy.functionalityHint : copy.bayHint;
             const open = searching || openIds.has(id);
             return (
               <div key={id} className="mb-1">
@@ -116,11 +121,11 @@ export function ProcessingBlockPalette() {
                     ▾
                   </motion.span>
                   <Icon size={14} className="shrink-0 text-ink-muted" />
-                  <span className="min-w-0 flex-1 truncate font-body text-sm font-semibold text-ink">{meta.label}</span>
+                  <span className="min-w-0 flex-1 truncate font-body text-sm font-semibold text-ink">{label}</span>
                   <span className="font-body text-xs text-ink-faint">{rows.length}</span>
                 </button>
                 {!searching && open && (
-                  <p className="mb-1 px-2 pl-8 font-body text-[10px] leading-snug text-ink-faint">{meta.hint}</p>
+                  <p className="mb-1 px-2 pl-8 font-body text-[10px] leading-snug text-ink-faint">{hint}</p>
                 )}
                 <AnimatePresence initial={false}>
                   {open && (
@@ -166,7 +171,7 @@ export function ProcessingBlockPalette() {
       </div>
       {dragReminder && (
         <div className="mx-2 mb-3 rounded-slsm bg-surface-raised px-3 py-2 font-body text-xs text-ink" style={{ outline: "1px solid var(--color-brand-blue)" }}>
-          Per inserire il blocco, trascinalo sul canvas.
+          {copy.dragReminder}
         </div>
       )}
     </div>
@@ -194,10 +199,12 @@ function PaletteRow({
   readonly onClickRemind: () => void;
   readonly onDragBegan: () => void;
 }) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const entry = row.entry;
   const needsPort = catalogEntryNeedsConfiguredPort(entry);
   const placeable = isPlaceableOnDeviceGraph(entry) && (!needsPort || portsConfigured);
-  const badge = !portsConfigured && needsPort ? "serve una Porta" : availabilityBadge(entry);
+  const badge = !portsConfigured && needsPort ? copy.needsPort : availabilityBadge(entry, copy);
 
   return (
     <motion.div
@@ -209,7 +216,7 @@ function PaletteRow({
       <button
         type="button"
         draggable={placeable}
-        title={placeable ? "Trascina sul canvas per inserire" : needsPort && !portsConfigured ? "Configura prima una Porta in Composizione fisica." : entry.notes}
+        title={placeable ? copy.dragToInsert : needsPort && !portsConfigured ? copy.configurePortFirst : entry.notes}
         onClick={() => {
           if (placeable) onClickRemind();
         }}
@@ -243,7 +250,7 @@ function PaletteRow({
               <span
                 className="inline-flex shrink-0 items-center gap-0.5 rounded-[3px] px-1 py-px font-mono text-[9px] font-semibold uppercase tracking-wide text-ink-muted"
                 style={{ outline: "1px solid color-mix(in srgb, #64748B 40%, transparent)" }}
-                title="Modulo hardware (bay)"
+                title={copy.bayModule}
               >
                 <Cpu size={9} strokeWidth={2.5} aria-hidden />
                 Bay
@@ -259,15 +266,15 @@ function PaletteRow({
   );
 }
 
-function availabilityBadge(entry: ProcessingCatalogEntry): string | undefined {
-  if (entry.availability === "planned") return "pianificato";
+function availabilityBadge(entry: ProcessingCatalogEntry, copy: ReturnType<typeof processingGraphCopy>): string | undefined {
+  if (entry.availability === "planned") return copy.planned;
   if (entry.availability === "pack") return "pack";
   if (!isPlaceableOnDeviceGraph(entry)) {
     if (entry.runtime === "node-red") return "Node-RED";
     if (entry.runtime === "feature") return "Features";
     if (entry.runtime === "core-admin") return "admin";
-    if (entry.runtime === "authoring") return "solo editor";
-    return "fuori scope";
+    if (entry.runtime === "authoring") return copy.editorOnly;
+    return copy.outOfScope;
   }
   return undefined;
 }

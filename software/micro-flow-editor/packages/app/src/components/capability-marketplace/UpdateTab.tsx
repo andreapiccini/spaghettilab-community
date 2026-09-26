@@ -3,7 +3,9 @@ import { BleOtaSession, evaluatePostflight, updateTransportLabel, type Postfligh
 import { updateStateLabel, type OtaCandidateManifest, type PreflightResult } from "@spaghettilab/ota-preflight";
 import { BadgeCheck, Loader2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { marketplaceCopy } from "../../lib/marketplace-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { hexToBytes } from "./hex.js";
 
@@ -25,6 +27,8 @@ const CHUNK_SIZE = 4096;
  */
 export function UpdateTab({ bindingId, candidate, preflight }: { readonly bindingId: CoreBindingId; readonly candidate: OtaCandidateManifest | null; readonly preflight: PreflightResult | null }) {
   const { session } = useSession();
+  const { locale } = useLocale();
+  const copy = marketplaceCopy(locale);
   const { getSnapshot, listDeviceProfiles, getClient, getUpdateStatus } = useCoreSessions();
   const [phase, setPhase] = useState<string>("IDLE");
   const [progress, setProgress] = useState(0);
@@ -119,7 +123,7 @@ export function UpdateTab({ bindingId, candidate, preflight }: { readonly bindin
   if (!candidate || !preflight || preflight.kind !== "READY") {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="font-body text-sm text-ink-faint">Nessun candidato pronto — completa il tab Preflight con esito "Pronto" prima di avviare l'OTA.</p>
+        <p className="font-body text-sm text-ink-faint">{copy.noReadyCandidate}</p>
       </div>
     );
   }
@@ -138,7 +142,7 @@ export function UpdateTab({ bindingId, candidate, preflight }: { readonly bindin
 
       {phase === "IDLE" && (
         <button type="button" onClick={() => void handleArm()} className="w-fit rounded-slpill bg-brand-purple-glow px-4 py-1.5 font-body-strong text-sm text-white hover:opacity-90">
-          Arma
+          {copy.arm}
         </button>
       )}
 
@@ -146,7 +150,7 @@ export function UpdateTab({ bindingId, candidate, preflight }: { readonly bindin
         <div className="flex items-center gap-2">
           <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 rounded-slpill bg-brand-purple-glow px-4 py-1.5 font-body-strong text-sm text-white hover:opacity-90">
             <Upload size={14} />
-            Carica immagine firmware (.bin)
+            {copy.uploadImage}
           </button>
           <input
             ref={fileInputRef}
@@ -159,7 +163,7 @@ export function UpdateTab({ bindingId, candidate, preflight }: { readonly bindin
             }}
           />
           <button type="button" onClick={() => void handleCancel()} className="rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:bg-surface-raised">
-            Annulla
+            {copy.cancel}
           </button>
         </div>
       )}
@@ -175,7 +179,7 @@ export function UpdateTab({ bindingId, candidate, preflight }: { readonly bindin
 
       {phase === "FINALIZE" && (
         <button type="button" onClick={() => void handleFinalize()} className="w-fit rounded-slpill bg-brand-purple-glow px-4 py-1.5 font-body-strong text-sm text-white hover:opacity-90">
-          Finalizza
+          {copy.finalize}
         </button>
       )}
 
@@ -183,20 +187,20 @@ export function UpdateTab({ bindingId, candidate, preflight }: { readonly bindin
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 rounded-slmd border border-info p-3" style={{ backgroundColor: "color-mix(in srgb, var(--color-info) 6%, transparent)" }}>
             <Loader2 size={16} className="animate-spin text-info" />
-            <p className="font-body text-sm text-ink">In attesa del riavvio del Core.</p>
+            <p className="font-body text-sm text-ink">{copy.waitingReboot}</p>
           </div>
           {liveState && (
             <div className="flex flex-wrap gap-2 font-mono text-xs text-ink-muted">
-              <span className="rounded-slpill border border-border-strong px-2 py-1">stato {updateStateLabel(liveState.state)}</span>
-              <span className="rounded-slpill border border-border-strong px-2 py-1">trasporto {updateTransportLabel(liveState.transport)}</span>
-              <span className="rounded-slpill border border-border-strong px-2 py-1">immagine confermata {liveState.imageConfirmed ? "sì" : "no"}</span>
+              <span className="rounded-slpill border border-border-strong px-2 py-1">{copy.state} {updateStateLabel(liveState.state)}</span>
+              <span className="rounded-slpill border border-border-strong px-2 py-1">{copy.transport} {updateTransportLabel(liveState.transport)}</span>
+              <span className="rounded-slpill border border-border-strong px-2 py-1">{copy.imageConfirmed} {liveState.imageConfirmed ? copy.yes : copy.no}</span>
             </div>
           )}
           <p className="font-body text-xs text-ink-muted">
-            Nessuna operazione wire espone "prova"/"conferma"/"rollback" esplicitamente — riconnetti il Core da Core Connections dopo il riavvio, poi premi Verifica per confrontare lo snapshot prima/dopo.
+            {copy.postflightHelp}
           </p>
           <button type="button" disabled={!beforeSnapshot} onClick={() => void handleVerifyPostflight()} className="w-fit rounded-slpill bg-brand-purple-glow px-4 py-1.5 font-body-strong text-sm text-white hover:opacity-90 disabled:opacity-40">
-            Verifica postflight
+            {copy.verifyPostflight}
           </button>
           {postflightResult && (
             <div className="flex items-center gap-2 rounded-slmd border-2 p-3" style={{ borderColor: postflightResult.kind === "CONFIRMED_INSTALLED" ? "var(--color-success)" : "var(--color-info)" }}>

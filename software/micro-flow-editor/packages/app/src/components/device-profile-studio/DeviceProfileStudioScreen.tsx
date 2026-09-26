@@ -9,7 +9,9 @@ import type { DeviceProfileSummary } from "@spaghettilab/protocol-sdk";
 import { addGraphNodeCommand, physicalGraphLens } from "@spaghettilab/react-flow-adapter";
 import { Download, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { deviceProfileCopy } from "../../lib/device-profile-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { CompatibilityPanel } from "./CompatibilityPanel.js";
 import { ImportExportDialog } from "./ImportExportDialog.js";
@@ -20,7 +22,6 @@ import { TransportTab } from "./TransportTab.js";
 
 const TABS = ["metadata", "transport", "instructions", "output"] as const;
 type Tab = (typeof TABS)[number];
-const TAB_LABEL: Record<Tab, string> = { metadata: "Metadata", transport: "Transport & Elettrico", instructions: "Istruzioni", output: "Output" };
 
 function emptyDraft(): DeviceProfileDraft {
   return {
@@ -52,6 +53,8 @@ function packageKey(profileId: string, version: number): string {
  * if lower-fidelity, interaction — not a data gap).
  */
 export function DeviceProfileStudioScreen() {
+  const { locale } = useLocale();
+  const copy = deviceProfileCopy(locale);
   const { session, execute, navigate } = useSession();
   const { rows, getSnapshot, listDeviceProfiles, installProfile } = useCoreSessions();
   const bindings = session?.stack.current.coreBindings ?? [];
@@ -159,24 +162,24 @@ export function DeviceProfileStudioScreen() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-14 shrink-0 items-center gap-3 overflow-hidden border-b border-border bg-surface px-4">
-        <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Nome profilo" className="min-w-0 flex-1 truncate bg-transparent font-heading text-lg font-semibold text-ink outline-none" />
+        <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder={copy.profileName} className="min-w-0 flex-1 truncate bg-transparent font-heading text-lg font-semibold text-ink outline-none" />
         <button type="button" onClick={() => setImportOpen(true)} className="flex h-9 items-center gap-1.5 rounded-slsm border border-border-strong px-3 font-body text-sm text-ink hover:bg-surface-raised">
           <Upload size={16} />
-          Importa
+          {copy.importAction}
         </button>
         <button type="button" onClick={() => setExportOpen(true)} disabled={!exportPackage} className="flex h-9 items-center gap-1.5 rounded-slsm border border-border-strong px-3 font-body text-sm text-ink hover:bg-surface-raised disabled:opacity-50">
           <Download size={16} />
-          Esporta
+          {copy.exportAction}
         </button>
         <button type="button" onClick={handleSave} disabled={!exportPackage} className="rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-          Salva profilo
+          {copy.saveProfile}
         </button>
       </div>
 
       <div className="flex h-11 shrink-0 items-center gap-1 border-b border-border bg-surface px-4">
         {TABS.map((t) => (
           <button key={t} type="button" onClick={() => setTab(t)} className={`rounded-slpill px-3 py-1.5 font-body text-sm ${tab === t ? "bg-brand-blue text-white" : "text-ink-muted hover:bg-surface-raised"}`}>
-            {TAB_LABEL[t]}
+            {copy.tabs[t]}
           </button>
         ))}
       </div>
@@ -253,6 +256,8 @@ function InstantiateDialog({
   readonly onCancel: () => void;
   readonly onConfirm: (choice: ModuleInstantiationChoice) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = deviceProfileCopy(locale);
   const firstFlow = topology?.flows[0];
   const firstBay = firstFlow?.bays[0];
   const [portId, setPortId] = useState(firstFlow?.portId ?? -1);
@@ -278,7 +283,7 @@ function InstantiateDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,23,31,.35)]" onClick={onCancel}>
       <div onClick={(e) => e.stopPropagation()} className="w-96 rounded-sllg bg-surface p-6 shadow-e3">
-        <h2 className="mb-4 font-heading text-lg font-semibold text-ink">Instanzia come Module</h2>
+        <h2 className="mb-4 font-heading text-lg font-semibold text-ink">{copy.instantiate}</h2>
         <label className="mb-1 block font-body text-xs font-semibold text-ink-muted">Port</label>
         <select value={portId} onChange={(e) => setPortId(Number(e.target.value))} className="mb-3 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none">
           <option value={-1}>—</option>
@@ -306,7 +311,7 @@ function InstantiateDialog({
             </option>
           ))}
         </select>
-        <label className="mb-1 block font-body text-xs font-semibold text-ink-muted">Modalità elettrica</label>
+        <label className="mb-1 block font-body text-xs font-semibold text-ink-muted">{copy.electricalMode}</label>
         <select value={electricalMode} onChange={(e) => setElectricalMode(e.target.value as ElectricalMode)} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none">
           <option value="input-only">input-only</option>
           <option value="output-only">output-only</option>
@@ -315,7 +320,7 @@ function InstantiateDialog({
         {transport === PortTransport.I2C && (
           <>
             <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="inst-i2c">
-              Indirizzo I2C (i2c_address)
+              {copy.i2cAddress}
             </label>
             <input id="inst-i2c" type="number" value={addressDraft} onChange={(e) => setAddressDraft(e.target.value)} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
           </>
@@ -334,15 +339,15 @@ function InstantiateDialog({
               ROM 1-Wire (w1_rom)
             </label>
             <input id="inst-w1" value={w1RomDraft} placeholder="28FF641F0000003D" onChange={(e) => setW1RomDraft(e.target.value)} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" style={{ borderColor: w1RomInvalid && w1RomDraft.trim() !== "" ? "var(--color-error)" : undefined }} />
-            <p className="mb-4 mt-1 font-body text-xs text-ink-faint">8 byte hex — binding di questa istanza, non del profilo condiviso.</p>
+            <p className="mb-4 mt-1 font-body text-xs text-ink-faint">{copy.w1Help}</p>
           </>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onCancel} className="rounded-slsm px-4 py-2 font-body text-sm text-ink-muted hover:bg-surface-raised">
-            Annulla
+            {copy.cancel}
           </button>
           <button type="button" onClick={() => onConfirm({ portId, bayId, railId, electricalMode, endpoint: endpointOf() })} disabled={!canConfirm} className="rounded-slsm bg-brand-blue px-4 py-2 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-            Instanzia
+            {copy.instantiateAction}
           </button>
         </div>
       </div>

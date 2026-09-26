@@ -1,4 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
+import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import {
   parseRgbLedConfig,
   serializeRgbLedActions,
@@ -13,6 +15,8 @@ export function RgbLedSequenceEditor({
   readonly properties: Readonly<Record<string, unknown>>;
   readonly onChange: (next: Record<string, unknown>) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const config = parseRgbLedConfig(properties);
   if (config.mode !== "sequence") return null;
 
@@ -38,15 +42,15 @@ export function RgbLedSequenceEditor({
 
   return (
     <div className="mb-4 rounded-slsm border border-border-strong p-3">
-      <div className="mb-2 font-body text-xs font-semibold text-ink-muted">Azioni della sequenza</div>
+      <div className="mb-2 font-body text-xs font-semibold text-ink-muted">{copy.sequenceTitle}</div>
       <p className="mb-3 font-body text-[11px] leading-snug text-ink-faint">
-        Ogni azione è un passo. Gli effetti pronti (Color cycle, Breathe…) restano parametrici — qui componi solo solid / fade / wait.
+        {copy.sequenceHelp}
       </p>
       <div className="flex flex-col gap-2">
         {config.actions.map((action, index) => (
           <div key={index} className="flex flex-wrap items-end gap-2 rounded-slsm bg-surface-sunken px-2 py-2">
             <label className="flex min-w-[5.5rem] flex-col gap-0.5 font-body text-[10px] text-ink-muted">
-              Tipo
+              {copy.type}
               <select
                 value={action.kind}
                 onChange={(e) => {
@@ -64,7 +68,7 @@ export function RgbLedSequenceEditor({
             {action.kind !== "wait" && (
               <>
                 <label className="flex flex-col gap-0.5 font-body text-[10px] text-ink-muted">
-                  Colore
+                  {copy.color}
                   <input
                     type="color"
                     value={action.color ?? "#FF3366"}
@@ -73,7 +77,7 @@ export function RgbLedSequenceEditor({
                   />
                 </label>
                 <label className="flex w-16 flex-col gap-0.5 font-body text-[10px] text-ink-muted">
-                  Intensità
+                  {copy.intensity}
                   <input
                     type="number"
                     min={0}
@@ -97,7 +101,7 @@ export function RgbLedSequenceEditor({
             </label>
             <button
               type="button"
-              aria-label="Rimuovi azione"
+              aria-label={copy.removeAction}
               onClick={() => removeAt(index)}
               className="ml-auto flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:bg-surface hover:text-error"
             >

@@ -1,5 +1,6 @@
 import type { DeviceProfileSummary, GetCatalogResponse } from "@spaghettilab/protocol-sdk";
 import { useState } from "react";
+import { catalogTopologyCopy } from "../../../lib/catalog-topology-copy.js";
 import { chromeCopy } from "../../../lib/chrome-copy.js";
 import { useCoreSessions } from "../../../state/core-sessions-context.js";
 import { useLocale } from "../../../state/locale-context.js";
@@ -10,6 +11,7 @@ import { InstalledDriverCard } from "../InstalledDriverCard.js";
 export function CoreCatalogPane() {
   const { locale } = useLocale();
   const copy = chromeCopy(locale);
+  const catalogCopy = catalogTopologyCopy(locale);
   const { session } = useSession();
   const { rows, getClient, listDeviceProfiles } = useCoreSessions();
   const bindings = session?.stack.current.coreBindings ?? [];
@@ -23,16 +25,16 @@ export function CoreCatalogPane() {
 
   async function requestCatalog() {
     if (!selected) {
-      setError("Nessun Core nel progetto.");
+      setError(catalogCopy.noCoreInProject);
       return;
     }
     if (row?.sessionState !== "READY") {
-      setError("Collega il Core da Core Connections, poi richiedi il catalogo.");
+      setError(catalogCopy.connectThenRequest);
       return;
     }
     const client = getClient(selected.bindingId);
     if (!client) {
-      setError("Sessione Core assente.");
+      setError(catalogCopy.sessionAbsent);
       return;
     }
     setLoading(true);
@@ -73,7 +75,7 @@ export function CoreCatalogPane() {
           disabled={loading}
           className="h-9 rounded-slsm bg-brand-blue px-4 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50"
         >
-          {loading ? "Richiesta…" : "Richiedi dal Core"}
+          {loading ? catalogCopy.requesting : catalogCopy.requestFromCore}
         </button>
       </div>
 

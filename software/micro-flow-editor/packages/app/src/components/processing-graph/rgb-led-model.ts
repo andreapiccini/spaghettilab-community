@@ -281,12 +281,14 @@ function parseHex(hex: string): { r: number; g: number; b: number } | undefined 
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
 
-export function rgbLedSubtitle(config: RgbLedConfig): string {
+export function rgbLedSubtitle(config: RgbLedConfig, locale: "it" | "en" = "it"): string {
   const n = `×${config.ledCount}`;
   const edge = config.triggerEdge === "falling" ? "falling" : "rising";
-  const action = config.triggerAction === "start" ? "avvia" : "segue";
+  const action = config.triggerAction === "start" ? (locale === "en" ? "start" : "avvia") : locale === "en" ? "follow" : "segue";
   const trigger = `${edge} · ${action}`;
-  if (config.mode === "sequence") return `Bay · uscita · sequenza (${config.actions.length}) · ${trigger} ${n}`;
+  const side = locale === "en" ? "output" : "uscita";
+  const sequence = locale === "en" ? "sequence" : "sequenza";
+  if (config.mode === "sequence") return `Bay · ${side} · ${sequence} (${config.actions.length}) · ${trigger} ${n}`;
   const label = RGB_LED_PRESET_OPTIONS.find((o) => o.value === config.preset)?.label ?? config.preset;
-  return `Bay · uscita · ${label} · ${trigger} ${n}`;
+  return `Bay · ${side} · ${label} · ${trigger} ${n}`;
 }

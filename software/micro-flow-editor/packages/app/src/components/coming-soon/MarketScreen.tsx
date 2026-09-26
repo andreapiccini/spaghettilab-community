@@ -1,26 +1,16 @@
 import { Boxes, Cpu, ShoppingBag, type LucideIcon } from "lucide-react";
+import { comingSoonCopy } from "../../lib/coming-soon-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { ComingSoonScreen } from "./ComingSoonScreen.js";
 
 type MarketCategory = {
   readonly id: "software" | "hardware";
   readonly icon: LucideIcon;
-  readonly title: string;
-  readonly body: string;
 };
 
 const CATEGORIES: readonly MarketCategory[] = [
-  {
-    id: "software",
-    icon: Boxes,
-    title: "Moduli software",
-    body: "Flow, blocchi di elaborazione, pack e estensioni da aggiungere al progetto.",
-  },
-  {
-    id: "hardware",
-    icon: Cpu,
-    title: "Moduli hardware",
-    body: "Schede, sensori e moduli fisici compatibili con i Core già collegati.",
-  },
+  { id: "software", icon: Boxes },
+  { id: "hardware", icon: Cpu },
 ];
 
 /**
@@ -28,15 +18,16 @@ const CATEGORIES: readonly MarketCategory[] = [
  * Capability Marketplace & OTA screen, which stays the advanced pack/OTA tool.
  */
 export function MarketScreen() {
+  const { locale } = useLocale();
+  const copy = comingSoonCopy(locale);
+
   return (
-    <ComingSoonScreen
-      icon={ShoppingBag}
-      title="Market"
-      description="Qui potrai acquistare e aggiungere moduli al progetto. Due cataloghi restano distinti: software (flow e pack) e hardware (schede e sensori). Nessun checkout per ora."
-    >
+    <ComingSoonScreen icon={ShoppingBag} title={copy.market.title} description={copy.market.description}>
       <div className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-2">
         {CATEGORIES.map((category) => {
           const Icon = category.icon;
+          const title = category.id === "software" ? copy.market.softwareTitle : copy.market.hardwareTitle;
+          const body = category.id === "software" ? copy.market.softwareBody : copy.market.hardwareBody;
           return (
             <article
               key={category.id}
@@ -51,21 +42,14 @@ export function MarketScreen() {
               >
                 <Icon size={20} className="text-brand-blue" />
               </div>
-              <h2 className="mt-3 font-heading text-base font-semibold text-ink">
-                {category.title}
-              </h2>
-              <p className="mt-1 font-body text-sm text-ink-muted">{category.body}</p>
-              <p className="mt-3 font-body text-xs text-ink-faint">
-                Catalogo riservato — Coming soon
-              </p>
+              <h2 className="mt-3 font-heading text-base font-semibold text-ink">{title}</h2>
+              <p className="mt-1 font-body text-sm text-ink-muted">{body}</p>
+              <p className="mt-3 font-body text-xs text-ink-faint">{copy.reservedCatalog}</p>
             </article>
           );
         })}
       </div>
-      <p className="mt-6 max-w-2xl font-body text-xs text-ink-faint">
-        I Capability Pack e l&apos;OTA restano in Capability Marketplace, in modalità
-        avanzata.
-      </p>
+      <p className="mt-6 max-w-2xl font-body text-xs text-ink-faint">{copy.market.footnote}</p>
     </ComingSoonScreen>
   );
 }

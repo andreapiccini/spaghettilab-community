@@ -2,7 +2,9 @@ import type { CapabilityPackIndex, CatalogIndex, ProfileIndex } from "@spaghetti
 import { Binary, Box, ChevronDown, Cpu, GitBranch, IdCard, Package, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { catalogTopologyCopy } from "../../lib/catalog-topology-copy.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { useLocale } from "../../state/locale-context.js";
 
 type CatalogEntry = { readonly key: string; readonly primary: string; readonly secondary: string; readonly detail: readonly { readonly label: string; readonly value: string }[] };
 
@@ -24,6 +26,8 @@ function bytesToHexShort(bytes: Uint8Array, len = 8): string {
  * non uno stato per voce di catalogo) — gap dichiarato, non un valore inventato.
  */
 export function CatalogView({ catalog, profiles, packs }: { readonly catalog: CatalogIndex; readonly profiles: ProfileIndex; readonly packs: CapabilityPackIndex | null }) {
+  const { locale } = useLocale();
+  const copy = catalogTopologyCopy(locale);
   const categories: { readonly key: string; readonly label: string; readonly icon: LucideIcon; readonly colorVar: string; readonly entries: readonly CatalogEntry[]; readonly emptyNote?: string }[] = [
     {
       key: "module-driver",
@@ -33,17 +37,17 @@ export function CatalogView({ catalog, profiles, packs }: { readonly catalog: Ca
       entries: catalog.moduleDrivers.map((d) => ({
         key: d.typeId,
         primary: d.typeId,
-        secondary: `${d.commandCount} comandi`,
+        secondary: copy.commands(d.commandCount),
         detail: [
           { label: "typeId", value: d.typeId },
           { label: "commandCount", value: String(d.commandCount) },
-          { label: "schema di campo", value: "Nessuno schema esposto dal protocollo per questo tipo (S042 gap)" },
+          { label: copy.fieldSchema, value: copy.noFieldSchema },
         ],
       })),
     },
-    { key: "rule", label: "Rule", icon: GitBranch, colorVar: "var(--color-warning)", entries: [], emptyNote: "Non ancora esposto dal protocollo (S041)" },
-    { key: "block", label: "Block", icon: Box, colorVar: "var(--color-brand-purple-glow)", entries: [], emptyNote: "Non ancora esposto dal protocollo (S041)" },
-    { key: "opcode", label: "Opcode", icon: Binary, colorVar: "var(--color-ink-muted)", entries: [], emptyNote: "Non ancora esposto dal protocollo (S041)" },
+    { key: "rule", label: "Rule", icon: GitBranch, colorVar: "var(--color-warning)", entries: [], emptyNote: copy.notExposed },
+    { key: "block", label: "Block", icon: Box, colorVar: "var(--color-brand-purple-glow)", entries: [], emptyNote: copy.notExposed },
+    { key: "opcode", label: "Opcode", icon: Binary, colorVar: "var(--color-ink-muted)", entries: [], emptyNote: copy.notExposed },
     {
       key: "profile",
       label: "Profile",
@@ -89,6 +93,8 @@ export function CatalogView({ catalog, profiles, packs }: { readonly catalog: Ca
 }
 
 function Category({ label, icon: Icon, colorVar, entries, emptyNote }: { readonly label: string; readonly icon: LucideIcon; readonly colorVar: string; readonly entries: readonly CatalogEntry[]; readonly emptyNote?: string }) {
+  const { locale } = useLocale();
+  const copy = catalogTopologyCopy(locale);
   const [open, setOpen] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
@@ -107,7 +113,7 @@ function Category({ label, icon: Icon, colorVar, entries, emptyNote }: { readonl
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={motionTokens.duration.base} className="overflow-hidden">
             <div className="flex flex-col gap-1 border-t border-border p-2 pl-4">
               {entries.length === 0 ? (
-                <p className="px-2 py-2 font-body text-xs text-ink-faint">{emptyNote ?? "Nessuna voce."}</p>
+                <p className="px-2 py-2 font-body text-xs text-ink-faint">{emptyNote ?? copy.noEntries}</p>
               ) : (
                 entries.map((entry, i) => (
                   <motion.div key={entry.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * motionTokens.stagger.list }}>

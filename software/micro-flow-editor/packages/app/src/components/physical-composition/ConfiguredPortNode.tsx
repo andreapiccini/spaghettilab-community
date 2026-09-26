@@ -2,7 +2,10 @@ import type { Node, NodeProps } from "@xyflow/react";
 import { motion } from "motion/react";
 import { Cable } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { physicalCompositionCopy } from "../../lib/physical-composition-copy.js";
+import { localizeCompositionLabel, physicalProtocolCopy } from "../../lib/physical-protocol-copy.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { useLocale } from "../../state/locale-context.js";
 import {
   PERIPHERAL_COLOR,
   PERIPHERAL_LABEL,
@@ -44,12 +47,14 @@ export function portIdFromCardId(id: string): number {
 }
 
 export function ConfiguredPortNode({ data, selected }: NodeProps & { readonly data: ConfiguredPortNodeData }) {
+  const { locale } = useLocale();
+  const proto = physicalProtocolCopy(locale);
   const assigned = assignedPinCount({ portId: data.portId, pins: data.pins });
   const peripherals = assignedPeripheralKinds(data.pins);
   const namedPeripherals = peripherals.filter((peripheral) => !isPowerPeripheral(peripheral));
   const protocol = data.protocolName ?? data.nativeTypeId;
-  const origin = data.fromCore ? "Dal Core" : assigned > 0 || protocol ? "Configurata" : "A mano";
-  const subtitle = [origin, `${data.pins.length} segnali`, data.flowId !== undefined ? `Flow ${data.flowId}` : undefined, protocol].filter(Boolean).join(" · ");
+  const origin = data.fromCore ? proto.fromCore : assigned > 0 || protocol ? proto.configured : proto.byHand;
+  const subtitle = [origin, proto.signals(data.pins.length), data.flowId !== undefined ? `Flow ${data.flowId}` : undefined, protocol].filter(Boolean).join(" · ");
   const [openPeripheral, setOpenPeripheral] = useState<LogicalPeripheral | null>(null);
   const [openFieldId, setOpenFieldId] = useState<string | null>(null);
   const [openPinIndex, setOpenPinIndex] = useState<number | null>(null);
@@ -89,7 +94,7 @@ export function ConfiguredPortNode({ data, selected }: NodeProps & { readonly da
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <div className="min-w-0 truncate font-body text-sm font-semibold text-ink">Porta {data.portId}</div>
+              <div className="min-w-0 truncate font-body text-sm font-semibold text-ink">{physicalCompositionCopy(locale).portTitle(data.portId)}</div>
               <div className="flex shrink-0 items-center gap-1.5">
                 {namedPeripherals.map((peripheral) => (
                   <PeripheralDot
@@ -109,10 +114,10 @@ export function ConfiguredPortNode({ data, selected }: NodeProps & { readonly da
           {openPeripheral && (
             <div className="px-3 pb-3 pt-2">
               <div className="mb-1.5 font-body text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
-                Grandezze · {PERIPHERAL_LABEL[openPeripheral]}
+                {physicalCompositionCopy(locale).quantity} · {PERIPHERAL_LABEL[openPeripheral]}
               </div>
               {linePins.length === 0 && quantities.length === 0 ? (
-                <p className="font-body text-[11px] text-ink-faint">Nessuna grandezza su questa periferica.</p>
+                <p className="font-body text-[11px] text-ink-faint">{physicalCompositionCopy(locale).noQuantity}</p>
               ) : linePins.length > 0 ? (
                 <div className="flex flex-wrap gap-1">
                   {linePins.map((pin) => (
@@ -150,7 +155,7 @@ export function ConfiguredPortNode({ data, selected }: NodeProps & { readonly da
                         setOpenFieldId(openFieldId === field.id ? null : field.id);
                       }}
                     >
-                      {field.label || field.name || field.identifier || "Senza nome"}
+                      {field.label || field.name || field.identifier || proto.unnamed}
                     </button>
                   ))}
                 </div>
@@ -257,6 +262,7 @@ function PeripheralDot({
 }
 
 function PinCompositionPanel({ pin, color }: { readonly pin: PinAssignment; readonly color: string }) {
+  const { locale } = useLocale();
   const lines = pinCompositionLines(pin);
   return (
     <div className="mt-2 rounded-slmd bg-surface-sunken px-2.5 py-2">
@@ -264,7 +270,7 @@ function PinCompositionPanel({ pin, color }: { readonly pin: PinAssignment; read
       <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
         {lines.map((line) => (
           <div key={line.label} className="min-w-0">
-            <span className="font-body text-[9px] uppercase tracking-wide text-ink-faint">{line.label}</span>
+            <span className="font-body text-[9px] uppercase tracking-wide text-ink-faint">{localizeCompositionLabel(line.label, locale)}</span>
             <div className="truncate font-mono text-[10px] text-ink" style={{ color }}>{line.value}</div>
           </div>
         ))}
@@ -274,6 +280,7 @@ function PinCompositionPanel({ pin, color }: { readonly pin: PinAssignment; read
 }
 
 function CompositionPanel({ field, color }: { readonly field: ProtocolField; readonly color: string }) {
+  const { locale } = useLocale();
   const lines = compositionLines(field);
   return (
     <div className="mt-2 rounded-slmd bg-surface-sunken px-2.5 py-2">
@@ -281,7 +288,7 @@ function CompositionPanel({ field, color }: { readonly field: ProtocolField; rea
       <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
         {lines.map((line) => (
           <div key={line.label} className="min-w-0">
-            <span className="font-body text-[9px] uppercase tracking-wide text-ink-faint">{line.label}</span>
+            <span className="font-body text-[9px] uppercase tracking-wide text-ink-faint">{localizeCompositionLabel(line.label, locale)}</span>
             <div className="truncate font-mono text-[10px] text-ink" style={{ color }}>{line.value}</div>
           </div>
         ))}

@@ -16,14 +16,19 @@ export function formatConfiguredSubtitle(
   typeId: string,
   properties: Readonly<Record<string, unknown>>,
   inputLabel?: string,
+  locale: "it" | "en" = "it",
 ): string | undefined {
-  const expr = kind === "rule" ? formatRule(typeId, properties) : formatBlock(typeId, properties);
+  const expr = kind === "rule" ? formatRule(typeId, properties, locale) : formatBlock(typeId, properties, locale);
   if (expr === undefined) return formatGenericProperties(properties);
   if (inputLabel && inputLabel.trim() !== "") return `${inputLabel.trim()} ${expr}`;
   return expr;
 }
 
-function formatBlock(typeId: string, properties: Readonly<Record<string, unknown>>): string | undefined {
+function formatBlock(
+  typeId: string,
+  properties: Readonly<Record<string, unknown>>,
+  locale: "it" | "en" = "it",
+): string | undefined {
   switch (typeId) {
     case "threshold": {
       const level = propText(properties["1"]);
@@ -36,7 +41,7 @@ function formatBlock(typeId: string, properties: Readonly<Record<string, unknown
     }
     case "debounce": {
       const samples = propText(properties["1"]);
-      return samples === undefined ? undefined : `${samples} campioni`;
+      return samples === undefined ? undefined : `${samples} ${locale === "en" ? "samples" : "campioni"}`;
     }
     case "scale_offset": {
       const scale = propText(properties["1"]);
@@ -65,9 +70,13 @@ function formatBlock(typeId: string, properties: Readonly<Record<string, unknown
   }
 }
 
-function formatRule(typeId: string, properties: Readonly<Record<string, unknown>>): string | undefined {
+function formatRule(
+  typeId: string,
+  properties: Readonly<Record<string, unknown>>,
+  locale: "it" | "en" = "it",
+): string | undefined {
   if (typeId !== "threshold") return undefined;
-  return formatThresholdRuleExpr(properties);
+  return formatThresholdRuleExpr(properties, locale);
 }
 
 function formatGenericProperties(properties: Readonly<Record<string, unknown>>): string | undefined {

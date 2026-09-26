@@ -1,5 +1,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Cable, Cpu, Palette, Power, ToggleLeft } from "lucide-react";
+import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { FLOW_START_COLOR } from "./block-visuals.js";
 import { lineHighAtElapsed, lineHighAtTick, waveformPlateaus, type ToggleMode } from "./dry-run-preview.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
@@ -25,6 +27,8 @@ const CHANNEL_ROW_H = 22;
  * Multi-channel (Terminal block): named rows with a handle beside each label.
  */
 export function ProcessingNode({ id, data, selected }: NodeProps & { readonly data: ProcessingNodeUiData }) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
   const Icon =
     data.tileGlyph === "toggle"
@@ -89,7 +93,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               : undefined,
             cursor: "default",
           }}
-          title="Attivazione Schedule — collega al primo blocco"
+          title={copy.scheduleActivation}
         >
           <Handle
             type="source"
@@ -123,7 +127,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
     <div className="group relative" style={{ width: cardWidth }}>
       <HoverDeleteButton
         id={id}
-        label="Elimina blocco"
+        label={copy.deleteBlock}
         forceVisible={selected}
         corner={multiChannel ? "left" : "right"}
       />
@@ -135,7 +139,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             backgroundColor: "var(--color-surface)",
             outline: `1px solid color-mix(in srgb, ${BAY_EDGE} 45%, transparent)`,
           }}
-          title="Modulo hardware (bay)"
+          title={copy.bayModule}
         >
           <Cpu size={9} strokeWidth={2.5} aria-hidden />
           Bay
@@ -212,7 +216,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                     color: BAY_EDGE,
                     outline: `1px solid color-mix(in srgb, ${BAY_EDGE} 45%, transparent)`,
                   }}
-                  title="Modulo hardware (bay)"
+                  title={copy.bayModule}
                 >
                   <Cpu size={9} strokeWidth={2.5} aria-hidden />
                   Bay

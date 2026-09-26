@@ -1,25 +1,15 @@
 import type { CoreBindingId } from "@spaghettilab/domain";
-import { compareResourceBudget, preflightOtaCandidate, PreflightOutcome, type CoreOtaContext, type OtaCandidateManifest, type PreflightResult, type UpdateState } from "@spaghettilab/ota-preflight";
+import { compareResourceBudget, preflightOtaCandidate, type CoreOtaContext, type OtaCandidateManifest, type PreflightResult, type UpdateState } from "@spaghettilab/ota-preflight";
 import { AlertTriangle, CheckCircle2, Upload, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { marketplaceCopy } from "../../lib/marketplace-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useLocale } from "../../state/locale-context.js";
 import { parseOtaCandidateManifestJson } from "./ota-candidate-json.js";
 
-const OUTCOME_LABEL: Record<string, string> = {
-  [PreflightOutcome.READY]: "Pronto",
-  [PreflightOutcome.REJECTED_UNTRUSTED]: "Fonte non fidata",
-  [PreflightOutcome.REJECTED_HASH_MISMATCH]: "Hash non corrispondente",
-  [PreflightOutcome.REJECTED_CORE_VARIANT]: "Variante Core incompatibile",
-  [PreflightOutcome.REJECTED_RESOURCE_PROFILE]: "Resource profile incompatibile",
-  [PreflightOutcome.REJECTED_COORDINATOR_BUSY]: "Coordinator OTA occupato",
-  [PreflightOutcome.REJECTED_POSSIBLE_DOWNGRADE]: "Possibile downgrade",
-  [PreflightOutcome.REJECTED_BOOTLOADER_TOO_OLD]: "Bootloader troppo vecchio",
-  [PreflightOutcome.REJECTED_PROTOCOL_TOO_OLD]: "Protocollo troppo vecchio",
-  [PreflightOutcome.REJECTED_CONFIG_VERSION_TOO_OLD]: "Versione Config troppo vecchia",
-  [PreflightOutcome.REJECTED_ABI_TOO_NEW]: "ABI troppo nuova",
-  [PreflightOutcome.REJECTED_CONFIG_TYPE_REMOVED]: "Config referenzia un tipo rimosso",
-  [PreflightOutcome.REJECTED_BUDGET_EXCEEDED]: "Budget risorse superato",
-};
+function outcomeLabel(kind: string, copy: ReturnType<typeof marketplaceCopy>): string {
+  return copy.outcomes[kind] ?? kind;
+}
 
 /**
  * `ux/screens/S100-capability-marketplace/visual.md` § Preflight, cablato su
@@ -42,6 +32,8 @@ export function PreflightTab({
   readonly onPreflightComputed: (result: PreflightResult | null) => void;
   readonly onStartUpdate: () => void;
 }) {
+  const { locale } = useLocale();
+  const copy = marketplaceCopy(locale);
   const { getSnapshot, getUpdateStatus } = useCoreSessions();
   const [importError, setImportError] = useState<string | null>(null);
   const [updateState, setUpdateState] = useState<UpdateState | null>(null);
@@ -122,16 +114,16 @@ export function PreflightTab({
 
       {!candidate ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-body text-sm text-ink-faint">Nessun candidato OTA importato — nessuna operazione wire elenca immagini firmware scaricabili, importa direttamente il manifest JSON di una build.</p>
+          <p className="font-body text-sm text-ink-faint">{copy.noOtaCandidate}</p>
         </div>
       ) : !preflight ? (
-        <p className="font-body text-sm text-ink-faint">In attesa dello stato del Core…</p>
+        <p className="font-body text-sm text-ink-faint">{copy.waitingCore}</p>
       ) : (
         <>
           <div className="flex items-center gap-2 rounded-slmd border-2 p-3" style={{ borderColor: preflight.kind === "READY" ? "var(--color-success)" : "var(--color-error)" }}>
             {preflight.kind === "READY" ? <CheckCircle2 size={18} className="text-success" /> : <XCircle size={18} className="text-error" />}
             <div>
-              <p className="font-body-strong text-sm text-ink">{OUTCOME_LABEL[preflight.kind] ?? preflight.kind}</p>
+              <p className="font-body-strong text-sm text-ink">{outcomeLabel(preflight.kind, copy)}</p>
               <p className="font-body text-xs text-ink-muted">{preflight.reason}</p>
             </div>
             <button
@@ -140,21 +132,21 @@ export function PreflightTab({
               onClick={onStartUpdate}
               className="ml-auto rounded-slpill bg-brand-purple-glow px-4 py-1.5 font-body-strong text-xs text-white hover:opacity-90 disabled:opacity-40"
             >
-              Avvia OTA
+              {copy.startOta}
             </button>
           </div>
 
           {budget && (
             <div>
-              <h2 className="font-heading text-sm font-semibold text-ink">Budget risorse</h2>
+              <h2 className="font-heading text-sm font-semibold text-ink">{copy.resourceBudget}</h2>
               <div className="mt-2 overflow-auto rounded-slmd border border-border">
                 <table className="w-full font-mono text-xs">
                   <thead>
                     <tr className="border-b border-border bg-surface-sunken">
-                      <th className="p-2 text-left">Dimensione</th>
-                      <th className="p-2 text-right">Richiesto</th>
-                      <th className="p-2 text-right">Capacità</th>
-                      <th className="p-2 text-right">Margine</th>
+                      <th className="p-2 text-left">{copy.dimension}</th>
+                      <th className="p-2 text-right">{copy.requiredBytes}</th>
+                      <th className="p-2 text-right">{copy.capacity}</th>
+                      <th className="p-2 text-right">{copy.margin}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -177,7 +169,7 @@ export function PreflightTab({
           {preflight.budgetDeltas && preflight.budgetDeltas.length > 0 && preflight.kind !== "READY" && (
             <div className="flex items-start gap-2 border-l-4 border-error p-3" style={{ backgroundColor: "color-mix(in srgb, var(--color-error) 6%, transparent)" }}>
               <AlertTriangle size={16} className="mt-0.5 shrink-0 text-error" />
-              <p className="font-body text-sm text-ink">Preflight bloccato — vedi {preflight.budgetDeltas.length} dimensioni fuori budget sopra.</p>
+              <p className="font-body text-sm text-ink">{copy.preflightBlocked(preflight.budgetDeltas.length)}</p>
             </div>
           )}
         </>

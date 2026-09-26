@@ -2,7 +2,9 @@ import { normalizeCapabilityPacks, normalizeCatalogPages, normalizeProfilePages,
 import type { CoreBindingId, CoreBindingRecord } from "@spaghettilab/domain";
 import { TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { catalogTopologyCopy } from "../../lib/catalog-topology-copy.js";
 import { reconnectCoreBinding } from "../../lib/reconnect-binding.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useSession } from "../../state/session-context.js";
 import { CatalogView } from "./CatalogView.js";
@@ -17,6 +19,8 @@ function fingerprintHex(bytes: Uint8Array): string {
 
 /** `ux/screens/S040-catalog-topology/{visual,ui-behavior,backend-behavior}.md`. Puramente diagnostica: nessuna mutazione, nessun canvas React Flow (non è questa schermata a usare `react-flow-adapter`, vedi `backend-behavior.md`). */
 export function CatalogTopologyScreen() {
+  const { locale } = useLocale();
+  const copy = catalogTopologyCopy(locale);
   const { session } = useSession();
   const { rows, getSnapshot, listDeviceProfiles, connect, fail } = useCoreSessions();
   const bindings = session?.stack.current.coreBindings ?? [];
@@ -64,10 +68,10 @@ export function CatalogTopologyScreen() {
         <h1 className="min-w-0 flex-1 truncate font-heading text-lg font-semibold text-ink">Catalog & Topology Explorer</h1>
         <div className="flex shrink-0 items-center gap-1 rounded-slpill border border-border bg-surface p-1">
           <button type="button" onClick={() => setView("catalog")} className={`rounded-slpill px-3 py-1 font-body text-sm ${view === "catalog" ? "bg-brand-blue text-white" : "text-ink-muted"}`}>
-            Catalogo
+            {copy.catalog}
           </button>
           <button type="button" onClick={() => setView("topology")} className={`rounded-slpill px-3 py-1 font-body text-sm ${view === "topology" ? "bg-brand-blue text-white" : "text-ink-muted"}`}>
-            Topologia
+            {copy.topology}
           </button>
         </div>
         {catalogIndex && catalogIndex.fingerprint.byteLength > 0 && <span className="hidden shrink-0 font-mono text-xs text-ink-faint lg:inline">fp: {fingerprintHex(catalogIndex.fingerprint)}…</span>}
@@ -76,7 +80,7 @@ export function CatalogTopologyScreen() {
       {partial && (
         <div className="flex items-center gap-2 border-l-4 border-warning px-4 py-2" style={{ backgroundColor: "color-mix(in srgb, var(--color-warning) 8%, transparent)" }}>
           <TriangleAlert size={16} className="text-warning" />
-          <span className="font-body text-sm text-ink">Lettura del catalogo interrotta — i dati mostrati potrebbero essere incompleti.</span>
+          <span className="font-body text-sm text-ink">{copy.interrupted}</span>
           {selected && (
             <button
               type="button"
@@ -87,7 +91,7 @@ export function CatalogTopologyScreen() {
               }
               className="ml-auto font-body text-sm font-semibold text-info underline"
             >
-              Riprova lettura
+              {copy.retryRead}
             </button>
           )}
         </div>
@@ -95,11 +99,11 @@ export function CatalogTopologyScreen() {
 
       {!selected ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-body text-sm text-ink-faint">Nessun Core nel progetto — vai a Core Connections per connetterne uno.</p>
+          <p className="font-body text-sm text-ink-faint">{copy.noCore}</p>
         </div>
       ) : !snapshot?.catalog ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3">
-          <p className="font-body text-sm text-ink-muted">Nessun dato disponibile per questo Core.</p>
+          <p className="font-body text-sm text-ink-muted">{copy.noData}</p>
           <button
             type="button"
             onClick={() =>
@@ -109,7 +113,7 @@ export function CatalogTopologyScreen() {
             }
             className="rounded-slpill bg-brand-blue px-4 py-2 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
           >
-            Connetti e leggi
+            {copy.connectAndRead}
           </button>
         </div>
       ) : (

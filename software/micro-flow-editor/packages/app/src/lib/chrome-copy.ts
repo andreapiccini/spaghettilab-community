@@ -16,6 +16,46 @@ type ChromeCopy = {
   readonly comingSoon: string;
   readonly comingSoonBody: string;
   readonly languageHelp: string;
+  readonly noActiveCore: string;
+  readonly collapseRail: string;
+  readonly expandRail: string;
+  readonly hideHint: string;
+  readonly tourNext: string;
+  readonly tourDone: string;
+  readonly goToPrefix: string;
+  readonly screens: {
+    readonly coreConnections: string;
+    readonly catalogTopology: string;
+    readonly physicalComposition: string;
+    readonly deviceProfiles: string;
+    readonly processingGraph: string;
+    readonly deployDiff: string;
+    readonly runtimeDiagnostics: string;
+    readonly capabilityMarketplace: string;
+    readonly automations: string;
+    readonly security: string;
+    readonly market: string;
+    readonly generateSchematic: string;
+    readonly education: string;
+    readonly datasheets: string;
+  };
+  readonly palette: {
+    readonly catalogTopology: string;
+    readonly physicalComposition: string;
+    readonly deviceProfileStudio: string;
+    readonly processingGraph: string;
+    readonly capabilityMarketplace: string;
+    readonly security: string;
+    readonly saveProject: string;
+    readonly undo: string;
+    readonly redo: string;
+    readonly enableAdvanced: string;
+    readonly disableAdvanced: string;
+    readonly searchPlaceholder: string;
+    readonly saving: string;
+    readonly saved: string;
+    readonly saveFailed: string;
+  };
   readonly groups: Record<SettingsGroupId, string>;
   readonly categories: Record<SettingsCategoryId, { readonly label: string; readonly title: string; readonly subtitle: string }>;
 };
@@ -34,7 +74,47 @@ const IT: ChromeCopy = {
   tourReplayHelp: "La guida mostrata alla prima apertura, con le zone principali della shell.",
   comingSoon: "Non ancora disponibile",
   comingSoonBody: "La categoria è riservata. Quando servirà, si aggiunge qui senza cambiare la shell.",
-  languageHelp: "Nome e bandiera della lingua della chrome. Le schermate già scritte restano com'erano finché non opt-in.",
+  languageHelp: "Nome e bandiera della lingua dell'interfaccia. Tutte le schermate seguono questa lingua.",
+  noActiveCore: "Nessun Core attivo",
+  collapseRail: "Comprimi",
+  expandRail: "Espandi",
+  hideHint: "Nascondi",
+  tourNext: "Avanti",
+  tourDone: "Fine",
+  goToPrefix: "Vai a:",
+  screens: {
+    coreConnections: "Core Connections",
+    catalogTopology: "Catalog & Topology",
+    physicalComposition: "Physical Composition",
+    deviceProfiles: "Device Profiles",
+    processingGraph: "Processing Graph",
+    deployDiff: "Deploy & Diff",
+    runtimeDiagnostics: "Runtime & Diagnostics",
+    capabilityMarketplace: "Capability Marketplace",
+    automations: "Automazioni",
+    security: "Sicurezza",
+    market: "Market",
+    generateSchematic: "Genera schematico e PCB",
+    education: "Formazione",
+    datasheets: "Datasheet e istruzioni",
+  },
+  palette: {
+    catalogTopology: "Catalog & Topology Explorer",
+    physicalComposition: "Physical Composition Editor",
+    deviceProfileStudio: "Device Profile Studio",
+    processingGraph: "Processing Graph Editor",
+    capabilityMarketplace: "Capability Marketplace & OTA",
+    security: "Sicurezza e recupero",
+    saveProject: "Salva progetto",
+    undo: "Annulla ultima modifica",
+    redo: "Ripeti ultima modifica",
+    enableAdvanced: "Attiva modalità avanzata",
+    disableAdvanced: "Disattiva modalità avanzata",
+    searchPlaceholder: "Cerca un comando o una schermata...",
+    saving: "Salvataggio...",
+    saved: "Progetto salvato",
+    saveFailed: "Salvataggio non riuscito",
+  },
   groups: {
     application: "Applicazione",
     security: "Sicurezza",
@@ -76,7 +156,47 @@ const EN: ChromeCopy = {
   tourReplayHelp: "The guide shown on first launch, covering the shell's main zones.",
   comingSoon: "Not available yet",
   comingSoonBody: "This category is reserved. When it is needed it can be added here without changing the shell.",
-  languageHelp: "Chrome language, shown with name and flag. Existing screens stay as authored until they opt in.",
+  languageHelp: "Interface language, shown with name and flag. Every screen follows this language.",
+  noActiveCore: "No active Core",
+  collapseRail: "Collapse",
+  expandRail: "Expand",
+  hideHint: "Hide",
+  tourNext: "Next",
+  tourDone: "Done",
+  goToPrefix: "Go to:",
+  screens: {
+    coreConnections: "Core Connections",
+    catalogTopology: "Catalog & Topology",
+    physicalComposition: "Physical Composition",
+    deviceProfiles: "Device Profiles",
+    processingGraph: "Processing Graph",
+    deployDiff: "Deploy & Diff",
+    runtimeDiagnostics: "Runtime & Diagnostics",
+    capabilityMarketplace: "Capability Marketplace",
+    automations: "Automations",
+    security: "Security",
+    market: "Market",
+    generateSchematic: "Generate schematic and PCB",
+    education: "Education",
+    datasheets: "Datasheets and instructions",
+  },
+  palette: {
+    catalogTopology: "Catalog & Topology Explorer",
+    physicalComposition: "Physical Composition Editor",
+    deviceProfileStudio: "Device Profile Studio",
+    processingGraph: "Processing Graph Editor",
+    capabilityMarketplace: "Capability Marketplace & OTA",
+    security: "Security and recovery",
+    saveProject: "Save project",
+    undo: "Undo last change",
+    redo: "Redo last change",
+    enableAdvanced: "Enable advanced mode",
+    disableAdvanced: "Disable advanced mode",
+    searchPlaceholder: "Search a command or screen...",
+    saving: "Saving...",
+    saved: "Project saved",
+    saveFailed: "Save failed",
+  },
   groups: {
     application: "Application",
     security: "Security",

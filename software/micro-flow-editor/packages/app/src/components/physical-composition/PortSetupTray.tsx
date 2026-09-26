@@ -46,6 +46,8 @@ import {
   type PortPinMap,
   type ProtocolMode,
 } from "../../lib/port-protocol-mock.js";
+import { physicalCompositionCopy } from "../../lib/physical-composition-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { PinLineSettingsForm } from "./PinLineSettingsForm.js";
 import { PortDialectPicker } from "./PortDialectPicker.js";
@@ -53,6 +55,10 @@ import { PortMappingEditor } from "./PortMappingEditor.js";
 import type { PortSetupRequest } from "./port-setup-types.js";
 
 const PERIPHERAL_ORDER: readonly LogicalPeripheral[] = ["uart", "i2c", "spi", "can", "gpio", "adc", "pwm", "dac", "w1", "vcc", "gnd", "unused"];
+
+function peripheralLabel(key: LogicalPeripheral, unused: string): string {
+  return key === "unused" ? unused : PERIPHERAL_LABEL[key];
+}
 
 export function PortSetupTray({
   open,
@@ -73,6 +79,8 @@ export function PortSetupTray({
   readonly onReloadTopology?: () => void;
   readonly onClose: () => void;
 }) {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
   const { pinMapOf, protocolFor, upsertProtocol, bindProtocol, savePort, capabilitiesOf } = usePortProtocol();
   const allDeclared = declaredPortsOf(topology, extraPortIds);
   const requestKey = !request ? "closed" : request.kind === "pick" ? "pick" : `${request.kind}-${request.portId}-${request.kind === "pin" ? (request.pinIndex ?? "") : ""}-${request.moduleNodeId ?? ""}`;
@@ -136,7 +144,7 @@ export function PortSetupTray({
     setSection("pin");
   }
 
-  const title = !request || request.kind === "pick" ? "Aggiungi una Porta" : section === "dialect" ? `Porta ${portId} · protocollo` : section === "configure" ? `Porta ${portId} · mapping` : `Porta ${portId}`;
+  const title = !request || request.kind === "pick" ? copy.addAPortTitle : section === "dialect" ? copy.portProtocol(portId) : section === "configure" ? copy.portMapping(portId) : copy.portTitle(portId);
 
   return (
     <AnimatePresence>
@@ -144,7 +152,7 @@ export function PortSetupTray({
         <motion.div initial={{ x: 360 }} animate={{ x: 0 }} exit={{ x: 360 }} transition={motionTokens.spring.smooth} className="flex h-full w-[360px] flex-col border-l border-border bg-surface shadow-e2">
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
             {request.kind !== "pick" && section !== "pin" && (
-              <button type="button" onClick={goBack} className="flex h-8 w-8 items-center justify-center rounded-slsm text-ink-faint hover:bg-surface-raised" aria-label="Indietro">
+              <button type="button" onClick={goBack} className="flex h-8 w-8 items-center justify-center rounded-slsm text-ink-faint hover:bg-surface-raised" aria-label={copy.back}>
                 <ChevronLeft size={16} />
               </button>
             )}
@@ -210,7 +218,7 @@ export function PortSetupTray({
               />
             )}
             {portId >= 0 && section === "configure" && !current && (
-              <p className="font-body text-sm text-ink-muted">Scegli prima un protocollo.</p>
+              <p className="font-body text-sm text-ink-muted">{copy.chooseProtocolFirst}</p>
             )}
           </div>
         </motion.div>
@@ -264,11 +272,11 @@ function DialectStep({
   );
 }
 
-function portOptionLabel(port: DeclaredPort, placed: boolean): string {
-  const bits = [`Porta ${port.portId}`];
+function portOptionLabel(port: DeclaredPort, placed: boolean, copy: ReturnType<typeof physicalCompositionCopy>): string {
+  const bits = [copy.portTitle(port.portId)];
   if (port.flowId !== undefined) bits.push(`Flow ${port.flowId}`);
-  bits.push(`${port.signalCount} segnali`);
-  if (placed) bits.push("già sul canvas");
+  bits.push(copy.signals(port.signalCount));
+  if (placed) bits.push(copy.alreadyOnCanvas);
   return bits.join(" · ");
 }
 
@@ -285,20 +293,22 @@ function PortPicker({
   readonly onReload?: () => void;
   readonly onPick: (portId: number) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
   const firstFree = ports.find((p) => !placedPortIds.includes(p.portId));
   const [chosen, setChosen] = useState(firstFree ? String(firstFree.portId) : "");
 
   if (loading && ports.length === 0) {
-    return <p className="font-body text-sm text-ink-muted">Lettura Porte dal Core (GET_TOPOLOGY)…</p>;
+    return <p className="font-body text-sm text-ink-muted">{copy.readingPorts}</p>;
   }
 
   if (ports.length === 0) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="font-body text-sm text-ink">Nessuna Porta letta dal firmware. Il menu si riempie solo da GET_TOPOLOGY — non si digita un numero.</p>
+        <p className="font-body text-sm text-ink">{copy.noPortsFromFirmware}</p>
         {onReload && (
           <button type="button" onClick={onReload} className="h-9 rounded-slsm bg-brand-blue font-body-strong text-sm text-white hover:bg-brand-blue-dark">
-            Rileggi dal Core
+            {copy.rereadFromCore}
           </button>
         )}
       </div>
@@ -307,21 +317,21 @@ function PortPicker({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="font-body text-sm text-ink-muted">Le Porte arrivano dal Core. Scegli dal menu, poi aggiungila al canvas.</p>
+      <p className="font-body text-sm text-ink-muted">{copy.portsComeFromCore}</p>
       <label className="block" htmlFor="port-from-core">
-        <span className="mb-1 block font-body text-xs font-semibold text-ink-muted">Porta</span>
+        <span className="mb-1 block font-body text-xs font-semibold text-ink-muted">{copy.port}</span>
         <select
           id="port-from-core"
           value={chosen}
           onChange={(e) => setChosen(e.target.value)}
           className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none"
         >
-          <option value="">— scegli una Porta —</option>
+          <option value="">{copy.choosePort}</option>
           {ports.map((port) => {
             const placed = placedPortIds.includes(port.portId);
             return (
               <option key={port.portId} value={port.portId} disabled={placed}>
-                {portOptionLabel(port, placed)}
+                {portOptionLabel(port, placed, copy)}
               </option>
             );
           })}
@@ -333,11 +343,11 @@ function PortPicker({
         onClick={() => onPick(Number(chosen))}
         className="h-9 rounded-slsm bg-brand-blue font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-40"
       >
-        Aggiungi sul canvas
+        {copy.addToCanvas}
       </button>
       {onReload && (
         <button type="button" onClick={onReload} disabled={loading} className="h-9 rounded-slsm border border-border-strong font-body text-sm text-ink hover:bg-surface-raised disabled:opacity-40">
-          {loading ? "Lettura…" : "Rileggi dal Core"}
+          {loading ? copy.reading : copy.rereadFromCore}
         </button>
       )}
     </div>
@@ -363,6 +373,8 @@ function PinSignalEditor({
   readonly onReload?: () => void;
   readonly onDone: () => void;
 }) {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
   const { pinMapOf, setPinMap, protocolFor, upsertProtocol } = usePortProtocol();
   const map = pinMapOf(portId, signalCount);
   const [pinIndex, setPinIndex] = useState(initialPinIndex ?? map.pins[0]?.pinIndex ?? 1);
@@ -510,41 +522,41 @@ function PinSignalEditor({
         <p>
           {capabilities === undefined
             ? fromCore
-              ? "Il Core ha questa Porta ma non ha inviato le periferiche del connettore. Aggiorna il firmware (GET_TOPOLOGY chiave 5) e rileggi. VCC e GND restano disponibili."
-              : "Le periferiche MCU arrivano dal firmware di questa Porta. VCC e GND restano disponibili."
+              ? copy.coreMissingPeripherals
+              : copy.peripheralsFromFirmware
             : focus
-              ? `Clicca un pin libero per assegnarlo, o un segnale già messo per toglierlo. ${signalCount} linee dal Core.`
-              : `Scegli una periferica che il Core espone su questa Porta, poi assegna i segnali. ${signalCount} linee dal Core.`}
+              ? copy.clickFreePin(signalCount)
+              : copy.choosePeripheral(signalCount)}
         </p>
         {capabilities !== undefined && (
           <p className="mt-1 font-body text-xs text-ink-faint">
-            Su questa Porta: {available.filter((key) => key !== "vcc" && key !== "gnd").map((key) => PERIPHERAL_LABEL[key]).join(", ") || "nessuna periferica MCU"}
+            {copy.onThisPort(available.filter((key) => key !== "vcc" && key !== "gnd").map((key) => (key === "unused" ? copy.unused : PERIPHERAL_LABEL[key])).join(", ") || copy.noMcuPeripheral)}
           </p>
         )}
         {capabilities === undefined && onReload && (
           <button type="button" onClick={onReload} className="mt-2 h-8 rounded-slsm border border-border-strong font-body text-xs text-ink hover:bg-surface-raised">
-            Rileggi periferiche dal Core
+            {copy.rereadPeripherals}
           </button>
         )}
       </div>
       {pendingPeripheral && exclusive && (
         <div className="rounded-slmd border border-border bg-surface-sunken p-3">
           <p className="font-body text-sm text-ink">
-            Hai già {PERIPHERAL_LABEL[exclusive]}. Passare a {PERIPHERAL_LABEL[pendingPeripheral]} toglie quei pin. Procedere?
+            {copy.alreadyHave(exclusive === "unused" ? copy.unused : PERIPHERAL_LABEL[exclusive], pendingPeripheral === "unused" ? copy.unused : PERIPHERAL_LABEL[pendingPeripheral])}
           </p>
           <div className="mt-2 flex gap-2">
             <button type="button" onClick={() => setPendingPeripheral(null)} className="h-8 flex-1 rounded-slsm border border-border-strong font-body text-xs text-ink hover:bg-surface-raised">
-              Annulla
+              {copy.cancel}
             </button>
             <button type="button" onClick={() => applyPeripheral(pendingPeripheral)} className="h-8 flex-1 rounded-slsm bg-brand-blue font-body-strong text-xs text-white hover:bg-brand-blue-dark">
-              Procedi
+              {copy.proceed}
             </button>
           </div>
         </div>
       )}
 
       <div className="rounded-slmd bg-surface-sunken p-3">
-        <div className="mb-2 font-body text-[10px] font-semibold uppercase tracking-wide text-ink-faint">Connettore</div>
+        <div className="mb-2 font-body text-[10px] font-semibold uppercase tracking-wide text-ink-faint">{copy.connector}</div>
         <div className="flex justify-center gap-2">
           {map.pins.map((p) => {
             const color = pinColor(p);
@@ -556,7 +568,7 @@ function PinSignalEditor({
                 type="button"
                 onClick={() => selectPin(p.pinIndex)}
                 className="flex flex-col items-center gap-1"
-                title={used ? `Togli ${p.signal || pinCaption(p)} da ${pinLetter(p.pinIndex)}` : pinLetter(p.pinIndex)}
+                title={used ? copy.removeFromPin(p.signal || pinCaption(p), pinLetter(p.pinIndex)) : pinLetter(p.pinIndex)}
               >
                 <span
                   className="block h-7 w-7 rounded-full"
@@ -576,7 +588,7 @@ function PinSignalEditor({
       </div>
 
       <div>
-        <p className="mb-2 font-body text-xs font-semibold text-ink-muted">Funzione — {pinLetter(pin.pinIndex)}</p>
+        <p className="mb-2 font-body text-xs font-semibold text-ink-muted">{copy.function} — {pinLetter(pin.pinIndex)}</p>
         <div className="flex flex-wrap gap-1.5">
           {offered.map((key) => {
             const selected = focus === key || (!focus && pin.peripheral === key);
@@ -593,14 +605,14 @@ function PinSignalEditor({
                   outline: selected ? undefined : "1px solid var(--color-border)",
                 }}
               >
-                {PERIPHERAL_LABEL[key]}
+                {peripheralLabel(key, copy.unused)}
               </button>
             );
           })}
         </div>
         {offered.length <= 1 && (
           <p className="mt-2 font-body text-xs text-ink-faint">
-            Nessuna periferica MCU disponibile su questa Porta. Rileggi le capacità dal Core o assegna VCC/GND.
+            {copy.noPeripheralAvailable}
           </p>
         )}
       </div>
@@ -609,15 +621,15 @@ function PinSignalEditor({
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <p className="font-body text-xs font-semibold text-ink-muted">
-              {PERIPHERAL_LABEL[focus]} — {pinLetter(pin.pinIndex)}
+              {focus === "unused" ? copy.unused : PERIPHERAL_LABEL[focus]} — {pinLetter(pin.pinIndex)}
             </p>
             <button type="button" onClick={() => setFocus(null)} className="font-body text-xs text-brand-blue hover:underline">
-              Chiudi dettaglio
+              {copy.closeDetail}
             </button>
           </div>
           {exclusive && (
             <div>
-              <p className="mb-1.5 font-body text-[10px] font-semibold uppercase tracking-wide text-ink-faint">Altri pin — linee del Core</p>
+              <p className="mb-1.5 font-body text-[10px] font-semibold uppercase tracking-wide text-ink-faint">{copy.otherPins}</p>
               <div className="flex flex-wrap gap-1.5">
                 {offeredAux.map((key) => {
                   const selected = pin.peripheral === key;
@@ -634,7 +646,7 @@ function PinSignalEditor({
                         outline: selected ? undefined : "1px solid var(--color-border)",
                       }}
                     >
-                      {PERIPHERAL_LABEL[key]}
+                      {peripheralLabel(key, copy.unused)}
                     </button>
                   );
                 })}
@@ -646,7 +658,7 @@ function PinSignalEditor({
 
       {signals.length > 0 && (
         <div>
-          <p className="mb-2 font-body text-xs font-semibold text-ink-muted">Segnale</p>
+          <p className="mb-2 font-body text-xs font-semibold text-ink-muted">{copy.signal}</p>
           <div className="flex flex-wrap gap-1.5">
             {signals.map((signal) => {
               const selected = pin.signal === signal;
@@ -657,7 +669,7 @@ function PinSignalEditor({
                 <button
                   key={signal}
                   type="button"
-                  title={selected ? `Togli ${signal} da questo pin` : taken ? `${signal} su ${holder ? pinLetter(holder.pinIndex) : "?"} — clicca per spostarlo qui` : signal}
+                  title={selected ? copy.removeSignal(signal) : taken ? copy.moveSignal(signal, holder ? pinLetter(holder.pinIndex) : "?") : signal}
                   onClick={() => chooseSignal(signal)}
                   className="rounded-slpill px-3 py-1.5 font-mono text-xs"
                   style={{
@@ -677,7 +689,7 @@ function PinSignalEditor({
 
       {(focus || pin.peripheral !== "unused") && (
         <label className="block">
-          <span className="mb-1 block font-body text-xs font-semibold text-ink-muted">Nome (opzionale)</span>
+          <span className="mb-1 block font-body text-xs font-semibold text-ink-muted">{copy.optionalName}</span>
           <input
             value={pin.label}
             placeholder={pinCaption(pin) || `${PERIPHERAL_LABEL[activePeripheral ?? pin.peripheral]}_${pin.signal || "…"}`}
@@ -689,15 +701,13 @@ function PinSignalEditor({
 
       {pin.settings && isLinePeripheral(pin.peripheral) && (
         <div>
-          <p className="mb-2 font-body text-xs font-semibold text-ink-muted">Impostazioni {PERIPHERAL_LABEL[pin.peripheral]} · {pinLetter(pin.pinIndex)}</p>
+          <p className="mb-2 font-body text-xs font-semibold text-ink-muted">{copy.settings(peripheralLabel(pin.peripheral, copy.unused), pinLetter(pin.pinIndex))}</p>
           <PinLineSettingsForm settings={pin.settings} capabilities={capabilities} onChange={patchSettings} />
         </div>
       )}
 
       <p className="font-body text-xs text-ink-faint">
-        {assigned === 0
-          ? "Nessun segnale assegnato. Scegli una periferica del Core prima di andare al protocollo."
-          : `${assigned} di ${signalCount} assegnati.`}
+        {assigned === 0 ? copy.noSignalAssigned : copy.assignedOf(assigned, signalCount)}
       </p>
       <button
         type="button"
@@ -705,10 +715,10 @@ function PinSignalEditor({
         onClick={onAdvance}
         className="h-9 rounded-slsm bg-brand-blue font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-40"
       >
-        Avanti
+        {copy.next}
       </button>
       <button type="button" onClick={onDone} className="h-9 rounded-slsm border border-border-strong font-body text-sm text-ink hover:bg-surface-raised">
-        Solo pin, chiudi
+        {copy.pinsOnlyClose}
       </button>
     </div>
   );

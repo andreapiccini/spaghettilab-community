@@ -2,6 +2,9 @@ import {
   gpioDirectionsFromCapabilities,
   type PinLineSettings,
 } from "../../lib/port-protocol-mock.js";
+import { physicalCompositionCopy } from "../../lib/physical-composition-copy.js";
+import { physicalProtocolCopy } from "../../lib/physical-protocol-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 
 export function PinLineSettingsForm({
   settings,
@@ -12,18 +15,21 @@ export function PinLineSettingsForm({
   readonly capabilities?: number;
   readonly onChange: (next: PinLineSettings) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
+  const proto = physicalProtocolCopy(locale);
   if (settings.kind === "gpio") {
     const dirs = gpioDirectionsFromCapabilities(capabilities);
     return (
       <FormGrid>
         <Select
-          label="Direzione"
+          label={proto.direction}
           value={settings.direction}
           options={dirs.map((value) => ({ value, label: value === "input" ? "Input" : "Output" }))}
           onChange={(direction) => onChange({ ...settings, direction: direction as "input" | "output" })}
         />
         <Select
-          label="Polarità"
+          label={copy.polarity}
           value={settings.polarity}
           options={[
             { value: "high", label: "Active high" },
@@ -35,7 +41,7 @@ export function PinLineSettingsForm({
           label="Pull"
           value={settings.pull}
           options={[
-            { value: "none", label: "Nessuno" },
+            { value: "none", label: proto.none },
             { value: "up", label: "Pull-up" },
             { value: "down", label: "Pull-down" },
           ]}
@@ -43,12 +49,12 @@ export function PinLineSettingsForm({
         />
         {settings.direction === "input" && (
           <>
-            <Text label="Debounce (ms)" value={settings.debounceMs} onChange={(debounceMs) => onChange({ ...settings, debounceMs })} />
+            <Text label={proto.debounceMs} value={settings.debounceMs} onChange={(debounceMs) => onChange({ ...settings, debounceMs })} />
             <Select
               label="Edge trigger"
               value={settings.edge}
               options={[
-                { value: "none", label: "Nessuno" },
+                { value: "none", label: proto.none },
                 { value: "rising", label: "Rising" },
                 { value: "falling", label: "Falling" },
                 { value: "both", label: "Both" },
@@ -59,7 +65,7 @@ export function PinLineSettingsForm({
         )}
         {settings.direction === "output" && (
           <>
-            <Text label="Valore iniziale" value={settings.initial} onChange={(initial) => onChange({ ...settings, initial })} />
+            <Text label={proto.initialValue} value={settings.initial} onChange={(initial) => onChange({ ...settings, initial })} />
             <Text label="Safe state" value={settings.safeState} onChange={(safeState) => onChange({ ...settings, safeState })} />
           </>
         )}
@@ -70,13 +76,13 @@ export function PinLineSettingsForm({
   if (settings.kind === "adc") {
     return (
       <FormGrid>
-        <Text label="Risoluzione (bit)" value={settings.resolution} onChange={(resolution) => onChange({ ...settings, resolution })} />
-        <Text label="Campionamento (Hz)" value={settings.sampleHz} onChange={(sampleHz) => onChange({ ...settings, sampleHz })} />
-        <Text label="Range min (mV)" value={settings.rangeMin} onChange={(rangeMin) => onChange({ ...settings, rangeMin })} />
-        <Text label="Range max (mV)" value={settings.rangeMax} onChange={(rangeMax) => onChange({ ...settings, rangeMax })} />
-        <Text label="Grezzo min" value={settings.rawMin} onChange={(rawMin) => onChange({ ...settings, rawMin })} />
-        <Text label="Grezzo max" value={settings.rawMax} onChange={(rawMax) => onChange({ ...settings, rawMax })} />
-        <Text label="Filtro" value={settings.filter} onChange={(filter) => onChange({ ...settings, filter })} wide />
+        <Text label={proto.resolutionBits} value={settings.resolution} onChange={(resolution) => onChange({ ...settings, resolution })} />
+        <Text label={proto.sampleHz} value={settings.sampleHz} onChange={(sampleHz) => onChange({ ...settings, sampleHz })} />
+        <Text label={proto.rangeMinMv} value={settings.rangeMin} onChange={(rangeMin) => onChange({ ...settings, rangeMin })} />
+        <Text label={proto.rangeMaxMv} value={settings.rangeMax} onChange={(rangeMax) => onChange({ ...settings, rangeMax })} />
+        <Text label={proto.rawMin} value={settings.rawMin} onChange={(rawMin) => onChange({ ...settings, rawMin })} />
+        <Text label={proto.rawMax} value={settings.rawMax} onChange={(rawMax) => onChange({ ...settings, rawMax })} />
+        <Text label={proto.filter} value={settings.filter} onChange={(filter) => onChange({ ...settings, filter })} wide />
       </FormGrid>
     );
   }
@@ -84,9 +90,9 @@ export function PinLineSettingsForm({
   if (settings.kind === "pwm") {
     return (
       <FormGrid>
-        <Text label="Frequenza (Hz)" value={settings.frequencyHz} onChange={(frequencyHz) => onChange({ ...settings, frequencyHz })} />
+        <Text label={proto.frequencyHz} value={settings.frequencyHz} onChange={(frequencyHz) => onChange({ ...settings, frequencyHz })} />
         <Select
-          label="Polarità"
+          label={copy.polarity}
           value={settings.polarity}
           options={[
             { value: "high", label: "Active high" },
@@ -96,22 +102,22 @@ export function PinLineSettingsForm({
         />
         <Text label="Duty min (%)" value={settings.dutyMin} onChange={(dutyMin) => onChange({ ...settings, dutyMin })} />
         <Text label="Duty max (%)" value={settings.dutyMax} onChange={(dutyMax) => onChange({ ...settings, dutyMax })} />
-        <Text label="Valore iniziale" value={settings.initial} onChange={(initial) => onChange({ ...settings, initial })} />
+        <Text label={proto.initialValue} value={settings.initial} onChange={(initial) => onChange({ ...settings, initial })} />
         <Text label="Safe state" value={settings.safeState} onChange={(safeState) => onChange({ ...settings, safeState })} />
-        <Text label="Range proprietà min" value={settings.rangeMin} onChange={(rangeMin) => onChange({ ...settings, rangeMin })} />
-        <Text label="Range proprietà max" value={settings.rangeMax} onChange={(rangeMax) => onChange({ ...settings, rangeMax })} />
+        <Text label={copy.propertyRangeMin} value={settings.rangeMin} onChange={(rangeMin) => onChange({ ...settings, rangeMin })} />
+        <Text label={copy.propertyRangeMax} value={settings.rangeMax} onChange={(rangeMax) => onChange({ ...settings, rangeMax })} />
       </FormGrid>
     );
   }
 
   return (
     <FormGrid>
-      <Text label="Risoluzione (bit)" value={settings.resolution} onChange={(resolution) => onChange({ ...settings, resolution })} />
-      <Text label="Range min (mV)" value={settings.rangeMin} onChange={(rangeMin) => onChange({ ...settings, rangeMin })} />
-      <Text label="Range max (mV)" value={settings.rangeMax} onChange={(rangeMax) => onChange({ ...settings, rangeMax })} />
-      <Text label="Grezzo min" value={settings.rawMin} onChange={(rawMin) => onChange({ ...settings, rawMin })} />
-      <Text label="Grezzo max" value={settings.rawMax} onChange={(rawMax) => onChange({ ...settings, rawMax })} />
-      <Text label="Valore iniziale" value={settings.initial} onChange={(initial) => onChange({ ...settings, initial })} />
+      <Text label={proto.resolutionBits} value={settings.resolution} onChange={(resolution) => onChange({ ...settings, resolution })} />
+      <Text label={proto.rangeMinMv} value={settings.rangeMin} onChange={(rangeMin) => onChange({ ...settings, rangeMin })} />
+      <Text label={proto.rangeMaxMv} value={settings.rangeMax} onChange={(rangeMax) => onChange({ ...settings, rangeMax })} />
+      <Text label={proto.rawMin} value={settings.rawMin} onChange={(rawMin) => onChange({ ...settings, rawMin })} />
+      <Text label={proto.rawMax} value={settings.rawMax} onChange={(rawMax) => onChange({ ...settings, rawMax })} />
+      <Text label={proto.initialValue} value={settings.initial} onChange={(initial) => onChange({ ...settings, initial })} />
       <Text label="Safe state" value={settings.safeState} onChange={(safeState) => onChange({ ...settings, safeState })} wide />
     </FormGrid>
   );

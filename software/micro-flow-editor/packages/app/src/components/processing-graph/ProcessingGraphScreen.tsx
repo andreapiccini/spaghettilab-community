@@ -14,6 +14,9 @@ import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { useSession } from "../../state/session-context.js";
 import { portCardId } from "../physical-composition/ConfiguredPortNode.js";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
+import { localizeCatalogEntry, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
+import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
 import {
   PROCESSING_BLOCK_MIME,
@@ -92,6 +95,8 @@ export function ProcessingGraphScreen() {
 
 function ProcessingGraphScreenInner() {
   const { session, execute, navigate } = useSession();
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const { configuredPorts, pinMapOf, protocolFor, selectedBindingId, setSelectedBindingId } = usePortProtocol();
   const bindings = session?.stack.current.coreBindings ?? [];
 
@@ -208,7 +213,7 @@ function ProcessingGraphScreenInner() {
   const errorCount = dryRun?.issues.filter((i) => i.severity !== "warning").length ?? 0;
   const warningCount = dryRun?.issues.filter((i) => i.severity === "warning").length ?? 0;
 
-  const domainRfNodes = useMemo(() => toProcessingNodes(graphState, authoringMetadata, new Set(errorsByNode.keys()), moduleLabel, fieldLabel), [graphState, authoringMetadata, errorsByNode, moduleLabel, fieldLabel]);
+  const domainRfNodes = useMemo(() => toProcessingNodes(graphState, authoringMetadata, new Set(errorsByNode.keys()), moduleLabel, fieldLabel, new Set(), locale), [graphState, authoringMetadata, errorsByNode, moduleLabel, fieldLabel, locale]);
   // "deletable" (DeletableEdge.tsx) routes around other blocks on H/V
   // segments with rounded corners, plus a hover trash control.
   const edges = useMemo<Edge[]>(() => toReactFlowEdges(graphState).map((edge) => ({ ...edge, type: "deletable" })), [graphState]);
@@ -573,7 +578,7 @@ function ProcessingGraphScreenInner() {
           if (parent && escapingParent) {
             const plan = detachMemberEdges(change.id, parent, graphState.edges);
             for (const edgeId of plan.removeIds) removeEdgeCommands.push(removeGraphEdgeCommand(lens, edgeId));
-            setOverlapWarning(`Rimosso da «${parent.label}».`);
+              setOverlapWarning(copy.removedFrom(parent.label));
           }
           if (target && target.triggerId !== parent?.triggerId) {
             const alreadyNested = graphState.edges.some((e) => e.source === target.triggerId && e.target === change.id);
@@ -587,12 +592,12 @@ function ProcessingGraphScreenInner() {
                   targetHandle: "0",
                 }),
               );
-              setOverlapWarning(`Inserito in «${target.label}».`);
+              setOverlapWarning(copy.insertedInto(target.label));
             }
           } else if (!canBeNested(draggedKind ?? "block") && info) {
             const origin = triggerToContainerOrigin(triggerPosition);
             const peer = overlappingPeerContainer({ x: origin.x, y: origin.y, width: info.width, height: info.height }, change.id, eventContainers, containerByTriggerId);
-            if (peer) setOverlapWarning("Uno Schedule non può stare dentro un altro.");
+            if (peer) setOverlapWarning(copy.scheduleInsideSchedule);
           }
         }
 
@@ -695,13 +700,13 @@ function ProcessingGraphScreenInner() {
                     targetHandle: "0",
                   }),
                 );
-                setOverlapWarning(plan.detachFrom ? `Spostato in «${target.label}».` : `Collegato a «${target.label}».`);
+                setOverlapWarning(plan.detachFrom ? copy.movedInto(target.label) : copy.connectedTo(target.label));
               }
               attachLowerBound = { x: target.x + NODE_PADDING + ENTRY_FEED_INSET, y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT };
               position = { x: Math.max(position.x, attachLowerBound.x), y: Math.max(position.y, attachLowerBound.y) };
             }
           } else if (plan.detachFrom && container) {
-            setOverlapWarning(`Rimosso da «${container.label}».`);
+            setOverlapWarning(copy.removedFrom(container.label));
           }
         }
       }
@@ -790,7 +795,7 @@ function ProcessingGraphScreenInner() {
           sourceHandle: "0",
           targetHandle: "0",
         });
-        setOverlapWarning(`Collegato a «${target.label}».`);
+        setOverlapWarning(copy.connectedTo(target.label));
         attachLowerBound = { x: target.x + NODE_PADDING + ENTRY_FEED_INSET, y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT };
         position = { x: Math.max(position.x, attachLowerBound.x), y: Math.max(position.y, attachLowerBound.y) };
       }
@@ -804,11 +809,11 @@ function ProcessingGraphScreenInner() {
           sourceHandle: "0",
           targetHandle: "0",
         });
-        setOverlapWarning(`Inserito in «${target.label}».`);
+        setOverlapWarning(copy.insertedInto(target.label));
         attachLowerBound = { x: target.x + NODE_PADDING + ENTRY_FEED_INSET, y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT };
         position = { x: Math.max(position.x, attachLowerBound.x), y: Math.max(position.y, attachLowerBound.y) };
       } else if (data.kind === "schedule" && containerAtPosition(position, eventContainers)) {
-        setOverlapWarning("Uno Schedule non può stare dentro un altro.");
+        setOverlapWarning(copy.scheduleInsideSchedule);
       }
       const size = emptyEventContainerSize();
       const origin = triggerToContainerOrigin(position);
@@ -835,7 +840,9 @@ function ProcessingGraphScreenInner() {
     execute(addGraphNodeCommand(deviceGraphLens(bindingIndex), { layer: "device-processing", id, data }));
     if (attachEdgeCommand) execute(attachEdgeCommand);
     const comment =
-      bay && resolvedBaySide ? `${entry.label} · ${resolvedBaySide === "input" ? "ingresso" : "uscita"}` : entry.label;
+      bay && resolvedBaySide
+        ? `${localizeCatalogEntry(entry, locale).label} · ${localizedBaySideLabel(resolvedBaySide, locale)}`
+        : localizeCatalogEntry(entry, locale).label;
     execute({
       kind: "UpdateAuthoringMetadata",
       apply: (project) => ({
@@ -1031,12 +1038,12 @@ function ProcessingGraphScreenInner() {
           ? "var(--color-warning)"
           : "var(--color-success)";
   const statusText = simulating
-    ? "Anteprima locale in corso — nessuna Config inviata al Core"
+    ? copy.previewInProgress
     : !dryRun
-      ? "Dry-run non ancora eseguito"
+      ? copy.dryRunNotRun
       : errorCount > 0 || warningCount > 0
-        ? `${errorCount} errori, ${warningCount} warning`
-        : "Valido";
+        ? copy.issuesCount(errorCount, warningCount)
+        : copy.valid;
 
   return (
     <div className="flex h-full flex-col">
@@ -1044,7 +1051,7 @@ function ProcessingGraphScreenInner() {
         <div className="shrink-0">
           <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
         </div>
-        <h1 className="min-w-0 flex-1 truncate font-heading text-lg font-semibold text-ink">Processing Graph</h1>
+        <h1 className="min-w-0 flex-1 truncate font-heading text-lg font-semibold text-ink">{copy.title}</h1>
         <button
           type="button"
           onClick={() => void handleDryRun()}
@@ -1055,22 +1062,22 @@ function ProcessingGraphScreenInner() {
           style={simulating ? { backgroundColor: "color-mix(in srgb, #F5C518 14%, transparent)" } : undefined}
         >
           {simulating ? <Square size={14} fill="currentColor" /> : <PlayCircle size={16} />}
-          {running ? "In corso…" : simulating ? "Ferma anteprima" : "Dry-run"}
+          {running ? copy.running : simulating ? copy.stopPreview : copy.dryRun}
         </button>
         {errorCount > 0 && (
           <span className="flex shrink-0 items-center gap-1.5 rounded-slpill px-3 py-1.5 font-body text-sm text-error" style={{ backgroundColor: "color-mix(in srgb, var(--color-error) 10%, transparent)" }}>
             <CircleAlert size={14} />
-            {errorCount} errori
+            {copy.errorsCount(errorCount)}
           </span>
         )}
         <button type="button" disabled={!canDeploy} onClick={() => navigate("deploy-diff")} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-          Invia a Deploy
+          {copy.sendToDeploy}
         </button>
       </div>
 
       {!selected ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-body text-sm text-ink-faint">Nessun Core nel progetto — vai a Core Connections per connetterne uno.</p>
+          <p className="font-body text-sm text-ink-faint">{copy.noCore}</p>
         </div>
       ) : (
         <div className="relative flex flex-1 overflow-hidden">
@@ -1108,8 +1115,8 @@ function ProcessingGraphScreenInner() {
             {domainNodes.length === 0 && !dropPreview && (
               <div className="pointer-events-none absolute inset-0 mb-10 flex flex-col items-center justify-center">
                 <Workflow size={48} strokeWidth={1.5} className="text-ink-faint" />
-                <p className="mt-2 font-heading text-lg font-semibold text-ink">Nessun blocco ancora</p>
-                <p className="mt-2 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white opacity-70">Trascina un blocco dalla palette per iniziare</p>
+                <p className="mt-2 font-heading text-lg font-semibold text-ink">{copy.emptyTitle}</p>
+                <p className="mt-2 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white opacity-70">{copy.emptyHint}</p>
               </div>
             )}
 
@@ -1137,7 +1144,7 @@ function ProcessingGraphScreenInner() {
               <span className="font-body text-xs text-ink-muted">{statusText}</span>
               {hashHex && <span className="font-mono text-xs text-ink-faint">hash: {hashHex}…</span>}
               <span className="ml-auto font-mono text-xs text-ink-faint">
-                {domainNodes.length} nodi · {graphState.edges.length} edge
+                {copy.nodesEdges(domainNodes.length, graphState.edges.length)}
               </span>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { nodeHeightForPorts, nodeShellRadius, portsForKind, portsForNode } from "./node-ports.js";
-import { NODE_HEIGHT } from "./layout-constants.js";
+import { handlesForNode, nodeHeightForPorts, nodeShellRadius, portsForKind, portsForNode } from "./node-ports.js";
+import { NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
 
 describe("portsForKind", () => {
   it("schedules and event-sources only have an output", () => {
@@ -66,6 +66,34 @@ describe("portsForNode", () => {
     expect(ports.outputs).toHaveLength(6);
     expect(ports.outputs.map((p) => p.label)).toEqual(["CH1", "CH2", "Sensore A", "CH4", "CH5", "CH6"]);
     expect(nodeHeightForPorts(ports)).toBeGreaterThan(NODE_HEIGHT);
+  });
+});
+
+describe("handlesForNode", () => {
+  it("keeps a source and target so rebuilt cards still have edge anchors", () => {
+    const handles = handlesForNode(portsForKind("block"), { width: NODE_WIDTH, height: NODE_HEIGHT });
+    expect(handles.map((h) => [h.id, h.type])).toEqual([
+      ["0", "target"],
+      ["0", "source"],
+    ]);
+    expect(handles.every((h) => h.width > 0 && h.height > 0)).toBe(true);
+  });
+
+  it("tick disc exposes only the right-side source", () => {
+    const handles = handlesForNode(portsForKind("block"), { width: 28, height: 28, circular: true });
+    expect(handles).toHaveLength(1);
+    expect(handles[0]).toMatchObject({ id: "0", type: "source" });
+  });
+
+  it("terminal block lists every channel output id", () => {
+    const ports = portsForNode({
+      kind: "block",
+      blockTypeId: "ab.terminal_block",
+      catalogEntryId: "appblocks.terminal_block",
+      properties: {},
+    });
+    const handles = handlesForNode(ports, { width: 200, height: nodeHeightForPorts(ports) });
+    expect(handles.filter((h) => h.type === "source").map((h) => h.id)).toEqual(["0", "1", "2", "3", "4", "5"]);
   });
 });
 

@@ -2,8 +2,7 @@ import type { Storage } from "@spaghettilab/domain";
 
 /**
  * Host chrome locale — not a `ProjectV1` field. Adding a language is appending
- * to `SUPPORTED_LOCALES` and (optionally) chrome copy; editor screens stay in
- * their authored language until they opt in.
+ * to `SUPPORTED_LOCALES` and the matching IT/EN copy dictionaries.
  */
 export const LOCALE_STORAGE_KEY = "ui.locale";
 export const LOCALE_LOCAL_STORAGE_KEY = `spaghettilab:${LOCALE_STORAGE_KEY}`;

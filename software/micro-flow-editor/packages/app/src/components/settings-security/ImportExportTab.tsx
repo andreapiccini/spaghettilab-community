@@ -2,6 +2,8 @@ import { exportProjectSelective, previewProjectImport, projectId, resolveProject
 import { AlertTriangle, Download, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { projectRepository, uuidGenerator } from "../../lib/repository.js";
+import { settingsSecurityCopy } from "../../lib/settings-security-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 
 /**
@@ -15,6 +17,8 @@ import { useSession } from "../../state/session-context.js";
  * documentato dal pacchetto stesso.
  */
 export function ImportExportTab() {
+  const { locale } = useLocale();
+  const copy = settingsSecurityCopy(locale);
   const { session } = useSession();
   const [preview, setPreview] = useState<ProjectImportPreview | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -59,10 +63,10 @@ export function ImportExportTab() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div>
-        <h2 className="font-heading text-sm font-semibold text-ink">Importa progetto</h2>
+        <h2 className="font-heading text-sm font-semibold text-ink">{copy.importTitle}</h2>
         <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2 flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body-strong text-xs text-ink hover:bg-surface-raised">
           <Upload size={12} />
-          Scegli file
+          {copy.chooseFile}
         </button>
         <input
           ref={fileInputRef}
@@ -85,26 +89,26 @@ export function ImportExportTab() {
             {preview.isDuplicateId && (
               <div className="flex items-center gap-2 text-warning">
                 <AlertTriangle size={14} />
-                <p className="font-body text-xs">ID progetto già esistente — scegli come procedere.</p>
+                <p className="font-body text-xs">{copy.duplicateId}</p>
               </div>
             )}
             <div className="flex gap-2">
               {preview.isDuplicateId ? (
                 <>
                   <button type="button" onClick={() => void handleConfirmImport("rename")} className="rounded-slsm bg-brand-blue px-3 py-1.5 font-body-strong text-xs text-white hover:bg-brand-blue-dark">
-                    Importa con nuovo ID
+                    {copy.importNewId}
                   </button>
                   <button type="button" onClick={() => void handleConfirmImport("keep")} className="rounded-slsm border border-border-strong px-3 py-1.5 font-body-strong text-xs text-ink hover:bg-surface-raised">
-                    Sovrascrivi esistente
+                    {copy.overwriteExisting}
                   </button>
                 </>
               ) : (
                 <button type="button" onClick={() => void handleConfirmImport("keep")} className="rounded-slsm bg-brand-blue px-3 py-1.5 font-body-strong text-xs text-white hover:bg-brand-blue-dark">
-                  Importa
+                  {copy.importAction}
                 </button>
               )}
               <button type="button" onClick={() => setPreview(null)} className="rounded-slsm border border-border-strong px-3 py-1.5 font-body-strong text-xs text-ink-muted hover:bg-surface-raised">
-                Annulla
+                {copy.cancel}
               </button>
             </div>
           </div>
@@ -112,34 +116,34 @@ export function ImportExportTab() {
       </div>
 
       <div>
-        <h2 className="font-heading text-sm font-semibold text-ink">Esporta progetto</h2>
+        <h2 className="font-heading text-sm font-semibold text-ink">{copy.exportTitle}</h2>
         {!session ? (
-          <p className="mt-2 font-body text-sm text-ink-faint">Nessun progetto aperto.</p>
+          <p className="mt-2 font-body text-sm text-ink-faint">{copy.noOpenProject}</p>
         ) : (
           <>
             <div className="mt-2 flex flex-col gap-1 rounded-slmd border border-border p-3">
-              <p className="font-body-strong text-xs text-ink-muted">Escluso automaticamente</p>
-              <p className="font-body text-xs text-ink-faint">Credenziali, valori record live — mai inclusi, nessuna opzione per abilitarli.</p>
+              <p className="font-body-strong text-xs text-ink-muted">{copy.excludedAuto}</p>
+              <p className="font-body text-xs text-ink-faint">{copy.excludedHint}</p>
             </div>
             <label className="mt-2 flex items-center gap-2">
               <input type="checkbox" checked={includeImages} onChange={(e) => setIncludeImages(e.target.checked)} />
-              <span className="font-body text-sm text-ink">Includi immagini</span>
-              <span className="font-body text-xs text-ink-faint">(inerte oggi — ProjectV1 non ha ancora campi immagine)</span>
+              <span className="font-body text-sm text-ink">{copy.includeImages}</span>
+              <span className="font-body text-xs text-ink-faint">{copy.includeImagesHint}</span>
             </label>
             <label className="mt-1 flex items-center gap-2">
               <input type="checkbox" checked={includeLiveRecords} onChange={(e) => setIncludeLiveRecords(e.target.checked)} />
-              <span className="font-body text-sm text-ink">Includi record live più recenti</span>
-              <span className="font-body text-xs text-ink-faint">(inerte oggi — ProjectV1 non ha ancora campi record live)</span>
+              <span className="font-body text-sm text-ink">{copy.includeLive}</span>
+              <span className="font-body text-xs text-ink-faint">{copy.includeLiveHint}</span>
             </label>
             {exportPreview && exportPreview.suspiciousKeysFound.length > 0 && (
               <div className="mt-2 flex items-center gap-2 text-warning">
                 <AlertTriangle size={14} />
-                <p className="font-body text-xs">{exportPreview.suspiciousKeysFound.length} chiavi dall'aspetto sospetto (segreto?) trovate — verificale prima di condividere l'export.</p>
+                <p className="font-body text-xs">{copy.suspiciousKeys(exportPreview.suspiciousKeysFound.length)}</p>
               </div>
             )}
             <button type="button" onClick={handleExport} className="mt-3 flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
               <Download size={14} />
-              Scarica export
+              {copy.downloadExport}
             </button>
           </>
         )}

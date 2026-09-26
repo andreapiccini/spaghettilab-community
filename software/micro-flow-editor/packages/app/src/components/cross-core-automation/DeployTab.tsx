@@ -10,6 +10,8 @@ import {
 } from "@spaghettilab/node-red-deploy";
 import { Rocket, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import { automationsCopy } from "../../lib/automations-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { useNodeRedRuntime } from "../../state/node-red-runtime-context.js";
 import type { AppLink } from "./link-meta.js";
@@ -32,6 +34,8 @@ type DiffRow = { readonly id: string; readonly change: "added" | "removed" | "mo
  * ricostruita a livello app confrontando gli id dei nodi posseduti prima/dopo.
  */
 export function DeployTab({ links }: { readonly links: readonly AppLink[] }) {
+  const { locale } = useLocale();
+  const copy = automationsCopy(locale);
   const { session } = useSession();
   const { target, token, reachability } = useNodeRedRuntime();
   const [diff, setDiff] = useState<readonly DiffRow[] | null>(null);
@@ -134,7 +138,7 @@ export function DeployTab({ links }: { readonly links: readonly AppLink[] }) {
           <h2 className="font-heading text-sm font-semibold text-ink">Diff ({diff.length})</h2>
           <div className="mt-2 flex flex-col gap-1">
             {diff.length === 0 ? (
-              <p className="font-body text-sm text-ink-faint">Nessuna modifica.</p>
+              <p className="font-body text-sm text-ink-faint">{copy.noChanges}</p>
             ) : (
               diff.map((row) => (
                 <div

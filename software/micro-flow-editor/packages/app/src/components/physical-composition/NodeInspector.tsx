@@ -6,6 +6,8 @@ import type { DiscoveryCandidate } from "@spaghettilab/protocol-sdk";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { assignedPinCount } from "../../lib/port-protocol-mock.js";
+import { physicalCompositionCopy } from "../../lib/physical-composition-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -64,6 +66,8 @@ export function NodeInspector({
   readonly onOpenDiscovery?: () => void;
   readonly onConfigurePort?: (portId: number) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
   const [comment, setComment] = useState(mode.kind === "edit" ? mode.comment : (mode.prefillComment ?? ""));
   const [data, setData] = useState<PhysicalCompositionNodeData>(mode.kind === "edit" ? mode.data : ({ ...defaultDataFor(mode.nodeKind), ...mode.prefillData } as PhysicalCompositionNodeData));
   const [w1RomDraft, setW1RomDraft] = useState(() => (mode.kind === "edit" && mode.data.kind === "module" ? (mode.data.endpoint?.w1Rom ?? "") : ""));
@@ -227,7 +231,7 @@ export function NodeInspector({
               <option value={-1}>—</option>
               {(selectedBay?.rails ?? []).map((r) => (
                 <option key={r.railId} value={r.railId}>
-                  Rail {r.railId} ({r.assurance === RailAssurance.UNMANAGED ? "non gestita" : r.assurance === RailAssurance.SWITCHED ? "switched" : "switched+measured"})
+                  Rail {r.railId} ({r.assurance === RailAssurance.UNMANAGED ? copy.unmanagedRail : r.assurance === RailAssurance.SWITCHED ? "switched" : "switched+measured"})
                 </option>
               ))}
             </select>
@@ -235,7 +239,7 @@ export function NodeInspector({
             <div className="mb-4 flex gap-2">
               <div className="flex-1">
                 <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-addr">
-                  Indirizzo (I2C)
+                  {copy.addressI2c}
                 </label>
                 <input
                   id="ni-addr"
@@ -288,13 +292,13 @@ export function NodeInspector({
                   className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
                   style={{ borderColor: w1RomInvalid || collisionErrors.length > 0 ? "var(--color-error)" : undefined }}
                 />
-                <p className="mt-1 font-body text-xs text-ink-faint">8 byte hex, spazi o due punti ammessi — binding di istanza, non del profilo.</p>
-                {w1RomInvalid && <p className="mt-1 font-body text-xs text-error">Servono esattamente 8 byte (16 cifre hex).</p>}
+                <p className="mt-1 font-body text-xs text-ink-faint">{copy.w1RomHelp}</p>
+                {w1RomInvalid && <p className="mt-1 font-body text-xs text-error">{copy.w1RomInvalid}</p>}
               </div>
             )}
 
             <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-mode">
-              Modalità elettrica
+              {copy.electricalMode}
             </label>
             <select id="ni-mode" value={data.electricalMode} onChange={(e) => patchModule({ electricalMode: e.target.value as ElectricalMode })} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none">
               {ELECTRICAL_MODES.map((m) => (
@@ -304,16 +308,16 @@ export function NodeInspector({
               ))}
             </select>
 
-            {data.moduleKey !== undefined && <p className="mb-4 font-mono text-xs text-ink-faint">moduleKey: {data.moduleKey} (assegnato dal firmware)</p>}
+            {data.moduleKey !== undefined && <p className="mb-4 font-mono text-xs text-ink-faint">moduleKey: {data.moduleKey} {copy.moduleKeyFirmware}</p>}
 
             {selectedBay && selectedBay.rails.find((r) => r.railId === data.railId) && requiresPowerAcknowledgement(selectedBay.rails.find((r) => r.railId === data.railId)!.assurance) && (
               <label className="mb-4 flex items-start gap-2 rounded-slsm bg-surface-raised p-2 font-body text-xs text-ink">
                 <input type="checkbox" checked={acknowledgedModuleNodeIds.has(nodeId)} onChange={onAcknowledge} className="mt-0.5" />
-                Questa rail è passiva (non verificabile dal firmware) — confermo il posizionamento di questo Module qui.
+                {copy.passiveRailAck}
               </label>
             )}
 
-            {(selectedFlow?.bays.find((b) => b.bayId === data.bayId)?.admission ?? undefined) === PowerAdmission.UNVERIFIED && <p className="mb-4 font-body text-xs text-warning">Bay {data.bayId}: admission UNVERIFIED — non normalizzata come ENFORCED.</p>}
+            {(selectedFlow?.bays.find((b) => b.bayId === data.bayId)?.admission ?? undefined) === PowerAdmission.UNVERIFIED && <p className="mb-4 font-body text-xs text-warning">{copy.admissionUnverified(data.bayId)}</p>}
           </>
         )}
       </div>
@@ -321,11 +325,11 @@ export function NodeInspector({
       <div className="flex shrink-0 items-center gap-2 border-t border-border p-3">
         {onDelete && (
           <button type="button" onClick={onDelete} className="rounded-slsm border border-border-strong px-3 py-1.5 font-body text-sm text-error hover:bg-surface-raised">
-            Elimina
+            {copy.delete}
           </button>
         )}
         <button type="button" onClick={() => onSave(data, comment)} disabled={!canSave} className="ml-auto rounded-slsm bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-          Salva
+          {copy.save}
         </button>
       </div>
     </motion.div>
@@ -345,6 +349,8 @@ function PortPathCard({
   readonly onOpenDiscovery?: () => void;
   readonly onConfigurePort?: (portId: number) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
   const { pinMapOf, protocolFor } = usePortProtocol();
   const pins = assignedPinCount(pinMapOf(portId));
   const protocol = protocolFor({ moduleNodeId, portId });
@@ -352,17 +358,17 @@ function PortPathCard({
 
   return (
     <div className="mb-4 rounded-slmd border border-border bg-surface-raised p-3">
-      <p className="font-body text-xs font-semibold text-ink-muted">Cosa c’è su questa Porta</p>
+      <p className="font-body text-xs font-semibold text-ink-muted">{copy.whatOnPort}</p>
       {recognized ? (
         <p className="mt-1 font-body text-sm text-ink">
-          Il Core ha rilevato {candidates.length === 1 ? "un candidato" : `${candidates.length} candidati`}. Accettalo se è giusto.
+          {copy.candidates(candidates.length)}.
         </p>
       ) : (
-        <p className="mt-1 font-body text-sm text-ink">Nessun hardware riconosciuto. Configura pin e protocollo a mano.</p>
+        <p className="mt-1 font-body text-sm text-ink">{copy.noHardware}. {copy.assignPinProtocol}.</p>
       )}
       {(pins > 0 || protocol) && (
         <p className="mt-1 font-body text-xs text-ink-faint">
-          {pins > 0 ? `${pins} pin assegnati` : "Nessun pin"}
+          {pins > 0 ? copy.pinsAssigned(pins) : copy.noPin}
           {protocol ? ` · ${protocol.name}` : ""}
         </p>
       )}
@@ -374,7 +380,7 @@ function PortPathCard({
         )}
         {onConfigurePort && (
           <button type="button" onClick={() => onConfigurePort(portId)} className={`h-8 rounded-slsm font-body text-xs ${recognized ? "border border-border-strong text-ink hover:bg-surface" : "bg-brand-blue font-body-strong text-white hover:bg-brand-blue-dark"}`}>
-            {recognized ? "Non è quello — configura a mano" : "Assegna pin e protocollo"}
+            {recognized ? copy.notThatConfigure : copy.assignPinProtocol}
           </button>
         )}
       </div>

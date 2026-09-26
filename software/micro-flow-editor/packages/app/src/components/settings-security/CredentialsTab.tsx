@@ -3,6 +3,8 @@ import { confirmCredentialRemoval } from "@spaghettilab/security-recovery";
 import { KeyRound, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { listConnectionProfiles, removeConnectionProfile } from "../../lib/connection-profile-store.js";
+import { settingsSecurityCopy } from "../../lib/settings-security-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 
 const credentialStore = new InMemoryCredentialStore();
@@ -18,6 +20,8 @@ const credentialStore = new InMemoryCredentialStore();
  * reload), non un fake spacciato per reale.
  */
 export function CredentialsTab() {
+  const { locale } = useLocale();
+  const copy = settingsSecurityCopy(locale);
   const [profiles, setProfiles] = useState<readonly ConnectionProfile[]>([]);
   const [pending, setPending] = useState<ConnectionProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -43,13 +47,13 @@ export function CredentialsTab() {
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <p className="font-body text-sm text-ink-muted">Solo riferimenti opachi alle credenziali — mai il valore del segreto, in nessuno stato di questa schermata.</p>
+      <p className="font-body text-sm text-ink-muted">{copy.credentialsBody}</p>
       {error && <p className="font-body text-sm text-error">{error}</p>}
 
       {withCredentials.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-12 text-center">
           <KeyRound size={40} className="text-ink-faint" />
-          <p className="font-body text-sm text-ink-muted">Nessuna credenziale registrata.</p>
+          <p className="font-body text-sm text-ink-muted">{copy.noCredentials}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -62,7 +66,7 @@ export function CredentialsTab() {
               </div>
               <button type="button" onClick={() => setPending(p)} className="flex items-center gap-1 rounded-slsm border border-border-strong px-2 py-1 font-body text-xs text-error hover:bg-surface-raised">
                 <Trash2 size={12} />
-                Rimuovi
+                {copy.remove}
               </button>
             </div>
           ))}

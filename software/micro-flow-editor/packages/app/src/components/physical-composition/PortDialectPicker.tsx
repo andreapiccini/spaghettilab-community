@@ -2,7 +2,6 @@ import { Check } from "lucide-react";
 import { type ReactNode } from "react";
 import {
   BUS_PERIPHERALS,
-  DIALECT_BLURB,
   DIALECT_LABEL,
   INTEGRATED_MODULES,
   PERIPHERAL_LABEL,
@@ -13,6 +12,9 @@ import {
   type LogicalPeripheral,
   type ProtocolMode,
 } from "../../lib/port-protocol-mock.js";
+import { physicalCompositionCopy } from "../../lib/physical-composition-copy.js";
+import { localizedDialectBlurb, localizedIntegratedName, physicalProtocolCopy } from "../../lib/physical-protocol-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 
 export function PortDialectPicker({
   peripherals,
@@ -35,6 +37,8 @@ export function PortDialectPicker({
   readonly onIntegrated: (moduleId: string) => void;
   readonly onNext: () => void;
 }) {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
   const sections = dialectSections(peripherals);
   const modules = INTEGRATED_MODULES.filter((mod) => compatible.includes(mod.dialect));
   const canContinue = mode === "custom" ? dialect !== undefined && compatible.includes(dialect) : Boolean(integratedModuleId);
@@ -42,11 +46,11 @@ export function PortDialectPicker({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="font-body text-sm text-ink-muted">Come parla il dispositivo su questi pin?</p>
+      <p className="font-body text-sm text-ink-muted">{copy.howDeviceTalks}</p>
 
       <div className="grid grid-cols-2 gap-1 rounded-slmd bg-surface-sunken p-1">
-        <ModeButton active={mode === "integrated"} onClick={() => onMode("integrated")} label="Modulo integrato" />
-        <ModeButton active={mode === "custom"} onClick={() => onMode("custom")} label="Protocollo custom" />
+        <ModeButton active={mode === "integrated"} onClick={() => onMode("integrated")} label={copy.integratedModule} />
+        <ModeButton active={mode === "custom"} onClick={() => onMode("custom")} label={copy.customProtocol} />
       </div>
 
       {mode === "custom" ? (
@@ -57,7 +61,7 @@ export function PortDialectPicker({
                 <ChoiceCard
                   key={kind}
                   title={DIALECT_LABEL[kind]}
-                  subtitle={DIALECT_BLURB[kind]}
+                  subtitle={localizedDialectBlurb(kind, locale)}
                   selected={dialect === kind}
                   onClick={() => onDialect(kind)}
                 />
@@ -71,14 +75,14 @@ export function PortDialectPicker({
             <p className="font-body text-sm text-ink-muted">
               {fromPins ? (
                 <>
-                  Nessun modulo per questa periferica,{" "}
+                  {copy.noIntegratedModule}{" "}
                   <button type="button" onClick={() => onMode("custom")} className="font-semibold text-brand-blue hover:underline">
-                    crearne uno custom
+                    {copy.configureManually}
                   </button>
                   .
                 </>
               ) : (
-                "Assegna prima i pin della Porta. Poi compariranno solo i moduli compatibili con quelle periferiche."
+                copy.assignPinsFirst
               )}
             </p>
           )}
@@ -90,8 +94,8 @@ export function PortDialectPicker({
                 {inSection.map((mod) => (
                   <ChoiceCard
                     key={mod.id}
-                    title={mod.name}
-                    subtitle={`${DIALECT_LABEL[mod.dialect]} · ${mod.fields.length} mapping già pronti`}
+                    title={localizedIntegratedName(mod.id, mod.name, locale)}
+                    subtitle={`${DIALECT_LABEL[mod.dialect]} · ${physicalProtocolCopy(locale).mappingsReady(mod.fields.length)}`}
                     selected={integratedModuleId === mod.id}
                     onClick={() => onIntegrated(mod.id)}
                   />
@@ -108,7 +112,7 @@ export function PortDialectPicker({
         onClick={onNext}
         className="h-9 rounded-slsm bg-brand-blue font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-40"
       >
-        {mode === "integrated" ? "Salva e chiudi" : "Avanti"}
+        {mode === "integrated" ? copy.saveAndClose : copy.next}
       </button>
     </div>
   );
@@ -128,7 +132,7 @@ function PeripheralSection({
     <section>
       <SectionHeading
         title={PERIPHERAL_LABEL[section.peripheral]}
-        hint={fromPins ? `${count === 1 ? "1 protocollo" : `${count} protocolli`} su questi pin` : `Disponibile se assegni pin ${PERIPHERAL_LABEL[section.peripheral]}`}
+        hint={fromPins ? physicalProtocolCopy(useLocale().locale).protocolsOnPins(count) : physicalProtocolCopy(useLocale().locale).availableIfAssign(PERIPHERAL_LABEL[section.peripheral])}
       />
       <div className="flex flex-col gap-1.5">{children}</div>
     </section>

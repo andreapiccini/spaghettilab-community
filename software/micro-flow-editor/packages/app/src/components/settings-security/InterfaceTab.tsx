@@ -1,14 +1,18 @@
+import { settingsSecurityCopy } from "../../lib/settings-security-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useUiMode } from "../../state/ui-mode-context.js";
 
 /** `ux/screens/S125-simple-advanced-mode/backend-behavior.md` — stesso `UiModeProvider` già cablato al command palette (S125), esposto qui come impostazione persistente invece che solo come comando rapido. */
 export function InterfaceTab() {
   const { mode, setMode } = useUiMode();
+  const { locale } = useLocale();
+  const copy = settingsSecurityCopy(locale);
 
   return (
     <div className="flex flex-col gap-4 p-6">
       <div>
-        <h2 className="font-heading text-sm font-semibold text-ink">Modalità interfaccia</h2>
-        <p className="mt-1 font-body text-sm text-ink-muted">Modalità avanzata mostra Catalog & Topology, Device Profile Studio, Capability Marketplace, Cross-Core Automation e questa scheda Permessi/Audit/Recovery.</p>
+        <h2 className="font-heading text-sm font-semibold text-ink">{copy.interfaceTitle}</h2>
+        <p className="mt-1 font-body text-sm text-ink-muted">{copy.interfaceBody}</p>
         <div className="mt-3 flex gap-2">
           {(["base", "advanced"] as const).map((m) => (
             <button
@@ -22,7 +26,7 @@ export function InterfaceTab() {
                 color: mode === m ? "var(--color-brand-blue)" : "var(--color-ink)",
               }}
             >
-              {m === "base" ? "Base" : "Avanzata"}
+              {m === "base" ? copy.modeBase : copy.modeAdvanced}
             </button>
           ))}
         </div>

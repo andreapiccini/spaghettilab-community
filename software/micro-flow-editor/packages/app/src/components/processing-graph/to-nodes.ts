@@ -1,6 +1,9 @@
 import type { AuthoringMetadata, GraphState } from "@spaghettilab/domain";
 import { isBlockNodeData, isRuleNodeData, moduleReferenceOf, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
-import { baySideLabel, formatFieldsSubtitle, isBayEntry, type BaySide } from "@spaghettilab/processing-block-catalog";
+import { formatFieldsSubtitle, isBayEntry, type BaySide } from "@spaghettilab/processing-block-catalog";
+import { localizeCatalogEntry, localizeCatalogText, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
+import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import type { LocaleId } from "../../lib/locale.js";
 import type { Node } from "@xyflow/react";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
@@ -9,7 +12,7 @@ import { hysteresisTicksFromProperties, initialHighFromProperties, isDigitalOutT
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
 import { FLOW_START_SIZE } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
-import { portsForNode, nodeHeightForPorts, nodeWidthForPorts } from "./node-ports.js";
+import { handlesForNode, portsForNode, nodeHeightForPorts, nodeWidthForPorts } from "./node-ports.js";
 
 export type ToggleWaveUi = {
   readonly mode: "astable" | "pulse_high" | "pulse_low";
@@ -84,10 +87,11 @@ export function toProcessingNodes(
   moduleLabel: (moduleNodeId: string) => string,
   fieldLabel: (moduleNodeId: string, fieldId: number) => string = (_moduleNodeId, fieldId) => String(fieldId),
   previewActiveIds: ReadonlySet<string> = new Set(),
+  locale: LocaleId = "it",
 ): Node<ProcessingNodeUiData>[] {
   const titles = new Map<string, string>();
   for (const node of graphState.nodes) {
-    titles.set(node.id, canvasTitle(node.data as DeviceProcessingNodeData, authoringMetadata[node.id]));
+    titles.set(node.id, canvasTitle(node.data as DeviceProcessingNodeData, authoringMetadata[node.id], locale));
   }
 
   return graphState.nodes.map((node) => {
@@ -109,18 +113,24 @@ export function toProcessingNodes(
       // React Flow considers it measured; a plain top-level node never hits that
       // gate, which is why this went unnoticed until blocks started getting
       // reparented into event containers.
+      //
+      // Static `handles` are required for the same rebuild: dragging a member
+      // recreates every card (relative position + parentId + preview). Without
+      // this list, handleBounds are cleared and edges disappear (getEdgePosition
+      // returns null) — the same bug EventContainer nodes already guard against.
       width: cardWidth,
       height: cardHeight,
+      handles: handlesForNode(ports, { width: cardWidth, height: cardHeight, circular: isTick }),
       data: {
         domainId: node.id,
         kind: data.kind,
         label: titles.get(node.id) ?? PROCESSING_NODE_KIND_CONFIG[data.kind].label,
-        subtitle: subtitleFor(node.id, data, graphState, titles, moduleLabel, fieldLabel),
+        subtitle: subtitleFor(node.id, data, graphState, titles, moduleLabel, fieldLabel, locale),
         hasError: errorNodeIds.has(node.id),
         hasInput: ports.hasInput,
         hasOutput: ports.hasOutput,
-        inputHandles: ports.inputs,
-        outputHandles: ports.outputs,
+        inputHandles: localizeHandleLabels(ports.inputs, locale),
+        outputHandles: localizeHandleLabels(ports.outputs, locale),
         cardHeight,
         cardWidth,
         previewActive: previewActiveIds.has(node.id),
@@ -193,10 +203,19 @@ function blockAccentFields(
   };
 }
 
-function canvasTitle(data: DeviceProcessingNodeData, meta: AuthoringMetadata | undefined): string {
+function localizeHandleLabels(
+  handles: readonly { readonly id: string; readonly label?: string }[],
+  locale: LocaleId,
+): readonly { readonly id: string; readonly label?: string }[] {
+  return handles.map((handle) =>
+    handle.label ? { ...handle, label: localizeCatalogText(handle.label, locale) } : handle,
+  );
+}
+
+function canvasTitle(data: DeviceProcessingNodeData, meta: AuthoringMetadata | undefined, locale: LocaleId): string {
   if (meta?.comment && meta.comment.trim() !== "") return meta.comment.trim();
   const entry = catalogEntryForNode(data);
-  if (entry) return entry.label;
+  if (entry) return localizeCatalogEntry(entry, locale).label;
   return PROCESSING_NODE_KIND_CONFIG[data.kind].label;
 }
 
@@ -207,13 +226,16 @@ function subtitleFor(
   titles: ReadonlyMap<string, string>,
   moduleLabel: (moduleNodeId: string) => string,
   fieldLabel: (moduleNodeId: string, fieldId: number) => string,
+  locale: LocaleId,
 ): string {
-  const entry = catalogEntryForNode(data);
+  const rawEntry = catalogEntryForNode(data);
+  const entry = rawEntry ? localizeCatalogEntry(rawEntry, locale) : undefined;
+  const copy = processingGraphCopy(locale);
   const placedId = data.kind === "block" || data.kind === "event-source" ? data.catalogEntryId : undefined;
   const placed = placedId ? entry : undefined;
   const fromFields = placed?.fields?.length ? formatFieldsSubtitle(placed.fields, propertiesOf(data)) : undefined;
 
-  if (data.kind === "schedule") return `${moduleLabel(data.moduleNodeId)} · ogni ${data.periodMs}ms${data.enabled ? "" : " · disabilitato"}`;
+  if (data.kind === "schedule") return `${moduleLabel(data.moduleNodeId)} · ${copy.everyMs(data.periodMs)}${data.enabled ? "" : ` · ${copy.disabledSuffix}`}`;
   if (data.kind === "event-source") {
     const module = data.moduleNodeId.trim() !== "" ? moduleLabel(data.moduleNodeId) : undefined;
     return [fromFields, module].filter((part): part is string => Boolean(part)).join(" · ") || entry?.subtitle || "—";
@@ -223,20 +245,20 @@ function subtitleFor(
     const bay = entry && isBayEntry(entry);
     const rawRole = data.properties.bayRole;
     const baySide: BaySide | undefined = rawRole === "input" || rawRole === "output" ? rawRole : entry?.bayIo === "input" ? "input" : bay ? "output" : undefined;
-    const bayPrefix = bay && baySide ? `Bay · ${baySideLabel(baySide)}` : undefined;
+    const bayPrefix = bay && baySide ? `Bay · ${localizedBaySideLabel(baySide, locale)}` : undefined;
     // Terminal / RGB: keep subtitle short (details live in inspector / handles).
     if (entry?.id === "appblocks.terminal_block" || entry?.typeId === "ab.terminal_block") {
-      return bayPrefix ? `${bayPrefix} · 6 canali` : "6 canali";
+      return bayPrefix ? `${bayPrefix} · ${copy.sixChannels}` : copy.sixChannels;
     }
     if (entry?.id === "appblocks.rgb_led" || entry?.typeId === "ab.rgb_led") {
-      return rgbLedSubtitle(parseRgbLedConfig(data.properties));
+      return rgbLedSubtitle(parseRgbLedConfig(data.properties), locale);
     }
     if (fromFields) {
       const body = input ? `${input} ${fromFields}` : fromFields;
       return bayPrefix ? `${bayPrefix} · ${body}` : body;
     }
     const fallback =
-      formatConfiguredSubtitle("block", data.blockTypeId, data.properties, input) ??
+      formatConfiguredSubtitle("block", data.blockTypeId, data.properties, input, locale) ??
       entry?.subtitle ??
       entry?.label ??
       (data.blockTypeId !== "" ? data.blockTypeId : "—");
@@ -246,7 +268,7 @@ function subtitleFor(
     const source = data.sourceReference
       ? `${moduleLabel(data.sourceReference.moduleNodeId)}.${fieldLabel(data.sourceReference.moduleNodeId, data.sourceReference.fieldId)}`
       : undefined;
-    return formatConfiguredSubtitle("rule", data.ruleTypeId, data.properties, source) ?? entry?.subtitle ?? entry?.label ?? "—";
+    return formatConfiguredSubtitle("rule", data.ruleTypeId, data.properties, source, locale) ?? entry?.subtitle ?? entry?.label ?? "—";
   }
   return moduleReferenceOf(data) ?? "—";
 }

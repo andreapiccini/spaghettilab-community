@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 import { connectBrowserWebSocket } from "../../lib/browser-websocket-connection.js";
 import { saveConnectionProfile } from "../../lib/connection-profile-store.js";
 import { coreDisplayName, identityFromStatus } from "../../lib/core-identity.js";
+import { coreConnectionsCopy } from "../../lib/core-connections-copy.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { probeUsbCores, requestUsbCorePort, usbSerialSupported, type FoundUsbCore } from "../../lib/probe-usb-cores.js";
 import { uuidGenerator } from "../../lib/repository.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import type { CoreLink } from "../../state/core-sessions-context.js";
 
@@ -24,6 +26,8 @@ export function ConnectCoreDialog({
   readonly onConnect: (binding: CoreBindingRecord, link: CoreLink) => void;
 }) {
   const { session, execute } = useSession();
+  const { locale } = useLocale();
+  const copy = coreConnectionsCopy(locale);
   const [method, setMethod] = useState<Method>("auto");
   const [nickname, setNickname] = useState("");
   const [address, setAddress] = useState("");
@@ -50,7 +54,7 @@ export function ConnectCoreDialog({
       })
       .catch((cause: unknown) => {
         if (cancelled) return;
-        setError(cause instanceof Error ? cause.message : String(cause));
+        setError(localizeUsbError(cause, copy));
       });
     return () => {
       cancelled = true;
@@ -70,7 +74,7 @@ export function ConnectCoreDialog({
       setSelectedIds((prev) => new Set([...prev, core.deviceIdHex]));
     } catch (cause) {
       if (cause instanceof DOMException && cause.name === "NotFoundError") return;
-      setError(cause instanceof Error ? cause.message : String(cause));
+      setError(localizeUsbError(cause, copy));
     } finally {
       setBusy(false);
     }
@@ -169,7 +173,7 @@ export function ConnectCoreDialog({
       setAddress("");
       onClose();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      setError(localizeUsbError(cause, copy));
     } finally {
       setBusy(false);
     }
@@ -189,16 +193,16 @@ export function ConnectCoreDialog({
       {open && (
         <motion.div className="fixed inset-0 z-50 flex justify-center bg-[rgba(20,23,31,.35)] pt-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={motionTokens.duration.base} onClick={onClose}>
           <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }} transition={motionTokens.spring.smooth} onClick={(e) => e.stopPropagation()} className="h-fit w-[520px] rounded-sllg bg-surface p-6 shadow-e3">
-            <h2 className="mb-4 font-heading text-lg font-semibold">Connetti un Core</h2>
+            <h2 className="mb-4 font-heading text-lg font-semibold">{copy.dialogTitle}</h2>
 
             <label className="mb-1 block font-body text-sm font-semibold text-ink" htmlFor="core-nickname">
-              Nome (opzionale)
+              {copy.nicknameLabel}
             </label>
             <input
               id="core-nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              placeholder="Se vuoto, si usa il nome o l'identificatore del Core"
+              placeholder={copy.nicknamePlaceholder}
               className="mb-4 w-full rounded-slsm border border-border-strong px-3 py-2 font-body text-sm outline-none"
             />
 
@@ -206,8 +210,8 @@ export function ConnectCoreDialog({
               {(
                 [
                   ["auto", "Auto"],
-                  ["network", "Core in rete"],
-                  ["usb", "Core via cavo"],
+                  ["network", copy.methodNetwork],
+                  ["usb", copy.methodUsb],
                 ] as const
               ).map(([id, label]) => (
                 <button
@@ -225,7 +229,7 @@ export function ConnectCoreDialog({
               {method === "network" ? (
                 <motion.div key="network" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={motionTokens.duration.fast}>
                   <label className="mb-1 block font-body text-sm font-semibold text-ink" htmlFor="core-address">
-                    Indirizzo WebSocket
+                    {copy.websocketAddress}
                   </label>
                   <input id="core-address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ws://192.168.1.42:8765" className="w-full rounded-slsm border border-border-strong px-3 py-2 font-mono text-sm outline-none" />
                 </motion.div>
@@ -234,14 +238,14 @@ export function ConnectCoreDialog({
                   {usbCores.length === 0 ? (
                     <div className="flex flex-col items-center gap-2 rounded-slsm bg-surface-sunken py-8 text-center">
                       <p className="font-body text-sm text-ink-muted">
-                        {method === "auto" ? "Nessun Core trovato" : "Nessun Core via cavo"}
+                        {method === "auto" ? copy.noCoreFound : copy.noUsbCore}
                       </p>
                       <p className="max-w-80 font-body text-xs text-ink-faint">
                         {!usbSerialSupported()
-                          ? "Safari non apre la USB da solo. Avvia React Flow con make up-d (parte il ponte USB). Chiudi make monitor, poi riprova."
+                          ? copy.safariUsbHelp
                           : method === "auto"
-                            ? "Auto interroga le porte USB già autorizzate e il ponte locale avviato con make up-d. Per un Core nuovo usa «Core via cavo»."
-                            : "Autorizza la porta USB del Core. In Safari il ponte parte con make up-d. Chiudi make monitor prima."}
+                            ? copy.autoHelp
+                            : copy.usbHelp}
                       </p>
                       <button
                         type="button"
@@ -253,12 +257,12 @@ export function ConnectCoreDialog({
                               setSelectedIds(new Set(found.map((core) => core.deviceIdHex)));
                             })
                             .catch((cause: unknown) => {
-                              setError(cause instanceof Error ? cause.message : String(cause));
+                              setError(localizeUsbError(cause, copy));
                             });
                         }}
                         className="mt-1 font-body text-xs text-brand-blue hover:underline"
                       >
-                        Riprova
+                        {copy.retry}
                       </button>
                     </div>
                   ) : (
@@ -281,7 +285,7 @@ export function ConnectCoreDialog({
                               <span className="block truncate font-mono text-xs text-ink-faint">
                                 core://{core.deviceIdHex}
                                 {core.version ? ` · ${core.version}` : ""}
-                                {core.source === "bridge" ? " · ponte locale" : ""}
+                                {core.source === "bridge" ? ` · ${copy.localBridge}` : ""}
                               </span>
                             </span>
                           </label>
@@ -291,7 +295,7 @@ export function ConnectCoreDialog({
                   )}
                   {method === "usb" && usbSerialSupported() && (
                     <button type="button" onClick={() => void addUsbPort()} disabled={busy} className="mt-3 w-full rounded-slsm border border-border-strong py-2 font-body text-sm text-ink hover:bg-surface-raised disabled:opacity-50">
-                      Aggiungi porta USB…
+                      {copy.addUsbPort}
                     </button>
                   )}
                 </motion.div>
@@ -301,10 +305,10 @@ export function ConnectCoreDialog({
 
             <div className="mt-6 flex justify-end gap-2">
               <button type="button" onClick={onClose} className="rounded-slsm px-4 py-2 font-body text-sm text-ink-muted hover:bg-surface-raised">
-                Annulla
+                {copy.cancel}
               </button>
               <button type="button" onClick={() => void handleConnect()} disabled={!canConnect} className="rounded-slsm bg-brand-blue px-4 py-2 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-                {busy ? "Connessione…" : selectedUsb.length > 1 && method !== "network" ? `Connetti ${selectedUsb.length} Core` : "Connetti"}
+                {busy ? copy.connecting : selectedUsb.length > 1 && method !== "network" ? copy.connectCount(selectedUsb.length) : copy.connect}
               </button>
             </div>
           </motion.div>
@@ -312,4 +316,11 @@ export function ConnectCoreDialog({
       )}
     </AnimatePresence>
   );
+}
+
+function localizeUsbError(cause: unknown, copy: ReturnType<typeof coreConnectionsCopy>): string {
+  const message = cause instanceof Error ? cause.message : String(cause);
+  if (message === "usb-serial-unavailable") return copy.usbSerialUnavailable;
+  if (message === "usb-not-a-core") return copy.usbNotACore;
+  return message;
 }

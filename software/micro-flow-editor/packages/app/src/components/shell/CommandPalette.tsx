@@ -102,26 +102,26 @@ export function CommandPalette() {
   const entries = useMemo<PaletteEntry[]>(() => {
     const navEntries: PaletteEntry[] = (
       [
-        ["core-connections", "Core Connections", Cable],
-        ["catalog-topology", "Catalog & Topology Explorer", Network],
-        ["physical-composition", "Physical Composition Editor", Boxes],
-        ["device-profile-studio", "Device Profile Studio", FileCode],
-        ["processing-graph", "Processing Graph Editor", Workflow],
-        ["deploy-diff", "Deploy & Diff", GitCompareArrows],
-        ["runtime-diagnostics", "Runtime & Diagnostics", Activity],
-        ["capability-marketplace", "Capability Marketplace & OTA", Store],
-        ["cross-core-automation", "Automazioni", Share2],
-        ["settings-security", "Sicurezza e recupero", Shield],
-        ["market", "Market", ShoppingBag],
-        ["generate-schematic-pcb", "Genera schematico e PCB", CircuitBoard],
-        ["education", "Formazione", GraduationCap],
-        ["datasheets", "Datasheet e istruzioni", BookOpen],
+        ["core-connections", copy.screens.coreConnections, Cable],
+        ["catalog-topology", copy.palette.catalogTopology, Network],
+        ["physical-composition", copy.palette.physicalComposition, Boxes],
+        ["device-profile-studio", copy.palette.deviceProfileStudio, FileCode],
+        ["processing-graph", copy.palette.processingGraph, Workflow],
+        ["deploy-diff", copy.screens.deployDiff, GitCompareArrows],
+        ["runtime-diagnostics", copy.screens.runtimeDiagnostics, Activity],
+        ["capability-marketplace", copy.palette.capabilityMarketplace, Store],
+        ["cross-core-automation", copy.screens.automations, Share2],
+        ["settings-security", copy.palette.security, Shield],
+        ["market", copy.screens.market, ShoppingBag],
+        ["generate-schematic-pcb", copy.screens.generateSchematic, CircuitBoard],
+        ["education", copy.screens.education, GraduationCap],
+        ["datasheets", copy.screens.datasheets, BookOpen],
       ] as const
     )
       .filter(([id]) => isScreenVisibleInMode(id, mode))
       .map(([id, label, icon]: readonly [ScreenId, string, LucideIcon]) => ({
         id: `nav-${id}`,
-        label: `Vai a: ${label}`,
+        label: `${copy.goToPrefix} ${label}`,
         icon,
         run: () => navigate(id),
       }));
@@ -136,7 +136,7 @@ export function CommandPalette() {
     if (session) {
       actionEntries.push({
         id: "save",
-        label: "Salva progetto",
+        label: copy.palette.saveProject,
         icon: Save,
         shortcut: "⌘S",
         run: () => void save(),
@@ -145,7 +145,7 @@ export function CommandPalette() {
     if (session?.stack.canUndo()) {
       actionEntries.push({
         id: "undo",
-        label: "Annulla ultima modifica",
+        label: copy.palette.undo,
         icon: Undo2,
         shortcut: "⌘Z",
         run: undo,
@@ -154,7 +154,7 @@ export function CommandPalette() {
     if (session?.stack.canRedo()) {
       actionEntries.push({
         id: "redo",
-        label: "Ripeti ultima modifica",
+        label: copy.palette.redo,
         icon: Redo2,
         shortcut: "⌘⇧Z",
         run: redo,
@@ -164,8 +164,8 @@ export function CommandPalette() {
       id: "ui-mode",
       label:
         mode === "advanced"
-          ? "Disattiva modalità avanzata"
-          : "Attiva modalità avanzata",
+          ? copy.palette.disableAdvanced
+          : copy.palette.enableAdvanced,
       icon: SlidersHorizontal,
       run: () => setMode(mode === "advanced" ? "base" : "advanced"),
     });
@@ -181,7 +181,7 @@ export function CommandPalette() {
 
     return [...actionEntries, ...navEntries, ...extensionEntries];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, navigate, undo, redo, mode, setMode, copy.settings, openSettings]);
+  }, [session, navigate, undo, redo, mode, setMode, copy, openSettings]);
 
   const filtered = entries.filter((e) =>
     e.label.toLowerCase().includes(query.toLowerCase()),
@@ -212,10 +212,10 @@ export function CommandPalette() {
             }}
           >
             {saveState === "saving"
-              ? "Salvataggio..."
+              ? copy.palette.saving
               : saveState === "saved"
-                ? "Progetto salvato"
-                : "Salvataggio non riuscito"}
+                ? copy.palette.saved
+                : copy.palette.saveFailed}
           </motion.div>
         )}
       </AnimatePresence>
@@ -257,7 +257,7 @@ export function CommandPalette() {
                       runHighlighted();
                     }
                   }}
-                  placeholder="Cerca un comando o una schermata..."
+                  placeholder={copy.palette.searchPlaceholder}
                   className="w-full bg-transparent font-body text-sm outline-none placeholder:text-ink-faint"
                 />
               </div>

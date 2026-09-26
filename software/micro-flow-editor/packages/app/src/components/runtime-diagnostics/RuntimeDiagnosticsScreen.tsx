@@ -1,7 +1,9 @@
 import type { CoreBindingId } from "@spaghettilab/domain";
 import { Activity, ShieldAlert, SlidersHorizontal, Terminal, WifiOff } from "lucide-react";
 import { useMemo, useState } from "react";
+import { runtimeDiagnosticsCopy } from "../../lib/runtime-diagnostics-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { AdminTab } from "./AdminTab.js";
 import { CommandsTab } from "./CommandsTab.js";
@@ -9,14 +11,14 @@ import { DiscoveryTab } from "./DiscoveryTab.js";
 import { StatusResourcesTab } from "./StatusResourcesTab.js";
 import { TelemetryTab } from "./TelemetryTab.js";
 
-const TABS = [
-  { id: "telemetria", label: "Telemetria", icon: Activity },
-  { id: "comandi", label: "Comandi", icon: Terminal },
-  { id: "discovery", label: "Discovery", icon: WifiOff },
-  { id: "stato-risorse", label: "Stato & Risorse", icon: SlidersHorizontal },
-  { id: "amministrazione", label: "Amministrazione", icon: ShieldAlert },
+const TAB_IDS = [
+  { id: "telemetria", icon: Activity },
+  { id: "comandi", icon: Terminal },
+  { id: "discovery", icon: WifiOff },
+  { id: "stato-risorse", icon: SlidersHorizontal },
+  { id: "amministrazione", icon: ShieldAlert },
 ] as const;
-type TabId = (typeof TABS)[number]["id"];
+type TabId = (typeof TAB_IDS)[number]["id"];
 
 /**
  * `ux/screens/S090-runtime-diagnostics/{visual,ui-behavior,backend-behavior}.md`,
@@ -28,6 +30,8 @@ type TabId = (typeof TABS)[number]["id"];
  */
 export function RuntimeDiagnosticsScreen() {
   const { session } = useSession();
+  const { locale } = useLocale();
+  const copy = runtimeDiagnosticsCopy(locale);
   const { rows } = useCoreSessions();
   const bindings = session?.stack.current.coreBindings ?? [];
 
@@ -40,15 +44,15 @@ export function RuntimeDiagnosticsScreen() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-4">
-        <h1 className="font-heading text-lg font-semibold text-ink">Runtime & Diagnostics</h1>
+        <h1 className="font-heading text-lg font-semibold text-ink">{copy.title}</h1>
         <span className="ml-auto flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink-muted">
-          {bindings.length} Core · {readyRows.length} pronti
+          {copy.coresReady(bindings.length, readyRows.length)}
         </span>
       </div>
 
       {readyRows.length === 0 ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-body text-sm text-ink-faint">Nessun Core connesso e pronto — connetti un Core (Core Connections) per vedere telemetria, comandi e stato qui.</p>
+          <p className="font-body text-sm text-ink-faint">{copy.noCore}</p>
         </div>
       ) : (
         <>
@@ -70,9 +74,19 @@ export function RuntimeDiagnosticsScreen() {
           </div>
 
           <div className="flex shrink-0 gap-1 border-b border-border bg-surface px-4">
-            {TABS.map((t) => {
+            {TAB_IDS.map((t) => {
               const Icon = t.icon;
               const activeTab = tab === t.id;
+              const label =
+                t.id === "telemetria"
+                  ? copy.tabs.telemetry
+                  : t.id === "comandi"
+                    ? copy.tabs.commands
+                    : t.id === "discovery"
+                      ? copy.tabs.discovery
+                      : t.id === "stato-risorse"
+                        ? copy.tabs.status
+                        : copy.tabs.admin;
               return (
                 <button
                   key={t.id}
@@ -82,7 +96,7 @@ export function RuntimeDiagnosticsScreen() {
                   style={{ borderColor: activeTab ? "var(--color-brand-blue)" : "transparent", color: activeTab ? "var(--color-brand-blue)" : "var(--color-ink-muted)" }}
                 >
                   <Icon size={14} />
-                  {t.label}
+                  {label}
                 </button>
               );
             })}

@@ -18,7 +18,9 @@ import {
   Workflow,
 } from "lucide-react";
 import { useState } from "react";
+import { chromeCopy } from "../../lib/chrome-copy.js";
 import { isScreenVisibleInMode } from "../../lib/ui-mode.js";
+import { useLocale } from "../../state/locale-context.js";
 import type { ScreenId } from "../../state/session-context.js";
 import { useSession } from "../../state/session-context.js";
 import { useUiMode } from "../../state/ui-mode-context.js";
@@ -31,50 +33,70 @@ type RailItem = {
   readonly icon: typeof Cable;
 };
 
-const GROUPS: readonly { readonly items: readonly RailItem[] }[] = [
+const GROUPS: readonly { readonly items: readonly Omit<RailItem, "label">[] }[] = [
   {
     items: [
-      { id: "core-connections", label: "Core Connections", icon: Cable },
-      { id: "catalog-topology", label: "Catalog & Topology", icon: Boxes },
-      { id: "physical-composition", label: "Physical Composition", icon: Blocks },
-      { id: "device-profile-studio", label: "Device Profiles", icon: Cpu },
+      { id: "core-connections", icon: Cable },
+      { id: "catalog-topology", icon: Boxes },
+      { id: "physical-composition", icon: Blocks },
+      { id: "device-profile-studio", icon: Cpu },
     ],
   },
   {
     items: [
-      { id: "processing-graph", label: "Processing Graph", icon: Workflow },
-      { id: "deploy-diff", label: "Deploy & Diff", icon: GitCompareArrows },
-      { id: "runtime-diagnostics", label: "Runtime & Diagnostics", icon: Activity },
+      { id: "processing-graph", icon: Workflow },
+      { id: "deploy-diff", icon: GitCompareArrows },
+      { id: "runtime-diagnostics", icon: Activity },
     ],
   },
   {
     items: [
-      { id: "capability-marketplace", label: "Capability Marketplace", icon: Store },
-      { id: "cross-core-automation", label: "Automazioni", icon: Share2 },
-      { id: "settings-security", label: "Sicurezza", icon: Shield },
+      { id: "capability-marketplace", icon: Store },
+      { id: "cross-core-automation", icon: Share2 },
+      { id: "settings-security", icon: Shield },
     ],
   },
   {
     items: [
-      { id: "market", label: "Market", icon: ShoppingBag },
-      {
-        id: "generate-schematic-pcb",
-        label: "Genera schematico e PCB",
-        icon: CircuitBoard,
-      },
-      { id: "education", label: "Formazione", icon: GraduationCap },
-      { id: "datasheets", label: "Datasheet e istruzioni", icon: BookOpen },
+      { id: "market", icon: ShoppingBag },
+      { id: "generate-schematic-pcb", icon: CircuitBoard },
+      { id: "education", icon: GraduationCap },
+      { id: "datasheets", icon: BookOpen },
     ],
   },
 ];
+
+const SCREEN_LABEL_KEY: Record<string, keyof ReturnType<typeof chromeCopy>["screens"]> = {
+  "core-connections": "coreConnections",
+  "catalog-topology": "catalogTopology",
+  "physical-composition": "physicalComposition",
+  "device-profile-studio": "deviceProfiles",
+  "processing-graph": "processingGraph",
+  "deploy-diff": "deployDiff",
+  "runtime-diagnostics": "runtimeDiagnostics",
+  "capability-marketplace": "capabilityMarketplace",
+  "cross-core-automation": "automations",
+  "settings-security": "security",
+  market: "market",
+  "generate-schematic-pcb": "generateSchematic",
+  education: "education",
+  datasheets: "datasheets",
+};
 
 /** `UX_ARCHITECTURE.md` § Shell applicativa — 64px collapsed / 240px expanded, groups separated by a thin divider. */
 export function LeftRail() {
   const { activeScreen, navigate } = useSession();
   const { mode } = useUiMode();
+  const { locale } = useLocale();
+  const copy = chromeCopy(locale);
   const [expanded, setExpanded] = useState(false);
   const visibleGroups = GROUPS.map((group) => ({
-    items: group.items.filter((item) => isScreenVisibleInMode(item.id, mode)),
+    items: group.items
+      .filter((item) => isScreenVisibleInMode(item.id, mode))
+      .map((item) => ({
+        ...item,
+        label: copy.screens[SCREEN_LABEL_KEY[item.id] ?? "market"],
+      })),
   })).filter((group) => group.items.length > 0);
   const extensionItems: RailItem[] = productionExtensions
     .screens()
@@ -121,7 +143,7 @@ export function LeftRail() {
           type="button"
           onClick={() => setExpanded((e) => !e)}
           className="flex h-10 w-full items-center gap-3 rounded-slsm px-3 text-ink-faint hover:bg-surface-raised"
-          aria-label={expanded ? "Comprimi" : "Espandi"}
+          aria-label={expanded ? copy.collapseRail : copy.expandRail}
         >
           {expanded ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
         </button>

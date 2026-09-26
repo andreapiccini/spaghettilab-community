@@ -6,6 +6,8 @@ import { buildDemoProject } from "../../lib/demo-project.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { localStorageAdapter, projectRepository } from "../../lib/repository.js";
 import { saveTourSeen } from "../../lib/tour.js";
+import { projectPickerCopy } from "../../lib/project-picker-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { useSettingsModal } from "../../state/settings-modal-context.js";
 import { ChromeStatus } from "../shell/ChromeStatus.js";
@@ -42,6 +44,8 @@ async function loadSummaries(): Promise<LoadState> {
 export function ProjectPicker() {
   const { openProject, navigate } = useSession();
   const { openSettings } = useSettingsModal();
+  const { locale } = useLocale();
+  const copy = projectPickerCopy(locale);
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -82,7 +86,7 @@ export function ProjectPicker() {
       }
       const demo = buildDemoProject(DEMO_PROJECT_NAME);
       if (!demo) {
-        setState({ kind: "error", message: "Non è stato possibile creare il progetto demo." });
+        setState({ kind: "error", message: copy.demoFailed });
         return;
       }
       await projectRepository.save(demo);
@@ -90,10 +94,10 @@ export function ProjectPicker() {
       openProject(demo.projectId, demo);
       navigate("processing-graph");
     } catch (cause) {
-      const detail = cause instanceof Error ? cause.message : "errore sconosciuto";
-      setState({ kind: "error", message: `Non è stato possibile creare il progetto demo: ${detail}` });
+      const detail = cause instanceof Error ? cause.message : copy.unknownError;
+      setState({ kind: "error", message: copy.demoFailedDetail(detail) });
     }
-  }, [openProject, navigate, state]);
+  }, [openProject, navigate, state, copy]);
 
   const handleImportFile = useCallback(
     async (file: File) => {
@@ -145,7 +149,7 @@ export function ProjectPicker() {
       </header>
 
       {state.kind === "loaded" && state.projects.length === 0 ? (
-        <EmptyState onCreate={() => setDialogOpen(true)} onDemo={() => void openDemo()} />
+        <EmptyState copy={copy} onCreate={() => setDialogOpen(true)} onDemo={() => void openDemo()} />
       ) : (
         <div className="flex-1 overflow-auto p-6">
           <div className="mb-6 flex items-center justify-between">
@@ -154,7 +158,7 @@ export function ProjectPicker() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="cerca progetti..."
+                placeholder={copy.searchPlaceholder}
                 className="w-full bg-transparent text-sm font-body outline-none placeholder:text-ink-faint"
               />
             </div>
@@ -164,14 +168,14 @@ export function ProjectPicker() {
                 onClick={() => void openDemo()}
                 className="flex items-center gap-1.5 rounded-slpill border border-border-strong px-4 py-2 text-sm font-body-strong text-ink hover:bg-surface-raised"
               >
-                <PlayCircle size={16} /> Prova la demo
+                <PlayCircle size={16} /> {copy.tryDemo}
               </button>
               <button
                 type="button"
                 onClick={() => setDialogOpen(true)}
                 className="flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-2 text-sm font-body-strong text-white hover:bg-brand-blue-dark"
               >
-                <Plus size={16} /> Nuovo progetto
+                <Plus size={16} /> {copy.newProject}
               </button>
             </div>
           </div>
@@ -179,13 +183,14 @@ export function ProjectPicker() {
           {state.kind === "loading" || importing ? (
             <SkeletonGrid />
           ) : state.kind === "error" ? (
-            <ErrorBanner message={state.message} onRetry={refresh} />
+            <ErrorBanner message={state.message} retryLabel={copy.retry} onRetry={refresh} />
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,240px)] gap-4">
               <AnimatePresence>
                 {filtered.map((project) => (
                   <motion.div key={project.projectId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={motionTokens.duration.fast}>
                     <ProjectCard
+                      coresLabel={copy.coresConnected(project.coreBindingCount)}
                       project={project}
                       onOpen={() => {
                         // Old "Demo" cards still in storage must rebuild — otherwise users
@@ -214,7 +219,15 @@ export function ProjectPicker() {
   );
 }
 
-function EmptyState({ onCreate, onDemo }: { readonly onCreate: () => void; readonly onDemo: () => void }) {
+function EmptyState({
+  copy,
+  onCreate,
+  onDemo,
+}: {
+  readonly copy: ReturnType<typeof projectPickerCopy>;
+  readonly onCreate: () => void;
+  readonly onDemo: () => void;
+}) {
   return (
     <div
       className="flex flex-1 flex-col items-center justify-center gap-4 text-center"
@@ -223,14 +236,14 @@ function EmptyState({ onCreate, onDemo }: { readonly onCreate: () => void; reado
       }}
     >
       <FolderPlus size={48} className="text-ink-faint" />
-      <h1 className="font-heading text-[28px] font-bold leading-[1.2]">Nessun progetto ancora</h1>
-      <p className="max-w-sm font-body text-sm text-ink-muted">Crea il tuo primo progetto per iniziare a comporre Core, sensori e automazioni.</p>
+      <h1 className="font-heading text-[28px] font-bold leading-[1.2]">{copy.emptyTitle}</h1>
+      <p className="max-w-sm font-body text-sm text-ink-muted">{copy.emptyBody}</p>
       <div className="mt-2 flex items-center gap-2">
         <button type="button" onClick={onDemo} className="flex items-center gap-1.5 rounded-slpill border border-border-strong px-4 py-2 text-sm font-body-strong text-ink hover:bg-surface-raised">
-          <PlayCircle size={16} /> Prova la demo
+          <PlayCircle size={16} /> {copy.tryDemo}
         </button>
         <button type="button" onClick={onCreate} className="flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-2 text-sm font-body-strong text-white hover:bg-brand-blue-dark">
-          <Plus size={16} /> Crea il tuo primo progetto
+          <Plus size={16} /> {copy.createFirst}
         </button>
       </div>
     </div>
@@ -247,12 +260,12 @@ function SkeletonGrid() {
   );
 }
 
-function ErrorBanner({ message, onRetry }: { readonly message: string; readonly onRetry: () => void }) {
+function ErrorBanner({ message, retryLabel, onRetry }: { readonly message: string; readonly retryLabel: string; readonly onRetry: () => void }) {
   return (
     <div className="flex items-center justify-between rounded-slsm border-l-4 border-error bg-surface-raised p-4">
       <p className="font-body text-sm text-ink">{message}</p>
       <button type="button" onClick={onRetry} className="rounded-slsm border border-border-strong px-3 py-1.5 text-sm font-body-strong">
-        Riprova
+        {retryLabel}
       </button>
     </div>
   );

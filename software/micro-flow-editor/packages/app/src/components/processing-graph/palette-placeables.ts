@@ -1,13 +1,13 @@
 import {
-  bayChoiceHint,
   bayFamilyIdOf,
-  baySideLabel,
   baySidesForEntry,
   blockFamilyOf,
   isBayEntry,
   type BaySide,
   type ProcessingCatalogEntry,
 } from "@spaghettilab/processing-block-catalog";
+import { localizeCatalogEntry, localizedBayChoiceHint, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
+import type { LocaleId } from "../../lib/locale.js";
 
 export const PROCESSING_BLOCK_MIME = "application/x-spaghettilab-processing-block";
 
@@ -44,12 +44,16 @@ export type PalettePlaceable = {
 };
 
 /** Expand bay both/either into separate palette rows; functionality stays one row. */
-export function expandPalettePlaceables(entries: readonly ProcessingCatalogEntry[]): readonly PalettePlaceable[] {
+export function expandPalettePlaceables(
+  entries: readonly ProcessingCatalogEntry[],
+  locale: LocaleId = "it",
+): readonly PalettePlaceable[] {
   const rows: PalettePlaceable[] = [];
-  for (const entry of entries) {
+  for (const raw of entries) {
+    const entry = localizeCatalogEntry(raw, locale);
     if (!isBayEntry(entry)) {
       rows.push({
-        entry,
+        entry: raw,
         rowKey: entry.id,
         label: entry.label,
         subtitle: entry.subtitle,
@@ -57,11 +61,11 @@ export function expandPalettePlaceables(entries: readonly ProcessingCatalogEntry
       continue;
     }
     const sides = baySidesForEntry(entry);
-    const hint = bayChoiceHint(entry);
+    const hint = localizedBayChoiceHint(entry.bayIo, locale);
     for (const side of sides) {
-      const sideLabel = baySideLabel(side);
+      const sideLabel = localizedBaySideLabel(side, locale);
       rows.push({
-        entry,
+        entry: raw,
         baySide: side,
         rowKey: `${entry.id}::${side}`,
         label: sides.length > 1 ? `${entry.label} · ${sideLabel}` : entry.label,

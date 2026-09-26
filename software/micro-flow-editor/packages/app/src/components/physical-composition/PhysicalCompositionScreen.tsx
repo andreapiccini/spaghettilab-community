@@ -9,6 +9,8 @@ import { CircleAlert, Plug, Plus, Radar, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { declaredPortsOf, resizePinMap, summarizeConfiguredPort } from "../../lib/port-protocol-mock.js";
+import { physicalCompositionCopy } from "../../lib/physical-composition-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { useSession } from "../../state/session-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
@@ -53,6 +55,8 @@ export function PhysicalCompositionScreen() {
 }
 
 function PhysicalCompositionScreenInner() {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
   const { session, execute, navigate } = useSession();
   const { rows, getSnapshot, getClient, listDeviceProfiles, listDiscoveryCandidates, acceptDiscovery } = useCoreSessions();
   const { configuredPorts, protocolFor, cardPositionOf, setCardPosition, rememberCapabilities, selectedBindingId, setSelectedBindingId } = usePortProtocol();
@@ -147,7 +151,7 @@ function PhysicalCompositionScreenInner() {
   }, [validation]);
   const collisionCount = validation && !validation.ok ? validation.error.filter((e) => e.code === "physical-composition.endpoint_collision" || e.code === "physical-composition.module_key_conflict").length : 0;
 
-  const domainRfNodes = useMemo(() => toPhysicalNodes(graphState, authoringMetadata, new Set(errorsByNode.keys())), [graphState, authoringMetadata, errorsByNode]);
+  const domainRfNodes = useMemo(() => toPhysicalNodes(graphState, authoringMetadata, new Set(errorsByNode.keys()), locale), [graphState, authoringMetadata, errorsByNode, locale]);
   const edges = useMemo(() => toReactFlowEdges(graphState), [graphState]);
 
   // Local mirror for smooth dragging — `applyNodeChanges` gives immediate visual
@@ -287,8 +291,8 @@ function PhysicalCompositionScreenInner() {
 
   const noPorts = configuredPorts.length === 0;
   const subtitle = !selected
-    ? "Nessun Core"
-    : `${declaredPorts.length} ${declaredPorts.length === 1 ? "porta letta" : "porte lette"} dal Core${configuredPorts.length > 0 ? ` · ${configuredPorts.length} sul canvas` : ""} · ${collisionCount} conflitti`;
+    ? copy.noCoreShort
+    : `${copy.portsRead(declaredPorts.length)}${configuredPorts.length > 0 ? ` · ${copy.onCanvas(configuredPorts.length)}` : ""} · ${copy.conflicts(collisionCount)}`;
 
   return (
     <div className="flex h-full flex-col">
@@ -297,7 +301,7 @@ function PhysicalCompositionScreenInner() {
           <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate font-heading text-[28px] font-bold leading-none text-ink">Physical Composition</h1>
+          <h1 className="truncate font-heading text-[28px] font-bold leading-none text-ink">{copy.title}</h1>
           <p className="font-body text-xs text-ink-muted">{subtitle}</p>
         </div>
         {selected && (
@@ -307,38 +311,38 @@ function PhysicalCompositionScreenInner() {
             className="flex shrink-0 items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-2 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
           >
             <Plus size={16} />
-            Aggiungi Porta
+            {copy.addPort}
           </button>
         )}
         {visibleCandidates.length > 0 && (
           <button type="button" onClick={() => setDiscoveryOpen(true)} className="flex shrink-0 items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink">
             <Radar size={14} />
-            {visibleCandidates.length} candidati
+            {copy.candidates(visibleCandidates.length)}
           </button>
         )}
         {collisionCount > 0 && (
           <span className="flex shrink-0 items-center gap-1.5 rounded-slpill px-3 py-1.5 font-body text-sm text-error" style={{ backgroundColor: "color-mix(in srgb, var(--color-error) 10%, transparent)" }}>
             <CircleAlert size={14} />
-            {collisionCount} indirizzi in conflitto
+            {copy.addressConflicts(collisionCount)}
           </span>
         )}
         {selected && !noPorts && (
           <button type="button" onClick={() => navigate("deploy-diff")} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
-            Invia a Deploy
+            {copy.sendToDeploy}
           </button>
         )}
       </div>
 
       {!selected ? (
-        <EmptyHero icon={Plug} title="Nessun Core nel progetto" body="Connetti un Core per configurare le Porte di questo progetto." actionLabel="Vai a Core Connections" onAction={() => navigate("core-connections")} />
+        <EmptyHero icon={Plug} title={copy.noCoreTitle} body={copy.noCoreBody} actionLabel={copy.goCoreConnections} onAction={() => navigate("core-connections")} />
       ) : (
         <div className="relative flex flex-1 overflow-hidden">
           {noPorts ? (
             <EmptyHero
               icon={Plug}
-              title="Nessuna porta sul canvas"
-              body={declaredPorts.length > 0 ? "Scegli una Porta dal menu (lette dal firmware), poi clicca i pin per i segnali." : "Nessuna Porta da GET_TOPOLOGY. Rileggi dal Core: il menu si riempie solo da lì."}
-              actionLabel="Aggiungi una Porta"
+              title={copy.noPortTitle}
+              body={declaredPorts.length > 0 ? copy.noPortBody : copy.noTopologyBody}
+              actionLabel={copy.addAPort}
               onAction={() => setPortSetup({ kind: "pick" })}
             />
           ) : (

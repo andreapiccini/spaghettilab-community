@@ -1,5 +1,7 @@
 import { PortCapability, PortTransport } from "@spaghettilab/device-profile-authoring-model";
 import { Plug, TriangleAlert } from "lucide-react";
+import { deviceProfileCopy } from "../../lib/device-profile-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 
 const TRANSPORT_OPTIONS: readonly { readonly value: number; readonly label: string }[] = [
   { value: PortTransport.I2C, label: "I2C" },
@@ -32,6 +34,8 @@ const CAPABILITY_OPTIONS: readonly { readonly bit: number; readonly label: strin
  * never a fabricated constraint.
  */
 export function TransportTab({ transport, onTransport, requiredCapabilities, onRequiredCapabilities }: { readonly transport: number; readonly onTransport: (v: number) => void; readonly requiredCapabilities: number; readonly onRequiredCapabilities: (v: number) => void }) {
+  const { locale } = useLocale();
+  const copy = deviceProfileCopy(locale);
   return (
     <div className="flex max-w-xl flex-col gap-4 p-6">
       <div>
@@ -46,7 +50,7 @@ export function TransportTab({ transport, onTransport, requiredCapabilities, onR
       </div>
 
       <div>
-        <label className="mb-1 block font-body text-xs font-semibold text-ink-muted">Capability richieste (Port)</label>
+        <label className="mb-1 block font-body text-xs font-semibold text-ink-muted">{copy.requiredCapabilities}</label>
         <div className="flex flex-col gap-1">
           {CAPABILITY_OPTIONS.map((c) => (
             <label key={c.bit} className="flex items-center gap-2 font-body text-sm text-ink">
@@ -60,8 +64,8 @@ export function TransportTab({ transport, onTransport, requiredCapabilities, onR
       <div className="flex items-start gap-2 rounded-slsm border-l-4 border-warning bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] p-3">
         <TriangleAlert size={16} className="mt-0.5 shrink-0 text-warning" />
         <div>
-          <p className="font-body text-sm text-ink">Nessun vincolo elettrico da Bay disponibile</p>
-          <p className="font-body text-xs text-ink-muted">Un profilo non è associato a una Bay specifica mentre lo si autora — i vincoli elettrici reali si vedono al momento di "Instanzia come Module" in Physical Composition. Anche allora, il modello di topologia attuale non riporta ancora tensione/modalità/frequenza massima per rail — solo assurance/admission grezzi.</p>
+          <p className="font-body text-sm text-ink">{copy.noBayConstraint}</p>
+          <p className="font-body text-xs text-ink-muted">{copy.bayConstraintBody}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 font-body text-xs text-ink-faint">

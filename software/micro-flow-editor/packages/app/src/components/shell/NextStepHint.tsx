@@ -2,6 +2,7 @@ import { ChevronLeft, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { readHintDismissedFromLocalStorage, saveHintDismissed } from "../../lib/hints.js";
+import { chromeCopy } from "../../lib/chrome-copy.js";
 import { nextStepLabel } from "../../lib/next-step-copy.js";
 import { nextStepTarget } from "../../lib/next-step.js";
 import { localStorageAdapter } from "../../lib/repository.js";
@@ -21,6 +22,7 @@ export function NextStepHint() {
   const { session } = useSession();
   const { active: tourActive } = useTour();
   const { locale } = useLocale();
+  const copy = chromeCopy(locale);
   const [dismissed, setDismissed] = useState(readHintDismissedFromLocalStorage);
 
   const target = session ? nextStepTarget(session.stack.current) : null;
@@ -43,7 +45,7 @@ export function NextStepHint() {
       </motion.div>
       <div className="flex items-center gap-1.5 rounded-slpill bg-ink px-2.5 py-1 text-white shadow-e2">
         <span className="whitespace-nowrap font-body text-xs">{nextStepLabel(target, locale)}</span>
-        <button type="button" onClick={dismiss} className="rounded-full p-0.5 text-white/70 hover:text-white" aria-label="Nascondi">
+        <button type="button" onClick={dismiss} className="rounded-full p-0.5 text-white/70 hover:text-white" aria-label={copy.hideHint}>
           <X size={12} />
         </button>
       </div>

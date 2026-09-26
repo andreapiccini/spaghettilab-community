@@ -1,3 +1,6 @@
+import { deviceProfileCopy } from "../../lib/device-profile-copy.js";
+import { useLocale } from "../../state/locale-context.js";
+
 /**
  * `ux/screens/S060-device-profile-studio/visual.md` § Tab Metadata. `DeviceProfileDraft`
  * (`@spaghettilab/device-profile-authoring-model`) has no `name`/`author`/
@@ -33,35 +36,37 @@ export function MetadataTab({
   readonly description: string;
   readonly onDescription: (v: string) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = deviceProfileCopy(locale);
   return (
     <div className="flex max-w-xl flex-col gap-4 p-6">
       <div>
         <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="dps-name">
-          Nome
+          {copy.name}
         </label>
-        <input id="dps-name" value={label} onChange={(e) => onLabel(e.target.value)} placeholder="Sensore di temperatura esterno" className="w-full rounded-slsm border border-border-strong px-3 py-2 font-body text-sm outline-none" />
+        <input id="dps-name" value={label} onChange={(e) => onLabel(e.target.value)} placeholder={copy.temperaturePlaceholder} className="w-full rounded-slsm border border-border-strong px-3 py-2 font-body text-sm outline-none" />
       </div>
       <div>
         <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="dps-id">
-          ID {idLocked && <span className="font-normal text-ink-faint">(sola lettura dopo il primo salvataggio)</span>}
+          ID {idLocked && <span className="font-normal text-ink-faint">{copy.readOnlyAfterSave}</span>}
         </label>
         <input id="dps-id" value={profileId} onChange={(e) => onProfileId(e.target.value)} disabled={idLocked} placeholder="sensor.example" className="w-full rounded-slsm border border-border-strong px-3 py-2 font-mono text-sm outline-none disabled:bg-surface-sunken disabled:text-ink-faint" />
       </div>
       <div>
         <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="dps-version">
-          Versione
+          {copy.version}
         </label>
         <input id="dps-version" type="number" value={version} onChange={(e) => onVersion(Number(e.target.value))} className="w-full rounded-slsm border border-border-strong px-3 py-2 font-mono text-sm outline-none" />
       </div>
       <div>
         <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="dps-author">
-          Autore
+          {copy.author}
         </label>
         <input id="dps-author" value={author} onChange={(e) => onAuthor(e.target.value)} className="w-full rounded-slsm border border-border-strong px-3 py-2 font-body text-sm outline-none" />
       </div>
       <div>
         <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="dps-desc">
-          Descrizione <span className="font-normal text-ink-faint">(non persistita — nessun campo per questo nel modello attuale)</span>
+          {copy.description} <span className="font-normal text-ink-faint">{locale === "en" ? "(not persisted — no field for this in the current model)" : "(non persistita — nessun campo per questo nel modello attuale)"}</span>
         </label>
         <textarea id="dps-desc" value={description} onChange={(e) => onDescription(e.target.value)} rows={4} className="w-full rounded-slsm border border-border-strong px-3 py-2 font-body text-sm outline-none" />
       </div>

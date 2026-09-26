@@ -52,4 +52,15 @@ describe("toProcessingNodes", () => {
     expect(nodes.find((n) => n.id === "dbg")?.data.label).toBe("Debug Print");
     expect(nodes.find((n) => n.id === "dbg")?.data.subtitle).toBe("hello");
   });
+
+  it("attaches static handles so wires survive a node-object rebuild", () => {
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [{ layer: "device-processing", id: "src", data: { kind: "block", blockTypeId: "scale_offset", properties: {} } }],
+      edges: [],
+    };
+    const [node] = toProcessingNodes(graphState, { src: { position: { x: 0, y: 0 } } }, new Set(), () => "Module");
+    expect(node?.handles?.some((h) => h.type === "source")).toBe(true);
+    expect(node?.handles?.some((h) => h.type === "target")).toBe(true);
+  });
 });

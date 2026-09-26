@@ -1,4 +1,6 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
 import { formatSchedulePeriod } from "./event-containers.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -24,6 +26,8 @@ export type EventContainerNodeData = {
  * handles — activation goes via the fixed violet tick disc; event-source keeps ports.
  */
 export function EventContainerNode({ id, data, selected }: NodeProps & { readonly data: EventContainerNodeData }) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
   const Icon = config.icon;
 
@@ -45,7 +49,7 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
             : `color-mix(in srgb, ${config.colorVar} 4%, transparent)`,
       }}
     >
-      <HoverDeleteButton id={id} label="Elimina contenitore" forceVisible={selected} />
+      <HoverDeleteButton id={id} label={copy.deleteContainer} forceVisible={selected} />
       {data.kind === "event-source" && (
         <>
           <Handle type="target" position={Position.Left} id="0" style={{ ...TARGET_HANDLE_STYLE, top: 16 }} />

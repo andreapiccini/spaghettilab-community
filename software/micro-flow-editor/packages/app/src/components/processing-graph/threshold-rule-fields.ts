@@ -72,7 +72,10 @@ export function readThresholdRule(properties: Readonly<Record<string, unknown>>)
   return { op: storedOp ?? "gte", level: upper ?? level, action: storedAction ?? (above ? "high" : "low") };
 }
 
-export function formatThresholdRuleExpr(properties: Readonly<Record<string, unknown>>): string | undefined {
+export function formatThresholdRuleExpr(
+  properties: Readonly<Record<string, unknown>>,
+  locale: "it" | "en" = "it",
+): string | undefined {
   const lower = asInt(properties[LOWER]);
   const upper = asInt(properties[UPPER]);
   if (
@@ -88,7 +91,8 @@ export function formatThresholdRuleExpr(properties: Readonly<Record<string, unkn
   }
   const parsed = readThresholdRule(properties);
   const symbol = parsed.op === "gte" ? "≥" : parsed.op === "gt" ? ">" : parsed.op === "lte" ? "≤" : parsed.op === "lt" ? "<" : "=";
-  return `${symbol} ${parsed.level.toString()} → ${parsed.action === "high" ? "alto" : "basso"}`;
+  const levelLabel = parsed.action === "high" ? (locale === "en" ? "high" : "alto") : locale === "en" ? "low" : "basso";
+  return `${symbol} ${parsed.level.toString()} → ${levelLabel}`;
 }
 
 function encodeThresholdBounds(op: ThresholdOp, level: bigint, action: GpioLevel): {

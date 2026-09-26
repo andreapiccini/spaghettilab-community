@@ -2,10 +2,14 @@ import { createEmptyProject, projectId as generateProjectId, type ProjectId } fr
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { projectPickerCopy } from "../../lib/project-picker-copy.js";
 import { projectRepository, uuidGenerator } from "../../lib/repository.js";
+import { useLocale } from "../../state/locale-context.js";
 
 /** `ux/screens/S010-workspace-shell/ui-behavior.md` § Creazione di un nuovo progetto. */
 export function NewProjectDialog({ open, onClose, onCreated }: { readonly open: boolean; readonly onClose: () => void; readonly onCreated: (id: ProjectId) => void }) {
+  const { locale } = useLocale();
+  const copy = projectPickerCopy(locale);
   const [name, setName] = useState("");
   const [fieldError, setFieldError] = useState<string | undefined>();
   const [remoteError, setRemoteError] = useState<string | undefined>();
@@ -13,7 +17,7 @@ export function NewProjectDialog({ open, onClose, onCreated }: { readonly open: 
 
   async function handleConfirm() {
     if (name.trim() === "") {
-      setFieldError("Il nome non può essere vuoto.");
+      setFieldError(copy.nameEmpty);
       return;
     }
     setFieldError(undefined);
@@ -31,7 +35,7 @@ export function NewProjectDialog({ open, onClose, onCreated }: { readonly open: 
       setName("");
       onCreated(project.projectId);
     } catch (cause) {
-      setRemoteError(cause instanceof Error ? cause.message : "Salvataggio fallito.");
+      setRemoteError(cause instanceof Error ? cause.message : copy.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -48,9 +52,9 @@ export function NewProjectDialog({ open, onClose, onCreated }: { readonly open: 
             transition={motionTokens.duration.base}
             className="w-[420px] rounded-sllg bg-surface p-6 shadow-e3"
           >
-            <h2 className="mb-4 font-heading text-lg font-semibold">Nuovo progetto</h2>
+            <h2 className="mb-4 font-heading text-lg font-semibold">{copy.dialogTitle}</h2>
             <label className="mb-1 block font-body text-sm font-semibold text-ink" htmlFor="new-project-name">
-              Nome progetto
+              {copy.nameLabel}
             </label>
             <input
               id="new-project-name"
@@ -67,10 +71,10 @@ export function NewProjectDialog({ open, onClose, onCreated }: { readonly open: 
             {remoteError && <p className="mt-1 font-body text-xs text-error">{remoteError}</p>}
             <div className="mt-6 flex justify-end gap-2">
               <button type="button" onClick={onClose} className="rounded-slsm px-4 py-2 font-body text-sm text-ink-muted hover:bg-surface-raised">
-                Annulla
+                {copy.cancel}
               </button>
               <button type="button" onClick={() => void handleConfirm()} disabled={saving} className="rounded-slsm bg-brand-blue px-4 py-2 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-                {saving ? "Creazione..." : "Crea progetto"}
+                {saving ? copy.creating : copy.createProject}
               </button>
             </div>
           </motion.div>

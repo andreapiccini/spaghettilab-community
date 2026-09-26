@@ -1,6 +1,8 @@
 import { nodeRedResourceId, type CoreBindingId, type CoreBindingRecord } from "@spaghettilab/domain";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { automationsCopy } from "../../lib/automations-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import type { CrossCoreNodeData } from "./node-data.js";
 
 type Kind = CrossCoreNodeData["kind"];
@@ -12,6 +14,8 @@ type Kind = CrossCoreNodeData["kind"];
  * doc comment ("always caller-supplied, never invented here").
  */
 export function NodeCreateDialog({ bindings, onCreate, onClose }: { readonly bindings: readonly CoreBindingRecord[]; readonly onCreate: (data: CrossCoreNodeData) => void; readonly onClose: () => void }) {
+  const { locale } = useLocale();
+  const copy = automationsCopy(locale);
   const [kind, setKind] = useState<Kind>("record-field");
   const [coreBinding, setCoreBinding] = useState<CoreBindingId | "">(bindings[0]?.bindingId ?? "");
   const [label, setLabel] = useState("");
@@ -44,7 +48,7 @@ export function NodeCreateDialog({ bindings, onCreate, onClose }: { readonly bin
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: "rgba(20, 23, 31, 0.4)" }}>
       <div className="w-[420px] rounded-slmd bg-surface p-5 shadow-e3">
         <div className="flex items-center justify-between">
-          <h3 className="font-heading text-base font-semibold text-ink">Nuovo nodo</h3>
+          <h3 className="font-heading text-base font-semibold text-ink">{copy.newNode}</h3>
           <button type="button" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-slsm text-ink-faint hover:bg-surface-raised">
             <X size={16} />
           </button>
@@ -65,7 +69,7 @@ export function NodeCreateDialog({ bindings, onCreate, onClose }: { readonly bin
         </div>
 
         <label className="mt-3 flex flex-col gap-1">
-          <span className="font-body text-xs text-ink-muted">Etichetta</span>
+          <span className="font-body text-xs text-ink-muted">{copy.label}</span>
           <input value={label} onChange={(e) => setLabel(e.target.value)} className="rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none" />
         </label>
 
@@ -87,7 +91,7 @@ export function NodeCreateDialog({ bindings, onCreate, onClose }: { readonly bin
             <NumField label="Source key" value={sourceKey} onChange={setSourceKey} />
             <NumField label="Field id" value={fieldId} onChange={setFieldId} />
             <label className="flex flex-col gap-1">
-              <span className="font-body text-xs text-ink-muted">Schema id</span>
+              <span className="font-body text-xs text-ink-muted">{copy.schemaId}</span>
               <input value={schemaId} onChange={(e) => setSchemaId(e.target.value)} className="rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-xs outline-none" />
             </label>
             <NumField label="Schema version" value={schemaVersion} onChange={setSchemaVersion} />
@@ -104,11 +108,11 @@ export function NodeCreateDialog({ bindings, onCreate, onClose }: { readonly bin
         {kind !== "nodered" && (
           <div className="mt-2 grid grid-cols-2 gap-2">
             <label className="flex flex-col gap-1">
-              <span className="font-body text-xs text-ink-muted">Value type{kind === "record-field" ? "" : " (opz.)"}</span>
+              <span className="font-body text-xs text-ink-muted">{copy.valueType}{kind === "record-field" ? "" : copy.optional}</span>
               <input value={valueType} onChange={(e) => setValueType(e.target.value)} placeholder="es. float32" className="rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-xs outline-none" />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="font-body text-xs text-ink-muted">Unit (opz.)</span>
+              <span className="font-body text-xs text-ink-muted">{copy.unitOptional}</span>
               <input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="es. °C" className="rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-xs outline-none" />
             </label>
           </div>
@@ -116,10 +120,10 @@ export function NodeCreateDialog({ bindings, onCreate, onClose }: { readonly bin
 
         <div className="mt-4 flex gap-2">
           <button type="button" onClick={onClose} className="flex-1 rounded-slsm border border-border-strong px-3 py-2 font-body text-sm text-ink hover:bg-surface-raised">
-            Annulla
+            {copy.cancel}
           </button>
           <button type="button" onClick={handleCreate} className="flex-1 rounded-slsm bg-brand-blue px-3 py-2 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
-            Crea
+            {copy.create}
           </button>
         </div>
       </div>

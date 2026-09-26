@@ -38,7 +38,7 @@ export function TopBar() {
         {/* Undo/redo buttons hidden for now — no keyboard shortcut backs them, they were
             the only entry point, and it's unclear yet whether surfacing undo/redo here is
             right for every flow. undo()/redo() themselves are untouched in session-context. */}
-        <span className="font-body text-sm text-ink-muted">Nessun Core attivo</span>
+        <span className="font-body text-sm text-ink-muted">{copy.noActiveCore}</span>
       </div>
       <div className="flex items-center gap-2">
         <ChromeStatus />

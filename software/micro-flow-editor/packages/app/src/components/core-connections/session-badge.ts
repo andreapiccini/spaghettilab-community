@@ -1,5 +1,9 @@
 import type { SessionState, SyncRelationship } from "@spaghettilab/core-session";
 import { CircleCheck, GitFork, PenLine, RotateCw, TriangleAlert, type LucideIcon } from "lucide-react";
+import { coreConnectionsCopy, type RowActionId } from "../../lib/core-connections-copy.js";
+import type { LocaleId } from "../../lib/locale.js";
+
+export type { RowActionId };
 
 /** `ux/screens/S030-core-connections/visual.md` § Badge stato sessione — color + whether the dot pulses (transitional states only). */
 export function sessionBadgeStyle(state: SessionState): { readonly colorVar: string; readonly pulsing: boolean; readonly label: string } {
@@ -28,18 +32,19 @@ export function sessionBadgeStyle(state: SessionState): { readonly colorVar: str
 }
 
 /** `ux/screens/S030-core-connections/visual.md` § Badge relazione progetto/dispositivo. */
-export function syncBadge(relationship: SyncRelationship): { readonly icon: LucideIcon; readonly colorVar: string; readonly label: string } {
+export function syncBadge(relationship: SyncRelationship, locale: LocaleId): { readonly icon: LucideIcon; readonly colorVar: string; readonly label: string } {
+  const copy = coreConnectionsCopy(locale);
   switch (relationship) {
     case "IN_SYNC":
       return { icon: CircleCheck, colorVar: "var(--color-success)", label: "IN_SYNC" };
     case "PROJECT_DIRTY":
-      return { icon: PenLine, colorVar: "var(--color-warning)", label: "modifiche locali non ancora inviate" };
+      return { icon: PenLine, colorVar: "var(--color-warning)", label: copy.sync.projectDirty };
     case "DEVICE_CHANGED":
-      return { icon: RotateCw, colorVar: "var(--color-info)", label: "il dispositivo ha uno stato diverso dall'ultimo deploy" };
+      return { icon: RotateCw, colorVar: "var(--color-info)", label: copy.sync.deviceChanged };
     case "DIVERGED":
-      return { icon: GitFork, colorVar: "var(--color-error)", label: "progetto e dispositivo sono cambiati entrambi" };
+      return { icon: GitFork, colorVar: "var(--color-error)", label: copy.sync.diverged };
     case "INCOMPATIBLE":
-      return { icon: TriangleAlert, colorVar: "var(--color-error)", label: "catalogo/profilo non compatibile con questo progetto" };
+      return { icon: TriangleAlert, colorVar: "var(--color-error)", label: copy.sync.incompatible };
   }
 }
 
@@ -51,25 +56,29 @@ export function syncBadge(relationship: SyncRelationship): { readonly icon: Luci
  * `ERROR` to key off of. Without this, a failed attempt looked identical to "never
  * tried" — a real bug found wiring this screen up live.
  */
-export function rowActionLabel(state: SessionState, stale: boolean, relationship: SyncRelationship | null, hasError = false): string | null {
-  if (state === "DISCONNECTED" && hasError) return "Rivedi errore";
-  if (state === "DISCONNECTED") return stale ? "Riconnetti" : "Connetti";
-  if (state === "CONNECTING" || state === "AUTHENTICATING" || state === "SYNCHRONIZING") return "Annulla";
+export function rowActionId(state: SessionState, stale: boolean, relationship: SyncRelationship | null, hasError = false): RowActionId | null {
+  if (state === "DISCONNECTED" && hasError) return "review-error";
+  if (state === "DISCONNECTED") return stale ? "reconnect" : "connect";
+  if (state === "CONNECTING" || state === "AUTHENTICATING" || state === "SYNCHRONIZING") return "cancel";
   if (state === "READY") {
     switch (relationship) {
       case "PROJECT_DIRTY":
-        return "Invia al Core";
+        return "send-to-core";
       case "DEVICE_CHANGED":
-        return "Rivedi modifiche";
+        return "review-changes";
       case "DIVERGED":
-        return "Confronta e riconcilia";
+        return "compare-reconcile";
       case "INCOMPATIBLE":
-        return "Dettagli incompatibilità";
+        return "incompatibility-details";
       default:
         return null;
     }
   }
-  if (state === "CONFLICT" || state === "ERROR") return "Rivedi errore";
-  if (state === "ROLLED_BACK") return "Vedi cosa è cambiato";
+  if (state === "CONFLICT" || state === "ERROR") return "review-error";
+  if (state === "ROLLED_BACK") return "see-what-changed";
   return null;
+}
+
+export function rowActionLabel(id: RowActionId, locale: LocaleId): string {
+  return coreConnectionsCopy(locale).actions[id];
 }

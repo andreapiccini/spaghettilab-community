@@ -6,6 +6,8 @@ import { Radar, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { physicalCompositionCopy } from "../../lib/physical-composition-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 
 const CONFIDENCE_LABEL = (c: number): { readonly label: string; readonly colorVar: string } => (c >= 80 ? { label: "Alta", colorVar: "var(--color-success)" } : c >= 40 ? { label: "Media", colorVar: "var(--color-warning)" } : { label: "Bassa", colorVar: "var(--color-error)" });
 
@@ -34,12 +36,14 @@ export function DiscoveryTray({
   readonly onClose: () => void;
   readonly onConfigureManually?: (portId?: number) => void;
 }) {
+  const { locale } = useLocale();
+  const copy = physicalCompositionCopy(locale);
   return (
     <AnimatePresence>
       {open && (
         <motion.div initial={{ x: 360 }} animate={{ x: 0 }} exit={{ x: 360 }} transition={motionTokens.spring.smooth} className="flex h-full w-[360px] flex-col border-l border-border bg-surface shadow-e2">
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
-            <h2 className="font-heading text-sm font-semibold text-ink">Candidati rilevati</h2>
+            <h2 className="font-heading text-sm font-semibold text-ink">{copy.recognizedHardware}</h2>
             <button type="button" onClick={onClose} className="ml-auto flex h-8 w-8 items-center justify-center rounded-slsm text-ink-faint hover:bg-surface-raised">
               <X size={16} />
             </button>
@@ -48,11 +52,11 @@ export function DiscoveryTray({
             {candidates.length === 0 ? (
               <div className="flex flex-col items-center gap-3 py-10 text-center">
                 <Radar size={40} className="text-ink-faint" />
-                <p className="font-body text-sm text-ink-muted">Nessun hardware riconosciuto</p>
-                <p className="max-w-[240px] font-body text-xs text-ink-faint">Se hai collegato qualcosa, configuralo a mano: pin, protocollo, campi.</p>
+                <p className="font-body text-sm text-ink-muted">{copy.noHardware}</p>
+                <p className="max-w-[240px] font-body text-xs text-ink-faint">{copy.noHardwareHint}</p>
                 {onConfigureManually && (
                   <button type="button" onClick={() => onConfigureManually()} className="h-9 rounded-slsm bg-brand-blue px-4 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
-                    Configura a mano
+                    {copy.configureManually}
                   </button>
                 )}
               </div>

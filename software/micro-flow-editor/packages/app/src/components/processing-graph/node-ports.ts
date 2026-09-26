@@ -1,4 +1,5 @@
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
+import { Position } from "@xyflow/react";
 import type { CSSProperties } from "react";
 import { catalogEntryForNode } from "./catalog-entry-for-node.js";
 import { NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
@@ -109,4 +110,94 @@ export const TARGET_HANDLE_STYLE: CSSProperties = {
 export function stackedHandleTop(index: number, count: number): string {
   if (count <= 1) return "50%";
   return `${((index + 1) / (count + 1)) * 100}%`;
+}
+
+const TARGET_W = 10;
+const TARGET_H = 14;
+const SOURCE_W = 14;
+const SOURCE_H = 14;
+const TICK_HANDLE = 8;
+const MULTI_SOURCE = 10;
+
+/**
+ * Static React Flow `handles` matching ProcessingNode / the tick disc.
+ * Required because `renderedNodes` rebuilds every drag frame (parentId,
+ * live container size, preview). That wipes DOM-measured handleBounds and
+ * `getEdgePosition` then returns null — wires vanish until the next measure.
+ * Same reason EventContainer nodes already carry an explicit `handles` list.
+ */
+export type StaticNodeHandle = {
+  readonly id: string;
+  readonly type: "source" | "target";
+  readonly position: Position;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+};
+
+export function handlesForNode(
+  ports: NodePortLayout,
+  size: { readonly width: number; readonly height: number; readonly circular?: boolean },
+): StaticNodeHandle[] {
+  if (size.circular) {
+    return [
+      {
+        id: "0",
+        type: "source",
+        position: Position.Right,
+        x: size.width - TICK_HANDLE + 2,
+        y: size.height / 2 - TICK_HANDLE / 2,
+        width: TICK_HANDLE,
+        height: TICK_HANDLE,
+      },
+    ];
+  }
+
+  const stacked = Math.max(ports.inputs.length, ports.outputs.length) > 1;
+  const handles: StaticNodeHandle[] = [];
+  const inputCount = stacked ? Math.max(ports.inputs.length, ports.outputs.length) : ports.inputs.length;
+
+  for (let i = 0; i < ports.inputs.length; i++) {
+    handles.push({
+      id: ports.inputs[i]!.id,
+      type: "target",
+      position: Position.Left,
+      x: -TARGET_W / 2,
+      y: stackedHandleY(i, inputCount, size.height, TARGET_H),
+      width: TARGET_W,
+      height: TARGET_H,
+    });
+  }
+
+  for (let i = 0; i < ports.outputs.length; i++) {
+    if (stacked) {
+      handles.push({
+        id: ports.outputs[i]!.id,
+        type: "source",
+        position: Position.Right,
+        x: size.width - MULTI_SOURCE + 2,
+        y: MULTI_HEADER + i * MULTI_ROW + (MULTI_ROW - MULTI_SOURCE) / 2,
+        width: MULTI_SOURCE,
+        height: MULTI_SOURCE,
+      });
+      continue;
+    }
+    handles.push({
+      id: ports.outputs[i]!.id,
+      type: "source",
+      position: Position.Right,
+      x: size.width - SOURCE_W,
+      y: size.height / 2 - SOURCE_H / 2,
+      width: SOURCE_W,
+      height: SOURCE_H,
+    });
+  }
+
+  return handles;
+}
+
+function stackedHandleY(index: number, count: number, nodeHeight: number, handleHeight: number): number {
+  if (count <= 1) return nodeHeight / 2 - handleHeight / 2;
+  return (nodeHeight * (index + 1)) / (count + 1) - handleHeight / 2;
 }

@@ -2,7 +2,9 @@ import type { CoreBindingId } from "@spaghettilab/domain";
 import { TelemetryBufferStore, type TelemetryGap } from "@spaghettilab/telemetry-buffer";
 import { AlertTriangle, Radio } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { runtimeDiagnosticsCopy } from "../../lib/runtime-diagnostics-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useLocale } from "../../state/locale-context.js";
 
 type SeqKey = string;
 
@@ -20,6 +22,8 @@ type SeqKey = string;
  * ogni cambio di Core selezionato senza bisogno di un effetto di reset.
  */
 export function TelemetryTab({ bindingId }: { readonly bindingId: CoreBindingId }) {
+  const { locale } = useLocale();
+  const copy = runtimeDiagnosticsCopy(locale);
   const { onRecordEvent, getLastBootId } = useCoreSessions();
   const [store] = useState(() => new TelemetryBufferStore());
   const seqRef = useRef(new Map<SeqKey, number>());
@@ -61,9 +65,9 @@ export function TelemetryTab({ bindingId }: { readonly bindingId: CoreBindingId 
   return (
     <div className="flex h-full flex-col gap-4 p-6">
       <div className="rounded-slmd border-l-4 border-brand-purple-glow p-3" style={{ backgroundColor: "color-mix(in srgb, var(--color-brand-purple-glow) 6%, transparent)" }}>
-        <p className="font-body text-sm text-ink">Stream di notifiche in tempo reale — nessuna scrittura su Core o progetto.</p>
+        <p className="font-body text-sm text-ink">{copy.telemetryBody}</p>
         <p className="mt-0.5 font-body text-xs text-ink-muted">
-          Gap onesto: nessun valore di campo è disponibile su questi transport (WebSocket/USB-seriale) — solo provenienza (source, schema, sequenza, boot epoch).
+          {copy.telemetryGap}
         </p>
       </div>
 
@@ -71,7 +75,7 @@ export function TelemetryTab({ bindingId }: { readonly bindingId: CoreBindingId 
         <div className="flex flex-1 items-center justify-center">
           <div className="flex flex-col items-center gap-2 text-center">
             <Radio size={40} className="text-ink-faint" />
-            <p className="font-body text-sm text-ink-muted">Nessun record ricevuto finora per questo Core.</p>
+            <p className="font-body text-sm text-ink-muted">{copy.noRecords}</p>
           </div>
         </div>
       ) : (

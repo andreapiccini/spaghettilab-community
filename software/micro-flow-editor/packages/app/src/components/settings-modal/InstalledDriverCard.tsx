@@ -1,4 +1,7 @@
 import { useState, type ReactNode } from "react";
+import { catalogTopologyCopy } from "../../lib/catalog-topology-copy.js";
+import { localizeCompositionLabel } from "../../lib/physical-protocol-copy.js";
+import { useLocale } from "../../state/locale-context.js";
 import {
   compositionLines,
   contentForInstalledDriver,
@@ -15,6 +18,8 @@ export function InstalledDriverCard({
   readonly commandCount: number;
   readonly profiles?: readonly { readonly profileId: string; readonly version: number }[];
 }) {
+  const { locale } = useLocale();
+  const copy = catalogTopologyCopy(locale);
   const [open, setOpen] = useState(false);
   const content = contentForInstalledDriver(typeId);
   return (
@@ -23,7 +28,7 @@ export function InstalledDriverCard({
         <div className="min-w-0">
           <p className="truncate font-mono text-sm text-ink">{typeId}</p>
           <p className="font-body text-xs text-ink-faint">
-            Presente sul Core · {commandCount === 1 ? "1 comando" : `${commandCount} comandi`}
+            {copy.presentOnCore(commandCount)}
           </p>
         </div>
         <button
@@ -31,7 +36,7 @@ export function InstalledDriverCard({
           onClick={() => setOpen((value) => !value)}
           className="shrink-0 rounded-slsm border border-border-strong px-2 py-1 font-body text-[11px] text-ink hover:bg-surface-raised"
         >
-          {open ? "Chiudi" : "Leggi"}
+          {open ? copy.close : copy.read}
         </button>
       </div>
       {open && <InstalledDriverBody content={content} commandCount={commandCount} profiles={profiles ?? []} />}
@@ -60,7 +65,7 @@ function InstalledDriverBody({
         <span className="truncate font-mono text-ink">{content.typeId}</span>
         {content.transport !== "" && (
           <>
-            <span className="text-ink-faint">Trasporto</span>
+            <span className="text-ink-faint">{catalogTopologyCopy(useLocale().locale).transport}</span>
             <span className="text-ink">{content.transport}</span>
           </>
         )}
@@ -70,11 +75,11 @@ function InstalledDriverBody({
             <span className="truncate font-mono text-ink">{content.configSchema}</span>
           </>
         )}
-        <span className="text-ink-faint">Comandi wire</span>
+        <span className="text-ink-faint">{catalogTopologyCopy(useLocale().locale).wireCommands}</span>
         <span className="font-mono text-ink">{commandCount}</span>
       </div>
       {settings && (
-        <DriverSection title="Interfaccia">
+        <DriverSection title={catalogTopologyCopy(useLocale().locale).transport === "Transport" ? "Interface" : "Interfaccia"}>
           <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
             {Object.entries(settings)
               .filter(([key, value]) => key !== "kind" && String(value).trim() !== "")
@@ -102,7 +107,7 @@ function InstalledDriverBody({
         </DriverSection>
       )}
       {content.commands.length > 0 && (
-        <DriverSection title="Comandi">
+        <DriverSection title={catalogTopologyCopy(useLocale().locale).wireCommands}>
           {content.commands.map((command) => (
             <div key={command.commandId}>
               <p className="font-mono text-[11px] text-ink">
@@ -116,14 +121,14 @@ function InstalledDriverBody({
         </DriverSection>
       )}
       {content.protocol && content.protocol.fields.length > 0 && (
-        <DriverSection title="Grandezze">
+        <DriverSection title={catalogTopologyCopy(useLocale().locale).quantities}>
           {content.protocol.fields.map((field) => (
             <div key={field.id} className="rounded-slsm bg-surface px-2 py-1.5">
               <p className="font-body text-[11px] font-semibold text-ink">{field.label || field.name}</p>
               <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-0.5">
                 {compositionLines(field).map((line) => (
                   <div key={line.label} className="min-w-0">
-                    <span className="font-body text-[9px] uppercase tracking-wide text-ink-faint">{line.label}</span>
+                    <span className="font-body text-[9px] uppercase tracking-wide text-ink-faint">{localizeCompositionLabel(line.label, useLocale().locale)}</span>
                     <div className="truncate font-mono text-[10px] text-ink">{line.value}</div>
                   </div>
                 ))}
@@ -133,7 +138,7 @@ function InstalledDriverBody({
         </DriverSection>
       )}
       {profiles.length > 0 && (
-        <DriverSection title="Profili sul Core">
+        <DriverSection title={catalogTopologyCopy(useLocale().locale).profilesOnCore}>
           {profiles.map((profile) => (
             <p key={`${profile.profileId}@${profile.version}`} className="font-mono text-[11px] text-ink">
               {profile.profileId}@{profile.version}

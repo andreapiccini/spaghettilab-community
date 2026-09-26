@@ -5,7 +5,9 @@ import { appendDeploymentRecord, canonicalProjectHash, deploymentId, type CoreBi
 import { Check, PackageX, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
+import { deployDiffCopy } from "../../lib/deploy-diff-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { ConfigDiffView } from "./ConfigDiffView.js";
 import { PipelineStepper } from "./PipelineStepper.js";
@@ -32,6 +34,8 @@ type CoreCandidate = {
  * questa lista solo se ha davvero modifiche pendenti in questo momento.
  */
 export function DeployDiffScreen() {
+  const { locale } = useLocale();
+  const copy = deployDiffCopy(locale);
   const { session, execute, navigate } = useSession();
   const { getSnapshot, listDeviceProfiles, deployConfig } = useCoreSessions();
   const bindings = session?.stack.current.coreBindings ?? EMPTY_BINDINGS;
@@ -122,16 +126,16 @@ export function DeployDiffScreen() {
       <div className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-4">
         <h1 className="font-heading text-lg font-semibold text-ink">Deploy & Diff</h1>
         <span className="ml-auto flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink-muted">
-          {totalChanges} modifiche · {selectedCandidates.length} Core
+          {copy.changesCores(totalChanges, selectedCandidates.length)}
         </span>
         <button type="button" disabled={!canDeploy} onClick={() => void handleDeploy()} className="rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-40">
-          Avvia deploy
+          {copy.startDeploy}
         </button>
       </div>
 
       {candidates.length === 0 ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-body text-sm text-ink-faint">Nessun Core con modifiche pendenti — connetti un Core (Core Connections) e componi un progetto per vedere un diff qui.</p>
+          <p className="font-body text-sm text-ink-faint">{copy.noPending}</p>
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-4 p-6">
@@ -150,7 +154,7 @@ export function DeployDiffScreen() {
                   {c.missingProfiles.length > 0 ? <PackageX size={12} className="text-warning" /> : <span className="h-2 w-2 rounded-full" style={{ backgroundColor: isRunning ? "var(--color-info)" : "var(--color-ink-faint)" }} />}
                   {c.binding.expectedDeviceId}
                   <span className="font-body text-xs text-ink-faint">
-                    {c.diff.modules.added.length + c.diff.modules.removed.length + c.diff.modules.changed.length + c.diff.schedules.added.length + c.diff.rules.added.length + c.diff.blocks.added.length + c.diff.edges.added.length} modifiche
+                    {copy.changes(c.diff.modules.added.length + c.diff.modules.removed.length + c.diff.modules.changed.length + c.diff.schedules.added.length + c.diff.rules.added.length + c.diff.blocks.added.length + c.diff.edges.added.length)}
                   </span>
                   {result && (result.outcome === DeploymentOutcomeKind.SUCCESS || result.outcome === DeploymentOutcomeKind.NO_OP ? <Check size={12} className="text-success" /> : <X size={12} className="text-error" />)}
                 </button>
@@ -162,13 +166,13 @@ export function DeployDiffScreen() {
             <div className="flex items-start gap-2 border-l-4 border-warning p-3" style={{ backgroundColor: "color-mix(in srgb, var(--color-warning) 8%, transparent)" }}>
               <PackageX size={16} className="mt-0.5 shrink-0 text-warning" />
               <div>
-                <p className="font-body text-sm text-ink">Deploy bloccato: {blockedCandidates.reduce((n, c) => n + c.missingProfiles.length, 0)} profili richiesti non sono installati.</p>
+                <p className="font-body text-sm text-ink">{copy.blocked(blockedCandidates.reduce((n, c) => n + c.missingProfiles.length, 0))}</p>
                 <ul className="mt-1 flex flex-col gap-0.5">
                   {blockedCandidates.flatMap((c) => c.missingProfiles.map((p) => (
                     <li key={`${c.binding.bindingId}-${p}`} className="font-body text-xs text-ink-muted">
                       {c.binding.expectedDeviceId}: <span className="font-mono">{p}</span> —{" "}
                       <button type="button" onClick={() => navigate("device-profile-studio")} className="font-semibold text-brand-blue underline">
-                        Vai a Device Profile Studio
+                        {copy.goToStudio}
                       </button>
                     </li>
                   )))}
@@ -184,7 +188,7 @@ export function DeployDiffScreen() {
               <div key={c.binding.bindingId} className="flex flex-col gap-2 rounded-slmd border border-border p-3">
                 <h2 className="font-body text-sm font-semibold text-ink">{c.binding.expectedDeviceId}</h2>
                 {result?.outcome === DeploymentOutcomeKind.STALE_GENERATION && result.diff && result.liveConfig ? (
-                  <ConflictPanel coreName={c.binding.expectedDeviceId} diff={result.diff} />
+                  <ConflictPanel coreName={c.binding.expectedDeviceId} diff={result.diff} copy={copy} />
                 ) : (
                   <ConfigDiffView diff={c.diff} />
                 )}
@@ -198,23 +202,23 @@ export function DeployDiffScreen() {
   );
 }
 
-function ConflictPanel({ coreName, diff }: { readonly coreName: string; readonly diff: ConfigDiff }) {
+function ConflictPanel({ coreName, diff, copy }: { readonly coreName: string; readonly diff: ConfigDiff; readonly copy: ReturnType<typeof deployDiffCopy> }) {
   return (
     <div className="rounded-slmd border-2 border-error p-4">
-      <h3 className="font-heading text-base font-semibold text-ink">Conflitto su {coreName}</h3>
-      <p className="mt-1 font-body text-sm text-ink-muted">Il dispositivo ha uno snapshot diverso da quello atteso al momento dell'apply. Nessuna scrittura è avvenuta.</p>
+      <h3 className="font-heading text-base font-semibold text-ink">{copy.conflictOn(coreName)}</h3>
+      <p className="mt-1 font-body text-sm text-ink-muted">{copy.conflictBody}</p>
       <div className="mt-3">
         <ConfigDiffView diff={diff} />
       </div>
       <div className="mt-3 flex gap-2">
         <button type="button" className="flex-1 rounded-slsm border border-border-strong px-3 py-2 font-body text-sm text-ink hover:bg-surface-raised">
-          Importa stato live
+          {copy.importLive}
         </button>
         <button type="button" disabled title="Non ancora implementato — il rebase/merge strutturato richiede il decompilatore collegato al progetto autore, non ancora cablato (gap dichiarato)" className="flex-1 rounded-slsm border border-border-strong px-3 py-2 font-body text-sm text-ink opacity-40">
-          Rebase/merge strutturato
+          {copy.rebase}
         </button>
         <button type="button" className="flex-1 rounded-slsm border border-border-strong px-3 py-2 font-body text-sm text-ink-muted hover:bg-surface-raised">
-          Annulla
+          {copy.cancel}
         </button>
       </div>
     </div>
