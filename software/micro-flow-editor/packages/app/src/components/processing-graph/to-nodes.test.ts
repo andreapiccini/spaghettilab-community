@@ -135,6 +135,22 @@ describe("toProcessingNodes", () => {
     expect(nodes.find((n) => n.id === "r2")?.data.relayClose?.closeWhenHigh).toBe(false);
   });
 
+  it("leaves Digital Toggle without a subtitle line", () => {
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [
+        {
+          layer: "device-processing",
+          id: "t1",
+          data: { kind: "block", blockTypeId: "ab.digital_out_toggle", catalogEntryId: "appblocks.digital_out_toggle", properties: {} },
+        },
+      ],
+      edges: [],
+    };
+    const nodes = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
+    expect(nodes.find((n) => n.id === "t1")?.data.subtitle).toBe("");
+  });
+
   it("attaches static handles so wires survive a node-object rebuild", () => {
     const graphState: GraphState<"device-processing"> = {
       layer: "device-processing",

@@ -245,22 +245,24 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 </span>
               )}
             </div>
-            <div
-              className={
-                isIf || isRelay
-                  ? "whitespace-nowrap font-mono text-[10px] leading-tight text-ink"
-                  : "truncate font-body text-xs text-ink-faint"
-              }
-              title={
-                isIf
-                  ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ")
-                  : isRelay
-                    ? [subtitle, data.relayClose?.label].filter(Boolean).join(" · ")
-                    : subtitle
-              }
-            >
-              {subtitle}
-            </div>
+            {subtitle ? (
+              <div
+                className={
+                  isIf || isRelay
+                    ? "whitespace-nowrap font-mono text-[10px] leading-tight text-ink"
+                    : "truncate font-body text-xs text-ink-faint"
+                }
+                title={
+                  isIf
+                    ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ")
+                    : isRelay
+                      ? [subtitle, data.relayClose?.label].filter(Boolean).join(" · ")
+                      : subtitle
+                }
+              >
+                {subtitle}
+              </div>
+            ) : null}
             {isRelay && data.relayClose && data.previewing && (
               <div className="whitespace-nowrap font-mono text-[10px] leading-tight text-ink-muted" title={data.relayClose.label}>
                 {data.relayClose.label}

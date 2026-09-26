@@ -392,6 +392,7 @@ function subtitleFor(
   if (isBlockNodeData(data)) {
     if (isCompareIf(data)) return formatIfCondition(nodeId, data, graphState, locale);
     if (isRelayBlock(data)) return formatRelayClose(data, locale);
+    if (isDigitalOutToggle(data)) return "";
     const input = incomingLabel(nodeId, graphState, titles);
     const bay = entry && isBayEntry(entry);
     const rawRole = data.properties.bayRole;
