@@ -10,6 +10,9 @@ export const DEMO_LED_PERIOD_MS = 1000;
 
 export const DEMO_PROJECT_NAME = "Demo";
 
+/** Visitor-facing project title on the public GitHub Pages demo. */
+export const DEMO_VISITOR_PROJECT_NAME = "LED control";
+
 /**
  * A explorable, pre-populated project — no real Core behind it (the binding
  * has no connection profile, so "Connetti" on it will fail cleanly like any

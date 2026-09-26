@@ -16,6 +16,7 @@ import { portCardId } from "../physical-composition/ConfiguredPortNode.js";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
 import { localizeCatalogEntry, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import { DEMO_VISITOR_PROJECT_NAME } from "../../lib/demo-project.js";
 import { isDemoOnlyEnabled } from "../../lib/demo-only.js";
 import { VisitorDemoTour } from "./VisitorDemoTour.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -1080,7 +1081,7 @@ function ProcessingGraphScreenInner() {
             <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
           </div>
         )}
-        <h1 className="min-w-0 truncate font-heading text-lg font-semibold text-ink">{demoOnly ? "Flow" : copy.title}</h1>
+        <h1 className="min-w-0 truncate font-heading text-lg font-semibold text-ink">{demoOnly ? DEMO_VISITOR_PROJECT_NAME : copy.title}</h1>
         <div className="min-w-0 flex-1" />
         <button
           type="button"
