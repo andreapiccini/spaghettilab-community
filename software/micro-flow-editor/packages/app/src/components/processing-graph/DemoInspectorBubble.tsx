@@ -1,12 +1,17 @@
-import type { ReactNode } from "react";
-import { useTargetRect } from "../../lib/use-target-rect.js";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { placeInspectorAwayFromTarget } from "./inspector-placement.js";
 
-const CARD_MAX = 360;
-const GAP = 12;
+const CARD_MAX = 340;
+
+function readTargetRect(nodeId: string | undefined): DOMRect | null {
+  if (!nodeId || typeof document === "undefined") return null;
+  return document.querySelector(`[data-tour-target="flow-node-${nodeId}"]`)?.getBoundingClientRect() ?? null;
+}
 
 /**
- * Speech-bubble settings on the public demo: sits near the selected block
- * instead of a desktop side drawer that steals the phone canvas.
+ * Settings card next to the selected demo block. Position is resolved before
+ * paint so the card does not flash at a fallback origin, and it never covers
+ * the block — Live preview (LED, relay, IF, temperature) stays visible.
  */
 export function DemoInspectorBubble({
   nodeId,
@@ -17,21 +22,62 @@ export function DemoInspectorBubble({
   readonly onDismiss: () => void;
   readonly children: ReactNode;
 }) {
-  const rect = useTargetRect(nodeId ? `flow-node-${nodeId}` : undefined);
-  const width = typeof window !== "undefined" ? Math.min(CARD_MAX, window.innerWidth - 24) : CARD_MAX;
-  const heightGuess = typeof window !== "undefined" ? Math.min(window.innerHeight * 0.58, 420) : 320;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ left: number; top: number; width: number; ready: boolean }>(() => ({
+    left: 0,
+    top: 0,
+    width: typeof window !== "undefined" ? Math.min(CARD_MAX, window.innerWidth - 20) : CARD_MAX,
+    ready: false,
+  }));
 
-  let left = 12;
-  let top = 80;
-  if (rect && typeof window !== "undefined") {
-    left = rect.left + rect.width / 2 - width / 2;
-    top = rect.bottom + GAP;
-    if (top + heightGuess > window.innerHeight - 12) {
-      top = Math.max(12, rect.top - heightGuess - GAP);
+  useLayoutEffect(() => {
+    let raf = 0;
+    let tries = 0;
+    const ro = new ResizeObserver(() => place());
+
+    function watchTarget() {
+      const targetEl = nodeId ? document.querySelector(`[data-tour-target="flow-node-${nodeId}"]`) : null;
+      if (targetEl) ro.observe(targetEl);
     }
-    left = Math.max(12, Math.min(window.innerWidth - width - 12, left));
-    top = Math.max(12, Math.min(window.innerHeight - 80, top));
-  }
+
+    function place() {
+      const card = cardRef.current;
+      if (!card || typeof window === "undefined") return;
+      const target = readTargetRect(nodeId);
+      if (!target) {
+        if (tries < 40) {
+          tries += 1;
+          raf = window.requestAnimationFrame(place);
+        }
+        return;
+      }
+      watchTarget();
+      const width = Math.min(CARD_MAX, window.innerWidth - 20);
+      const next = placeInspectorAwayFromTarget(
+        target,
+        { width, height: card.offsetHeight || 160 },
+        { width: window.innerWidth, height: window.innerHeight },
+      );
+      setBox((prev) =>
+        prev.ready && prev.left === next.left && prev.top === next.top && prev.width === width
+          ? prev
+          : { left: next.left, top: next.top, width, ready: true },
+      );
+    }
+
+    place();
+    const card = cardRef.current;
+    if (card) ro.observe(card);
+    watchTarget();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [nodeId]);
 
   return (
     <div className="pointer-events-none absolute inset-0 z-30">
@@ -42,8 +88,15 @@ export function DemoInspectorBubble({
         onClick={onDismiss}
       />
       <div
-        className="pointer-events-auto absolute overflow-hidden rounded-slmd border border-border bg-surface shadow-e2"
-        style={{ left, top, width, maxHeight: "min(70dvh, 28rem)" }}
+        ref={cardRef}
+        className="pointer-events-auto absolute overflow-auto rounded-slmd border border-border bg-surface shadow-e2"
+        style={{
+          left: box.left,
+          top: box.top,
+          width: box.width,
+          maxHeight: "min(42dvh, 22rem)",
+          visibility: box.ready ? "visible" : "hidden",
+        }}
       >
         {children}
       </div>

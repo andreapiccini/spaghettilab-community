@@ -244,13 +244,13 @@ export function NodeInspector({
   return (
     <motion.div
       data-tour-target="demo-tour-inspector"
-      initial={demoOnly ? { opacity: 0, y: 8 } : { x: 320, opacity: 0 }}
-      animate={demoOnly ? { opacity: 1, y: 0 } : { x: 0, opacity: 1 }}
-      exit={demoOnly ? { opacity: 0, y: 8 } : { x: 320, opacity: 0 }}
+      initial={demoOnly ? false : { x: 320, opacity: 0 }}
+      animate={demoOnly ? undefined : { x: 0, opacity: 1 }}
+      exit={demoOnly ? undefined : { x: 320, opacity: 0 }}
       transition={motionTokens.spring.smooth}
       className={
         demoOnly
-          ? "flex max-h-[min(70dvh,28rem)] w-full flex-col bg-surface"
+          ? "flex w-full flex-col bg-surface"
           : "flex h-full w-80 flex-col border-l border-border bg-surface shadow-e2"
       }
     >
