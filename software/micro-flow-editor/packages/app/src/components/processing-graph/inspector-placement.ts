@@ -18,6 +18,7 @@ export function placeInspectorAwayFromTarget(
   target: RectLike,
   size: { readonly width: number; readonly height: number },
   viewport: { readonly width: number; readonly height: number },
+  options?: { readonly preferSide?: boolean },
 ): { readonly left: number; readonly top: number } {
   const vw = viewport.width;
   const vh = viewport.height;
@@ -28,12 +29,12 @@ export function placeInspectorAwayFromTarget(
   const clampTop = (top: number) => Math.max(PAD, Math.min(Math.max(PAD, vh - h - PAD), top));
   const centeredLeft = clampLeft(target.left + target.width / 2 - w / 2);
 
-  const candidates = [
-    { left: centeredLeft, top: target.bottom + GAP },
-    { left: centeredLeft, top: target.top - h - GAP },
-    { left: target.right + GAP, top: clampTop(target.top) },
-    { left: target.left - w - GAP, top: clampTop(target.top) },
-  ];
+  const below = { left: centeredLeft, top: target.bottom + GAP };
+  const above = { left: centeredLeft, top: target.top - h - GAP };
+  const right = { left: target.right + GAP, top: clampTop(target.top) };
+  const left = { left: target.left - w - GAP, top: clampTop(target.top) };
+  const preferSide = options?.preferSide === true || target.height > 80;
+  const candidates = preferSide ? [right, left, below, above] : [below, above, right, left];
 
   function overlaps(box: { left: number; top: number }): boolean {
     const right = box.left + w;

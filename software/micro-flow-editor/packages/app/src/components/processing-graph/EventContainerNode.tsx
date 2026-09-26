@@ -59,7 +59,8 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
         </>
       )}
       <div className="flex h-8 shrink-0 items-center gap-1.5 px-2">
-        <Icon size={13} className="shrink-0" style={{ color: config.colorVar }} />
+        <div data-inspector-anchor={`flow-node-${id}`} className="inline-flex min-w-0 items-center gap-1.5">
+          <Icon size={13} className="shrink-0" style={{ color: config.colorVar }} />
         <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted group-hover:text-brand-blue">
           {data.label}
         </span>
@@ -99,6 +100,7 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
             aria-hidden
           />
         )}
+        </div>
       </div>
     </div>
   );
