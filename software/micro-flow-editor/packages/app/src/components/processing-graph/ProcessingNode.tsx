@@ -516,9 +516,10 @@ function ToggleOutputWaveform({
 
   return (
     <span
-      className="pointer-events-none absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-[calc(100%+10px)] rounded-[3px] px-0.5 py-px"
+      className="pointer-events-none absolute right-0 z-10 translate-x-[calc(100%+4px)] rounded-[3px] px-0.5 py-px"
       style={{
-        backgroundColor: "var(--color-surface)",
+        bottom: "calc(50% + 10px)",
+        backgroundColor: "color-mix(in srgb, var(--color-surface) 88%, transparent)",
         outline: `1px solid color-mix(in srgb, ${color} 28%, var(--color-border))`,
         boxShadow: live && lineHigh ? `0 0 0 2px color-mix(in srgb, ${color} 22%, transparent)` : undefined,
       }}
