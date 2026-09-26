@@ -5,7 +5,7 @@ import { useLocale } from "../../state/locale-context.js";
 import { FLOW_START_COLOR } from "./block-visuals.js";
 import { lineHighAtElapsed, lineHighAtTick, waveformPlateaus, type ToggleMode } from "./dry-run-preview.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
-import { FLOW_START_SIZE, NODE_WIDTH } from "./layout-constants.js";
+import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, IF_LANE_WIDTH, NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import {
   nodeShellRadius,
@@ -167,7 +167,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         </span>
       )}
       <div
-        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : isIf ? "pl-16 pr-16" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
+        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isIf ? "w-full flex-col items-stretch p-0" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
         style={{
           width: cardWidth,
           minHeight: cardHeight,
@@ -186,8 +186,10 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         {isIf && (
           <>
             <div
-              className="pointer-events-none absolute inset-y-0 left-0 z-0 flex w-14 flex-col items-center justify-center gap-0.5"
+              className="pointer-events-none absolute left-0 top-0 z-0 flex flex-col items-center justify-center gap-0.5"
               style={{
+                width: IF_LANE_WIDTH,
+                height: NODE_HEIGHT,
                 background: `color-mix(in srgb, ${ifInColor} 22%, var(--color-surface))`,
                 borderRight: `1px solid color-mix(in srgb, ${ifInColor} 55%, transparent)`,
               }}
@@ -198,8 +200,10 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               </span>
             </div>
             <div
-              className="pointer-events-none absolute inset-y-0 right-0 z-0 flex w-14 flex-col items-center justify-center gap-0.5"
+              className="pointer-events-none absolute right-0 top-0 z-0 flex flex-col items-center justify-center gap-0.5"
               style={{
+                width: IF_LANE_WIDTH,
+                height: NODE_HEIGHT,
                 background: `color-mix(in srgb, ${ifOutColor} 22%, var(--color-surface))`,
                 borderLeft: `1px solid color-mix(in srgb, ${ifOutColor} 55%, transparent)`,
               }}
@@ -230,7 +234,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               title={handle.label}
               style={{
                 ...TARGET_HANDLE_STYLE,
-                top: stackedHandleTop(index, inputHandles.length),
+                top: isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length),
                 ...(isIf
                   ? {
                       border: `1.5px solid ${ifInColor}`,
@@ -242,7 +246,16 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           ))}
 
         {/* No overflow-hidden on LED: tile box-shadow (glow) would get clipped on the left. */}
-        <div className={`flex min-w-0 flex-1 items-center gap-2 ${multiChannel ? "w-full pr-1" : isLed ? "" : "overflow-hidden"}`}>
+        <div
+          className={`flex min-w-0 items-center gap-2 ${
+            multiChannel ? "w-full flex-1 pr-1" : isLed ? "" : isIf ? "w-full" : "flex-1 overflow-hidden"
+          }`}
+          style={
+            isIf
+              ? { minHeight: NODE_HEIGHT, paddingLeft: IF_LANE_WIDTH + 4, paddingRight: IF_LANE_WIDTH + 4 }
+              : undefined
+          }
+        >
           <div
             key={`led-${ledColor}-${Math.round((intensity ?? 1) * 100)}`}
             className={`h-7 w-7 shrink-0 ${isBay ? "rounded-[3px]" : "rounded-slsm"}`}
@@ -265,9 +278,9 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               </div>
             ) : null}
           </div>
-          <div className="min-w-0 flex-1 overflow-hidden">
+          <div className={`min-w-0 flex-1 ${isIf ? "" : "overflow-hidden"}`}>
             <div className="flex min-w-0 items-center gap-1.5">
-              <div className="min-w-0 truncate font-body text-sm font-semibold text-ink" title={data.label}>
+              <div className={`${isIf ? "shrink-0" : "min-w-0 truncate"} font-body text-sm font-semibold text-ink`} title={data.label}>
                 {data.label}
               </div>
               {isBay && multiChannel && (
@@ -285,18 +298,41 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               )}
             </div>
             <div
-              className={`${isIf ? "whitespace-normal break-words leading-tight" : "truncate"} font-body text-xs text-ink-faint`}
+              className={
+                isIf
+                  ? "whitespace-nowrap font-mono text-[10px] leading-tight text-ink"
+                  : "truncate font-body text-xs text-ink-faint"
+              }
               title={isIf ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ") : subtitle}
             >
               {subtitle}
             </div>
-            {isIf && data.ifOutput?.thenElse && (
-              <div className="truncate font-mono text-[10px] text-ink-muted" title={data.ifOutput.thenElse}>
-                {data.ifOutput.thenElse}
-              </div>
-            )}
           </div>
         </div>
+        {isIf && data.ifOutput && (
+          <div
+            className="grid grid-cols-2"
+            style={{
+              height: IF_FOOTER_HEIGHT,
+              borderTop: `1px solid color-mix(in srgb, ${ifOutColor} 40%, var(--color-border))`,
+              background: `color-mix(in srgb, ${ifOutColor} 8%, var(--color-surface))`,
+            }}
+          >
+            <IfOutChip
+              label={copy.ifThenTiny}
+              value={ifBoolean ? (data.ifOutput.thenHigh ? "true" : "false") : data.ifOutput.thenHigh ? "HIGH" : "LOW"}
+              color={ifOutColor}
+              active={data.ifOutput.thenHigh}
+            />
+            <IfOutChip
+              label={copy.ifElseTiny}
+              value={ifBoolean ? (data.ifOutput.elseHigh ? "true" : "false") : data.ifOutput.elseHigh ? "HIGH" : "LOW"}
+              color={ifOutColor}
+              active={data.ifOutput.elseHigh}
+              divided
+            />
+          </div>
+        )}
 
         {multiChannel ? (
           <div className="relative flex flex-col">
@@ -350,7 +386,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 title={handle.label}
                 style={{
                   ...SOURCE_HANDLE_STYLE,
-                  top: stackedHandleTop(index, outputHandles.length),
+                  top: isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length),
                   ...(isIf
                     ? {
                         border: `1.5px solid ${ifOutColor}`,
@@ -400,6 +436,34 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function IfOutChip({
+  label,
+  value,
+  color,
+  active,
+  divided,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly color: string;
+  readonly active: boolean;
+  readonly divided?: boolean;
+}) {
+  return (
+    <div
+      className="flex min-w-0 items-center justify-center gap-1 whitespace-nowrap px-1"
+      style={{
+        borderLeft: divided ? `1px solid color-mix(in srgb, ${color} 35%, var(--color-border))` : undefined,
+      }}
+    >
+      <span className="font-mono text-[8px] font-bold uppercase tracking-wide text-ink-muted">{label}</span>
+      <span className="font-mono text-[11px] font-semibold" style={{ color: active ? color : "var(--color-ink)" }}>
+        {value}
+      </span>
     </div>
   );
 }

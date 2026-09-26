@@ -88,6 +88,8 @@ type ProcessingGraphCopy = {
   readonly ifSentenceElse: string;
   readonly ifThenShort: string;
   readonly ifElseShort: string;
+  readonly ifThenTiny: string;
+  readonly ifElseTiny: string;
   readonly ifOutputType: string;
   readonly ifOutputDigital: string;
   readonly ifOutputBoolean: string;
@@ -98,6 +100,7 @@ type ProcessingGraphCopy = {
   readonly ifInputMismatch: string;
   readonly brokenConnection: string;
   readonly ifConditionNone: string;
+  readonly ifConditionToggle: string;
   readonly ifConditionTemp: string;
   readonly tempProbeHint: string;
 };
@@ -203,6 +206,8 @@ const IT: ProcessingGraphCopy = {
   ifSentenceElse: "altrimenti",
   ifThenShort: "allora",
   ifElseShort: "altrimenti",
+  ifThenTiny: "then",
+  ifElseTiny: "else",
   ifOutputType: "Tipo di uscita",
   ifOutputDigital: "Digitale",
   ifOutputBoolean: "Booleano",
@@ -213,6 +218,7 @@ const IT: ProcessingGraphCopy = {
   ifInputMismatch: "Questo tipo di ingresso non è compatibile con il blocco collegato.",
   brokenConnection: "Collegamento non valido",
   ifConditionNone: "Nessun ingresso",
+  ifConditionToggle: "TGL",
   ifConditionTemp: "TEMP",
   tempProbeHint: "Trascina l’indicatore sotto il sensore per provare la temperatura.",
 };
@@ -306,6 +312,8 @@ const EN: ProcessingGraphCopy = {
   ifSentenceElse: "else",
   ifThenShort: "then",
   ifElseShort: "else",
+  ifThenTiny: "then",
+  ifElseTiny: "else",
   ifOutputType: "Output type",
   ifOutputDigital: "Digital",
   ifOutputBoolean: "Boolean",
@@ -316,6 +324,7 @@ const EN: ProcessingGraphCopy = {
   ifInputMismatch: "This input type does not match the connected block.",
   brokenConnection: "Broken connection",
   ifConditionNone: "No input",
+  ifConditionToggle: "TGL",
   ifConditionTemp: "TEMP",
   tempProbeHint: "Drag the indicator under the sensor to test the temperature.",
 };

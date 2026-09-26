@@ -138,7 +138,7 @@ export type StaticNodeHandle = {
 
 export function handlesForNode(
   ports: NodePortLayout,
-  size: { readonly width: number; readonly height: number; readonly circular?: boolean },
+  size: { readonly width: number; readonly height: number; readonly circular?: boolean; readonly bandHeight?: number },
 ): StaticNodeHandle[] {
   if (size.circular) {
     return [
@@ -157,6 +157,7 @@ export function handlesForNode(
   const stacked = Math.max(ports.inputs.length, ports.outputs.length) > 1;
   const handles: StaticNodeHandle[] = [];
   const inputCount = stacked ? Math.max(ports.inputs.length, ports.outputs.length) : ports.inputs.length;
+  const bandHeight = size.bandHeight ?? size.height;
 
   for (let i = 0; i < ports.inputs.length; i++) {
     handles.push({
@@ -164,7 +165,7 @@ export function handlesForNode(
       type: "target",
       position: Position.Left,
       x: -TARGET_W / 2,
-      y: stackedHandleY(i, inputCount, size.height, TARGET_H),
+      y: stackedHandleY(i, inputCount, bandHeight, TARGET_H),
       width: TARGET_W,
       height: TARGET_H,
     });
@@ -188,7 +189,7 @@ export function handlesForNode(
       type: "source",
       position: Position.Right,
       x: size.width - SOURCE_W,
-      y: size.height / 2 - SOURCE_H / 2,
+      y: bandHeight / 2 - SOURCE_H / 2,
       width: SOURCE_W,
       height: SOURCE_H,
     });

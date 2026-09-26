@@ -11,7 +11,7 @@ import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
 import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifInputType, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
-import { FLOW_START_SIZE } from "./layout-constants.js";
+import { FLOW_START_SIZE, IF_CARD_EXTRA_WIDTH, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { handlesForNode, portsForNode, nodeHeightForPorts, nodeWidthForPorts } from "./node-ports.js";
 
@@ -120,8 +120,8 @@ export function toProcessingNodes(
     const isTick = accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
     const ports = portsForNode(data);
     const ifLane = isBlockNodeData(data) && isCompareIf(data);
-    const cardHeight = isTick ? FLOW_START_SIZE : nodeHeightForPorts(ports) + (ifLane ? 18 : 0);
-    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports) + (ifLane ? 56 : 0);
+    const cardHeight = isTick ? FLOW_START_SIZE : nodeHeightForPorts(ports) + (ifLane ? IF_FOOTER_HEIGHT : 0);
+    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports) + (ifLane ? IF_CARD_EXTRA_WIDTH : 0);
     return {
       id: node.id,
       type: "processing",
@@ -140,7 +140,12 @@ export function toProcessingNodes(
       // returns null) — the same bug EventContainer nodes already guard against.
       width: cardWidth,
       height: cardHeight,
-      handles: handlesForNode(ports, { width: cardWidth, height: cardHeight, circular: isTick }),
+      handles: handlesForNode(ports, {
+        width: cardWidth,
+        height: cardHeight,
+        circular: isTick,
+        bandHeight: ifLane ? NODE_HEIGHT : undefined,
+      }),
       data: {
         domainId: node.id,
         kind: data.kind,
@@ -211,10 +216,10 @@ export function formatIfCondition(
   const op = compareSymbol(compareOpFromProperties(data.properties));
   if (ifInputType(data, source) === "analog") {
     const tempC = numberFromProperty(data.properties.compareTempC, 25);
-    return `${copy.ifConditionTemp} ${op} ${tempC}°C`;
+    return `${copy.ifConditionTemp} ${op} ${tempC}°`;
   }
   const level = data.properties.compareLevel === "low" ? "LOW" : "HIGH";
-  return `${copy.ifSentenceToggle} ${op} ${level}`;
+  return `${copy.ifConditionToggle} ${op} ${level}`;
 }
 
 function compareSymbol(op: CompareOp): string {
