@@ -1,5 +1,5 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { Cable, Cpu, GitBranch, Palette, Power, Thermometer, ToggleLeft } from "lucide-react";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -10,7 +10,6 @@ import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT, NODE_WIDTH } from "./la
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { nodeShellRadius, SOURCE_HANDLE_STYLE, stackedHandleTop, type PortKind } from "./node-ports.js";
 import type { ProcessingNodeUiData } from "./to-nodes.js";
-import { cycleSelectValue, type SettingsFooterTab } from "./settings-footer.js";
 
 /** Slate chrome for hardware bay endpoints — distinct from solid functionality cards. */
 const BAY_EDGE = "#64748B";
@@ -69,7 +68,6 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
 
   const isRelay = data.tileGlyph === "power";
   const isIf = data.tileGlyph === "if";
-  const isSplitCard = isIf || Boolean(data.settingsFooter);
   const ifBoolean = data.ifOutput?.kind === "boolean";
   const ifThenHigh = data.ifOutput?.thenHigh !== false;
   const ifLiveHigh = data.previewing ? previewOn : ifThenHigh;
@@ -165,7 +163,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         </span>
       )}
       <div
-        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isSplitCard ? "w-full flex-col items-stretch p-0" : "w-full items-center gap-2 px-2.5 py-2"} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
+        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isIf || isRelay ? "w-full flex-col items-stretch p-0" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
         style={{
           width: cardWidth,
           minHeight: cardHeight,
@@ -175,7 +173,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             : "var(--color-surface)",
           outline: selectedOutline ?? idleOutline,
           // LED glow must not be clipped by the card / bay chrome.
-          overflow: isLed || isIf || isRelay || isToggle ? "visible" : undefined,
+          overflow: isLed || isIf || isRelay ? "visible" : undefined,
           boxShadow: ledLit
             ? `0 0 0 4px ${ledGlowRgba(ledColor, 0.12 + (intensity ?? 1) * 0.2)}, var(--shadow-e1)`
             : undefined,
@@ -197,20 +195,16 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               id={handle.id}
               title={handle.label}
               kind={handle.kind}
-              top={isSplitCard ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length)}
+              top={isIf || isRelay ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length)}
             />
           ))}
 
         {/* No overflow-hidden on LED: tile box-shadow (glow) would get clipped on the left. */}
         <div
           className={`flex min-w-0 items-center gap-2 ${
-            multiChannel ? "w-full flex-1 pr-1" : isSplitCard ? "w-full" : "flex-1 overflow-hidden"
+            multiChannel ? "w-full flex-1 pr-1" : isLed ? "" : isIf || isRelay ? "w-full" : "flex-1 overflow-hidden"
           }`}
-          style={
-            isSplitCard
-              ? { minHeight: NODE_HEIGHT, paddingLeft: isLed || isRelay ? 16 : 10, paddingRight: 10 }
-              : undefined
-          }
+          style={isIf || isRelay ? { minHeight: NODE_HEIGHT, paddingLeft: isRelay ? 16 : 10, paddingRight: 10 } : undefined}
         >
           <div
             key={`led-${ledColor}-${Math.round((intensity ?? 1) * 100)}`}
@@ -234,7 +228,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               </div>
             ) : null}
           </div>
-          <div className={`min-w-0 flex-1 ${isSplitCard ? "" : "overflow-hidden"}`}>
+          <div className={`min-w-0 flex-1 ${isIf || isRelay ? "" : "overflow-hidden"}`}>
             <div className="flex min-w-0 items-center gap-1.5">
               <div className={`${isIf ? "shrink-0" : "min-w-0 truncate"} font-body text-sm font-semibold text-ink`} title={data.label}>
                 {data.label}
@@ -291,8 +285,22 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             />
           </div>
         )}
-        {data.settingsFooter && (
-          <SettingsFooterBar footer={data.settingsFooter} onPatch={data.onFooterPatch} />
+        {isRelay && data.relayClose && (
+          <div
+            className="flex items-center justify-center"
+            style={{
+              height: IF_FOOTER_HEIGHT,
+              borderTop: "1px solid color-mix(in srgb, #0F766E 40%, var(--color-border))",
+              background: "color-mix(in srgb, #0F766E 8%, var(--color-surface))",
+            }}
+          >
+            <IfOutChip
+              label={copy.relayClosedIf}
+              value={data.relayClose.closeWhenHigh ? "HIGH" : "LOW"}
+              color="#0F766E"
+              active
+            />
+          </div>
         )}
 
         {multiChannel ? (
@@ -336,7 +344,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 id={handle.id}
                 title={handle.label}
                 kind={handle.kind}
-                top={isSplitCard ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length)}
+                top={isIf || isRelay ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length)}
                 live={isIf ? ifLiveHigh : previewOn}
               />
             ))}
@@ -497,123 +505,6 @@ function IfOutChip({
   );
 }
 
-function SettingsFooterBar({
-  footer,
-  onPatch,
-}: {
-  readonly footer: NonNullable<ProcessingNodeUiData["settingsFooter"]>;
-  readonly onPatch?: (fieldId: string, value: unknown) => void;
-}) {
-  return (
-    <div
-      className="nodrag nowheel nopan grid"
-      style={{
-        gridTemplateColumns: `repeat(${footer.tabs.length}, minmax(0, 1fr))`,
-        height: IF_FOOTER_HEIGHT,
-        borderTop: `1px solid color-mix(in srgb, ${footer.color} 40%, var(--color-border))`,
-        background: `color-mix(in srgb, ${footer.color} 8%, var(--color-surface))`,
-      }}
-      onPointerDown={(event) => event.stopPropagation()}
-      onClick={(event) => event.stopPropagation()}
-    >
-      {footer.tabs.map((tab, index) => (
-        <SettingsFooterChip
-          key={tab.id}
-          tab={tab}
-          color={footer.color}
-          divided={index > 0}
-          onPatch={onPatch}
-        />
-      ))}
-    </div>
-  );
-}
-
-function SettingsFooterChip({
-  tab,
-  color,
-  divided,
-  onPatch,
-}: {
-  readonly tab: SettingsFooterTab;
-  readonly color: string;
-  readonly divided: boolean;
-  readonly onPatch?: (fieldId: string, value: unknown) => void;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState("");
-  const numeric = Number(tab.display.replace(/[^\d.-]/g, ""));
-
-  function commitNumber(raw: string) {
-    const parsed = Number(raw);
-    if (!Number.isFinite(parsed)) {
-      setEditing(false);
-      return;
-    }
-    const clamped = Math.min(tab.max ?? parsed, Math.max(tab.min ?? parsed, Math.trunc(parsed)));
-    onPatch?.(tab.id, BigInt(clamped));
-    setEditing(false);
-  }
-
-  return (
-    <div
-      className="flex min-w-0 items-center justify-center gap-0.5 whitespace-nowrap px-0.5"
-      style={{
-        borderLeft: divided ? `1px solid color-mix(in srgb, ${color} 35%, var(--color-border))` : undefined,
-      }}
-    >
-      <span className="font-mono text-[8px] font-bold uppercase tracking-wide text-ink-muted">{tab.label}</span>
-      {tab.kind === "color" ? (
-        <label className="relative flex h-3.5 w-3.5 shrink-0 cursor-pointer overflow-hidden rounded-[2px]" title={tab.display}>
-          <span className="h-full w-full" style={{ backgroundColor: tab.display }} />
-          <input
-            type="color"
-            value={/^#[0-9a-fA-F]{6}$/.test(tab.display) ? tab.display : "#F5C518"}
-            aria-label={tab.label}
-            className="absolute inset-0 cursor-pointer opacity-0"
-            onChange={(event) => onPatch?.(tab.id, event.target.value)}
-          />
-        </label>
-      ) : tab.kind === "number" && editing ? (
-        <input
-          autoFocus
-          type="number"
-          min={tab.min}
-          max={tab.max}
-          value={draft}
-          aria-label={tab.label}
-          className="w-8 rounded-[2px] border-0 bg-transparent p-0 text-center font-mono text-[11px] font-semibold outline-none"
-          style={{ color }}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={() => commitNumber(draft)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") commitNumber(draft);
-            if (event.key === "Escape") setEditing(false);
-          }}
-        />
-      ) : (
-        <button
-          type="button"
-          className="font-mono text-[11px] font-semibold"
-          style={{ color }}
-          title={`Edit ${tab.label}`}
-          onClick={() => {
-            if (tab.kind === "select") {
-              const next = cycleSelectValue(tab);
-              if (next !== undefined) onPatch?.(tab.id, next);
-              return;
-            }
-            setDraft(Number.isFinite(numeric) ? String(numeric) : "0");
-            setEditing(true);
-          }}
-        >
-          {tab.display}
-        </button>
-      )}
-    </div>
-  );
-}
-
 function RelayContact({ closed }: { readonly closed: boolean }) {
   return (
     <svg width="28" height="28" viewBox="0 0 28 28" className="block">
@@ -666,7 +557,7 @@ function ToggleOutputWaveform({
     <span
       className="pointer-events-none absolute right-0 z-10 translate-x-[calc(100%+4px)] rounded-[3px] px-0.5 py-px"
       style={{
-        top: NODE_HEIGHT / 2 - 26,
+        bottom: "calc(50% + 10px)",
         backgroundColor: "color-mix(in srgb, var(--color-surface) 88%, transparent)",
         outline: `1px solid color-mix(in srgb, ${color} 28%, var(--color-border))`,
         boxShadow: live && lineHigh ? `0 0 0 2px color-mix(in srgb, ${color} 22%, transparent)` : undefined,
