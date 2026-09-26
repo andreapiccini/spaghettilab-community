@@ -12,6 +12,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { isDemoOnlyEnabled } from "../../lib/demo-only.js";
 import { localizeCatalogEntry, localizeCatalogEntries } from "../../lib/processing-catalog-copy.js";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -139,6 +140,7 @@ export function NodeInspector({
 }) {
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
+  const demoOnly = isDemoOnlyEnabled();
   const [comment, setComment] = useState(mode.kind === "edit" ? mode.comment : "");
   const [data, setData] = useState<DeviceProcessingNodeData>(() =>
     withFieldDefaults(mode.kind === "edit" ? mode.data : defaultDataFor(mode.nodeKind, moduleOptions[0]?.id)),
@@ -251,12 +253,16 @@ export function NodeInspector({
           )}
         </AnimatePresence>
 
-        <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-name">
-          {copy.nameLabel}
-        </label>
-        <input id="ni-name" value={comment} onChange={(e) => setCommentAndMaybeApply(e.target.value)} placeholder={config.label} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none" />
+        {!demoOnly && (
+          <>
+            <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-name">
+              {copy.nameLabel}
+            </label>
+            <input id="ni-name" value={comment} onChange={(e) => setCommentAndMaybeApply(e.target.value)} placeholder={config.label} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none" />
+          </>
+        )}
 
-        {mode.kind === "edit" && (
+        {!demoOnly && mode.kind === "edit" && (
           <EdgeList title="Input" edges={incoming.map((e) => ({ id: e.id, label: nodeLabel(e.source) }))} empty={copy.noIncoming} />
         )}
 
@@ -328,42 +334,46 @@ export function NodeInspector({
 
         {data.kind === "block" && (
           <>
-            <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-blocktype">
-              Block
-            </label>
-            <TypeIdSelect
-              id="ni-blocktype"
-              kind="block"
-              value={data.blockTypeId}
-              catalogEntryId={data.catalogEntryId}
-              onChange={(blockTypeId, entry) =>
-                applyCatalogChange(
-                  {
-                    ...data,
-                    blockTypeId,
-                    catalogEntryId: entry?.id,
-                    properties: defaultPropertiesFromFields(entry?.fields ?? []),
-                  } as DeviceProcessingNodeData,
-                  entry,
-                )
-              }
-            />
-            <CatalogNotes entry={localizedEntry} />
-            {!authoringType && (
-              <div className="mb-4 flex gap-2">
-                <div className="flex-1">
-                  <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-minver">
-                    {copy.minVersion}
-                  </label>
-                  <input id="ni-minver" type="number" value={data.minVersion ?? ""} onChange={(e) => patch({ minVersion: e.target.value === "" ? undefined : Number(e.target.value) })} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
-                </div>
-                <div className="flex-1">
-                  <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-exactver">
-                    {copy.exactVersion}
-                  </label>
-                  <input id="ni-exactver" type="number" value={data.exactVersion ?? ""} onChange={(e) => patch({ exactVersion: e.target.value === "" ? undefined : Number(e.target.value) })} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
-                </div>
-              </div>
+            {!demoOnly && (
+              <>
+                <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-blocktype">
+                  Block
+                </label>
+                <TypeIdSelect
+                  id="ni-blocktype"
+                  kind="block"
+                  value={data.blockTypeId}
+                  catalogEntryId={data.catalogEntryId}
+                  onChange={(blockTypeId, entry) =>
+                    applyCatalogChange(
+                      {
+                        ...data,
+                        blockTypeId,
+                        catalogEntryId: entry?.id,
+                        properties: defaultPropertiesFromFields(entry?.fields ?? []),
+                      } as DeviceProcessingNodeData,
+                      entry,
+                    )
+                  }
+                />
+                <CatalogNotes entry={localizedEntry} />
+                {!authoringType && (
+                  <div className="mb-4 flex gap-2">
+                    <div className="flex-1">
+                      <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-minver">
+                        {copy.minVersion}
+                      </label>
+                      <input id="ni-minver" type="number" value={data.minVersion ?? ""} onChange={(e) => patch({ minVersion: e.target.value === "" ? undefined : Number(e.target.value) })} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
+                    </div>
+                    <div className="flex-1">
+                      <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-exactver">
+                        {copy.exactVersion}
+                      </label>
+                      <input id="ni-exactver" type="number" value={data.exactVersion ?? ""} onChange={(e) => patch({ exactVersion: e.target.value === "" ? undefined : Number(e.target.value) })} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             {namedFields.length > 0 ? (
               <CatalogFieldsEditor fields={namedFields} properties={data.properties} lineOptions={lineOptions} onChange={(properties) => patch({ properties })} />
@@ -446,11 +456,12 @@ export function NodeInspector({
           </>
         )}
 
-        {mode.kind === "edit" && (
+        {!demoOnly && mode.kind === "edit" && (
           <EdgeList title="Output" edges={outgoing.map((e) => ({ id: e.id, label: nodeLabel(e.target) }))} empty={isRuleNodeData(data) ? copy.ruleNoOutgoing : copy.noOutgoing} />
         )}
       </div>
 
+      {!demoOnly && (
       <div className="flex shrink-0 items-center gap-2 border-t border-border p-3">
         {onDelete && (
           <button type="button" onClick={onDelete} className="rounded-slsm border border-border-strong px-3 py-1.5 font-body text-sm text-error hover:bg-surface-raised">
@@ -461,6 +472,7 @@ export function NodeInspector({
           {copy.save}
         </button>
       </div>
+      )}
     </motion.div>
   );
 }
