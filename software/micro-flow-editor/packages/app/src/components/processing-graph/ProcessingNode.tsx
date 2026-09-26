@@ -165,7 +165,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         </span>
       )}
       <div
-        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isIf ? "w-full flex-col items-stretch p-0" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
+        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isIf ? "w-full flex-col items-stretch p-0" : `w-full items-center gap-2 py-2 ${isLed || isRelay ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
         style={{
           width: cardWidth,
           minHeight: cardHeight,
@@ -175,7 +175,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             : "var(--color-surface)",
           outline: selectedOutline ?? idleOutline,
           // LED glow must not be clipped by the card / bay chrome.
-          overflow: isLed || isIf ? "visible" : undefined,
+          overflow: isLed || isIf || isRelay ? "visible" : undefined,
           boxShadow: ledLit
             ? `0 0 0 4px ${ledGlowRgba(ledColor, 0.12 + (intensity ?? 1) * 0.2)}, var(--shadow-e1)`
             : undefined,
