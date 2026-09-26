@@ -771,8 +771,11 @@ function ProcessingGraphScreenInner() {
 
   function onNodeClick(_: unknown, node: Node<ProcessingNodeUiData>) {
     const domainNode = domainNodes.find((n) => n.id === node.id);
+    if (!domainNode) return;
+    // The violet Activation disc is wiring-only — it must not open an inspector.
+    if (node.data.circular || isFlowStartBlock(domainNode.data)) return;
     const meta = authoringMetadata[node.id];
-    if (domainNode) setInspector({ kind: "edit", nodeId: node.id, data: domainNode.data, comment: meta?.comment ?? "" });
+    setInspector({ kind: "edit", nodeId: node.id, data: domainNode.data, comment: meta?.comment ?? "" });
   }
 
   function placeFromCatalog(
