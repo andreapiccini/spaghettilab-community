@@ -1,6 +1,6 @@
 import { encodeConfigCbor, sha256 } from "@spaghettilab/config-compiler";
 import { dryRunConfig, type DryRunResult } from "@spaghettilab/config-decompiler";
-import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
+import { isBlockNodeData, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import type { CoreBindingRecord, GraphNode, GraphState } from "@spaghettilab/domain";
 import { isModuleNodeData, type PhysicalCompositionNodeData } from "@spaghettilab/physical-composition-model";
 import { findCatalogEntryById, isBayEntry, shippedTypeIds, type ProcessingCatalogEntry } from "@spaghettilab/processing-block-catalog";
@@ -17,8 +17,9 @@ import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.j
 import { localizeCatalogEntry, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { DEMO_VISITOR_PROJECT_NAME } from "../../lib/demo-project.js";
-import { isDemoOnlyEnabled } from "../../lib/demo-only.js";
+import { DEMO_ADD_BLOCK_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
 import { VisitorDemoTour } from "./VisitorDemoTour.js";
+import { DemoRadialAdd } from "./DemoRadialAdd.js";
 import { useLocale } from "../../state/locale-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
 import {
@@ -32,7 +33,7 @@ import {
 } from "./catalog-to-node.js";
 import { catalogEntryForNode } from "./catalog-entry-for-node.js";
 import { positionForBayDrop } from "./bay-layout.js";
-import { isValidProcessingConnection } from "./connection-rules.js";
+import { isValidDemoProcessingConnection, isValidProcessingConnection } from "./connection-rules.js";
 import { PROCESSING_EDGE_TYPES } from "./DeletableEdge.js";
 import { NodeInspector, type ProcessingInspectorMode } from "./NodeInspector.js";
 import { DemoInspectorBubble } from "./DemoInspectorBubble.js";
@@ -54,7 +55,7 @@ import {
   triggerToContainerOrigin,
   type EventContainer,
 } from "./event-containers.js";
-import { activeActuatorsAt, activeTriggersAt, buildDryRunPreviewChannels, isFlowStartBlock, ledIntensitiesAt, previewParticipantIds, rgbVisualsAt, type DryRunPreviewChannel } from "./dry-run-preview.js";
+import { activeActuatorsAt, activeTriggersAt, buildDryRunPreviewChannels, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRelayBlock, isTemperatureSensor, ledIntensitiesAt, numberFromProperty, previewParticipantIds, rgbVisualsAt, type DryRunPreviewChannel } from "./dry-run-preview.js";
 import { NODE_HEIGHT, NODE_PADDING, NODE_WIDTH, ENTRY_FEED_INSET, EVENT_CONTAINER_HEADER_HEIGHT, FLOW_START_SIZE, fixedTickAbsolute, fixedTickRelativePosition } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { containerAtPosition, resolveRectOverlap, resolveSiblingOverlap, type SizedRect } from "./node-overlap.js";
@@ -72,9 +73,20 @@ function chainTailId(container: EventContainer, edges: GraphState<"device-proces
   return container.triggerId;
 }
 
+const TEMP_PROBE_EXTRA_H = 36;
+
 function layoutSizeForUiNode(node: Node<ProcessingNodeUiData>): { w: number; h: number } {
   if (node.data.circular) return { w: FLOW_START_SIZE, h: FLOW_START_SIZE };
-  return { w: node.data.cardWidth ?? NODE_WIDTH, h: node.data.cardHeight ?? NODE_HEIGHT };
+  return {
+    w: node.data.cardWidth ?? NODE_WIDTH,
+    h: (node.data.cardHeight ?? NODE_HEIGHT) + (node.data.tempProbe ? TEMP_PROBE_EXTRA_H : 0),
+  };
+}
+
+function demoSpawnPosition(entryId: (typeof DEMO_ADD_BLOCK_IDS)[number]): { x: number; y: number } {
+  if (entryId === "appblocks.compare_if") return { x: 300, y: 36 };
+  if (entryId === "appblocks.relay") return { x: 420, y: 260 };
+  return { x: 20, y: 280 };
 }
 
 const NODE_TYPES = { ...PROCESSING_NODE_TYPES, ...EVENT_CONTAINER_NODE_TYPES, ...DEMO_BACKBONE_NODE_TYPES };
@@ -133,6 +145,7 @@ function ProcessingGraphScreenInner() {
   } | null>(null);
   const previewChannelsRef = useRef<readonly DryRunPreviewChannel[]>([]);
   const previewStartedAtRef = useRef(0);
+  const persistTempTestRef = useRef<(nodeId: string, celsius: number) => void>(() => {});
 
   useEffect(() => {
     if (!overlapWarning) return;
@@ -250,9 +263,12 @@ function ProcessingGraphScreenInner() {
   );
 
   const isValidConnection = useCallback(
-    (connection: Connection | { source?: string | null; target?: string | null; sourceHandle?: string | null; targetHandle?: string | null }) =>
-      isValidProcessingConnection(connection, resolveCatalogEntry),
-    [resolveCatalogEntry],
+    (connection: Connection | { source?: string | null; target?: string | null; sourceHandle?: string | null; targetHandle?: string | null }) => {
+      if (!isValidProcessingConnection(connection, resolveCatalogEntry)) return false;
+      if (!demoOnly) return true;
+      return isValidDemoProcessingConnection(connection, { nodes: domainNodes, edges: graphState.edges });
+    },
+    [resolveCatalogEntry, demoOnly, domainNodes, graphState.edges],
   );
 
   const [localNodes, setLocalNodes] = useState<Node<ProcessingNodeUiData>[]>(domainRfNodes);
@@ -413,40 +429,98 @@ function ProcessingGraphScreenInner() {
       })
       .map((n) => {
         if (!demoOnly) return n;
-        if (n.id === "demo-toggle") return { ...n, data: { ...n.data, subtitle: "Firmware function" } };
-        if (n.id === "demo-led") return { ...n, data: { ...n.data, subtitle: "Hardware module" } };
+        const domain = domainNodes.find((node) => node.id === n.id)?.data;
+        if (!domain) return n;
+        if (isDigitalOutToggle(domain) || isCompareIf(domain)) {
+          return { ...n, data: { ...n.data, subtitle: "Firmware function" } };
+        }
+        if (isLedBlock(domain) || isRelayBlock(domain)) {
+          return { ...n, data: { ...n.data, subtitle: "Hardware module" } };
+        }
+        if (isTemperatureSensor(domain) && isBlockNodeData(domain)) {
+          const celsius = numberFromProperty(domain.properties.testC, 22);
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              subtitle: "Hardware module",
+              tempProbe: {
+                celsius,
+                min: -10,
+                max: 80,
+                onChange: (next: number) => persistTempTestRef.current(n.id, next),
+              },
+            },
+          };
+        }
         return n;
       });
     if (!demoOnly) return [...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
     const led = rest.find((n) => n.id === "demo-led");
-    if (!led) return [...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
-    const ledW = led.data.cardWidth ?? led.width ?? NODE_WIDTH;
-    const ledH = led.data.cardHeight ?? led.height ?? NODE_HEIGHT;
+    const outputHardware = rest.filter((n) => n.id === "demo-led" || n.data.tileGlyph === "power");
+    const temps = rest.filter((n) => n.data.tempProbe);
     const pad = NODE_PADDING;
     const header = EVENT_CONTAINER_HEADER_HEIGHT;
-    const frameW = ledW + pad * 2;
-    const frameH = ledH + pad * 2 + header;
-    const backbone = {
-      id: DEMO_BACKBONE_FRAME_ID,
-      type: "demo-backbone",
-      position: { x: led.position.x - pad, y: led.position.y - header - pad },
-      width: frameW,
-      height: frameH,
-      style: { width: frameW, height: frameH, overflow: "visible" },
-      draggable: false,
-      selectable: false,
-      focusable: false,
-      zIndex: -1,
-      data: { label: "Backbone", caption: "Hardware" },
+    const frames: Node[] = [];
+    if (led && outputHardware.length > 0) {
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      for (const node of outputHardware) {
+        const size = layoutSizeForUiNode(node);
+        minX = Math.min(minX, node.position.x);
+        minY = Math.min(minY, node.position.y);
+        maxX = Math.max(maxX, node.position.x + size.w);
+        maxY = Math.max(maxY, node.position.y + size.h);
+      }
+      const frameW = maxX - minX + pad * 2;
+      const frameH = maxY - minY + pad * 2 + header;
+      frames.push({
+        id: DEMO_BACKBONE_FRAME_ID,
+        type: "demo-backbone",
+        position: { x: minX - pad, y: minY - header - pad },
+        width: frameW,
+        height: frameH,
+        style: { width: frameW, height: frameH, overflow: "visible" },
+        draggable: false,
+        selectable: false,
+        focusable: false,
+        zIndex: -1,
+        data: { label: "Backbone", caption: "Hardware" },
+      });
+    }
+    for (const temp of temps) {
+      const size = layoutSizeForUiNode(temp);
+      const frameW = size.w + pad * 2;
+      const frameH = size.h + pad * 2 + header;
+      frames.push({
+        id: `demo-hw-${temp.id}`,
+        type: "demo-backbone",
+        position: { x: temp.position.x - pad, y: temp.position.y - header - pad },
+        width: frameW,
+        height: frameH,
+        style: { width: frameW, height: frameH, overflow: "visible" },
+        draggable: false,
+        selectable: false,
+        focusable: false,
+        zIndex: -1,
+        data: { label: "Backbone", caption: "Hardware" },
+      });
+    }
+    if (!led) return [...frames, ...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
+    const frameOrigin = frames.find((frame) => frame.id === DEMO_BACKBONE_FRAME_ID)?.position ?? {
+      x: led.position.x - pad,
+      y: led.position.y - header - pad,
     };
     const nestedLed = {
       ...led,
       parentId: DEMO_BACKBONE_FRAME_ID,
-      position: { x: pad, y: header + pad },
+      position: { x: led.position.x - frameOrigin.x, y: led.position.y - frameOrigin.y },
       draggable: false,
     };
-    return [backbone, ...containerNodes, ...rest.map((n) => (n.id === "demo-led" ? nestedLed : n))] as unknown as Node<ProcessingNodeUiData>[];
-  }, [demoOnly, containerNodes, localNodes, containerByTriggerId, containerByMemberId, previewActiveIds, previewActuatorIds, previewTriggerIds, previewElapsedMs, previewLedIntensity, previewRgbVisual]);
+    return [ ...frames, ...containerNodes, ...rest.map((n) => (n.id === "demo-led" ? nestedLed : n))] as unknown as Node<ProcessingNodeUiData>[];
+  }, [demoOnly, containerNodes, localNodes, containerByTriggerId, containerByMemberId, previewActiveIds, previewActuatorIds, previewTriggerIds, previewElapsedMs, previewLedIntensity, previewRgbVisual, domainNodes]);
 
   // Domain keeps Schedule → entry edges for membership/dry-run; the canvas hides
   // them so the dashed box + “entry” badge carry that meaning instead of a
@@ -816,7 +890,7 @@ function ProcessingGraphScreenInner() {
     const domainNode = domainNodes.find((n) => n.id === node.id);
     if (!domainNode) return;
     // The violet Activation disc is wiring-only — it must not open an inspector.
-    if (node.id === DEMO_BACKBONE_FRAME_ID) return;
+    if (node.id === DEMO_BACKBONE_FRAME_ID || node.id.startsWith("demo-hw-")) return;
     if (node.data.circular || isFlowStartBlock(domainNode.data)) return;
     const meta = authoringMetadata[node.id];
     setInspector({ kind: "edit", nodeId: node.id, data: domainNode.data, comment: meta?.comment ?? "" });
@@ -902,9 +976,9 @@ function ProcessingGraphScreenInner() {
     execute(addGraphNodeCommand(deviceGraphLens(bindingIndex), { layer: "device-processing", id, data }));
     if (attachEdgeCommand) execute(attachEdgeCommand);
     const comment =
-      bay && resolvedBaySide
-        ? `${localizeCatalogEntry(entry, locale).label} · ${localizedBaySideLabel(resolvedBaySide, locale)}`
-        : localizeCatalogEntry(entry, locale).label;
+      demoOnly || !bay || !resolvedBaySide
+        ? localizeCatalogEntry(entry, locale).label
+        : `${localizeCatalogEntry(entry, locale).label} · ${localizedBaySideLabel(resolvedBaySide, locale)}`;
     execute({
       kind: "UpdateAuthoringMetadata",
       apply: (project) => ({
@@ -962,6 +1036,15 @@ function ProcessingGraphScreenInner() {
       }),
     });
   }
+
+  persistTempTestRef.current = (nodeId, celsius) => {
+    const node = domainNodes.find((item) => item.id === nodeId);
+    if (!node || !isBlockNodeData(node.data)) return;
+    persistNode(nodeId, {
+      ...node.data,
+      properties: { ...node.data.properties, testC: BigInt(Math.round(celsius)) },
+    }, authoringMetadata[nodeId]?.comment ?? "");
+  };
 
   function persistNode(nodeId: string, data: DeviceProcessingNodeData, comment: string) {
     if (!execute || bindingIndex < 0) return;
@@ -1057,7 +1140,7 @@ function ProcessingGraphScreenInner() {
     setRunning(true);
     setHashHex(null);
     try {
-      const result = dryRunConfig({ physicalGraph: physicalGraphState, processingGraph: graphState, mqtt: DISABLED_MQTT, connectivity: 0, energy: DEFAULT_ENERGY }, { availableBlockRuleTypeIds: SHIPPED_TYPE_IDS });
+      const result = dryRunConfig({ physicalGraph: physicalGraphState, processingGraph: graphState, mqtt: DISABLED_MQTT, connectivity: 0, energy: DEFAULT_ENERGY }, { availableBlockRuleTypeIds: demoOnly ? new Set([...SHIPPED_TYPE_IDS, "ab.relay", "ab.compare_if", "ab.temperature_sensor"]) : SHIPPED_TYPE_IDS });
       setDryRun(result);
       const hardErrors = result.issues.filter((i) => i.severity !== "warning").length;
       // Start local LED/GPIO preview immediately after validate — before the
@@ -1128,7 +1211,7 @@ function ProcessingGraphScreenInner() {
           <h1 className="truncate font-heading text-lg font-semibold text-ink">{demoOnly ? DEMO_VISITOR_PROJECT_NAME : copy.title}</h1>
           {demoOnly && (
             <p className="hidden truncate font-body text-[11px] text-ink-muted sm:block">
-              Firmware functions command the LED module on the Backbone
+              Firmware functions command hardware modules on the Backbone
             </p>
           )}
         </div>
@@ -1206,6 +1289,16 @@ function ProcessingGraphScreenInner() {
               <Controls position="bottom-left" showInteractive={!demoOnly} />
               {!demoOnly && domainNodes.length > 0 && <MiniMap position="bottom-right" pannable zoomable className="!rounded-slsm !border !border-border-strong !shadow-e1" nodeColor={(n) => PROCESSING_NODE_KIND_CONFIG[(n.data as ProcessingNodeUiData).kind]?.colorVar ?? "#8A8F99"} />}
             </ReactFlow>
+            {demoOnly && (
+              <DemoRadialAdd
+                onPick={(entryId) => {
+                  const entry = findCatalogEntryById(entryId);
+                  if (!entry) return;
+                  const baySide = entry.family === "bay" ? (entry.bayIo === "input" ? "input" : "output") : undefined;
+                  placeFromCatalog(entry, demoSpawnPosition(entryId), baySide);
+                }}
+              />
+            )}
 
             {domainNodes.length === 0 && !dropPreview && (
               <div className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center${demoOnly || simulating ? "" : " mb-10"}`}>

@@ -73,6 +73,19 @@ type ProcessingGraphCopy = {
   readonly sixChannels: string;
   readonly samples: (count: string) => string;
   readonly nodesEdges: (nodes: number, edges: number) => string;
+  readonly addBlock: string;
+  readonly addIf: string;
+  readonly addRelay: string;
+  readonly addTemperature: string;
+  readonly addIfHint: string;
+  readonly addRelayHint: string;
+  readonly addTemperatureHint: string;
+  readonly ifNeedsInput: string;
+  readonly ifSentenceIf: string;
+  readonly ifSentenceToggle: string;
+  readonly ifSentenceTemp: string;
+  readonly ifSentenceThen: string;
+  readonly tempProbeHint: string;
 };
 
 /** Compact duration for Schedule chips (`1s`, `1.5s`, `250ms`, or `—`). */
@@ -161,6 +174,19 @@ const IT: ProcessingGraphCopy = {
   sixChannels: "6 canali",
   samples: (count) => `${count} campioni`,
   nodesEdges: (nodes, edges) => `${nodes} nodi · ${edges} edge`,
+  addBlock: "Aggiungi blocco",
+  addIf: "IF",
+  addRelay: "Relè",
+  addTemperature: "Temperatura",
+  addIfHint: "Funzione firmware",
+  addRelayHint: "Hardware Backbone",
+  addTemperatureHint: "Hardware Backbone",
+  ifNeedsInput: "Collega l’uscita del Toggle oppure il Sensore temperatura — un solo ingresso.",
+  ifSentenceIf: "Se",
+  ifSentenceToggle: "TOGGLE",
+  ifSentenceTemp: "SENSORE TEMPERATURA",
+  ifSentenceThen: "allora uscita",
+  tempProbeHint: "Trascina l’indicatore sotto il sensore per provare la temperatura.",
 };
 
 const EN: ProcessingGraphCopy = {
@@ -237,6 +263,19 @@ const EN: ProcessingGraphCopy = {
   sixChannels: "6 channels",
   samples: (count) => `${count} sample${count === "1" ? "" : "s"}`,
   nodesEdges: (nodes, edges) => `${nodes} node${nodes === 1 ? "" : "s"} · ${edges} edge${edges === 1 ? "" : "s"}`,
+  addBlock: "Add block",
+  addIf: "IF",
+  addRelay: "Relay",
+  addTemperature: "Temperature",
+  addIfHint: "Firmware function",
+  addRelayHint: "Backbone hardware",
+  addTemperatureHint: "Backbone hardware",
+  ifNeedsInput: "Connect the Toggle output or the Temperature sensor — one input only.",
+  ifSentenceIf: "If",
+  ifSentenceToggle: "TOGGLE",
+  ifSentenceTemp: "TEMPERATURE SENSOR",
+  ifSentenceThen: "then output",
+  tempProbeHint: "Drag the indicator under the sensor to test the temperature.",
 };
 
 const COPY: Record<LocaleId, ProcessingGraphCopy> = { it: IT, en: EN };

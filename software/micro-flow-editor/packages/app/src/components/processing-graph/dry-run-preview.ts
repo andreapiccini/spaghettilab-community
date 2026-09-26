@@ -12,14 +12,40 @@ export const LED_BLOCK_IDS = new Set(["appblocks.led", "ab.led"]);
 /** RGB LED bay — sequence player (solid / breathe / blink / cycle / custom). */
 export const RGB_LED_BLOCK_IDS = new Set(["appblocks.rgb_led", "ab.rgb_led"]);
 
-/** Relay actuator — authoring stub; behavior TBD. */
+/** Relay actuator — Backbone hardware contact. */
 export const RELAY_BLOCK_IDS = new Set(["appblocks.relay", "ab.relay"]);
+
+/** IF compare — firmware function, one digital or temperature input. */
+export const COMPARE_IF_IDS = new Set(["appblocks.compare_if", "ab.compare_if"]);
+
+/** Temperature sensor — Backbone hardware, feeds IF only. */
+export const TEMPERATURE_SENSOR_IDS = new Set(["appblocks.temperature_sensor", "ab.temperature_sensor"]);
 
 /** Terminal block bay input — 6 analog/digital channels. */
 export const TERMINAL_BLOCK_IDS = new Set(["appblocks.terminal_block", "ab.terminal_block"]);
 
 /** Circular flow Start — authoring entry that enables blocks downstream of Schedule. */
 export const FLOW_START_IDS = new Set(["native.flow_start", "ab.flow_start"]);
+
+export type CompareOp = "eq" | "neq" | "gt" | "gte" | "lt" | "lte";
+
+export type IfActuatorDrive = {
+  readonly kind: "if";
+  readonly ifId: string;
+  readonly compare: CompareOp;
+  readonly thenOutput: "high" | "low";
+  readonly compareLevel: "high" | "low";
+  readonly compareTempC: number;
+  readonly source: { readonly kind: "toggle" } | { readonly kind: "temperature"; readonly testC: number };
+};
+
+export type ActuatorDrive = { readonly kind: "toggle" } | IfActuatorDrive;
+
+export type RelayBinding = {
+  readonly id: string;
+  readonly closeWhenHigh: boolean;
+  readonly drive?: ActuatorDrive;
+};
 
 export type LedActuatorBinding = {
   readonly id: string;
@@ -35,6 +61,8 @@ export type LedActuatorBinding = {
   readonly softOnMs: number;
   /** Soft-stop: ms to ramp 1→0 after delay OFF (0 = instant). */
   readonly softOffMs: number;
+  /** When set, LED follows IF output instead of the Toggle line. */
+  readonly drive?: ActuatorDrive;
 };
 
 export type DryRunPreviewChannel = {
@@ -66,6 +94,14 @@ export type DryRunPreviewChannel = {
    * - `trigger` — each Schedule period restarts the sequence (no toggle required)
    */
   readonly rgbDrive?: "line" | "trigger";
+  /** IF nodes on this channel (preview HIGH when the condition is met). */
+  readonly ifIds?: readonly string[];
+  /** IF evaluation bindings (condition + source). */
+  readonly ifDrives?: readonly IfActuatorDrive[];
+  /** Relay contacts on this channel. */
+  readonly relayBindings?: readonly RelayBinding[];
+  /** Temperature sensors feeding an IF on this channel. */
+  readonly tempIds?: readonly string[];
 };
 
 /** Digital Out Toggle behaviour on each Schedule impulse. */
@@ -87,20 +123,29 @@ export function buildDryRunPreviewChannels(
 ): readonly DryRunPreviewChannel[] {
   const nodesById = new Map(graph.nodes.map((n) => [n.id, n.data as DeviceProcessingNodeData]));
   const outgoing = new Map<string, string[]>();
+  const incoming = new Map<string, string[]>();
   for (const edge of graph.edges) {
-    const list = outgoing.get(edge.source) ?? [];
-    list.push(edge.target);
-    outgoing.set(edge.source, list);
+    const out = outgoing.get(edge.source) ?? [];
+    out.push(edge.target);
+    outgoing.set(edge.source, out);
+    const inn = incoming.get(edge.target) ?? [];
+    inn.push(edge.source);
+    incoming.set(edge.target, inn);
   }
 
   const channels: DryRunPreviewChannel[] = [];
+  const claimed = new Set<string>();
   for (const node of graph.nodes) {
     const data = node.data as DeviceProcessingNodeData;
     if (data.kind !== "schedule" || !data.enabled) continue;
     const periodMs = Number.isFinite(data.periodMs) && data.periodMs > 0 ? data.periodMs : 1000;
-    const reach = reachableViaToggle(node.id, outgoing, nodesById);
+    const reach = reachableViaToggle(node.id, outgoing, incoming, nodesById);
     const hasToggle = reach.toggleIds.length > 0;
-    if (!hasToggle && reach.rgbActuators.length === 0) continue;
+    if (!hasToggle && reach.rgbActuators.length === 0 && reach.ifIds.length === 0 && reach.relayBindings.length === 0) {
+      continue;
+    }
+    for (const led of reach.actuators) claimed.add(led.id);
+    for (const relay of reach.relayBindings) claimed.add(relay.id);
     channels.push({
       triggerId: node.id,
       periodMs,
@@ -115,6 +160,50 @@ export function buildDryRunPreviewChannels(
       actuators: hasToggle ? reach.actuators : [],
       rgbActuators: reach.rgbActuators,
       rgbDrive: hasToggle ? "line" : "trigger",
+      ...(reach.ifIds.length > 0 ? { ifIds: reach.ifIds, ifDrives: reach.ifDrives } : {}),
+      ...(reach.relayBindings.length > 0 ? { relayBindings: reach.relayBindings } : {}),
+      ...(reach.tempIds.length > 0 ? { tempIds: reach.tempIds } : {}),
+    });
+  }
+
+  for (const node of graph.nodes) {
+    const data = node.data as DeviceProcessingNodeData;
+    if (!isCompareIf(data)) continue;
+    const srcId = incoming.get(node.id)?.[0];
+    const src = srcId ? nodesById.get(srcId) : undefined;
+    if (!src || !isTemperatureSensor(src)) continue;
+    const drive = actuatorDriveFor(node.id, incoming, nodesById);
+    const leds: LedActuatorBinding[] = [];
+    const relays: RelayBinding[] = [];
+    for (const outId of outgoing.get(node.id) ?? []) {
+      if (claimed.has(outId)) continue;
+      const outData = nodesById.get(outId);
+      if (!outData || !isBlockNodeData(outData)) continue;
+      if (isLedBlock(outData)) {
+        leds.push({ ...ledBindingFromProperties(outId, outData.properties), drive });
+        claimed.add(outId);
+      } else if (isRelayBlock(outData)) {
+        relays.push(relayBindingFromProperties(outId, outData.properties, drive));
+        claimed.add(outId);
+      }
+    }
+    const tempDrive = drive?.kind === "if" ? drive : ifDriveFromNode(node.id, node.data as Extract<DeviceProcessingNodeData, { kind: "block" }>, incoming, nodesById);
+    channels.push({
+      triggerId: `temp-drive:${node.id}`,
+      periodMs: 1000,
+      highTicks: 1,
+      lowTicks: 1,
+      initialHigh: true,
+      toggleMode: "astable",
+      pulseMs: 100,
+      toggleIds: [],
+      startIds: [],
+      actuators: leds,
+      rgbActuators: [],
+      ifIds: [node.id],
+      ifDrives: [tempDrive],
+      relayBindings: relays,
+      tempIds: srcId ? [srcId] : [],
     });
   }
   return channels;
@@ -123,12 +212,17 @@ export function buildDryRunPreviewChannels(
 function reachableViaToggle(
   startId: string,
   outgoing: ReadonlyMap<string, readonly string[]>,
+  incoming: ReadonlyMap<string, readonly string[]>,
   nodesById: ReadonlyMap<string, DeviceProcessingNodeData>,
 ): {
   actuators: LedActuatorBinding[];
   rgbActuators: RgbActuatorBinding[];
   toggleIds: string[];
   startIds: string[];
+  ifIds: string[];
+  ifDrives: IfActuatorDrive[];
+  relayBindings: RelayBinding[];
+  tempIds: string[];
   highTicks: number;
   lowTicks: number;
   initialHigh: boolean;
@@ -139,6 +233,10 @@ function reachableViaToggle(
   const foundRgb: RgbActuatorBinding[] = [];
   const foundToggles: string[] = [];
   const foundStarts: string[] = [];
+  const foundIfs: string[] = [];
+  const foundIfDrives: IfActuatorDrive[] = [];
+  const foundRelays: RelayBinding[] = [];
+  const foundTemps: string[] = [];
   let highTicks = 1;
   let lowTicks = 1;
   let initialHigh = true;
@@ -170,10 +268,24 @@ function reachableViaToggle(
           hysteresisTaken = true;
         }
       }
+      if (isCompareIf(data) && isBlockNodeData(data)) {
+        foundIfs.push(nextId);
+        foundIfDrives.push(ifDriveFromNode(nextId, data, incoming, nodesById));
+      }
+      if (isTemperatureSensor(data)) foundTemps.push(nextId);
+      const drive = actuatorDriveFor(nextId, incoming, nodesById);
       const passedToggle = current.passedToggle || isToggle;
+      const viaIf = drive?.kind === "if";
       if (isLedBlock(data)) {
-        if (passedToggle && isBlockNodeData(data)) {
-          foundLeds.push(ledBindingFromProperties(nextId, data.properties));
+        if ((passedToggle || viaIf) && isBlockNodeData(data)) {
+          const binding = ledBindingFromProperties(nextId, data.properties);
+          foundLeds.push(drive?.kind === "if" ? { ...binding, drive } : binding);
+        }
+        continue;
+      }
+      if (isRelayBlock(data)) {
+        if ((passedToggle || viaIf) && isBlockNodeData(data)) {
+          foundRelays.push(relayBindingFromProperties(nextId, data.properties, drive?.kind === "if" ? drive : undefined));
         }
         continue;
       }
@@ -204,6 +316,10 @@ function reachableViaToggle(
     rgbActuators,
     toggleIds: [...new Set(foundToggles)],
     startIds: [...new Set(foundStarts)],
+    ifIds: [...new Set(foundIfs)],
+    ifDrives: foundIfDrives.filter((drive, index, list) => list.findIndex((item) => item.ifId === drive.ifId) === index),
+    relayBindings: foundRelays.filter((relay, index, list) => list.findIndex((item) => item.id === relay.id) === index),
+    tempIds: [...new Set(foundTemps)],
     highTicks,
     lowTicks,
     initialHigh,
@@ -216,6 +332,135 @@ export function isDigitalOutToggle(data: DeviceProcessingNodeData): boolean {
   if (!isBlockNodeData(data)) return false;
   if (data.catalogEntryId && DIGITAL_OUT_TOGGLE_IDS.has(data.catalogEntryId)) return true;
   return DIGITAL_OUT_TOGGLE_IDS.has(data.blockTypeId);
+}
+
+export function isCompareIf(data: DeviceProcessingNodeData): boolean {
+  if (!isBlockNodeData(data)) return false;
+  if (data.catalogEntryId && COMPARE_IF_IDS.has(data.catalogEntryId)) return true;
+  return COMPARE_IF_IDS.has(data.blockTypeId);
+}
+
+export function isTemperatureSensor(data: DeviceProcessingNodeData): boolean {
+  if (!isBlockNodeData(data)) return false;
+  if (data.catalogEntryId && TEMPERATURE_SENSOR_IDS.has(data.catalogEntryId)) return true;
+  return TEMPERATURE_SENSOR_IDS.has(data.blockTypeId);
+}
+
+export function isRelayBlock(data: DeviceProcessingNodeData): boolean {
+  if (!isBlockNodeData(data)) return false;
+  if (data.catalogEntryId && RELAY_BLOCK_IDS.has(data.catalogEntryId)) return true;
+  return RELAY_BLOCK_IDS.has(data.blockTypeId);
+}
+
+export function compareOpFromProperties(properties: Readonly<Record<string, unknown>>): CompareOp {
+  const raw = properties.compare;
+  if (raw === "neq" || raw === "gt" || raw === "gte" || raw === "lt" || raw === "lte") return raw;
+  return "eq";
+}
+
+export function compareNumeric(op: CompareOp, left: number, right: number): boolean {
+  switch (op) {
+    case "eq":
+      return left === right;
+    case "neq":
+      return left !== right;
+    case "gt":
+      return left > right;
+    case "gte":
+      return left >= right;
+    case "lt":
+      return left < right;
+    case "lte":
+      return left <= right;
+  }
+}
+
+export function compareDigital(op: CompareOp, leftHigh: boolean, rightHigh: boolean): boolean {
+  return compareNumeric(op === "neq" ? "neq" : "eq", leftHigh ? 1 : 0, rightHigh ? 1 : 0);
+}
+
+export function numberFromProperty(raw: unknown, fallback: number): number {
+  const n = typeof raw === "bigint" ? Number(raw) : typeof raw === "number" ? raw : Number(raw);
+  if (!Number.isFinite(n)) return fallback;
+  return n;
+}
+
+export function evaluateIfDrive(elapsedMs: number, channel: DryRunPreviewChannel, drive: IfActuatorDrive): boolean {
+  const thenHigh = drive.thenOutput !== "low";
+  const met =
+    drive.source.kind === "temperature"
+      ? compareNumeric(drive.compare, drive.source.testC, drive.compareTempC)
+      : compareDigital(drive.compare, lineHighAtElapsed(elapsedMs, channel), drive.compareLevel !== "low");
+  return met ? thenHigh : !thenHigh;
+}
+
+export function commandLevelForActuator(
+  elapsedMs: number,
+  channel: DryRunPreviewChannel,
+  drive: ActuatorDrive | undefined,
+): number {
+  if (drive?.kind === "if") return evaluateIfDrive(elapsedMs, channel, drive) ? 100 : 0;
+  return commandLevelAtElapsed(elapsedMs, channel);
+}
+
+function actuatorDriveFor(
+  nodeId: string,
+  incoming: ReadonlyMap<string, readonly string[]>,
+  nodesById: ReadonlyMap<string, DeviceProcessingNodeData>,
+): ActuatorDrive | undefined {
+  const srcId = incoming.get(nodeId)?.[0];
+  if (!srcId) return undefined;
+  const src = nodesById.get(srcId);
+  if (!src || !isCompareIf(src) || !isBlockNodeData(src)) return { kind: "toggle" };
+  return ifDriveFromNode(srcId, src, incoming, nodesById);
+}
+
+function ifDriveFromNode(
+  ifId: string,
+  data: Extract<DeviceProcessingNodeData, { kind: "block" }>,
+  incoming: ReadonlyMap<string, readonly string[]>,
+  nodesById: ReadonlyMap<string, DeviceProcessingNodeData>,
+): IfActuatorDrive {
+  const inId = incoming.get(ifId)?.[0];
+  const inData = inId ? nodesById.get(inId) : undefined;
+  const source: IfActuatorDrive["source"] =
+    inData && isTemperatureSensor(inData) && isBlockNodeData(inData)
+      ? { kind: "temperature", testC: numberFromProperty(inData.properties.testC, 22) }
+      : { kind: "toggle" };
+  return {
+    kind: "if",
+    ifId,
+    compare: compareOpFromProperties(data.properties),
+    thenOutput: data.properties.thenOutput === "low" ? "low" : "high",
+    compareLevel: data.properties.compareLevel === "low" ? "low" : "high",
+    compareTempC: numberFromProperty(data.properties.compareTempC, 25),
+    source,
+  };
+}
+
+function relayBindingFromProperties(
+  id: string,
+  properties: Readonly<Record<string, unknown>>,
+  drive?: ActuatorDrive,
+): RelayBinding {
+  return {
+    id,
+    closeWhenHigh: properties.closeWhen !== "low",
+    drive,
+  };
+}
+
+function ifDriveOnChannel(channel: DryRunPreviewChannel, ifId: string): IfActuatorDrive | undefined {
+  for (const drive of channel.ifDrives ?? []) {
+    if (drive.ifId === ifId) return drive;
+  }
+  for (const led of channel.actuators) {
+    if (led.drive?.kind === "if" && led.drive.ifId === ifId) return led.drive;
+  }
+  for (const relay of channel.relayBindings ?? []) {
+    if (relay.drive?.kind === "if" && relay.drive.ifId === ifId) return relay.drive;
+  }
+  return undefined;
 }
 
 export function isLedBlock(data: DeviceProcessingNodeData): boolean {
@@ -394,7 +639,7 @@ export function ledWantedOn(level: number, led: LedActuatorBinding): boolean {
 }
 
 function ledActiveAtElapsed(elapsedMs: number, channel: DryRunPreviewChannel, led: LedActuatorBinding): boolean {
-  return ledWantedOn(commandLevelAtElapsed(elapsedMs, channel), led);
+  return ledWantedOn(commandLevelForActuator(elapsedMs, channel, led.drive), led);
 }
 
 /** Time spent continuously in the LED's active phase, or null if inactive. */
@@ -647,6 +892,14 @@ export function activeActuatorsAt(elapsedMs: number, channels: readonly DryRunPr
       const visual = rgbLedPlaybackAt(rgbLineSignalAt(elapsedMs, channel), parseRgbLedConfig(rgb.properties), elapsedMs);
       if (visual.intensity > 0.08) on.add(rgb.id);
     }
+    for (const ifId of channel.ifIds ?? []) {
+      const drive = ifDriveOnChannel(channel, ifId);
+      if (drive ? evaluateIfDrive(elapsedMs, channel, drive) : lineHigh) on.add(ifId);
+    }
+    for (const relay of channel.relayBindings ?? []) {
+      const high = commandLevelForActuator(elapsedMs, channel, relay.drive) >= 50;
+      if (relay.closeWhenHigh ? high : !high) on.add(relay.id);
+    }
   }
   return on;
 }
@@ -658,6 +911,9 @@ export function previewParticipantIds(channels: readonly DryRunPreviewChannel[])
     for (const id of channel.startIds) ids.add(id);
     for (const led of channel.actuators) ids.add(led.id);
     for (const rgb of channel.rgbActuators ?? []) ids.add(rgb.id);
+    for (const id of channel.ifIds ?? []) ids.add(id);
+    for (const relay of channel.relayBindings ?? []) ids.add(relay.id);
+    for (const id of channel.tempIds ?? []) ids.add(id);
   }
   return ids;
 }

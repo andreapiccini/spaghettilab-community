@@ -1,6 +1,7 @@
 import { useReactFlow } from "@xyflow/react";
 import { Trash2 } from "lucide-react";
 import type { MouseEvent } from "react";
+import { DEMO_SEEDED_NODE_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
 
 /**
  * Hover/select trash sitting just outside the top-right corner of a canvas
@@ -22,6 +23,7 @@ export function HoverDeleteButton({
   readonly corner?: "left" | "right";
 }) {
   const { deleteElements, getNodes } = useReactFlow();
+  if (isDemoOnlyEnabled() && DEMO_SEEDED_NODE_IDS.has(id)) return null;
 
   function handleClick(event: MouseEvent<HTMLButtonElement>) {
     event.preventDefault();

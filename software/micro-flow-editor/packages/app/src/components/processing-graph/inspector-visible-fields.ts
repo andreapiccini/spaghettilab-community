@@ -1,11 +1,17 @@
 import type { CatalogField, ProcessingCatalogEntry } from "@spaghettilab/processing-block-catalog";
-import { DIGITAL_OUT_TOGGLE_IDS, LED_BLOCK_IDS } from "./dry-run-preview.js";
+import { COMPARE_IF_IDS, DIGITAL_OUT_TOGGLE_IDS, LED_BLOCK_IDS, RELAY_BLOCK_IDS } from "./dry-run-preview.js";
 
 /** Visitor-facing Digital Out Toggle settings. `line` and `pulseMs` stay on the model. */
 export const DIGITAL_OUT_TOGGLE_INSPECTOR_FIELD_IDS = ["toggleMode", "initial", "lowToHigh", "highToLow"] as const;
 
 /** Visitor-facing LED settings. `threshold` and `negated` stay on the model. */
 export const LED_INSPECTOR_FIELD_IDS = ["color", "delayOnMs", "delayOffMs", "softOnMs", "softOffMs"] as const;
+
+/** Visitor-facing Relay: closed if the digital input is HIGH or LOW. */
+export const RELAY_INSPECTOR_FIELD_IDS = ["closeWhen"] as const;
+
+/** IF sentence fields — filtered further by the connected source. */
+export const IF_INSPECTOR_FIELD_IDS = ["compare", "compareLevel", "compareTempC", "thenOutput"] as const;
 
 function entryMatches(entry: ProcessingCatalogEntry | undefined, ids: ReadonlySet<string>): boolean {
   if (!entry) return false;
@@ -16,6 +22,8 @@ function entryMatches(entry: ProcessingCatalogEntry | undefined, ids: ReadonlySe
 function allowlistFor(entry: ProcessingCatalogEntry | undefined): ReadonlySet<string> | undefined {
   if (entryMatches(entry, DIGITAL_OUT_TOGGLE_IDS)) return new Set(DIGITAL_OUT_TOGGLE_INSPECTOR_FIELD_IDS);
   if (entryMatches(entry, LED_BLOCK_IDS)) return new Set(LED_INSPECTOR_FIELD_IDS);
+  if (entryMatches(entry, RELAY_BLOCK_IDS)) return new Set(RELAY_INSPECTOR_FIELD_IDS);
+  if (entryMatches(entry, COMPARE_IF_IDS)) return new Set(IF_INSPECTOR_FIELD_IDS);
   return undefined;
 }
 

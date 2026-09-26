@@ -21,7 +21,16 @@ import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { visualForCatalogEntryId } from "./block-visuals.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { commentAfterCatalogChange } from "./catalog-to-node.js";
-import { isLedBlock, isRgbLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
+import { ifSourceKind } from "./connection-rules.js";
+import {
+  isCompareIf,
+  isLedBlock,
+  isRgbLedBlock,
+  isTemperatureSensor,
+  ledColorFromProperties,
+  numberFromProperty,
+  type CompareOp,
+} from "./dry-run-preview.js";
 import { inspectorVisibleFields } from "./inspector-visible-fields.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { withThresholdFirmwareFields } from "./threshold-rule-fields.js";
@@ -206,6 +215,12 @@ export function NodeInspector({
 
   const incoming = existingEdges.filter((e) => e.target === nodeId);
   const outgoing = existingEdges.filter((e) => e.source === nodeId);
+  const demoIfSource =
+    demoOnly && data.kind === "block" && isCompareIf(data)
+      ? ifSourceKind(nodeId, { nodes: existingNodes, edges: existingEdges })
+      : undefined;
+  const demoIfBlock = demoOnly && data.kind === "block" && isCompareIf(data);
+  const demoTempBlock = demoOnly && data.kind === "block" && isTemperatureSensor(data);
 
   const blockTypeId = data.kind === "block" ? data.blockTypeId : data.kind === "rule" ? data.ruleTypeId : undefined;
   const catalogVisual =
@@ -386,7 +401,15 @@ export function NodeInspector({
                 )}
               </>
             )}
-            {namedFields.length > 0 ? (
+            {demoIfBlock ? (
+              <DemoIfSentence
+                source={demoIfSource ?? "none"}
+                properties={data.properties}
+                onChange={(properties) => patch({ properties })}
+              />
+            ) : demoTempBlock ? (
+              <p className="font-body text-sm text-ink-muted">{copy.tempProbeHint}</p>
+            ) : namedFields.length > 0 ? (
               <CatalogFieldsEditor fields={namedFields} properties={data.properties} lineOptions={lineOptions} onChange={(properties) => patch({ properties })} />
             ) : (
               <>
@@ -839,5 +862,98 @@ function NamedOrNumericModuleRef({
       )}
       {!(showNamed && named.length === 0 && moduleNodeId !== "") && <div className="mb-3" />}
     </>
+  );
+}
+
+const IF_COMPARE_TOGGLE: readonly { value: CompareOp; label: string }[] = [
+  { value: "eq", label: "equals" },
+  { value: "neq", label: "is not equal to" },
+];
+
+const IF_COMPARE_TEMP: readonly { value: CompareOp; label: string }[] = [
+  { value: "eq", label: "equals" },
+  { value: "neq", label: "is not equal to" },
+  { value: "gt", label: "is greater than" },
+  { value: "gte", label: "is greater than or equal to" },
+  { value: "lt", label: "is less than" },
+  { value: "lte", label: "is less than or equal to" },
+];
+
+function DemoIfSentence({
+  source,
+  properties,
+  onChange,
+}: {
+  readonly source: "toggle" | "temperature" | "none";
+  readonly properties: Readonly<Record<string, unknown>>;
+  readonly onChange: (properties: Record<string, unknown>) => void;
+}) {
+  const { locale } = useLocale();
+  const copy = processingGraphCopy(locale);
+  if (source === "none") {
+    return <p className="font-body text-sm text-ink-muted">{copy.ifNeedsInput}</p>;
+  }
+
+  const compare = (properties.compare as CompareOp | undefined) ?? "eq";
+  const compareLevel = properties.compareLevel === "low" ? "low" : "high";
+  const thenOutput = properties.thenOutput === "low" ? "low" : "high";
+  const compareTempC = numberFromProperty(properties.compareTempC, 25);
+  const ops = source === "toggle" ? IF_COMPARE_TOGGLE : IF_COMPARE_TEMP;
+
+  function set(partial: Record<string, unknown>) {
+    onChange({ ...properties, ...partial });
+  }
+
+  return (
+    <div className="flex flex-col gap-2 font-body text-sm text-ink">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span>{copy.ifSentenceIf}</span>
+        <span className="font-body-strong">
+          {source === "toggle" ? copy.ifSentenceToggle : copy.ifSentenceTemp}
+        </span>
+        <select
+          value={ops.some((op) => op.value === compare) ? compare : "eq"}
+          onChange={(event) => set({ compare: event.target.value })}
+          className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-body text-sm outline-none"
+        >
+          {ops.map((op) => (
+            <option key={op.value} value={op.value}>
+              {op.label}
+            </option>
+          ))}
+        </select>
+        {source === "toggle" ? (
+          <select
+            value={compareLevel}
+            onChange={(event) => set({ compareLevel: event.target.value })}
+            className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-body text-sm outline-none"
+          >
+            <option value="high">HIGH</option>
+            <option value="low">LOW</option>
+          </select>
+        ) : (
+          <span className="inline-flex items-center gap-1">
+            <input
+              type="number"
+              value={compareTempC}
+              onChange={(event) => set({ compareTempC: BigInt(Math.round(Number(event.target.value) || 0)) })}
+              className="w-16 rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-mono text-sm outline-none"
+            />
+            <span className="text-ink-muted">°C</span>
+          </span>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span>{copy.ifSentenceThen}</span>
+        <select
+          value={thenOutput}
+          onChange={(event) => set({ thenOutput: event.target.value })}
+          className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-body text-sm outline-none"
+        >
+          <option value="high">HIGH</option>
+          <option value="low">LOW</option>
+        </select>
+      </div>
+    </div>
   );
 }

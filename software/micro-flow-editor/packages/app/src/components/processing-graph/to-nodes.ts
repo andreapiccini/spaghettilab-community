@@ -72,6 +72,13 @@ export type ProcessingNodeUiData = {
   readonly cardHeight?: number;
   /** Measured card width for multi-channel bay cards. */
   readonly cardWidth?: number;
+  /** Temperature sensor: live test value + slider callback (demo). */
+  readonly tempProbe?: {
+    readonly celsius: number;
+    readonly min: number;
+    readonly max: number;
+    readonly onChange?: (celsius: number) => void;
+  };
 };
 
 /**

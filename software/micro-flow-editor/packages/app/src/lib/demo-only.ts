@@ -7,7 +7,29 @@ export const DEMO_QUERY_PARAM = "demo";
 export const DEMO_ONLY_SCREEN_ID = "processing-graph";
 
 /** Catalog ids visitors may add in demo-only. The shipped graph already has these. */
-export const DEMO_PALETTE_IDS = ["native.schedule", "appblocks.digital_out_toggle", "appblocks.led"] as const;
+export const DEMO_PALETTE_IDS = [
+  "native.schedule",
+  "appblocks.digital_out_toggle",
+  "appblocks.led",
+  "appblocks.compare_if",
+  "appblocks.relay",
+  "appblocks.temperature_sensor",
+] as const;
+
+/** Blocks the visitor radial menu can insert. */
+export const DEMO_ADD_BLOCK_IDS = [
+  "appblocks.compare_if",
+  "appblocks.relay",
+  "appblocks.temperature_sensor",
+] as const;
+
+/** Seeded visitor graph — not deletable. Added IF / Relay / sensor can be removed. */
+export const DEMO_SEEDED_NODE_IDS = new Set([
+  "demo-schedule",
+  "dp-tick-demo-schedule",
+  "demo-toggle",
+  "demo-led",
+]);
 
 export function isTruthyFlag(value: string | boolean | undefined | null): boolean {
   if (value === true) return true;

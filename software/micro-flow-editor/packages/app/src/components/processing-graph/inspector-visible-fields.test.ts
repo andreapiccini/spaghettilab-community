@@ -47,4 +47,9 @@ describe("inspectorVisibleFields", () => {
     const entry = findCatalogEntryById("appblocks.rgb_led")!;
     expect(inspectorVisibleFields(entry, entry.fields ?? [])).toBe(entry.fields);
   });
+
+  it("keeps only close-when on Relay", () => {
+    const entry = findCatalogEntryById("appblocks.relay")!;
+    expect(inspectorVisibleFields(entry, entry.fields ?? []).map((field) => field.id)).toEqual(["closeWhen"]);
+  });
 });

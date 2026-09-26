@@ -419,3 +419,84 @@ describe("helpers", () => {
     expect(rgbEntry?.family).toBe("bay");
   });
 });
+
+describe("IF / relay / temperature dry-run", () => {
+  const iff = (id: string, properties: Record<string, unknown>) =>
+    ({
+      layer: "device-processing" as const,
+      id,
+      data: { kind: "block" as const, blockTypeId: "ab.compare_if", catalogEntryId: "appblocks.compare_if", properties },
+    });
+  const temp = (id: string, testC: number) =>
+    ({
+      layer: "device-processing" as const,
+      id,
+      data: { kind: "block" as const, blockTypeId: "ab.temperature_sensor", catalogEntryId: "appblocks.temperature_sensor", properties: { testC } },
+    });
+  const relay = (id: string, closeWhen = "high") =>
+    ({
+      layer: "device-processing" as const,
+      id,
+      data: { kind: "block" as const, blockTypeId: "ab.relay", catalogEntryId: "appblocks.relay", properties: { closeWhen } },
+    });
+
+  it("drives LED from IF when Toggle equals HIGH then HIGH", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [
+          schedule("s1", 1000),
+          toggle("t1", { initial: "high", highToLow: 1, lowToHigh: 1 }),
+          iff("if1", { compare: "eq", compareLevel: "high", thenOutput: "high" }),
+          led("led1"),
+        ],
+        [
+          { layer: "device-processing", id: "e1", source: "s1", target: "t1" },
+          { layer: "device-processing", id: "e2", source: "t1", target: "if1" },
+          { layer: "device-processing", id: "e3", source: "if1", target: "led1" },
+        ],
+      ),
+    );
+    expect(channels[0]?.ifIds).toContain("if1");
+    expect(activeActuatorsAt(0, channels).has("led1")).toBe(true);
+    expect(activeActuatorsAt(1000, channels).has("led1")).toBe(false);
+  });
+
+  it("inverts LED when IF is not-equal HIGH then HIGH", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [
+          schedule("s1", 1000),
+          toggle("t1", { initial: "high", highToLow: 1, lowToHigh: 1 }),
+          iff("if1", { compare: "neq", compareLevel: "high", thenOutput: "high" }),
+          led("led1"),
+        ],
+        [
+          { layer: "device-processing", id: "e1", source: "s1", target: "t1" },
+          { layer: "device-processing", id: "e2", source: "t1", target: "if1" },
+          { layer: "device-processing", id: "e3", source: "if1", target: "led1" },
+        ],
+      ),
+    );
+    expect(activeActuatorsAt(0, channels).has("led1")).toBe(false);
+    expect(activeActuatorsAt(1000, channels).has("led1")).toBe(true);
+  });
+
+  it("closes the relay when IF temperature is greater than the threshold", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [
+          temp("temp1", 30),
+          iff("if1", { compare: "gt", compareTempC: 25, thenOutput: "high" }),
+          relay("relay1", "high"),
+        ],
+        [
+          { layer: "device-processing", id: "e1", source: "temp1", target: "if1" },
+          { layer: "device-processing", id: "e2", source: "if1", target: "relay1" },
+        ],
+      ),
+    );
+    expect(channels.some((channel) => channel.tempIds?.includes("temp1"))).toBe(true);
+    expect(activeActuatorsAt(0, channels).has("relay1")).toBe(true);
+    expect(activeActuatorsAt(0, channels).has("if1")).toBe(true);
+  });
+});

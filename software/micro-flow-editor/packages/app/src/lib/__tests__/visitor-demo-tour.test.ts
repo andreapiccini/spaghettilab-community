@@ -6,12 +6,13 @@ import {
 } from "../visitor-demo-tour.js";
 
 describe("visitor demo tour", () => {
-  it("has four first-visit steps with live targets", () => {
+  it("has first-visit steps with live targets", () => {
     expect(VISITOR_DEMO_TOUR_STEPS.map((step) => step.target)).toEqual([
       "flow-node-demo-schedule",
       "flow-node-demo-backbone",
       "demo-tour-inspector",
       "demo-tour-run",
+      "demo-tour-add",
     ]);
     expect(VISITOR_DEMO_TOUR_STEPS[0]?.title).toBe("Firmware functions");
   });

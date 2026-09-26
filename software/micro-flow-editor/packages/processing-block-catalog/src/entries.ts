@@ -692,6 +692,61 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       "Input: attivazione dallo Start (o jolly da Schedule). Output: comando digitale (0/1). Astabile = cambia stato a ogni impulso; impulso HIGH/LOW = monostabile (riposo + impulso sulla durata impostata).",
   }),
   e({
+    id: "appblocks.compare_if",
+    label: "IF",
+    subtitle: "Confronto → comando",
+    category: "logic",
+    runtime: "core-block",
+    availability: "shipped",
+    family: "functionality",
+    appblocksId: "compare_if",
+    typeId: "ab.compare_if",
+    needsModule: false,
+    inputs: [
+      inPort("0", [T.digitalComando, T.analogMisura], {
+        label: "Ingresso",
+        required: true,
+      }),
+    ],
+    outputs: [outPort("0", [T.digitalComando], "Uscita")],
+    fields: [
+      sel(
+        "compare",
+        "Quando",
+        [
+          { value: "eq", label: "è uguale" },
+          { value: "neq", label: "è diverso" },
+          { value: "gt", label: "è maggiore" },
+          { value: "gte", label: "è maggiore o uguale" },
+          { value: "lt", label: "è minore" },
+          { value: "lte", label: "è minore o uguale" },
+        ],
+        "eq",
+      ),
+      sel(
+        "compareLevel",
+        "Livello",
+        [
+          { value: "high", label: "HIGH" },
+          { value: "low", label: "LOW" },
+        ],
+        "high",
+      ),
+      num("compareTempC", "Temperatura (°C)", 25, "Soglia in °C"),
+      sel(
+        "thenOutput",
+        "allora uscita",
+        [
+          { value: "high", label: "HIGH" },
+          { value: "low", label: "LOW" },
+        ],
+        "high",
+      ),
+    ],
+    notes:
+      "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). L’uscita è HIGH o LOW.",
+  }),
+  e({
     id: "appblocks.led",
     label: "LED",
     subtitle: "Indicatore luminoso",
@@ -837,7 +892,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     typeId: "ab.relay",
     needsModule: false,
     inputs: [
-      inPort("0", [T.digitalComando, T.activationTrigger], {
+      inPort("0", [T.digitalComando], {
         label: "Comando",
         required: true,
       }),
@@ -845,12 +900,35 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     outputs: [],
     fields: [
       txt("line", "Linea", "RELAY"),
-      sel("initial", "Stato iniziale", [
-        { value: "open", label: "Aperto (OFF)" },
-        { value: "closed", label: "Chiuso (ON)" },
-      ], "open"),
+      sel(
+        "closeWhen",
+        "Chiuso quando l'ingresso è",
+        [
+          { value: "high", label: "HIGH" },
+          { value: "low", label: "LOW" },
+        ],
+        "high",
+      ),
     ],
-    notes: AUTHORING + " Comportamento relè (contatto, debounce, fail-safe) da definire.",
+    notes: AUTHORING + " Relè hardware: chiuso se l’ingresso è HIGH, oppure chiuso se l’ingresso è LOW.",
+  }),
+  e({
+    id: "appblocks.temperature_sensor",
+    label: "Sensore temperatura",
+    subtitle: "Misura in °C",
+    category: "io",
+    runtime: "core-block",
+    availability: "shipped",
+    family: "bay",
+    bayIo: "input",
+    bayFamilyId: "bay.temperature_sensor",
+    appblocksId: "temperature_sensor",
+    typeId: "ab.temperature_sensor",
+    needsModule: false,
+    inputs: [],
+    outputs: [outPort("0", [T.analogMisura], "Temperatura")],
+    fields: [num("testC", "Temperatura di prova (°C)", 22, "Valore per il dry-run")],
+    notes: AUTHORING + " Sensore hardware: si collega solo a un blocco IF. L’indicatore sotto il blocco serve a provare la temperatura.",
   }),
   e({
     id: "appblocks.terminal_block",

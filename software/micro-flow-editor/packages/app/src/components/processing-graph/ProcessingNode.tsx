@@ -1,5 +1,5 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Cable, Cpu, Palette, Power, ToggleLeft } from "lucide-react";
+import { Cable, Cpu, GitBranch, Palette, Power, Thermometer, ToggleLeft } from "lucide-react";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
 import { FLOW_START_COLOR } from "./block-visuals.js";
@@ -39,7 +39,11 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           ? Power
           : data.tileGlyph === "cable"
             ? Cable
-            : config.icon;
+            : data.tileGlyph === "if"
+              ? GitBranch
+              : data.tileGlyph === "thermometer"
+                ? Thermometer
+                : config.icon;
   const inputHandles = data.inputHandles ?? (data.hasInput ? [{ id: "0" }] : []);
   const outputHandles = data.outputHandles ?? (data.hasOutput ? [{ id: "0" }] : []);
   const ports = { hasInput: inputHandles.length > 0, hasOutput: outputHandles.length > 0 };
@@ -66,6 +70,8 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
   const cardHeight = data.cardHeight;
   const cardWidth = data.cardWidth ?? NODE_WIDTH;
 
+  const isRelay = data.tileGlyph === "power";
+  const isIf = data.tileGlyph === "if";
   const subtitle =
     isLed && data.previewing && intensity !== undefined
       ? intensity > 0.85
@@ -73,7 +79,17 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         : intensity < 0.15
           ? "OFF"
           : `${Math.round(intensity * 100)}%`
-      : data.subtitle;
+      : isRelay && data.previewing
+        ? previewOn
+          ? "CLOSED"
+          : "OPEN"
+        : isIf && data.previewing
+          ? previewOn
+            ? "HIGH"
+            : "LOW"
+          : data.tempProbe
+            ? `${Math.round(data.tempProbe.celsius)}°C`
+            : data.subtitle;
 
   if (isTick) {
     const fill = data.hasError ? "var(--color-error)" : (data.accentColor ?? FLOW_START_COLOR);
@@ -300,6 +316,31 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           </>
         )}
       </div>
+      {data.tempProbe && (
+        <div
+          className="nodrag nowheel nopan absolute left-0 right-0 top-full z-20 mt-1.5 px-0.5"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <input
+            type="range"
+            min={data.tempProbe.min}
+            max={data.tempProbe.max}
+            step={1}
+            value={data.tempProbe.celsius}
+            aria-label="Test temperature"
+            onChange={(event) => data.tempProbe?.onChange?.(Number(event.target.value))}
+            className="h-1.5 w-full cursor-ew-resize appearance-none rounded-full"
+            style={{
+              background: "linear-gradient(90deg, #38BDF8, #F97316)",
+              accentColor: "#0EA5E9",
+            }}
+          />
+          <div className="mt-0.5 text-center font-mono text-[10px] font-semibold text-ink-muted">
+            {Math.round(data.tempProbe.celsius)}°C
+          </div>
+        </div>
+      )}
     </div>
   );
 }

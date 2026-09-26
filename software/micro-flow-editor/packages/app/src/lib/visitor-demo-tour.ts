@@ -1,6 +1,6 @@
 /** First-visit coach marks on the public GitHub Pages demo. */
 
-export const VISITOR_DEMO_TOUR_STORAGE_KEY = "demo.visitor-tour.seen.v3";
+export const VISITOR_DEMO_TOUR_STORAGE_KEY = "demo.visitor-tour.seen.v4";
 export const VISITOR_DEMO_TOUR_LOCAL_STORAGE_KEY = `spaghettilab:${VISITOR_DEMO_TOUR_STORAGE_KEY}`;
 
 export type VisitorDemoTourStep = {
@@ -34,6 +34,12 @@ export const VISITOR_DEMO_TOUR_STEPS: readonly VisitorDemoTourStep[] = [
     title: "Watch it run",
     body: "Run previews the firmware commanding the LED. The blink comes from the Flow; the swatch is the module.",
     side: "bottom",
+  },
+  {
+    target: "demo-tour-add",
+    title: "Add more blocks",
+    body: "Open the plus button to add an IF function, a Backbone relay, or a temperature sensor. IF accepts one input: Toggle or the sensor.",
+    side: "left",
   },
 ];
 

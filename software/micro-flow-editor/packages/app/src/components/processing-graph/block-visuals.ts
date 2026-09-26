@@ -1,10 +1,12 @@
-import { Cable, Palette, Power, ToggleLeft, type LucideIcon } from "lucide-react";
+import { Cable, GitBranch, Palette, Power, Thermometer, ToggleLeft, type LucideIcon } from "lucide-react";
 import {
+  COMPARE_IF_IDS,
   DIGITAL_OUT_TOGGLE_IDS,
   FLOW_START_IDS,
   LED_BLOCK_IDS,
   RELAY_BLOCK_IDS,
   RGB_LED_BLOCK_IDS,
+  TEMPERATURE_SENSOR_IDS,
   TERMINAL_BLOCK_IDS,
 } from "./dry-run-preview.js";
 
@@ -13,7 +15,7 @@ import {
  * (teal + SlidersHorizontal). LED keeps a solid swatch; Digital Out Toggle
  * gets a toggle glyph; Flow Start is a bare dark-violet disc (Schedule tick).
  */
-export type CatalogTileGlyph = "toggle" | "palette" | "power" | "cable";
+export type CatalogTileGlyph = "toggle" | "palette" | "power" | "cable" | "if" | "thermometer";
 
 export type CatalogBlockVisual = {
   readonly colorVar: string;
@@ -53,6 +55,18 @@ const RELAY_VISUAL: CatalogBlockVisual = {
   tileGlyph: "power",
 };
 
+const COMPARE_IF_VISUAL: CatalogBlockVisual = {
+  colorVar: "#4F46E5",
+  icon: GitBranch,
+  tileGlyph: "if",
+};
+
+const TEMPERATURE_VISUAL: CatalogBlockVisual = {
+  colorVar: "#0EA5E9",
+  icon: Thermometer,
+  tileGlyph: "thermometer",
+};
+
 const TERMINAL_BLOCK_VISUAL: CatalogBlockVisual = {
   colorVar: "#0F766E",
   icon: Cable,
@@ -68,6 +82,8 @@ export function visualForCatalogEntryId(entryId: string | undefined): CatalogBlo
   }
   if (RGB_LED_BLOCK_IDS.has(entryId)) return RGB_LED_VISUAL;
   if (RELAY_BLOCK_IDS.has(entryId)) return RELAY_VISUAL;
+  if (COMPARE_IF_IDS.has(entryId)) return COMPARE_IF_VISUAL;
+  if (TEMPERATURE_SENSOR_IDS.has(entryId)) return TEMPERATURE_VISUAL;
   if (TERMINAL_BLOCK_IDS.has(entryId)) return TERMINAL_BLOCK_VISUAL;
   return undefined;
 }

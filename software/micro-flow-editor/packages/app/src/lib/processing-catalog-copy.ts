@@ -48,6 +48,9 @@ const PHRASES: Record<string, string> = {
   "Rilascio pulsante": "Button release",
   "Scrivi GPIO HIGH/LOW": "Write GPIO HIGH/LOW",
   "Inverti uscita digitale": "Invert digital output",
+  "Confronto → comando": "Compare → command",
+  "Sensore temperatura": "Temperature sensor",
+  "Misura in °C": "Reading in °C",
   "Indicatore luminoso": "Light indicator",
   "Sequenze colore · trigger in ingresso": "Color sequences · input trigger",
   "Uscita relè": "Relay output",
@@ -209,6 +212,22 @@ const PHRASES: Record<string, string> = {
   "=  uguale": "=  equal",
   "Va alto": "Goes high",
   "Va basso": "Goes low",
+  "è uguale": "equals",
+  "è diverso": "is not equal to",
+  "è maggiore": "is greater than",
+  "è maggiore o uguale": "is greater than or equal to",
+  "è minore": "is less than",
+  "è minore o uguale": "is less than or equal to",
+  Livello: "Level",
+  "Temperatura (°C)": "Temperature (°C)",
+  "Soglia in °C": "Threshold in °C",
+  "allora uscita": "then output",
+  "Chiuso quando l'ingresso è": "Closed if input is",
+  "Temperatura di prova (°C)": "Test temperature (°C)",
+  "Valore per il dry-run": "Dry-run value",
+  Ingresso: "Input",
+  Uscita: "Output",
+  Temperatura: "Temperature",
 
   "Entry point firmware (`spaghetti_runtime_schedule_config`): a ogni periodo emette attivazione (jolly). Equivalente AppBlocks: On Time Period. Se disabilitato non viene eseguito.":
     "Firmware entry point (`spaghetti_runtime_schedule_config`): each period emits activation (wildcard). AppBlocks equivalent: On Time Period. If disabled it is not run.",
@@ -242,8 +261,12 @@ const PHRASES: Record<string, string> = {
     "Sink on a digital (0/100) or analog (0–100) command. On if level ≥ threshold. ON/OFF delays relative to the signal, then soft start/stop.",
   [`${AUTHORING_IT} Player di sequenze: rising/falling sceglie il bordo che avvia. «Segue il trigger» spegne sul bordo opposto; «Avvia e non ferma» lascia correre la sequenza. Effetti pronti = sequenze parametriche; in «Sequenza mia» componi solid/fade/wait. Strip (N LED) = un unico player.`]:
     `${AUTHORING_EN} Sequence player: rising/falling picks the starting edge. “Follows the trigger” turns off on the opposite edge; “Start and do not stop” lets the sequence run. Ready-made effects = parametric sequences; in “My sequence” compose solid/fade/wait. Strip (N LEDs) = one player.`,
-  [`${AUTHORING_IT} Comportamento relè (contatto, debounce, fail-safe) da definire.`]:
-    `${AUTHORING_EN} Relay behavior (contact, debounce, fail-safe) still to be defined.`,
+  [`${AUTHORING_IT} Relè hardware: chiuso se l’ingresso è HIGH, oppure chiuso se l’ingresso è LOW.`]:
+    `${AUTHORING_EN} Hardware relay: closed if the input is HIGH, or closed if the input is LOW.`,
+  "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). L’uscita è HIGH o LOW.":
+    "One input at a time: Digital Out Toggle (equals / is not equal to HIGH/LOW) or Temperature sensor (equals / is not equal / greater / less). The output is HIGH or LOW.",
+  [`${AUTHORING_IT} Sensore hardware: si collega solo a un blocco IF. L’indicatore sotto il blocco serve a provare la temperatura.`]:
+    `${AUTHORING_EN} Hardware sensor: connects only to an IF block. The indicator under the block is for testing the temperature.`,
   [`${AUTHORING_IT} Morsettiera bay: fino a 6 canali digital, analog o alimentazione (tensione + direzione ingresso/uscita). Nomi editabili; sul canvas ogni nome sta accanto al pallino.`]:
     `${AUTHORING_EN} Bay terminal block: up to 6 digital, analog or power channels (voltage + input/output direction). Names are editable; on the canvas each name sits next to the handle.`,
   "Driver `round` pianificato (valore numerico bounded, non formattazione stringa libera).":
