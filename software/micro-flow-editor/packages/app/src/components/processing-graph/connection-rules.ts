@@ -48,8 +48,8 @@ export type DemoConnectionContext = {
 };
 
 /**
- * Visitor demo: IF takes exactly one input (Toggle or Temperature sensor);
- * the temperature sensor only feeds IF; Relay is driven by Toggle or IF.
+ * Visitor demo: IF takes Toggle or Temperature; temperature only feeds IF;
+ * LED / Relay take Toggle or IF. Connecting a new source replaces the old wire.
  */
 export function isValidDemoProcessingConnection(
   connection: {
@@ -64,15 +64,14 @@ export function isValidDemoProcessingConnection(
   if (!source || !target) return true;
 
   if (isTemperatureSensor(source)) {
-    return isCompareIf(target) && incomingCount(ctx.edges, connection.target) === 0;
+    return isCompareIf(target);
   }
   if (isCompareIf(target)) {
-    if (incomingCount(ctx.edges, connection.target) > 0) return false;
     return isDigitalOutToggle(source) || isTemperatureSensor(source);
   }
   if (isTemperatureSensor(target)) return false;
   if (isCompareIf(source)) return isLedBlock(target) || isRelayBlock(target);
-  if (isRelayBlock(target)) return isDigitalOutToggle(source) || isCompareIf(source);
+  if (isLedBlock(target) || isRelayBlock(target)) return isDigitalOutToggle(source) || isCompareIf(source);
   return true;
 }
 
@@ -89,6 +88,3 @@ export function ifSourceKind(
   return "none";
 }
 
-function incomingCount(edges: DemoConnectionContext["edges"], targetId: string): number {
-  return edges.filter((edge) => edge.target === targetId).length;
-}

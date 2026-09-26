@@ -419,11 +419,19 @@ function actuatorDriveFor(
   incoming: ReadonlyMap<string, readonly string[]>,
   nodesById: ReadonlyMap<string, DeviceProcessingNodeData>,
 ): ActuatorDrive | undefined {
-  const srcId = incoming.get(nodeId)?.[0];
-  if (!srcId) return undefined;
-  const src = nodesById.get(srcId);
-  if (!src || !isCompareIf(src) || !isBlockNodeData(src)) return { kind: "toggle" };
-  return ifDriveFromNode(srcId, src, incoming, nodesById);
+  const srcIds = incoming.get(nodeId) ?? [];
+  let toggleFallback: ActuatorDrive | undefined;
+  for (const srcId of srcIds) {
+    const src = nodesById.get(srcId);
+    if (!src) continue;
+    if (isCompareIf(src) && isBlockNodeData(src)) {
+      return ifDriveFromNode(srcId, src, incoming, nodesById);
+    }
+    if (isDigitalOutToggle(src)) toggleFallback = { kind: "toggle" };
+  }
+  if (toggleFallback) return toggleFallback;
+  if (srcIds.length > 0) return { kind: "toggle" };
+  return undefined;
 }
 
 function ifDriveFromNode(

@@ -865,9 +865,20 @@ function ProcessingGraphScreenInner() {
 
   function onConnect(connection: Connection) {
     if (!execute || bindingIndex < 0 || !isValidConnection(connection)) return;
+    const lens = deviceGraphLens(bindingIndex);
+    if (demoOnly && connection.target) {
+      const targetData = domainNodes.find((node) => node.id === connection.target)?.data;
+      const oneInput =
+        !!targetData && (isCompareIf(targetData) || isLedBlock(targetData) || isRelayBlock(targetData));
+      if (oneInput) {
+        for (const edge of graphState.edges) {
+          if (edge.target === connection.target) execute(removeGraphEdgeCommand(lens, edge.id));
+        }
+      }
+    }
     const edgeId = `dpe-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
     execute(
-      addGraphEdgeCommand(deviceGraphLens(bindingIndex), {
+      addGraphEdgeCommand(lens, {
         id: edgeId,
         source: connection.source,
         target: connection.target,

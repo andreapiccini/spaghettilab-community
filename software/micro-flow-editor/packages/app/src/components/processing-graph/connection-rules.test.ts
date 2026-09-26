@@ -62,10 +62,10 @@ describe("isValidDemoProcessingConnection", () => {
   const relay = { id: "relay", data: { kind: "block" as const, blockTypeId: "ab.relay", catalogEntryId: "appblocks.relay", properties: {} } };
   const nodes = [toggle, iff, temp, led, relay];
 
-  it("lets Toggle or Temperature feed IF, but only one input", () => {
+  it("lets Toggle or Temperature feed IF, replacing a previous input", () => {
     expect(isValidDemoProcessingConnection({ source: "t", target: "if" }, { nodes, edges: [] })).toBe(true);
     expect(isValidDemoProcessingConnection({ source: "temp", target: "if" }, { nodes, edges: [] })).toBe(true);
-    expect(isValidDemoProcessingConnection({ source: "temp", target: "if" }, { nodes, edges: [{ source: "t", target: "if" }] })).toBe(false);
+    expect(isValidDemoProcessingConnection({ source: "temp", target: "if" }, { nodes, edges: [{ source: "t", target: "if" }] })).toBe(true);
   });
 
   it("keeps the temperature sensor wired only to IF", () => {
@@ -77,5 +77,6 @@ describe("isValidDemoProcessingConnection", () => {
     expect(isValidDemoProcessingConnection({ source: "if", target: "led" }, { nodes, edges: [] })).toBe(true);
     expect(isValidDemoProcessingConnection({ source: "if", target: "relay" }, { nodes, edges: [] })).toBe(true);
     expect(isValidDemoProcessingConnection({ source: "t", target: "relay" }, { nodes, edges: [] })).toBe(true);
+    expect(isValidDemoProcessingConnection({ source: "if", target: "led" }, { nodes, edges: [{ source: "t", target: "led" }] })).toBe(true);
   });
 });
