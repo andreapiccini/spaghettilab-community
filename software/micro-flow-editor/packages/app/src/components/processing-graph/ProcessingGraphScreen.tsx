@@ -41,6 +41,7 @@ import { DEMO_BACKBONE_FRAME_ID, DEMO_BACKBONE_NODE_TYPES } from "./DemoBackbone
 import { EVENT_CONTAINER_NODE_TYPES, type EventContainerNodeData } from "./EventContainerNode.js";
 import {
   canBeNested,
+  canChainIntoEventContainer,
   collectDescendantMemberIds,
   computeEventContainers,
   containerContainsTrigger,
@@ -778,7 +779,7 @@ function ProcessingGraphScreenInner() {
       }
 
       const escaping = container !== undefined && memberEscapesContainer(position, container);
-      const isChainableBlock = domainNodes.find((n) => n.id === change.id)?.data.kind === "block";
+      const isChainableBlock = canChainIntoEventContainer(domainNodes.find((n) => n.id === change.id)?.data);
       const hovered = isChainableBlock
         ? containerAtPosition(position, eventContainers, escaping && container ? new Set([container.triggerId]) : undefined)
         : undefined;

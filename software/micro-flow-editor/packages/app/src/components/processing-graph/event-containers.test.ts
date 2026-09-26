@@ -1,6 +1,6 @@
 import type { GraphState } from "@spaghettilab/domain";
 import { describe, expect, it } from "vitest";
-import { computeEventContainers, detachMemberEdges, formatSchedulePeriod, memberEscapesContainer, overlappingPeerContainer, peerContainerObstacles, planMembershipDrop } from "./event-containers.js";
+import { canChainIntoEventContainer, computeEventContainers, detachMemberEdges, formatSchedulePeriod, memberEscapesContainer, overlappingPeerContainer, peerContainerObstacles, planMembershipDrop } from "./event-containers.js";
 import { EVENT_CONTAINER_HEADER_HEIGHT, NODE_HEIGHT, NODE_PADDING, NODE_WIDTH } from "./layout-constants.js";
 
 describe("memberEscapesContainer", () => {
@@ -177,6 +177,51 @@ describe("computeEventContainers nesting", () => {
     const previewSched = preview.find((c) => c.triggerId === "sched")!;
     expect(previewSched.height).toBeGreaterThan(idleSched.height);
     expect(preview.find((c) => c.triggerId === "btn")!.memberIds).toEqual([]);
+  });
+});
+
+describe("canChainIntoEventContainer", () => {
+  it("lets firmware functions join a Schedule and keeps bay hardware out", () => {
+    expect(
+      canChainIntoEventContainer({
+        kind: "block",
+        blockTypeId: "ab.compare_if",
+        catalogEntryId: "appblocks.compare_if",
+        properties: {},
+      }),
+    ).toBe(true);
+    expect(
+      canChainIntoEventContainer({
+        kind: "block",
+        blockTypeId: "ab.digital_out_toggle",
+        catalogEntryId: "appblocks.digital_out_toggle",
+        properties: {},
+      }),
+    ).toBe(true);
+    expect(
+      canChainIntoEventContainer({
+        kind: "block",
+        blockTypeId: "ab.relay",
+        catalogEntryId: "appblocks.relay",
+        properties: {},
+      }),
+    ).toBe(false);
+    expect(
+      canChainIntoEventContainer({
+        kind: "block",
+        blockTypeId: "ab.led",
+        catalogEntryId: "appblocks.led",
+        properties: {},
+      }),
+    ).toBe(false);
+    expect(
+      canChainIntoEventContainer({
+        kind: "block",
+        blockTypeId: "ab.temperature_sensor",
+        catalogEntryId: "appblocks.temperature_sensor",
+        properties: {},
+      }),
+    ).toBe(false);
   });
 });
 

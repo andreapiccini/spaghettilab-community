@@ -44,6 +44,17 @@ export function canBeNested(kind: DeviceProcessingNodeData["kind"]): boolean {
 
 export const canNestTrigger = canBeNested;
 
+/**
+ * Firmware functions (IF, Toggle, …) join a Schedule chain when dropped in
+ * the dashed box. Bay hardware (Relay, LED, Temperature) must stay outside —
+ * dragging a Relay over the box used to wire it to IF, the chain tail.
+ */
+export function canChainIntoEventContainer(data: DeviceProcessingNodeData | undefined): boolean {
+  if (!data || data.kind !== "block") return false;
+  const entry = catalogEntryForNode(data);
+  return !entry || !isBayEntry(entry);
+}
+
 export function triggerToContainerOrigin(position: { readonly x: number; readonly y: number }): { x: number; y: number } {
   return {
     x: position.x - NODE_PADDING,
