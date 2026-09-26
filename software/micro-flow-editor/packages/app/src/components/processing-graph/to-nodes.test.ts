@@ -130,6 +130,7 @@ describe("toProcessingNodes", () => {
     };
     const nodes = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
     expect(nodes.find((n) => n.id === "r1")?.data.subtitle).toBe("closed if HIGH");
+    expect(nodes.find((n) => n.id === "r1")?.data.cardHeight).toBe(80);
     expect(nodes.find((n) => n.id === "r1")?.data.relayClose).toEqual({ closeWhenHigh: true, label: "closed if HIGH" });
     expect(nodes.find((n) => n.id === "r2")?.data.subtitle).toBe("closed if LOW");
     expect(nodes.find((n) => n.id === "r2")?.data.relayClose?.closeWhenHigh).toBe(false);

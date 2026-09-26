@@ -128,7 +128,7 @@ export function toProcessingNodes(
     const relayCard = isBlockNodeData(data) && isRelayBlock(data);
     const cardHeight = isTick
       ? FLOW_START_SIZE
-      : nodeHeightForPorts(ports) + (ifLane ? IF_FOOTER_HEIGHT : relayCard ? 14 : 0);
+      : nodeHeightForPorts(ports) + (ifLane || relayCard ? IF_FOOTER_HEIGHT : 0);
     const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports);
     return {
       id: node.id,
@@ -152,7 +152,7 @@ export function toProcessingNodes(
         width: cardWidth,
         height: cardHeight,
         circular: isTick,
-        bandHeight: ifLane ? NODE_HEIGHT : undefined,
+        bandHeight: ifLane || relayCard ? NODE_HEIGHT : undefined,
       }),
       data: {
         domainId: node.id,

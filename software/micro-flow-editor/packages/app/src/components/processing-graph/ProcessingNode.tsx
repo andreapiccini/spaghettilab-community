@@ -79,11 +79,13 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         : intensity < 0.15
           ? "OFF"
           : `${Math.round(intensity * 100)}%`
-      : isRelay && data.previewing
-        ? previewOn
-          ? copy.relayClosed
-          : copy.relayOpen
-        : isIf || isRelay
+      : isRelay
+        ? data.previewing
+          ? previewOn
+            ? copy.relayClosed
+            : copy.relayOpen
+          : ""
+        : isIf
           ? data.subtitle
           : data.tempProbe
             ? `${Math.round(data.tempProbe.celsius)}°C`
@@ -161,7 +163,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         </span>
       )}
       <div
-        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isIf ? "w-full flex-col items-stretch p-0" : `w-full items-center gap-2 py-2 ${isLed || isRelay ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
+        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isIf || isRelay ? "w-full flex-col items-stretch p-0" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
         style={{
           width: cardWidth,
           minHeight: cardHeight,
@@ -193,7 +195,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               id={handle.id}
               title={handle.label}
               kind={handle.kind}
-              top={isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length)}
+              top={isIf || isRelay ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length)}
             />
           ))}
 
@@ -202,7 +204,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           className={`flex min-w-0 items-center gap-2 ${
             multiChannel ? "w-full flex-1 pr-1" : isLed ? "" : isIf || isRelay ? "w-full" : "flex-1 overflow-hidden"
           }`}
-          style={isIf ? { minHeight: NODE_HEIGHT, paddingLeft: 10, paddingRight: 10 } : undefined}
+          style={isIf || isRelay ? { minHeight: NODE_HEIGHT, paddingLeft: isRelay ? 16 : 10, paddingRight: 10 } : undefined}
         >
           <div
             key={`led-${ledColor}-${Math.round((intensity ?? 1) * 100)}`}
@@ -252,22 +254,11 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                     ? "whitespace-nowrap font-mono text-[10px] leading-tight text-ink"
                     : "truncate font-body text-xs text-ink-faint"
                 }
-                title={
-                  isIf
-                    ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ")
-                    : isRelay
-                      ? [subtitle, data.relayClose?.label].filter(Boolean).join(" · ")
-                      : subtitle
-                }
+                title={isIf ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ") : subtitle}
               >
                 {subtitle}
               </div>
             ) : null}
-            {isRelay && data.relayClose && data.previewing && (
-              <div className="whitespace-nowrap font-mono text-[10px] leading-tight text-ink-muted" title={data.relayClose.label}>
-                {data.relayClose.label}
-              </div>
-            )}
           </div>
         </div>
         {isIf && data.ifOutput && (
@@ -291,6 +282,23 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               color={ifOutColor}
               active={data.ifOutput.elseHigh}
               divided
+            />
+          </div>
+        )}
+        {isRelay && data.relayClose && (
+          <div
+            className="flex items-center justify-center"
+            style={{
+              height: IF_FOOTER_HEIGHT,
+              borderTop: "1px solid color-mix(in srgb, #0F766E 40%, var(--color-border))",
+              background: "color-mix(in srgb, #0F766E 8%, var(--color-surface))",
+            }}
+          >
+            <IfOutChip
+              label={copy.relayClosedIf}
+              value={data.relayClose.closeWhenHigh ? "HIGH" : "LOW"}
+              color="#0F766E"
+              active
             />
           </div>
         )}
@@ -336,7 +344,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 id={handle.id}
                 title={handle.label}
                 kind={handle.kind}
-                top={isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length)}
+                top={isIf || isRelay ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length)}
                 live={isIf ? ifLiveHigh : previewOn}
               />
             ))}
