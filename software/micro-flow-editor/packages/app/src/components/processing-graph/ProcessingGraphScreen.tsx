@@ -35,6 +35,7 @@ import { positionForBayDrop } from "./bay-layout.js";
 import { isValidProcessingConnection } from "./connection-rules.js";
 import { PROCESSING_EDGE_TYPES } from "./DeletableEdge.js";
 import { NodeInspector, type ProcessingInspectorMode } from "./NodeInspector.js";
+import { DEMO_BACKBONE_FRAME_ID, DEMO_BACKBONE_NODE_TYPES } from "./DemoBackboneFrame.js";
 import { EVENT_CONTAINER_NODE_TYPES, type EventContainerNodeData } from "./EventContainerNode.js";
 import {
   canBeNested,
@@ -75,7 +76,7 @@ function layoutSizeForUiNode(node: Node<ProcessingNodeUiData>): { w: number; h: 
   return { w: node.data.cardWidth ?? NODE_WIDTH, h: node.data.cardHeight ?? NODE_HEIGHT };
 }
 
-const NODE_TYPES = { ...PROCESSING_NODE_TYPES, ...EVENT_CONTAINER_NODE_TYPES };
+const NODE_TYPES = { ...PROCESSING_NODE_TYPES, ...EVENT_CONTAINER_NODE_TYPES, ...DEMO_BACKBONE_NODE_TYPES };
 
 const EMPTY_GRAPH: GraphState<"device-processing"> = { layer: "device-processing", nodes: [], edges: [] };
 const EMPTY_PHYSICAL_GRAPH: GraphState<"physical-composition"> = { layer: "physical-composition", nodes: [], edges: [] };
@@ -338,6 +339,7 @@ function ProcessingGraphScreenInner() {
             data: {
               label: container.label,
               kind,
+              roleLabel: demoOnly && kind === "schedule" ? "Firmware" : undefined,
               periodMs: container.periodMs,
               rejecting: containerHint?.kind === "rejecting" && containerHint.triggerId === container.triggerId,
               accepting: containerHint?.kind === "accepting" && containerHint.triggerId === container.triggerId,
@@ -346,7 +348,7 @@ function ProcessingGraphScreenInner() {
           };
         });
     },
-    [eventContainers, domainNodes, containerHint, containerByTriggerId, previewTriggerIds],
+    [demoOnly, eventContainers, domainNodes, containerHint, containerByTriggerId, previewTriggerIds],
   );
   // Real React Flow children: relative-to-container position + parentId, so
   // dragging the container (or a sibling member) behaves natively instead of
@@ -402,9 +404,43 @@ function ProcessingGraphScreenInner() {
           parentId: container.triggerId,
           position: isTick ? { x: tickRel.x, y: tickRel.y } : { x: n.position.x - container.x, y: n.position.y - container.y },
         };
+      })
+      .map((n) => {
+        if (!demoOnly) return n;
+        if (n.id === "demo-toggle") return { ...n, data: { ...n.data, subtitle: "Firmware function" } };
+        if (n.id === "demo-led") return { ...n, data: { ...n.data, subtitle: "Hardware module" } };
+        return n;
       });
-    return [...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
-  }, [containerNodes, localNodes, containerByTriggerId, containerByMemberId, previewActiveIds, previewActuatorIds, previewTriggerIds, previewElapsedMs, previewLedIntensity, previewRgbVisual]);
+    if (!demoOnly) return [...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
+    const led = rest.find((n) => n.id === "demo-led");
+    if (!led) return [...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
+    const ledW = led.data.cardWidth ?? led.width ?? NODE_WIDTH;
+    const ledH = led.data.cardHeight ?? led.height ?? NODE_HEIGHT;
+    const pad = NODE_PADDING;
+    const header = EVENT_CONTAINER_HEADER_HEIGHT;
+    const frameW = ledW + pad * 2;
+    const frameH = ledH + pad * 2 + header;
+    const backbone = {
+      id: DEMO_BACKBONE_FRAME_ID,
+      type: "demo-backbone",
+      position: { x: led.position.x - pad, y: led.position.y - header - pad },
+      width: frameW,
+      height: frameH,
+      style: { width: frameW, height: frameH, overflow: "visible" },
+      draggable: false,
+      selectable: false,
+      focusable: false,
+      zIndex: -1,
+      data: { label: "Backbone", caption: "Hardware" },
+    };
+    const nestedLed = {
+      ...led,
+      parentId: DEMO_BACKBONE_FRAME_ID,
+      position: { x: pad, y: header + pad },
+      draggable: false,
+    };
+    return [backbone, ...containerNodes, ...rest.map((n) => (n.id === "demo-led" ? nestedLed : n))] as unknown as Node<ProcessingNodeUiData>[];
+  }, [demoOnly, containerNodes, localNodes, containerByTriggerId, containerByMemberId, previewActiveIds, previewActuatorIds, previewTriggerIds, previewElapsedMs, previewLedIntensity, previewRgbVisual]);
 
   // Domain keeps Schedule → entry edges for membership/dry-run; the canvas hides
   // them so the dashed box + “entry” badge carry that meaning instead of a
@@ -774,6 +810,7 @@ function ProcessingGraphScreenInner() {
     const domainNode = domainNodes.find((n) => n.id === node.id);
     if (!domainNode) return;
     // The violet Activation disc is wiring-only — it must not open an inspector.
+    if (node.id === DEMO_BACKBONE_FRAME_ID) return;
     if (node.data.circular || isFlowStartBlock(domainNode.data)) return;
     const meta = authoringMetadata[node.id];
     setInspector({ kind: "edit", nodeId: node.id, data: domainNode.data, comment: meta?.comment ?? "" });
@@ -1081,7 +1118,14 @@ function ProcessingGraphScreenInner() {
             <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
           </div>
         )}
-        <h1 className="min-w-0 truncate font-heading text-lg font-semibold text-ink">{demoOnly ? DEMO_VISITOR_PROJECT_NAME : copy.title}</h1>
+        <div className="min-w-0">
+          <h1 className="truncate font-heading text-lg font-semibold text-ink">{demoOnly ? DEMO_VISITOR_PROJECT_NAME : copy.title}</h1>
+          {demoOnly && (
+            <p className="truncate font-body text-[11px] text-ink-muted">
+              Firmware functions command the LED module on the Backbone
+            </p>
+          )}
+        </div>
         <div className="min-w-0 flex-1" />
         <button
           type="button"

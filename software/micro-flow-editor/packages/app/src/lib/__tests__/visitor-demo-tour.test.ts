@@ -9,11 +9,11 @@ describe("visitor demo tour", () => {
   it("has four first-visit steps with live targets", () => {
     expect(VISITOR_DEMO_TOUR_STEPS.map((step) => step.target)).toEqual([
       "flow-node-demo-schedule",
-      "flow-node-demo-toggle",
+      "flow-node-demo-backbone",
       "demo-tour-inspector",
       "demo-tour-run",
     ]);
-    expect(VISITOR_DEMO_TOUR_STEPS[0]?.title).toBe("This is the Flow");
+    expect(VISITOR_DEMO_TOUR_STEPS[0]?.title).toBe("Firmware functions");
   });
 
   it("treats only 1 as seen", () => {

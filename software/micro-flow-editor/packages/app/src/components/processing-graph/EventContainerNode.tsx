@@ -8,6 +8,8 @@ import { SOURCE_HANDLE_STYLE, TARGET_HANDLE_STYLE } from "./node-ports.js";
 export type EventContainerNodeData = {
   readonly label: string;
   readonly kind: "schedule" | "event-source";
+  /** Visitor demo: e.g. "Firmware function" under the Schedule title. */
+  readonly roleLabel?: string;
   /** Schedule period in ms — shown as a non-truncating badge beside the title. */
   readonly periodMs?: number;
   /** A member is being dragged past the top/left dashed edge — release outside detaches it. */
@@ -61,12 +63,24 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
         <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted group-hover:text-brand-blue">
           {data.label}
         </span>
-        {periodLabel && (
+        {data.roleLabel && (
           <span
-            className="ml-auto shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums"
+            className="shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide"
             style={{
               color: config.colorVar,
               backgroundColor: `color-mix(in srgb, ${config.colorVar} 12%, transparent)`,
+            }}
+          >
+            {data.roleLabel}
+          </span>
+        )}
+        {periodLabel && (
+          <span
+            className={`shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums${data.roleLabel ? "" : " ml-auto"}`}
+            style={{
+              color: config.colorVar,
+              backgroundColor: `color-mix(in srgb, ${config.colorVar} 12%, transparent)`,
+              marginLeft: data.roleLabel ? 4 : undefined,
             }}
           >
             {periodLabel}

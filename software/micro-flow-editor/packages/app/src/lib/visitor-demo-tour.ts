@@ -1,6 +1,6 @@
 /** First-visit coach marks on the public GitHub Pages demo. */
 
-export const VISITOR_DEMO_TOUR_STORAGE_KEY = "demo.visitor-tour.seen";
+export const VISITOR_DEMO_TOUR_STORAGE_KEY = "demo.visitor-tour.seen.v2";
 export const VISITOR_DEMO_TOUR_LOCAL_STORAGE_KEY = `spaghettilab:${VISITOR_DEMO_TOUR_STORAGE_KEY}`;
 
 export type VisitorDemoTourStep = {
@@ -13,26 +13,26 @@ export type VisitorDemoTourStep = {
 export const VISITOR_DEMO_TOUR_STEPS: readonly VisitorDemoTourStep[] = [
   {
     target: "flow-node-demo-schedule",
-    title: "This is the Flow",
-    body: "A Schedule ticks every second and starts the chain. The Digital Out Toggle sits inside; the LED is the output.",
+    title: "Firmware functions",
+    body: "Schedule and Digital Out Toggle run in the Core firmware. This is the programmable logic — not a physical module.",
     side: "right",
   },
   {
-    target: "flow-node-demo-toggle",
-    title: "Click a block",
-    body: "Select Digital Out Toggle or the LED to open its settings on the right.",
-    side: "bottom",
+    target: "flow-node-demo-backbone",
+    title: "Hardware on the Backbone",
+    body: "The LED is a real module plugged into the Backbone. Flow commands it; color and timing settings show on that module.",
+    side: "left",
   },
   {
     target: "demo-tour-inspector",
     title: "Change the settings",
-    body: "Only the useful controls are here. Edits apply immediately — try the period, toggle type, or LED color.",
+    body: "Click a firmware block or the LED. Period and toggle change the logic; LED color and delays change the hardware look.",
     side: "left",
   },
   {
     target: "demo-tour-run",
     title: "Watch it run",
-    body: "Run starts a local LED preview. Change a value and see the blink follow.",
+    body: "Run previews the firmware commanding the LED. The blink comes from the Flow; the swatch is the module.",
     side: "bottom",
   },
 ];
