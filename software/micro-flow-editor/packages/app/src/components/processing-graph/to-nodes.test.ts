@@ -108,6 +108,30 @@ describe("toProcessingNodes", () => {
     expect(nodes.find((n) => n.id === "if3")?.data.ifInput?.kind).toBe("digital");
   });
 
+  it("shows the relay close condition on the card", () => {
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [
+        {
+          layer: "device-processing",
+          id: "r1",
+          data: { kind: "block", blockTypeId: "ab.relay", catalogEntryId: "appblocks.relay", properties: {} },
+        },
+        {
+          layer: "device-processing",
+          id: "r2",
+          data: { kind: "block", blockTypeId: "ab.relay", catalogEntryId: "appblocks.relay", properties: { closeWhen: "low" } },
+        },
+      ],
+      edges: [],
+    };
+    const nodes = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
+    expect(nodes.find((n) => n.id === "r1")?.data.subtitle).toBe("closed if HIGH");
+    expect(nodes.find((n) => n.id === "r1")?.data.relayClose).toEqual({ closeWhenHigh: true, label: "closed if HIGH" });
+    expect(nodes.find((n) => n.id === "r2")?.data.subtitle).toBe("closed if LOW");
+    expect(nodes.find((n) => n.id === "r2")?.data.relayClose?.closeWhenHigh).toBe(false);
+  });
+
   it("attaches static handles so wires survive a node-object rebuild", () => {
     const graphState: GraphState<"device-processing"> = {
       layer: "device-processing",

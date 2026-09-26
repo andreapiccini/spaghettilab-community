@@ -87,9 +87,9 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           : `${Math.round(intensity * 100)}%`
       : isRelay && data.previewing
         ? previewOn
-          ? "CLOSED"
-          : "OPEN"
-        : isIf
+          ? copy.relayClosed
+          : copy.relayOpen
+        : isIf || isRelay
           ? data.subtitle
           : data.tempProbe
             ? `${Math.round(data.tempProbe.celsius)}°C`
@@ -246,7 +246,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         {/* No overflow-hidden on LED: tile box-shadow (glow) would get clipped on the left. */}
         <div
           className={`flex min-w-0 items-center gap-2 ${
-            multiChannel ? "w-full flex-1 pr-1" : isLed ? "" : isIf ? "w-full" : "flex-1 overflow-hidden"
+            multiChannel ? "w-full flex-1 pr-1" : isLed ? "" : isIf || isRelay ? "w-full" : "flex-1 overflow-hidden"
           }`}
           style={
             isIf
@@ -276,7 +276,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               </div>
             ) : null}
           </div>
-          <div className={`min-w-0 flex-1 ${isIf ? "" : "overflow-hidden"}`}>
+          <div className={`min-w-0 flex-1 ${isIf || isRelay ? "" : "overflow-hidden"}`}>
             <div className="flex min-w-0 items-center gap-1.5">
               <div className={`${isIf ? "shrink-0" : "min-w-0 truncate"} font-body text-sm font-semibold text-ink`} title={data.label}>
                 {data.label}
@@ -297,14 +297,25 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             </div>
             <div
               className={
-                isIf
+                isIf || isRelay
                   ? "whitespace-nowrap font-mono text-[10px] leading-tight text-ink"
                   : "truncate font-body text-xs text-ink-faint"
               }
-              title={isIf ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ") : subtitle}
+              title={
+                isIf
+                  ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ")
+                  : isRelay
+                    ? [subtitle, data.relayClose?.label].filter(Boolean).join(" · ")
+                    : subtitle
+              }
             >
               {subtitle}
             </div>
+            {isRelay && data.relayClose && data.previewing && (
+              <div className="whitespace-nowrap font-mono text-[10px] leading-tight text-ink-muted" title={data.relayClose.label}>
+                {data.relayClose.label}
+              </div>
+            )}
           </div>
         </div>
         {isIf && data.ifOutput && (

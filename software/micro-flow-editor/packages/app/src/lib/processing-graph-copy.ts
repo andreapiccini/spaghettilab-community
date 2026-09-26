@@ -102,6 +102,9 @@ type ProcessingGraphCopy = {
   readonly ifConditionNone: string;
   readonly ifConditionToggle: string;
   readonly ifConditionTemp: string;
+  readonly relayClosedIf: string;
+  readonly relayClosed: string;
+  readonly relayOpen: string;
   readonly tempProbeHint: string;
 };
 
@@ -220,6 +223,9 @@ const IT: ProcessingGraphCopy = {
   ifConditionNone: "Nessun ingresso",
   ifConditionToggle: "TGL",
   ifConditionTemp: "TEMP",
+  relayClosedIf: "closed if",
+  relayClosed: "CLOSED",
+  relayOpen: "OPEN",
   tempProbeHint: "Trascina l’indicatore sotto il sensore per provare la temperatura.",
 };
 
@@ -326,6 +332,9 @@ const EN: ProcessingGraphCopy = {
   ifConditionNone: "No input",
   ifConditionToggle: "TGL",
   ifConditionTemp: "TEMP",
+  relayClosedIf: "closed if",
+  relayClosed: "CLOSED",
+  relayOpen: "OPEN",
   tempProbeHint: "Drag the indicator under the sensor to test the temperature.",
 };
 

@@ -9,7 +9,7 @@ import { ifSourceKind } from "./connection-rules.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
-import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifInputType, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
+import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifInputType, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRelayBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
 import { FLOW_START_SIZE, IF_CARD_EXTRA_WIDTH, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -91,6 +91,11 @@ export type ProcessingNodeUiData = {
   readonly ifInput?: {
     readonly kind: "digital" | "analog";
   };
+  /** Relay: contact closes when the input is HIGH or LOW. */
+  readonly relayClose?: {
+    readonly closeWhenHigh: boolean;
+    readonly label: string;
+  };
 };
 
 /**
@@ -120,7 +125,10 @@ export function toProcessingNodes(
     const isTick = accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
     const ports = portsForNode(data);
     const ifLane = isBlockNodeData(data) && isCompareIf(data);
-    const cardHeight = isTick ? FLOW_START_SIZE : nodeHeightForPorts(ports) + (ifLane ? IF_FOOTER_HEIGHT : 0);
+    const relayCard = isBlockNodeData(data) && isRelayBlock(data);
+    const cardHeight = isTick
+      ? FLOW_START_SIZE
+      : nodeHeightForPorts(ports) + (ifLane ? IF_FOOTER_HEIGHT : relayCard ? 14 : 0);
     const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports) + (ifLane ? IF_CARD_EXTRA_WIDTH : 0);
     return {
       id: node.id,
@@ -186,6 +194,7 @@ export function toProcessingNodes(
         ...toggleWaveFields(data),
         ...ifOutputFields(data, locale),
         ...ifInputFields(node.id, data, graphState),
+        ...relayCloseFields(data, locale),
         ...bayChromeFields(data),
       },
     };
@@ -237,6 +246,22 @@ function compareSymbol(op: CompareOp): string {
     default:
       return "=";
   }
+}
+
+function formatRelayClose(data: DeviceProcessingNodeData, locale: LocaleId): string {
+  const copy = processingGraphCopy(locale);
+  const closeWhenHigh = isBlockNodeData(data) && data.properties.closeWhen !== "low";
+  return `${copy.relayClosedIf} ${closeWhenHigh ? "HIGH" : "LOW"}`;
+}
+
+function relayCloseFields(data: DeviceProcessingNodeData, locale: LocaleId): Pick<ProcessingNodeUiData, "relayClose"> {
+  if (!isRelayBlock(data) || !isBlockNodeData(data)) return {};
+  return {
+    relayClose: {
+      closeWhenHigh: data.properties.closeWhen !== "low",
+      label: formatRelayClose(data, locale),
+    },
+  };
 }
 
 function ifInputFields(
@@ -338,6 +363,7 @@ function subtitleFor(
   }
   if (isBlockNodeData(data)) {
     if (isCompareIf(data)) return formatIfCondition(nodeId, data, graphState, locale);
+    if (isRelayBlock(data)) return formatRelayClose(data, locale);
     const input = incomingLabel(nodeId, graphState, titles);
     const bay = entry && isBayEntry(entry);
     const rawRole = data.properties.bayRole;

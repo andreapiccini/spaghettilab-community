@@ -447,7 +447,7 @@ function ProcessingGraphScreenInner() {
         if (isDigitalOutToggle(domain)) {
           return { ...n, data: { ...n.data, subtitle: "Firmware function" } };
         }
-        if (isLedBlock(domain) || isRelayBlock(domain)) {
+        if (isLedBlock(domain)) {
           return { ...n, data: { ...n.data, subtitle: "Hardware module" } };
         }
         if (isTemperatureSensor(domain) && isBlockNodeData(domain)) {
