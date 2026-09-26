@@ -36,7 +36,10 @@ export type IfActuatorDrive = {
   readonly thenOutput: "high" | "low";
   readonly compareLevel: "high" | "low";
   readonly compareTempC: number;
-  readonly source: { readonly kind: "toggle" } | { readonly kind: "temperature"; readonly testC: number };
+  readonly source:
+    | { readonly kind: "toggle" }
+    | { readonly kind: "temperature"; readonly testC: number }
+    | { readonly kind: "none" };
 };
 
 export type ActuatorDrive = { readonly kind: "toggle" } | IfActuatorDrive;
@@ -172,13 +175,19 @@ export function buildDryRunPreviewChannels(
     const srcId = incoming.get(node.id)?.[0];
     const src = srcId ? nodesById.get(srcId) : undefined;
     if (!src || !isTemperatureSensor(src)) continue;
-    const drive = actuatorDriveFor(node.id, incoming, nodesById);
+    const tempDrive = ifDriveFromNode(
+      node.id,
+      node.data as Extract<DeviceProcessingNodeData, { kind: "block" }>,
+      incoming,
+      nodesById,
+    );
     const leds: LedActuatorBinding[] = [];
     const relays: RelayBinding[] = [];
     for (const outId of outgoing.get(node.id) ?? []) {
       if (claimed.has(outId)) continue;
       const outData = nodesById.get(outId);
       if (!outData || !isBlockNodeData(outData)) continue;
+      const drive = actuatorDriveFor(outId, incoming, nodesById);
       if (isLedBlock(outData)) {
         leds.push({ ...ledBindingFromProperties(outId, outData.properties), drive });
         claimed.add(outId);
@@ -187,7 +196,6 @@ export function buildDryRunPreviewChannels(
         claimed.add(outId);
       }
     }
-    const tempDrive = drive?.kind === "if" ? drive : ifDriveFromNode(node.id, node.data as Extract<DeviceProcessingNodeData, { kind: "block" }>, incoming, nodesById);
     channels.push({
       triggerId: `temp-drive:${node.id}`,
       periodMs: 1000,
@@ -275,17 +283,14 @@ function reachableViaToggle(
       if (isTemperatureSensor(data)) foundTemps.push(nextId);
       const drive = actuatorDriveFor(nextId, incoming, nodesById);
       const passedToggle = current.passedToggle || isToggle;
-      const viaIf = drive?.kind === "if";
-      if (isLedBlock(data)) {
-        if ((passedToggle || viaIf) && isBlockNodeData(data)) {
-          const binding = ledBindingFromProperties(nextId, data.properties);
-          foundLeds.push(drive?.kind === "if" ? { ...binding, drive } : binding);
-        }
-        continue;
-      }
-      if (isRelayBlock(data)) {
-        if ((passedToggle || viaIf) && isBlockNodeData(data)) {
-          foundRelays.push(relayBindingFromProperties(nextId, data.properties, drive?.kind === "if" ? drive : undefined));
+      if (isLedBlock(data) || isRelayBlock(data)) {
+        if (isBlockNodeData(data) && driveFollowsTogglePath(drive, passedToggle)) {
+          if (isLedBlock(data)) {
+            const binding = ledBindingFromProperties(nextId, data.properties);
+            foundLeds.push(drive?.kind === "if" ? { ...binding, drive } : binding);
+          } else {
+            foundRelays.push(relayBindingFromProperties(nextId, data.properties, drive?.kind === "if" ? drive : undefined));
+          }
         }
         continue;
       }
@@ -386,12 +391,18 @@ export function numberFromProperty(raw: unknown, fallback: number): number {
 }
 
 export function evaluateIfDrive(elapsedMs: number, channel: DryRunPreviewChannel, drive: IfActuatorDrive): boolean {
+  if (drive.source.kind === "none") return false;
   const thenHigh = drive.thenOutput !== "low";
   const met =
     drive.source.kind === "temperature"
       ? compareNumeric(drive.compare, drive.source.testC, drive.compareTempC)
       : compareDigital(drive.compare, lineHighAtElapsed(elapsedMs, channel), drive.compareLevel !== "low");
   return met ? thenHigh : !thenHigh;
+}
+
+function driveFollowsTogglePath(drive: ActuatorDrive | undefined, passedToggle: boolean): boolean {
+  if (drive?.kind === "if") return drive.source.kind === "toggle";
+  return passedToggle;
 }
 
 export function commandLevelForActuator(
@@ -426,7 +437,9 @@ function ifDriveFromNode(
   const source: IfActuatorDrive["source"] =
     inData && isTemperatureSensor(inData) && isBlockNodeData(inData)
       ? { kind: "temperature", testC: numberFromProperty(inData.properties.testC, 22) }
-      : { kind: "toggle" };
+      : inData && isDigitalOutToggle(inData)
+        ? { kind: "toggle" }
+        : { kind: "none" };
   return {
     kind: "if",
     ifId,

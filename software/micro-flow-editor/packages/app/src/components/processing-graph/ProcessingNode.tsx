@@ -207,18 +207,23 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             key={`led-${ledColor}-${Math.round((intensity ?? 1) * 100)}`}
             className={`h-7 w-7 shrink-0 ${isBay ? "rounded-[3px]" : "rounded-slsm"}`}
             style={{
-              backgroundColor: tileColor,
+              backgroundColor: isRelay ? (previewOn ? "#0F766E" : "#64748B") : tileColor,
+              transition: isRelay ? "background-color 180ms ease, box-shadow 180ms ease" : undefined,
               boxShadow: ledLit
                 ? `0 0 ${Math.round(4 + (intensity ?? 1) * 10)}px ${Math.round(1 + (intensity ?? 1) * 2)}px ${ledGlowRgba(ledColor, 0.35 + (intensity ?? 1) * 0.45)}`
-                : undefined,
+                : isRelay && previewOn
+                  ? "0 0 0 3px color-mix(in srgb, #0F766E 35%, transparent)"
+                  : undefined,
             }}
             aria-hidden
           >
-            {!isLed && (
+            {isRelay ? (
+              <RelayContact closed={previewOn} />
+            ) : !isLed ? (
               <div className="flex h-full w-full items-center justify-center">
                 <Icon size={14} color="#fff" />
               </div>
-            )}
+            ) : null}
           </div>
           <div className="min-w-0 flex-1 overflow-hidden">
             <div className="flex min-w-0 items-center gap-1.5">
@@ -342,6 +347,25 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         </div>
       )}
     </div>
+  );
+}
+
+function RelayContact({ closed }: { readonly closed: boolean }) {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" className="block">
+      <circle cx="7" cy="19" r="2.2" fill="#fff" />
+      <circle cx="21" cy="19" r="2.2" fill="#fff" />
+      <path d="M7 19H21" stroke="rgba(255,255,255,0.28)" strokeWidth="1.25" />
+      <g
+        style={{
+          transformOrigin: "7px 19px",
+          transform: closed ? "rotate(0deg)" : "rotate(-34deg)",
+          transition: "transform 180ms ease",
+        }}
+      >
+        <path d="M7 19H21.5" stroke="#fff" strokeWidth="2.1" strokeLinecap="round" />
+      </g>
+    </svg>
   );
 }
 

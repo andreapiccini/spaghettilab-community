@@ -482,7 +482,8 @@ function ProcessingGraphScreenInner() {
         position: { x: minX - pad, y: minY - header - pad },
         width: frameW,
         height: frameH,
-        style: { width: frameW, height: frameH, overflow: "visible" },
+        style: { width: frameW, height: frameH, overflow: "visible", pointerEvents: "none" },
+        className: "!pointer-events-none",
         draggable: false,
         selectable: false,
         focusable: false,
@@ -500,7 +501,8 @@ function ProcessingGraphScreenInner() {
         position: { x: temp.position.x - pad, y: temp.position.y - header - pad },
         width: frameW,
         height: frameH,
-        style: { width: frameW, height: frameH, overflow: "visible" },
+        style: { width: frameW, height: frameH, overflow: "visible", pointerEvents: "none" },
+        className: "!pointer-events-none",
         draggable: false,
         selectable: false,
         focusable: false,
@@ -508,18 +510,7 @@ function ProcessingGraphScreenInner() {
         data: { label: "Backbone", caption: "Hardware" },
       });
     }
-    if (!led) return [...frames, ...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
-    const frameOrigin = frames.find((frame) => frame.id === DEMO_BACKBONE_FRAME_ID)?.position ?? {
-      x: led.position.x - pad,
-      y: led.position.y - header - pad,
-    };
-    const nestedLed = {
-      ...led,
-      parentId: DEMO_BACKBONE_FRAME_ID,
-      position: { x: led.position.x - frameOrigin.x, y: led.position.y - frameOrigin.y },
-      draggable: false,
-    };
-    return [ ...frames, ...containerNodes, ...rest.map((n) => (n.id === "demo-led" ? nestedLed : n))] as unknown as Node<ProcessingNodeUiData>[];
+    return [...frames, ...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
   }, [demoOnly, containerNodes, localNodes, containerByTriggerId, containerByMemberId, previewActiveIds, previewActuatorIds, previewTriggerIds, previewElapsedMs, previewLedIntensity, previewRgbVisual, domainNodes]);
 
   // Domain keeps Schedule → entry edges for membership/dry-run; the canvas hides

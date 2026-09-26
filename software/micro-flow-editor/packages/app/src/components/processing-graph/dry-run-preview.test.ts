@@ -499,4 +499,27 @@ describe("IF / relay / temperature dry-run", () => {
     expect(activeActuatorsAt(0, channels).has("relay1")).toBe(true);
     expect(activeActuatorsAt(0, channels).has("if1")).toBe(true);
   });
+
+  it("keeps LED on the temperature IF, not the Toggle clock, when Toggle is disconnected", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [
+          schedule("s1", 1000),
+          toggle("t1", { initial: "high", highToLow: 1, lowToHigh: 1 }),
+          temp("temp1", 30),
+          iff("if1", { compare: "gt", compareTempC: 25, thenOutput: "high" }),
+          led("led1"),
+        ],
+        [
+          { layer: "device-processing", id: "e1", source: "s1", target: "t1" },
+          { layer: "device-processing", id: "e2", source: "temp1", target: "if1" },
+          { layer: "device-processing", id: "e3", source: "if1", target: "led1" },
+        ],
+      ),
+    );
+    expect(activeActuatorsAt(0, channels).has("led1")).toBe(true);
+    expect(activeActuatorsAt(1000, channels).has("led1")).toBe(true);
+    const ledDrive = channels.flatMap((channel) => channel.actuators).find((actuator) => actuator.id === "led1")?.drive;
+    expect(ledDrive).toMatchObject({ kind: "if", source: { kind: "temperature", testC: 30 } });
+  });
 });

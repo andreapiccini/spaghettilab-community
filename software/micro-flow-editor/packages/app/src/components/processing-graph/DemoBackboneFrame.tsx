@@ -16,7 +16,7 @@ export function DemoBackboneFrame({ data }: NodeProps & { readonly data: DemoBac
   return (
     <div
       data-tour-target="flow-node-demo-backbone"
-      className="flex h-full w-full cursor-default flex-col overflow-visible rounded-slmd border-2 border-dashed"
+      className="pointer-events-none flex h-full w-full cursor-default flex-col overflow-visible rounded-slmd border-2 border-dashed"
       style={{
         borderColor: "#64748B",
         backgroundColor: "color-mix(in srgb, #64748B 6%, transparent)",
