@@ -8,11 +8,11 @@ import { TopBar } from "./TopBar.js";
 export function AppShell({ children }: { readonly children: ReactNode }) {
   const demoOnly = isDemoOnlyEnabled();
   return (
-    <div className="flex h-screen flex-col bg-surface-sunken">
+    <div className="flex h-dvh flex-col bg-surface-sunken">
       <TopBar />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         {!demoOnly && <LeftRail />}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className={`min-h-0 flex-1 ${demoOnly ? "overflow-hidden" : "overflow-auto"}`}>{children}</main>
       </div>
       {!demoOnly && <CommandPalette />}
     </div>

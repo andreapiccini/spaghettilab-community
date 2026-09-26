@@ -1,6 +1,6 @@
 /** First-visit coach marks on the public GitHub Pages demo. */
 
-export const VISITOR_DEMO_TOUR_STORAGE_KEY = "demo.visitor-tour.seen.v2";
+export const VISITOR_DEMO_TOUR_STORAGE_KEY = "demo.visitor-tour.seen.v3";
 export const VISITOR_DEMO_TOUR_LOCAL_STORAGE_KEY = `spaghettilab:${VISITOR_DEMO_TOUR_STORAGE_KEY}`;
 
 export type VisitorDemoTourStep = {
@@ -26,7 +26,7 @@ export const VISITOR_DEMO_TOUR_STEPS: readonly VisitorDemoTourStep[] = [
   {
     target: "demo-tour-inspector",
     title: "Change the settings",
-    body: "Click a firmware block or the LED. Period and toggle change the logic; LED color and delays change the hardware look.",
+    body: "Tap a block — a bubble opens with its settings. Period and toggle change the firmware; LED color changes the module.",
     side: "left",
   },
   {

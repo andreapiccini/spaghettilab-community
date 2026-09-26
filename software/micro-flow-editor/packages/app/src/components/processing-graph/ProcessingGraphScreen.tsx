@@ -35,6 +35,7 @@ import { positionForBayDrop } from "./bay-layout.js";
 import { isValidProcessingConnection } from "./connection-rules.js";
 import { PROCESSING_EDGE_TYPES } from "./DeletableEdge.js";
 import { NodeInspector, type ProcessingInspectorMode } from "./NodeInspector.js";
+import { DemoInspectorBubble } from "./DemoInspectorBubble.js";
 import { DEMO_BACKBONE_FRAME_ID, DEMO_BACKBONE_NODE_TYPES } from "./DemoBackboneFrame.js";
 import { EVENT_CONTAINER_NODE_TYPES, type EventContainerNodeData } from "./EventContainerNode.js";
 import {
@@ -103,7 +104,6 @@ function ProcessingGraphScreenInner() {
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
   const demoAutoStarted = useRef(false);
-  const demoInspectorSeeded = useRef(false);
   const { configuredPorts, pinMapOf, protocolFor, selectedBindingId, setSelectedBindingId } = usePortProtocol();
   const bindings = session?.stack.current.coreBindings ?? [];
 
@@ -183,13 +183,19 @@ function ProcessingGraphScreenInner() {
   const authoringMetadata = useMemo(() => projectAuthoringMetadata ?? {}, [projectAuthoringMetadata]);
 
   useEffect(() => {
-    if (!demoOnly || demoInspectorSeeded.current) return;
-    const schedule = domainNodes.find((n) => n.id === "demo-schedule");
-    if (!schedule) return;
-    demoInspectorSeeded.current = true;
-    const meta = authoringMetadata[schedule.id];
-    setInspector({ kind: "edit", nodeId: schedule.id, data: schedule.data, comment: meta?.comment ?? "" });
-  }, [demoOnly, domainNodes, authoringMetadata]);
+    if (!demoOnly || !rf) return;
+    const fit = () => {
+      void rf.fitView({ padding: 0.22, duration: 180, minZoom: 0.18, maxZoom: 1.15 });
+    };
+    const raf = window.requestAnimationFrame(() => window.requestAnimationFrame(fit));
+    window.addEventListener("resize", fit);
+    window.addEventListener("orientationchange", fit);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("resize", fit);
+      window.removeEventListener("orientationchange", fit);
+    };
+  }, [demoOnly, rf, domainNodes.length]);
 
   const moduleOptions = useMemo(() => {
     const fromModules = moduleNodes
@@ -1110,9 +1116,9 @@ function ProcessingGraphScreenInner() {
         : copy.valid;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       {demoOnly && <VisitorDemoTour enabled />}
-      <div className="flex h-14 shrink-0 items-center gap-3 overflow-hidden border-b border-border bg-surface px-4">
+      <div className="flex h-12 shrink-0 items-center gap-2 overflow-hidden border-b border-border bg-surface px-3 sm:h-14 sm:gap-3 sm:px-4">
         {!demoOnly && (
           <div className="shrink-0">
             <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
@@ -1121,7 +1127,7 @@ function ProcessingGraphScreenInner() {
         <div className="min-w-0">
           <h1 className="truncate font-heading text-lg font-semibold text-ink">{demoOnly ? DEMO_VISITOR_PROJECT_NAME : copy.title}</h1>
           {demoOnly && (
-            <p className="truncate font-body text-[11px] text-ink-muted">
+            <p className="hidden truncate font-body text-[11px] text-ink-muted sm:block">
               Firmware functions command the LED module on the Backbone
             </p>
           )}
@@ -1189,10 +1195,16 @@ function ProcessingGraphScreenInner() {
               proOptions={demoOnly ? { hideAttribution: true } : undefined}
               defaultEdgeOptions={{ type: "deletable", interactionWidth: 24, style: { stroke: "var(--color-ink-faint)", strokeWidth: 1.75 } }}
               fitView
+              fitViewOptions={demoOnly ? { padding: 0.22, minZoom: 0.18, maxZoom: 1.15 } : undefined}
+              minZoom={demoOnly ? 0.15 : undefined}
+              maxZoom={demoOnly ? 1.5 : undefined}
+              panOnScroll={!demoOnly}
+              zoomOnPinch
+              preventScrolling={demoOnly}
             >
               <Background gap={20} color="#E1E4EB" />
-              <Controls position="bottom-left" />
-              {domainNodes.length > 0 && <MiniMap position="bottom-right" pannable zoomable className="!rounded-slsm !border !border-border-strong !shadow-e1" nodeColor={(n) => PROCESSING_NODE_KIND_CONFIG[(n.data as ProcessingNodeUiData).kind]?.colorVar ?? "#8A8F99"} />}
+              <Controls position="bottom-left" showInteractive={!demoOnly} />
+              {!demoOnly && domainNodes.length > 0 && <MiniMap position="bottom-right" pannable zoomable className="!rounded-slsm !border !border-border-strong !shadow-e1" nodeColor={(n) => PROCESSING_NODE_KIND_CONFIG[(n.data as ProcessingNodeUiData).kind]?.colorVar ?? "#8A8F99"} />}
             </ReactFlow>
 
             {domainNodes.length === 0 && !dropPreview && (
@@ -1234,7 +1246,26 @@ function ProcessingGraphScreenInner() {
             )}
           </div>
 
-          {inspector && (
+          {inspector && demoOnly && (
+            <DemoInspectorBubble
+              nodeId={inspector.kind === "edit" ? inspector.nodeId : undefined}
+              onDismiss={() => setInspector(null)}
+            >
+              <NodeInspector
+                key={inspector.kind === "edit" ? inspector.nodeId : `create-${inspector.nodeKind}`}
+                mode={inspector}
+                moduleOptions={moduleOptions}
+                existingNodes={domainNodes}
+                existingEdges={graphState.edges}
+                nodeLabel={processingNodeLabel}
+                knownModuleNodeIds={knownModuleNodeIds}
+                onSave={handleSave}
+                onApply={handleApply}
+                onClose={() => setInspector(null)}
+              />
+            </DemoInspectorBubble>
+          )}
+          {inspector && !demoOnly && (
             <NodeInspector
               key={inspector.kind === "edit" ? inspector.nodeId : `create-${inspector.nodeKind}`}
               mode={inspector}
@@ -1245,7 +1276,7 @@ function ProcessingGraphScreenInner() {
               knownModuleNodeIds={knownModuleNodeIds}
               onSave={handleSave}
               onApply={handleApply}
-              onDelete={!demoOnly && inspector.kind === "edit" ? handleDelete : undefined}
+              onDelete={inspector.kind === "edit" ? handleDelete : undefined}
               onClose={() => setInspector(null)}
             />
           )}

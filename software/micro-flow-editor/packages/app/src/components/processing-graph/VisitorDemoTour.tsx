@@ -9,7 +9,7 @@ import {
 } from "../../lib/visitor-demo-tour.js";
 
 const PADDING = 12;
-const CARD_WIDTH = 320;
+const CARD_WIDTH = typeof window !== "undefined" ? Math.min(320, window.innerWidth - 32) : 320;
 
 /**
  * First-visit overlay on the public demo. Separate from the IDE shell tour
