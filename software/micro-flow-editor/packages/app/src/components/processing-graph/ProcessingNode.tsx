@@ -1,4 +1,5 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import type { CSSProperties } from "react";
 import { Cable, Cpu, GitBranch, Palette, Power, Thermometer, ToggleLeft } from "lucide-react";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -7,13 +8,7 @@ import { lineHighAtElapsed, lineHighAtTick, waveformPlateaus, type ToggleMode } 
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
 import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
-import {
-  nodeShellRadius,
-  SOURCE_HANDLE_STYLE,
-  stackedHandleTop,
-  TARGET_HANDLE_STYLE,
-  type PortKind,
-} from "./node-ports.js";
+import { nodeShellRadius, SOURCE_HANDLE_STYLE, stackedHandleTop, type PortKind } from "./node-ports.js";
 import type { ProcessingNodeUiData } from "./to-nodes.js";
 
 /** Slate chrome for hardware bay endpoints — distinct from solid functionality cards. */
@@ -122,6 +117,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               ...SOURCE_HANDLE_STYLE,
               width: 8,
               height: 8,
+              borderRadius: "50%",
               right: -2,
               border: `1.5px solid ${fill}`,
               background: "var(--color-surface)",
@@ -190,25 +186,16 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         )}
 
         {!multiChannel &&
-          inputHandles.map((handle, index) => {
-            const top = isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length);
-            return (
-              <span key={`in-${handle.id}`}>
-                <PortKindBadge kind={handle.kind} side="in" top={top} />
-                <Handle
-                  type="target"
-                  position={Position.Left}
-                  id={handle.id}
-                  title={handle.label}
-                  style={{
-                    ...TARGET_HANDLE_STYLE,
-                    top,
-                    ...portHandleStyle(handle.kind, true),
-                  }}
-                />
-              </span>
-            );
-          })}
+          inputHandles.map((handle, index) => (
+            <PortKindHandle
+              key={`in-${handle.id}`}
+              type="target"
+              id={handle.id}
+              title={handle.label}
+              kind={handle.kind}
+              top={isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length)}
+            />
+          ))}
 
         {/* No overflow-hidden on LED: tile box-shadow (glow) would get clipped on the left. */}
         <div
@@ -317,65 +304,40 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 <span className="min-w-0 truncate text-right font-mono text-[10px] font-medium text-ink-muted" title={handle.label}>
                   {handle.label ?? handle.id}
                 </span>
-                <PortKindBadge kind={handle.kind} side="out" top="50%" />
-                <Handle
+                <PortKindHandle
                   type="source"
-                  position={Position.Right}
                   id={handle.id}
                   title={handle.label}
-                  style={{
-                    ...SOURCE_HANDLE_STYLE,
-                    width: 10,
-                    height: 10,
-                    right: -2,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    ...portHandleStyle(handle.kind, false),
-                  }}
+                  kind={handle.kind}
+                  top="50%"
+                  extra={{ right: -2, transform: "translateY(-50%)" }}
                 />
               </div>
             ))}
-            {inputHandles.map((handle, index) => {
-              const top = stackedHandleTop(index, Math.max(inputHandles.length, outputHandles.length));
-              return (
-                <span key={`in-${handle.id}`}>
-                  <PortKindBadge kind={handle.kind} side="in" top={top} />
-                  <Handle
-                    type="target"
-                    position={Position.Left}
-                    id={handle.id}
-                    title={handle.label}
-                    style={{
-                      ...TARGET_HANDLE_STYLE,
-                      top,
-                      ...portHandleStyle(handle.kind, true),
-                    }}
-                  />
-                </span>
-              );
-            })}
+            {inputHandles.map((handle, index) => (
+              <PortKindHandle
+                key={`in-${handle.id}`}
+                type="target"
+                id={handle.id}
+                title={handle.label}
+                kind={handle.kind}
+                top={stackedHandleTop(index, Math.max(inputHandles.length, outputHandles.length))}
+              />
+            ))}
           </div>
         ) : (
           <>
-            {outputHandles.map((handle, index) => {
-              const top = isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length);
-              return (
-                <span key={`out-${handle.id}`}>
-                  <PortKindBadge kind={handle.kind} side="out" top={top} />
-                  <Handle
-                    type="source"
-                    position={Position.Right}
-                    id={handle.id}
-                    title={handle.label}
-                    style={{
-                      ...SOURCE_HANDLE_STYLE,
-                      top,
-                      ...portHandleStyle(handle.kind, isIf ? ifLiveHigh : previewOn),
-                    }}
-                  />
-                </span>
-              );
-            })}
+            {outputHandles.map((handle, index) => (
+              <PortKindHandle
+                key={`out-${handle.id}`}
+                type="source"
+                id={handle.id}
+                title={handle.label}
+                kind={handle.kind}
+                top={isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length)}
+                live={isIf ? ifLiveHigh : previewOn}
+              />
+            ))}
             {isToggle && data.toggleWave && ports.hasOutput && (
               <ToggleOutputWaveform
                 mode={data.toggleWave.mode}
@@ -438,42 +400,50 @@ const PORT_KIND_TITLE: Record<PortKind, string> = {
   power: "Power",
 };
 
-function portHandleStyle(kind: PortKind | undefined, filled: boolean): { border?: string; background?: string } {
-  if (!kind) return {};
-  const color = PORT_KIND_COLOR[kind];
-  return {
-    border: `1.5px solid ${color}`,
-    background: filled ? color : "var(--color-surface)",
-  };
-}
-
-function PortKindBadge({
+function PortKindHandle({
+  type,
+  id,
+  title,
   kind,
-  side,
   top,
+  live,
+  extra,
 }: {
+  readonly type: "source" | "target";
+  readonly id: string;
+  readonly title?: string;
   readonly kind?: PortKind;
-  readonly side: "in" | "out";
   readonly top: string | number;
+  readonly live?: boolean;
+  readonly extra?: CSSProperties;
 }) {
-  if (!kind) return null;
-  const color = PORT_KIND_COLOR[kind];
+  const color = kind ? PORT_KIND_COLOR[kind] : "var(--color-brand-blue)";
+  const filled = live === true && type === "source";
+  const kindTitle = kind ? PORT_KIND_TITLE[kind] : undefined;
   return (
-    <span
-      className="pointer-events-none absolute z-20 flex h-3.5 w-3.5 items-center justify-center rounded-[3px]"
+    <Handle
+      type={type}
+      position={type === "target" ? Position.Left : Position.Right}
+      id={id}
+      title={[title, kindTitle].filter(Boolean).join(" · ") || undefined}
       style={{
+        ...SOURCE_HANDLE_STYLE,
         top,
-        [side === "in" ? "left" : "right"]: 0,
-        transform: `translate(${side === "in" ? "-50%" : "50%"}, calc(-100% - 4px))`,
-        backgroundColor: "var(--color-surface)",
-        outline: `1px solid color-mix(in srgb, ${color} 65%, transparent)`,
-        color,
+        border: `1.5px solid ${color}`,
+        background: filled ? color : "var(--color-surface)",
+        color: filled ? "#fff" : color,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        ...extra,
       }}
-      title={PORT_KIND_TITLE[kind]}
-      aria-hidden
     >
-      <PortKindGlyph kind={kind} />
-    </span>
+      {kind ? (
+        <span className="pointer-events-none flex">
+          <PortKindGlyph kind={kind} />
+        </span>
+      ) : null}
+    </Handle>
   );
 }
 

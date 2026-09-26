@@ -103,21 +103,18 @@ export function nodeShellRadius(ports: Pick<NodePortLayout, "hasInput" | "hasOut
   return `${MARK}px ${MARK}px ${MARK}px ${round}px`;
 }
 
+/** Type-icon handle (replaces the old circle / input bar). */
+export const PORT_HANDLE_SIZE = 16;
+
 export const SOURCE_HANDLE_STYLE: CSSProperties = {
-  width: 14,
-  height: 14,
-  borderRadius: 9999,
+  width: PORT_HANDLE_SIZE,
+  height: PORT_HANDLE_SIZE,
+  borderRadius: 3,
   background: "var(--color-surface)",
-  border: "2px solid var(--color-brand-blue)",
+  border: "1.5px solid var(--color-brand-blue)",
 };
 
-export const TARGET_HANDLE_STYLE: CSSProperties = {
-  width: 10,
-  height: 14,
-  borderRadius: 2,
-  background: "var(--color-surface)",
-  border: "2px solid var(--color-brand-blue)",
-};
+export const TARGET_HANDLE_STYLE: CSSProperties = SOURCE_HANDLE_STYLE;
 
 /** Vertical position (%) for the i-th of n stacked handles. */
 export function stackedHandleTop(index: number, count: number): string {
@@ -125,12 +122,12 @@ export function stackedHandleTop(index: number, count: number): string {
   return `${((index + 1) / (count + 1)) * 100}%`;
 }
 
-const TARGET_W = 10;
-const TARGET_H = 14;
-const SOURCE_W = 14;
-const SOURCE_H = 14;
+const TARGET_W = PORT_HANDLE_SIZE;
+const TARGET_H = PORT_HANDLE_SIZE;
+const SOURCE_W = PORT_HANDLE_SIZE;
+const SOURCE_H = PORT_HANDLE_SIZE;
 const TICK_HANDLE = 8;
-const MULTI_SOURCE = 10;
+const MULTI_SOURCE = PORT_HANDLE_SIZE;
 
 /**
  * Static React Flow `handles` matching ProcessingNode / the tick disc.
