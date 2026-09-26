@@ -102,8 +102,11 @@ describe("toProcessingNodes", () => {
     expect(nodes.find((n) => n.id === "if1")?.data.subtitle).toBe("TGL = HIGH");
     expect(nodes.find((n) => n.id === "if1")?.data.ifOutput?.thenElse).toBe("then HIGH · else LOW");
     expect(nodes.find((n) => n.id === "if1")?.data.ifInput?.kind).toBe("digital");
+    expect(nodes.find((n) => n.id === "if1")?.data.inputHandles?.[0]?.kind).toBe("digital");
+    expect(nodes.find((n) => n.id === "if1")?.data.outputHandles?.[0]?.kind).toBe("digital");
     expect(nodes.find((n) => n.id === "if2")?.data.subtitle).toBe("TEMP ≥ 25°");
     expect(nodes.find((n) => n.id === "if2")?.data.ifInput?.kind).toBe("analog");
+    expect(nodes.find((n) => n.id === "if2")?.data.inputHandles?.[0]?.kind).toBe("analog");
     expect(nodes.find((n) => n.id === "if3")?.data.subtitle).toBe("No input");
     expect(nodes.find((n) => n.id === "if3")?.data.ifInput?.kind).toBe("digital");
   });

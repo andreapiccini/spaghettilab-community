@@ -1,8 +1,19 @@
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
+import type { PortType } from "@spaghettilab/processing-block-catalog";
 import { Position } from "@xyflow/react";
 import type { CSSProperties } from "react";
 import { catalogEntryForNode } from "./catalog-entry-for-node.js";
 import { NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
+
+export type PortKind = "digital" | "analog" | "boolean" | "activation" | "event" | "power";
+
+export function portKindFromTypes(types: readonly PortType[] | undefined): PortKind | undefined {
+  const domain = types?.[0]?.domain;
+  if (domain === "digital" || domain === "analog" || domain === "activation" || domain === "event" || domain === "power") {
+    return domain;
+  }
+  return undefined;
+}
 
 /**
  * Port layout for a processing-graph card. Prefer catalog `inputs`/`outputs`
@@ -11,6 +22,7 @@ import { NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
 export type NodePortHandle = {
   readonly id: string;
   readonly label?: string;
+  readonly kind?: PortKind;
 };
 
 export type NodePortLayout = {
@@ -36,10 +48,11 @@ export function portsForNode(data: DeviceProcessingNodeData): NodePortLayout {
   const entry = catalogEntryForNode(data);
   if (entry && (entry.inputs !== undefined || entry.outputs !== undefined)) {
     const props = data.kind === "block" || data.kind === "rule" || data.kind === "event-source" ? data.properties ?? {} : {};
-    const inputs = (entry.inputs ?? []).map((p) => ({ id: p.id, label: p.label }));
+    const inputs = (entry.inputs ?? []).map((p) => ({ id: p.id, label: p.label, kind: portKindFromTypes(p.types) }));
     const outputs = (entry.outputs ?? []).map((p, index) => ({
       id: p.id,
       label: resolveChannelName(props, index, p.label ?? `CH${index + 1}`),
+      kind: portKindFromTypes(p.types),
     }));
     return {
       hasInput: inputs.length > 0,

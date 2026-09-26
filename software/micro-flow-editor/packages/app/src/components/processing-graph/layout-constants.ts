@@ -2,10 +2,8 @@
 // event-containers.ts and node-overlap.ts so layout math stays consistent.
 export const NODE_WIDTH = 176;
 export const NODE_HEIGHT = 52;
-/** IF: colored I/O lanes sit on the title row; then/else is a full-width footer. */
-export const IF_LANE_WIDTH = 40;
+/** IF: then/else sits on a full-width footer under the title row. */
 export const IF_FOOTER_HEIGHT = 28;
-export const IF_CARD_EXTRA_WIDTH = 48;
 /** Bare Flow Start disc — fixed Schedule tick plug inside the dashed box. */
 export const FLOW_START_SIZE = 28;
 export const NODE_PADDING = 24;

@@ -5,13 +5,14 @@ import { useLocale } from "../../state/locale-context.js";
 import { FLOW_START_COLOR } from "./block-visuals.js";
 import { lineHighAtElapsed, lineHighAtTick, waveformPlateaus, type ToggleMode } from "./dry-run-preview.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
-import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, IF_LANE_WIDTH, NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
+import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import {
   nodeShellRadius,
   SOURCE_HANDLE_STYLE,
   stackedHandleTop,
   TARGET_HANDLE_STYLE,
+  type PortKind,
 } from "./node-ports.js";
 import type { ProcessingNodeUiData } from "./to-nodes.js";
 
@@ -73,11 +74,9 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
   const isRelay = data.tileGlyph === "power";
   const isIf = data.tileGlyph === "if";
   const ifBoolean = data.ifOutput?.kind === "boolean";
-  const ifAnalogIn = data.ifInput?.kind === "analog";
   const ifThenHigh = data.ifOutput?.thenHigh !== false;
   const ifLiveHigh = data.previewing ? previewOn : ifThenHigh;
   const ifOutColor = ifBoolean ? "#C026D3" : "#0F766E";
-  const ifInColor = ifAnalogIn ? "#0EA5E9" : "#EA580C";
   const subtitle =
     isLed && data.previewing && intensity !== undefined
       ? intensity > 0.85
@@ -176,44 +175,12 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             : "var(--color-surface)",
           outline: selectedOutline ?? idleOutline,
           // LED glow must not be clipped by the card / bay chrome.
-          overflow: isLed ? "visible" : isIf ? "hidden" : undefined,
+          overflow: isLed || isIf ? "visible" : undefined,
           boxShadow: ledLit
             ? `0 0 0 4px ${ledGlowRgba(ledColor, 0.12 + (intensity ?? 1) * 0.2)}, var(--shadow-e1)`
             : undefined,
         }}
       >
-        {isIf && (
-          <>
-            <div
-              className="pointer-events-none absolute left-0 top-0 z-0 flex flex-col items-center pt-1"
-              style={{
-                width: IF_LANE_WIDTH,
-                height: NODE_HEIGHT,
-                background: `color-mix(in srgb, ${ifInColor} 22%, var(--color-surface))`,
-                borderRight: `1px solid color-mix(in srgb, ${ifInColor} 55%, transparent)`,
-              }}
-              aria-hidden
-            >
-              <span className="max-w-full px-0.5 text-center font-mono text-[8px] font-bold uppercase leading-none" style={{ color: ifInColor }}>
-                {ifAnalogIn ? "Analog" : "Digital"}
-              </span>
-            </div>
-            <div
-              className="pointer-events-none absolute right-0 top-0 z-0 flex flex-col items-center pt-1"
-              style={{
-                width: IF_LANE_WIDTH,
-                height: NODE_HEIGHT,
-                background: `color-mix(in srgb, ${ifOutColor} 22%, var(--color-surface))`,
-                borderLeft: `1px solid color-mix(in srgb, ${ifOutColor} 55%, transparent)`,
-              }}
-              aria-hidden
-            >
-              <span className="max-w-full px-0.5 text-center font-mono text-[8px] font-bold uppercase leading-none" style={{ color: ifOutColor }}>
-                {ifBoolean ? "Bool" : "Digital"}
-              </span>
-            </div>
-          </>
-        )}
         {isBay && (
           <span
             className="absolute inset-y-1.5 left-0 w-0.5 rounded-full"
@@ -223,36 +190,32 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         )}
 
         {!multiChannel &&
-          inputHandles.map((handle, index) => (
-            <Handle
-              key={`in-${handle.id}`}
-              type="target"
-              position={Position.Left}
-              id={handle.id}
-              title={handle.label}
-              style={{
-                ...TARGET_HANDLE_STYLE,
-                top: isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length),
-                ...(isIf
-                  ? {
-                      border: `1.5px solid ${ifInColor}`,
-                      background: ifInColor,
-                    }
-                  : {}),
-              }}
-            />
-          ))}
+          inputHandles.map((handle, index) => {
+            const top = isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length);
+            return (
+              <span key={`in-${handle.id}`}>
+                <PortKindBadge kind={handle.kind} side="in" top={top} />
+                <Handle
+                  type="target"
+                  position={Position.Left}
+                  id={handle.id}
+                  title={handle.label}
+                  style={{
+                    ...TARGET_HANDLE_STYLE,
+                    top,
+                    ...portHandleStyle(handle.kind, true),
+                  }}
+                />
+              </span>
+            );
+          })}
 
         {/* No overflow-hidden on LED: tile box-shadow (glow) would get clipped on the left. */}
         <div
           className={`flex min-w-0 items-center gap-2 ${
             multiChannel ? "w-full flex-1 pr-1" : isLed ? "" : isIf || isRelay ? "w-full" : "flex-1 overflow-hidden"
           }`}
-          style={
-            isIf
-              ? { minHeight: NODE_HEIGHT, paddingLeft: IF_LANE_WIDTH + 4, paddingRight: IF_LANE_WIDTH + 4 }
-              : undefined
-          }
+          style={isIf ? { minHeight: NODE_HEIGHT, paddingLeft: 10, paddingRight: 10 } : undefined}
         >
           <div
             key={`led-${ledColor}-${Math.round((intensity ?? 1) * 100)}`}
@@ -354,6 +317,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 <span className="min-w-0 truncate text-right font-mono text-[10px] font-medium text-ink-muted" title={handle.label}>
                   {handle.label ?? handle.id}
                 </span>
+                <PortKindBadge kind={handle.kind} side="out" top="50%" />
                 <Handle
                   type="source"
                   position={Position.Right}
@@ -366,45 +330,52 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                     right: -2,
                     top: "50%",
                     transform: "translateY(-50%)",
+                    ...portHandleStyle(handle.kind, false),
                   }}
                 />
               </div>
             ))}
-            {inputHandles.map((handle, index) => (
-              <Handle
-                key={`in-${handle.id}`}
-                type="target"
-                position={Position.Left}
-                id={handle.id}
-                title={handle.label}
-                style={{
-                  ...TARGET_HANDLE_STYLE,
-                  top: stackedHandleTop(index, Math.max(inputHandles.length, outputHandles.length)),
-                }}
-              />
-            ))}
+            {inputHandles.map((handle, index) => {
+              const top = stackedHandleTop(index, Math.max(inputHandles.length, outputHandles.length));
+              return (
+                <span key={`in-${handle.id}`}>
+                  <PortKindBadge kind={handle.kind} side="in" top={top} />
+                  <Handle
+                    type="target"
+                    position={Position.Left}
+                    id={handle.id}
+                    title={handle.label}
+                    style={{
+                      ...TARGET_HANDLE_STYLE,
+                      top,
+                      ...portHandleStyle(handle.kind, true),
+                    }}
+                  />
+                </span>
+              );
+            })}
           </div>
         ) : (
           <>
-            {outputHandles.map((handle, index) => (
-              <Handle
-                key={`out-${handle.id}`}
-                type="source"
-                position={Position.Right}
-                id={handle.id}
-                title={handle.label}
-                style={{
-                  ...SOURCE_HANDLE_STYLE,
-                  top: isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length),
-                  ...(isIf
-                    ? {
-                        border: `1.5px solid ${ifOutColor}`,
-                        background: ifLiveHigh ? ifOutColor : "var(--color-surface)",
-                      }
-                    : {}),
-                }}
-              />
-            ))}
+            {outputHandles.map((handle, index) => {
+              const top = isIf ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length);
+              return (
+                <span key={`out-${handle.id}`}>
+                  <PortKindBadge kind={handle.kind} side="out" top={top} />
+                  <Handle
+                    type="source"
+                    position={Position.Right}
+                    id={handle.id}
+                    title={handle.label}
+                    style={{
+                      ...SOURCE_HANDLE_STYLE,
+                      top,
+                      ...portHandleStyle(handle.kind, isIf ? ifLiveHigh : previewOn),
+                    }}
+                  />
+                </span>
+              );
+            })}
             {isToggle && data.toggleWave && ports.hasOutput && (
               <ToggleOutputWaveform
                 mode={data.toggleWave.mode}
@@ -446,6 +417,83 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         </div>
       )}
     </div>
+  );
+}
+
+const PORT_KIND_COLOR: Record<PortKind, string> = {
+  digital: "#EA580C",
+  analog: "#0EA5E9",
+  boolean: "#C026D3",
+  activation: "#4C2FB8",
+  event: "#7C3AED",
+  power: "#CA8A04",
+};
+
+const PORT_KIND_TITLE: Record<PortKind, string> = {
+  digital: "Digital",
+  analog: "Analog",
+  boolean: "Boolean",
+  activation: "Activation",
+  event: "Event",
+  power: "Power",
+};
+
+function portHandleStyle(kind: PortKind | undefined, filled: boolean): { border?: string; background?: string } {
+  if (!kind) return {};
+  const color = PORT_KIND_COLOR[kind];
+  return {
+    border: `1.5px solid ${color}`,
+    background: filled ? color : "var(--color-surface)",
+  };
+}
+
+function PortKindBadge({
+  kind,
+  side,
+  top,
+}: {
+  readonly kind?: PortKind;
+  readonly side: "in" | "out";
+  readonly top: string | number;
+}) {
+  if (!kind) return null;
+  const color = PORT_KIND_COLOR[kind];
+  return (
+    <span
+      className="pointer-events-none absolute z-20 flex h-3.5 w-3.5 items-center justify-center rounded-[3px]"
+      style={{
+        top,
+        [side === "in" ? "left" : "right"]: 0,
+        transform: `translate(${side === "in" ? "-50%" : "50%"}, calc(-100% - 4px))`,
+        backgroundColor: "var(--color-surface)",
+        outline: `1px solid color-mix(in srgb, ${color} 65%, transparent)`,
+        color,
+      }}
+      title={PORT_KIND_TITLE[kind]}
+      aria-hidden
+    >
+      <PortKindGlyph kind={kind} />
+    </span>
+  );
+}
+
+function PortKindGlyph({ kind }: { readonly kind: PortKind }) {
+  return (
+    <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden>
+      {kind === "digital" ? (
+        <path d="M1 6.5V2.5H3.2V6.5H5.4V2.5H8" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="miter" />
+      ) : kind === "analog" ? (
+        <path d="M1 5Q2.2 1.5 4.5 4.5T8 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+      ) : kind === "boolean" ? (
+        <path d="M4.5 1.4 7.4 4.5 4.5 7.6 1.6 4.5Z" stroke="currentColor" strokeWidth="1.15" />
+      ) : kind === "activation" ? (
+        <path d="M2.2 1.6v5.8L7.4 4.5Z" fill="currentColor" />
+      ) : kind === "power" ? (
+        <path d="M5.2 1.2 2.2 5.1h2.1L3.8 7.8 7 3.7H4.8Z" fill="currentColor" />
+      ) : (
+        <circle cx="4.5" cy="4.5" r="2.2" stroke="currentColor" strokeWidth="1.2" />
+      )}
+    </svg>
   );
 }
 

@@ -11,9 +11,9 @@ import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
 import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifInputType, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRelayBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
-import { FLOW_START_SIZE, IF_CARD_EXTRA_WIDTH, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
+import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
-import { handlesForNode, portsForNode, nodeHeightForPorts, nodeWidthForPorts } from "./node-ports.js";
+import { handlesForNode, portsForNode, nodeHeightForPorts, nodeWidthForPorts, type PortKind } from "./node-ports.js";
 
 export type ToggleWaveUi = {
   readonly mode: "astable" | "pulse_high" | "pulse_low";
@@ -66,9 +66,9 @@ export type ProcessingNodeUiData = {
   /** Bay I/O side when `bay` is true. */
   readonly baySide?: BaySide;
   /** Catalog input handles (multi-port cards). */
-  readonly inputHandles?: readonly { readonly id: string; readonly label?: string }[];
+  readonly inputHandles?: readonly { readonly id: string; readonly label?: string; readonly kind?: PortKind }[];
   /** Catalog output handles (multi-port cards). */
-  readonly outputHandles?: readonly { readonly id: string; readonly label?: string }[];
+  readonly outputHandles?: readonly { readonly id: string; readonly label?: string; readonly kind?: PortKind }[];
   /** Measured card height when stacked handles need more than NODE_HEIGHT. */
   readonly cardHeight?: number;
   /** Measured card width for multi-channel bay cards. */
@@ -129,7 +129,7 @@ export function toProcessingNodes(
     const cardHeight = isTick
       ? FLOW_START_SIZE
       : nodeHeightForPorts(ports) + (ifLane ? IF_FOOTER_HEIGHT : relayCard ? 14 : 0);
-    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports) + (ifLane ? IF_CARD_EXTRA_WIDTH : 0);
+    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports);
     return {
       id: node.id,
       type: "processing",
@@ -162,8 +162,20 @@ export function toProcessingNodes(
         hasError: errorNodeIds.has(node.id),
         hasInput: ports.hasInput,
         hasOutput: ports.hasOutput,
-        inputHandles: localizeHandleLabels(ports.inputs, locale),
-        outputHandles: localizeHandleLabels(ports.outputs, locale),
+        inputHandles: applySelectedPortKinds(
+          node.id,
+          data,
+          graphState,
+          localizeHandleLabels(ports.inputs, locale),
+          "in",
+        ),
+        outputHandles: applySelectedPortKinds(
+          node.id,
+          data,
+          graphState,
+          localizeHandleLabels(ports.outputs, locale),
+          "out",
+        ),
         cardHeight,
         cardWidth,
         previewActive: previewActiveIds.has(node.id),
@@ -325,12 +337,28 @@ function blockAccentFields(
 }
 
 function localizeHandleLabels(
-  handles: readonly { readonly id: string; readonly label?: string }[],
+  handles: readonly { readonly id: string; readonly label?: string; readonly kind?: PortKind }[],
   locale: LocaleId,
-): readonly { readonly id: string; readonly label?: string }[] {
+): readonly { readonly id: string; readonly label?: string; readonly kind?: PortKind }[] {
   return handles.map((handle) =>
     handle.label ? { ...handle, label: localizeCatalogText(handle.label, locale) } : handle,
   );
+}
+
+function applySelectedPortKinds(
+  nodeId: string,
+  data: DeviceProcessingNodeData,
+  graphState: GraphState<"device-processing">,
+  handles: readonly { readonly id: string; readonly label?: string; readonly kind?: PortKind }[],
+  side: "in" | "out",
+): readonly { readonly id: string; readonly label?: string; readonly kind?: PortKind }[] {
+  if (!isCompareIf(data) || !isBlockNodeData(data)) return handles;
+  const source = ifSourceKind(nodeId, {
+    nodes: graphState.nodes as readonly { readonly id: string; readonly data: DeviceProcessingNodeData }[],
+    edges: graphState.edges,
+  });
+  const kind: PortKind = side === "in" ? ifInputType(data, source) : ifOutputType(data);
+  return handles.map((handle) => ({ ...handle, kind }));
 }
 
 function canvasTitle(data: DeviceProcessingNodeData, meta: AuthoringMetadata | undefined, locale: LocaleId): string {
