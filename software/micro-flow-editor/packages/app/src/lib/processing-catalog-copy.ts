@@ -222,6 +222,8 @@ const PHRASES: Record<string, string> = {
   "Temperatura (°C)": "Temperature (°C)",
   "Soglia in °C": "Threshold in °C",
   "allora uscita": "then output",
+  "Tipo di uscita": "Output type",
+  Booleano: "Boolean",
   "Chiuso quando l'ingresso è": "Closed if input is",
   "Temperatura di prova (°C)": "Test temperature (°C)",
   "Valore per il dry-run": "Dry-run value",
@@ -263,8 +265,8 @@ const PHRASES: Record<string, string> = {
     `${AUTHORING_EN} Sequence player: rising/falling picks the starting edge. “Follows the trigger” turns off on the opposite edge; “Start and do not stop” lets the sequence run. Ready-made effects = parametric sequences; in “My sequence” compose solid/fade/wait. Strip (N LEDs) = one player.`,
   [`${AUTHORING_IT} Relè hardware: chiuso se l’ingresso è HIGH, oppure chiuso se l’ingresso è LOW.`]:
     `${AUTHORING_EN} Hardware relay: closed if the input is HIGH, or closed if the input is LOW.`,
-  "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). L’uscita è HIGH o LOW.":
-    "One input at a time: Digital Out Toggle (equals / is not equal to HIGH/LOW) or Temperature sensor (equals / is not equal / greater / less). The output is HIGH or LOW.",
+  "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). Tipo di uscita: Digitale (HIGH/LOW, può comandare LED o Relè) oppure Booleano (true/false, non è un ingresso digitale/analogico).":
+    "One input at a time: Digital Out Toggle (equals / is not equal to HIGH/LOW) or Temperature sensor (equals / is not equal / greater / less). Output type: Digital (HIGH/LOW, can drive a LED or Relay) or Boolean (true/false, not a digital/analog input).",
   [`${AUTHORING_IT} Sensore hardware: si collega solo a un blocco IF. L’indicatore sotto il blocco serve a provare la temperatura.`]:
     `${AUTHORING_EN} Hardware sensor: connects only to an IF block. The indicator under the block is for testing the temperature.`,
   [`${AUTHORING_IT} Morsettiera bay: fino a 6 canali digital, analog o alimentazione (tensione + direzione ingresso/uscita). Nomi editabili; sul canvas ogni nome sta accanto al pallino.`]:

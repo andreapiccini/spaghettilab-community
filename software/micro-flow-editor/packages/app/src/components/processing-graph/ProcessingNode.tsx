@@ -72,6 +72,11 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
 
   const isRelay = data.tileGlyph === "power";
   const isIf = data.tileGlyph === "if";
+  const ifBoolean = data.ifOutput?.kind === "boolean";
+  const ifThenHigh = data.ifOutput?.thenHigh !== false;
+  const ifLiveHigh = data.previewing ? previewOn : ifThenHigh;
+  const ifOutLabel = ifBoolean ? (ifLiveHigh ? "true" : "false") : ifLiveHigh ? "HIGH" : "LOW";
+  const ifOutColor = ifBoolean ? "#C026D3" : "#0F766E";
   const subtitle =
     isLed && data.previewing && intensity !== undefined
       ? intensity > 0.85
@@ -83,10 +88,8 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         ? previewOn
           ? "CLOSED"
           : "OPEN"
-        : isIf && data.previewing
-          ? previewOn
-            ? "HIGH"
-            : "LOW"
+        : isIf
+          ? ifOutLabel
           : data.tempProbe
             ? `${Math.round(data.tempProbe.celsius)}°C`
             : data.subtitle;
@@ -162,7 +165,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         </span>
       )}
       <div
-        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
+        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : isIf ? "pl-2.5 pr-16" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
         style={{
           width: cardWidth,
           minHeight: cardHeight,
@@ -172,12 +175,30 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             : "var(--color-surface)",
           outline: selectedOutline ?? idleOutline,
           // LED glow must not be clipped by the card / bay chrome.
-          overflow: isLed ? "visible" : undefined,
+          overflow: isLed ? "visible" : isIf ? "hidden" : undefined,
           boxShadow: ledLit
             ? `0 0 0 4px ${ledGlowRgba(ledColor, 0.12 + (intensity ?? 1) * 0.2)}, var(--shadow-e1)`
             : undefined,
         }}
       >
+        {isIf && (
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 z-0 flex w-14 flex-col items-center justify-center gap-0.5"
+            style={{
+              background: `color-mix(in srgb, ${ifOutColor} 22%, var(--color-surface))`,
+              borderLeft: `1px solid color-mix(in srgb, ${ifOutColor} 55%, transparent)`,
+            }}
+            aria-hidden
+          >
+            <span
+              className="font-mono text-[8px] font-bold uppercase tracking-wide"
+              style={{ color: ifOutColor }}
+            >
+              {ifBoolean ? "Bool" : "Digital"}
+            </span>
+            <span className="font-mono text-[10px] font-semibold text-ink">{ifOutLabel}</span>
+          </div>
+        )}
         {isBay && (
           <span
             className="absolute inset-y-1.5 left-0 w-0.5 rounded-full"
@@ -303,6 +324,12 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 style={{
                   ...SOURCE_HANDLE_STYLE,
                   top: stackedHandleTop(index, outputHandles.length),
+                  ...(isIf
+                    ? {
+                        border: `1.5px solid ${ifOutColor}`,
+                        background: ifLiveHigh ? ifOutColor : "var(--color-surface)",
+                      }
+                    : {}),
                 }}
               />
             ))}

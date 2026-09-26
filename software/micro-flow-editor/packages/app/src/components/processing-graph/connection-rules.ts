@@ -4,6 +4,7 @@ import {
   type ProcessingCatalogEntry,
 } from "@spaghettilab/processing-block-catalog";
 import {
+  ifOutputType,
   isCompareIf,
   isDigitalOutToggle,
   isLedBlock,
@@ -49,7 +50,7 @@ export type DemoConnectionContext = {
 
 /**
  * Visitor demo: IF takes Toggle or Temperature; temperature only feeds IF;
- * LED / Relay take Toggle or IF. Connecting a new source replaces the old wire.
+ * LED / Relay take Toggle or a Digital IF. Connecting a new source replaces the old wire.
  */
 export function isValidDemoProcessingConnection(
   connection: {
@@ -73,6 +74,19 @@ export function isValidDemoProcessingConnection(
   if (isCompareIf(source)) return isLedBlock(target) || isRelayBlock(target);
   if (isLedBlock(target) || isRelayBlock(target)) return isDigitalOutToggle(source) || isCompareIf(source);
   return true;
+}
+
+/** Existing wire that the visitor should see as broken (e.g. Boolean IF → LED). */
+export function isIncompatibleDemoEdge(
+  edge: { readonly source: string; readonly target: string },
+  ctx: DemoConnectionContext,
+): boolean {
+  const source = ctx.nodes.find((node) => node.id === edge.source)?.data;
+  const target = ctx.nodes.find((node) => node.id === edge.target)?.data;
+  if (!source || !target) return false;
+  if (!isCompareIf(source)) return false;
+  if (!(isLedBlock(target) || isRelayBlock(target))) return false;
+  return ifOutputType(source) === "boolean";
 }
 
 export function ifSourceKind(

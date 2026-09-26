@@ -33,7 +33,7 @@ import {
 } from "./catalog-to-node.js";
 import { catalogEntryForNode } from "./catalog-entry-for-node.js";
 import { positionForBayDrop } from "./bay-layout.js";
-import { isValidDemoProcessingConnection, isValidProcessingConnection } from "./connection-rules.js";
+import { isIncompatibleDemoEdge, isValidDemoProcessingConnection, isValidProcessingConnection } from "./connection-rules.js";
 import { PROCESSING_EDGE_TYPES } from "./DeletableEdge.js";
 import { NodeInspector, type ProcessingInspectorMode } from "./NodeInspector.js";
 import { DemoInspectorBubble } from "./DemoInspectorBubble.js";
@@ -251,7 +251,20 @@ function ProcessingGraphScreenInner() {
   const domainRfNodes = useMemo(() => toProcessingNodes(graphState, authoringMetadata, new Set(errorsByNode.keys()), moduleLabel, fieldLabel, new Set(), locale), [graphState, authoringMetadata, errorsByNode, moduleLabel, fieldLabel, locale]);
   // "deletable" (DeletableEdge.tsx) routes around other blocks on H/V
   // segments with rounded corners, plus a hover trash control.
-  const edges = useMemo<Edge[]>(() => toReactFlowEdges(graphState).map((edge) => ({ ...edge, type: "deletable" })), [graphState]);
+  const edges = useMemo<Edge[]>(() => {
+    const ctx = { nodes: domainNodes, edges: graphState.edges };
+    return toReactFlowEdges(graphState).map((edge) => {
+      const invalid = demoOnly && isIncompatibleDemoEdge(edge, ctx);
+      return {
+        ...edge,
+        type: "deletable",
+        data: { invalid },
+        style: invalid
+          ? { stroke: "var(--color-error)", strokeWidth: 2, strokeDasharray: "6 4" }
+          : undefined,
+      };
+    });
+  }, [graphState, demoOnly, domainNodes]);
   const processingNodeLabel = useCallback((id: string) => domainRfNodes.find((n) => n.id === id)?.data.label ?? id, [domainRfNodes]);
 
   const resolveCatalogEntry = useCallback(

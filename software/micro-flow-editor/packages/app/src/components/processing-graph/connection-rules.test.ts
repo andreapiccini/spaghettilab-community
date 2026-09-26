@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { findCatalogEntryById } from "@spaghettilab/processing-block-catalog";
-import { isValidDemoProcessingConnection, isValidProcessingConnection } from "./connection-rules.js";
+import { isIncompatibleDemoEdge, isValidDemoProcessingConnection, isValidProcessingConnection } from "./connection-rules.js";
 
 describe("isValidProcessingConnection", () => {
   it("rejects a block connecting its output to its own input", () => {
@@ -78,5 +78,13 @@ describe("isValidDemoProcessingConnection", () => {
     expect(isValidDemoProcessingConnection({ source: "if", target: "relay" }, { nodes, edges: [] })).toBe(true);
     expect(isValidDemoProcessingConnection({ source: "t", target: "relay" }, { nodes, edges: [] })).toBe(true);
     expect(isValidDemoProcessingConnection({ source: "if", target: "led" }, { nodes, edges: [{ source: "t", target: "led" }] })).toBe(true);
+  });
+
+  it("keeps Boolean IF → LED drawable but marks the wire as broken", () => {
+    const booleanIf = { ...iff, data: { ...iff.data, properties: { outputType: "boolean" } } };
+    const ctx = { nodes: [toggle, booleanIf, temp, led, relay], edges: [{ source: "if", target: "led" }] };
+    expect(isValidDemoProcessingConnection({ source: "if", target: "led" }, ctx)).toBe(true);
+    expect(isIncompatibleDemoEdge({ source: "if", target: "led" }, ctx)).toBe(true);
+    expect(isIncompatibleDemoEdge({ source: "if", target: "led" }, { nodes, edges: [{ source: "if", target: "led" }] })).toBe(false);
   });
 });

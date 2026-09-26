@@ -734,6 +734,15 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       ),
       num("compareTempC", "Temperatura (°C)", 25, "Soglia in °C"),
       sel(
+        "outputType",
+        "Tipo di uscita",
+        [
+          { value: "digital", label: "Digitale" },
+          { value: "boolean", label: "Booleano" },
+        ],
+        "digital",
+      ),
+      sel(
         "thenOutput",
         "allora uscita",
         [
@@ -744,7 +753,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       ),
     ],
     notes:
-      "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). L’uscita è HIGH o LOW.",
+      "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). Tipo di uscita: Digitale (HIGH/LOW, può comandare LED o Relè) oppure Booleano (true/false, non è un ingresso digitale/analogico).",
   }),
   e({
     id: "appblocks.led",

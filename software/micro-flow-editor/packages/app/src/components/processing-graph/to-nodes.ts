@@ -8,7 +8,7 @@ import type { Node } from "@xyflow/react";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
-import { hysteresisTicksFromProperties, initialHighFromProperties, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, pulseMsFromProperties, toggleModeFromProperties } from "./dry-run-preview.js";
+import { hysteresisTicksFromProperties, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, pulseMsFromProperties, toggleModeFromProperties } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
 import { FLOW_START_SIZE } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -79,6 +79,11 @@ export type ProcessingNodeUiData = {
     readonly max: number;
     readonly onChange?: (celsius: number) => void;
   };
+  /** IF: output lane kind + configured then-level (HIGH/true vs LOW/false). */
+  readonly ifOutput?: {
+    readonly kind: "digital" | "boolean";
+    readonly thenHigh: boolean;
+  };
 };
 
 /**
@@ -107,8 +112,9 @@ export function toProcessingNodes(
     const accent = blockAccentFields(data);
     const isTick = accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
     const ports = portsForNode(data);
+    const ifLane = isBlockNodeData(data) && isCompareIf(data);
     const cardHeight = isTick ? FLOW_START_SIZE : nodeHeightForPorts(ports);
-    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports);
+    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports) + (ifLane ? 24 : 0);
     return {
       id: node.id,
       type: "processing",
@@ -166,6 +172,7 @@ export function toProcessingNodes(
           : {}),
         ...accent,
         ...toggleWaveFields(data),
+        ...ifOutputFields(data),
         ...bayChromeFields(data),
       },
     };
@@ -178,6 +185,16 @@ function bayChromeFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiD
   const raw = isBlockNodeData(data) ? data.properties.bayRole : undefined;
   const baySide: BaySide | undefined = raw === "input" || raw === "output" ? raw : entry.bayIo === "input" ? "input" : "output";
   return { bay: true, baySide };
+}
+
+function ifOutputFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiData, "ifOutput"> {
+  if (!isCompareIf(data) || !isBlockNodeData(data)) return {};
+  return {
+    ifOutput: {
+      kind: ifOutputType(data),
+      thenHigh: data.properties.thenOutput !== "low" && data.properties.thenOutput !== "false",
+    },
+  };
 }
 
 function toggleWaveFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiData, "toggleWave"> {

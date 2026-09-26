@@ -546,4 +546,22 @@ describe("IF / relay / temperature dry-run", () => {
     const ledDrive = channels.flatMap((channel) => channel.actuators).find((actuator) => actuator.id === "led1")?.drive;
     expect(ledDrive).toMatchObject({ kind: "if", source: { kind: "temperature", testC: 30 } });
   });
+
+  it("does not drive the LED when IF output type is boolean", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [
+          temp("temp1", 30),
+          iff("if1", { compare: "gt", compareTempC: 25, thenOutput: "high", outputType: "boolean" }),
+          led("led1"),
+        ],
+        [
+          { layer: "device-processing", id: "e1", source: "temp1", target: "if1" },
+          { layer: "device-processing", id: "e2", source: "if1", target: "led1" },
+        ],
+      ),
+    );
+    expect(channels.flatMap((channel) => channel.actuators).some((actuator) => actuator.id === "led1")).toBe(false);
+    expect(activeActuatorsAt(0, channels).has("led1")).toBe(false);
+  });
 });

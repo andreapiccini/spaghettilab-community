@@ -2,6 +2,7 @@ import { defaultPropertiesFromFields, findCatalogEntryById } from "@spaghettilab
 import { describe, expect, it } from "vitest";
 import {
   DIGITAL_OUT_TOGGLE_INSPECTOR_FIELD_IDS,
+  IF_INSPECTOR_FIELD_IDS,
   inspectorVisibleFields,
   LED_INSPECTOR_FIELD_IDS,
 } from "./inspector-visible-fields.js";
@@ -51,5 +52,11 @@ describe("inspectorVisibleFields", () => {
   it("keeps only close-when on Relay", () => {
     const entry = findCatalogEntryById("appblocks.relay")!;
     expect(inspectorVisibleFields(entry, entry.fields ?? []).map((field) => field.id)).toEqual(["closeWhen"]);
+  });
+
+  it("keeps output type on IF", () => {
+    const entry = findCatalogEntryById("appblocks.compare_if")!;
+    expect(inspectorVisibleFields(entry, entry.fields ?? []).map((field) => field.id)).toEqual([...IF_INSPECTOR_FIELD_IDS]);
+    expect(defaultPropertiesFromFields(entry.fields ?? []).outputType).toBe("digital");
   });
 });

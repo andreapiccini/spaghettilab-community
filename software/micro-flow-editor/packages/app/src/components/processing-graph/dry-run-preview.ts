@@ -185,6 +185,7 @@ export function buildDryRunPreviewChannels(
     const relays: RelayBinding[] = [];
     for (const outId of outgoing.get(node.id) ?? []) {
       if (claimed.has(outId)) continue;
+      if (ifOutputType(data) === "boolean") continue;
       const outData = nodesById.get(outId);
       if (!outData || !isBlockNodeData(outData)) continue;
       const drive = actuatorDriveFor(outId, incoming, nodesById);
@@ -284,6 +285,10 @@ function reachableViaToggle(
       const drive = actuatorDriveFor(nextId, incoming, nodesById);
       const passedToggle = current.passedToggle || isToggle;
       if (isLedBlock(data) || isRelayBlock(data)) {
+        if (drive?.kind === "if") {
+          const ifData = nodesById.get(drive.ifId);
+          if (ifData && ifOutputType(ifData) === "boolean") continue;
+        }
         if (isBlockNodeData(data) && driveFollowsTogglePath(drive, passedToggle)) {
           if (isLedBlock(data)) {
             const binding = ledBindingFromProperties(nextId, data.properties);
@@ -343,6 +348,11 @@ export function isCompareIf(data: DeviceProcessingNodeData): boolean {
   if (!isBlockNodeData(data)) return false;
   if (data.catalogEntryId && COMPARE_IF_IDS.has(data.catalogEntryId)) return true;
   return COMPARE_IF_IDS.has(data.blockTypeId);
+}
+
+export function ifOutputType(data: DeviceProcessingNodeData): "digital" | "boolean" {
+  if (!isBlockNodeData(data)) return "digital";
+  return data.properties.outputType === "boolean" ? "boolean" : "digital";
 }
 
 export function isTemperatureSensor(data: DeviceProcessingNodeData): boolean {

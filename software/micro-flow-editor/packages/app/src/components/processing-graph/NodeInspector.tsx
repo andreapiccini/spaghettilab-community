@@ -25,6 +25,7 @@ import { ifSourceKind } from "./connection-rules.js";
 import {
   isCompareIf,
   isLedBlock,
+  isRelayBlock,
   isRgbLedBlock,
   isTemperatureSensor,
   ledColorFromProperties,
@@ -406,6 +407,10 @@ export function NodeInspector({
                 source={demoIfSource ?? "none"}
                 properties={data.properties}
                 onChange={(properties) => patch({ properties })}
+                digitalSinkConnected={outgoing.some((edge) => {
+                  const sink = existingNodes.find((node) => node.id === edge.target)?.data;
+                  return !!sink && (isLedBlock(sink) || isRelayBlock(sink));
+                })}
               />
             ) : demoTempBlock ? (
               <p className="font-body text-sm text-ink-muted">{copy.tempProbeHint}</p>
@@ -883,15 +888,30 @@ function DemoIfSentence({
   source,
   properties,
   onChange,
+  digitalSinkConnected,
 }: {
   readonly source: "toggle" | "temperature" | "none";
   readonly properties: Readonly<Record<string, unknown>>;
   readonly onChange: (properties: Record<string, unknown>) => void;
+  readonly digitalSinkConnected: boolean;
 }) {
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
+  const outputType = properties.outputType === "boolean" ? "boolean" : "digital";
+  const booleanOut = outputType === "boolean";
+
   if (source === "none") {
-    return <p className="font-body text-sm text-ink-muted">{copy.ifNeedsInput}</p>;
+    return (
+      <div className="flex flex-col gap-3 font-body text-sm text-ink">
+        <IfOutputTypeField value={outputType} copy={copy} onChange={(next) => onChange({ ...properties, outputType: next })} />
+        <p className="text-ink-muted">{copy.ifNeedsInput}</p>
+        {booleanOut && digitalSinkConnected && (
+          <p className="rounded-slsm border border-error/40 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-2 py-1.5 text-xs text-error">
+            {copy.ifBooleanLedInvalid}
+          </p>
+        )}
+      </div>
+    );
   }
 
   const compare = (properties.compare as CompareOp | undefined) ?? "eq";
@@ -906,6 +926,12 @@ function DemoIfSentence({
 
   return (
     <div className="flex flex-col gap-2 font-body text-sm text-ink">
+      <IfOutputTypeField value={outputType} copy={copy} onChange={(next) => set({ outputType: next })} />
+      {booleanOut && digitalSinkConnected && (
+        <p className="rounded-slsm border border-error/40 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-2 py-1.5 text-xs text-error">
+          {copy.ifBooleanLedInvalid}
+        </p>
+      )}
       <div className="flex flex-wrap items-center gap-1.5">
         <span>{copy.ifSentenceIf}</span>
         <span className="font-body-strong">
@@ -950,10 +976,34 @@ function DemoIfSentence({
           onChange={(event) => set({ thenOutput: event.target.value })}
           className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-body text-sm outline-none"
         >
-          <option value="high">HIGH</option>
-          <option value="low">LOW</option>
+          <option value="high">{booleanOut ? "true" : "HIGH"}</option>
+          <option value="low">{booleanOut ? "false" : "LOW"}</option>
         </select>
       </div>
     </div>
+  );
+}
+
+function IfOutputTypeField({
+  value,
+  copy,
+  onChange,
+}: {
+  readonly value: "digital" | "boolean";
+  readonly copy: ReturnType<typeof processingGraphCopy>;
+  readonly onChange: (value: "digital" | "boolean") => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="font-body text-xs font-semibold text-ink-muted">{copy.ifOutputType}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value === "boolean" ? "boolean" : "digital")}
+        className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-body text-sm outline-none"
+      >
+        <option value="digital">{copy.ifOutputDigital}</option>
+        <option value="boolean">{copy.ifOutputBoolean}</option>
+      </select>
+    </label>
   );
 }

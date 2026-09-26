@@ -27,6 +27,10 @@ function handleSide(position: Position): "left" | "right" | "top" | "bottom" {
  * Routed as a handful of horizontal/vertical segments with rounded corners
  * only at 90° joins — never a grid staircase or a free diagonal.
  */
+function edgeMarkedInvalid(data: unknown): boolean {
+  return !!data && typeof data === "object" && "invalid" in data && (data as { invalid?: unknown }).invalid === true;
+}
+
 export function DeletableEdge({
   id,
   source,
@@ -39,10 +43,12 @@ export function DeletableEdge({
   targetPosition,
   style,
   selected,
+  data,
 }: EdgeProps) {
   const [hovered, setHovered] = useState(false);
   const { deleteElements } = useReactFlow();
   const nodes = useNodes();
+  const invalid = edgeMarkedInvalid(data);
 
   const { edgePath, labelX, labelY } = useMemo(() => {
     const start: Point = { x: sourceX, y: sourceY };
@@ -57,8 +63,14 @@ export function DeletableEdge({
     return { edgePath: path, labelX: label.x, labelY: label.y };
   }, [nodes, source, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition]);
 
-  const showDelete = hovered || selected;
-  const stroke = showDelete ? "var(--color-brand-blue)" : typeof style?.stroke === "string" ? style.stroke : "var(--color-ink-faint)";
+  const showDelete = hovered || selected || invalid;
+  const stroke = invalid
+    ? "var(--color-error)"
+    : showDelete
+      ? "var(--color-brand-blue)"
+      : typeof style?.stroke === "string"
+        ? style.stroke
+        : "var(--color-ink-faint)";
   const markerId = `edge-arrow-${id}`;
 
   return (
@@ -75,6 +87,7 @@ export function DeletableEdge({
         style={{
           ...style,
           stroke,
+          strokeDasharray: invalid ? "6 4" : style?.strokeDasharray,
         }}
       />
       <path
@@ -104,8 +117,13 @@ export function DeletableEdge({
           {showDelete && (
             <button
               type="button"
-              aria-label="Scollega"
-              className="flex h-7 w-7 items-center justify-center rounded-full border border-border-strong bg-surface text-ink-muted shadow-e1 hover:border-error hover:text-error"
+              aria-label={invalid ? "Broken connection" : "Scollega"}
+              title={invalid ? "Broken connection" : undefined}
+              className={`flex h-7 w-7 items-center justify-center rounded-full border bg-surface shadow-e1 ${
+                invalid
+                  ? "border-error text-error"
+                  : "border-border-strong text-ink-muted hover:border-error hover:text-error"
+              }`}
               onPointerDown={(event) => event.stopPropagation()}
               onMouseDown={(event) => event.stopPropagation()}
               onClick={(event) => {

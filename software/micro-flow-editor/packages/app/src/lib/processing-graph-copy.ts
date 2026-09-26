@@ -85,6 +85,11 @@ type ProcessingGraphCopy = {
   readonly ifSentenceToggle: string;
   readonly ifSentenceTemp: string;
   readonly ifSentenceThen: string;
+  readonly ifOutputType: string;
+  readonly ifOutputDigital: string;
+  readonly ifOutputBoolean: string;
+  readonly ifBooleanLedInvalid: string;
+  readonly brokenConnection: string;
   readonly tempProbeHint: string;
 };
 
@@ -186,6 +191,11 @@ const IT: ProcessingGraphCopy = {
   ifSentenceToggle: "TOGGLE",
   ifSentenceTemp: "SENSORE TEMPERATURA",
   ifSentenceThen: "allora uscita",
+  ifOutputType: "Tipo di uscita",
+  ifOutputDigital: "Digitale",
+  ifOutputBoolean: "Booleano",
+  ifBooleanLedInvalid: "Il LED vuole un ingresso digitale o analogico. L’uscita booleana (true/false) non è valida.",
+  brokenConnection: "Collegamento non valido",
   tempProbeHint: "Trascina l’indicatore sotto il sensore per provare la temperatura.",
 };
 
@@ -275,6 +285,11 @@ const EN: ProcessingGraphCopy = {
   ifSentenceToggle: "TOGGLE",
   ifSentenceTemp: "TEMPERATURE SENSOR",
   ifSentenceThen: "then output",
+  ifOutputType: "Output type",
+  ifOutputDigital: "Digital",
+  ifOutputBoolean: "Boolean",
+  ifBooleanLedInvalid: "The LED needs a digital or analog input. Boolean output (true/false) is not valid.",
+  brokenConnection: "Broken connection",
   tempProbeHint: "Drag the indicator under the sensor to test the temperature.",
 };
 
