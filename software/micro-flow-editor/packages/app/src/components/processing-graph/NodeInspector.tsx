@@ -1,5 +1,5 @@
 import type { DomainError, GraphEdge, GraphNode } from "@spaghettilab/domain";
-import { isRuleNodeData, validateDeviceProcessingGraph, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
+import { isBlockNodeData, isRuleNodeData, validateDeviceProcessingGraph, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import {
   catalogEntriesForNodeKind,
   defaultPropertiesFromFields,
@@ -14,10 +14,14 @@ import { useMemo, useState } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { pinCaption, pinLetter, selectableSignalsForPort, signalsForRole, type CustomProtocol, type PortPinMap } from "../../lib/port-protocol-mock.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
+import { visualForCatalogEntryId } from "./block-visuals.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { commentAfterCatalogChange } from "./catalog-to-node.js";
+import { isLedBlock, isRgbLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { withThresholdFirmwareFields } from "./threshold-rule-fields.js";
+import { parseRgbLedConfig, rgbLedVisualAt } from "./rgb-led-model.js";
+import { RgbLedSequenceEditor } from "./RgbLedSequenceEditor.js";
 
 function TypeIdSelect({
   id,
@@ -165,7 +169,16 @@ export function NodeInspector({
   const canSave = errors.length === 0;
 
   function patch(partial: Partial<DeviceProcessingNodeData>) {
-    setData({ ...data, ...partial } as DeviceProcessingNodeData);
+    const next = { ...data, ...partial } as DeviceProcessingNodeData;
+    setData(next);
+    // Keep the graph (and Dry-run) in sync while the inspector is open — otherwise
+    // effect/delay edits only appear after Salva.
+    if (mode.kind === "edit") onApply?.(next, comment);
+  }
+
+  function setCommentAndMaybeApply(nextComment: string) {
+    setComment(nextComment);
+    if (mode.kind === "edit") onApply?.(data, nextComment);
   }
 
   function applyCatalogChange(next: DeviceProcessingNodeData, entry: ProcessingCatalogEntry | undefined) {
@@ -179,14 +192,39 @@ export function NodeInspector({
   const incoming = existingEdges.filter((e) => e.target === nodeId);
   const outgoing = existingEdges.filter((e) => e.source === nodeId);
 
+  const blockTypeId = data.kind === "block" ? data.blockTypeId : data.kind === "rule" ? data.ruleTypeId : undefined;
+  const catalogVisual =
+    visualForCatalogEntryId(catalogEntry?.id) ?? visualForCatalogEntryId(blockTypeId);
+  const headerTitle =
+    (comment.trim() !== "" ? comment.trim() : undefined) ?? catalogEntry?.label ?? config.label;
+  const headerColor =
+    data.kind === "block" && isBlockNodeData(data) && isRgbLedBlock(data)
+      ? (() => {
+          const cfg = parseRgbLedConfig(data.properties);
+          // Identity swatch only — RGB stays off until the input trigger drives it.
+          if (cfg.mode === "preset" && cfg.preset === "color_cycle") return rgbLedVisualAt(0, cfg, true).color;
+          return cfg.color;
+        })()
+      : data.kind === "block" && isBlockNodeData(data) && isLedBlock(data)
+        ? ledColorFromProperties(data.properties, catalogVisual?.colorVar ?? "#F5C518")
+        : (catalogVisual?.colorVar ?? config.colorVar);
+  const HeaderIcon = catalogVisual?.icon ?? config.icon;
+  const headerSolid = catalogVisual?.solidSwatch === true || (data.kind === "block" && isBlockNodeData(data) && isRgbLedBlock(data));
+
   return (
     <motion.div initial={{ x: 320, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 320, opacity: 0 }} transition={motionTokens.spring.smooth} className="flex h-full w-80 flex-col border-l border-border bg-surface shadow-e2">
       <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
-        <div className="flex h-6 w-6 items-center justify-center rounded-slsm" style={{ backgroundColor: `color-mix(in srgb, ${config.colorVar} 12%, transparent)` }}>
-          <config.icon size={14} style={{ color: config.colorVar }} />
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-slsm"
+          style={{ backgroundColor: headerSolid ? headerColor : `color-mix(in srgb, ${headerColor} 18%, transparent)` }}
+          aria-hidden
+        >
+          {!headerSolid && <HeaderIcon size={14} style={{ color: headerColor }} />}
         </div>
-        <h2 className="font-heading text-sm font-semibold text-ink">{config.label}</h2>
-        <button type="button" onClick={onClose} className="ml-auto text-ink-faint hover:text-ink">
+        <h2 className="min-w-0 truncate font-heading text-sm font-semibold text-ink" title={headerTitle}>
+          {headerTitle}
+        </h2>
+        <button type="button" onClick={onClose} className="ml-auto shrink-0 text-ink-faint hover:text-ink">
           ✕
         </button>
       </div>
@@ -203,7 +241,7 @@ export function NodeInspector({
         <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-name">
           Nome (etichetta)
         </label>
-        <input id="ni-name" value={comment} onChange={(e) => setComment(e.target.value)} placeholder={config.label} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none" />
+        <input id="ni-name" value={comment} onChange={(e) => setCommentAndMaybeApply(e.target.value)} placeholder={config.label} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none" />
 
         {mode.kind === "edit" && (
           <EdgeList title="Input" edges={incoming.map((e) => ({ id: e.id, label: nodeLabel(e.source) }))} empty="Nessun collegamento in ingresso." />
@@ -326,6 +364,9 @@ export function NodeInspector({
                 <PropertiesEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
               </>
             )}
+            {isRgbLedBlock(data) && (
+              <RgbLedSequenceEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
+            )}
           </>
         )}
 
@@ -437,16 +478,50 @@ function CatalogFieldsEditor({
 
   return (
     <div className="mb-4 flex flex-col gap-3">
-      {fields.map((field) => (
-        <CatalogFieldInput
-          key={field.id}
-          field={field.id === "line" && lineOptions.length > 0 ? { ...field, type: "select", options: lineOptions } : field}
-          value={properties[field.id]}
-          onChange={(value) => setField(field.id, value)}
-        />
-      ))}
+      {fields
+        .filter((field) => fieldVisible(field, properties))
+        .map((field) => (
+          <CatalogFieldInput
+            key={field.id}
+            field={field.id === "line" && lineOptions.length > 0 ? { ...field, type: "select", options: lineOptions } : field}
+            value={properties[field.id]}
+            onChange={(value) => setField(field.id, value)}
+          />
+        ))}
     </div>
   );
+}
+
+function fieldVisible(field: CatalogField, properties: Readonly<Record<string, unknown>>): boolean {
+  if (!field.when) return true;
+  // Preset-only fields (color, speed) must not appear in «Sequenza mia».
+  if (field.when.field === "preset") {
+    const modeRaw = properties.mode;
+    const mode =
+      typeof modeRaw === "string" ? modeRaw : modeRaw === undefined ? "preset" : String(modeRaw);
+    if (mode !== "preset") return false;
+  }
+  const raw = properties[field.when.field];
+  const current =
+    typeof raw === "string"
+      ? raw
+      : raw === undefined && field.when.field === "effect"
+        ? "follow"
+        : raw === undefined && field.when.field === "activeOn"
+          ? "rising"
+          : raw === undefined && field.when.field === "mode"
+            ? "preset"
+            : raw === undefined && field.when.field === "preset"
+              ? "solid"
+              : raw === undefined && field.when.field === "toggleMode"
+                ? "astable"
+                : raw === undefined
+                  ? undefined
+                  : String(raw);
+  if (current === undefined) return false;
+  if (field.when.in) return field.when.in.includes(current);
+  if (field.when.equals !== undefined) return current === field.when.equals;
+  return true;
 }
 
 function CatalogFieldInput({
@@ -487,7 +562,7 @@ function CatalogFieldInput({
           id={id}
           type="number"
           placeholder={field.placeholder}
-          value={value === undefined || value === null ? "" : String(value)}
+          value={value === undefined || value === null ? String(field.default ?? "") : String(value)}
           onChange={(e) => {
             const raw = e.target.value;
             if (raw === "" || raw === "-") onChange(0n);
@@ -504,6 +579,23 @@ function CatalogFieldInput({
           onChange={(e) => onChange(e.target.value)}
           className="w-full resize-y rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none"
         />
+      ) : field.type === "color" ? (
+        <div className="flex items-center gap-2">
+          <input
+            id={id}
+            type="color"
+            value={typeof value === "string" && /^#[0-9A-Fa-f]{6}$/.test(value) ? value : String(field.default ?? "#F5C518")}
+            onChange={(e) => onChange(e.target.value)}
+            className="h-9 w-12 cursor-pointer rounded-slsm border border-border-strong bg-surface p-0.5"
+          />
+          <input
+            type="text"
+            value={typeof value === "string" ? value : String(field.default ?? "#F5C518")}
+            onChange={(e) => onChange(e.target.value)}
+            spellCheck={false}
+            className="min-w-0 flex-1 rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
+          />
+        </div>
       ) : (
         <input
           id={id}

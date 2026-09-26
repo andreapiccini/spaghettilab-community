@@ -1,4 +1,5 @@
 import type { CatalogField, ProcessingCatalogEntry, ProcessingNodeKind, ProcessingRuntime } from "./types.js";
+import { inPort, outPort, T } from "./ports.js";
 
 function nodeKindFromRuntime(runtime: ProcessingRuntime): ProcessingNodeKind | undefined {
   switch (runtime) {
@@ -21,11 +22,17 @@ function e(entry: Omit<ProcessingCatalogEntry, "nodeKind">): ProcessingCatalogEn
 
 const AUTHORING = "Authoring visibile sul blocco; il Config/firmware si aggancia in un passo successivo.";
 
+/** Firmware entry-point: Schedule / Event emit jolly `activation` to start a chain. */
+const ENTRY_OUTPUTS = [outPort("0", [T.activationTrigger, T.eventTrigger], "Attivazione")];
+
 function sel(id: string, label: string, options: readonly { value: string; label: string }[], def?: string): CatalogField {
   return { id, label, type: "select", options, default: def };
 }
 function num(id: string, label: string, def?: number, placeholder?: string): CatalogField {
   return { id, label, type: "number", default: def, placeholder };
+}
+function chk(id: string, label: string, def = false): CatalogField {
+  return { id, label, type: "checkbox", default: def, placeholder: label };
 }
 function txt(id: string, label: string, def?: string, placeholder?: string): CatalogField {
   return { id, label, type: "text", default: def, placeholder };
@@ -47,7 +54,11 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     category: "trigger",
     runtime: "core-schedule",
     availability: "shipped",
-    notes: "struct spaghetti_runtime_schedule_config: period_ms su un Module. Equivalente AppBlocks: On Time Period.",
+    family: "functionality",
+    inputs: [],
+    outputs: ENTRY_OUTPUTS,
+    notes:
+      "Entry point firmware (`spaghetti_runtime_schedule_config`): a ogni periodo emette attivazione (jolly). Equivalente AppBlocks: On Time Period. Se disabilitato non viene eseguito.",
   }),
   e({
     id: "native.event-source",
@@ -56,7 +67,23 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     category: "trigger",
     runtime: "core-event",
     availability: "shipped",
-    notes: "Module che pubblica eventi (`spaghetti_module_manager_start_events`), non uno schedule.",
+    inputs: [],
+    outputs: ENTRY_OUTPUTS,
+    notes: "Entry point firmware: Module che pubblica eventi (`spaghetti_module_manager_start_events`). Output = attivazione (jolly).",
+  }),
+  e({
+    id: "native.flow_start",
+    label: "Attivazione",
+    subtitle: "Pallino Schedule → primo blocco",
+    category: "trigger",
+    runtime: "core-block",
+    availability: "shipped",
+    typeId: "ab.flow_start",
+    needsModule: false,
+    inputs: [],
+    outputs: [outPort("0", [T.activationTrigger], "Attivazione")],
+    notes:
+      "Pallino violetto fisso dentro ogni Schedule (non dalla palette). Solo uscita a destra: collega al Digital Out Toggle o a un altro blocco per scegliere l’entry.",
   }),
   e({
     id: "appblocks.system",
@@ -67,6 +94,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     availability: "planned",
     appblocksId: "system",
     needsModule: false,
+    inputs: [],
+    outputs: ENTRY_OUTPUTS,
     notes: AUTHORING,
   }),
   e({
@@ -580,20 +609,299 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
   e({
     id: "appblocks.digital_line_set",
     label: "Digital Line Set",
-    subtitle: "Scrivi GPIO",
+    subtitle: "Scrivi GPIO HIGH/LOW",
     category: "io",
     runtime: "core-block",
-    availability: "planned",
+    availability: "shipped",
     appblocksId: "digital_line_set",
     typeId: "ab.digital_line_set",
     fields: [
-      txt("line", "Linea"),
+      txt("line", "Linea", "LED"),
       sel("state", "Stato", [
         { value: "high", label: "HIGH" },
         { value: "low", label: "LOW" },
       ], "high"),
     ],
     notes: AUTHORING,
+  }),
+  e({
+    id: "appblocks.digital_out_toggle",
+    label: "Digital Out Toggle",
+    subtitle: "Inverti uscita digitale",
+    category: "io",
+    runtime: "core-block",
+    availability: "shipped",
+    family: "functionality",
+    appblocksId: "digital_out_toggle",
+    typeId: "ab.digital_out_toggle",
+    inputs: [
+      inPort("0", [T.activationTrigger, T.eventTrigger, T.digitalComando], {
+        label: "Trigger / comando",
+        required: true,
+      }),
+    ],
+    outputs: [outPort("0", [T.digitalComando], "Comando digitale")],
+    fields: [
+      txt("line", "Linea", "LED"),
+      sel(
+        "toggleMode",
+        "Tipo di toggle",
+        [
+          { value: "astable", label: "Astable (toggle a ogni impulso)" },
+          { value: "pulse_high", label: "Impulso HIGH (riposo LOW)" },
+          { value: "pulse_low", label: "Impulso LOW (riposo HIGH)" },
+        ],
+        "astable",
+      ),
+      {
+        ...sel("initial", "Stato iniziale", [
+          { value: "high", label: "ON (dopo rising edge)" },
+          { value: "low", label: "OFF (dopo falling edge)" },
+        ], "high"),
+        when: { field: "toggleMode", equals: "astable" },
+      },
+      {
+        ...num(
+          "lowToHigh",
+          "Contatore impulsi ON → rising edge",
+          1,
+          "Quanti trigger Schedule (impulsi) restare OFF prima del rising edge / ON",
+        ),
+        when: { field: "toggleMode", equals: "astable" },
+      },
+      {
+        ...num(
+          "highToLow",
+          "Contatore impulsi OFF → falling edge",
+          1,
+          "Quanti trigger Schedule (impulsi) restare ON prima del falling edge / OFF",
+        ),
+        when: { field: "toggleMode", equals: "astable" },
+      },
+      {
+        ...num(
+          "pulseMs",
+          "Durata impulso (ms)",
+          100,
+          "Larghezza dell’impulso dopo ogni trigger Schedule",
+        ),
+        when: { field: "toggleMode", in: ["pulse_high", "pulse_low"] },
+      },
+    ],
+    notes:
+      "Input: attivazione dallo Start (o jolly da Schedule). Output: comando digitale (0/1). Astabile = cambia stato a ogni impulso; impulso HIGH/LOW = monostabile (riposo + impulso sulla durata impostata).",
+  }),
+  e({
+    id: "appblocks.led",
+    label: "LED",
+    subtitle: "Indicatore luminoso",
+    category: "io",
+    runtime: "core-block",
+    availability: "shipped",
+    family: "bay",
+    bayIo: "output",
+    bayFamilyId: "bay.led",
+    appblocksId: "led",
+    typeId: "ab.led",
+    needsModule: false,
+    inputs: [
+      inPort("0", [T.digitalComando, T.analogComando], {
+        label: "Comando",
+        required: true,
+      }),
+    ],
+    outputs: [],
+    fields: [
+      { id: "color", label: "Colore", type: "color", default: "#F5C518" },
+      num("threshold", "Soglia (0–100)", 50, "Accende se il comando ≥ soglia"),
+      chk("negated", "Negato", false),
+      num(
+        "delayOnMs",
+        "Ritardo ON (ms)",
+        0,
+        "Attesa dopo il segnale ON (comando ≥ soglia) prima di soft start",
+      ),
+      num(
+        "delayOffMs",
+        "Ritardo OFF (ms)",
+        0,
+        "Attesa dopo il segnale OFF (comando < soglia) prima di soft stop",
+      ),
+      num("softOnMs", "Soft start ON (ms)", 0, "Velocità di salita 0→100% (0 = istantaneo)"),
+      num("softOffMs", "Soft stop OFF (ms)", 0, "Velocità di decadimento 100%→0 (0 = istantaneo)"),
+    ],
+    notes:
+      "Sink su comando digitale (0/100) o analogico (0–100). Acceso se livello ≥ soglia. Ritardi ON/OFF rispetto al segnale, poi soft start/stop.",
+  }),
+  e({
+    id: "appblocks.rgb_led",
+    label: "RGB LED",
+    subtitle: "Sequenze colore · trigger in ingresso",
+    category: "io",
+    runtime: "core-block",
+    availability: "planned",
+    family: "bay",
+    bayIo: "output",
+    bayFamilyId: "bay.rgb_led",
+    appblocksId: "rgb_led",
+    typeId: "ab.rgb_led",
+    needsModule: false,
+    inputs: [
+      inPort("0", [T.activationTrigger, T.eventTrigger, T.digitalComando], {
+        label: "Trigger",
+        required: true,
+      }),
+    ],
+    outputs: [],
+    fields: [
+      sel(
+        "mode",
+        "Modalità",
+        [
+          { value: "preset", label: "Effetto pronto" },
+          { value: "sequence", label: "Sequenza mia" },
+        ],
+        "preset",
+      ),
+      sel(
+        "triggerEdge",
+        "Trigger",
+        [
+          { value: "rising", label: "Rising edge" },
+          { value: "falling", label: "Falling edge" },
+        ],
+        "rising",
+      ),
+      sel(
+        "triggerAction",
+        "Azione sul trigger",
+        [
+          {
+            value: "follow",
+            label: "Segue il trigger (stop sul bordo opposto)",
+          },
+          {
+            value: "start",
+            label: "Avvia e non ferma sul bordo opposto",
+          },
+        ],
+        "follow",
+      ),
+      {
+        ...sel(
+          "preset",
+          "Effetto",
+          [
+            { value: "solid", label: "Solid" },
+            { value: "breathe", label: "Breathe" },
+            { value: "blink", label: "Blink" },
+            { value: "color_cycle", label: "Color cycle" },
+          ],
+          "solid",
+        ),
+        when: { field: "mode", equals: "preset" },
+      },
+      {
+        id: "color",
+        label: "Colore",
+        type: "color",
+        default: "#FF3366",
+        when: { field: "preset", in: ["solid", "breathe", "blink"] },
+      },
+      {
+        ...num("intensity", "Intensità (0–100)", 100),
+        when: { field: "mode", equals: "preset" },
+      },
+      {
+        ...num("speedMs", "Velocità / periodo (ms)", 1200, "Breathe, blink, color cycle"),
+        when: { field: "preset", in: ["breathe", "blink", "color_cycle"] },
+      },
+      chk("loop", "Loop", true),
+      num("ledCount", "N LED (stub bay)", 1, "Dal bay/NFC quando disponibile"),
+    ],
+    notes:
+      AUTHORING +
+      " Player di sequenze: rising/falling sceglie il bordo che avvia. «Segue il trigger» spegne sul bordo opposto; «Avvia e non ferma» lascia correre la sequenza. Effetti pronti = sequenze parametriche; in «Sequenza mia» componi solid/fade/wait. Strip (N LED) = un unico player.",
+  }),
+  e({
+    id: "appblocks.relay",
+    label: "Relay",
+    subtitle: "Uscita relè",
+    category: "io",
+    runtime: "core-block",
+    availability: "planned",
+    family: "bay",
+    bayIo: "output",
+    bayFamilyId: "bay.relay",
+    appblocksId: "relay",
+    typeId: "ab.relay",
+    needsModule: false,
+    inputs: [
+      inPort("0", [T.digitalComando, T.activationTrigger], {
+        label: "Comando",
+        required: true,
+      }),
+    ],
+    outputs: [],
+    fields: [
+      txt("line", "Linea", "RELAY"),
+      sel("initial", "Stato iniziale", [
+        { value: "open", label: "Aperto (OFF)" },
+        { value: "closed", label: "Chiuso (ON)" },
+      ], "open"),
+    ],
+    notes: AUTHORING + " Comportamento relè (contatto, debounce, fail-safe) da definire.",
+  }),
+  e({
+    id: "appblocks.terminal_block",
+    label: "Terminal block",
+    subtitle: "6 canali digital / analog / alimentazione",
+    category: "io",
+    runtime: "core-block",
+    availability: "planned",
+    family: "bay",
+    bayIo: "input",
+    bayFamilyId: "bay.terminal_block",
+    appblocksId: "terminal_block",
+    typeId: "ab.terminal_block",
+    needsModule: false,
+    inputs: [],
+    outputs: [1, 2, 3, 4, 5, 6].map((n) =>
+      outPort(String(n - 1), [T.digitalMisura, T.analogMisura, T.powerMisura], `CH${n}`),
+    ),
+    fields: [1, 2, 3, 4, 5, 6].flatMap((n) => [
+      txt(`ch${n}Name`, `Nome canale ${n}`, `CH${n}`, `Es. Sensore A`),
+      sel(
+        `ch${n}Mode`,
+        `Tipo CH${n}`,
+        [
+          { value: "digital", label: "Digitale" },
+          { value: "analog", label: "Analogico" },
+          { value: "alimentazione", label: "Alimentazione" },
+        ],
+        "digital",
+      ),
+      chk(`ch${n}Enabled`, `Canale ${n} attivo`, true),
+      {
+        ...num(`ch${n}Voltage`, `Tensione CH${n} (V)`, 24, "Valore di alimentazione"),
+        when: { field: `ch${n}Mode`, equals: "alimentazione" },
+      },
+      {
+        ...sel(
+          `ch${n}PowerDir`,
+          `Direzione CH${n}`,
+          [
+            { value: "input", label: "Ingresso — alimentato dall'esterno" },
+            { value: "output", label: "Uscita — alimento il device" },
+          ],
+          "input",
+        ),
+        when: { field: `ch${n}Mode`, equals: "alimentazione" },
+      },
+    ]),
+    notes:
+      AUTHORING +
+      " Morsettiera bay: fino a 6 canali digital, analog o alimentazione (tensione + direzione ingresso/uscita). Nomi editabili; sul canvas ogni nome sta accanto al pallino.",
   }),
 
   e({

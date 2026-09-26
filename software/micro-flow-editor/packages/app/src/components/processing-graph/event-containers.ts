@@ -1,6 +1,6 @@
 import type { AuthoringMetadata, GraphState } from "@spaghettilab/domain";
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
-import { formatFieldsSubtitle } from "@spaghettilab/processing-block-catalog";
+import { formatFieldsSubtitle, isBayEntry } from "@spaghettilab/processing-block-catalog";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { EVENT_CONTAINER_HEADER_HEIGHT, NODE_HEIGHT, NODE_PADDING, NODE_WIDTH } from "./layout-constants.js";
 
@@ -8,6 +8,8 @@ export type EventContainer = {
   readonly id: string;
   readonly triggerId: string;
   readonly label: string;
+  /** Schedule period shown beside the title — undefined for event-sources. */
+  readonly periodMs?: number;
   readonly x: number;
   readonly y: number;
   readonly width: number;
@@ -63,12 +65,27 @@ export function emptyEventContainerSize(): { width: number; height: number } {
 }
 
 function containerLabel(data: DeviceProcessingNodeData, meta: AuthoringMetadata | undefined): string {
-  if (meta?.comment && meta.comment.trim() !== "") return meta.comment.trim();
-  if (data.kind === "schedule") return `ogni ${data.periodMs}ms`;
+  const custom = meta?.comment?.trim();
+  if (data.kind === "schedule") {
+    return custom && custom !== "" ? custom : "Schedule";
+  }
+  if (custom && custom !== "") return custom;
   const entry = catalogEntryForNode(data);
   const fromFields = entry?.fields?.length ? formatFieldsSubtitle(entry.fields, propertiesOf(data)) : undefined;
   const parts = [entry?.label, fromFields].filter((part): part is string => Boolean(part));
   return parts.join(" · ") || "Event source";
+}
+
+/** Compact period for the Schedule container header (e.g. `ogni 1s`, `ogni 500ms`). */
+export function formatSchedulePeriod(periodMs: number): string {
+  if (!Number.isFinite(periodMs) || periodMs <= 0) return "ogni —";
+  if (periodMs >= 1000 && periodMs % 1000 === 0) return `ogni ${periodMs / 1000}s`;
+  if (periodMs >= 1000) {
+    const seconds = periodMs / 1000;
+    const rounded = Math.round(seconds * 10) / 10;
+    return `ogni ${rounded}s`;
+  }
+  return `ogni ${Math.round(periodMs)}ms`;
 }
 
 export type ContainerSizePreview = {
@@ -129,9 +146,14 @@ export function computeEventContainers(
     while (queue.length > 0) {
       const id = queue.shift()!;
       if (memberIds.has(id) || id === node.id) continue;
-      memberIds.add(id);
       const child = nodesById.get(id);
-      const childKind = child ? (child.data as DeviceProcessingNodeData).kind : undefined;
+      const childData = child ? (child.data as DeviceProcessingNodeData) : undefined;
+      const childEntry = childData ? catalogEntryForNode(childData) : undefined;
+      // Bay hardware endpoints sit outside the dashed box (left in / right out).
+      if (childEntry && isBayEntry(childEntry)) continue;
+      memberIds.add(id);
+      const childKind = childData?.kind;
+      // Nested trigger keeps its own dashed box; don't steal its chain as outer members.
       if (childKind && isTriggerKind(childKind)) continue;
       for (const next of outgoing.get(id) ?? []) queue.push(next);
     }
@@ -157,6 +179,7 @@ export function computeEventContainers(
       id: `container-${node.id}`,
       triggerId: node.id,
       label,
+      ...(data.kind === "schedule" ? { periodMs: data.periodMs } : {}),
       x: Math.round(triggerPos.x - NODE_PADDING),
       y: Math.round(triggerPos.y - NODE_PADDING - EVENT_CONTAINER_HEADER_HEIGHT),
       width: Math.round(maxRelX + NODE_WIDTH + NODE_PADDING * 2),

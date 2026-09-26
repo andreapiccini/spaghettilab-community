@@ -1,24 +1,42 @@
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
-import { defaultPropertiesFromFields, isPlaceableOnDeviceGraph, type ProcessingCatalogEntry } from "@spaghettilab/processing-block-catalog";
+import {
+  defaultPropertiesFromFields,
+  isBayEntry,
+  isPlaceableOnDeviceGraph,
+  type ProcessingCatalogEntry,
+} from "@spaghettilab/processing-block-catalog";
+import type { BaySide } from "@spaghettilab/processing-block-catalog";
 import { withThresholdFirmwareFields } from "./threshold-rule-fields.js";
+import { bayPropertiesForPlace } from "./palette-placeables.js";
 
-export const PROCESSING_BLOCK_MIME = "application/x-spaghettilab-processing-block";
+export { PROCESSING_BLOCK_MIME, decodePaletteDrag, encodePaletteDrag, type PaletteDragPayload } from "./palette-placeables.js";
 
 let paletteDragNodeKind: DeviceProcessingNodeData["kind"] | undefined;
+let paletteDragBaySide: BaySide | undefined;
 
-export function beginPaletteDrag(kind: DeviceProcessingNodeData["kind"] | undefined): void {
+export function beginPaletteDrag(kind: DeviceProcessingNodeData["kind"] | undefined, baySide?: BaySide): void {
   paletteDragNodeKind = kind;
+  paletteDragBaySide = baySide;
 }
 
 export function endPaletteDrag(): void {
   paletteDragNodeKind = undefined;
+  paletteDragBaySide = undefined;
 }
 
 export function peekPaletteDragKind(): DeviceProcessingNodeData["kind"] | undefined {
   return paletteDragNodeKind;
 }
 
-export function nodeDataFromCatalogEntry(entry: ProcessingCatalogEntry, firstModuleId: string | undefined): DeviceProcessingNodeData | null {
+export function peekPaletteDragBaySide(): BaySide | undefined {
+  return paletteDragBaySide;
+}
+
+export function nodeDataFromCatalogEntry(
+  entry: ProcessingCatalogEntry,
+  firstModuleId: string | undefined,
+  baySide?: BaySide,
+): DeviceProcessingNodeData | null {
   if (!isPlaceableOnDeviceGraph(entry) || entry.nodeKind === undefined) return null;
   switch (entry.nodeKind) {
     case "schedule":
@@ -30,13 +48,16 @@ export function nodeDataFromCatalogEntry(entry: ProcessingCatalogEntry, firstMod
         catalogEntryId: entry.id,
         properties: defaultPropertiesFromFields(entry.fields ?? []),
       };
-    case "block":
+    case "block": {
+      const base = defaultPropertiesFromFields(entry.fields ?? []);
+      const bayProps = bayPropertiesForPlace(entry, baySide ?? (isBayEntry(entry) ? "output" : undefined));
       return {
         kind: "block",
         blockTypeId: entry.typeId ?? "",
         catalogEntryId: entry.id,
-        properties: defaultPropertiesFromFields(entry.fields ?? []),
+        properties: { ...base, ...bayProps },
       };
+    }
     case "rule":
       return {
         kind: "rule",

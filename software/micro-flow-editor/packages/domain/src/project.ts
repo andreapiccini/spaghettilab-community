@@ -192,8 +192,15 @@ export function createEmptyProject(projectId: ProjectId, name: string): ProjectV
   };
 }
 
+/**
+ * Persist a project as JSON. Graph node `data` may contain `bigint` property
+ * values (firmware int64 defaults from the processing catalog) — stringify
+ * those as decimal strings so `JSON.stringify` does not throw
+ * ("Do not know how to serialize a BigInt"), matching the lossless int64
+ * JSON boundary used elsewhere in the stack.
+ */
 export function exportProjectV1(project: ProjectV1): string {
-  return JSON.stringify(project, null, 2);
+  return JSON.stringify(project, (_key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
 }
 
 export function importProjectV1(json: string): Result<ProjectV1, DomainError[]> {

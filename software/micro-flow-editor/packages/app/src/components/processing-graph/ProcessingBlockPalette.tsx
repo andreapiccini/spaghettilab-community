@@ -1,36 +1,28 @@
 import {
-  groupCatalogByCategory,
   isPlaceableOnDeviceGraph,
   searchCatalog,
-  type ProcessingCatalogCategoryId,
   type ProcessingCatalogEntry,
 } from "@spaghettilab/processing-block-catalog";
 import { AnimatePresence, motion } from "motion/react";
-import {
-  Bell,
-  Cable,
-  Calculator,
-  Clock,
-  Cloud,
-  GitBranch,
-  Globe,
-  Monitor,
-  Radio,
-  Search,
-  SlidersHorizontal,
-  Table,
-  Type,
-  Variable,
-  Volume2,
-  Workflow,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
+import { Boxes, Cpu, Search, Zap, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
-import { beginPaletteDrag, endPaletteDrag, PROCESSING_BLOCK_MIME } from "./catalog-to-node.js";
+import { FLOW_START_IDS } from "./dry-run-preview.js";
+import { visualForCatalogEntryId } from "./block-visuals.js";
+import { beginPaletteDrag, endPaletteDrag, encodePaletteDrag, PROCESSING_BLOCK_MIME } from "./catalog-to-node.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
+import { expandPalettePlaceables, groupPlaceablesByFamily, type PalettePlaceable } from "./palette-placeables.js";
+
+/** Authoring surface: only these blocks (plus Schedule trigger). Flow Start is auto-spawned. */
+const PALETTE_ALLOWED_IDS = new Set([
+  "native.schedule",
+  "appblocks.digital_out_toggle",
+  "appblocks.led",
+  "appblocks.rgb_led",
+  "appblocks.relay",
+  "appblocks.terminal_block",
+]);
 
 function catalogEntryNeedsConfiguredPort(entry: ProcessingCatalogEntry): boolean {
   if (entry.needsModule === false) return false;
@@ -38,32 +30,20 @@ function catalogEntryNeedsConfiguredPort(entry: ProcessingCatalogEntry): boolean
   return Boolean(entry.fields?.some((field) => field.id === "line"));
 }
 
-const CATEGORY_ICONS: Record<ProcessingCatalogCategoryId, LucideIcon> = {
-  system: Bell,
-  trigger: Zap,
-  variables: Variable,
-  logic: GitBranch,
-  math: Calculator,
-  filter: SlidersHorizontal,
-  time: Clock,
-  io: Radio,
-  strings: Type,
-  display: Monitor,
-  sound: Volume2,
-  storage: Table,
-  serial: Cable,
-  network: Globe,
-  cloud: Cloud,
-  modbus: Workflow,
+type FamilySectionId = "functionality" | "bay";
+
+const FAMILY_META: Record<FamilySectionId, { label: string; icon: LucideIcon; hint: string }> = {
+  functionality: { label: "Funzionalità", icon: Zap, hint: "Azioni e logica del flusso" },
+  bay: { label: "Bay", icon: Boxes, hint: "Moduli hardware · ingresso a sinistra, uscita a destra" },
 };
 
-const DEFAULT_OPEN: ReadonlySet<ProcessingCatalogCategoryId> = new Set(["trigger", "logic", "math", "filter", "time", "io"]);
+const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "bay"]);
 
 export function ProcessingBlockPalette() {
   const { configuredPorts } = usePortProtocol();
   const portsConfigured = configuredPorts.length > 0;
   const [query, setQuery] = useState("");
-  const [openIds, setOpenIds] = useState<ReadonlySet<ProcessingCatalogCategoryId>>(DEFAULT_OPEN);
+  const [openIds, setOpenIds] = useState<ReadonlySet<FamilySectionId>>(DEFAULT_OPEN);
   const [dragReminder, setDragReminder] = useState(false);
 
   useEffect(() => {
@@ -73,13 +53,21 @@ export function ProcessingBlockPalette() {
   }, [dragReminder]);
 
   const filtered = useMemo(
-    () => searchCatalog(query).filter((e) => e.availability !== "unavailable"),
+    () =>
+      searchCatalog(query).filter(
+        (e) =>
+          PALETTE_ALLOWED_IDS.has(e.id) &&
+          e.availability !== "unavailable" &&
+          !FLOW_START_IDS.has(e.id) &&
+          !FLOW_START_IDS.has(e.typeId ?? ""),
+      ),
     [query],
   );
-  const groups = useMemo(() => groupCatalogByCategory(filtered), [filtered]);
+  const placeables = useMemo(() => expandPalettePlaceables(filtered), [filtered]);
+  const groups = useMemo(() => groupPlaceablesByFamily(placeables), [placeables]);
   const searching = query.trim() !== "";
 
-  function toggle(id: ProcessingCatalogCategoryId) {
+  function toggle(id: FamilySectionId) {
     setOpenIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -87,6 +75,11 @@ export function ProcessingBlockPalette() {
       return next;
     });
   }
+
+  const sections: { id: FamilySectionId; rows: readonly PalettePlaceable[] }[] = [
+    { id: "functionality", rows: groups.functionality },
+    { id: "bay", rows: groups.bay },
+  ];
 
   return (
     <div className="flex h-full w-[260px] shrink-0 flex-col border-r border-border bg-surface">
@@ -102,27 +95,33 @@ export function ProcessingBlockPalette() {
         </label>
       </div>
       <div className="min-h-0 flex-1 overflow-auto px-2 pb-3">
-        {groups.length === 0 ? (
+        {placeables.length === 0 ? (
           <p className="px-2 py-6 text-center font-body text-sm text-ink-faint">Nessun risultato.</p>
         ) : (
-          groups.map(({ category, entries }, index) => {
-            const Icon = CATEGORY_ICONS[category.id];
-            const open = searching || openIds.has(category.id);
+          sections.map(({ id, rows }, index) => {
+            if (rows.length === 0 && searching) return null;
+            const meta = FAMILY_META[id];
+            const Icon = meta.icon;
+            const open = searching || openIds.has(id);
             return (
-              <div key={category.id} className="mb-1">
+              <div key={id} className="mb-1">
                 <button
                   type="button"
-                  onClick={() => toggle(category.id)}
+                  onClick={() => toggle(id)}
                   disabled={searching}
                   className="flex h-10 w-full items-center gap-2 rounded-slsm px-2 text-left hover:bg-surface-raised disabled:hover:bg-transparent"
-                  style={{ opacity: entries.length === 0 ? 0.45 : 1 }}
+                  style={{ opacity: rows.length === 0 ? 0.45 : 1 }}
                 >
                   <motion.span animate={{ rotate: open ? 0 : -90 }} transition={motionTokens.duration.base} className="text-ink-faint">
                     ▾
                   </motion.span>
-                  <span className="flex-1 truncate font-body text-sm font-semibold text-ink">{category.label}</span>
-                  <span className="font-body text-xs text-ink-faint">{entries.length}</span>
+                  <Icon size={14} className="shrink-0 text-ink-muted" />
+                  <span className="min-w-0 flex-1 truncate font-body text-sm font-semibold text-ink">{meta.label}</span>
+                  <span className="font-body text-xs text-ink-faint">{rows.length}</span>
                 </button>
+                {!searching && open && (
+                  <p className="mb-1 px-2 pl-8 font-body text-[10px] leading-snug text-ink-faint">{meta.hint}</p>
+                )}
                 <AnimatePresence initial={false}>
                   {open && (
                     <motion.div
@@ -132,19 +131,29 @@ export function ProcessingBlockPalette() {
                       transition={motionTokens.duration.base}
                       className="overflow-hidden"
                     >
-                      {entries.map((entry, entryIndex) => {
-                        const kindConfig = entry.nodeKind ? PROCESSING_NODE_KIND_CONFIG[entry.nodeKind] : undefined;
+                      {rows.map((row, entryIndex) => {
+                        const kindConfig = row.entry.nodeKind ? PROCESSING_NODE_KIND_CONFIG[row.entry.nodeKind] : undefined;
+                        const catalogVisual = visualForCatalogEntryId(row.entry.id);
+                        const isLed = catalogVisual?.solidSwatch === true;
+                        const isCircular = catalogVisual?.circular === true;
+                        const ledDefault = row.entry.fields?.find((f) => f.id === "color")?.default;
                         return (
-                        <PaletteRow
-                          key={entry.id}
-                          entry={entry}
-                          color={kindConfig?.colorVar ?? "#8A8F99"}
-                          icon={kindConfig?.icon ?? Icon}
-                          delay={index * 0 + entryIndex * motionTokens.stagger.list}
-                          portsConfigured={portsConfigured}
-                          onClickRemind={() => setDragReminder(true)}
-                          onDragBegan={() => setDragReminder(false)}
-                        />
+                          <PaletteRow
+                            key={row.rowKey}
+                            row={row}
+                            color={
+                              isLed && typeof ledDefault === "string"
+                                ? ledDefault
+                                : (catalogVisual?.colorVar ?? kindConfig?.colorVar ?? "#8A8F99")
+                            }
+                            icon={catalogVisual?.icon ?? kindConfig?.icon ?? Icon}
+                            solidSwatch={isLed}
+                            circular={isCircular}
+                            delay={index * 0 + entryIndex * motionTokens.stagger.list}
+                            portsConfigured={portsConfigured}
+                            onClickRemind={() => setDragReminder(true)}
+                            onDragBegan={() => setDragReminder(false)}
+                          />
                         );
                       })}
                     </motion.div>
@@ -165,22 +174,27 @@ export function ProcessingBlockPalette() {
 }
 
 function PaletteRow({
-  entry,
+  row,
   color,
   icon: Icon,
+  solidSwatch = false,
+  circular = false,
   delay,
   portsConfigured,
   onClickRemind,
   onDragBegan,
 }: {
-  readonly entry: ProcessingCatalogEntry;
+  readonly row: PalettePlaceable;
   readonly color: string;
   readonly icon: LucideIcon;
+  readonly solidSwatch?: boolean;
+  readonly circular?: boolean;
   readonly delay: number;
   readonly portsConfigured: boolean;
   readonly onClickRemind: () => void;
   readonly onDragBegan: () => void;
 }) {
+  const entry = row.entry;
   const needsPort = catalogEntryNeedsConfiguredPort(entry);
   const placeable = isPlaceableOnDeviceGraph(entry) && (!needsPort || portsConfigured);
   const badge = !portsConfigured && needsPort ? "serve una Porta" : availabilityBadge(entry);
@@ -204,10 +218,10 @@ function PaletteRow({
             e.preventDefault();
             return;
           }
-          e.dataTransfer.setData(PROCESSING_BLOCK_MIME, entry.id);
+          e.dataTransfer.setData(PROCESSING_BLOCK_MIME, encodePaletteDrag({ entryId: entry.id, baySide: row.baySide }));
           e.dataTransfer.effectAllowed = "copy";
           e.currentTarget.style.opacity = "0.6";
-          beginPaletteDrag(entry.nodeKind);
+          beginPaletteDrag(entry.nodeKind, row.baySide);
           onDragBegan();
         }}
         onDragEnd={(e: DragEvent<HTMLButtonElement>) => {
@@ -217,15 +231,27 @@ function PaletteRow({
         className={`flex h-11 w-full items-center gap-2.5 rounded-lg px-2 text-left ${placeable ? "cursor-grab hover:bg-surface-raised active:cursor-grabbing" : "cursor-not-allowed"}`}
       >
         <div
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
+          className={`flex h-7 w-7 shrink-0 items-center justify-center ${circular ? "rounded-full" : "rounded-md"}`}
           style={{ backgroundColor: placeable ? color : "#E1E4EB" }}
         >
-          <Icon size={14} color={placeable ? "#fff" : "#8A8F99"} />
+          {solidSwatch || circular ? null : <Icon size={14} color={placeable ? "#fff" : "#8A8F99"} />}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="truncate font-body text-sm text-ink">{entry.label}</div>
+          <div className="flex items-center gap-1.5">
+            <div className="truncate font-body text-sm text-ink">{row.label}</div>
+            {row.baySide && (
+              <span
+                className="inline-flex shrink-0 items-center gap-0.5 rounded-[3px] px-1 py-px font-mono text-[9px] font-semibold uppercase tracking-wide text-ink-muted"
+                style={{ outline: "1px solid color-mix(in srgb, #64748B 40%, transparent)" }}
+                title="Modulo hardware (bay)"
+              >
+                <Cpu size={9} strokeWidth={2.5} aria-hidden />
+                Bay
+              </span>
+            )}
+          </div>
           <div className="truncate font-body text-xs text-ink-faint">
-            {badge ? `${badge} · ${entry.subtitle}` : entry.subtitle}
+            {badge ? `${badge} · ${row.subtitle}` : row.subtitle}
           </div>
         </div>
       </button>
