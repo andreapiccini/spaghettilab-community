@@ -663,7 +663,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       {
         ...num(
           "lowToHigh",
-          "Contatore impulsi ON → rising edge",
+          "Contatore impulsi ON",
           1,
           "Quanti trigger Schedule (impulsi) restare OFF prima del rising edge / ON",
         ),
@@ -672,7 +672,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       {
         ...num(
           "highToLow",
-          "Contatore impulsi OFF → falling edge",
+          "Contatore impulsi OFF",
           1,
           "Quanti trigger Schedule (impulsi) restare ON prima del falling edge / OFF",
         ),

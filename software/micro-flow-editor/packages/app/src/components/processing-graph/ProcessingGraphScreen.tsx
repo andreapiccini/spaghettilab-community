@@ -1144,7 +1144,7 @@ function ProcessingGraphScreenInner() {
             </ReactFlow>
 
             {domainNodes.length === 0 && !dropPreview && (
-              <div className="pointer-events-none absolute inset-0 mb-10 flex flex-col items-center justify-center">
+              <div className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center${demoOnly || simulating ? "" : " mb-10"}`}>
                 <Workflow size={48} strokeWidth={1.5} className="text-ink-faint" />
                 <p className="mt-2 font-heading text-lg font-semibold text-ink">{copy.emptyTitle}</p>
                 <p className="mt-2 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white opacity-70">{copy.emptyHint}</p>
@@ -1170,14 +1170,16 @@ function ProcessingGraphScreenInner() {
               </div>
             )}
 
-            <div className="absolute bottom-0 left-0 right-0 flex h-10 items-center gap-2 border-t border-border bg-surface px-4">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: statusColor }} />
-              <span className="font-body text-xs text-ink-muted">{statusText}</span>
-              {hashHex && <span className="font-mono text-xs text-ink-faint">hash: {hashHex}…</span>}
-              <span className="ml-auto font-mono text-xs text-ink-faint">
-                {copy.nodesEdges(domainNodes.length, graphState.edges.length)}
-              </span>
-            </div>
+            {!demoOnly && !simulating && (
+              <div className="absolute bottom-0 left-0 right-0 flex h-10 items-center gap-2 border-t border-border bg-surface px-4">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: statusColor }} />
+                <span className="font-body text-xs text-ink-muted">{statusText}</span>
+                {hashHex && <span className="font-mono text-xs text-ink-faint">hash: {hashHex}…</span>}
+                <span className="ml-auto font-mono text-xs text-ink-faint">
+                  {copy.nodesEdges(domainNodes.length, graphState.edges.length)}
+                </span>
+              </div>
+            )}
           </div>
 
           {inspector && (

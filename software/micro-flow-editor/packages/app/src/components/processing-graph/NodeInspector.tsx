@@ -21,6 +21,7 @@ import { visualForCatalogEntryId } from "./block-visuals.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { commentAfterCatalogChange } from "./catalog-to-node.js";
 import { isLedBlock, isRgbLedBlock, ledColorFromProperties } from "./dry-run-preview.js";
+import { inspectorVisibleFields } from "./inspector-visible-fields.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { withThresholdFirmwareFields } from "./threshold-rule-fields.js";
 import { parseRgbLedConfig, rgbLedVisualAt } from "./rgb-led-model.js";
@@ -146,11 +147,12 @@ export function NodeInspector({
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
   const catalogEntry = catalogEntryForNode(data);
   const localizedEntry = catalogEntry ? localizeCatalogEntry(catalogEntry, locale) : undefined;
-  const namedFields =
+  const catalogFields =
     data.kind === "rule" && data.ruleTypeId === "threshold"
       ? (localizeCatalogEntry(catalogEntry ?? findCatalogEntryById("rule.threshold")!, locale).fields ?? [])
       : (localizedEntry?.fields ?? []);
-  const showModulePicker = data.kind === "schedule" || (data.kind === "event-source" && catalogEntry?.needsModule !== false);
+  const namedFields = inspectorVisibleFields(catalogEntry, catalogFields);
+  const showModulePicker = data.kind === "event-source" && catalogEntry?.needsModule !== false;
   const authoringType = Boolean(data.kind === "block" && data.blockTypeId.startsWith("ab."));
   const { protocolFor, pinMapOf } = usePortProtocol();
   const selectedPortId =
@@ -321,10 +323,6 @@ export function NodeInspector({
               {copy.periodMs}
             </label>
             <input id="ni-period" type="number" value={data.periodMs} onChange={(e) => patch({ periodMs: Number(e.target.value) })} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
-            <label className="mb-4 flex items-center gap-2 font-body text-sm text-ink">
-              <input type="checkbox" checked={data.enabled} onChange={(e) => patch({ enabled: e.target.checked })} />
-              {copy.enabled}
-            </label>
           </>
         )}
 
