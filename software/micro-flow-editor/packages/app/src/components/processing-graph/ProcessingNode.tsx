@@ -76,7 +76,6 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
   const ifAnalogIn = data.ifInput?.kind === "analog";
   const ifThenHigh = data.ifOutput?.thenHigh !== false;
   const ifLiveHigh = data.previewing ? previewOn : ifThenHigh;
-  const ifOutLabel = ifBoolean ? (ifLiveHigh ? "true" : "false") : ifLiveHigh ? "HIGH" : "LOW";
   const ifOutColor = ifBoolean ? "#C026D3" : "#0F766E";
   const ifInColor = ifAnalogIn ? "#0EA5E9" : "#EA580C";
   const subtitle =
@@ -186,7 +185,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         {isIf && (
           <>
             <div
-              className="pointer-events-none absolute left-0 top-0 z-0 flex flex-col items-center justify-center gap-0.5"
+              className="pointer-events-none absolute left-0 top-0 z-0 flex flex-col items-center pt-1"
               style={{
                 width: IF_LANE_WIDTH,
                 height: NODE_HEIGHT,
@@ -195,12 +194,12 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               }}
               aria-hidden
             >
-              <span className="font-mono text-[8px] font-bold uppercase tracking-wide" style={{ color: ifInColor }}>
+              <span className="max-w-full px-0.5 text-center font-mono text-[8px] font-bold uppercase leading-none" style={{ color: ifInColor }}>
                 {ifAnalogIn ? "Analog" : "Digital"}
               </span>
             </div>
             <div
-              className="pointer-events-none absolute right-0 top-0 z-0 flex flex-col items-center justify-center gap-0.5"
+              className="pointer-events-none absolute right-0 top-0 z-0 flex flex-col items-center pt-1"
               style={{
                 width: IF_LANE_WIDTH,
                 height: NODE_HEIGHT,
@@ -209,10 +208,9 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               }}
               aria-hidden
             >
-              <span className="font-mono text-[8px] font-bold uppercase tracking-wide" style={{ color: ifOutColor }}>
+              <span className="max-w-full px-0.5 text-center font-mono text-[8px] font-bold uppercase leading-none" style={{ color: ifOutColor }}>
                 {ifBoolean ? "Bool" : "Digital"}
               </span>
-              <span className="font-mono text-[10px] font-semibold text-ink">{ifOutLabel}</span>
             </div>
           </>
         )}
