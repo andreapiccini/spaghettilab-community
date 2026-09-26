@@ -47,7 +47,7 @@ export type ProcessingNodeKind = "schedule" | "event-source" | "block" | "rule";
 
 /**
  * Authoring axis for the Processing Graph palette:
- * - `functionality` — azioni / logica (es. Digital Out Toggle, Schedule)
+ * - `functionality` — azioni / logica (es. Digital Toggle, Schedule)
  * - `bay` — endpoint legati a moduli hardware reali (es. LED, Relay)
  */
 export type ProcessingBlockFamily = "functionality" | "bay";

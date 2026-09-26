@@ -14,7 +14,7 @@ export const VISITOR_DEMO_TOUR_STEPS: readonly VisitorDemoTourStep[] = [
   {
     target: "flow-node-demo-schedule",
     title: "Firmware functions",
-    body: "Schedule and Digital Out Toggle run in the Core firmware. This is the programmable logic — not a physical module.",
+    body: "Schedule and Digital Toggle run in the Core firmware. This is the programmable logic — not a physical module.",
     side: "right",
   },
   {

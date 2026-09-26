@@ -204,7 +204,7 @@ Visitor demo (Processing Graph only, English, no Core required):
 http://127.0.0.1:5173/?demo=1
 ```
 
-That URL rebuilds the shipped Schedule → Digital Out Toggle → LED graph,
+That URL rebuilds the shipped Schedule → Digital Toggle → LED graph,
 skips the project picker / tour / Core Connections, and auto-runs a local
 LED preview. Click a block to change settings. A production build can lock
 the same mode with `VITE_DEMO_ONLY=1` (`base: './'` is already set for a

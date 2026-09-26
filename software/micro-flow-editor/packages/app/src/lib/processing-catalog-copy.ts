@@ -237,8 +237,8 @@ const PHRASES: Record<string, string> = {
     "Firmware entry point (`spaghetti_runtime_schedule_config`): each period emits activation (wildcard). AppBlocks equivalent: On Time Period. If disabled it is not run.",
   "Entry point firmware: Module che pubblica eventi (`spaghetti_module_manager_start_events`). Output = attivazione (jolly).":
     "Firmware entry point: Module that publishes events (`spaghetti_module_manager_start_events`). Output = activation (wildcard).",
-  "Pallino violetto fisso dentro ogni Schedule (non dalla palette). Solo uscita a destra: collega al Digital Out Toggle o a un altro blocco per scegliere l’entry.":
-    "Fixed violet tick inside every Schedule (not from the palette). Output only on the right: connect to Digital Out Toggle or another block to choose the entry.",
+  "Pallino violetto fisso dentro ogni Schedule (non dalla palette). Solo uscita a destra: collega al Digital Toggle o a un altro blocco per scegliere l’entry.":
+    "Fixed violet tick inside every Schedule (not from the palette). Output only on the right: connect to Digital Toggle or another block to choose the entry.",
   "Il grafo Core è un DAG: `threshold` emette un bool. L'operatore è authoring; il firmware oggi applica ≥ sul field 1.":
     "The Core graph is a DAG: `threshold` emits a bool. The operator is authoring; firmware currently applies ≥ on field 1.",
   "Firmware: Block `add` (e subtract/multiply/divide in palette). L'operatore è visibile in authoring.":
@@ -267,8 +267,8 @@ const PHRASES: Record<string, string> = {
     `${AUTHORING_EN} Sequence player: rising/falling picks the starting edge. “Follows the trigger” turns off on the opposite edge; “Start and do not stop” lets the sequence run. Ready-made effects = parametric sequences; in “My sequence” compose solid/fade/wait. Strip (N LEDs) = one player.`,
   [`${AUTHORING_IT} Relè hardware: chiuso se l’ingresso è HIGH, oppure chiuso se l’ingresso è LOW.`]:
     `${AUTHORING_EN} Hardware relay: closed if the input is HIGH, or closed if the input is LOW.`,
-  "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). Tipo di uscita: Digitale (HIGH/LOW, può comandare LED o Relè) oppure Booleano (true/false, non è un ingresso digitale/analogico).":
-    "One input at a time: Digital Out Toggle (equals / is not equal to HIGH/LOW) or Temperature sensor (equals / is not equal / greater / less). Output type: Digital (HIGH/LOW, can drive a LED or Relay) or Boolean (true/false, not a digital/analog input).",
+  "Un solo ingresso alla volta: Digital Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). Tipo di uscita: Digitale (HIGH/LOW, può comandare LED o Relè) oppure Booleano (true/false, non è un ingresso digitale/analogico).":
+    "One input at a time: Digital Toggle (equals / is not equal to HIGH/LOW) or Temperature sensor (equals / is not equal / greater / less). Output type: Digital (HIGH/LOW, can drive a LED or Relay) or Boolean (true/false, not a digital/analog input).",
   [`${AUTHORING_IT} Sensore hardware: si collega solo a un blocco IF. L’indicatore sotto il blocco serve a provare la temperatura.`]:
     `${AUTHORING_EN} Hardware sensor: connects only to an IF block. The indicator under the block is for testing the temperature.`,
   [`${AUTHORING_IT} Morsettiera bay: fino a 6 canali digital, analog o alimentazione (tensione + direzione ingresso/uscita). Nomi editabili; sul canvas ogni nome sta accanto al pallino.`]:

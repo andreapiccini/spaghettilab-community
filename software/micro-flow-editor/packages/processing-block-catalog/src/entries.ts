@@ -83,7 +83,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     inputs: [],
     outputs: [outPort("0", [T.activationTrigger], "Attivazione")],
     notes:
-      "Pallino violetto fisso dentro ogni Schedule (non dalla palette). Solo uscita a destra: collega al Digital Out Toggle o a un altro blocco per scegliere l’entry.",
+      "Pallino violetto fisso dentro ogni Schedule (non dalla palette). Solo uscita a destra: collega al Digital Toggle o a un altro blocco per scegliere l’entry.",
   }),
   e({
     id: "appblocks.system",
@@ -626,7 +626,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
   }),
   e({
     id: "appblocks.digital_out_toggle",
-    label: "Digital Out Toggle",
+    label: "Digital Toggle",
     subtitle: "Inverti uscita digitale",
     category: "io",
     runtime: "core-block",
@@ -771,7 +771,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       ),
     ],
     notes:
-      "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). Tipo di uscita: Digitale (HIGH/LOW, può comandare LED o Relè) oppure Booleano (true/false, non è un ingresso digitale/analogico).",
+      "Un solo ingresso alla volta: Digital Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). Tipo di uscita: Digitale (HIGH/LOW, può comandare LED o Relè) oppure Booleano (true/false, non è un ingresso digitale/analogico).",
   }),
   e({
     id: "appblocks.led",

@@ -3,7 +3,7 @@ import { buildDryRunPreviewChannels } from "../components/processing-graph/dry-r
 import { buildDemoProject, DEMO_LED_PERIOD_MS } from "./demo-project.js";
 
 describe("buildDemoProject", () => {
-  it("wires Schedule → tick disc → Digital Out Toggle → LED for Dry-run preview", () => {
+  it("wires Schedule → tick disc → Digital Toggle → LED for Dry-run preview", () => {
     const project = buildDemoProject("Demo");
     expect(project).not.toBeNull();
     const graph = project!.deviceGraphs[0]!;
@@ -36,6 +36,7 @@ describe("buildDemoProject", () => {
     ]);
     const led = graph.nodes.find((n) => n.id === "demo-led");
     expect(led?.data).toMatchObject({ kind: "block", catalogEntryId: "appblocks.led" });
+    expect(project!.authoringMetadata["demo-toggle"]?.comment).toBe("Digital Toggle");
     expect(project!.authoringMetadata["demo-led"]?.comment).toBe("LED");
   });
 });
