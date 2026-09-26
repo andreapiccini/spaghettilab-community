@@ -4,7 +4,6 @@ type ProcessingGraphCopy = {
   readonly title: string;
   readonly dryRun: string;
   readonly run: string;
-  readonly demoHint: string;
   readonly running: string;
   readonly stopPreview: string;
   readonly sendToDeploy: string;
@@ -79,7 +78,6 @@ const IT: ProcessingGraphCopy = {
   title: "Processing Graph",
   dryRun: "Dry-run",
   run: "Esegui",
-  demoHint: "Clicca un blocco per cambiare i parametri. Esegui avvia l'anteprima LED in locale — nessun Core serve.",
   running: "In corso…",
   stopPreview: "Ferma anteprima",
   sendToDeploy: "Invia a Deploy",
@@ -156,7 +154,6 @@ const EN: ProcessingGraphCopy = {
   title: "Processing Graph",
   dryRun: "Dry-run",
   run: "Run",
-  demoHint: "Click a block to change its settings. Run starts a local LED preview — no Core needed.",
   running: "Running…",
   stopPreview: "Stop preview",
   sendToDeploy: "Send to Deploy",

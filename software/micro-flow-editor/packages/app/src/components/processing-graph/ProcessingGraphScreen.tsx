@@ -1075,9 +1075,8 @@ function ProcessingGraphScreenInner() {
             <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
           </div>
         )}
-        <h1 className="min-w-0 truncate font-heading text-lg font-semibold text-ink">{copy.title}</h1>
-        {demoOnly && <p className="min-w-0 flex-1 truncate font-body text-xs text-ink-muted">{copy.demoHint}</p>}
-        {!demoOnly && <div className="min-w-0 flex-1" />}
+        <h1 className="min-w-0 truncate font-heading text-lg font-semibold text-ink">{demoOnly ? "Flow" : copy.title}</h1>
+        <div className="min-w-0 flex-1" />
         <button
           type="button"
           onClick={() => void handleDryRun()}
