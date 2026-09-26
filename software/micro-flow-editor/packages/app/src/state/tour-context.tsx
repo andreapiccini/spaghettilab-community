@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { isDemoOnlyEnabled } from "../lib/demo-only.js";
 import { localStorageAdapter } from "../lib/repository.js";
 import { readTourSeenFromLocalStorage, saveTourSeen } from "../lib/tour.js";
 import { useSession } from "./session-context.js";
@@ -37,7 +38,7 @@ export function TourProvider({ children }: { readonly children: ReactNode }) {
   const [seenSession, setSeenSession] = useState<typeof session>(null);
   if (session && session !== seenSession) {
     setSeenSession(session);
-    if (!readTourSeenFromLocalStorage()) setPending(true);
+    if (!isDemoOnlyEnabled() && !readTourSeenFromLocalStorage()) setPending(true);
   }
 
   // Fires the moment a project is actually open, whether that's the arming
@@ -45,8 +46,8 @@ export function TourProvider({ children }: { readonly children: ReactNode }) {
   // clicked) or a later one (armed from the ProjectPicker, project opened
   // afterwards) — same render-time pattern as above, not a useEffect: this
   // only touches TourProvider's own state, which render-time adjustment is
-  // fine for.
-  if (session && pending) {
+  // fine for. Demo-only never arms: visitors stay on Processing Graph.
+  if (session && pending && !isDemoOnlyEnabled()) {
     setPending(false);
     setStepIndex(0);
     setActive(true);

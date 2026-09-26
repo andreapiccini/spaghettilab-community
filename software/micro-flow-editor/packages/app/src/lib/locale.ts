@@ -20,6 +20,11 @@ export function parseLocale(raw: string | null | undefined): LocaleId {
   return SUPPORTED_LOCALES.some((locale) => locale.id === raw) ? (raw as LocaleId) : DEFAULT_LOCALE;
 }
 
+/** Demo-only locks the host chrome to English; stored locale is left untouched. */
+export function resolveLocale(raw: string | null | undefined, demoOnly = false): LocaleId {
+  return demoOnly ? "en" : parseLocale(raw);
+}
+
 export function localeMeta(id: LocaleId): (typeof SUPPORTED_LOCALES)[number] {
   return SUPPORTED_LOCALES.find((locale) => locale.id === id) ?? SUPPORTED_LOCALES[0];
 }

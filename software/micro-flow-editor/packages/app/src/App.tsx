@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "./components/shell/AppShell.js";
 import { ScreenStub } from "./components/shell/ScreenStub.js";
 import { ProjectPicker } from "./components/project-picker/ProjectPicker.js";
@@ -19,6 +19,9 @@ import { DatasheetsScreen } from "./components/coming-soon/DatasheetsScreen.js";
 import { SettingsModal } from "./components/settings-modal/SettingsModal.js";
 import { NextStepHint } from "./components/shell/NextStepHint.js";
 import { TourOverlay } from "./components/shell/TourOverlay.js";
+import { isDemoOnlyEnabled, isScreenAllowedInDemo } from "./lib/demo-only.js";
+import { prepareDemoProject } from "./lib/open-demo.js";
+import { publicAsset } from "./lib/public-asset.js";
 import { isScreenVisibleInMode } from "./lib/ui-mode.js";
 import { CoreSessionsProvider } from "./state/core-sessions-context.js";
 import { LocaleProvider } from "./state/locale-context.js";
@@ -41,15 +44,61 @@ const SCREEN_TITLES: Record<string, { readonly title: string; readonly task: str
     "settings-security": { title: "Sicurezza e recupero", task: "UI-S120" },
   };
 
+function useDemoOnlyBootstrap() {
+  const { session, openProject } = useSession();
+  const [error, setError] = useState<string | null>(null);
+  const [booting, setBooting] = useState(() => isDemoOnlyEnabled());
+
+  useEffect(() => {
+    if (!isDemoOnlyEnabled()) return;
+    let cancelled = false;
+    void (async () => {
+      const result = await prepareDemoProject();
+      if (cancelled) return;
+      if (!result.ok) {
+        setError(result.kind === "build" ? "Could not create the demo project." : `Could not create the demo project: ${result.detail}`);
+        setBooting(false);
+        return;
+      }
+      openProject(result.project.projectId, result.project, { screen: "processing-graph" });
+      setBooting(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [openProject]);
+
+  return { error, booting, session };
+}
+
+function DemoBootScreen({ error }: { readonly error?: string | null }) {
+  return (
+    <div className="flex h-screen flex-col items-center justify-center gap-3 bg-surface">
+      <img src={publicAsset("ux-assets/logo-full.png")} alt="Spaghetti LAB" className="h-8" />
+      <p className="font-body text-sm text-ink-muted">{error ?? "Opening the Processing Graph demo…"}</p>
+    </div>
+  );
+}
+
 function AppContent() {
   const { session, activeScreen, navigate } = useSession();
   const { mode } = useUiMode();
+  const demoOnly = isDemoOnlyEnabled();
+  const { error: demoError, booting: demoBooting } = useDemoOnlyBootstrap();
 
   useEffect(() => {
+    if (demoOnly) {
+      if (session && !isScreenAllowedInDemo(activeScreen)) navigate("processing-graph");
+      return;
+    }
     if (!isScreenVisibleInMode(activeScreen, mode)) {
       navigate("core-connections");
     }
-  }, [activeScreen, mode, navigate]);
+  }, [activeScreen, mode, navigate, demoOnly, session]);
+
+  if (demoOnly && (demoBooting || demoError || !session)) {
+    return <DemoBootScreen error={demoError} />;
+  }
 
   if (!session) return <ProjectPicker />;
 
@@ -200,9 +249,9 @@ export default function App() {
                 <TourProvider>
                   <CoreSessionsProvider>
                     <AppContent />
-                    <SettingsModal />
-                    <TourOverlay />
-                    <NextStepHint />
+                    {!isDemoOnlyEnabled() && <SettingsModal />}
+                    {!isDemoOnlyEnabled() && <TourOverlay />}
+                    {!isDemoOnlyEnabled() && <NextStepHint />}
                   </CoreSessionsProvider>
                 </TourProvider>
               </PortProtocolProvider>

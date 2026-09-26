@@ -83,6 +83,8 @@ function spaghettiExtensions(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Relative base so a static build can live on GitHub Pages (or any subpath).
+  base: "./",
   plugins: [react(), tailwindcss(), spaghettiUsbBridge(), spaghettiExtensions()],
   server: {
     host: "0.0.0.0",

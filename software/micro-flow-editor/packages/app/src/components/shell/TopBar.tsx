@@ -1,6 +1,8 @@
 import { MoreVertical, Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { chromeCopy } from "../../lib/chrome-copy.js";
+import { isDemoOnlyEnabled } from "../../lib/demo-only.js";
+import { publicAsset } from "../../lib/public-asset.js";
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { useSettingsModal } from "../../state/settings-modal-context.js";
@@ -31,10 +33,22 @@ export function TopBar() {
 
   if (!session) return null;
 
+  if (isDemoOnlyEnabled()) {
+    return (
+      <header className="flex h-14 items-center justify-between border-b border-border bg-surface px-4">
+        <div className="flex items-center gap-3">
+          <img src={publicAsset("ux-assets/icon-transparent-28@2x.png")} alt="" className="h-7 w-7" />
+          <span className="font-heading text-sm font-semibold text-ink">Processing Graph</span>
+          <span className="font-body text-xs text-ink-muted">Interactive demo — no hardware required</span>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-surface px-4">
       <div className="flex items-center gap-3">
-        <img src="/ux-assets/icon-transparent-28@2x.png" alt="" className="h-7 w-7" />
+        <img src={publicAsset("ux-assets/icon-transparent-28@2x.png")} alt="" className="h-7 w-7" />
         {/* Undo/redo buttons hidden for now — no keyboard shortcut backs them, they were
             the only entry point, and it's unclear yet whether surfacing undo/redo here is
             right for every flow. undo()/redo() themselves are untouched in session-context. */}

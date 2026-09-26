@@ -16,6 +16,7 @@ import { portCardId } from "../physical-composition/ConfiguredPortNode.js";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
 import { localizeCatalogEntry, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
+import { isDemoOnlyEnabled } from "../../lib/demo-only.js";
 import { useLocale } from "../../state/locale-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
 import {
@@ -97,6 +98,9 @@ function ProcessingGraphScreenInner() {
   const { session, execute, navigate } = useSession();
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
+  const demoOnly = isDemoOnlyEnabled();
+  const demoAutoStarted = useRef(false);
+  const demoInspectorSeeded = useRef(false);
   const { configuredPorts, pinMapOf, protocolFor, selectedBindingId, setSelectedBindingId } = usePortProtocol();
   const bindings = session?.stack.current.coreBindings ?? [];
 
@@ -174,6 +178,15 @@ function ProcessingGraphScreenInner() {
   const moduleNodes = physicalGraphState.nodes as readonly GraphNode<"physical-composition", string, PhysicalCompositionNodeData>[];
   const projectAuthoringMetadata = session?.stack.current.authoringMetadata;
   const authoringMetadata = useMemo(() => projectAuthoringMetadata ?? {}, [projectAuthoringMetadata]);
+
+  useEffect(() => {
+    if (!demoOnly || demoInspectorSeeded.current) return;
+    const schedule = domainNodes.find((n) => n.id === "demo-schedule");
+    if (!schedule) return;
+    demoInspectorSeeded.current = true;
+    const meta = authoringMetadata[schedule.id];
+    setInspector({ kind: "edit", nodeId: schedule.id, data: schedule.data, comment: meta?.comment ?? "" });
+  }, [demoOnly, domainNodes, authoringMetadata]);
 
   const moduleOptions = useMemo(() => {
     const fromModules = moduleNodes
@@ -1027,6 +1040,14 @@ function ProcessingGraphScreenInner() {
     }
   }
 
+  useEffect(() => {
+    if (!demoOnly || demoAutoStarted.current || graphState.nodes.length === 0) return;
+    demoAutoStarted.current = true;
+    void handleDryRun();
+    // First visitor paint only — later graph edits keep the live preview loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoOnly, graphState.nodes.length]);
+
   const canDeploy = dryRun !== null && errorCount === 0;
   const statusColor = simulating
     ? "#F5C518"
@@ -1048,21 +1069,29 @@ function ProcessingGraphScreenInner() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-14 shrink-0 items-center gap-3 overflow-hidden border-b border-border bg-surface px-4">
-        <div className="shrink-0">
-          <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
-        </div>
-        <h1 className="min-w-0 flex-1 truncate font-heading text-lg font-semibold text-ink">{copy.title}</h1>
+        {!demoOnly && (
+          <div className="shrink-0">
+            <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
+          </div>
+        )}
+        <h1 className="min-w-0 truncate font-heading text-lg font-semibold text-ink">{copy.title}</h1>
+        {demoOnly && <p className="min-w-0 flex-1 truncate font-body text-xs text-ink-muted">{copy.demoHint}</p>}
+        {!demoOnly && <div className="min-w-0 flex-1" />}
         <button
           type="button"
           onClick={() => void handleDryRun()}
           disabled={running}
-          className={`flex shrink-0 items-center gap-1.5 rounded-slpill border px-3 py-1.5 font-body text-sm disabled:opacity-50 ${
-            simulating ? "border-[#F5C518] text-ink" : "border-border-strong text-ink"
+          className={`flex shrink-0 items-center gap-1.5 rounded-slpill px-4 py-1.5 font-body-strong text-sm disabled:opacity-50 ${
+            simulating
+              ? "border border-[#F5C518] text-ink"
+              : demoOnly
+                ? "bg-brand-blue text-white hover:bg-brand-blue-dark"
+                : "border border-border-strong font-body text-ink"
           }`}
           style={simulating ? { backgroundColor: "color-mix(in srgb, #F5C518 14%, transparent)" } : undefined}
         >
           {simulating ? <Square size={14} fill="currentColor" /> : <PlayCircle size={16} />}
-          {running ? copy.running : simulating ? copy.stopPreview : copy.dryRun}
+          {running ? copy.running : simulating ? copy.stopPreview : demoOnly ? copy.run : copy.dryRun}
         </button>
         {errorCount > 0 && (
           <span className="flex shrink-0 items-center gap-1.5 rounded-slpill px-3 py-1.5 font-body text-sm text-error" style={{ backgroundColor: "color-mix(in srgb, var(--color-error) 10%, transparent)" }}>
@@ -1070,9 +1099,11 @@ function ProcessingGraphScreenInner() {
             {copy.errorsCount(errorCount)}
           </span>
         )}
-        <button type="button" disabled={!canDeploy} onClick={() => navigate("deploy-diff")} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-          {copy.sendToDeploy}
-        </button>
+        {!demoOnly && (
+          <button type="button" disabled={!canDeploy} onClick={() => navigate("deploy-diff")} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
+            {copy.sendToDeploy}
+          </button>
+        )}
       </div>
 
       {!selected ? (
@@ -1081,7 +1112,7 @@ function ProcessingGraphScreenInner() {
         </div>
       ) : (
         <div className="relative flex flex-1 overflow-hidden">
-          <ProcessingBlockPalette />
+          {!demoOnly && <ProcessingBlockPalette />}
 
           <div className="relative flex-1" onDragOver={onCanvasDragOver} onDragLeave={() => { setDropPreview(null); setContainerHint(null); }} onDrop={onCanvasDrop}>
             <ReactFlow
@@ -1103,7 +1134,7 @@ function ProcessingGraphScreenInner() {
               isValidConnection={isValidConnection}
               onNodeClick={onNodeClick}
               onInit={setRf}
-              deleteKeyCode={["Backspace", "Delete"]}
+              deleteKeyCode={demoOnly ? null : ["Backspace", "Delete"]}
               defaultEdgeOptions={{ type: "deletable", interactionWidth: 24, style: { stroke: "var(--color-ink-faint)", strokeWidth: 1.75 } }}
               fitView
             >
@@ -1160,7 +1191,7 @@ function ProcessingGraphScreenInner() {
               knownModuleNodeIds={knownModuleNodeIds}
               onSave={handleSave}
               onApply={handleApply}
-              onDelete={inspector.kind === "edit" ? handleDelete : undefined}
+              onDelete={!demoOnly && inspector.kind === "edit" ? handleDelete : undefined}
               onClose={() => setInspector(null)}
             />
           )}

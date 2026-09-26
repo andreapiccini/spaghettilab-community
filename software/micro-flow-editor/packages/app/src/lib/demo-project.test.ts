@@ -15,6 +15,10 @@ describe("buildDemoProject", () => {
         highTicks: 1,
         lowTicks: 1,
         initialHigh: true,
+        toggleMode: "astable",
+        pulseMs: 100,
+        rgbActuators: [],
+        rgbDrive: "line",
         toggleIds: ["demo-toggle"],
         startIds: ["dp-tick-demo-schedule"],
         actuators: [
@@ -32,6 +36,6 @@ describe("buildDemoProject", () => {
     ]);
     const led = graph.nodes.find((n) => n.id === "demo-led");
     expect(led?.data).toMatchObject({ kind: "block", catalogEntryId: "appblocks.led" });
-    expect(project!.authoringMetadata["demo-led"]?.comment).toBe("LED · uscita");
+    expect(project!.authoringMetadata["demo-led"]?.comment).toBe("LED");
   });
 });

@@ -8,6 +8,8 @@ import { nodeDataFromCatalogEntry } from "../components/processing-graph/catalog
 /** Schedule period for the demo — each tick toggles Digital Out → LED. */
 export const DEMO_LED_PERIOD_MS = 1000;
 
+export const DEMO_PROJECT_NAME = "Demo";
+
 /**
  * A explorable, pre-populated project — no real Core behind it (the binding
  * has no connection profile, so "Connetti" on it will fail cleanly like any
@@ -89,7 +91,7 @@ export function buildDemoProject(name: string): ProjectV1 | null {
   // Fixed tick + Toggle inside Schedule; LED bay uscita outside to the right.
   if (!placeDevice(startId, startData, "", { x: 40, y: 86 })) return null;
   if (!placeDevice(toggleId, toggleData, "Digital Out Toggle", { x: 160, y: 160 })) return null;
-  if (!placeDevice(ledId, ledData, "LED · uscita", { x: 420, y: 160 })) return null;
+  if (!placeDevice(ledId, ledData, "LED", { x: 420, y: 160 })) return null;
   if (!stack.execute(addGraphEdgeCommand(device, { id: "demo-edge-1", source: scheduleId, target: startId, sourceHandle: "0", targetHandle: "0" })).ok) return null;
   if (!stack.execute(addGraphEdgeCommand(device, { id: "demo-edge-2", source: startId, target: toggleId, sourceHandle: "0", targetHandle: "0" })).ok) return null;
   if (!stack.execute(addGraphEdgeCommand(device, { id: "demo-edge-3", source: toggleId, target: ledId, sourceHandle: "0", targetHandle: "0" })).ok) return null;

@@ -2,10 +2,11 @@ import { importProjectV1, projectId as parseProjectId, type ProjectId } from "@s
 import { FolderPlus, Plus, PlayCircle, Search, Settings, Upload } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { buildDemoProject } from "../../lib/demo-project.js";
+import { DEMO_PROJECT_NAME } from "../../lib/demo-project.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
-import { localStorageAdapter, projectRepository } from "../../lib/repository.js";
-import { saveTourSeen } from "../../lib/tour.js";
+import { prepareDemoProject } from "../../lib/open-demo.js";
+import { publicAsset } from "../../lib/public-asset.js";
+import { projectRepository } from "../../lib/repository.js";
 import { projectPickerCopy } from "../../lib/project-picker-copy.js";
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
@@ -15,8 +16,6 @@ import { NewProjectDialog } from "./NewProjectDialog.js";
 import { ProjectCard } from "./ProjectCard.js";
 
 export type ProjectSummary = { readonly projectId: ProjectId; readonly name: string; readonly coreBindingCount: number };
-
-const DEMO_PROJECT_NAME = "Demo";
 
 type LoadState = { readonly kind: "loading" } | { readonly kind: "error"; readonly message: string } | { readonly kind: "loaded"; readonly projects: readonly ProjectSummary[] };
 
@@ -42,7 +41,7 @@ async function loadSummaries(): Promise<LoadState> {
 }
 
 export function ProjectPicker() {
-  const { openProject, navigate } = useSession();
+  const { openProject } = useSession();
   const { openSettings } = useSettingsModal();
   const { locale } = useLocale();
   const copy = projectPickerCopy(locale);
@@ -79,25 +78,16 @@ export function ProjectPicker() {
   // can blink the LED without Deploy. Marks the shell tour seen so it does not
   // yank navigation back to Core Connections over the graph we just opened.
   const openDemo = useCallback(async () => {
-    try {
-      const existing = state.kind === "loaded" ? state.projects.find((p) => p.name === DEMO_PROJECT_NAME) : undefined;
-      if (existing) {
-        await projectRepository.remove(existing.projectId);
-      }
-      const demo = buildDemoProject(DEMO_PROJECT_NAME);
-      if (!demo) {
-        setState({ kind: "error", message: copy.demoFailed });
-        return;
-      }
-      await projectRepository.save(demo);
-      await saveTourSeen(localStorageAdapter, true);
-      openProject(demo.projectId, demo);
-      navigate("processing-graph");
-    } catch (cause) {
-      const detail = cause instanceof Error ? cause.message : copy.unknownError;
-      setState({ kind: "error", message: copy.demoFailedDetail(detail) });
+    const result = await prepareDemoProject();
+    if (!result.ok) {
+      setState({
+        kind: "error",
+        message: result.kind === "build" ? copy.demoFailed : copy.demoFailedDetail(result.detail),
+      });
+      return;
     }
-  }, [openProject, navigate, state, copy]);
+    openProject(result.project.projectId, result.project, { screen: "processing-graph" });
+  }, [openProject, copy]);
 
   const handleImportFile = useCallback(
     async (file: File) => {
@@ -121,7 +111,7 @@ export function ProjectPicker() {
   return (
     <div className="flex h-full flex-col bg-surface">
       <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <img src="/ux-assets/logo-full.png" alt="Spaghetti LAB" className="h-8" />
+        <img src={publicAsset("ux-assets/logo-full.png")} alt="Spaghetti LAB" className="h-8" />
         <div className="flex items-center gap-2">
           <ChromeStatus />
           <button

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { isDemoOnlyEnabled } from "../lib/demo-only.js";
 import { localStorageAdapter } from "../lib/repository.js";
-import { readLocaleFromLocalStorage, saveLocale, type LocaleId } from "../lib/locale.js";
+import { readLocaleFromLocalStorage, resolveLocale, saveLocale, type LocaleId } from "../lib/locale.js";
 
 type LocaleContextValue = {
   readonly locale: LocaleId;
@@ -10,10 +11,13 @@ type LocaleContextValue = {
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 
 export function LocaleProvider({ children }: { readonly children: ReactNode }) {
-  const [locale, setLocaleState] = useState<LocaleId>(readLocaleFromLocalStorage);
+  const demoOnly = isDemoOnlyEnabled();
+  const [stored, setStored] = useState<LocaleId>(readLocaleFromLocalStorage);
+  const locale = resolveLocale(stored, demoOnly);
 
   const setLocale = useCallback((next: LocaleId) => {
-    setLocaleState(next);
+    if (isDemoOnlyEnabled()) return;
+    setStored(next);
     void saveLocale(localStorageAdapter, next);
   }, []);
 

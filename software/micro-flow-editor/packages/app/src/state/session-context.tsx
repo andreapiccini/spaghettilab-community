@@ -20,7 +20,7 @@ type SessionState = {
 type SessionContextValue = {
   readonly session: SessionState | null;
   readonly activeScreen: ScreenId;
-  openProject(projectId: ProjectId, project: ProjectV1): void;
+  openProject(projectId: ProjectId, project: ProjectV1, options?: { readonly screen?: ScreenId }): void;
   closeProject(): void;
   /** Bumped on every `execute()`/`undo()`/`redo()` so consumers re-render — `CommandStack` itself is a plain mutable class, not React state. */
   revision: number;
@@ -41,9 +41,9 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
   const [revision, setRevision] = useState(0);
   const [dirty, setDirty] = useState(false);
 
-  const openProject = useCallback((projectId: ProjectId, project: ProjectV1) => {
+  const openProject = useCallback((projectId: ProjectId, project: ProjectV1, options?: { readonly screen?: ScreenId }) => {
     setSession({ projectId, stack: new CommandStack(project) });
-    setActiveScreen("core-connections");
+    setActiveScreen(options?.screen ?? "core-connections");
     setRevision((r) => r + 1);
     setDirty(false);
   }, []);

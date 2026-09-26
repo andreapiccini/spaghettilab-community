@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Boxes, Cpu, Search, Zap, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { DEMO_PALETTE_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
@@ -44,6 +45,7 @@ const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "ba
 export function ProcessingBlockPalette() {
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
+  const demoOnly = isDemoOnlyEnabled();
   const { configuredPorts } = usePortProtocol();
   const portsConfigured = configuredPorts.length > 0;
   const [query, setQuery] = useState("");
@@ -60,12 +62,12 @@ export function ProcessingBlockPalette() {
     () =>
       searchCatalog(query).filter(
         (e) =>
-          PALETTE_ALLOWED_IDS.has(e.id) &&
+          (demoOnly ? (DEMO_PALETTE_IDS as readonly string[]).includes(e.id) : PALETTE_ALLOWED_IDS.has(e.id)) &&
           e.availability !== "unavailable" &&
           !FLOW_START_IDS.has(e.id) &&
           !FLOW_START_IDS.has(e.typeId ?? ""),
       ),
-    [query],
+    [query, demoOnly],
   );
   const placeables = useMemo(() => expandPalettePlaceables(filtered, locale), [filtered, locale]);
   const groups = useMemo(() => groupPlaceablesByFamily(placeables), [placeables]);
