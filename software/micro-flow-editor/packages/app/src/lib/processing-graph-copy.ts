@@ -85,6 +85,9 @@ type ProcessingGraphCopy = {
   readonly ifSentenceToggle: string;
   readonly ifSentenceTemp: string;
   readonly ifSentenceThen: string;
+  readonly ifSentenceElse: string;
+  readonly ifThenShort: string;
+  readonly ifElseShort: string;
   readonly ifOutputType: string;
   readonly ifOutputDigital: string;
   readonly ifOutputBoolean: string;
@@ -193,6 +196,9 @@ const IT: ProcessingGraphCopy = {
   ifSentenceToggle: "TOGGLE",
   ifSentenceTemp: "SENSORE TEMPERATURA",
   ifSentenceThen: "allora uscita",
+  ifSentenceElse: "altrimenti",
+  ifThenShort: "allora",
+  ifElseShort: "altrimenti",
   ifOutputType: "Tipo di uscita",
   ifOutputDigital: "Digitale",
   ifOutputBoolean: "Booleano",
@@ -289,6 +295,9 @@ const EN: ProcessingGraphCopy = {
   ifSentenceToggle: "TOGGLE",
   ifSentenceTemp: "TEMPERATURE SENSOR",
   ifSentenceThen: "then output",
+  ifSentenceElse: "else",
+  ifThenShort: "then",
+  ifElseShort: "else",
   ifOutputType: "Output type",
   ifOutputDigital: "Digital",
   ifOutputBoolean: "Boolean",

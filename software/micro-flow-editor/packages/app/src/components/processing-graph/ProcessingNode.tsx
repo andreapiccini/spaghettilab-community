@@ -267,10 +267,15 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             </div>
             <div
               className={`${isIf ? "whitespace-normal break-words leading-tight" : "truncate"} font-body text-xs text-ink-faint`}
-              title={subtitle}
+              title={isIf ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ") : subtitle}
             >
               {subtitle}
             </div>
+            {isIf && data.ifOutput?.thenElse && (
+              <div className="truncate font-mono text-[10px] text-ink-muted" title={data.ifOutput.thenElse}>
+                {data.ifOutput.thenElse}
+              </div>
+            )}
           </div>
         </div>
 

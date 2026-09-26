@@ -34,6 +34,7 @@ export type IfActuatorDrive = {
   readonly ifId: string;
   readonly compare: CompareOp;
   readonly thenOutput: "high" | "low";
+  readonly elseOutput: "high" | "low";
   readonly compareLevel: "high" | "low";
   readonly compareTempC: number;
   readonly source:
@@ -400,14 +401,21 @@ export function numberFromProperty(raw: unknown, fallback: number): number {
   return n;
 }
 
+export function elseOutputFromProperties(properties: Readonly<Record<string, unknown>>): "high" | "low" {
+  if (properties.elseOutput === "high" || properties.elseOutput === "true") return "high";
+  if (properties.elseOutput === "low" || properties.elseOutput === "false") return "low";
+  return properties.thenOutput === "low" || properties.thenOutput === "false" ? "high" : "low";
+}
+
 export function evaluateIfDrive(elapsedMs: number, channel: DryRunPreviewChannel, drive: IfActuatorDrive): boolean {
   if (drive.source.kind === "none") return false;
   const thenHigh = drive.thenOutput !== "low";
+  const elseHigh = drive.elseOutput !== "low";
   const met =
     drive.source.kind === "temperature"
       ? compareNumeric(drive.compare, drive.source.testC, drive.compareTempC)
       : compareDigital(drive.compare, lineHighAtElapsed(elapsedMs, channel), drive.compareLevel !== "low");
-  return met ? thenHigh : !thenHigh;
+  return met ? thenHigh : elseHigh;
 }
 
 function driveFollowsTogglePath(drive: ActuatorDrive | undefined, passedToggle: boolean): boolean {
@@ -463,6 +471,7 @@ function ifDriveFromNode(
     ifId,
     compare: compareOpFromProperties(data.properties),
     thenOutput: data.properties.thenOutput === "low" ? "low" : "high",
+    elseOutput: elseOutputFromProperties(data.properties),
     compareLevel: data.properties.compareLevel === "low" ? "low" : "high",
     compareTempC: numberFromProperty(data.properties.compareTempC, 25),
     source,

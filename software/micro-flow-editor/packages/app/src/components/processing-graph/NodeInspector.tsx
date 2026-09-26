@@ -23,6 +23,7 @@ import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { commentAfterCatalogChange } from "./catalog-to-node.js";
 import { ifSourceKind } from "./connection-rules.js";
 import {
+  elseOutputFromProperties,
   isCompareIf,
   isLedBlock,
   isRelayBlock,
@@ -917,6 +918,7 @@ function DemoIfSentence({
   const compare = (properties.compare as CompareOp | undefined) ?? "eq";
   const compareLevel = properties.compareLevel === "low" ? "low" : "high";
   const thenOutput = properties.thenOutput === "low" ? "low" : "high";
+  const elseOutput = elseOutputFromProperties(properties);
   const compareTempC = numberFromProperty(properties.compareTempC, 25);
   const ops = source === "toggle" ? IF_COMPARE_TOGGLE : IF_COMPARE_TEMP;
 
@@ -974,6 +976,17 @@ function DemoIfSentence({
         <select
           value={thenOutput}
           onChange={(event) => set({ thenOutput: event.target.value })}
+          className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-body text-sm outline-none"
+        >
+          <option value="high">{booleanOut ? "true" : "HIGH"}</option>
+          <option value="low">{booleanOut ? "false" : "LOW"}</option>
+        </select>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span>{copy.ifSentenceElse}</span>
+        <select
+          value={elseOutput}
+          onChange={(event) => set({ elseOutput: event.target.value })}
           className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-body text-sm outline-none"
         >
           <option value="high">{booleanOut ? "true" : "HIGH"}</option>

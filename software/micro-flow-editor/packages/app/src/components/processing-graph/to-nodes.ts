@@ -9,7 +9,7 @@ import { ifSourceKind } from "./connection-rules.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
-import { compareOpFromProperties, hysteresisTicksFromProperties, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
+import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
 import { FLOW_START_SIZE } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -80,10 +80,12 @@ export type ProcessingNodeUiData = {
     readonly max: number;
     readonly onChange?: (celsius: number) => void;
   };
-  /** IF: output lane kind + configured then-level (HIGH/true vs LOW/false). */
+  /** IF: output lane kind + configured then / else levels. */
   readonly ifOutput?: {
     readonly kind: "digital" | "boolean";
     readonly thenHigh: boolean;
+    readonly elseHigh: boolean;
+    readonly thenElse: string;
   };
 };
 
@@ -114,7 +116,7 @@ export function toProcessingNodes(
     const isTick = accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
     const ports = portsForNode(data);
     const ifLane = isBlockNodeData(data) && isCompareIf(data);
-    const cardHeight = isTick ? FLOW_START_SIZE : nodeHeightForPorts(ports);
+    const cardHeight = isTick ? FLOW_START_SIZE : nodeHeightForPorts(ports) + (ifLane ? 18 : 0);
     const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports) + (ifLane ? 24 : 0);
     return {
       id: node.id,
@@ -173,7 +175,7 @@ export function toProcessingNodes(
           : {}),
         ...accent,
         ...toggleWaveFields(data),
-        ...ifOutputFields(data),
+        ...ifOutputFields(data, locale),
         ...bayChromeFields(data),
       },
     };
@@ -227,12 +229,19 @@ function compareSymbol(op: CompareOp): string {
   }
 }
 
-function ifOutputFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiData, "ifOutput"> {
+function ifOutputFields(data: DeviceProcessingNodeData, locale: LocaleId): Pick<ProcessingNodeUiData, "ifOutput"> {
   if (!isCompareIf(data) || !isBlockNodeData(data)) return {};
+  const kind = ifOutputType(data);
+  const thenHigh = data.properties.thenOutput !== "low" && data.properties.thenOutput !== "false";
+  const elseHigh = elseOutputFromProperties(data.properties) === "high";
+  const copy = processingGraphCopy(locale);
+  const level = (high: boolean) => (kind === "boolean" ? (high ? "true" : "false") : high ? "HIGH" : "LOW");
   return {
     ifOutput: {
-      kind: ifOutputType(data),
-      thenHigh: data.properties.thenOutput !== "low" && data.properties.thenOutput !== "false",
+      kind,
+      thenHigh,
+      elseHigh,
+      thenElse: `${copy.ifThenShort} ${level(thenHigh)} · ${copy.ifElseShort} ${level(elseHigh)}`,
     },
   };
 }

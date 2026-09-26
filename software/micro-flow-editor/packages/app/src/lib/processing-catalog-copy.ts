@@ -222,6 +222,7 @@ const PHRASES: Record<string, string> = {
   "Temperatura (°C)": "Temperature (°C)",
   "Soglia in °C": "Threshold in °C",
   "allora uscita": "then output",
+  altrimenti: "else",
   "Tipo di uscita": "Output type",
   Booleano: "Boolean",
   "Chiuso quando l'ingresso è": "Closed if input is",

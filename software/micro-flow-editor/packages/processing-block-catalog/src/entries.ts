@@ -751,6 +751,15 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
         ],
         "high",
       ),
+      sel(
+        "elseOutput",
+        "altrimenti",
+        [
+          { value: "high", label: "HIGH" },
+          { value: "low", label: "LOW" },
+        ],
+        "low",
+      ),
     ],
     notes:
       "Un solo ingresso alla volta: Digital Out Toggle (uguale / diverso da HIGH/LOW) oppure Sensore temperatura (uguale / diverso / maggiore / minore). Tipo di uscita: Digitale (HIGH/LOW, può comandare LED o Relè) oppure Booleano (true/false, non è un ingresso digitale/analogico).",
