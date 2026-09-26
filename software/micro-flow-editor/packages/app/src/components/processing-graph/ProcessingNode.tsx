@@ -124,7 +124,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
       : undefined;
 
   return (
-    <div className="group relative" style={{ width: cardWidth }}>
+    <div className="group relative" style={{ width: cardWidth }} data-tour-target={`flow-node-${id}`}>
       <HoverDeleteButton
         id={id}
         label={copy.deleteBlock}

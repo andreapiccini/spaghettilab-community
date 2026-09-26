@@ -17,6 +17,7 @@ import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.j
 import { localizeCatalogEntry, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { isDemoOnlyEnabled } from "../../lib/demo-only.js";
+import { VisitorDemoTour } from "./VisitorDemoTour.js";
 import { useLocale } from "../../state/locale-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
 import {
@@ -1069,6 +1070,7 @@ function ProcessingGraphScreenInner() {
 
   return (
     <div className="flex h-full flex-col">
+      {demoOnly && <VisitorDemoTour enabled />}
       <div className="flex h-14 shrink-0 items-center gap-3 overflow-hidden border-b border-border bg-surface px-4">
         {!demoOnly && (
           <div className="shrink-0">
@@ -1079,6 +1081,7 @@ function ProcessingGraphScreenInner() {
         <div className="min-w-0 flex-1" />
         <button
           type="button"
+          data-tour-target="demo-tour-run"
           onClick={() => void handleDryRun()}
           disabled={running}
           className={`flex shrink-0 items-center gap-1.5 rounded-slpill px-4 py-1.5 font-body-strong text-sm disabled:opacity-50 ${

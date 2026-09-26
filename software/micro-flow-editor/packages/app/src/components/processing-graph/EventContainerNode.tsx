@@ -38,6 +38,7 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
   const periodLabel = data.kind === "schedule" && data.periodMs !== undefined ? copy.everyMs(data.periodMs) : undefined;
   return (
     <div
+      data-tour-target={`flow-node-${id}`}
       className={`group relative flex h-full w-full cursor-pointer flex-col overflow-visible rounded-slmd border-2 border-dashed transition-colors ${idle ? "border-border-strong hover:border-brand-blue" : ""}`}
       style={{
         borderColor: highlight ?? (selected ? "var(--color-brand-blue)" : undefined),

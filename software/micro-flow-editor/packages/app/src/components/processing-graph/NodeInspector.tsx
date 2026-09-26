@@ -227,7 +227,7 @@ export function NodeInspector({
   const headerSolid = catalogVisual?.solidSwatch === true || (data.kind === "block" && isBlockNodeData(data) && isRgbLedBlock(data));
 
   return (
-    <motion.div initial={{ x: 320, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 320, opacity: 0 }} transition={motionTokens.spring.smooth} className="flex h-full w-80 flex-col border-l border-border bg-surface shadow-e2">
+    <motion.div data-tour-target="demo-tour-inspector" initial={{ x: 320, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 320, opacity: 0 }} transition={motionTokens.spring.smooth} className="flex h-full w-80 flex-col border-l border-border bg-surface shadow-e2">
       <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
         <div
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-slsm"
