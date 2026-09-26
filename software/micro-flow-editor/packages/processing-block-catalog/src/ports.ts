@@ -135,10 +135,12 @@ export function catalogPortsCompatible(
     findPort(targetInputs, targetHandle, "in") ??
     (targetInputs === undefined ? undefined : targetInputs[0]);
 
-  if (sourceOutputs === undefined || targetInputs === undefined) {
+  if (sourceOutputs === undefined) {
     // One side typed: allow if the typed side has a matching direction port.
-    if (sourceOutputs === undefined) return inPort !== undefined || targetInputs.length > 0;
-    if (targetInputs === undefined) return outPort !== undefined || sourceOutputs.length > 0;
+    return targetInputs === undefined || inPort !== undefined || targetInputs.length > 0;
+  }
+  if (targetInputs === undefined) {
+    return outPort !== undefined || sourceOutputs.length > 0;
   }
 
   if (!outPort || !inPort) return false;

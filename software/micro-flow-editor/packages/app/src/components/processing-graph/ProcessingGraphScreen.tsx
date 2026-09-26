@@ -530,6 +530,7 @@ function ProcessingGraphScreenInner() {
 
     // Tick discs are system-owned: never drag, detach, or delete from the canvas.
     const gatedChanges = changes.filter((change) => {
+      if (!("id" in change)) return true;
       const data = domainNodes.find((n) => n.id === change.id)?.data;
       if (!data || !isFlowStartBlock(data)) return true;
       return change.type !== "position" && change.type !== "remove";
