@@ -146,6 +146,7 @@ function ProcessingGraphScreenInner() {
   const previewChannelsRef = useRef<readonly DryRunPreviewChannel[]>([]);
   const previewStartedAtRef = useRef(0);
   const persistTempTestRef = useRef<(nodeId: string, celsius: number) => void>(() => {});
+  const persistFooterRef = useRef<(nodeId: string, fieldId: string, value: unknown) => void>(() => {});
 
   useEffect(() => {
     if (!overlapWarning) return;
@@ -431,6 +432,7 @@ function ProcessingGraphScreenInner() {
             ...(previewing && n.data.toggleWave && wavePeriodMs !== undefined
               ? { waveLive: { elapsedMs: previewElapsedMs, periodMs: wavePeriodMs } }
               : { waveLive: undefined }),
+            onFooterPatch: (fieldId: string, value: unknown) => persistFooterRef.current(n.id, fieldId, value),
           },
         };
         if (!container) return withPreview;
@@ -1069,6 +1071,16 @@ function ProcessingGraphScreenInner() {
       ...node.data,
       properties: { ...node.data.properties, testC: BigInt(Math.round(celsius)) },
     }, authoringMetadata[nodeId]?.comment ?? "");
+  };
+
+  persistFooterRef.current = (nodeId, fieldId, value) => {
+    const node = domainNodes.find((item) => item.id === nodeId);
+    if (!node || !isBlockNodeData(node.data)) return;
+    const nextData = { ...node.data, properties: { ...node.data.properties, [fieldId]: value } };
+    persistNode(nodeId, nextData, authoringMetadata[nodeId]?.comment ?? "");
+    if (inspector?.kind === "edit" && inspector.nodeId === nodeId && isBlockNodeData(inspector.data)) {
+      setInspector({ ...inspector, data: { ...inspector.data, properties: { ...inspector.data.properties, [fieldId]: value } } });
+    }
   };
 
   function persistNode(nodeId: string, data: DeviceProcessingNodeData, comment: string) {

@@ -149,7 +149,28 @@ describe("toProcessingNodes", () => {
       edges: [],
     };
     const nodes = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
-    expect(nodes.find((n) => n.id === "t1")?.data.subtitle).toBe("");
+    const toggle = nodes.find((n) => n.id === "t1");
+    expect(toggle?.data.subtitle).toBe("");
+    expect(toggle?.data.settingsFooter?.tabs.map((tab) => tab.id)).toEqual(["toggleMode", "initial", "lowToHigh", "highToLow"]);
+    expect(toggle?.data.cardHeight).toBe(80);
+  });
+
+  it("puts LED timings on a settings footer", () => {
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [
+        {
+          layer: "device-processing",
+          id: "led",
+          data: { kind: "block", blockTypeId: "ab.led", catalogEntryId: "appblocks.led", properties: { color: "#F5C518" } },
+        },
+      ],
+      edges: [],
+    };
+    const led = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en").find((n) => n.id === "led");
+    expect(led?.data.settingsFooter?.tabs.map((tab) => tab.id)).toEqual(["color", "delayOnMs", "delayOffMs", "softOnMs", "softOffMs"]);
+    expect(led?.data.cardHeight).toBe(80);
+    expect(led?.data.cardWidth).toBe(260);
   });
 
   it("attaches static handles so wires survive a node-object rebuild", () => {

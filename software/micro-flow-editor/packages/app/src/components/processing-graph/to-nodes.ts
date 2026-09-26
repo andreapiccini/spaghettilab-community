@@ -14,6 +14,7 @@ import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-mod
 import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { handlesForNode, portsForNode, nodeHeightForPorts, nodeWidthForPorts, type PortKind } from "./node-ports.js";
+import { footerCardWidth, settingsFooterFor, type SettingsFooterModel } from "./settings-footer.js";
 
 export type ToggleWaveUi = {
   readonly mode: "astable" | "pulse_high" | "pulse_low";
@@ -96,6 +97,10 @@ export type ProcessingNodeUiData = {
     readonly closeWhenHigh: boolean;
     readonly label: string;
   };
+  /** Toggle / LED / Relay: compact setting tabs under the title. */
+  readonly settingsFooter?: SettingsFooterModel;
+  /** Persist one footer field without opening the inspector. */
+  readonly onFooterPatch?: (fieldId: string, value: unknown) => void;
 };
 
 /**
@@ -125,11 +130,14 @@ export function toProcessingNodes(
     const isTick = accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
     const ports = portsForNode(data);
     const ifLane = isBlockNodeData(data) && isCompareIf(data);
-    const relayCard = isBlockNodeData(data) && isRelayBlock(data);
+    const settingsFooter = settingsFooterFor(data);
+    const hasFooterBand = ifLane || Boolean(settingsFooter);
     const cardHeight = isTick
       ? FLOW_START_SIZE
-      : nodeHeightForPorts(ports) + (ifLane || relayCard ? IF_FOOTER_HEIGHT : 0);
-    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports);
+      : nodeHeightForPorts(ports) + (hasFooterBand ? IF_FOOTER_HEIGHT : 0);
+    const cardWidth = isTick
+      ? FLOW_START_SIZE
+      : Math.max(nodeWidthForPorts(ports), settingsFooter ? footerCardWidth(settingsFooter.tabs.length) : 0);
     return {
       id: node.id,
       type: "processing",
@@ -152,7 +160,7 @@ export function toProcessingNodes(
         width: cardWidth,
         height: cardHeight,
         circular: isTick,
-        bandHeight: ifLane || relayCard ? NODE_HEIGHT : undefined,
+        bandHeight: hasFooterBand ? NODE_HEIGHT : undefined,
       }),
       data: {
         domainId: node.id,
@@ -207,6 +215,7 @@ export function toProcessingNodes(
         ...ifOutputFields(data, locale),
         ...ifInputFields(node.id, data, graphState),
         ...relayCloseFields(data, locale),
+        ...(settingsFooter ? { settingsFooter } : {}),
         ...bayChromeFields(data),
       },
     };
