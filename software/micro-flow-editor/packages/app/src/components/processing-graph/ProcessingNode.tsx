@@ -73,10 +73,12 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
   const isRelay = data.tileGlyph === "power";
   const isIf = data.tileGlyph === "if";
   const ifBoolean = data.ifOutput?.kind === "boolean";
+  const ifAnalogIn = data.ifInput?.kind === "analog";
   const ifThenHigh = data.ifOutput?.thenHigh !== false;
   const ifLiveHigh = data.previewing ? previewOn : ifThenHigh;
   const ifOutLabel = ifBoolean ? (ifLiveHigh ? "true" : "false") : ifLiveHigh ? "HIGH" : "LOW";
   const ifOutColor = ifBoolean ? "#C026D3" : "#0F766E";
+  const ifInColor = ifAnalogIn ? "#0EA5E9" : "#EA580C";
   const subtitle =
     isLed && data.previewing && intensity !== undefined
       ? intensity > 0.85
@@ -165,7 +167,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         </span>
       )}
       <div
-        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : isIf ? "pl-2.5 pr-16" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
+        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : isIf ? "pl-16 pr-16" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
         style={{
           width: cardWidth,
           minHeight: cardHeight,
@@ -182,22 +184,33 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         }}
       >
         {isIf && (
-          <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-0 flex w-14 flex-col items-center justify-center gap-0.5"
-            style={{
-              background: `color-mix(in srgb, ${ifOutColor} 22%, var(--color-surface))`,
-              borderLeft: `1px solid color-mix(in srgb, ${ifOutColor} 55%, transparent)`,
-            }}
-            aria-hidden
-          >
-            <span
-              className="font-mono text-[8px] font-bold uppercase tracking-wide"
-              style={{ color: ifOutColor }}
+          <>
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 z-0 flex w-14 flex-col items-center justify-center gap-0.5"
+              style={{
+                background: `color-mix(in srgb, ${ifInColor} 22%, var(--color-surface))`,
+                borderRight: `1px solid color-mix(in srgb, ${ifInColor} 55%, transparent)`,
+              }}
+              aria-hidden
             >
-              {ifBoolean ? "Bool" : "Digital"}
-            </span>
-            <span className="font-mono text-[10px] font-semibold text-ink">{ifOutLabel}</span>
-          </div>
+              <span className="font-mono text-[8px] font-bold uppercase tracking-wide" style={{ color: ifInColor }}>
+                {ifAnalogIn ? "Analog" : "Digital"}
+              </span>
+            </div>
+            <div
+              className="pointer-events-none absolute inset-y-0 right-0 z-0 flex w-14 flex-col items-center justify-center gap-0.5"
+              style={{
+                background: `color-mix(in srgb, ${ifOutColor} 22%, var(--color-surface))`,
+                borderLeft: `1px solid color-mix(in srgb, ${ifOutColor} 55%, transparent)`,
+              }}
+              aria-hidden
+            >
+              <span className="font-mono text-[8px] font-bold uppercase tracking-wide" style={{ color: ifOutColor }}>
+                {ifBoolean ? "Bool" : "Digital"}
+              </span>
+              <span className="font-mono text-[10px] font-semibold text-ink">{ifOutLabel}</span>
+            </div>
+          </>
         )}
         {isBay && (
           <span
@@ -218,6 +231,12 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               style={{
                 ...TARGET_HANDLE_STYLE,
                 top: stackedHandleTop(index, inputHandles.length),
+                ...(isIf
+                  ? {
+                      border: `1.5px solid ${ifInColor}`,
+                      background: ifInColor,
+                    }
+                  : {}),
               }}
             />
           ))}

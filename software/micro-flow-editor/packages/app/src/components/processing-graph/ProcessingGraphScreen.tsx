@@ -879,8 +879,8 @@ function ProcessingGraphScreenInner() {
   function onConnect(connection: Connection) {
     if (!execute || bindingIndex < 0 || !isValidConnection(connection)) return;
     const lens = deviceGraphLens(bindingIndex);
+    const targetData = connection.target ? domainNodes.find((node) => node.id === connection.target)?.data : undefined;
     if (demoOnly && connection.target) {
-      const targetData = domainNodes.find((node) => node.id === connection.target)?.data;
       const oneInput =
         !!targetData && (isCompareIf(targetData) || isLedBlock(targetData) || isRelayBlock(targetData));
       if (oneInput) {
@@ -899,6 +899,19 @@ function ProcessingGraphScreenInner() {
         targetHandle: connection.targetHandle ?? undefined,
       }),
     );
+    if (demoOnly && connection.source && connection.target && targetData && isCompareIf(targetData) && isBlockNodeData(targetData)) {
+      const src = domainNodes.find((node) => node.id === connection.source)?.data;
+      if (src && (isDigitalOutToggle(src) || isTemperatureSensor(src))) {
+        persistNode(
+          connection.target,
+          {
+            ...targetData,
+            properties: { ...targetData.properties, inputType: isTemperatureSensor(src) ? "analog" : "digital" },
+          },
+          authoringMetadata[connection.target]?.comment ?? "",
+        );
+      }
+    }
   }
 
   function onNodeClick(_: unknown, node: Node<ProcessingNodeUiData>) {

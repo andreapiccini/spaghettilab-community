@@ -91,7 +91,11 @@ type ProcessingGraphCopy = {
   readonly ifOutputType: string;
   readonly ifOutputDigital: string;
   readonly ifOutputBoolean: string;
+  readonly ifInputType: string;
+  readonly ifInputDigital: string;
+  readonly ifInputAnalog: string;
   readonly ifBooleanLedInvalid: string;
+  readonly ifInputMismatch: string;
   readonly brokenConnection: string;
   readonly ifConditionNone: string;
   readonly ifConditionTemp: string;
@@ -202,7 +206,11 @@ const IT: ProcessingGraphCopy = {
   ifOutputType: "Tipo di uscita",
   ifOutputDigital: "Digitale",
   ifOutputBoolean: "Booleano",
+  ifInputType: "Tipo di ingresso",
+  ifInputDigital: "Digitale",
+  ifInputAnalog: "Analogico",
   ifBooleanLedInvalid: "Il LED vuole un ingresso digitale o analogico. L’uscita booleana (true/false) non è valida.",
+  ifInputMismatch: "Questo tipo di ingresso non è compatibile con il blocco collegato.",
   brokenConnection: "Collegamento non valido",
   ifConditionNone: "Nessun ingresso",
   ifConditionTemp: "TEMP",
@@ -301,7 +309,11 @@ const EN: ProcessingGraphCopy = {
   ifOutputType: "Output type",
   ifOutputDigital: "Digital",
   ifOutputBoolean: "Boolean",
+  ifInputType: "Input type",
+  ifInputDigital: "Digital",
+  ifInputAnalog: "Analog",
   ifBooleanLedInvalid: "The LED needs a digital or analog input. Boolean output (true/false) is not valid.",
+  ifInputMismatch: "This input type does not match the connected block.",
   brokenConnection: "Broken connection",
   ifConditionNone: "No input",
   ifConditionTemp: "TEMP",

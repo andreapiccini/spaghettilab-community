@@ -567,6 +567,28 @@ describe("IF / relay / temperature dry-run", () => {
     expect(ledDrive).toMatchObject({ kind: "if", source: { kind: "temperature", testC: 30 } });
   });
 
+  it("does not drive the LED when IF input type does not match the wired source", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [
+          schedule("s1", 1000),
+          toggle("t1", { initial: "high", highToLow: 1, lowToHigh: 1 }),
+          temp("temp1", 30),
+          iff("if1", { compare: "gt", compareTempC: 25, thenOutput: "high", inputType: "digital" }),
+          led("led1"),
+        ],
+        [
+          { layer: "device-processing", id: "e1", source: "s1", target: "t1" },
+          { layer: "device-processing", id: "e2", source: "temp1", target: "if1" },
+          { layer: "device-processing", id: "e3", source: "if1", target: "led1" },
+        ],
+      ),
+    );
+    const ledDrive = channels.flatMap((channel) => channel.actuators).find((actuator) => actuator.id === "led1")?.drive;
+    expect(ledDrive).toMatchObject({ kind: "if", source: { kind: "none" } });
+    expect(activeActuatorsAt(0, channels).has("led1")).toBe(false);
+  });
+
   it("does not drive the LED when IF output type is boolean", () => {
     const channels = buildDryRunPreviewChannels(
       graph(

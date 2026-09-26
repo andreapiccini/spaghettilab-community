@@ -899,28 +899,26 @@ function DemoIfSentence({
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
   const outputType = properties.outputType === "boolean" ? "boolean" : "digital";
+  const inputType =
+    properties.inputType === "analog"
+      ? "analog"
+      : properties.inputType === "digital"
+        ? "digital"
+        : source === "temperature"
+          ? "analog"
+          : "digital";
+  const analogIn = inputType === "analog";
   const booleanOut = outputType === "boolean";
-
-  if (source === "none") {
-    return (
-      <div className="flex flex-col gap-3 font-body text-sm text-ink">
-        <IfOutputTypeField value={outputType} copy={copy} onChange={(next) => onChange({ ...properties, outputType: next })} />
-        <p className="text-ink-muted">{copy.ifNeedsInput}</p>
-        {booleanOut && digitalSinkConnected && (
-          <p className="rounded-slsm border border-error/40 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-2 py-1.5 text-xs text-error">
-            {copy.ifBooleanLedInvalid}
-          </p>
-        )}
-      </div>
-    );
-  }
+  const inputMismatch =
+    (source === "toggle" && properties.inputType === "analog") ||
+    (source === "temperature" && properties.inputType === "digital");
 
   const compare = (properties.compare as CompareOp | undefined) ?? "eq";
   const compareLevel = properties.compareLevel === "low" ? "low" : "high";
   const thenOutput = properties.thenOutput === "low" ? "low" : "high";
   const elseOutput = elseOutputFromProperties(properties);
   const compareTempC = numberFromProperty(properties.compareTempC, 25);
-  const ops = source === "toggle" ? IF_COMPARE_TOGGLE : IF_COMPARE_TEMP;
+  const ops = analogIn ? IF_COMPARE_TEMP : IF_COMPARE_TOGGLE;
 
   function set(partial: Record<string, unknown>) {
     onChange({ ...properties, ...partial });
@@ -928,17 +926,22 @@ function DemoIfSentence({
 
   return (
     <div className="flex flex-col gap-2 font-body text-sm text-ink">
+      <IfInputTypeField value={inputType} copy={copy} onChange={(next) => set({ inputType: next })} />
+      {inputMismatch && (
+        <p className="rounded-slsm border border-error/40 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-2 py-1.5 text-xs text-error">
+          {copy.ifInputMismatch}
+        </p>
+      )}
       <IfOutputTypeField value={outputType} copy={copy} onChange={(next) => set({ outputType: next })} />
       {booleanOut && digitalSinkConnected && (
         <p className="rounded-slsm border border-error/40 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-2 py-1.5 text-xs text-error">
           {copy.ifBooleanLedInvalid}
         </p>
       )}
+      {source === "none" && <p className="text-ink-muted">{copy.ifNeedsInput}</p>}
       <div className="flex flex-wrap items-center gap-1.5">
         <span>{copy.ifSentenceIf}</span>
-        <span className="font-body-strong">
-          {source === "toggle" ? copy.ifSentenceToggle : copy.ifSentenceTemp}
-        </span>
+        <span className="font-body-strong">{analogIn ? copy.ifSentenceTemp : copy.ifSentenceToggle}</span>
         <select
           value={ops.some((op) => op.value === compare) ? compare : "eq"}
           onChange={(event) => set({ compare: event.target.value })}
@@ -950,7 +953,7 @@ function DemoIfSentence({
             </option>
           ))}
         </select>
-        {source === "toggle" ? (
+        {!analogIn ? (
           <select
             value={compareLevel}
             onChange={(event) => set({ compareLevel: event.target.value })}
@@ -994,6 +997,30 @@ function DemoIfSentence({
         </select>
       </div>
     </div>
+  );
+}
+
+function IfInputTypeField({
+  value,
+  copy,
+  onChange,
+}: {
+  readonly value: "digital" | "analog";
+  readonly copy: ReturnType<typeof processingGraphCopy>;
+  readonly onChange: (value: "digital" | "analog") => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="font-body text-xs font-semibold text-ink-muted">{copy.ifInputType}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value === "analog" ? "analog" : "digital")}
+        className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-body text-sm outline-none"
+      >
+        <option value="digital">{copy.ifInputDigital}</option>
+        <option value="analog">{copy.ifInputAnalog}</option>
+      </select>
+    </label>
   );
 }
 

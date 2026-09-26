@@ -734,6 +734,15 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       ),
       num("compareTempC", "Temperatura (°C)", 25, "Soglia in °C"),
       sel(
+        "inputType",
+        "Tipo di ingresso",
+        [
+          { value: "digital", label: "Digitale" },
+          { value: "analog", label: "Analogico" },
+        ],
+        "digital",
+      ),
+      sel(
         "outputType",
         "Tipo di uscita",
         [

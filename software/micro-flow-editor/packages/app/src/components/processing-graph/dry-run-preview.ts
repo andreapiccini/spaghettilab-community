@@ -356,6 +356,27 @@ export function ifOutputType(data: DeviceProcessingNodeData): "digital" | "boole
   return data.properties.outputType === "boolean" ? "boolean" : "digital";
 }
 
+export function ifInputType(
+  data: DeviceProcessingNodeData,
+  sourceKind: "toggle" | "temperature" | "none" = "none",
+): "digital" | "analog" {
+  if (!isBlockNodeData(data)) return "digital";
+  if (data.properties.inputType === "analog") return "analog";
+  if (data.properties.inputType === "digital") return "digital";
+  return sourceKind === "temperature" ? "analog" : "digital";
+}
+
+export function ifInputCompatibleWith(data: DeviceProcessingNodeData, source: DeviceProcessingNodeData): boolean {
+  if (!isBlockNodeData(data)) return true;
+  const explicit = data.properties.inputType;
+  if (explicit !== "analog" && explicit !== "digital") {
+    return isDigitalOutToggle(source) || isTemperatureSensor(source);
+  }
+  if (isDigitalOutToggle(source)) return explicit === "digital";
+  if (isTemperatureSensor(source)) return explicit === "analog";
+  return false;
+}
+
 export function isTemperatureSensor(data: DeviceProcessingNodeData): boolean {
   if (!isBlockNodeData(data)) return false;
   if (data.catalogEntryId && TEMPERATURE_SENSOR_IDS.has(data.catalogEntryId)) return true;
@@ -460,10 +481,11 @@ function ifDriveFromNode(
 ): IfActuatorDrive {
   const inId = incoming.get(ifId)?.[0];
   const inData = inId ? nodesById.get(inId) : undefined;
+  const compatible = inData ? ifInputCompatibleWith(data, inData) : false;
   const source: IfActuatorDrive["source"] =
-    inData && isTemperatureSensor(inData) && isBlockNodeData(inData)
+    compatible && inData && isTemperatureSensor(inData) && isBlockNodeData(inData)
       ? { kind: "temperature", testC: numberFromProperty(inData.properties.testC, 22) }
-      : inData && isDigitalOutToggle(inData)
+      : compatible && inData && isDigitalOutToggle(inData)
         ? { kind: "toggle" }
         : { kind: "none" };
   return {

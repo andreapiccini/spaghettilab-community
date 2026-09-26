@@ -9,7 +9,7 @@ import { ifSourceKind } from "./connection-rules.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
-import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
+import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifInputType, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
 import { FLOW_START_SIZE } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -87,6 +87,10 @@ export type ProcessingNodeUiData = {
     readonly elseHigh: boolean;
     readonly thenElse: string;
   };
+  /** IF: selected input domain (auto from the wire, overridable). */
+  readonly ifInput?: {
+    readonly kind: "digital" | "analog";
+  };
 };
 
 /**
@@ -117,7 +121,7 @@ export function toProcessingNodes(
     const ports = portsForNode(data);
     const ifLane = isBlockNodeData(data) && isCompareIf(data);
     const cardHeight = isTick ? FLOW_START_SIZE : nodeHeightForPorts(ports) + (ifLane ? 18 : 0);
-    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports) + (ifLane ? 24 : 0);
+    const cardWidth = isTick ? FLOW_START_SIZE : nodeWidthForPorts(ports) + (ifLane ? 56 : 0);
     return {
       id: node.id,
       type: "processing",
@@ -176,6 +180,7 @@ export function toProcessingNodes(
         ...accent,
         ...toggleWaveFields(data),
         ...ifOutputFields(data, locale),
+        ...ifInputFields(node.id, data, graphState),
         ...bayChromeFields(data),
       },
     };
@@ -204,12 +209,12 @@ export function formatIfCondition(
   });
   if (source === "none") return copy.ifConditionNone;
   const op = compareSymbol(compareOpFromProperties(data.properties));
-  if (source === "toggle") {
-    const level = data.properties.compareLevel === "low" ? "LOW" : "HIGH";
-    return `${copy.ifSentenceToggle} ${op} ${level}`;
+  if (ifInputType(data, source) === "analog") {
+    const tempC = numberFromProperty(data.properties.compareTempC, 25);
+    return `${copy.ifConditionTemp} ${op} ${tempC}°C`;
   }
-  const tempC = numberFromProperty(data.properties.compareTempC, 25);
-  return `${copy.ifConditionTemp} ${op} ${tempC}°C`;
+  const level = data.properties.compareLevel === "low" ? "LOW" : "HIGH";
+  return `${copy.ifSentenceToggle} ${op} ${level}`;
 }
 
 function compareSymbol(op: CompareOp): string {
@@ -227,6 +232,19 @@ function compareSymbol(op: CompareOp): string {
     default:
       return "=";
   }
+}
+
+function ifInputFields(
+  nodeId: string,
+  data: DeviceProcessingNodeData,
+  graphState: GraphState<"device-processing">,
+): Pick<ProcessingNodeUiData, "ifInput"> {
+  if (!isCompareIf(data)) return {};
+  const source = ifSourceKind(nodeId, {
+    nodes: graphState.nodes as readonly { readonly id: string; readonly data: DeviceProcessingNodeData }[],
+    edges: graphState.edges,
+  });
+  return { ifInput: { kind: ifInputType(data, source) } };
 }
 
 function ifOutputFields(data: DeviceProcessingNodeData, locale: LocaleId): Pick<ProcessingNodeUiData, "ifOutput"> {

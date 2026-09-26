@@ -224,6 +224,7 @@ const PHRASES: Record<string, string> = {
   "allora uscita": "then output",
   altrimenti: "else",
   "Tipo di uscita": "Output type",
+  "Tipo di ingresso": "Input type",
   Booleano: "Boolean",
   "Chiuso quando l'ingresso è": "Closed if input is",
   "Temperatura di prova (°C)": "Test temperature (°C)",

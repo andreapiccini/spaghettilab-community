@@ -11,7 +11,7 @@ export const LED_INSPECTOR_FIELD_IDS = ["color", "delayOnMs", "delayOffMs", "sof
 export const RELAY_INSPECTOR_FIELD_IDS = ["closeWhen"] as const;
 
 /** IF sentence fields — filtered further by the connected source. */
-export const IF_INSPECTOR_FIELD_IDS = ["compare", "compareLevel", "compareTempC", "outputType", "thenOutput", "elseOutput"] as const;
+export const IF_INSPECTOR_FIELD_IDS = ["compare", "compareLevel", "compareTempC", "inputType", "outputType", "thenOutput", "elseOutput"] as const;
 
 function entryMatches(entry: ProcessingCatalogEntry | undefined, ids: ReadonlySet<string>): boolean {
   if (!entry) return false;

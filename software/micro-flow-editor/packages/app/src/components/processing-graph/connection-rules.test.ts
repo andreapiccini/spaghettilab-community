@@ -87,4 +87,14 @@ describe("isValidDemoProcessingConnection", () => {
     expect(isIncompatibleDemoEdge({ source: "if", target: "led" }, ctx)).toBe(true);
     expect(isIncompatibleDemoEdge({ source: "if", target: "led" }, { nodes, edges: [{ source: "if", target: "led" }] })).toBe(false);
   });
+
+  it("keeps Toggle → analog IF and Temperature → digital IF drawable but marks the wire as broken", () => {
+    const analogIf = { ...iff, data: { ...iff.data, properties: { inputType: "analog" } } };
+    const digitalIf = { ...iff, data: { ...iff.data, properties: { inputType: "digital" } } };
+    expect(isIncompatibleDemoEdge({ source: "t", target: "if" }, { nodes: [toggle, analogIf], edges: [{ source: "t", target: "if" }] })).toBe(true);
+    expect(isIncompatibleDemoEdge({ source: "temp", target: "if" }, { nodes: [temp, digitalIf], edges: [{ source: "temp", target: "if" }] })).toBe(true);
+    expect(isIncompatibleDemoEdge({ source: "t", target: "if" }, { nodes: [toggle, digitalIf], edges: [{ source: "t", target: "if" }] })).toBe(false);
+    expect(isIncompatibleDemoEdge({ source: "temp", target: "if" }, { nodes: [temp, analogIf], edges: [{ source: "temp", target: "if" }] })).toBe(false);
+    expect(isIncompatibleDemoEdge({ source: "temp", target: "if" }, { nodes, edges: [{ source: "temp", target: "if" }] })).toBe(false);
+  });
 });
