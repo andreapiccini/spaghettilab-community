@@ -53,6 +53,57 @@ describe("toProcessingNodes", () => {
     expect(nodes.find((n) => n.id === "dbg")?.data.subtitle).toBe("hello");
   });
 
+  it("shows the IF compare on the card from the wired input", () => {
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [
+        {
+          layer: "device-processing",
+          id: "t1",
+          data: { kind: "block", blockTypeId: "ab.digital_out_toggle", catalogEntryId: "appblocks.digital_out_toggle", properties: {} },
+        },
+        {
+          layer: "device-processing",
+          id: "temp1",
+          data: { kind: "block", blockTypeId: "ab.temperature_sensor", catalogEntryId: "appblocks.temperature_sensor", properties: { testC: 22 } },
+        },
+        {
+          layer: "device-processing",
+          id: "if1",
+          data: {
+            kind: "block",
+            blockTypeId: "ab.compare_if",
+            catalogEntryId: "appblocks.compare_if",
+            properties: { compare: "eq", compareLevel: "high", thenOutput: "high" },
+          },
+        },
+        {
+          layer: "device-processing",
+          id: "if2",
+          data: {
+            kind: "block",
+            blockTypeId: "ab.compare_if",
+            catalogEntryId: "appblocks.compare_if",
+            properties: { compare: "gte", compareTempC: 25, thenOutput: "high" },
+          },
+        },
+        {
+          layer: "device-processing",
+          id: "if3",
+          data: { kind: "block", blockTypeId: "ab.compare_if", catalogEntryId: "appblocks.compare_if", properties: {} },
+        },
+      ],
+      edges: [
+        { layer: "device-processing", id: "e1", source: "t1", target: "if1" },
+        { layer: "device-processing", id: "e2", source: "temp1", target: "if2" },
+      ],
+    };
+    const nodes = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
+    expect(nodes.find((n) => n.id === "if1")?.data.subtitle).toBe("TOGGLE = HIGH");
+    expect(nodes.find((n) => n.id === "if2")?.data.subtitle).toBe("TEMP ≥ 25°C");
+    expect(nodes.find((n) => n.id === "if3")?.data.subtitle).toBe("No input");
+  });
+
   it("attaches static handles so wires survive a node-object rebuild", () => {
     const graphState: GraphState<"device-processing"> = {
       layer: "device-processing",

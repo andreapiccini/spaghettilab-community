@@ -5,10 +5,11 @@ import { localizeCatalogEntry, localizeCatalogText, localizedBaySideLabel } from
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import type { LocaleId } from "../../lib/locale.js";
 import type { Node } from "@xyflow/react";
+import { ifSourceKind } from "./connection-rules.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
-import { hysteresisTicksFromProperties, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, pulseMsFromProperties, toggleModeFromProperties } from "./dry-run-preview.js";
+import { compareOpFromProperties, hysteresisTicksFromProperties, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
 import { FLOW_START_SIZE } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -187,6 +188,45 @@ function bayChromeFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiD
   return { bay: true, baySide };
 }
 
+export function formatIfCondition(
+  nodeId: string,
+  data: DeviceProcessingNodeData,
+  graphState: GraphState<"device-processing">,
+  locale: LocaleId,
+): string {
+  const copy = processingGraphCopy(locale);
+  if (!isCompareIf(data) || !isBlockNodeData(data)) return copy.ifConditionNone;
+  const source = ifSourceKind(nodeId, {
+    nodes: graphState.nodes as readonly { readonly id: string; readonly data: DeviceProcessingNodeData }[],
+    edges: graphState.edges,
+  });
+  if (source === "none") return copy.ifConditionNone;
+  const op = compareSymbol(compareOpFromProperties(data.properties));
+  if (source === "toggle") {
+    const level = data.properties.compareLevel === "low" ? "LOW" : "HIGH";
+    return `${copy.ifSentenceToggle} ${op} ${level}`;
+  }
+  const tempC = numberFromProperty(data.properties.compareTempC, 25);
+  return `${copy.ifConditionTemp} ${op} ${tempC}°C`;
+}
+
+function compareSymbol(op: CompareOp): string {
+  switch (op) {
+    case "neq":
+      return "≠";
+    case "gt":
+      return ">";
+    case "gte":
+      return "≥";
+    case "lt":
+      return "<";
+    case "lte":
+      return "≤";
+    default:
+      return "=";
+  }
+}
+
 function ifOutputFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiData, "ifOutput"> {
   if (!isCompareIf(data) || !isBlockNodeData(data)) return {};
   return {
@@ -265,6 +305,7 @@ function subtitleFor(
     return [fromFields, module].filter((part): part is string => Boolean(part)).join(" · ") || entry?.subtitle || "—";
   }
   if (isBlockNodeData(data)) {
+    if (isCompareIf(data)) return formatIfCondition(nodeId, data, graphState, locale);
     const input = incomingLabel(nodeId, graphState, titles);
     const bay = entry && isBayEntry(entry);
     const rawRole = data.properties.bayRole;

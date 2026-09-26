@@ -89,7 +89,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           ? "CLOSED"
           : "OPEN"
         : isIf
-          ? ifOutLabel
+          ? data.subtitle
           : data.tempProbe
             ? `${Math.round(data.tempProbe.celsius)}°C`
             : data.subtitle;
@@ -265,7 +265,10 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 </span>
               )}
             </div>
-            <div className="truncate font-body text-xs text-ink-faint" title={subtitle}>
+            <div
+              className={`${isIf ? "whitespace-normal break-words leading-tight" : "truncate"} font-body text-xs text-ink-faint`}
+              title={subtitle}
+            >
               {subtitle}
             </div>
           </div>

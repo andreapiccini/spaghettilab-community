@@ -90,6 +90,8 @@ type ProcessingGraphCopy = {
   readonly ifOutputBoolean: string;
   readonly ifBooleanLedInvalid: string;
   readonly brokenConnection: string;
+  readonly ifConditionNone: string;
+  readonly ifConditionTemp: string;
   readonly tempProbeHint: string;
 };
 
@@ -196,6 +198,8 @@ const IT: ProcessingGraphCopy = {
   ifOutputBoolean: "Booleano",
   ifBooleanLedInvalid: "Il LED vuole un ingresso digitale o analogico. L’uscita booleana (true/false) non è valida.",
   brokenConnection: "Collegamento non valido",
+  ifConditionNone: "Nessun ingresso",
+  ifConditionTemp: "TEMP",
   tempProbeHint: "Trascina l’indicatore sotto il sensore per provare la temperatura.",
 };
 
@@ -290,6 +294,8 @@ const EN: ProcessingGraphCopy = {
   ifOutputBoolean: "Boolean",
   ifBooleanLedInvalid: "The LED needs a digital or analog input. Boolean output (true/false) is not valid.",
   brokenConnection: "Broken connection",
+  ifConditionNone: "No input",
+  ifConditionTemp: "TEMP",
   tempProbeHint: "Drag the indicator under the sensor to test the temperature.",
 };
 

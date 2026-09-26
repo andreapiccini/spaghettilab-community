@@ -444,7 +444,7 @@ function ProcessingGraphScreenInner() {
         if (!demoOnly) return n;
         const domain = domainNodes.find((node) => node.id === n.id)?.data;
         if (!domain) return n;
-        if (isDigitalOutToggle(domain) || isCompareIf(domain)) {
+        if (isDigitalOutToggle(domain)) {
           return { ...n, data: { ...n.data, subtitle: "Firmware function" } };
         }
         if (isLedBlock(domain) || isRelayBlock(domain)) {
