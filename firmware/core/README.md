@@ -1,7 +1,8 @@
 # Zephyr on ESP32-C3
 
-A Docker-based development environment for the Zephyr 4.4.0 firmware running on
-`spaghettilab_core_v1/esp32c3`.
+A Docker-based development environment for the Zephyr 4.4.0 firmware. The default
+target is `spaghettilab_core_v1/esp32c3`. Physical Backbone boards use
+`spaghettilab_backbone_v1/esp32s3/procpu`.
 
 Docker provides Zephyr, West, the RISC-V toolchain, modules, and dependencies.
 The source code and generated `build/` directory stay on the host computer.
@@ -68,6 +69,38 @@ without changing common firmware code with:
 ```sh
 BOARD=spaghettilab_core_v2_build_only/esp32c3 make build
 ```
+
+Flash the same application on a Backbone ESP32-S3-MINI-1 with:
+
+```sh
+BOARD=spaghettilab_backbone_v1/esp32s3/procpu make build
+BOARD=spaghettilab_backbone_v1/esp32s3/procpu make flash
+```
+
+After the first USB flash, type SLUP on the USB master only. The other
+Backbones stay on CAN and need no console. `slup list` assigns idx 1=master,
+2..N=peers. Then `slup load 2` or `slup load 0xNODE`. Details:
+[`subsys/services/ota/SLUP.md`](subsys/services/ota/SLUP.md).
+
+```text
+slup list
+slup blink 2
+slup load 2
+```
+
+To push a **file on the Mac** (not the image already running on the master),
+close the monitor and run:
+
+```sh
+make slup-list
+make slup-load TARGET=2 IMAGE=build/app/zephyr/zephyr.signed.bin
+```
+
+`slup load` sends EnterUpdate to that node, then the running signed image on
+the SN65HVD230 TWAI bus (500 kbit/s). `slup espnow` sends the existing `BNOW`
+datagram on Wi-Fi channel 1 / UDP 1339. Peers write the secondary MCUboot slot
+and reboot into a trial image. Status LED D5 stays solid red while the firmware
+is running; it is a single-color LED, not RGB.
 
 Core V2 is build-only: its pin and connector assignments are intentionally simulated
 and it intentionally defines no default flash runner.

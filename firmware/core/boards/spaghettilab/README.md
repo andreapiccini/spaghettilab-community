@@ -36,6 +36,11 @@ rails, console, flash layout, and real hardware capabilities.
 
 - `spaghettilab_core_v1/esp32c3` — physical ESP32-C3 Core: USB console, I2C0 on
   verified GPIO3/GPIO4, Port 0, Flow 0.
+- `spaghettilab_backbone_v1/esp32s3/procpu` — physical ESP32-S3-MINI-1 Backbone:
+  USB Serial/JTAG console, fixed-red STATUS LED D5 on GPIO10 (no RGB),
+  I2C0/maintenance on J8 GPIO38/37, CAN TWAI GPIO48/34 (SLUP field update),
+  NFC ST25R100 SPI2 on
+  GPIO4/3/6 with CS GPIO2, RST GPIO1, IRQ GPIO5.
 - `spaghettilab_core_v2_build_only/esp32c3` — simulated portability target with
   two Ports / two Flows. No default flash runner; never flash this target.
 

@@ -52,6 +52,31 @@ describe("GET_STATUS", () => {
       ],
       deviceId: new Uint8Array([0x90, 0x70, 0x69, 0xad]),
       deviceName: "core-lab",
+      chainPeers: [
+        {
+          nodeId: 0xe1c52c,
+          mac: new Uint8Array([0x90, 0x70, 0x69, 0xe1, 0xc5, 0x2c]),
+          flags: 0x81,
+          local: true,
+          version: "0.1.0+0",
+        },
+        {
+          nodeId: 0xe18030,
+          mac: new Uint8Array([0x90, 0x70, 0x69, 0xe1, 0x80, 0x30]),
+          flags: 0,
+          local: false,
+          version: "0.1.0+1",
+        },
+      ],
+      nfcTags: [
+        {
+          portId: 1,
+          typeId: "t2t",
+          uid: new Uint8Array([0x04, 0x12, 0x34, 0x56]),
+          nodeId: 0xe1c52c,
+          local: true,
+        },
+      ],
     };
     expect(ops.decodeGetStatusResponse(ops.encodeGetStatusResponse(response))).toEqual(response);
   });

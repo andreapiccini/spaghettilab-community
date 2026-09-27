@@ -28,3 +28,9 @@ OTA never writes flash directly. It arms and assigns the global Update coordinat
 `SPAGHETTI_UPDATE_TRANSPORT_UDP`; Update owns image-1, the absolute deadline and the
 MCUboot test marker. Timeout or Wi-Fi loss closes DTLS and discards the incomplete
 candidate. A complete candidate is rebooted as trial and can still roll back.
+
+SLUP on Backbone (`field_update.c`, `field_update_can.c`, `field_update_espnow.c`)
+is a separate listen/send path. It uses `SPAGHETTI_UPDATE_TRANSPORT_CAN` and
+`SPAGHETTI_UPDATE_TRANSPORT_ESPNOW` and does not open the DTLS socket or require
+OTA credentials. The USB master discovers boards, puts one in load mode, and
+pushes firmware over the CAN transceiver. See [`SLUP.md`](SLUP.md).

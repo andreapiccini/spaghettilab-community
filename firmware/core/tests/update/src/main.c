@@ -232,6 +232,16 @@ ZTEST(update, test_update_lifecycle_and_failures)
 	zassert_equal(spaghetti_update_begin(
 		SPAGHETTI_UPDATE_TRANSPORT_UDP), -EBUSY);
 	zassert_ok(spaghetti_update_cancel());
+	zassert_ok(spaghetti_update_arm(1000U));
+	zassert_ok(spaghetti_update_begin(SPAGHETTI_UPDATE_TRANSPORT_CAN));
+	expect_status(SPAGHETTI_UPDATE_RECEIVING,
+		      SPAGHETTI_UPDATE_TRANSPORT_CAN, 0);
+	zassert_ok(spaghetti_update_cancel());
+	zassert_ok(spaghetti_update_arm(1000U));
+	zassert_ok(spaghetti_update_begin(SPAGHETTI_UPDATE_TRANSPORT_ESPNOW));
+	expect_status(SPAGHETTI_UPDATE_RECEIVING,
+		      SPAGHETTI_UPDATE_TRANSPORT_ESPNOW, 0);
+	zassert_ok(spaghetti_update_cancel());
 	expect_status(SPAGHETTI_UPDATE_IDLE,
 		      SPAGHETTI_UPDATE_TRANSPORT_NONE, 0);
 

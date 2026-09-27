@@ -135,6 +135,7 @@ Service references:
 - [MQTT](subsys/services/mqtt/README.md)
 - [Update](subsys/services/update/README.md)
 - [OTA](subsys/services/ota/README.md)
+- [SLUP field update](subsys/services/ota/SLUP.md)
 - [Maintenance Link](subsys/services/maintenance_link/README.md)
 
 ## Complete roadmap in order

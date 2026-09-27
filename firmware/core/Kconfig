@@ -90,6 +90,14 @@ module = SPAGHETTI_OTA
 module-str = spaghetti_ota
 source "subsys/logging/Kconfig.template.log_config"
 
+module = SPAGHETTI_FIELD_UPDATE
+module-str = spaghetti_field_update
+source "subsys/logging/Kconfig.template.log_config"
+
+module = SPAGHETTI_NFC
+module-str = spaghetti_nfc
+source "subsys/logging/Kconfig.template.log_config"
+
 module = SPAGHETTI_DATA
 module-str = spaghetti_data
 source "subsys/logging/Kconfig.template.log_config"
@@ -534,6 +542,69 @@ config SPAGHETTI_OTA_WORK_PRIORITY
 	default 5
 	help
 	  Preemptive priority shared by the OTA lifecycle and receive threads.
+
+config SPAGHETTI_NFC
+	bool "ST25R100 Type-A tag presence"
+	depends on SPI && GPIO
+	default y if BOARD_SPAGHETTILAB_BACKBONE_V1
+	default n
+	help
+	  Periodic Type-A scan on the Backbone ST25R100. Tags are published
+	  on GET_STATUS and forwarded over SLUP so one USB or Wi-Fi session
+	  sees the whole chain.
+
+config SPAGHETTI_FIELD_UPDATE
+	bool "SLUP field firmware update over CAN and ESP-NOW"
+	default y if BOARD_SPAGHETTILAB_BACKBONE_V1
+	default n
+	help
+	  SLUP: a USB-connected Backbone discovers peers on the CAN bus, puts
+	  one addressed board into load mode, and pushes the running signed
+	  image. The listener starts even when no Config is stored.
+
+config SPAGHETTI_FIELD_UPDATE_CAN
+	bool "SLUP CAN adapter"
+	depends on SPAGHETTI_FIELD_UPDATE && CAN
+	default y if BOARD_SPAGHETTILAB_BACKBONE_V1
+	default n
+	help
+	  SLUP on the Backbone SN65HVD230 transceiver. Discover, EnterUpdate,
+	  and the image use TWAI frames. Each board is the last three STA MAC
+	  bytes; chain slot 1 is the USB master.
+
+config SPAGHETTI_FIELD_UPDATE_ESPNOW
+	bool "ESP-NOW field-update adapter"
+	depends on SPAGHETTI_FIELD_UPDATE && WIFI
+	default y if BOARD_SPAGHETTILAB_BACKBONE_V1
+	default n
+	help
+	  Accept and send firmware images with the existing BNOW packet on Wi-Fi
+	  channel 1 and UDP port 1339. The Zephyr ESP32-S3 blobs do not export
+	  the IDF ESP-NOW API.
+
+config SPAGHETTI_FIELD_UPDATE_WINDOW_MS
+	int "Field-update whole-session timeout in milliseconds"
+	depends on SPAGHETTI_FIELD_UPDATE
+	range 10000 900000
+	default 300000
+	help
+	  Absolute Update arm timeout used when a CAN or ESP-NOW begin arrives.
+
+config SPAGHETTI_FIELD_UPDATE_STACK_SIZE
+	int "Field-update worker stack bytes"
+	depends on SPAGHETTI_FIELD_UPDATE
+	range 1536 4096
+	default 2048
+	help
+	  Static stack reserved for the CAN / ESP-NOW receive worker.
+
+config SPAGHETTI_FIELD_UPDATE_CAN_BITRATE
+	int "Field-update CAN bitrate"
+	depends on SPAGHETTI_FIELD_UPDATE_CAN
+	range 125000 1000000
+	default 500000
+	help
+	  Classic CAN bitrate for the Backbone SN65HVD230 pair.
 
 config SPAGHETTI_MQTT_QUEUE_DEPTH
 	int "MQTT outbound publication queue depth"

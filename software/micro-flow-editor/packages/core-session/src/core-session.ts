@@ -184,11 +184,9 @@ export class CoreSession {
    */
   private async sync(): Promise<void> {
     try {
-      const [status, capabilities, features] = await Promise.all([
-        this.client.getStatus(),
-        this.client.getCapabilities(),
-        this.client.getFeatures(),
-      ]);
+      const status = await this.client.getStatus();
+      const capabilities = await this.client.getCapabilities();
+      const features = await this.client.getFeatures();
 
       if (status.deviceId) {
         this.deviceId = status.deviceId;

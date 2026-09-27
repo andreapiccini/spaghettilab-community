@@ -50,6 +50,8 @@ This directory contains contracts shared between firmware components. Headers ex
 | `discovery.h` | Bounded per-key identification results and lifecycle events. |
 | `power.h` | Optional shared-resource contract. |
 | `update.h` | Transport-independent firmware-update session contract. |
+	| `field_update.h` | SLUP: CAN/ESP-NOW field update, Discover, chain identity, and remote NFC. |
+	| `nfc.h` | Live ST25R100 Type-A tag presence. |
 
 ## Data model
 

@@ -20,6 +20,9 @@
 #include <spaghetti/access_control.h>
 #include <spaghetti/communication.h>
 #include <spaghetti/core.h>
+#if IS_ENABLED(CONFIG_SPAGHETTI_FIELD_UPDATE)
+#include <spaghetti/field_update.h>
+#endif
 #include <spaghetti/protocol.h>
 
 LOG_MODULE_REGISTER(spaghetti_usb_protocol,
@@ -78,6 +81,12 @@ static void usb_feed_shell(uint8_t byte)
 static void usb_handle_rx_byte(uint8_t byte)
 {
 	enum spaghetti_usb_frame_push result;
+
+#if IS_ENABLED(CONFIG_SPAGHETTI_FIELD_UPDATE)
+	if (spaghetti_field_update_usb_feed(byte)) {
+		return;
+	}
+#endif
 
 	if (atomic_get(&work_pending) != 0) {
 		return;

@@ -17,7 +17,7 @@ type DeployDiffCopy = {
 
 const IT: DeployDiffCopy = {
   noPending:
-    "Nessun Core con modifiche pendenti — connetti un Core (Core Connections) e componi un progetto per vedere un diff qui.",
+    "Nessuna Backbone con modifiche pendenti — connetti una Backbone e componi un progetto per vedere un diff qui.",
   blocked: (count) => `Deploy bloccato: ${count} ${count === 1 ? "profilo richiesto non è installato" : "profili richiesti non sono installati"}.`,
   conflictOn: (name) => `Conflitto su ${name}`,
   conflictBody: "Il dispositivo ha uno snapshot diverso da quello atteso al momento dell'apply. Nessuna scrittura è avvenuta.",
@@ -32,7 +32,7 @@ const IT: DeployDiffCopy = {
 };
 
 const EN: DeployDiffCopy = {
-  noPending: "No Core with pending changes — connect a Core (Core Connections) and compose a project to see a diff here.",
+  noPending: "No Backbone with pending changes — connect a Backbone and compose a project to see a diff here.",
   blocked: (count) =>
     `Deploy blocked: ${count} required profile${count === 1 ? " is" : "s are"} not installed.`,
   conflictOn: (name) => `Conflict on ${name}`,

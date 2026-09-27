@@ -49,6 +49,7 @@ export function TopBar() {
     <header className="flex h-14 items-center justify-between border-b border-border bg-surface px-4">
       <div className="flex items-center gap-3">
         <img src={publicAsset("ux-assets/icon-transparent-28@2x.png")} alt="" className="h-7 w-7" />
+        <span className="font-heading text-sm font-semibold text-ink">Flow</span>
         {/* Undo/redo buttons hidden for now — no keyboard shortcut backs them, they were
             the only entry point, and it's unclear yet whether surfacing undo/redo here is
             right for every flow. undo()/redo() themselves are untouched in session-context. */}

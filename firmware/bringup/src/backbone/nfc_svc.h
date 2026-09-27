@@ -3,10 +3,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// ST25R100 on SPI: SCK=10, MOSI=18, MISO=19, CS=6, IRQ=5, RESET=7.
+// ST25R100 on SPI. C3 defaults: SCK=10, MOSI=18, MISO=19, CS=6, IRQ=5, RESET=7.
+// S3 backbone (U19): SCK=4, MOSI=3, MISO=6, CS=2, IRQ=5, RESET=1.
 // PCB routing: physical antenna 1 uses RFO2/RFI2; antenna 2 uses RFO1/RFI1.
 bool nfc_start();
 void nfc_tick(uint32_t now_ms);
+// IRQ / LPCD listen like the C3 bringup loop: wake on ANT1, rotate to ANT2.
+void nfc_listen_start();
 bool nfc_ready();
 uint8_t nfc_ic_id();
 uint8_t nfc_last_error();

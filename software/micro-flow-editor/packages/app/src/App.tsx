@@ -24,6 +24,8 @@ import { prepareDemoProject } from "./lib/open-demo.js";
 import { publicAsset } from "./lib/public-asset.js";
 import { isScreenVisibleInMode } from "./lib/ui-mode.js";
 import { CoreSessionsProvider } from "./state/core-sessions-context.js";
+import { NfcPresenceProvider } from "./state/nfc-presence-context.js";
+import { NfcModulePopup } from "./components/core-connections/NfcModulePopup.js";
 import { LocaleProvider } from "./state/locale-context.js";
 import { NodeRedRuntimeProvider } from "./state/node-red-runtime-context.js";
 import { PortProtocolProvider } from "./state/port-protocol-context.js";
@@ -248,10 +250,13 @@ export default function App() {
               <PortProtocolProvider>
                 <TourProvider>
                   <CoreSessionsProvider>
-                    <AppContent />
-                    {!isDemoOnlyEnabled() && <SettingsModal />}
-                    {!isDemoOnlyEnabled() && <TourOverlay />}
-                    {!isDemoOnlyEnabled() && <NextStepHint />}
+                    <NfcPresenceProvider>
+                      <AppContent />
+                      {!isDemoOnlyEnabled() && <SettingsModal />}
+                      {!isDemoOnlyEnabled() && <TourOverlay />}
+                      {!isDemoOnlyEnabled() && <NextStepHint />}
+                      {!isDemoOnlyEnabled() && <NfcModulePopup />}
+                    </NfcPresenceProvider>
                   </CoreSessionsProvider>
                 </TourProvider>
               </PortProtocolProvider>

@@ -11,12 +11,23 @@
 #define BACKBONE_SAFE_RECOVERY 0
 #endif
 
-static const int kNfcSck = 10;
-static const int kNfcMosi = 18;
-static const int kNfcMiso = 19;
-static const int kNfcCs = 6;
-static const int kNfcIrq = 5;
-static const int kNfcReset = 7;
+// C3 bringup defaults. BACKBONE S3 (open schematic) overrides these from
+// platformio build_flags to match U19 → U15 nets.
+#ifndef NFC_PIN_SCK
+#define NFC_PIN_SCK 10
+#define NFC_PIN_MOSI 18
+#define NFC_PIN_MISO 19
+#define NFC_PIN_CS 6
+#define NFC_PIN_IRQ 5
+#define NFC_PIN_RESET 7
+#endif
+
+static const int kNfcSck = NFC_PIN_SCK;
+static const int kNfcMosi = NFC_PIN_MOSI;
+static const int kNfcMiso = NFC_PIN_MISO;
+static const int kNfcCs = NFC_PIN_CS;
+static const int kNfcIrq = NFC_PIN_IRQ;
+static const int kNfcReset = NFC_PIN_RESET;
 
 static RfalRfST25R200Class s_rf(&SPI, kNfcCs, kNfcIrq, kNfcReset, 5000000);
 static RfalNfcClass s_nfc(&s_rf);
@@ -566,6 +577,12 @@ bool nfc_tag_write(uint8_t antenna, uint8_t page, const uint8_t data[4]) {
     s_rf.rfalFieldOff();
     s_error = (uint8_t)rc;
     return rc == ERR_NONE;
+}
+
+void nfc_listen_start() {
+    if (!nfc_ensure_rfal()) return;
+    stop_wakeup();
+    start_wakeup(1);
 }
 
 void nfc_tick(uint32_t now_ms) {

@@ -24,16 +24,67 @@ from tools.usb_bridge import (
     KIND_REQUEST,
     KIND_RESPONSE,
     BoundCore,
+    SlupPeer,
     UsbBridge,
+    _slup_list_sync,
     encode_usb_frame,
     make_handler,
     make_process_request,
+    parse_slup_list,
     pop_usb_frame,
 )
 
 
 DEVICE_ID = bytes(range(32))
 DEVICE_ID_HEX = DEVICE_ID.hex()
+
+
+class SlupListParseTest(unittest.TestCase):
+    def test_parses_master_and_peer(self) -> None:
+        text = (
+            "idx  role    node_id   mac                 version\r\n"
+            "1  master  0xe1c52c  90:70:69:e1:c5:2c  0.1.0+0\r\n"
+            "2  peer    0xe18030  90:70:69:e1:80:30  0.1.0+1\r\n"
+            "load/blink with idx or 0xNODE  (1 is this master)\r\n"
+        )
+        peers = parse_slup_list(text)
+        self.assertEqual(len(peers), 2)
+        self.assertEqual(peers[0].role, "master")
+        self.assertEqual(peers[0].node_id, 0xE1C52C)
+        self.assertEqual(peers[0].device_id_hex, "907069e1c52c" + ("0" * 52))
+        self.assertEqual(peers[0].version, "0.1.0+0")
+        self.assertEqual(peers[1].role, "peer")
+        self.assertEqual(peers[1].node_id, 0xE18030)
+        self.assertEqual(peers[1].mac, "90:70:69:e1:80:30")
+        self.assertEqual(peers[1].version, "0.1.0+1")
+
+    def test_parses_list_without_version(self) -> None:
+        peers = parse_slup_list("1  master  0xe1c52c  90:70:69:e1:c5:2c\r\n")
+        self.assertEqual(len(peers), 1)
+        self.assertEqual(peers[0].version, "")
+
+    def test_empty_list_keeps_cached_peers(self) -> None:
+        cached = (
+            SlupPeer(
+                device_id_hex="907069e18030" + ("0" * 52),
+                device_name="",
+                node_id=0xE18030,
+                mac="90:70:69:e1:80:30",
+                role="peer",
+            ),
+        )
+        serial = FakeSerial()
+        core = BoundCore(
+            device_id_hex=DEVICE_ID_HEX,
+            device_name="BridgeCore",
+            version="test",
+            port="/dev/cu.usbmodem-fake",
+            connection=serial,
+            write_lock=threading.Lock(),
+            slup_peers=cached,
+            slup_peers_at=0.0,
+        )
+        self.assertEqual(_slup_list_sync(core), cached)
 
 
 class FramingTest(unittest.TestCase):
@@ -177,7 +228,7 @@ class BridgeSessionTest(unittest.TestCase):
         with mock.patch(
             "tools.usb_bridge.serial_ports",
             return_value=["/dev/cu.usbmodem-fake"],
-        ):
+        ), mock.patch("tools.usb_bridge._slup_list_sync", return_value=()):
             _run(scenario())
 
     def test_http_list(self) -> None:
@@ -213,7 +264,7 @@ class BridgeSessionTest(unittest.TestCase):
         with mock.patch(
             "tools.usb_bridge.serial_ports",
             return_value=["/dev/cu.usbmodem-fake"],
-        ):
+        ), mock.patch("tools.usb_bridge._slup_list_sync", return_value=()):
             _run(scenario())
 
 

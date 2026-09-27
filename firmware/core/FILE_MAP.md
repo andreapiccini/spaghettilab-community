@@ -132,6 +132,8 @@ flowchart TD
 | `include/spaghetti/discovery.h` | Normalized module-discovery proposal/provider boundary | Adding manual, memory, or probe discovery |
 | `include/spaghetti/power.h` | Optional shared-resource coordination contract | Only when verified switchable/shared power hardware exists |
 | `include/spaghetti/update.h` | Exclusive update-session state, timeout and copied status contract | Arming, cancelling or finalizing firmware updates |
+| `include/spaghetti/field_update.h` | SLUP listen/send, Discover, chain-slot, and remote NFC contract | Updating a named Backbone over CAN without per-board USB |
+| `include/spaghetti/nfc.h` | Local ST25R100 Type-A tag table | Publishing live tags on GET_STATUS |
 
 Public headers contain contracts, not implementation state. Read the header
 before its `.c`; it tells you what the implementation is required to preserve.
@@ -161,6 +163,7 @@ Each subsystem follows the same three-file reading pattern:
 | Runtime | `subsys/runtime/README.md` | `subsys/runtime/runtime.c` | Periodic work, rules, worker context and lifecycle |
 | Communication | `subsys/communication/README.md` | `subsys/communication/communication.c`, `usb_protocol.c` | Transport-neutral dispatch; USB Protocol V1 on Serial/JTAG |
 | Discovery | `subsys/discovery/README.md` | `subsys/discovery/discovery.c` | Normalize/validate identification proposals |
+| NFC | `include/spaghetti/nfc.h` | `subsys/nfc/nfc.c` | ST25R100 Type-A presence published on GET_STATUS |
 | Power | `subsys/power/README.md` | `subsys/power/power.c` | Coordinate a verified real shared power resource |
 
 Do not read or modify a subsystem implementation merely because another
@@ -175,6 +178,8 @@ its `.c` only when changing its owned behavior or diagnosing an internal defect.
 | `subsys/services/timer/README.md` | Wake-up/timing service contract | Scheduling work without placing logic in timer callbacks |
 | `subsys/services/storage/README.md` | Bounded persistence, Settings/NVS, versioning, partition example | Saving/loading configuration or state |
 | `subsys/services/update/README.md` | Transport-independent update policy and MCUboot backend boundary | Implementing update state, cleanup, timeout or test boot |
+| `subsys/services/ota/SLUP.md` | SLUP master/target commands, node IDs, and chain slots | Loading firmware onto a chained Backbone from the USB master |
+| `subsys/services/ota/field_update.c` | SLUP session ingest, Discover, EnterUpdate, and Shell | Field firmware update on chained Backbone boards |
 | `subsys/services/mqtt/README.md` | Optional MQTT adapter and worker/network ownership | Product requirements explicitly choose MQTT |
 
 Services support owners; they do not own product rules or module instances.
@@ -200,6 +205,7 @@ instances, Runtime policy, or transports.
 |---|---|---|
 | `boards/esp32c3_devkitm_esp32c3.overlay` | Verified application additions to the selected development board DTS | Changing console or verified development-board wiring |
 | `boards/spaghettilab/spaghettilab_core_v1/` | Physical ESP32-C3 Core V1 definition and one I2C Port | Building or changing verified Core V1 wiring |
+| `boards/spaghettilab/spaghettilab_backbone_v1/` | Physical ESP32-S3 Backbone V1: USB, LED, I2C/CAN ports, NFC SPI | Building or flashing Backbone S3 hardware |
 | `boards/spaghettilab/spaghettilab_core_v2_build_only/` | Simulated two-Port topology used only for portability builds | Verifying common code against a different Port catalog |
 | `boards/spaghettilab/README.md` | Board/Core variant file layout and templates | Creating or reviewing a Spaghetti LAB board definition |
 | `dts/bindings/spaghetti/README.md` | Custom binding purpose, schema, and matching DTS example | Adding/changing a `spaghettilab,*` compatible/property |

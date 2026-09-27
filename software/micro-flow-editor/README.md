@@ -1,4 +1,4 @@
-# Micro Flow Editor
+# Flow
 
 A Docker Compose environment running a [React](https://react.dev/) +
 [Vite](https://vite.dev/) app with [React Flow](https://reactflow.dev/)

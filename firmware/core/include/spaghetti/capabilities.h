@@ -35,6 +35,8 @@ enum spaghetti_build_capability {
 	SPAGHETTI_BUILD_CAP_RUNTIME_PORT_MUX = BIT(8), /**< Port mux exists. */
 	SPAGHETTI_BUILD_CAP_POWER_SWITCHING = BIT(9), /**< Power switch exists. */
 	SPAGHETTI_BUILD_CAP_POWER_MEASUREMENT = BIT(10), /**< Power ADC exists. */
+	SPAGHETTI_BUILD_CAP_OTA_CAN = BIT(11), /**< CAN field-update adapter is compiled. */
+	SPAGHETTI_BUILD_CAP_OTA_ESPNOW = BIT(12), /**< ESP-NOW field-update adapter is compiled. */
 };
 
 /** Caller-owned immutable snapshot of the compiled firmware contract. */

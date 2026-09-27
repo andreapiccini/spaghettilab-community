@@ -3,10 +3,18 @@
 [← Services](../README.md) · [Public API](../../../include/spaghetti/update.h) ·
 [Architecture](../../../ARCHITECTURE.md)
 
-Update owns the single global firmware-update session. UART and authenticated UDP are
-adapters: they may move bytes only after obtaining ownership through `begin()`. They do
-not choose the destination slot, make an image permanent, or keep independent update
-state.
+Update owns the single global firmware-update session. UART, authenticated UDP, BLE,
+CAN, and ESP-NOW are adapters: they may move bytes only after obtaining ownership
+through `begin()`. They do not choose the destination slot, make an image permanent, or
+keep independent update state.
+
+CAN and ESP-NOW are SLUP field adapters for chained Backbone boards. They start even
+when no Config is stored so the USB-connected master can `slup list` then
+`slup load <node>`. Discover and EnterUpdate reuse the host-loader TWAI commands
+and 24-bit MAC node IDs. The image then uses classic 8-byte frames on IDs
+`0x1B0`–`0x1B3` at 500 kbit/s on the SN65HVD230 transceiver. The wireless path
+reuses the host-loader `BNOW` packet on UDP port 1339 / channel 1. See
+[`../ota/SLUP.md`](../ota/SLUP.md).
 
 Before preparing image-1, `begin()` calls
 `spaghetti_update_policy_authorize()`. Community supplies a weak allow policy so local

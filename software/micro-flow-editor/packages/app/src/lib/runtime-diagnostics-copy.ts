@@ -40,7 +40,7 @@ type RuntimeDiagnosticsCopy = {
 const IT: RuntimeDiagnosticsCopy = {
   title: "Runtime & Diagnostics",
   coresReady: (total, ready) => `${total} Core · ${ready} pronti`,
-  noCore: "Nessun Core connesso e pronto — connetti un Core (Core Connections) per vedere telemetria, comandi e stato qui.",
+  noCore: "Nessuna Backbone connessa e pronta — connetti una Backbone per vedere telemetria, comandi e stato qui.",
   tabs: {
     telemetry: "Telemetria",
     commands: "Comandi",
@@ -77,7 +77,7 @@ const IT: RuntimeDiagnosticsCopy = {
 const EN: RuntimeDiagnosticsCopy = {
   title: "Runtime & Diagnostics",
   coresReady: (total, ready) => `${total} Core · ${ready} ready`,
-  noCore: "No Core connected and ready — connect a Core (Core Connections) to see telemetry, commands and status here.",
+  noCore: "No Backbone connected and ready — connect a Backbone to see telemetry, commands and status here.",
   tabs: {
     telemetry: "Telemetry",
     commands: "Commands",

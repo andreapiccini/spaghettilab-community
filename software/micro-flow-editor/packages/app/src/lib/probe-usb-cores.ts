@@ -11,7 +11,13 @@ type FoundUsbCoreBase = {
 
 export type FoundUsbCore =
   | (FoundUsbCoreBase & { readonly source: "webserial"; readonly port: UsbSerialPort })
-  | (FoundUsbCoreBase & { readonly source: "bridge"; readonly url: string });
+  | (FoundUsbCoreBase & { readonly source: "bridge"; readonly url: string })
+  | (FoundUsbCoreBase & {
+      readonly source: "can";
+      readonly viaDeviceIdHex: string;
+      readonly nodeId: number;
+      readonly mac: string;
+    });
 
 async function identifyUsbCore(port: UsbSerialPort): Promise<FoundUsbCore | null> {
   try {
@@ -66,6 +72,14 @@ export async function probeUsbBridgeCores(): Promise<readonly FoundUsbCore[]> {
         deviceIdHex?: string;
         deviceName?: string;
         version?: string;
+        peers?: readonly {
+          deviceIdHex?: string;
+          deviceName?: string;
+          nodeId?: number;
+          mac?: string;
+          role?: string;
+          version?: string;
+        }[];
       }[];
     };
     const cores: FoundUsbCore[] = [];
@@ -79,6 +93,19 @@ export async function probeUsbBridgeCores(): Promise<readonly FoundUsbCore[]> {
         deviceName: item.deviceName?.trim() ?? "",
         version: item.version ?? "",
       });
+      for (const peer of item.peers ?? []) {
+        const peerId = peer.deviceIdHex?.toLowerCase();
+        if (!peerId || peerId === deviceIdHex || peer.role === "master") continue;
+        cores.push({
+          source: "can",
+          viaDeviceIdHex: deviceIdHex,
+          nodeId: peer.nodeId ?? 0,
+          mac: peer.mac ?? "",
+          deviceIdHex: peerId,
+          deviceName: peer.deviceName?.trim() ?? "",
+          version: peer.version?.trim() ?? "",
+        });
+      }
     }
     return cores;
   } catch {

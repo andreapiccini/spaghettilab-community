@@ -124,6 +124,34 @@ target_sources(app PRIVATE
   subsys/services/mqtt/mqtt_credentials.c
 )
 
+if(CONFIG_SPAGHETTI_NFC)
+  target_sources(app PRIVATE
+    subsys/nfc/nfc.c
+  )
+else()
+  target_sources(app PRIVATE
+    subsys/nfc/nfc_disabled.c
+  )
+endif()
+
+if(CONFIG_SPAGHETTI_FIELD_UPDATE)
+  target_sources(app PRIVATE
+    subsys/services/ota/field_update.c
+  )
+endif()
+
+if(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
+  target_sources(app PRIVATE
+    subsys/services/ota/field_update_can.c
+  )
+endif()
+
+if(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
+  target_sources(app PRIVATE
+    subsys/services/ota/field_update_espnow.c
+  )
+endif()
+
 if(CONFIG_WIFI)
   target_sources(app PRIVATE
     subsys/services/wifi_profiles/wifi_profiles.c

@@ -6,7 +6,7 @@ import type { LocaleId } from "../../lib/locale.js";
 export type { RowActionId };
 
 /** `ux/screens/S030-core-connections/visual.md` § Badge stato sessione — color + whether the dot pulses (transitional states only). */
-export function sessionBadgeStyle(state: SessionState): { readonly colorVar: string; readonly pulsing: boolean; readonly label: string } {
+export function sessionBadgeStyle(state: SessionState, onlineLabel = "Online"): { readonly colorVar: string; readonly pulsing: boolean; readonly label: string } {
   switch (state) {
     case "DISCONNECTED":
       return { colorVar: "var(--color-ink-faint)", pulsing: false, label: "DISCONNECTED" };
@@ -15,7 +15,7 @@ export function sessionBadgeStyle(state: SessionState): { readonly colorVar: str
     case "SYNCHRONIZING":
       return { colorVar: "var(--color-info)", pulsing: true, label: state };
     case "READY":
-      return { colorVar: "var(--color-success)", pulsing: false, label: "READY" };
+      return { colorVar: "var(--color-success)", pulsing: false, label: onlineLabel };
     case "VALIDATING":
     case "APPLYING":
     case "UPDATING":

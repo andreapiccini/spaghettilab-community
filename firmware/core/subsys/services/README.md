@@ -30,6 +30,7 @@ and their dynamic stacks. A failed cleanup remains `DEGRADED` and can be retried
 | `maintenance_link/` | Board-selected shared-pin UART and restricted SMP commands. |
 | `update/` | Exclusive update session, timeout and MCUboot test policy. |
 | `ota/` | One-shot authenticated DTLS-PSK adapter for restricted SMP update. |
+| `ota/SLUP.md` | CAN field update: Discover, EnterUpdate, chain identity, NFC snapshot. |
 | `secure_workspace/` | Exclusive secure-session admission over the shared libc heap. |
 | `service_manager.c` | Atomic lifecycle state and capability admission for optional services. |
 | `service_thread.c` | Profile-bounded dynamic stack admission, join, release, and peak metrics. |

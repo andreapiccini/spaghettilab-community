@@ -32,11 +32,14 @@ WEST_CMAKE_ARGS := -- -DBOARD_ROOT=/opt/zephyrproject/app \
 	-DDTS_ROOT=/opt/zephyrproject/app \
 	$(if $(strip $(EXTRA_CONF_FILE)),-DEXTRA_CONF_FILE=$(EXTRA_CONF_FILE),)
 
+IMAGE ?= build/app/zephyr/zephyr.signed.bin
+TARGET ?= 2
+
 .PHONY: image shell signing-key validate build build-ble pristine flash screen monitor \
 	host-tools ports remote-console-credential remote-console-provision \
 	remote-console-enable remote-console-clear remote-console-list update-qualification-manifest \
 	update-qualification-check resource-report node-red-ble-smoke node-red-mqtt-smoke \
-	spaghetti usb-bridge config-validate config-apply clean
+	spaghetti usb-bridge config-validate config-apply slup-load slup-list clean
 
 $(HOST_TOOLS_STAMP): tools/requirements.txt
 	@$(HOST_PYTHON) -m venv .venv
@@ -169,6 +172,14 @@ screen:
 monitor: $(HOST_TOOLS_STAMP)
 	@$(HOST_VENV_PYTHON) tools/device.py monitor --transport "$(TRANSPORT)" \
 		$(PORT_ARG) $(HOST_ARG) $(CREDENTIALS_ARG) --baud "$(BAUD)"
+
+# Close make monitor first. IMAGE is a host path; TARGET is slup idx or 0xNODE.
+slup-load: $(HOST_TOOLS_STAMP)
+	@PYTHONPATH=. $(HOST_VENV_PYTHON) tools/slup_load.py \
+		--image "$(IMAGE)" --target "$(TARGET)" $(PORT_ARG)
+
+slup-list: $(HOST_TOOLS_STAMP)
+	@PYTHONPATH=. $(HOST_VENV_PYTHON) tools/slup_load.py --list $(PORT_ARG)
 
 remote-console-credential:
 	@$(HOST_PYTHON) tools/device.py remote-console-credential \

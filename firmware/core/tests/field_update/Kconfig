@@ -1,0 +1,13 @@
+mainmenu "Spaghetti field-update tests"
+
+rsource "../../Kconfig.resources"
+
+config SPAGHETTI_FIELD_UPDATE_LOG_LEVEL
+	int
+	default 0
+
+config SPAGHETTI_FIELD_UPDATE_WINDOW_MS
+	int
+	default 300000
+
+source "Kconfig.zephyr"

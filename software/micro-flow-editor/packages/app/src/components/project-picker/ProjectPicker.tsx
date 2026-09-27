@@ -111,7 +111,10 @@ export function ProjectPicker() {
   return (
     <div className="flex h-full flex-col bg-surface">
       <header className="flex h-16 items-center justify-between border-b border-border px-6">
-        <img src={publicAsset("ux-assets/logo-full.png")} alt="Spaghetti LAB" className="h-8" />
+        <div className="flex items-center gap-3">
+          <img src={publicAsset("ux-assets/logo-full.png")} alt="Spaghetti LAB" className="h-8" />
+          <span className="font-heading text-lg font-semibold text-ink">Flow</span>
+        </div>
         <div className="flex items-center gap-2">
           <ChromeStatus />
           <button

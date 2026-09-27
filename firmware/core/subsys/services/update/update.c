@@ -57,7 +57,9 @@ static bool transport_is_valid(enum spaghetti_update_transport transport)
 {
 	return (transport == SPAGHETTI_UPDATE_TRANSPORT_UART) ||
 	       (transport == SPAGHETTI_UPDATE_TRANSPORT_UDP) ||
-	       (transport == SPAGHETTI_UPDATE_TRANSPORT_BLE);
+	       (transport == SPAGHETTI_UPDATE_TRANSPORT_BLE) ||
+	       (transport == SPAGHETTI_UPDATE_TRANSPORT_CAN) ||
+	       (transport == SPAGHETTI_UPDATE_TRANSPORT_ESPNOW);
 }
 
 __weak int spaghetti_update_policy_authorize(

@@ -1,18 +1,20 @@
 import { proposeBindingFromDiscovery } from "@spaghettilab/core-session";
 import { addCoreBinding, connectionProfileId, coreBindingId, createConnectionProfile, type CoreBindingRecord } from "@spaghettilab/domain";
 import { SpaghettiClient, WebSocketProtocolTransport } from "@spaghettilab/protocol-sdk";
+import { Cable } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { connectBrowserWebSocket } from "../../lib/browser-websocket-connection.js";
 import { saveConnectionProfile } from "../../lib/connection-profile-store.js";
-import { coreDisplayName, identityFromStatus } from "../../lib/core-identity.js";
+import { coreDisplayName, formatDeviceId, identityFromStatus } from "../../lib/core-identity.js";
 import { coreConnectionsCopy } from "../../lib/core-connections-copy.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { probeUsbCores, requestUsbCorePort, usbSerialSupported, type FoundUsbCore } from "../../lib/probe-usb-cores.js";
 import { uuidGenerator } from "../../lib/repository.js";
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
-import type { CoreLink } from "../../state/core-sessions-context.js";
+import type { AttachedBackbone, CoreLink } from "../../state/core-sessions-context.js";
+import { useCoreSessions } from "../../state/core-sessions-context.js";
 
 type Method = "auto" | "network" | "usb";
 
@@ -26,6 +28,7 @@ export function ConnectCoreDialog({
   readonly onConnect: (binding: CoreBindingRecord, link: CoreLink) => void;
 }) {
   const { session, execute } = useSession();
+  const { setAttachedBackbones } = useCoreSessions();
   const { locale } = useLocale();
   const copy = coreConnectionsCopy(locale);
   const [method, setMethod] = useState<Method>("auto");
@@ -87,17 +90,17 @@ export function ConnectCoreDialog({
     transport: "usb" | "websocket";
     host: string;
     port: number;
-  }): Promise<void> {
-    if (!execute || !session) return;
+  }): Promise<CoreBindingRecord | undefined> {
+    if (!execute || !session) return undefined;
     const existing = session.stack.current.coreBindings.find((b) => b.expectedDeviceId === bindingInput.deviceIdHex);
     if (existing) {
       onConnect(existing, bindingInput.link);
-      return;
+      return existing;
     }
 
     const profileIdResult = connectionProfileId(uuidGenerator.generate());
     const bindingIdResult = coreBindingId(uuidGenerator.generate());
-    if (!profileIdResult.ok || !bindingIdResult.ok) return;
+    if (!profileIdResult.ok || !bindingIdResult.ok) return undefined;
 
     const profileResult = createConnectionProfile({
       connectionProfileId: profileIdResult.value,
@@ -108,7 +111,7 @@ export function ConnectCoreDialog({
     });
     if (!profileResult.ok) {
       setError(profileResult.error.map((e) => e.remediation).join(" "));
-      return;
+      return undefined;
     }
     await saveConnectionProfile(profileResult.value);
 
@@ -119,12 +122,13 @@ export function ConnectCoreDialog({
     );
     if (proposed.bindingId !== bindingIdResult.value) {
       onConnect(proposed, bindingInput.link);
-      return;
+      return proposed;
     }
 
     const result = execute(addCoreBinding(proposed));
-    if (!result.ok) return;
+    if (!result.ok) return undefined;
     onConnect(proposed, bindingInput.link);
+    return proposed;
   }
 
   async function handleConnect() {
@@ -157,9 +161,11 @@ export function ConnectCoreDialog({
         }
       } else {
         const nick = nickname.trim();
-        for (const core of selectedUsb) {
-          const displayName = selectedUsb.length === 1 && nick ? nick : coreDisplayName(core.deviceName, core.deviceIdHex);
-          await bindAndConnect({
+        const usbSelected = selectedUsb.filter((core) => core.source !== "can");
+        const canSelected = selectedUsb.filter((core) => core.source === "can");
+        for (const core of usbSelected) {
+          const displayName = usbSelected.length === 1 && nick ? nick : coreDisplayName(core.deviceName, core.deviceIdHex);
+          const binding = await bindAndConnect({
             deviceIdHex: core.deviceIdHex,
             displayName,
             link: core.source === "bridge" ? { kind: "websocket", url: core.url } : { kind: "usb", port: core.port },
@@ -167,6 +173,20 @@ export function ConnectCoreDialog({
             host: core.deviceIdHex,
             port: 1,
           });
+          if (!binding) continue;
+          const peers: AttachedBackbone[] = [
+            { deviceIdHex: core.deviceIdHex, mac: formatDeviceId(core.deviceIdHex), nodeId: 0, local: true, version: core.version || undefined },
+            ...canSelected
+              .filter((peer) => peer.viaDeviceIdHex === core.deviceIdHex)
+              .map((peer) => ({
+                deviceIdHex: peer.deviceIdHex,
+                mac: peer.mac || formatDeviceId(peer.deviceIdHex),
+                nodeId: peer.nodeId,
+                local: false,
+                version: peer.version || undefined,
+              })),
+          ];
+          setAttachedBackbones(binding.bindingId, peers);
         }
       }
       setNickname("");
@@ -266,31 +286,53 @@ export function ConnectCoreDialog({
                       </button>
                     </div>
                   ) : (
-                    <ul className="flex max-h-56 flex-col gap-1 overflow-auto">
-                      {usbCores.map((core, index) => (
-                        <li key={core.deviceIdHex}>
-                          <label
-                            className="flex min-h-11 cursor-pointer items-center gap-3 rounded-slsm px-3 hover:bg-surface-raised"
-                            style={{ animationDelay: `${index * 30}ms` }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.has(core.deviceIdHex)}
-                              onChange={() => toggleUsb(core.deviceIdHex)}
-                            />
-                            <span className="min-w-0 flex-1">
-                              <span className="block truncate font-body text-sm font-semibold text-ink">
-                                {coreDisplayName(core.deviceName, core.deviceIdHex)}
-                              </span>
-                              <span className="block truncate font-mono text-xs text-ink-faint">
-                                core://{core.deviceIdHex}
-                                {core.version ? ` · ${core.version}` : ""}
-                                {core.source === "bridge" ? ` · ${copy.localBridge}` : ""}
-                              </span>
-                            </span>
-                          </label>
-                        </li>
-                      ))}
+                    <ul className="flex max-h-56 flex-col gap-3 overflow-auto">
+                      {usbCores
+                        .filter((core) => core.source !== "can")
+                        .map((master, groupIndex) => {
+                          const slaves = usbCores.filter(
+                            (core) => core.source === "can" && core.viaDeviceIdHex === master.deviceIdHex,
+                          );
+                          return (
+                            <li key={master.deviceIdHex} className="rounded-slsm bg-surface-sunken px-2 py-2">
+                              <p className="px-1 pb-1 font-body text-xs font-semibold text-ink-muted">
+                                {copy.groupTitle(groupIndex + 1)}
+                              </p>
+                              <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-slsm px-2 hover:bg-surface-raised">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedIds.has(master.deviceIdHex)}
+                                  onChange={() => toggleUsb(master.deviceIdHex)}
+                                />
+                                <span className="min-w-0 flex-1">
+                                  <span className="block truncate font-body text-sm font-semibold text-ink">{copy.master}</span>
+                                  <span className="flex items-center gap-1 font-body text-xs text-ink-muted">
+                                    <Cable size={12} />
+                                    {master.version || copy.viaCable}
+                                  </span>
+                                </span>
+                              </label>
+                              {slaves.map((slave, slaveIndex) => (
+                                <label
+                                  key={slave.deviceIdHex}
+                                  className="flex min-h-10 cursor-pointer items-center gap-3 rounded-slsm px-2 pl-8 hover:bg-surface-raised"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedIds.has(slave.deviceIdHex)}
+                                    onChange={() => toggleUsb(slave.deviceIdHex)}
+                                  />
+                                  <span className="min-w-0">
+                                    <span className="block font-body text-sm text-ink">{copy.slave(slaveIndex + 1)}</span>
+                                    {slave.version ? (
+                                      <span className="block font-body text-xs text-ink-muted">{slave.version}</span>
+                                    ) : null}
+                                  </span>
+                                </label>
+                              ))}
+                            </li>
+                          );
+                        })}
                     </ul>
                   )}
                   {method === "usb" && usbSerialSupported() && (

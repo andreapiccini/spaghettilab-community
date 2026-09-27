@@ -1,0 +1,219 @@
+/*
+ * Spaghetti LAB Backbone V1, ESP32-S3-MINI-1 (U19) PROCPU.
+ * Pins from hardware/backbone/backbone.kicad_sch.
+ */
+
+/dts-v1/;
+
+#include <espressif/esp32s3/esp32s3_mini_n8.dtsi>
+#include <espressif/partitions_0x0_default.dtsi>
+#include <zephyr/dt-bindings/pinctrl/esp-pinctrl-common.h>
+#include <zephyr/dt-bindings/pinctrl/esp32s3-pinctrl.h>
+#include <zephyr/dt-bindings/pinctrl/esp32s3-gpio-sigmap.h>
+
+/ {
+	model = "Spaghetti LAB Backbone V1";
+	compatible = "spaghettilab,backbone-v1", "espressif,esp32s3";
+
+	chosen {
+		zephyr,sram = &sram1;
+		zephyr,console = &usb_serial;
+		zephyr,shell-uart = &usb_serial;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,uart-mcumgr = &uart1;
+		zephyr,bt-hci = &esp32_bt_hci;
+	};
+
+	aliases {
+		i2c-0 = &i2c0;
+		led0 = &status_led;
+		watchdog0 = &wdt0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		/*
+		 * D5 LED0603-RD, cathode on GPIO10, active low.
+		 * Single red status LED; there is no RGB / SK6812 on this board.
+		 */
+		status_led: status_led {
+			gpios = <&gpio0 10 GPIO_ACTIVE_LOW>;
+			label = "STATUS";
+		};
+	};
+
+	/*
+	 * ST25R100 U15 control lines. SPI wires live on spi2 / nfc_spi_default.
+	 * RST GPIO1, IRQ GPIO5, CS GPIO2 (cs-gpios on spi2).
+	 */
+	spaghetti_nfc: spaghetti_nfc {
+		nfc-reset-gpios = <&gpio0 1 GPIO_ACTIVE_LOW>;
+		nfc-irq-gpios = <&gpio0 5 GPIO_ACTIVE_HIGH>;
+	};
+
+	spaghetti_ports {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* J8 A0/A1 GPIO38/37, J10 A2/A3 GPIO36/35. I2C/maintenance on A0/A1. */
+		port0: port@0 {
+			compatible = "spaghettilab,port";
+			reg = <0>;
+			i2c = <&i2c0>;
+			input-gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>,
+				      <&gpio1 5 GPIO_ACTIVE_HIGH>,
+				      <&gpio1 4 GPIO_ACTIVE_HIGH>,
+				      <&gpio1 3 GPIO_ACTIVE_HIGH>;
+			output-gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>,
+				       <&gpio1 5 GPIO_ACTIVE_HIGH>,
+				       <&gpio1 4 GPIO_ACTIVE_HIGH>,
+				       <&gpio1 3 GPIO_ACTIVE_HIGH>;
+			status = "okay";
+		};
+
+		/* SN65HVD230 U2: TX GPIO48, RX GPIO34. */
+		port1: port@1 {
+			compatible = "spaghettilab,port";
+			reg = <1>;
+			can = <&twai>;
+			status = "okay";
+		};
+	};
+
+	spaghetti_flows {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		flow0: flow@0 {
+			compatible = "spaghettilab,flow";
+			reg = <0>;
+			port = <&port0>;
+			direction = "bidirectional";
+			signal-count = <5>;
+			function-bay-count = <0>;
+			status = "okay";
+		};
+
+		flow1: flow@1 {
+			compatible = "spaghettilab,flow";
+			reg = <1>;
+			port = <&port1>;
+			direction = "bidirectional";
+			signal-count = <5>;
+			function-bay-count = <0>;
+			status = "okay";
+		};
+	};
+
+	maintenance_link0: maintenance-link {
+		compatible = "spaghettilab,maintenance-link";
+		normal-bus = <&i2c0>;
+		maintenance-uart = <&uart1>;
+		bootstrap-window-ms = <500>;
+		status = "okay";
+	};
+};
+
+&pinctrl {
+	spaghetti_i2c0_default: spaghetti_i2c0_default {
+		group1 {
+			pinmux = <I2C0_SDA_GPIO38>, <I2C0_SCL_GPIO37>;
+			bias-pull-up;
+			drive-open-drain;
+			output-high;
+		};
+	};
+
+	spaghetti_uart1_maintenance: spaghetti_uart1_maintenance {
+		group1 {
+			pinmux = <UART1_RX_GPIO38>, <UART1_TX_GPIO37>;
+		};
+	};
+
+	spaghetti_uart1_probe: spaghetti_uart1_probe {
+		group1 {
+			pinmux = <UART1_RX_GPIO38>;
+			bias-pull-up;
+		};
+	};
+
+	/* ST25R100 U15: SCK GPIO4, MOSI GPIO3, MISO GPIO6. CS GPIO2 is cs-gpios. */
+	nfc_spi_default: nfc_spi_default {
+		group1 {
+			pinmux = <SPIM2_SCLK_GPIO4>, <SPIM2_MISO_GPIO6>;
+		};
+
+		group2 {
+			pinmux = <SPIM2_MOSI_GPIO3>;
+			output-low;
+		};
+	};
+
+	spaghetti_twai_default: spaghetti_twai_default {
+		group1 {
+			pinmux = <TWAI_TX_GPIO48>, <TWAI_RX_GPIO34>;
+		};
+	};
+};
+
+&usb_serial {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&spaghetti_i2c0_default>;
+	pinctrl-names = "default";
+};
+
+&uart1 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&spaghetti_uart1_probe>;
+	pinctrl-1 = <&spaghetti_uart1_maintenance>;
+	pinctrl-names = "default", "sleep";
+};
+
+&spi2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	pinctrl-0 = <&nfc_spi_default>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;
+};
+
+&twai {
+	status = "okay";
+	pinctrl-0 = <&spaghetti_twai_default>;
+	pinctrl-names = "default";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&wdt0 {
+	status = "okay";
+};
+
+&trng0 {
+	status = "okay";
+};
+
+&wifi {
+	status = "okay";
+};
+
+&esp32_bt_hci {
+	status = "okay";
+};

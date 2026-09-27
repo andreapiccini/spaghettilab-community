@@ -1,5 +1,5 @@
 #!/bin/sh
-# Open the Micro Flow Editor in the default browser.
+# Open Flow in the default browser.
 # Starts `make up-d` if nothing is already listening on the editor port.
 # Not a desktop wrapper — the app stays a Vite web app (Web Serial, Docker HMR).
 set -e

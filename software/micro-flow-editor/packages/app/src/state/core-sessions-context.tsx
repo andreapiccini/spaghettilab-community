@@ -15,7 +15,31 @@ import { useSession } from "./session-context.js";
 
 export type CoreLink =
   | { readonly kind: "websocket"; readonly url: string }
-  | { readonly kind: "usb"; readonly port: UsbSerialPort };
+  | { readonly kind: "usb"; readonly port: UsbSerialPort }
+  | { readonly kind: "can"; readonly viaDeviceIdHex: string; readonly nodeId: number };
+
+export type CanVia = {
+  readonly viaDeviceIdHex: string;
+  readonly nodeId: number;
+};
+
+export type HostLink = "usb" | "wifi";
+
+export type AttachedBackbone = {
+  readonly deviceIdHex: string;
+  readonly mac: string;
+  readonly nodeId: number;
+  readonly local: boolean;
+  readonly version?: string;
+};
+
+function hostLinkFromCoreLink(link: CoreLink): HostLink {
+  if (link.kind === "usb") return "usb";
+  if (link.kind === "websocket" && link.url.includes("/usb-bridge/")) return "usb";
+  return "wifi";
+}
+
+export type { NfcNode } from "../lib/nfc-presence.js";
 
 export type CoreRowState = {
   readonly binding: CoreBindingRecord;
@@ -24,11 +48,15 @@ export type CoreRowState = {
   readonly stale: boolean;
   readonly syncRelationship: SyncRelationship | null;
   readonly error: DomainError | string | null;
+  readonly viaCan: CanVia | null;
+  readonly attachedBackbones: readonly AttachedBackbone[];
+  readonly hostLink: HostLink;
 };
 
 type CoreSessionsContextValue = {
   rows: readonly CoreRowState[];
   connect(binding: CoreBindingRecord, link: CoreLink): Promise<void>;
+  setAttachedBackbones(bindingId: CoreBindingId, peers: readonly AttachedBackbone[]): void;
   cancel(bindingId: CoreBindingId): void;
   fail(bindingId: CoreBindingId, message: string): void;
   getSnapshot(bindingId: CoreBindingId): CoreSessionSnapshot | undefined;
@@ -57,7 +85,18 @@ const CoreSessionsContext = createContext<CoreSessionsContextValue | undefined>(
 
 const sharedCatalogCache = new CatalogCache();
 
+function usbBridgeClientOptions(link: CoreLink): { defaultTimeoutMs: number; attemptTimeoutMs: number; maxRetries: number } | undefined {
+  if (link.kind === "usb") return { defaultTimeoutMs: 20000, attemptTimeoutMs: 8000, maxRetries: 1 };
+  if (link.kind === "websocket" && link.url.includes("/usb-bridge/")) {
+    return { defaultTimeoutMs: 20000, attemptTimeoutMs: 8000, maxRetries: 1 };
+  }
+  return undefined;
+}
+
 async function openLink(link: CoreLink): Promise<{ transport: ProtocolTransport; dispose: () => void; onDisconnected: (cb: () => void) => void }> {
+  if (link.kind === "can") {
+    throw new Error("CAN peers are reached through the USB master");
+  }
   if (link.kind === "websocket") {
     const { connection, socket } = await connectBrowserWebSocket(link.url);
     const transport = new WebSocketProtocolTransport(connection);
@@ -92,6 +131,9 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
   const { session } = useSession();
   const sessionsRef = useRef(new Map<CoreBindingId, CoreSession>());
   const disposersRef = useRef(new Map<CoreBindingId, () => void>());
+  const canViaRef = useRef(new Map<CoreBindingId, CanVia>());
+  const attachedRef = useRef(new Map<CoreBindingId, readonly AttachedBackbone[]>());
+  const hostLinkRef = useRef(new Map<CoreBindingId, HostLink>());
   const [renderCount, forceRender] = useState(0);
   const rerender = useCallback(() => forceRender((n) => n + 1), []);
   const [errors, setErrors] = useState<Map<CoreBindingId, DomainError | string>>(new Map());
@@ -108,10 +150,17 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
       sessionsRef.current.delete(binding.bindingId);
       disposersRef.current.get(binding.bindingId)?.();
       disposersRef.current.delete(binding.bindingId);
+      if (link.kind === "can") {
+        canViaRef.current.set(binding.bindingId, { viaDeviceIdHex: link.viaDeviceIdHex, nodeId: link.nodeId });
+        rerender();
+        return;
+      }
+      canViaRef.current.delete(binding.bindingId);
+      hostLinkRef.current.set(binding.bindingId, hostLinkFromCoreLink(link));
       try {
         const opened = await openLink(link);
         disposersRef.current.set(binding.bindingId, opened.dispose);
-        const client = new SpaghettiClient(opened.transport);
+        const client = new SpaghettiClient(opened.transport, usbBridgeClientOptions(link));
         const eventStream = new EventStream(opened.transport);
         const coreSession = new CoreSession(binding, client, eventStream, sharedCatalogCache);
         sessionsRef.current.set(binding.bindingId, coreSession);
@@ -149,6 +198,8 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
       sessionsRef.current.delete(bindingId);
       disposersRef.current.get(bindingId)?.();
       disposersRef.current.delete(bindingId);
+      canViaRef.current.delete(bindingId);
+      hostLinkRef.current.delete(bindingId);
       rerender();
     },
     [rerender],
@@ -156,6 +207,11 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
 
   const fail = useCallback((bindingId: CoreBindingId, message: string) => {
     setErrors((prev) => new Map(prev).set(bindingId, message));
+    rerender();
+  }, [rerender]);
+
+  const setAttachedBackbones = useCallback((bindingId: CoreBindingId, peers: readonly AttachedBackbone[]) => {
+    attachedRef.current.set(bindingId, peers);
     rerender();
   }, [rerender]);
 
@@ -171,6 +227,9 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
         stale: coreSession?.stale ?? false,
         syncRelationship: coreSession?.syncRelationship ?? null,
         error: errors.get(binding.bindingId) ?? null,
+        viaCan: canViaRef.current.get(binding.bindingId) ?? null,
+        attachedBackbones: attachedRef.current.get(binding.bindingId) ?? [],
+        hostLink: hostLinkRef.current.get(binding.bindingId) ?? "usb",
       };
     });
   }, [session, errors, renderCount]);
@@ -220,6 +279,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
   const value: CoreSessionsContextValue = {
     rows,
     connect,
+    setAttachedBackbones,
     cancel,
     fail,
     getSnapshot,

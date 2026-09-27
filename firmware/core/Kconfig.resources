@@ -2,6 +2,7 @@ choice SPAGHETTI_RESOURCE_PROFILE
 	prompt "Spaghetti LAB resource profile"
 	default SPAGHETTI_RESOURCE_PROFILE_MINIMAL if BOARD_SPAGHETTILAB_CORE_V1
 	default SPAGHETTI_RESOURCE_PROFILE_MINIMAL if BOARD_SPAGHETTILAB_CORE_V2_BUILD_ONLY
+	default SPAGHETTI_RESOURCE_PROFILE_MINIMAL if BOARD_SPAGHETTILAB_BACKBONE_V1
 	default SPAGHETTI_RESOURCE_PROFILE_MINIMAL
 	help
 	  Select one build-time resource budget. Runtime free memory never changes
@@ -29,6 +30,7 @@ config SPAGHETTI_CORE_VARIANT
 	string
 	default "core-v1-esp32c3" if BOARD_SPAGHETTILAB_CORE_V1
 	default "core-v2-build-only" if BOARD_SPAGHETTILAB_CORE_V2_BUILD_ONLY
+	default "backbone-v1-esp32s3" if BOARD_SPAGHETTILAB_BACKBONE_V1
 	default "native-sim"
 	help
 	  Stable Core variant identifier published by the firmware artifact.

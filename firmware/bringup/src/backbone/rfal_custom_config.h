@@ -1,5 +1,11 @@
 #pragma once
 
+// Xtensa (ESP32-S3) defines BR as a special register. RFAL uses BR as a
+// struct field in rfal_nfcDep.h — same pattern as RFAL's own DSI undef.
+#ifdef BR
+#undef BR
+#endif
+
 // ST25R100 reader/writer configuration for BACKBONE.  Keep listen/card
 // emulation and NFC-F disabled to reduce RAM/flash use on the ESP32-C3.
 #define RFAL_FEATURE_LISTEN_MODE false

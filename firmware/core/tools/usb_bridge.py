@@ -20,6 +20,7 @@ import argparse
 import asyncio
 import json
 import logging
+import re
 import sys
 import threading
 import time
@@ -86,6 +87,16 @@ def pop_usb_frame(buffer: bytearray) -> tuple[int, bytes] | None:
 
 
 @dataclass
+class SlupPeer:
+    device_id_hex: str
+    device_name: str
+    node_id: int
+    mac: str
+    role: str
+    version: str = ""
+
+
+@dataclass
 class BoundCore:
     device_id_hex: str
     device_name: str
@@ -93,6 +104,114 @@ class BoundCore:
     port: str
     connection: Any
     write_lock: threading.Lock
+    slup_peers: tuple[SlupPeer, ...] = ()
+    slup_peers_at: float = 0.0
+
+
+_SLUP_PEER_LINE = re.compile(
+    r"^\s*(\d+)\s+(master|peer)\s+0x([0-9a-fA-F]{1,6})\s+"
+    r"([0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){5})"
+    r"(?:\s+(\S+))?\s*$",
+    re.MULTILINE,
+)
+SLUP_LIST_TIMEOUT_S = 2.5
+SLUP_LIST_GIVE_UP_S = 0.4
+SLUP_LIST_CACHE_S = 30.0
+
+
+def _drain_serial(connection: Any, settle_s: float = 0.15) -> None:
+    """Drop leftover Shell/`slup list` bytes so they cannot look like Protocol frames."""
+    try:
+        if hasattr(connection, "reset_input_buffer"):
+            connection.reset_input_buffer()
+        deadline = time.monotonic() + settle_s
+        while time.monotonic() < deadline:
+            waiting = getattr(connection, "in_waiting", 0) or 0
+            if waiting:
+                connection.read(waiting)
+                continue
+            time.sleep(0.02)
+            waiting = getattr(connection, "in_waiting", 0) or 0
+            if not waiting:
+                break
+            connection.read(waiting)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def mac_to_device_id_hex(mac: str) -> str:
+    compact = "".join(ch for ch in mac.lower() if ch in "0123456789abcdef")
+    return (compact + ("0" * 64))[:64]
+
+
+def parse_slup_list(text: str) -> tuple[SlupPeer, ...]:
+    peers: list[SlupPeer] = []
+    seen: set[str] = set()
+    for match in _SLUP_PEER_LINE.finditer(text):
+        role = match.group(2).lower()
+        node_id = int(match.group(3), 16) & 0xFFFFFF
+        mac = match.group(4).lower()
+        device_id = mac_to_device_id_hex(mac)
+        if device_id in seen:
+            continue
+        seen.add(device_id)
+        version = match.group(5) or ""
+        if version == "-":
+            version = ""
+        peers.append(
+            SlupPeer(
+                device_id_hex=device_id,
+                device_name="",
+                node_id=node_id,
+                mac=mac,
+                role=role,
+                version=version,
+            )
+        )
+    return tuple(peers)
+
+
+def _slup_list_sync(core: BoundCore) -> tuple[SlupPeer, ...]:
+    """Leave Protocol mode briefly and run the existing `slup list` shell command."""
+    now = time.monotonic()
+    if core.slup_peers and (now - core.slup_peers_at) < SLUP_LIST_CACHE_S:
+        return core.slup_peers
+
+    conn = core.connection
+    buffer = bytearray()
+    try:
+        with core.write_lock:
+            conn.write(b"\x03")
+            conn.flush()
+            time.sleep(0.12)
+            if hasattr(conn, "reset_input_buffer"):
+                conn.reset_input_buffer()
+            conn.write(b"slup list\r\n")
+            conn.flush()
+            deadline = time.monotonic() + SLUP_LIST_TIMEOUT_S
+            started = time.monotonic()
+            while time.monotonic() < deadline:
+                waiting = getattr(conn, "in_waiting", 0) or 0
+                chunk = conn.read(waiting if waiting else 1)
+                if chunk:
+                    buffer.extend(chunk)
+                    text = bytes(buffer).decode("utf-8", errors="replace")
+                    if "load/blink" in text or "SLUP list failed" in text:
+                        break
+                elif (time.monotonic() - started) > SLUP_LIST_GIVE_UP_S and not buffer:
+                    break
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("slup list failed port=%s: %s", core.port, exc)
+        return core.slup_peers
+    finally:
+        _drain_serial(conn)
+
+    peers = parse_slup_list(bytes(buffer).decode("utf-8", errors="replace"))
+    if peers:
+        core.slup_peers = peers
+        core.slup_peers_at = time.monotonic()
+        return peers
+    return core.slup_peers
 
 
 def _close_quiet(connection: Any) -> None:
@@ -167,6 +286,7 @@ class UsbBridge:
         self._busy: set[str] = set()
         self._lock = threading.Lock()
         self._scan_lock = threading.Lock()
+        self._session_ws: dict[str, Any] = {}
 
     def refresh(self) -> list[BoundCore]:
         with self._scan_lock:
@@ -209,17 +329,34 @@ class UsbBridge:
 
     def cores_document(self) -> dict[str, Any]:
         cores = self.refresh()
-        return {
-            "cores": [
+        document: list[dict[str, Any]] = []
+        for core in cores:
+            busy = False
+            with self._lock:
+                busy = core.device_id_hex in self._busy
+            peers = core.slup_peers if busy else _slup_list_sync(core)
+            document.append(
                 {
                     "deviceIdHex": core.device_id_hex,
                     "deviceName": core.device_name,
                     "version": core.version,
                     "port": core.port,
+                    "peers": [
+                        {
+                            "deviceIdHex": peer.device_id_hex,
+                            "deviceName": peer.device_name,
+                            "nodeId": peer.node_id,
+                            "mac": peer.mac,
+                            "role": peer.role,
+                            "version": peer.version,
+                        }
+                        for peer in peers
+                        if peer.role != "master"
+                        and peer.device_id_hex != core.device_id_hex
+                    ],
                 }
-                for core in cores
-            ]
-        }
+            )
+        return {"cores": document}
 
     def get(self, device_id_hex: str) -> BoundCore | None:
         with self._lock:
@@ -236,6 +373,14 @@ class UsbBridge:
     def release(self, device_id_hex: str) -> None:
         with self._lock:
             self._busy.discard(device_id_hex)
+
+    def attach_session(self, device_id_hex: str, websocket: Any) -> None:
+        with self._lock:
+            self._session_ws[device_id_hex] = websocket
+
+    def take_session(self, device_id_hex: str) -> Any:
+        with self._lock:
+            return self._session_ws.pop(device_id_hex, None)
 
 
 def _read_serial_chunks(
@@ -255,6 +400,7 @@ def _read_serial_chunks(
 
 
 async def _pipe_core(websocket: Any, core: BoundCore) -> None:
+    await asyncio.to_thread(_drain_serial, core.connection, 0.2)
     stop = threading.Event()
     incoming: asyncio.Queue[bytes] = asyncio.Queue()
     loop = asyncio.get_running_loop()
@@ -337,15 +483,34 @@ def make_handler(bridge: UsbBridge):
                 if core is None:
                     await websocket.close(4404, "unknown core")
                     return
-                acquired = bridge.try_acquire(device_id)
+                previous = bridge.take_session(device_id)
+                if previous is not None:
+                    try:
+                        await previous.close(4409, "replaced")
+                    except Exception:  # noqa: BLE001
+                        pass
+                    for _ in range(40):
+                        acquired = bridge.try_acquire(device_id)
+                        if acquired is not None:
+                            break
+                        await asyncio.sleep(0.05)
+                else:
+                    acquired = bridge.try_acquire(device_id)
+                if acquired is None:
+                    bridge.release(device_id)
+                    acquired = bridge.try_acquire(device_id)
                 if acquired is None:
                     await websocket.close(4409, "core busy")
                     return
+                bridge.attach_session(device_id, websocket)
                 try:
                     await _pipe_core(websocket, acquired)
                 except ConnectionClosed:
                     pass
                 finally:
+                    with bridge._lock:
+                        if bridge._session_ws.get(device_id) is websocket:
+                            bridge._session_ws.pop(device_id, None)
                     bridge.release(device_id)
                 return
             await websocket.close(4404, "unknown path")

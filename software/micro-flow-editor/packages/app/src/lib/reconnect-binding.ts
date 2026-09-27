@@ -11,7 +11,17 @@ export async function reconnectCoreBinding(
 ): Promise<void> {
   const profile = await getConnectionProfile(binding.connectionProfileId);
   if (!profile) {
-    throw new Error("Profilo di connessione mancante per questo Core.");
+    throw new Error("Profilo di connessione mancante per questa Backbone.");
+  }
+  if (profile.host.startsWith("can:")) {
+    const [, via = "", node = "0"] = profile.host.split(":");
+    const nodeId = Number.parseInt(node, 16);
+    await connect(binding, {
+      kind: "can",
+      viaDeviceIdHex: via,
+      nodeId: Number.isFinite(nodeId) ? nodeId : 0,
+    });
+    return;
   }
   if (profile.transport === "usb") {
     const port = await findGrantedUsbPort(profile.host);

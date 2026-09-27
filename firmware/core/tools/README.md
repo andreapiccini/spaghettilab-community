@@ -34,6 +34,19 @@ status. Protocol status codes map directly to process exit codes (`conflict` →
 Update clients (`update uart|wifi|ble`) verify the signed image locally, stream
 bounded chunks with progress, cancel on Ctrl+C, and finalize as **trial** only.
 
+## SLUP host load (PC file → USB master → CAN peer)
+
+Close `make monitor`. From `firmware/core`:
+
+```sh
+make slup-list
+make slup-load TARGET=2
+make slup-load TARGET=0x112233 IMAGE=build/app/zephyr/zephyr.signed.bin
+```
+
+Default `IMAGE` is the last signed sysbuild image. `TARGET` is a `slup list`
+index or a `0xNODE` MAC suffix.
+
 ## USB Protocol V1 (same Serial/JTAG as the Shell)
 
 Close `make monitor` first. The CLI and React Flow own the port exclusively.

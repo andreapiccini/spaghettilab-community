@@ -4,9 +4,13 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <zephyr/devicetree.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/atomic.h>
+#if DT_HAS_ALIAS(led0)
+#include <zephyr/drivers/gpio.h>
+#endif
 
 #include <spaghetti/communication.h>
 #include <spaghetti/capabilities.h>
@@ -40,6 +44,8 @@
 #include <spaghetti/storage.h>
 #include <spaghetti/topology.h>
 #include <spaghetti/update.h>
+#include <spaghetti/field_update.h>
+#include <spaghetti/nfc.h>
 #include <spaghetti/wifi_profiles.h>
 
 #include "core_boot_internal.h"
@@ -63,6 +69,29 @@ static struct spaghetti_core_info core_info;
 static enum spaghetti_maintenance_entry_reason maintenance_reason;
 static atomic_t core_state = ATOMIC_INIT(SPAGHETTI_CORE_UNINITIALIZED);
 K_MUTEX_DEFINE(core_lock);
+
+#if DT_HAS_ALIAS(led0)
+static const struct gpio_dt_spec status_led =
+	GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
+#endif
+
+static void status_led_on(void)
+{
+#if DT_HAS_ALIAS(led0)
+	if (!gpio_is_ready_dt(&status_led)) {
+		return;
+	}
+	if (gpio_pin_configure_dt(&status_led, GPIO_OUTPUT_ACTIVE) < 0) {
+		LOG_WRN("status LED D5 could not be driven");
+		return;
+	}
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+	LOG_INF("status LED D5 idle pulse");
+#else
+	LOG_INF("status LED D5 on (fixed red)");
+#endif
+#endif
+}
 
 BUILD_ASSERT(sizeof(CONFIG_MCUBOOT_IMGTOOL_SIGN_VERSION) <=
 	     SPAGHETTI_CORE_VERSION_SIZE);
@@ -366,7 +395,20 @@ int spaghetti_core_init(void)
 			goto connectivity_failed;
 		}
 	}
+#if defined(CONFIG_SPAGHETTI_NFC)
+	err = spaghetti_nfc_init();
+	if (err < 0) {
+		LOG_WRN("NFC poller not started: err=%d", err);
+	}
+#endif
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+	err = spaghetti_field_update_init();
+	if (err < 0) {
+		LOG_WRN("SLUP listener not started: err=%d", err);
+	}
+#endif
 
+	status_led_on();
 	atomic_set(&core_state, SPAGHETTI_CORE_READY);
 	core_info.state = SPAGHETTI_CORE_READY;
 	core_info_available = true;

@@ -1,0 +1,6 @@
+board:
+  name: spaghettilab_backbone_v1
+  full_name: Spaghetti LAB Backbone V1
+  vendor: spaghettilab
+  socs:
+    - name: esp32s3

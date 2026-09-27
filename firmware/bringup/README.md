@@ -292,6 +292,61 @@ python3 scripts/flash_core.py
 
 The CORE RGB LED should then cycle at approximately 1 Hz.
 
+## BACKBONE peripheral self-test (S3 on the open schematic)
+
+`backbone-selftest` walks every ESP32-S3 peripheral on
+`hardware/backbone/backbone.kicad_sch` (U19 is ESP32-S3-MINI-1) and prints
+PASS/FAIL on USB CDC.
+
+```sh
+cd firmware/bringup
+~/.platformio/penv/bin/pio run -e backbone-selftest -t upload
+~/.platformio/penv/bin/pio device monitor -e backbone-selftest --baud 115200
+```
+
+| Test | Hardware |
+|---|---|
+| USB CDC | USB1 → R17/R18 → GPIO20/19 |
+| Chip / flash / MAC | U19 ESP32-S3-MINI-1 |
+| STATUS LED D5 | GPIO10, active LOW |
+| BOOT | GPIO0 |
+| NFC ST25R100 | same `nfc_svc` as C3 bringup; S3 SPI GPIO4/3/6, CS2, RST1, IRQ5 |
+| Tag read | `nfc_scan` + Type 2 `nfc_tag_read` on ANT1/ANT2 |
+| CAN ping | GPIO48 TX / GPIO34 RX TWAI 500 kbit/s; USB board pings, peer pongs and bursts D5 |
+| CAN terminator | Analog Q2+R8 120R on last board (J9 TO NEXT empty). Peer reports expect_term |
+| Wi-Fi scan | on-module radio |
+| BLE advertise `SL-BB-TEST` | on-module radio |
+| Core headers | J8 A0/A1 = GPIO38/37, J10 A2/A3 = GPIO36/35 |
+
+Serial commands: `a` all, `l` LED, `n`/`t` NFC+tag, `c` CAN ping, `w` Wi-Fi, `b` BLE, `g` GPIO, `h` help.
+Flash the same `backbone-selftest` image on **both** modules. The USB board is the leader and pings at boot; the other replies and blinks D5 six times. D5 stays on after a successful ping. Put a Type 2 tag on ANT1 to keep NFC checks.
+
+D2/D3 are rail LEDs (not MCU-driven). Field connectors J13/J14 do not reach the S3.
+
+## CORE peripheral self-test (this board only)
+
+`core-selftest` walks every ESP32-S3 peripheral on `hardware/core/core.kicad_sch`
+and prints PASS/FAIL on USB CDC. It does not talk to BACKBONE.
+
+```sh
+cd firmware/bringup
+~/.platformio/penv/bin/pio run -e core-selftest -t upload
+~/.platformio/penv/bin/pio device monitor -e core-selftest --baud 115200
+```
+
+| Test | Hardware |
+|---|---|
+| USB CDC | U1 USB-C → GPIO19/20 |
+| Chip / flash / MAC | U19 ESP32-S3-MINI-1 |
+| SK6812 R/G/B | GPIO34 → U10 inverter → ARGB |
+| BOOT | SW2 on GPIO0 |
+| CAN PHY echo | GPIO5 TX / GPIO4 RX through U21 SN65HVD230 |
+| Wi-Fi scan | on-module radio |
+| BLE advertise `SL-CORE-TEST` | on-module radio |
+| Link Bay GPIOs | J8 GPIO35–42, 45–48 (pull-up read) |
+
+Serial commands after boot: `a` all, `r` RGB, `c` CAN, `w` Wi-Fi, `b` BLE, `g` GPIO, `h` help.
+
 ## Conservative BACKBONE recovery image
 
 `backbone-recovery` is a separate safety build. It starts UART SLUP and TWAI

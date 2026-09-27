@@ -8,6 +8,16 @@ export function formatDeviceId(hex: string): string {
   return pairs.slice(0, 6).join(":");
 }
 
+export function macBytesToColon(bytes: Uint8Array): string {
+  return Array.from(bytes.slice(0, 6), (byte) => byte.toString(16).padStart(2, "0")).join(":");
+}
+
+/** Same padding the USB bridge uses so CAN peers keep a stable backend id. */
+export function macToDeviceIdHex(mac: string): string {
+  const compact = mac.toLowerCase().replace(/[^0-9a-f]/g, "");
+  return (compact + "0".repeat(64)).slice(0, 64);
+}
+
 export function coreDisplayName(deviceName: string | undefined, deviceIdHex: string): string {
   const trimmed = deviceName?.trim();
   if (trimmed) return trimmed;

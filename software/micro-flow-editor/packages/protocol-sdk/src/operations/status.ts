@@ -29,6 +29,15 @@ export type ModuleStatus = {
   readonly typeId: string;
 };
 
+export type ChainPeerStatus = {
+  readonly nodeId: number;
+  readonly mac: Uint8Array;
+  readonly flags: number;
+  readonly local: boolean;
+  /** Signed image version from the peer. Absent on older images. */
+  readonly version?: string;
+};
+
 export type GetStatusResponse = {
   readonly state: number;
   readonly mode: number;
@@ -44,6 +53,18 @@ export type GetStatusResponse = {
   readonly deviceId?: Uint8Array;
   /** Friendly name from Settings; empty string when unset. Absent on older images. */
   readonly deviceName?: string;
+  /** Live CAN/USB chain from the last Discover sweep. Absent on older images. */
+  readonly chainPeers?: readonly ChainPeerStatus[];
+  /** Live Type-A tags on this board and, when this session is a master, on CAN peers. */
+  readonly nfcTags?: readonly NfcTagStatus[];
+};
+
+export type NfcTagStatus = {
+  readonly portId: number;
+  readonly typeId: string;
+  readonly uid: Uint8Array;
+  readonly nodeId: number;
+  readonly local: boolean;
 };
 
 export function encodeGetStatusResponse(r: GetStatusResponse): Uint8Array {
@@ -76,6 +97,38 @@ export function encodeGetStatusResponse(r: GetStatusResponse): Uint8Array {
   if (r.deviceName !== undefined) {
     fields.push(textField(11, r.deviceName));
   }
+  if (r.chainPeers !== undefined) {
+    fields.push([
+      12,
+      encodeArray(
+        r.chainPeers.map((peer) =>
+          encodeMap([
+            u32Field(0, peer.nodeId),
+            bytesField(1, peer.mac),
+            u32Field(2, peer.flags),
+            boolField(3, peer.local),
+            ...(peer.version !== undefined ? [textField(4, peer.version)] : []),
+          ]),
+        ),
+      ),
+    ]);
+  }
+  if (r.nfcTags !== undefined) {
+    fields.push([
+      13,
+      encodeArray(
+        r.nfcTags.map((tag) =>
+          encodeMap([
+            u32Field(0, tag.portId),
+            textField(1, tag.typeId),
+            bytesField(2, tag.uid),
+            u32Field(3, tag.nodeId),
+            boolField(4, tag.local),
+          ]),
+        ),
+      ),
+    ]);
+  }
   return encodeMap(fields);
 }
 
@@ -106,5 +159,33 @@ export function decodeGetStatusResponse(bytes: Uint8Array): GetStatusResponse {
     modules,
     ...(map.get(10)?.kind === "bytes" ? { deviceId: requireBytes(map, 10, "GetStatusResponse") } : {}),
     ...(map.get(11)?.kind === "text" ? { deviceName: requireText(map, 11, "GetStatusResponse") } : {}),
+    ...(map.get(12)?.kind === "array"
+      ? {
+          chainPeers: requireArray(map, 12, "GetStatusResponse").map((entry) => {
+            const peer = requireMap(entry, "GetStatusResponse.chainPeers[]");
+            return {
+              nodeId: requireU32(peer, 0, "ChainPeerStatus"),
+              mac: requireBytes(peer, 1, "ChainPeerStatus"),
+              flags: requireU32(peer, 2, "ChainPeerStatus"),
+              local: requireBool(peer, 3, "ChainPeerStatus"),
+              ...(peer.get(4)?.kind === "text" ? { version: requireText(peer, 4, "ChainPeerStatus") } : {}),
+            };
+          }),
+        }
+      : {}),
+    ...(map.get(13)?.kind === "array"
+      ? {
+          nfcTags: requireArray(map, 13, "GetStatusResponse").map((entry) => {
+            const tag = requireMap(entry, "GetStatusResponse.nfcTags[]");
+            return {
+              portId: requireU32(tag, 0, "NfcTagStatus"),
+              typeId: requireText(tag, 1, "NfcTagStatus"),
+              uid: requireBytes(tag, 2, "NfcTagStatus"),
+              nodeId: requireU32(tag, 3, "NfcTagStatus"),
+              local: requireBool(tag, 4, "NfcTagStatus"),
+            };
+          }),
+        }
+      : {}),
   };
 }

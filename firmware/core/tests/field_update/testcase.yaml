@@ -1,0 +1,8 @@
+tests:
+  spaghetti.field_update:
+    platform_allow:
+      - native_sim/native/64
+    tags:
+      - spaghetti
+      - update
+      - field_update
