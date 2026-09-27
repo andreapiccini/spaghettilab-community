@@ -101,6 +101,7 @@ static struct spaghetti_job_slot job_slots[CONFIG_SPAGHETTI_MAX_INFLIGHT_REQUEST
 K_MSGQ_DEFINE(job_queue, sizeof(struct spaghetti_job_slot *),
 	      CONFIG_SPAGHETTI_MAX_INFLIGHT_REQUESTS, 4);
 static atomic_t next_job_id;
+static atomic_t event_sequence;
 
 #define SPAGHETTI_COMM_WORKER_STACK 4096
 K_THREAD_STACK_DEFINE(mutation_stack, SPAGHETTI_COMM_WORKER_STACK);
@@ -571,6 +572,7 @@ int spaghetti_communication_init(void)
 	memset(mutation_slots, 0, sizeof(mutation_slots));
 	memset(job_slots, 0, sizeof(job_slots));
 	atomic_set(&next_job_id, 0);
+	atomic_set(&event_sequence, 1);
 
 	k_thread_create(&mutation_thread, mutation_stack,
 			K_THREAD_STACK_SIZEOF(mutation_stack), mutation_worker,
@@ -711,6 +713,42 @@ void spaghetti_communication_invalidate_sessions(void)
 	 * Transport adapters own live sockets/console clients. Protocol V1
 	 * registers no durable session table yet; revoke hooks remain safe.
 	 */
+}
+
+int spaghetti_communication_emit_discovery(
+	uint32_t candidate_id,
+	uint8_t port_id,
+	uint32_t generation)
+{
+	struct spaghetti_protocol_payload body;
+	uint8_t envelope[SPAGHETTI_PROTOCOL_PAYLOAD_MAX + 64U];
+	size_t written = 0U;
+	uint32_t sequence;
+	int err;
+
+	if (atomic_get(&is_initialized) == 0) {
+		return -EACCES;
+	}
+
+	err = spaghetti_protocol_encode_discovery_event_payload(
+		candidate_id, port_id, generation, &body);
+	if (err < 0) {
+		return err;
+	}
+
+	sequence = (uint32_t)atomic_inc(&event_sequence);
+	if (sequence == 0U) {
+		sequence = (uint32_t)atomic_inc(&event_sequence);
+	}
+
+	err = spaghetti_protocol_encode_event(
+		SPAGHETTI_PROTOCOL_EVENT_DISCOVERY, sequence, &body, envelope,
+		sizeof(envelope), &written);
+	if (err < 0) {
+		return err;
+	}
+
+	return spaghetti_usb_protocol_send_event(envelope, written);
 }
 
 void spaghetti_communication_invalidate_principal(

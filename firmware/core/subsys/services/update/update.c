@@ -515,6 +515,12 @@ int spaghetti_update_get_status(struct spaghetti_update_status *out)
 	return 0;
 }
 
+__weak void spaghetti_update_notify_progress(uint8_t stage, uint8_t percent)
+{
+	ARG_UNUSED(stage);
+	ARG_UNUSED(percent);
+}
+
 int spaghetti_update_bind_candidate_manifest(
 	const struct spaghetti_image_manifest *candidate)
 {

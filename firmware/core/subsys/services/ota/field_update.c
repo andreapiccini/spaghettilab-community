@@ -49,6 +49,7 @@
 #include <spaghetti/nfc.h>
 
 #include "field_update_internal.h"
+#include "../update/update_internal.h"
 
 #ifndef CONFIG_SPAGHETTI_FIELD_UPDATE_WINDOW_MS
 #define CONFIG_SPAGHETTI_FIELD_UPDATE_WINDOW_MS 300000
@@ -122,6 +123,9 @@ struct field_update_session {
 static struct field_update_session session;
 static struct field_update_rx last_ack;
 static bool last_ack_valid;
+static atomic_t slup_install_pct;
+static atomic_t slup_progress_can;
+static atomic_t slup_xfer_active;
 static struct spaghetti_slup_peer slup_peers[SPAGHETTI_SLUP_PEERS_MAX];
 static size_t slup_peer_count;
 static struct spaghetti_nfc_tag slup_nfc_remotes[SPAGHETTI_NFC_TAGS_MAX];
@@ -132,6 +136,24 @@ static size_t slup_nfc_remote_count;
 
 static void slup_presence_work(struct k_work *work);
 static K_WORK_DELAYABLE_DEFINE(slup_presence_dwork, slup_presence_work);
+
+static bool slup_xfer_is_active(void)
+{
+	return atomic_get(&slup_xfer_active) != 0;
+}
+
+static void slup_xfer_begin(void)
+{
+	atomic_set(&slup_xfer_active, 1);
+	(void)k_work_cancel_delayable(&slup_presence_dwork);
+}
+
+static void slup_xfer_end(void)
+{
+	atomic_set(&slup_xfer_active, 0);
+	(void)k_work_schedule(&slup_presence_dwork,
+			      K_MSEC(SLUP_PRESENCE_PERIOD_MS));
+}
 
 #define SLUP_USB_RING 1024U
 #define SLUP_USB_CREDIT 256U
@@ -275,7 +297,9 @@ static void slup_led_start(void)
 	k_thread_name_set(slup_led_tid, "slup_led");
 }
 
+#if defined(CONFIG_SHELL)
 static const void *slup_ui;
+#endif
 
 void spaghetti_field_update_ui_text(const char *text)
 {
@@ -302,16 +326,21 @@ void spaghetti_field_update_ui_pct(const char *stage, uint8_t pct)
 	spaghetti_field_update_ui_text(line);
 }
 
+#if defined(CONFIG_SHELL)
 static void slup_ui_bind(const void *shell)
 {
 	slup_ui = shell;
 }
+#endif
 K_MUTEX_DEFINE(field_update_lock);
 K_SEM_DEFINE(field_update_ack_sem, 0, 1);
 
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
 	defined(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
-K_MSGQ_DEFINE(field_update_msgq, sizeof(struct field_update_rx), 8, 4);
+#define SPAGHETTI_SLUP_RX_QUEUE 24U
+
+K_MSGQ_DEFINE(field_update_msgq, sizeof(struct field_update_rx),
+	      SPAGHETTI_SLUP_RX_QUEUE, 4);
 K_THREAD_STACK_DEFINE(field_update_stack,
 		      CONFIG_SPAGHETTI_FIELD_UPDATE_STACK_SIZE);
 static struct k_thread field_update_thread;
@@ -360,6 +389,20 @@ __weak int spaghetti_field_update_can_send_ack(uint8_t type, uint8_t status,
 	ARG_UNUSED(status);
 	ARG_UNUSED(written);
 	return 0;
+}
+
+void spaghetti_update_notify_progress(uint8_t stage, uint8_t percent)
+{
+	if (percent > 100U) {
+		percent = 100U;
+	}
+	atomic_set(&slup_install_pct, percent);
+	if ((stage == SPAGHETTI_UPDATE_PROGRESS_ERASE) &&
+	    (atomic_get(&slup_progress_can) != 0)) {
+		(void)spaghetti_field_update_can_send_ack(
+			SPAGHETTI_ESPNOW_OTA_BEGIN, SPAGHETTI_SLUP_ACK_PROGRESS,
+			percent);
+	}
 }
 
 __weak int spaghetti_field_update_can_ctrl(uint32_t dest_node_id, uint8_t cmd,
@@ -490,6 +533,8 @@ static void reset_session_locked(void)
 	session.written = 0U;
 	session.crc_acc = 0xFFFFFFFFU;
 	session.last_pct = 0U;
+	atomic_set(&slup_install_pct, 0);
+	atomic_set(&slup_progress_can, 0);
 }
 
 uint32_t spaghetti_field_update_local_node_id(void)
@@ -547,6 +592,8 @@ static void slup_fill_self(struct spaghetti_slup_peer *peer)
 	slup_copy_local_version(peer->version);
 }
 
+#if defined(CONFIG_SHELL) || defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
+	defined(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
 static void slup_note_peer_locked(uint32_t node_id, const uint8_t mac[6],
 				  uint8_t flags, uint8_t chain_index)
 {
@@ -583,6 +630,7 @@ static void slup_note_peer_locked(uint32_t node_id, const uint8_t mac[6],
 	       sizeof(slup_peers[slup_peer_count].version));
 	slup_peer_count += 1U;
 }
+#endif
 
 static int slup_peer_order(const struct spaghetti_slup_peer *left,
 			   const struct spaghetti_slup_peer *right)
@@ -622,6 +670,8 @@ static void slup_sort_peers_locked(void)
 	}
 }
 
+#if defined(CONFIG_SHELL) || defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
+	defined(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
 static void slup_note_peer(uint32_t node_id, const uint8_t mac[6],
 			   uint8_t flags, uint8_t chain_index)
 {
@@ -629,7 +679,10 @@ static void slup_note_peer(uint32_t node_id, const uint8_t mac[6],
 	slup_note_peer_locked(node_id, mac, flags, chain_index);
 	k_mutex_unlock(&field_update_lock);
 }
+#endif
 
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
+	defined(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
 static void slup_note_peer_version(uint32_t node_id, uint8_t chunk,
 				   const uint8_t *data)
 {
@@ -655,6 +708,98 @@ static void slup_note_peer_version(uint32_t node_id, uint8_t chunk,
 	}
 	k_mutex_unlock(&field_update_lock);
 }
+#endif
+
+#if defined(CONFIG_SHELL)
+static bool slup_dest_is_remote(uint32_t dest_node_id);
+
+static void slup_clear_peer_version(uint32_t node_id)
+{
+	size_t i;
+
+	node_id &= SPAGHETTI_SLUP_NODE_MASK;
+	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	for (i = 0U; i < slup_peer_count; ++i) {
+		if (slup_peers[i].node_id == node_id) {
+			memset(slup_peers[i].version, 0,
+			       sizeof(slup_peers[i].version));
+			break;
+		}
+	}
+	k_mutex_unlock(&field_update_lock);
+}
+
+static int slup_copy_peer_version(uint32_t node_id, char *out)
+{
+	size_t i;
+	int err = -ENOENT;
+
+	if (out == NULL) {
+		return -EINVAL;
+	}
+
+	node_id &= SPAGHETTI_SLUP_NODE_MASK;
+	memset(out, 0, SPAGHETTI_SLUP_VERSION_SIZE);
+	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	for (i = 0U; i < slup_peer_count; ++i) {
+		if (slup_peers[i].node_id != node_id) {
+			continue;
+		}
+		memcpy(out, slup_peers[i].version, SPAGHETTI_SLUP_VERSION_SIZE);
+		out[SPAGHETTI_SLUP_VERSION_SIZE - 1U] = '\0';
+		err = (out[0] != '\0') ? 0 : -EAGAIN;
+		break;
+	}
+	k_mutex_unlock(&field_update_lock);
+	return err;
+}
+
+static int slup_fetch_peer_version(uint32_t dest_node_id, char *out)
+{
+	int err;
+
+	if (dest_node_id == session.node_id) {
+		slup_copy_local_version(out);
+		return (out[0] != '\0') ? 0 : -ENOENT;
+	}
+	if (!slup_dest_is_remote(dest_node_id)) {
+		return -EINVAL;
+	}
+
+	slup_note_peer(dest_node_id, NULL, 0U, SPAGHETTI_SLUP_CHAIN_UNKNOWN);
+	slup_clear_peer_version(dest_node_id);
+	err = spaghetti_field_update_can_ctrl(dest_node_id,
+					      SPAGHETTI_SLUP_CMD_VERSION,
+					      NULL, 0U);
+	if (err < 0) {
+		return err;
+	}
+	k_sleep(K_MSEC(120));
+	return slup_copy_peer_version(dest_node_id, out);
+}
+
+static int slup_ping_peer(uint32_t dest_node_id)
+{
+	uint8_t status = 0U;
+	int err;
+
+	if (!slup_dest_is_remote(dest_node_id)) {
+		return -EINVAL;
+	}
+
+	spaghetti_field_update_prepare_ack();
+	err = spaghetti_field_update_can_ctrl(dest_node_id,
+					      SPAGHETTI_SLUP_CMD_PING, NULL,
+					      0U);
+	if (err < 0) {
+		return err;
+	}
+	return spaghetti_field_update_wait_ack(
+		SPAGHETTI_SLUP_CMD_PING,
+		dest_node_id & SPAGHETTI_SLUP_NODE_MASK, &status,
+		K_MSEC(SPAGHETTI_SLUP_PING_MS));
+}
+#endif /* CONFIG_SHELL */
 
 static bool slup_dest_is_remote(uint32_t dest_node_id)
 {
@@ -820,7 +965,7 @@ static int slup_usb_read_cb(uint32_t offset, uint8_t *data, size_t length,
 			(uint8_t)(((offset + (uint32_t)length) * 100U) /
 				  slup_usb_total);
 
-		if ((pct >= (uint8_t)(slup_usb_last_pct + 5U)) ||
+		if ((pct >= (uint8_t)(slup_usb_last_pct + 1U)) ||
 		    ((offset + (uint32_t)length) >= slup_usb_total)) {
 			slup_usb_last_pct = pct;
 			spaghetti_field_update_ui_pct("usb", pct);
@@ -882,11 +1027,13 @@ int spaghetti_field_update_recv_usb(uint32_t dest_node_id)
 	slup_usb_last_pct = 0U;
 	spaghetti_field_update_ui_pct("usb", 0U);
 
+	slup_xfer_begin();
 	err = spaghetti_field_update_enter_update(dest_node_id);
 	if (err < 0) {
 		slup_usb_total = 0U;
 		atomic_set(&slup_usb_active, 0);
 		slup_led_set_mode(SPAGHETTI_SLUP_LED_IDLE);
+		slup_xfer_end();
 		return err;
 	}
 	err = spaghetti_field_update_confirm_peer(dest_node_id);
@@ -894,6 +1041,7 @@ int spaghetti_field_update_recv_usb(uint32_t dest_node_id)
 		slup_usb_total = 0U;
 		atomic_set(&slup_usb_active, 0);
 		slup_led_set_mode(SPAGHETTI_SLUP_LED_IDLE);
+		slup_xfer_end();
 		return err;
 	}
 
@@ -902,6 +1050,7 @@ int spaghetti_field_update_recv_usb(uint32_t dest_node_id)
 	slup_usb_total = 0U;
 	atomic_set(&slup_usb_active, 0);
 	slup_led_set_mode(SPAGHETTI_SLUP_LED_IDLE);
+	slup_xfer_end();
 	if (err < 0) {
 		return err;
 	}
@@ -934,7 +1083,7 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 	err = spaghetti_field_update_can_ctrl(SPAGHETTI_FIELD_UPDATE_BROADCAST,
 					      SPAGHETTI_SLUP_CMD_DISCOVER,
 					      NULL, 0U);
-	if (err == 0) {
+	if ((err == 0) && !slup_xfer_is_active()) {
 		struct spaghetti_slup_peer remotes[SPAGHETTI_SLUP_PEERS_MAX];
 		size_t remote_count = 0U;
 		size_t i;
@@ -952,21 +1101,29 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 		}
 		k_mutex_unlock(&field_update_lock);
 
-		for (i = 0U; i < remote_count; ++i) {
+		for (i = 0U; (i < remote_count) && !slup_xfer_is_active();
+		     ++i) {
 			(void)spaghetti_field_update_can_ctrl(
 				remotes[i].node_id, SPAGHETTI_SLUP_CMD_STATUS,
 				NULL, 0U);
 			k_sleep(K_MSEC(40));
+			if (slup_xfer_is_active()) {
+				break;
+			}
 			(void)spaghetti_field_update_can_ctrl(
 				remotes[i].node_id, SPAGHETTI_SLUP_CMD_VERSION,
 				NULL, 0U);
 			k_sleep(K_MSEC(40));
+			if (slup_xfer_is_active()) {
+				break;
+			}
 			(void)spaghetti_field_update_can_ctrl(
 				remotes[i].node_id, SPAGHETTI_SLUP_CMD_NFC,
 				NULL, 0U);
 			k_sleep(K_MSEC(80));
 		}
-	} else if ((err != -ENOTSUP) && (err != -EACCES) && (err != -ENODEV)) {
+	} else if ((err != 0) && (err != -ENOTSUP) && (err != -EACCES) &&
+		   (err != -ENODEV)) {
 		return err;
 	}
 
@@ -1068,7 +1225,7 @@ static void slup_presence_work(struct k_work *work)
 	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
 	armed = session.load_armed;
 	k_mutex_unlock(&field_update_lock);
-	if (!armed) {
+	if (!armed && !slup_xfer_is_active()) {
 		(void)spaghetti_field_update_discover(NULL, 0U, &count);
 	}
 	(void)k_work_schedule(&slup_presence_dwork, K_MSEC(SLUP_PRESENCE_PERIOD_MS));
@@ -1238,9 +1395,15 @@ int spaghetti_field_update_ingest_begin(
 		k_mutex_unlock(&field_update_lock);
 		return err;
 	}
+	session.transport = transport;
+	if (transport == SPAGHETTI_UPDATE_TRANSPORT_CAN) {
+		atomic_set(&slup_progress_can, 1);
+	}
 	err = spaghetti_update_begin(transport);
+	atomic_set(&slup_progress_can, 0);
 	if (err < 0) {
 		(void)spaghetti_update_cancel();
+		reset_session_locked();
 		k_mutex_unlock(&field_update_lock);
 		return err;
 	}
@@ -1251,6 +1414,8 @@ int spaghetti_field_update_ingest_begin(
 	session.expected_crc = image_crc32;
 	session.written = 0U;
 	session.crc_acc = 0xFFFFFFFFU;
+	session.last_pct = 0U;
+	atomic_set(&slup_install_pct, 0);
 	k_mutex_unlock(&field_update_lock);
 	LOG_INF("SLUP begin: transport=%u size=%u",
 		(uint32_t)transport, image_size);
@@ -1303,9 +1468,10 @@ int spaghetti_field_update_ingest_data(
 		const uint8_t pct = (uint8_t)((session.written * 100U) /
 					      session.expected_size);
 
-		if ((pct >= (uint8_t)(session.last_pct + 5U)) ||
+		if ((pct >= (uint8_t)(session.last_pct + 1U)) ||
 		    (session.written == session.expected_size)) {
 			session.last_pct = pct;
+			atomic_set(&slup_install_pct, pct);
 			LOG_INF("SLUP %u%%", pct);
 		}
 	}
@@ -1389,14 +1555,32 @@ int spaghetti_field_update_wait_ack(uint8_t type, uint32_t offset,
 	}
 
 	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
-	if (!last_ack_valid || (last_ack.dlc != type) ||
-	    (last_ack.can_id != offset)) {
+	if (!last_ack_valid || (last_ack.dlc != type)) {
+		k_mutex_unlock(&field_update_lock);
+		return -EAGAIN;
+	}
+	if (last_ack.u.can[0] == SPAGHETTI_SLUP_ACK_PROGRESS) {
+		*status = SPAGHETTI_SLUP_ACK_PROGRESS;
+		k_mutex_unlock(&field_update_lock);
+		return 0;
+	}
+	if (last_ack.can_id != offset) {
 		k_mutex_unlock(&field_update_lock);
 		return -EAGAIN;
 	}
 	*status = last_ack.u.can[0];
 	k_mutex_unlock(&field_update_lock);
 	return 0;
+}
+
+uint32_t spaghetti_field_update_last_ack_value(void)
+{
+	uint32_t value;
+
+	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	value = last_ack.can_id;
+	k_mutex_unlock(&field_update_lock);
+	return value;
 }
 
 #if defined(CONFIG_FLASH_MAP)
@@ -1484,7 +1668,7 @@ int spaghetti_field_update_running_image_info(uint32_t *size, uint32_t *crc32)
 			offset += (uint32_t)n;
 			remaining -= (uint32_t)n;
 			pct = (uint8_t)((offset * 100U) / *size);
-			if ((pct >= (uint8_t)(last_pct + 5U)) ||
+			if ((pct >= (uint8_t)(last_pct + 1U)) ||
 			    (remaining == 0U)) {
 				last_pct = pct;
 				spaghetti_field_update_ui_pct("hash", pct);
@@ -1541,9 +1725,11 @@ int spaghetti_field_update_send(enum spaghetti_update_transport transport,
 		if (!slup_dest_is_remote(dest_node_id)) {
 			return -EINVAL;
 		}
+		slup_xfer_begin();
 		slup_led_set_mode(SPAGHETTI_SLUP_LED_LOAD);
 		err = spaghetti_field_update_can_send(dest_node_id);
 		slup_led_set_mode(SPAGHETTI_SLUP_LED_IDLE);
+		slup_xfer_end();
 		return err;
 	}
 	if (transport == SPAGHETTI_UPDATE_TRANSPORT_ESPNOW) {
@@ -1613,13 +1799,14 @@ static void handle_slup_command(const struct field_update_rx *msg)
 		slup_reply(SPAGHETTI_SLUP_RSP_DISCOVER, extra, 7U);
 		break;
 	case SPAGHETTI_SLUP_CMD_STATUS: {
-		uint8_t payload[4];
+		uint8_t payload[5];
 
 		payload[0] = spaghetti_field_update_local_flags();
 		payload[1] = session.chain_index;
 		payload[2] = SPAGHETTI_SLUP_PROTO;
 		payload[3] = session.load_armed ? 1U : 0U;
-		slup_reply(SPAGHETTI_SLUP_RSP_STATUS, payload, 4U);
+		payload[4] = (uint8_t)atomic_get(&slup_install_pct);
+		slup_reply(SPAGHETTI_SLUP_RSP_STATUS, payload, 5U);
 		break;
 	}
 	case SPAGHETTI_SLUP_CMD_VERSION: {
@@ -1722,8 +1909,10 @@ static void handle_slup_response(const struct field_update_rx *msg)
 		if (msg->dlc >= 3U) {
 			slup_note_peer(node, NULL, msg->u.can[1], msg->u.can[2]);
 		}
-		spaghetti_field_update_note_ack(SPAGHETTI_SLUP_CMD_STATUS, node,
-						0U, 0U);
+		if (!slup_xfer_is_active()) {
+			spaghetti_field_update_note_ack(
+				SPAGHETTI_SLUP_CMD_STATUS, node, 0U, 0U);
+		}
 		return;
 	}
 	if (cmd == SPAGHETTI_SLUP_RSP_VERSION) {
@@ -1731,8 +1920,10 @@ static void handle_slup_response(const struct field_update_rx *msg)
 			slup_note_peer_version(node, msg->u.can[1],
 					       &msg->u.can[2]);
 		}
-		spaghetti_field_update_note_ack(SPAGHETTI_SLUP_CMD_VERSION, node,
-						0U, 0U);
+		if (!slup_xfer_is_active()) {
+			spaghetti_field_update_note_ack(
+				SPAGHETTI_SLUP_CMD_VERSION, node, 0U, 0U);
+		}
 		return;
 	}
 	if (cmd == SPAGHETTI_SLUP_RSP_NFC) {
@@ -1793,8 +1984,10 @@ static void handle_slup_response(const struct field_update_rx *msg)
 			}
 			k_mutex_unlock(&field_update_lock);
 		}
-		spaghetti_field_update_note_ack(SPAGHETTI_SLUP_CMD_NFC, node,
-						0U, 0U);
+		if (!slup_xfer_is_active()) {
+			spaghetti_field_update_note_ack(SPAGHETTI_SLUP_CMD_NFC,
+							node, 0U, 0U);
+		}
 		return;
 	}
 	if (cmd == SPAGHETTI_SLUP_RSP_ACK) {
@@ -2317,7 +2510,62 @@ static int cmd_slup_load(const struct shell *shell, size_t argc, char **argv)
 		shell_error(shell, "SLUP load failed: %d", err);
 		return err;
 	}
-	shell_print(shell, "SLUP load complete");
+
+	shell_print(shell, "SLUP image written; waiting for 0x%06x reboot",
+		    dest);
+	k_sleep(K_SECONDS(2));
+	{
+		char version[SPAGHETTI_SLUP_VERSION_SIZE];
+		uint8_t attempt;
+
+		for (attempt = 0U; attempt < 15U; ++attempt) {
+			if (slup_ping_peer(dest) != 0) {
+				k_sleep(K_SECONDS(1));
+				continue;
+			}
+			if (slup_fetch_peer_version(dest, version) != 0) {
+				k_sleep(K_SECONDS(1));
+				continue;
+			}
+			shell_print(shell,
+				    "firmware update done on 0x%06x version: %s",
+				    dest, version);
+			return 0;
+		}
+	}
+	shell_warn(shell,
+		   "image sent; 0x%06x did not report version yet. run slup version 0x%06x",
+		   dest, dest);
+	return 0;
+}
+
+static int cmd_slup_version(const struct shell *shell, size_t argc, char **argv)
+{
+	char version[SPAGHETTI_SLUP_VERSION_SIZE];
+	uint32_t dest = 0U;
+	int err;
+
+	if (argc < 2U) {
+		slup_copy_local_version(version);
+		shell_print(shell, "master 0x%06x version: %s",
+			    spaghetti_field_update_local_node_id(),
+			    version[0] != '\0' ? version : "-");
+		shell_print(shell,
+			    "peer: slup version <idx|0xNODE>   all: slup list");
+		return 0;
+	}
+
+	err = slup_parse_dest(shell, argv[1], &dest);
+	if (err < 0) {
+		return err;
+	}
+
+	err = slup_fetch_peer_version(dest, version);
+	if (err < 0) {
+		shell_error(shell, "no version from 0x%06x (%d)", dest, err);
+		return err;
+	}
+	shell_print(shell, "0x%06x version: %s", dest, version);
 	return 0;
 }
 
@@ -2357,6 +2605,9 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
 		  cmd_slup_recv),
 	SHELL_CMD(load, NULL, "Push running image over CAN: load <idx|0xNODE>",
 		  cmd_slup_load),
+	SHELL_CMD(version, NULL,
+		  "Ask image version: version [idx|0xNODE]",
+		  cmd_slup_version),
 	SHELL_CMD(espnow, NULL, "Send the running image over ESP-NOW [node]",
 		  cmd_slup_espnow),
 	SHELL_CMD(number, NULL, "Push list idx onto peers (optional)",

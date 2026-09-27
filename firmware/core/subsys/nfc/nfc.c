@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <spaghetti/communication.h>
+
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/gpio.h>
@@ -23,6 +25,7 @@ LOG_MODULE_REGISTER(spaghetti_nfc, CONFIG_SPAGHETTI_NFC_LOG_LEVEL);
 #define ST25_CMD_ADJUST_REGULATORS 0x68U
 #define ST25_CMD_TRANSMIT 0x6AU
 #define ST25_CMD_UNMASK_RX 0x72U
+#define ST25_CMD_CALIBRATE_WU 0x74U
 #define ST25_FIFO 0x5FU
 #define ST25_READ 0x80U
 
@@ -41,9 +44,18 @@ LOG_MODULE_REGISTER(spaghetti_nfc, CONFIG_SPAGHETTI_NFC_LOG_LEVEL);
 #define ST25_REG_NRT_GPT_CONF 0x1EU
 #define ST25_REG_NRT1 0x1FU
 #define ST25_REG_NRT2 0x20U
+#define ST25_REG_WAKEUP_CONF1 0x28U
+#define ST25_REG_WAKEUP_CONF2 0x29U
+#define ST25_REG_WU_I_CONF 0x2AU
+#define ST25_REG_WU_I_DELTA 0x2BU
+#define ST25_REG_WU_Q_CONF 0x2FU
+#define ST25_REG_WU_Q_DELTA 0x30U
 #define ST25_REG_TX_FRAME1 0x34U
 #define ST25_REG_TX_FRAME2 0x35U
 #define ST25_REG_FIFO_STATUS1 0x36U
+#define ST25_REG_IRQ_MASK1 0x39U
+#define ST25_REG_IRQ_MASK2 0x3AU
+#define ST25_REG_IRQ_MASK3 0x3BU
 #define ST25_REG_IRQ1 0x3CU
 #define ST25_REG_IRQ2 0x3DU
 #define ST25_REG_IRQ3 0x3EU
@@ -53,6 +65,23 @@ LOG_MODULE_REGISTER(spaghetti_nfc, CONFIG_SPAGHETTI_NFC_LOG_LEVEL);
 #define ST25_OP_RX_EN BIT(4)
 #define ST25_OP_AM_EN BIT(3)
 #define ST25_OP_EN BIT(1)
+#define ST25_OP_WU_EN BIT(0)
+
+#define ST25_WUT_SHIFT 4U
+#define ST25_WUT_PERIOD_215MS 0x09U
+#define ST25_WUTI BIT(3)
+#define ST25_WU_AUTO_AVG BIT(3)
+#define ST25_WU_MEAS_DUR_44_28 0x03U
+#define ST25_WU_AA_INCL BIT(6)
+#define ST25_WU_AA_WEIGHT_32 (0x03U << 4)
+#define ST25_WU_TRE_ABOVE BIT(2)
+#define ST25_WU_TRE_BELOW BIT(0)
+#define ST25_WU_DELTA 4U
+#define ST25_IRQ3_WUT BIT(1)
+#define ST25_IRQ3_WUI BIT(2)
+#define ST25_IRQ3_WUQ BIT(3)
+#define ST25_IRQ_MASK3_WU \
+	(uint8_t)~(ST25_IRQ3_WUT | ST25_IRQ3_WUI | ST25_IRQ3_WUQ)
 
 #define ST25_GEN_SINGLE BIT(5)
 #define ST25_GEN_RFO2 BIT(4)
@@ -80,7 +109,7 @@ LOG_MODULE_REGISTER(spaghetti_nfc, CONFIG_SPAGHETTI_NFC_LOG_LEVEL);
 #define NFCA_SAK_CASCADE BIT(2)
 #define NFCA_SAK_T4T BIT(5)
 
-#define NFC_SCAN_PERIOD_MS 500U
+#define NFC_FALLBACK_PERIOD_MS 2000U
 #define NFC_ANTENNAS 2U
 
 #if DT_NODE_EXISTS(NFC_DT_NODE) && DT_NODE_HAS_STATUS(NFC_SPI_NODE, okay)
@@ -88,8 +117,13 @@ LOG_MODULE_REGISTER(spaghetti_nfc, CONFIG_SPAGHETTI_NFC_LOG_LEVEL);
 static const struct device *nfc_spi = DEVICE_DT_GET(NFC_SPI_NODE);
 static const struct gpio_dt_spec nfc_rst =
 	GPIO_DT_SPEC_GET(NFC_DT_NODE, nfc_reset_gpios);
+#if DT_NODE_HAS_PROP(NFC_DT_NODE, nfc_irq_gpios)
 static const struct gpio_dt_spec nfc_irq =
 	GPIO_DT_SPEC_GET(NFC_DT_NODE, nfc_irq_gpios);
+#define SPAGHETTI_NFC_HAS_IRQ_GPIO 1
+#else
+#define SPAGHETTI_NFC_HAS_IRQ_GPIO 0
+#endif
 static const struct gpio_dt_spec nfc_cs =
 	GPIO_DT_SPEC_GET_BY_IDX(NFC_SPI_NODE, cs_gpios, 0);
 
@@ -102,12 +136,22 @@ static struct spi_config nfc_spi_cfg = {
 
 static bool nfc_ready;
 static bool nfc_initialized;
+static bool nfc_irq_armed;
+static bool nfc_wum_on;
+static bool nfc_tag_present;
+static uint8_t nfc_wum_antenna = 1U;
+static uint32_t nfc_generation = 1U;
 static struct spaghetti_nfc_tag nfc_tags[NFC_ANTENNAS];
 static size_t nfc_tag_count;
 K_MUTEX_DEFINE(nfc_lock);
 
-static void nfc_scan_work(struct k_work *work);
-static K_WORK_DELAYABLE_DEFINE(nfc_scan_dwork, nfc_scan_work);
+#if SPAGHETTI_NFC_HAS_IRQ_GPIO
+static struct gpio_callback nfc_irq_cb;
+#endif
+static void nfc_irq_work_fn(struct k_work *work);
+static void nfc_fallback_work(struct k_work *work);
+static K_WORK_DEFINE(nfc_irq_work, nfc_irq_work_fn);
+static K_WORK_DELAYABLE_DEFINE(nfc_fallback_dwork, nfc_fallback_work);
 
 static int nfc_spi_xfer(const uint8_t *tx, uint8_t *rx, size_t length)
 {
@@ -510,35 +554,260 @@ static int nfc_scan_antenna(uint8_t antenna, struct spaghetti_nfc_tag *tag)
 	return 0;
 }
 
-static void nfc_scan_work(struct k_work *work)
+static bool nfc_tags_same(const struct spaghetti_nfc_tag *left, size_t left_n,
+			  const struct spaghetti_nfc_tag *right, size_t right_n)
+{
+	size_t i;
+
+	if (left_n != right_n) {
+		return false;
+	}
+	for (i = 0U; i < left_n; ++i) {
+		if ((left[i].antenna != right[i].antenna) ||
+		    (left[i].type != right[i].type) ||
+		    (left[i].uid_len != right[i].uid_len) ||
+		    (memcmp(left[i].uid, right[i].uid, left[i].uid_len) !=
+		     0)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+static void nfc_notify_host(uint8_t port_id)
+{
+	uint32_t candidate_id = 0U;
+	uint32_t generation;
+
+	(void)k_mutex_lock(&nfc_lock, K_FOREVER);
+	generation = nfc_generation;
+	nfc_generation += 1U;
+	if (nfc_generation == 0U) {
+		nfc_generation = 1U;
+	}
+	if (nfc_tag_count > 0U) {
+		size_t i;
+
+		for (i = 0U; i < nfc_tags[0].uid_len; ++i) {
+			candidate_id = (candidate_id << 8) | nfc_tags[0].uid[i];
+		}
+	}
+	k_mutex_unlock(&nfc_lock);
+	if (candidate_id == 0U) {
+		candidate_id = generation;
+	}
+
+	(void)spaghetti_communication_emit_discovery(candidate_id, port_id,
+						     generation);
+}
+
+static void nfc_irq_disable(void)
+{
+#if SPAGHETTI_NFC_HAS_IRQ_GPIO
+	if (nfc_irq_armed && gpio_is_ready_dt(&nfc_irq)) {
+		(void)gpio_pin_interrupt_configure_dt(&nfc_irq,
+						      GPIO_INT_DISABLE);
+	}
+#endif
+}
+
+static void nfc_irq_enable(void)
+{
+#if SPAGHETTI_NFC_HAS_IRQ_GPIO
+	if (nfc_irq_armed && gpio_is_ready_dt(&nfc_irq)) {
+		(void)gpio_pin_interrupt_configure_dt(&nfc_irq,
+						      GPIO_INT_EDGE_TO_ACTIVE);
+	}
+#endif
+}
+
+static void nfc_wum_stop(void)
+{
+	if (!nfc_wum_on) {
+		return;
+	}
+
+	(void)nfc_modify(ST25_REG_OPERATION, ST25_OP_WU_EN, 0U);
+	(void)nfc_modify(ST25_REG_OPERATION, ST25_OP_EN, ST25_OP_EN);
+	(void)nfc_cmd(ST25_CMD_STOP);
+	nfc_clear_irq();
+	nfc_wum_on = false;
+	k_sleep(K_MSEC(2));
+}
+
+static int nfc_wum_start(uint8_t antenna)
+{
+	const uint8_t ch_conf =
+		(uint8_t)(ST25_WU_AA_INCL | ST25_WU_AA_WEIGHT_32 |
+			  ST25_WU_TRE_ABOVE | ST25_WU_TRE_BELOW);
+	int err;
+
+	nfc_wum_stop();
+	(void)nfc_field_off();
+	err = nfc_apply_antenna(antenna);
+	if (err < 0) {
+		return err;
+	}
+
+	err = nfc_write_reg(ST25_REG_WAKEUP_CONF1,
+			    (uint8_t)((ST25_WUT_PERIOD_215MS << ST25_WUT_SHIFT) |
+				      ST25_WUTI));
+	if (err == 0) {
+		err = nfc_write_reg(ST25_REG_WAKEUP_CONF2,
+				    (uint8_t)(ST25_WU_AUTO_AVG |
+					      ST25_WU_MEAS_DUR_44_28));
+	}
+	if (err == 0) {
+		err = nfc_write_reg(ST25_REG_WU_I_DELTA, ST25_WU_DELTA);
+	}
+	if (err == 0) {
+		err = nfc_write_reg(ST25_REG_WU_I_CONF, ch_conf);
+	}
+	if (err == 0) {
+		err = nfc_write_reg(ST25_REG_WU_Q_DELTA, ST25_WU_DELTA);
+	}
+	if (err == 0) {
+		err = nfc_write_reg(ST25_REG_WU_Q_CONF, ch_conf);
+	}
+	if (err == 0) {
+		err = nfc_write_reg(ST25_REG_IRQ_MASK1, 0xFFU);
+	}
+	if (err == 0) {
+		err = nfc_write_reg(ST25_REG_IRQ_MASK2, 0xFFU);
+	}
+	if (err == 0) {
+		err = nfc_write_reg(ST25_REG_IRQ_MASK3, ST25_IRQ_MASK3_WU);
+	}
+	if (err == 0) {
+		err = nfc_cmd(ST25_CMD_CALIBRATE_WU);
+	}
+	if (err < 0) {
+		return err;
+	}
+
+	k_sleep(K_MSEC(2));
+	nfc_clear_irq();
+	err = nfc_modify(ST25_REG_OPERATION,
+			 (uint8_t)(ST25_OP_TX_EN | ST25_OP_RX_EN |
+				   ST25_OP_AM_EN | ST25_OP_EN | ST25_OP_WU_EN),
+			 ST25_OP_WU_EN);
+	if (err < 0) {
+		return err;
+	}
+
+	nfc_wum_antenna = antenna;
+	nfc_wum_on = true;
+	return 0;
+}
+
+static void nfc_store_scan(const struct spaghetti_nfc_tag *found, size_t count)
+{
+	bool changed;
+
+	(void)k_mutex_lock(&nfc_lock, K_FOREVER);
+	changed = !nfc_tags_same(nfc_tags, nfc_tag_count, found, count);
+	nfc_tag_count = count;
+	nfc_tag_present = count > 0U;
+	if (count > 0U) {
+		memcpy(nfc_tags, found, count * sizeof(found[0]));
+	}
+	k_mutex_unlock(&nfc_lock);
+	if (changed) {
+		nfc_notify_host((count > 0U) ? found[0].antenna : 0U);
+	}
+}
+
+static uint8_t nfc_scan_both(void)
 {
 	struct spaghetti_nfc_tag found[NFC_ANTENNAS];
 	size_t count = 0U;
 	uint8_t antenna;
 
-	ARG_UNUSED(work);
-	if (!nfc_ready) {
-		(void)k_work_schedule(&nfc_scan_dwork, K_MSEC(NFC_SCAN_PERIOD_MS));
-		return;
-	}
-
 	for (antenna = 1U; antenna <= NFC_ANTENNAS; ++antenna) {
 		struct spaghetti_nfc_tag tag;
-		int err = nfc_scan_antenna(antenna, &tag);
 
-		if (err == 0) {
+		if (nfc_scan_antenna(antenna, &tag) == 0) {
 			found[count] = tag;
 			count += 1U;
 		}
 	}
+	nfc_store_scan(found, count);
+	return (count > 0U) ? found[0].antenna : 0U;
+}
 
-	(void)k_mutex_lock(&nfc_lock, K_FOREVER);
-	nfc_tag_count = count;
-	if (count > 0U) {
-		memcpy(nfc_tags, found, count * sizeof(found[0]));
+static void nfc_handle_wakeup(bool load_changed)
+{
+	const uint8_t monitored = nfc_wum_antenna;
+	uint8_t next = (monitored == 1U) ? 2U : 1U;
+
+	nfc_irq_disable();
+	nfc_wum_stop();
+	if (load_changed) {
+		const uint8_t found = nfc_scan_both();
+
+		if (found != 0U) {
+			next = found;
+		}
+	} else if (nfc_tag_present) {
+		next = monitored;
 	}
-	k_mutex_unlock(&nfc_lock);
-	(void)k_work_schedule(&nfc_scan_dwork, K_MSEC(NFC_SCAN_PERIOD_MS));
+
+	if (nfc_wum_start(next) < 0) {
+		LOG_WRN("wake-up restart failed, falling back to poll");
+		(void)k_work_schedule(&nfc_fallback_dwork,
+				      K_MSEC(NFC_FALLBACK_PERIOD_MS));
+	} else {
+		nfc_irq_enable();
+	}
+}
+
+static void nfc_irq_work_fn(struct k_work *work)
+{
+	uint8_t irq3 = 0U;
+	bool load_changed;
+	bool timed_out;
+
+	ARG_UNUSED(work);
+	if (!nfc_ready) {
+		return;
+	}
+
+	(void)nfc_read_reg(ST25_REG_IRQ3, &irq3);
+	nfc_clear_irq();
+	load_changed = (irq3 & (ST25_IRQ3_WUI | ST25_IRQ3_WUQ)) != 0U;
+	timed_out = (irq3 & ST25_IRQ3_WUT) != 0U;
+	if (!load_changed && !timed_out) {
+		if (nfc_wum_on) {
+			return;
+		}
+		load_changed = true;
+	}
+	nfc_handle_wakeup(load_changed);
+}
+
+#if SPAGHETTI_NFC_HAS_IRQ_GPIO
+static void nfc_irq_isr(const struct device *port, struct gpio_callback *cb,
+			uint32_t pins)
+{
+	ARG_UNUSED(port);
+	ARG_UNUSED(cb);
+	ARG_UNUSED(pins);
+	(void)k_work_submit(&nfc_irq_work);
+}
+#endif
+
+static void nfc_fallback_work(struct k_work *work)
+{
+	ARG_UNUSED(work);
+	if (!nfc_ready) {
+		return;
+	}
+
+	nfc_handle_wakeup(true);
+	if (!nfc_irq_armed) {
+		(void)k_work_schedule(&nfc_fallback_dwork,
+				      K_MSEC(NFC_FALLBACK_PERIOD_MS));
+	}
 }
 
 static int nfc_probe_chip(void)
@@ -555,9 +824,17 @@ static int nfc_probe_chip(void)
 	nfc_spi_cfg.cs.delay = 0U;
 
 	(void)gpio_pin_configure(nfc_rst.port, nfc_rst.pin, GPIO_OUTPUT);
+#if SPAGHETTI_NFC_HAS_IRQ_GPIO
 	if (gpio_is_ready_dt(&nfc_irq)) {
 		(void)gpio_pin_configure_dt(&nfc_irq, GPIO_INPUT);
+		gpio_init_callback(&nfc_irq_cb, nfc_irq_isr, BIT(nfc_irq.pin));
+		if (gpio_add_callback(nfc_irq.port, &nfc_irq_cb) == 0) {
+			nfc_irq_armed =
+				gpio_pin_interrupt_configure_dt(
+					&nfc_irq, GPIO_INT_EDGE_TO_ACTIVE) == 0;
+		}
 	}
+#endif
 	(void)gpio_pin_configure_dt(&nfc_cs, GPIO_OUTPUT_INACTIVE);
 
 	gpio_pin_set_raw(nfc_rst.port, nfc_rst.pin, 1);
@@ -609,7 +886,22 @@ int spaghetti_nfc_init(void)
 	}
 
 	nfc_ready = true;
-	(void)k_work_schedule(&nfc_scan_dwork, K_MSEC(200));
+	if (nfc_wum_start(1U) < 0) {
+		LOG_WRN("wake-up mode failed, polling Type-A");
+		nfc_irq_armed = false;
+		(void)k_work_schedule(&nfc_fallback_dwork, K_MSEC(200));
+		return 0;
+	}
+	if (!nfc_irq_armed) {
+		LOG_WRN("NFC IRQ GPIO missing, polling Type-A");
+		(void)k_work_schedule(&nfc_fallback_dwork, K_MSEC(200));
+	} else {
+#if SPAGHETTI_NFC_HAS_IRQ_GPIO
+		LOG_INF("NFC waiting on IRQ GPIO%u", nfc_irq.pin);
+#else
+		LOG_INF("NFC waiting on IRQ");
+#endif
+	}
 	return 0;
 }
 

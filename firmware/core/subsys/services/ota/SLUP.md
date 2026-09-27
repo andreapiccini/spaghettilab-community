@@ -55,8 +55,10 @@ slup blink 0x112233
 | Command | What it does |
 |---|---|
 | `slup who` | This master `node_id`. |
-| `slup list` | Discover + assign `idx`. Prints `idx`, role (`master`/`peer`), `node_id`, MAC. |
-| `slup load 2` | EnterUpdate + push the running image to the board that `list` called 2. |
+| `slup list` | Discover + assign `idx`. Prints `idx`, role (`master`/`peer`), `node_id`, MAC, version. |
+| `slup version` | This master's signed image version. |
+| `slup version 2` / `slup version 0xNODE` | Ask that board its running version over CAN. |
+| `slup load 2` | EnterUpdate + push the running image to the board that `list` called 2. After the peer reboots, prints `firmware update done on … version: …`. |
 | `slup load 0xNODE` | Same, by MAC suffix. |
 | `slup blink 2` / `slup blink 0xNODE` | Pulse D5 on that board so you can confirm which one it is. |
 | `slup locate` | Blink every listed board in turn. |
@@ -78,11 +80,28 @@ slup load 2
 The peer writes MCUboot image-1, ACKs, and trial-reboots. D5 is solid red
 while an image is running; `blink` pulses it, then it goes solid again.
 
+The master pauses the periodic Discover sweep for the whole `slup load`, so
+STATUS/VERSION/NFC replies cannot steal image ACKs (`-ETIMEDOUT` / `-116`).
+
+During `slup load` the **target** reports install progress on CAN. The master
+prints it:
+
+```text
+SLUP erase 1% … 100%     peer wiping its unused MCUboot slot
+SLUP install 1% … 100%   peer writing the image (each % is an ACK from that board)
+```
+
+STATUS replies include that same 0–100 value. A peer still on older firmware
+does not send erase percents; the master then estimates erase from elapsed
+time until that board is updated once.
+
 ## Bus
 
 - Discover: standard ID `0x10`, command `0x06`.
 - EnterUpdate to one `node_id`: extended ID `0x12000000 | node_id`, command `0x03`.
 - Image: standard IDs `0x1B0`–`0x1B3` at 500 kbit/s on the SN65HVD230.
+  The target sends `0x1B3` ACKs while it erases (`status=0xFE`, percent in
+  the 32-bit value) and after each written chunk.
 - Blink: command `0x0A`.
 - NFC snapshot: command `0x08`. The master collects each peer’s Type-A tags
   during the periodic Discover sweep and publishes them on GET_STATUS.

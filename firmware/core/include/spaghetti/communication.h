@@ -76,4 +76,27 @@ void spaghetti_communication_invalidate_sessions(void);
 void spaghetti_communication_invalidate_principal(
 	spaghetti_principal_id_t principal_id);
 
+/**
+ * @brief Push a Protocol V1 DISCOVERY event to every live host adapter.
+ *
+ * USB Serial/JTAG emits a kind-0x01 frame when a Protocol session is open.
+ * The host then re-reads GET_STATUS for NFC tags and chain peers. Quiet
+ * when Communication is not initialized or no adapter is listening.
+ *
+ * @param[in] candidate_id Ephemeral identity carried by the event.
+ * @param[in] port_id Antenna or port that changed, or 0.
+ * @param[in] generation Monotonic generation from the publisher.
+ *
+ * @retval 0 At least one adapter accepted the envelope.
+ * @retval -EACCES Communication has not been initialized.
+ * @retval -EAGAIN No host is in Protocol mode.
+ * @retval -ENOTSUP No adapter can emit events in this image.
+ *
+ * @note Thread context only. Never call from an ISR.
+ */
+int spaghetti_communication_emit_discovery(
+	uint32_t candidate_id,
+	uint8_t port_id,
+	uint32_t generation);
+
 #endif /* SPAGHETTI_COMMUNICATION_H */

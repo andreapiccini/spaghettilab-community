@@ -1,0 +1,16 @@
+description: Backbone ST25R100 reset and IRQ GPIOs
+
+compatible: "spaghettilab,nfc"
+
+include: base.yaml
+
+properties:
+  nfc-reset-gpios:
+    type: phandle-array
+    required: true
+    description: ST25R100 reset, active high on the wire
+
+  nfc-irq-gpios:
+    type: phandle-array
+    required: true
+    description: ST25R100 IRQ, active high

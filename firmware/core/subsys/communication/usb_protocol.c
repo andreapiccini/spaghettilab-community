@@ -44,6 +44,7 @@ static size_t tx_frame_sent;
 static atomic_t protocol_mode;
 static atomic_t work_pending;
 static atomic_t tx_pending;
+K_MUTEX_DEFINE(usb_tx_lock);
 K_SEM_DEFINE(work_sem, 0, 1);
 K_SEM_DEFINE(tx_done_sem, 0, 1);
 K_THREAD_STACK_DEFINE(usb_worker_stack, SPAGHETTI_USB_WORKER_STACK);
@@ -278,12 +279,47 @@ static void usb_worker(void *first, void *second, void *third)
 				decoder.bytes, encoded_size);
 			decoder.bytes[0] = SPAGHETTI_USB_FRAME_KIND_RESPONSE;
 			sys_put_be32((uint32_t)encoded_size, &decoder.bytes[1]);
+			(void)k_mutex_lock(&usb_tx_lock, K_FOREVER);
 			(void)usb_send_frame(
 				decoder.bytes,
 				SPAGHETTI_USB_FRAME_HEADER_SIZE + encoded_size);
+			k_mutex_unlock(&usb_tx_lock);
 		}
 		atomic_set(&work_pending, 0);
 	}
+}
+
+int spaghetti_usb_protocol_send_event(const uint8_t *envelope, size_t size)
+{
+	uint8_t frame[SPAGHETTI_USB_FRAME_MAX];
+	size_t written = 0U;
+	int err;
+
+	if ((envelope == NULL) || (size == 0U)) {
+		return -EINVAL;
+	}
+	if (atomic_get(&protocol_mode) == 0) {
+		return -EAGAIN;
+	}
+	if (uart_ctx == NULL) {
+		return -ENODEV;
+	}
+
+	err = spaghetti_usb_frame_encode(SPAGHETTI_USB_FRAME_KIND_EVENT,
+					 envelope, size, frame, sizeof(frame),
+					 &written);
+	if (err < 0) {
+		return err;
+	}
+
+	(void)k_mutex_lock(&usb_tx_lock, K_FOREVER);
+	err = usb_send_frame(frame, written);
+	k_mutex_unlock(&usb_tx_lock);
+	if (err == 0) {
+		(void)k_work_reschedule(&idle_work,
+					K_SECONDS(SPAGHETTI_USB_IDLE_SECONDS));
+	}
+	return err;
 }
 
 int spaghetti_usb_protocol_init(void)
@@ -320,6 +356,13 @@ int spaghetti_usb_protocol_init(void)
 int spaghetti_usb_protocol_init(void)
 {
 	return 0;
+}
+
+int spaghetti_usb_protocol_send_event(const uint8_t *envelope, size_t size)
+{
+	ARG_UNUSED(envelope);
+	ARG_UNUSED(size);
+	return -ENOTSUP;
 }
 
 #endif

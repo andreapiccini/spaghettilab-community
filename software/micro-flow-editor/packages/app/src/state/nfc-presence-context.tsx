@@ -13,7 +13,7 @@ import {
 import type { CoreBindingId } from "@spaghettilab/domain";
 import { useCoreSessions } from "./core-sessions-context.js";
 
-const POLL_MS = 1500;
+const POLL_MS = 4000;
 
 type NfcPresenceContextValue = {
   readonly nodesByBinding: ReadonlyMap<CoreBindingId, readonly NfcNode[]>;
@@ -25,7 +25,7 @@ type NfcPresenceContextValue = {
 const NfcPresenceContext = createContext<NfcPresenceContextValue | undefined>(undefined);
 
 export function NfcPresenceProvider({ children }: { readonly children: ReactNode }) {
-  const { rows, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones } = useCoreSessions();
+  const { rows, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones, onDiscoveryEvent } = useCoreSessions();
   const [nodesByBinding, setNodesByBinding] = useState<ReadonlyMap<CoreBindingId, readonly NfcNode[]>>(new Map());
   const [loadingBindings, setLoadingBindings] = useState<ReadonlySet<CoreBindingId>>(new Set());
   const [queue, setQueue] = useState<NfcPopupQueue>(emptyNfcPopupQueue);
@@ -33,6 +33,7 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
   const primedRef = useRef(new Set<CoreBindingId>());
   const nextIdRef = useRef(0);
   const inFlightRef = useRef(false);
+  const refreshRef = useRef(() => {});
 
   const readyRoots = useMemo(
     () => rows.filter((row) => row.sessionState === "READY" && row.viaCan === null),
@@ -168,6 +169,9 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
       }
     }
 
+    refreshRef.current = () => {
+      void poll();
+    };
     void poll();
     const timer = window.setInterval(() => void poll(), POLL_MS);
     return () => {
@@ -175,6 +179,19 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
       window.clearInterval(timer);
     };
   }, [readyKey, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones]);
+
+  useEffect(() => {
+    const unsubs: (() => void)[] = [];
+    for (const row of readyRoots) {
+      const off = onDiscoveryEvent(row.binding.bindingId, () => {
+        refreshRef.current();
+      });
+      if (off) unsubs.push(off);
+    }
+    return () => {
+      for (const off of unsubs) off();
+    };
+  }, [readyKey, readyRoots, onDiscoveryEvent]);
 
   const dismissCurrent = useCallback(() => {
     setQueue((q) => dismissNfcPopup(q));

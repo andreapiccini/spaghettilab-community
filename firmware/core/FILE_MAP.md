@@ -163,7 +163,7 @@ Each subsystem follows the same three-file reading pattern:
 | Runtime | `subsys/runtime/README.md` | `subsys/runtime/runtime.c` | Periodic work, rules, worker context and lifecycle |
 | Communication | `subsys/communication/README.md` | `subsys/communication/communication.c`, `usb_protocol.c` | Transport-neutral dispatch; USB Protocol V1 on Serial/JTAG |
 | Discovery | `subsys/discovery/README.md` | `subsys/discovery/discovery.c` | Normalize/validate identification proposals |
-| NFC | `include/spaghetti/nfc.h` | `subsys/nfc/nfc.c` | ST25R100 Type-A presence published on GET_STATUS |
+| NFC | `include/spaghetti/nfc.h` | `subsys/nfc/nfc.c` | ST25R100 LPCD IRQ, Type-A presence, DISCOVERY event |
 | Power | `subsys/power/README.md` | `subsys/power/power.c` | Coordinate a verified real shared power resource |
 
 Do not read or modify a subsystem implementation merely because another
@@ -179,7 +179,7 @@ its `.c` only when changing its owned behavior or diagnosing an internal defect.
 | `subsys/services/storage/README.md` | Bounded persistence, Settings/NVS, versioning, partition example | Saving/loading configuration or state |
 | `subsys/services/update/README.md` | Transport-independent update policy and MCUboot backend boundary | Implementing update state, cleanup, timeout or test boot |
 | `subsys/services/ota/SLUP.md` | SLUP master/target commands, node IDs, and chain slots | Loading firmware onto a chained Backbone from the USB master |
-| `subsys/services/ota/field_update.c` | SLUP session ingest, Discover, EnterUpdate, and Shell | Field firmware update on chained Backbone boards |
+| `subsys/services/ota/field_update.c` | SLUP session ingest, Discover, EnterUpdate, target install %, and Shell | Field firmware update on chained Backbone boards |
 | `subsys/services/mqtt/README.md` | Optional MQTT adapter and worker/network ownership | Product requirements explicitly choose MQTT |
 
 Services support owners; they do not own product rules or module instances.

@@ -7,25 +7,72 @@
 
 #include <zephyr/dfu/flash_img.h>
 #include <zephyr/dfu/mcuboot.h>
+#include <zephyr/drivers/flash.h>
 #include <zephyr/storage/flash_map.h>
 
 static struct flash_img_context upload_context;
 static uint32_t upload_offset;
 static bool upload_prepared;
 
+static size_t slot_erase_page(const struct flash_area *area)
+{
+	struct flash_pages_info info;
+
+	if ((area != NULL) &&
+	    (flash_get_page_info_by_offs(area->fa_dev, area->fa_off,
+					 &info) == 0) &&
+	    (info.size > 0U)) {
+		return info.size;
+	}
+
+	return 4096U;
+}
+
 static int erase_secondary_slot(void)
 {
 	const struct flash_area *area;
 	const uint8_t area_id = flash_img_get_upload_slot();
+	size_t page;
+	size_t erased = 0U;
+	uint8_t last_pct = 0U;
 	int err = flash_area_open(area_id, &area);
 
 	if (err < 0) {
 		return err;
 	}
 
-	err = flash_area_flatten(area, 0, area->fa_size);
+	page = slot_erase_page(area);
+	spaghetti_update_notify_progress(SPAGHETTI_UPDATE_PROGRESS_ERASE, 0U);
+	if ((page == 0U) || ((area->fa_size % page) != 0U)) {
+		err = flash_area_flatten(area, 0, area->fa_size);
+		if (err == 0) {
+			spaghetti_update_notify_progress(
+				SPAGHETTI_UPDATE_PROGRESS_ERASE, 100U);
+		}
+		flash_area_close(area);
+		return err;
+	}
+
+	while (erased < area->fa_size) {
+		uint8_t pct;
+
+		err = flash_area_erase(area, (off_t)erased, page);
+		if (err < 0) {
+			flash_area_close(area);
+			return err;
+		}
+		erased += page;
+		pct = (uint8_t)((erased * 100U) / area->fa_size);
+		if ((pct >= (uint8_t)(last_pct + 1U)) ||
+		    (erased == area->fa_size)) {
+			last_pct = pct;
+			spaghetti_update_notify_progress(
+				SPAGHETTI_UPDATE_PROGRESS_ERASE, pct);
+		}
+	}
+
 	flash_area_close(area);
-	return err;
+	return 0;
 }
 
 int spaghetti_update_backend_is_trial(bool *trial)

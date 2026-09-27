@@ -17,6 +17,7 @@
 #define SPAGHETTI_ESPNOW_OTA_DATA 2U
 #define SPAGHETTI_ESPNOW_OTA_END 3U
 #define SPAGHETTI_ESPNOW_OTA_ACK 0x80U
+#define SPAGHETTI_SLUP_ACK_PROGRESS 0xFEU
 
 #define SPAGHETTI_FIELD_CAN_ID_BEGIN 0x1B0U
 #define SPAGHETTI_FIELD_CAN_ID_DATA 0x1B1U
@@ -108,6 +109,7 @@ void spaghetti_field_update_note_ack(uint8_t type, uint32_t offset,
 				     uint8_t status, uint32_t written);
 int spaghetti_field_update_wait_ack(uint8_t type, uint32_t offset,
 				    uint8_t *status, k_timeout_t timeout);
+uint32_t spaghetti_field_update_last_ack_value(void);
 int spaghetti_field_update_confirm_peer(uint32_t dest_node_id);
 void spaghetti_field_update_ui_text(const char *text);
 void spaghetti_field_update_ui_pct(const char *stage, uint8_t pct);

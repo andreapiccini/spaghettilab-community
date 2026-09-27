@@ -31,6 +31,7 @@ import type {
   GetStatusResponse,
   GetTopologyResponse,
   GetUpdateStatusResponse,
+  DiscoveryEventPayload,
   RecordEventPayload,
   SpaghettiClient,
 } from "@spaghettilab/protocol-sdk";
@@ -68,6 +69,7 @@ export class CoreSession {
   private _syncRelationship: SyncRelationship | null = null;
   private readonly eventLoop: Promise<void>;
   private readonly recordListeners = new Set<(payload: RecordEventPayload) => void>();
+  private readonly discoveryListeners = new Set<(payload: DiscoveryEventPayload) => void>();
 
   constructor(
     readonly binding: CoreBindingRecord,
@@ -121,6 +123,18 @@ export class CoreSession {
     };
   }
 
+  /**
+   * Fans a `DISCOVERY` event out to every subscriber. The firmware emits this
+   * when NFC wake-up IRQ sees a tag appear or leave; Flow refreshes GET_STATUS
+   * immediately instead of waiting for the next poll.
+   */
+  onDiscoveryEvent(listener: (payload: DiscoveryEventPayload) => void): () => void {
+    this.discoveryListeners.add(listener);
+    return () => {
+      this.discoveryListeners.delete(listener);
+    };
+  }
+
   /** The most recent `boot_id` this session has observed via a `STATUS` event — `null` before the first one arrives, never a fabricated placeholder. Needed alongside a `RECORD` event's own fields to build a complete `TelemetryProvenance` (`@spaghettilab/telemetry-buffer`), since `RecordEventPayload` itself carries no boot ID (S091: boot ID is a `STATUS`-only field). */
   get lastBootId(): bigint | null {
     return this.bootId;
@@ -132,6 +146,10 @@ export class CoreSession {
         if (this.disposed) return;
         if (event.kind === "record") {
           for (const listener of this.recordListeners) listener(event.payload);
+          continue;
+        }
+        if (event.kind === "discovery") {
+          for (const listener of this.discoveryListeners) listener(event.payload);
           continue;
         }
         if (event.kind !== "status") continue;

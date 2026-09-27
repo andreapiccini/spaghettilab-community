@@ -49,6 +49,7 @@
 	 * RST GPIO1, IRQ GPIO5, CS GPIO2 (cs-gpios on spi2).
 	 */
 	spaghetti_nfc: spaghetti_nfc {
+		compatible = "spaghettilab,nfc";
 		nfc-reset-gpios = <&gpio0 1 GPIO_ACTIVE_LOW>;
 		nfc-irq-gpios = <&gpio0 5 GPIO_ACTIVE_HIGH>;
 	};

@@ -18,6 +18,8 @@ int spaghetti_communication_shell_init(void);
 
 int spaghetti_usb_protocol_init(void);
 
+int spaghetti_usb_protocol_send_event(const uint8_t *envelope, size_t size);
+
 int spaghetti_communication_shell_decode_hex(
 	const char *hex,
 	uint8_t *out,

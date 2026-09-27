@@ -34,6 +34,7 @@ import {
   Operation,
   ProtocolStatus,
   SpaghettiClient,
+  fakeDiscoveryEvent,
   fakeRecordEvent,
   fakeStatusEvent,
   type DeviceProfileSummary,
@@ -273,6 +274,33 @@ describe("CoreSession — reboot mid-READY", () => {
     }
 
     expect(session.state).toBe("READY");
+  });
+});
+
+describe("CoreSession — onDiscoveryEvent()", () => {
+  it("fans a DISCOVERY event out to every subscriber without disturbing STATUS-driven state tracking", async () => {
+    const { session, responder, transport } = makeSession();
+    await runToCompletion(() => session.connect(), responder);
+    expect(session.state).toBe("READY");
+
+    const receivedA: unknown[] = [];
+    const receivedB: unknown[] = [];
+    const unsubscribeA = session.onDiscoveryEvent((payload) => receivedA.push(payload));
+    session.onDiscoveryEvent((payload) => receivedB.push(payload));
+
+    transport.deliverEvent(fakeDiscoveryEvent(42, 7, 2, 3));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+
+    expect(receivedA).toEqual([{ candidateId: 7, portId: 2, generation: 3 }]);
+    expect(receivedB).toEqual(receivedA);
+    expect(session.state).toBe("READY");
+    expect(session.lastBootId).toBe(1n);
+
+    unsubscribeA();
+    transport.deliverEvent(fakeDiscoveryEvent(43, 8, 1, 4));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    expect(receivedA).toHaveLength(1);
+    expect(receivedB).toHaveLength(2);
   });
 });
 

@@ -270,6 +270,26 @@ ZTEST(field_update, test_slup_identity_discover_and_number)
 	zassert_equal(spaghetti_field_update_recv_usb(0x112233U), -EINVAL);
 }
 
+ZTEST(field_update, test_progress_ack_does_not_complete_begin)
+{
+	uint8_t status = 0xFFU;
+
+	spaghetti_field_update_prepare_ack();
+	spaghetti_field_update_note_ack(SPAGHETTI_ESPNOW_OTA_BEGIN, 40U,
+					SPAGHETTI_SLUP_ACK_PROGRESS, 0U);
+	zassert_ok(spaghetti_field_update_wait_ack(SPAGHETTI_ESPNOW_OTA_BEGIN,
+						   0U, &status, K_NO_WAIT));
+	zassert_equal(status, SPAGHETTI_SLUP_ACK_PROGRESS);
+	zassert_equal(spaghetti_field_update_last_ack_value(), 40U);
+
+	spaghetti_field_update_prepare_ack();
+	spaghetti_field_update_note_ack(SPAGHETTI_ESPNOW_OTA_BEGIN, 0U, 0U, 0U);
+	status = 0xFFU;
+	zassert_ok(spaghetti_field_update_wait_ack(SPAGHETTI_ESPNOW_OTA_BEGIN,
+						   0U, &status, K_NO_WAIT));
+	zassert_equal(status, 0U);
+}
+
 static void *field_update_setup(void)
 {
 	reset_fakes();

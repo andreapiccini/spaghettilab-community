@@ -6,7 +6,7 @@ import { CatalogCache, CoreSession, type CoreSessionSnapshot, type SessionState,
 import type { DeviceProfileDraft } from "@spaghettilab/device-profile-authoring-model";
 import type { InstallProfileResult } from "@spaghettilab/device-profile-install";
 import type { CoreBindingId, CoreBindingRecord, DomainError, PermissionSet, Result } from "@spaghettilab/domain";
-import { EventStream, SpaghettiClient, WebSerialProtocolTransport, WebSocketProtocolTransport, type AcceptDiscoveryRequest, type AcceptDiscoveryResponse, type AuditLogEntry, type DeviceProfileSummary, type DiscoveryCandidate, type GetConnectivityStatusResponse, type GetJobStatusResponse, type GetUpdateStatusResponse, type ProtocolTransport, type RecordEventPayload } from "@spaghettilab/protocol-sdk";
+import { EventStream, SpaghettiClient, WebSerialProtocolTransport, WebSocketProtocolTransport, type AcceptDiscoveryRequest, type AcceptDiscoveryResponse, type AuditLogEntry, type DeviceProfileSummary, type DiscoveryCandidate, type DiscoveryEventPayload, type GetConnectivityStatusResponse, type GetJobStatusResponse, type GetUpdateStatusResponse, type ProtocolTransport, type RecordEventPayload } from "@spaghettilab/protocol-sdk";
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { connectBrowserWebSocket } from "../lib/browser-websocket-connection.js";
 import { openBrowserSerial, type UsbSerialPort } from "../lib/browser-serial-connection.js";
@@ -67,6 +67,7 @@ type CoreSessionsContextValue = {
   removeProfile(bindingId: CoreBindingId, profileId: string, version: number, options: { readonly isReferencedLocally: boolean }): Promise<Result<void, DomainError>> | undefined;
   deployConfig(bindingId: CoreBindingId, input: CompileConfigInput, context: DeploymentContext): Promise<DeploymentResult> | undefined;
   onRecordEvent(bindingId: CoreBindingId, listener: (payload: RecordEventPayload) => void): (() => void) | undefined;
+  onDiscoveryEvent(bindingId: CoreBindingId, listener: (payload: DiscoveryEventPayload) => void): (() => void) | undefined;
   getLastBootId(bindingId: CoreBindingId): bigint | null | undefined;
   runCommand(bindingId: CoreBindingId, req: RunCommandRequest, granted: PermissionSet): Promise<CommandOutcome> | undefined;
   requestScan(bindingId: CoreBindingId, req: { readonly portId: number; readonly invasive: boolean }, granted: PermissionSet): Promise<ScanOutcome> | undefined;
@@ -248,6 +249,10 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     (bindingId: CoreBindingId, listener: (payload: RecordEventPayload) => void) => sessionsRef.current.get(bindingId)?.onRecordEvent(listener),
     [],
   );
+  const onDiscoveryEvent = useCallback(
+    (bindingId: CoreBindingId, listener: (payload: DiscoveryEventPayload) => void) => sessionsRef.current.get(bindingId)?.onDiscoveryEvent(listener),
+    [],
+  );
   const getLastBootId = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.lastBootId, []);
   const runCommand = useCallback(
     (bindingId: CoreBindingId, req: RunCommandRequest, granted: PermissionSet) => sessionsRef.current.get(bindingId)?.runCommand(req, granted),
@@ -290,6 +295,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     removeProfile,
     deployConfig,
     onRecordEvent,
+    onDiscoveryEvent,
     getLastBootId,
     runCommand,
     requestScan,

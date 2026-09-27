@@ -21,8 +21,8 @@ LOG_MODULE_DECLARE(spaghetti_field_update);
 #define CONFIG_SPAGHETTI_FIELD_UPDATE_CAN_BITRATE 500000
 #endif
 
-#define SPAGHETTI_FIELD_CAN_SEND_ATTEMPTS 5U
-#define SPAGHETTI_FIELD_CAN_ACK_WAIT_MS 250U
+#define SPAGHETTI_FIELD_CAN_SEND_ATTEMPTS 8U
+#define SPAGHETTI_FIELD_CAN_ACK_WAIT_MS 400U
 #define SPAGHETTI_FIELD_CAN_BEGIN_WAIT_MS 90000U
 #define SPAGHETTI_FIELD_CAN_BEGIN_ATTEMPTS 2U
 #define SPAGHETTI_FIELD_CAN_END_WAIT_MS 10000U
@@ -228,6 +228,7 @@ int spaghetti_field_update_can_push(
 		const int64_t deadline =
 			started + (int64_t)SPAGHETTI_FIELD_CAN_BEGIN_WAIT_MS;
 		uint8_t status = 0U;
+		bool slave_erase_pct = false;
 
 		err = -ETIMEDOUT;
 		while (k_uptime_get() < deadline) {
@@ -238,6 +239,15 @@ int spaghetti_field_update_can_push(
 				SPAGHETTI_ESPNOW_OTA_BEGIN, 0U, &status,
 				K_MSEC(5000));
 			if (err == 0) {
+				if (status == SPAGHETTI_SLUP_ACK_PROGRESS) {
+					wait_pct = (uint8_t)MIN(
+						99U,
+						spaghetti_field_update_last_ack_value());
+					slave_erase_pct = true;
+					spaghetti_field_update_ui_pct("erase",
+								      wait_pct);
+					continue;
+				}
 				if (status != 0U) {
 					LOG_ERR("SLUP image begin status=%u",
 						status);
@@ -245,18 +255,20 @@ int spaghetti_field_update_can_push(
 				}
 				break;
 			}
-			wait_pct = (uint8_t)MIN(
-				99,
-				(elapsed * 100) /
-				(int64_t)SPAGHETTI_FIELD_CAN_BEGIN_WAIT_MS);
-			spaghetti_field_update_ui_pct("erase", wait_pct);
+			if (!slave_erase_pct) {
+				wait_pct = (uint8_t)MIN(
+					99,
+					(elapsed * 100) /
+					(int64_t)SPAGHETTI_FIELD_CAN_BEGIN_WAIT_MS);
+				spaghetti_field_update_ui_pct("erase", wait_pct);
+			}
 		}
 		if (err < 0) {
 			LOG_ERR("SLUP image begin failed: %d", err);
 			return err;
 		}
 	}
-	spaghetti_field_update_ui_pct("send", 0U);
+	spaghetti_field_update_ui_pct("install", 0U);
 
 	while (offset < size) {
 		const uint8_t n = (uint8_t)MIN(size - offset,
@@ -279,10 +291,10 @@ int spaghetti_field_update_can_push(
 			const uint8_t pct =
 				(uint8_t)((offset * 100U) / size);
 
-			if ((pct >= (uint8_t)(last_pct + 5U)) ||
+			if ((pct >= (uint8_t)(last_pct + 1U)) ||
 			    (offset == size)) {
 				last_pct = pct;
-				spaghetti_field_update_ui_pct("send", pct);
+				spaghetti_field_update_ui_pct("install", pct);
 			}
 		}
 	}

@@ -5,6 +5,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define SPAGHETTI_UPDATE_PROGRESS_ERASE 1U
+#define SPAGHETTI_UPDATE_PROGRESS_WRITE 2U
+#define SPAGHETTI_UPDATE_PROGRESS_VERIFY 3U
+
+void spaghetti_update_notify_progress(uint8_t stage, uint8_t percent);
+
 int spaghetti_update_backend_is_trial(bool *trial);
 int spaghetti_update_backend_active_slot(uint8_t *slot);
 int spaghetti_update_backend_get_capacity(size_t *out_size);
