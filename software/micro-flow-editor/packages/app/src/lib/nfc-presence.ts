@@ -1,9 +1,14 @@
+export type ModulePosition = 1 | 2;
+
 export type NfcNode = {
-  readonly portId: number;
+  readonly portId: ModulePosition;
   readonly label: string;
   readonly uid?: string;
   readonly nodeId?: number;
   readonly backboneMac?: string;
+  readonly backboneLabel?: string;
+  readonly moduleTypeId?: number;
+  readonly fallbackClass?: number;
 };
 
 export type NfcTagInput = {
@@ -12,24 +17,61 @@ export type NfcTagInput = {
   readonly uid?: Uint8Array | string;
   readonly nodeId?: number;
   readonly backboneMac?: string;
+  readonly backboneLabel?: string;
+  readonly moduleTypeId?: number;
+  readonly vendorId?: number;
+  readonly fallbackClass?: number;
+  readonly registryId?: number;
 };
 
-export type NfcPopupKind = "read";
+export type NfcDetectKind = "read";
 
-export type NfcPopupEvent = {
+export type NfcDetectEvent = {
   readonly id: string;
-  readonly kind: NfcPopupKind;
+  readonly kind: NfcDetectKind;
   readonly node: NfcNode;
   readonly backboneMac: string;
 };
 
-export type NfcPopupQueue = {
-  readonly items: readonly NfcPopupEvent[];
+export type NfcDetectQueue = {
+  readonly items: readonly NfcDetectEvent[];
   readonly activeIndex: number;
 };
 
+/** @deprecated Use NfcDetectEvent — kept for existing imports during rename. */
+export type NfcPopupEvent = NfcDetectEvent;
+/** @deprecated Use NfcDetectQueue */
+export type NfcPopupQueue = NfcDetectQueue;
+/** @deprecated Use NfcDetectKind */
+export type NfcPopupKind = NfcDetectKind;
+
+const GENERIC_TYPE_IDS = new Set(["t2t", "t4t", "tag", ""]);
+
+const TYPE_LABELS: Record<string, string> = {
+  backbone: "Backbone",
+  power: "Power",
+  sensor: "Sensor",
+  actuator: "Actuator",
+  iface: "Interface",
+  interface: "Interface",
+  ctrl: "Controller",
+  controller: "Controller",
+  adapter: "Adapter",
+  module: "Module",
+};
+
+const FALLBACK_CLASS_LABELS: Record<number, string> = {
+  0x0001: "Backbone",
+  0x0002: "Power",
+  0x0003: "Sensor",
+  0x0004: "Actuator",
+  0x0005: "Interface",
+  0x0006: "Controller",
+  0x0007: "Adapter",
+};
+
 export function nfcNodeKey(node: NfcNode): string {
-  return `${node.nodeId ?? ""}\0${node.portId}\0${node.label}\0${node.uid ?? ""}`;
+  return `${node.nodeId ?? ""}\0${node.portId}\0${node.moduleTypeId ?? node.label}\0${node.uid ?? ""}`;
 }
 
 function uidHex(uid: Uint8Array | string | undefined): string | undefined {
@@ -40,10 +82,26 @@ function uidHex(uid: Uint8Array | string | undefined): string | undefined {
     .toUpperCase();
 }
 
-function nfcLabel(typeId: string): string {
-  const label = typeId.trim();
-  if (label === "t2t" || label === "t4t" || label === "tag") return "Tag NFC";
-  return label;
+export function isSlm1Tag(tag: NfcTagInput): boolean {
+  if (tag.moduleTypeId !== undefined && tag.moduleTypeId > 0) return true;
+  const typeId = tag.typeId.trim().toLowerCase();
+  if (GENERIC_TYPE_IDS.has(typeId)) return false;
+  return TYPE_LABELS[typeId] !== undefined;
+}
+
+export function moduleTypeLabel(tag: Pick<NfcTagInput, "typeId" | "fallbackClass" | "moduleTypeId">): string {
+  if (tag.fallbackClass !== undefined && FALLBACK_CLASS_LABELS[tag.fallbackClass]) {
+    return FALLBACK_CLASS_LABELS[tag.fallbackClass]!;
+  }
+  const key = tag.typeId.trim().toLowerCase();
+  if (TYPE_LABELS[key]) return TYPE_LABELS[key]!;
+  if (tag.moduleTypeId && tag.moduleTypeId > 0) return `Module ${tag.moduleTypeId}`;
+  return "Module";
+}
+
+export function asModulePosition(portId: number): ModulePosition | undefined {
+  if (portId === 1 || portId === 2) return portId;
+  return undefined;
 }
 
 export function nfcNodesForBoard(
@@ -71,41 +129,25 @@ export function nfcNodesForBoard(
   });
 }
 
-export function collectNfcNodes(
-  modules: readonly { readonly portId: number; readonly typeId: string }[],
-  candidates: readonly { readonly portId: number; readonly suggestedTypeId: string }[],
-  tags: readonly NfcTagInput[] = [],
-): NfcNode[] {
+/** Collect only SLM1-validated module tags from GET_STATUS `nfcTags`. */
+export function collectNfcNodes(tags: readonly NfcTagInput[] = []): NfcNode[] {
   const nodes: NfcNode[] = [];
   const seen = new Set<string>();
   for (const tag of tags) {
-    const label = nfcLabel(tag.typeId);
-    if (!label) continue;
-    const node = {
-      portId: tag.portId,
+    if (!isSlm1Tag(tag)) continue;
+    const portId = asModulePosition(tag.portId);
+    if (portId === undefined) continue;
+    const label = moduleTypeLabel(tag);
+    const node: NfcNode = {
+      portId,
       label,
       ...(tag.uid !== undefined ? { uid: uidHex(tag.uid) } : {}),
       ...(tag.nodeId !== undefined ? { nodeId: tag.nodeId } : {}),
       ...(tag.backboneMac ? { backboneMac: tag.backboneMac } : {}),
+      ...(tag.backboneLabel ? { backboneLabel: tag.backboneLabel } : {}),
+      ...(tag.moduleTypeId !== undefined ? { moduleTypeId: tag.moduleTypeId } : {}),
+      ...(tag.fallbackClass !== undefined ? { fallbackClass: tag.fallbackClass } : {}),
     };
-    const key = nfcNodeKey(node);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    nodes.push(node);
-  }
-  for (const module of modules) {
-    const label = nfcLabel(module.typeId);
-    if (!label) continue;
-    const node = { portId: module.portId, label };
-    const key = nfcNodeKey(node);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    nodes.push(node);
-  }
-  for (const candidate of candidates) {
-    const label = nfcLabel(candidate.suggestedTypeId);
-    if (!label) continue;
-    const node = { portId: candidate.portId, label };
     const key = nfcNodeKey(node);
     if (seen.has(key)) continue;
     seen.add(key);
@@ -126,23 +168,29 @@ export function diffNfcNodes(
   };
 }
 
-export function emptyNfcPopupQueue(): NfcPopupQueue {
+export function emptyNfcDetectQueue(): NfcDetectQueue {
   return { items: [], activeIndex: 0 };
 }
 
-export function enqueueNfcPopups(
-  queue: NfcPopupQueue,
-  events: readonly NfcPopupEvent[],
-): NfcPopupQueue {
+/** @deprecated */
+export const emptyNfcPopupQueue = emptyNfcDetectQueue;
+
+export function enqueueNfcDetects(
+  queue: NfcDetectQueue,
+  events: readonly NfcDetectEvent[],
+): NfcDetectQueue {
   const items = [...queue.items];
   for (const event of events) {
     if (items.some((item) => item.id === event.id)) continue;
     items.push(event);
   }
-  return { items, activeIndex: queue.activeIndex };
+  return { items, activeIndex: items.length > 0 ? items.length - 1 : 0 };
 }
 
-export function dismissNfcPopup(queue: NfcPopupQueue): NfcPopupQueue {
+/** @deprecated */
+export const enqueueNfcPopups = enqueueNfcDetects;
+
+export function dismissNfcDetect(queue: NfcDetectQueue): NfcDetectQueue {
   if (queue.items.length === 0) return queue;
   const items = queue.items.filter((_, index) => index !== queue.activeIndex);
   return {
@@ -151,7 +199,10 @@ export function dismissNfcPopup(queue: NfcPopupQueue): NfcPopupQueue {
   };
 }
 
-export function selectNfcPopup(queue: NfcPopupQueue, index: number): NfcPopupQueue {
+/** @deprecated */
+export const dismissNfcPopup = dismissNfcDetect;
+
+export function selectNfcDetect(queue: NfcDetectQueue, index: number): NfcDetectQueue {
   if (queue.items.length === 0) return queue;
   return {
     ...queue,
@@ -159,16 +210,22 @@ export function selectNfcPopup(queue: NfcPopupQueue, index: number): NfcPopupQue
   };
 }
 
-export function dismissAllNfcPopups(): NfcPopupQueue {
-  return emptyNfcPopupQueue();
+/** @deprecated */
+export const selectNfcPopup = selectNfcDetect;
+
+export function dismissAllNfcDetects(): NfcDetectQueue {
+  return emptyNfcDetectQueue();
 }
+
+/** @deprecated */
+export const dismissAllNfcPopups = dismissAllNfcDetects;
 
 export function nfcEventsFromDiff(
   backboneMac: string,
   previous: readonly NfcNode[],
   next: readonly NfcNode[],
   nextId: () => string,
-): NfcPopupEvent[] {
+): NfcDetectEvent[] {
   const { added } = diffNfcNodes(previous, next);
   return added.map((node) => ({
     id: nextId(),

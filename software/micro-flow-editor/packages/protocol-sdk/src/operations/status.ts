@@ -65,6 +65,14 @@ export type NfcTagStatus = {
   readonly uid: Uint8Array;
   readonly nodeId: number;
   readonly local: boolean;
+  /** SLM1 `module_type_id`. Absent on pre-SLM1 firmware images. */
+  readonly moduleTypeId?: number;
+  /** SLM1 `vendor_id`. Absent on pre-SLM1 firmware images. */
+  readonly vendorId?: number;
+  /** SLM1 `fallback_class`. Absent on pre-SLM1 firmware images. */
+  readonly fallbackClass?: number;
+  /** SLM1 `registry_id`. Absent on pre-SLM1 firmware images. */
+  readonly registryId?: number;
 };
 
 export function encodeGetStatusResponse(r: GetStatusResponse): Uint8Array {
@@ -124,6 +132,10 @@ export function encodeGetStatusResponse(r: GetStatusResponse): Uint8Array {
             bytesField(2, tag.uid),
             u32Field(3, tag.nodeId),
             boolField(4, tag.local),
+            ...(tag.moduleTypeId !== undefined ? [u32Field(5, tag.moduleTypeId)] : []),
+            ...(tag.vendorId !== undefined ? [u32Field(6, tag.vendorId)] : []),
+            ...(tag.fallbackClass !== undefined ? [u32Field(7, tag.fallbackClass)] : []),
+            ...(tag.registryId !== undefined ? [u32Field(8, tag.registryId)] : []),
           ]),
         ),
       ),
@@ -183,6 +195,10 @@ export function decodeGetStatusResponse(bytes: Uint8Array): GetStatusResponse {
               uid: requireBytes(tag, 2, "NfcTagStatus"),
               nodeId: requireU32(tag, 3, "NfcTagStatus"),
               local: requireBool(tag, 4, "NfcTagStatus"),
+              ...(tag.get(5)?.kind === "uint" ? { moduleTypeId: requireU32(tag, 5, "NfcTagStatus") } : {}),
+              ...(tag.get(6)?.kind === "uint" ? { vendorId: requireU32(tag, 6, "NfcTagStatus") } : {}),
+              ...(tag.get(7)?.kind === "uint" ? { fallbackClass: requireU32(tag, 7, "NfcTagStatus") } : {}),
+              ...(tag.get(8)?.kind === "uint" ? { registryId: requireU32(tag, 8, "NfcTagStatus") } : {}),
             };
           }),
         }

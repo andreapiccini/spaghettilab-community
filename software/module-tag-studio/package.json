@@ -1,0 +1,26 @@
+{
+  "name": "spaghettilab-module-tag-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "npm run dev -w @spaghettilab/module-tag-studio-app",
+    "dev:server": "npm run dev -w @spaghettilab/module-tag-studio-server",
+    "dev:all": "npm run dev:server & npm run dev",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:golden": "npm run test -w @spaghettilab/module-tag-protocol -- --run golden",
+    "generate-golden": "npm run generate-golden -w @spaghettilab/module-tag-protocol"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.9.3",
+    "vite": "^6.2.0",
+    "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "vite": "$vite"
+  }
+}

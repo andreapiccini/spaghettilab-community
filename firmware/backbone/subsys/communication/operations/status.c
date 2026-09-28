@@ -239,21 +239,32 @@ static int execute_get_status(
 		ARG_UNUSED(peer_count);
 #endif
 		if (have_nfc) {
+			size_t published = 0U;
+
+			for (size_t idx = 0U; idx < nfc_count; ++idx) {
+				if (nfc_tags[idx].module_type_id != 0U) {
+					published += 1U;
+				}
+			}
 			if (!zcbor_uint32_put(state, 13U) ||
-			    !zcbor_list_start_encode(state, nfc_count)) {
+			    !zcbor_list_start_encode(state, published)) {
 				return -EMSGSIZE;
 			}
 			for (size_t idx = 0U; idx < nfc_count; ++idx) {
 				const struct spaghetti_nfc_tag *tag =
 					&nfc_tags[idx];
-				const char *type_id =
-					spaghetti_nfc_type_id(tag->type);
+				const char *type_id;
+				const size_t map_keys = 9U;
 
-				if (!zcbor_map_start_encode(state, 5U) ||
+				if (tag->module_type_id == 0U) {
+					continue;
+				}
+				type_id = spaghetti_nfc_type_id(tag);
+				if (!zcbor_map_start_encode(state, map_keys) ||
 				    !zcbor_uint32_put(state, 0U) ||
 				    !zcbor_uint32_put(state, tag->antenna) ||
 				    !zcbor_uint32_put(state, 1U) ||
-				    !zcbor_tstr_put_term(state, type_id, 8U) ||
+				    !zcbor_tstr_put_term(state, type_id, 16U) ||
 				    !zcbor_uint32_put(state, 2U) ||
 				    !zcbor_bstr_encode_ptr(state, tag->uid,
 							   tag->uid_len) ||
@@ -261,11 +272,21 @@ static int execute_get_status(
 				    !zcbor_uint32_put(state, tag->node_id) ||
 				    !zcbor_uint32_put(state, 4U) ||
 				    !zcbor_bool_put(state, tag->local) ||
-				    !zcbor_map_end_encode(state, 5U)) {
+				    !zcbor_uint32_put(state, 5U) ||
+				    !zcbor_uint32_put(state,
+						      tag->module_type_id) ||
+				    !zcbor_uint32_put(state, 6U) ||
+				    !zcbor_uint32_put(state, tag->vendor_id) ||
+				    !zcbor_uint32_put(state, 7U) ||
+				    !zcbor_uint32_put(state,
+						      tag->fallback_class) ||
+				    !zcbor_uint32_put(state, 8U) ||
+				    !zcbor_uint32_put(state, tag->registry_id) ||
+				    !zcbor_map_end_encode(state, map_keys)) {
 					return -EMSGSIZE;
 				}
 			}
-			if (!zcbor_list_end_encode(state, nfc_count)) {
+			if (!zcbor_list_end_encode(state, published)) {
 				return -EMSGSIZE;
 			}
 		}

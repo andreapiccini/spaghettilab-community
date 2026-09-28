@@ -69,7 +69,12 @@ export function CoreConnectionsScreen() {
     const chain = attachedByRoot.get(root.binding.bindingId) ?? [];
     return total + Math.max(chain.length, 1);
   }, 0);
-  const subtitle = roots.length === 0 ? copy.noCoreShort : copy.coresCount(backboneTotal);
+  const clusterCount = roots.length;
+  const subtitle =
+    roots.length === 0
+      ? copy.noCoreShort
+      : `${clusterCount === 1 ? "1 cluster" : `${clusterCount} clusters`} · ${copy.coresCount(backboneTotal)}`;
+
 
   return (
     <div className="flex h-full flex-col">
@@ -97,10 +102,11 @@ export function CoreConnectionsScreen() {
       ) : (
         <div className="flex-1 overflow-auto p-6">
           <div className="flex flex-col gap-3">
-            {roots.map((row) => (
+            {roots.map((row, index) => (
               <CoreRow
                 key={row.binding.bindingId}
                 row={row}
+                clusterIndex={index + 1}
                 attached={attachedByRoot.get(row.binding.bindingId) ?? []}
                 onConnect={() =>
                   void reconnectCoreBinding(row.binding, connect).catch((cause: unknown) => {

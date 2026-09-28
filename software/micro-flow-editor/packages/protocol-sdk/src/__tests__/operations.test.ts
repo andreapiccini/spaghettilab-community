@@ -71,10 +71,14 @@ describe("GET_STATUS", () => {
       nfcTags: [
         {
           portId: 1,
-          typeId: "t2t",
+          typeId: "sensor",
           uid: new Uint8Array([0x04, 0x12, 0x34, 0x56]),
           nodeId: 0xe1c52c,
           local: true,
+          moduleTypeId: 2001,
+          vendorId: 1,
+          fallbackClass: 3,
+          registryId: 1,
         },
       ],
     };

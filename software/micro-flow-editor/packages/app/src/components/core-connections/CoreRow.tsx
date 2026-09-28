@@ -1,8 +1,8 @@
-import { Cable, CloudOff, Cpu, Wifi } from "lucide-react";
+import { Cable, CloudOff, Wifi } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { motionTokens } from "../../lib/motion-tokens.js";
-import { formatDeviceId } from "../../lib/core-identity.js";
 import { coreConnectionsCopy } from "../../lib/core-connections-copy.js";
+import { formatDeviceId } from "../../lib/core-identity.js";
 import type { AttachedBackbone, CoreRowState } from "../../state/core-sessions-context.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -13,13 +13,25 @@ import { rowActionId, rowActionLabel, sessionBadgeStyle } from "./session-badge.
 
 const TRANSITIONAL = new Set(["CONNECTING", "AUTHENTICATING", "SYNCHRONIZING", "VALIDATING", "APPLYING", "UPDATING", "REBOOTING", "TRIAL"]);
 
+function isTechnicalDeviceLabel(name: string | undefined, deviceIdHex: string): boolean {
+  const trimmed = name?.trim() ?? "";
+  if (!trimmed) return true;
+  const lower = trimmed.toLowerCase();
+  if (lower === formatDeviceId(deviceIdHex).toLowerCase()) return true;
+  if (/^([0-9a-f]{2}:){5}[0-9a-f]{2}$/i.test(trimmed)) return true;
+  if (/^[0-9a-f]{12,}$/i.test(trimmed.replace(/[^0-9a-f]/gi, ""))) return true;
+  return false;
+}
+
 export function CoreRow({
   row,
   attached,
+  clusterIndex,
   onConnect,
 }: {
   readonly row: CoreRowState;
   readonly attached: readonly AttachedBackbone[];
+  readonly clusterIndex: number;
   readonly onConnect: () => void;
 }) {
   const { cancel } = useCoreSessions();
@@ -36,15 +48,18 @@ export function CoreRow({
   const isErrorLike = row.sessionState === "ERROR" || row.sessionState === "CONFLICT" || hasError;
   const chain: readonly AttachedBackbone[] = attached.length > 0
     ? attached
-    : [{ deviceIdHex: row.binding.expectedDeviceId, mac: formatDeviceId(row.binding.expectedDeviceId), nodeId: 0, local: true }];
+    : [{ deviceIdHex: row.binding.expectedDeviceId, mac: "", nodeId: 0, local: true }];
   const HostIcon = row.hostLink === "wifi" ? Wifi : Cable;
+  const nfcTotal = chain.reduce((sum, board) => sum + nfcNodesForBoard(board, nfcNodes).length, 0);
 
   function handleAction() {
     if (actionId === "connect" || actionId === "reconnect" || actionId === "review-error") onConnect();
     else if (actionId === "cancel") cancel(row.binding.bindingId);
   }
 
-  const boardLabels = chain.map((_board, index) => copy.backbone(index + 1));
+  const title = isTechnicalDeviceLabel(row.displayName, row.binding.expectedDeviceId)
+    ? copy.clusterTitle(clusterIndex)
+    : row.displayName.trim();
 
   return (
     <motion.div
@@ -54,17 +69,15 @@ export function CoreRow({
     >
       <div className="flex min-h-10 items-center gap-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-slsm" style={{ backgroundColor: `color-mix(in srgb, ${badge.colorVar} 12%, transparent)` }}>
-          <Cpu size={20} style={{ color: badge.colorVar }} />
+          <HostIcon size={20} style={{ color: badge.colorVar }} />
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="truncate font-body text-sm font-semibold text-ink">
-            {boardLabels.join(" · ")}
-          </div>
-          <div className="flex items-center gap-1.5 font-body text-xs text-ink-muted">
-            <HostIcon size={12} />
-            {row.hostLink === "wifi" ? copy.viaWifi : copy.viaCable}
-            {row.displayName ? ` · ${row.displayName}` : null}
+          <div className="truncate font-body text-sm font-semibold text-ink">{title}</div>
+          <div className="font-body text-xs text-ink-muted">
+            {copy.linkToSoftware(row.hostLink === "wifi" ? "wifi" : "cable")}
+            {" · "}
+            {copy.clusterSummary(chain.length, nfcTotal)}
           </div>
         </div>
 
@@ -109,37 +122,23 @@ export function CoreRow({
       )}
 
       <div className="mt-4 border-t border-border pt-3">
-        <p className="mb-2 font-body text-xs font-semibold text-ink-muted">{copy.chainCaption(chain.length)}</p>
-        <ul className="mb-3 flex flex-col gap-1.5">
-          {chain.map((board, index) => {
-            const label = boardLabels[index] ?? board.mac;
-            const boardNfc = nfcNodesForBoard(board, nfcNodes);
-            return (
-              <li key={board.deviceIdHex} className="flex min-h-8 items-center gap-2 rounded-slsm bg-surface-sunken px-2.5 py-1.5">
-                <Cpu size={14} className="shrink-0 text-brand-blue" />
-                <span className="min-w-0 flex-1 truncate font-body text-sm font-semibold text-ink">{label}</span>
-                {board.version?.trim() ? (
-                  <span className="shrink-0 font-body text-xs text-ink-muted">{copy.commit(board.version.trim())}</span>
-                ) : null}
-                <span className="shrink-0 font-body text-xs text-ink-faint">
-                  {board.local ? (row.hostLink === "wifi" ? copy.viaWifi : copy.viaCable) : copy.viaCanShort}
-                </span>
-                <span className="shrink-0 font-body text-xs text-ink-faint">
-                  {boardNfc.length === 0 ? copy.nfcEmptyShort : copy.nfcTitle}
-                  {boardNfc.length > 0 ? ` · ${boardNfc.length}` : ""}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
         <BackboneNetworkGraph
-          boards={chain.map((board, index) => ({
-            id: board.deviceIdHex,
-            label: boardLabels[index] ?? board.mac,
-            sublabel: board.version?.trim() ? copy.commit(board.version.trim()) : "",
-            local: board.local,
-            hostLink: board.local ? row.hostLink : "can",
-          }))}
+          boards={chain.map((board, index) => {
+            const boardNfc = nfcNodesForBoard(board, nfcNodes);
+            const roleLabel = board.local || index === 0 ? copy.masterBackbone : copy.chainedBackbone(index + 1);
+            return {
+              id: board.deviceIdHex,
+              label: roleLabel,
+              sublabel: [
+                board.version?.trim() ? copy.fwVersion(board.version.trim()) : null,
+                copy.nfcCountShort(boardNfc.length),
+              ]
+                .filter(Boolean)
+                .join(" · "),
+              local: board.local,
+              hostLink: board.local ? row.hostLink : "can",
+            };
+          })}
           nfcByBoardId={new Map(chain.map((board) => [board.deviceIdHex, nfcNodesForBoard(board, nfcNodes)]))}
           nfcLoading={nfcLoading && (row.sessionState === "READY" || row.sessionState === "SYNCHRONIZING")}
           locale={locale}

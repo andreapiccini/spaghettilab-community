@@ -9,27 +9,29 @@ import {
   type ReactNode,
 } from "react";
 import { formatDeviceId, macBytesToColon } from "../lib/core-identity.js";
+import { coreConnectionsCopy } from "../lib/core-connections-copy.js";
 import { attachedFromStatus } from "./core-sessions-context.js";
 import {
   collectNfcNodes,
-  dismissAllNfcPopups,
-  dismissNfcPopup,
-  emptyNfcPopupQueue,
-  enqueueNfcPopups,
+  dismissAllNfcDetects,
+  dismissNfcDetect,
+  emptyNfcDetectQueue,
+  enqueueNfcDetects,
   nfcEventsFromDiff,
-  selectNfcPopup,
+  selectNfcDetect,
+  type NfcDetectQueue,
   type NfcNode,
-  type NfcPopupQueue,
 } from "../lib/nfc-presence.js";
 import type { CoreBindingId } from "@spaghettilab/domain";
 import { useCoreSessions } from "./core-sessions-context.js";
+import { useLocale } from "./locale-context.js";
 
 const POLL_MS = 1500;
 
 type NfcPresenceContextValue = {
   readonly nodesByBinding: ReadonlyMap<CoreBindingId, readonly NfcNode[]>;
   readonly loadingBindings: ReadonlySet<CoreBindingId>;
-  readonly queue: NfcPopupQueue;
+  readonly queue: NfcDetectQueue;
   dismissCurrent(): void;
   dismissAll(): void;
   selectPopup(index: number): void;
@@ -44,18 +46,19 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
     rows,
     getClient,
     getSnapshot,
-    listDiscoveryCandidates,
     setAttachedBackbones,
     observeStatus,
     onDiscoveryEvent,
   } = useCoreSessions();
+  const { locale } = useLocale();
+  const copy = coreConnectionsCopy(locale);
   const [nodesByBinding, setNodesByBinding] = useState<
     ReadonlyMap<CoreBindingId, readonly NfcNode[]>
   >(new Map());
   const [loadingBindings, setLoadingBindings] = useState<ReadonlySet<CoreBindingId>>(
     new Set(),
   );
-  const [queue, setQueue] = useState<NfcPopupQueue>(emptyNfcPopupQueue);
+  const [queue, setQueue] = useState<NfcDetectQueue>(emptyNfcDetectQueue);
   const lastNodesRef = useRef(new Map<CoreBindingId, readonly NfcNode[]>());
   const primedRef = useRef(new Set<CoreBindingId>());
   const nextIdRef = useRef(0);
@@ -147,28 +150,35 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
               const peers = attachedFromStatus(status, row.binding.expectedDeviceId);
               if (peers) setAttachedBackbones(bindingId, peers);
             }
-            let candidates: readonly { portId: number; suggestedTypeId: string }[] = [];
-            try {
-              candidates = (await listDiscoveryCandidates(bindingId)) ?? [];
-            } catch {
-              candidates = [];
-            }
             if (cancelled) return;
             const peerMacByNode = new Map<number, string>();
-            for (const peer of status?.chainPeers ?? []) {
+            const peerLabelByNode = new Map<number, string>();
+            const chainPeers = status?.chainPeers ?? [];
+            let remoteOrdinal = 1;
+            for (const peer of chainPeers) {
               peerMacByNode.set(peer.nodeId, macBytesToColon(peer.mac));
+              if (peer.local) {
+                peerLabelByNode.set(peer.nodeId, copy.masterBackbone);
+              } else {
+                remoteOrdinal += 1;
+                peerLabelByNode.set(peer.nodeId, copy.chainedBackbone(remoteOrdinal));
+              }
             }
+            const masterMac = formatDeviceId(row.binding.expectedDeviceId);
             const nodes = collectNfcNodes(
-              status?.modules ?? [],
-              candidates,
               (status?.nfcTags ?? []).map((tag) => ({
                 portId: tag.portId,
                 typeId: tag.typeId,
                 uid: tag.uid,
                 nodeId: tag.nodeId,
-                backboneMac:
-                  peerMacByNode.get(tag.nodeId) ??
-                  formatDeviceId(row.binding.expectedDeviceId),
+                backboneMac: peerMacByNode.get(tag.nodeId) ?? masterMac,
+                backboneLabel:
+                  peerLabelByNode.get(tag.nodeId) ??
+                  (tag.local ? copy.masterBackbone : copy.chainedBackbone(2)),
+                moduleTypeId: tag.moduleTypeId,
+                vendorId: tag.vendorId,
+                fallbackClass: tag.fallbackClass,
+                registryId: tag.registryId,
               })),
             );
             const previous = lastNodesRef.current.get(bindingId) ?? [];
@@ -182,12 +192,12 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
               primedRef.current.add(bindingId);
             } else {
               const events = nfcEventsFromDiff(
-                formatDeviceId(row.binding.expectedDeviceId),
+                masterMac,
                 previous,
                 nodes,
                 () => `nfc-${++nextIdRef.current}`,
               );
-              if (events.length > 0) setQueue((q) => enqueueNfcPopups(q, events));
+              if (events.length > 0) setQueue((q) => enqueueNfcDetects(q, events));
             }
           } catch {
             /* A failed poll must not look like every module vanished. */
@@ -220,9 +230,10 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
     readyKey,
     getClient,
     getSnapshot,
-    listDiscoveryCandidates,
     setAttachedBackbones,
     observeStatus,
+    copy.masterBackbone,
+    copy.chainedBackbone,
   ]);
 
   useEffect(() => {
@@ -239,15 +250,15 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
   }, [readyKey, readyRoots, onDiscoveryEvent]);
 
   const dismissCurrent = useCallback(() => {
-    setQueue((q) => dismissNfcPopup(q));
+    setQueue((q) => dismissNfcDetect(q));
   }, []);
 
   const dismissAll = useCallback(() => {
-    setQueue(dismissAllNfcPopups());
+    setQueue(dismissAllNfcDetects());
   }, []);
 
   const selectPopup = useCallback((index: number) => {
-    setQueue((q) => selectNfcPopup(q, index));
+    setQueue((q) => selectNfcDetect(q, index));
   }, []);
 
   const value = useMemo<NfcPresenceContextValue>(

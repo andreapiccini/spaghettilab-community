@@ -119,7 +119,7 @@ export function layoutBackboneNetwork(
         y: BOARD_Y - NFC_LIFT + (1 - Math.cos(angle)) * 18,
         r: NFC_R,
         label: node.label,
-        sublabel: "",
+        sublabel: String(node.portId),
         parentId: board.id,
       });
       edges.push({ id: `nfc-${id}`, kind: "nfc", from: board.id, to: id });

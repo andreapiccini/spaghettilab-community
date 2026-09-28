@@ -1,0 +1,7 @@
+{
+  "registryId": 1,
+  "name": "Spaghetti LAB Dev Registry",
+  "baseUrl": "https://registry.example.invalid",
+  "trustKeyId": "dev-key-1",
+  "note": "Mirrored in packages/registry fixtures; not for production."
+}

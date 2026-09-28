@@ -11402,14 +11402,26 @@
 		)
 		(embedded_fonts no)
 		(model "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x05_P2.54mm_Horizontal.step"
+			(hide yes)
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 0 1)
 			)
 			(scale
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz -0 -0 -0)
+			)
+		)
+		(model "/Users/andreapiccini/dev/SpaghettiLAB.3dshapes/CONN-TH_PR5L4015-5P-C-F.step"
+			(offset
+				(xyz -2.8 -5 0.4)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 90 -0 -90)
 			)
 		)
 	)
@@ -16808,7 +16820,7 @@
 			(uuid "21b026f6-23cc-41e1-af4e-5dc65eecbd2d")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -16821,7 +16833,7 @@
 			(uuid "300a1d22-4836-4bbd-b1e7-565675f2d330")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -16834,7 +16846,7 @@
 			(uuid "18aeae52-95d3-4b59-b182-91c8f24557f8")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -16847,7 +16859,7 @@
 			(uuid "89009c0e-2144-41f1-931b-e29d228f2235")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -16860,8 +16872,9 @@
 			(uuid "a182af79-f7f9-4b37-a031-42851a6241c7")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -21082,6 +21095,7 @@
 		)
 		(embedded_fonts no)
 		(model "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Horizontal.step"
+			(hide yes)
 			(offset
 				(xyz 0 0 0)
 			)
@@ -21090,6 +21104,29 @@
 			)
 			(rotate
 				(xyz 0 0 0)
+			)
+		)
+		(model "/Users/andreapiccini/dev/SpaghettiLAB.3dshapes/CONN-TH_PR5L4015-5P-C-F.wrl"
+			(hide yes)
+			(offset
+				(xyz 1 -5 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 90 -0 90)
+			)
+		)
+		(model "/Users/andreapiccini/dev/SpaghettiLAB.3dshapes/CONN-TH_PR5L5015-5P-C-H.step"
+			(offset
+				(xyz 2.8 -5 0.4)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 90 -0 90)
 			)
 		)
 	)
@@ -21574,7 +21611,7 @@
 			(uuid "b5c7fddd-f3cc-428d-b860-597492bd4fb4")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -21587,7 +21624,7 @@
 			(uuid "03dc4b15-2ed4-4eb7-8a99-aeadbfb7259f")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -21600,7 +21637,7 @@
 			(uuid "439de10b-b118-4df6-9698-002ed3c3ecd6")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -21613,7 +21650,7 @@
 			(uuid "d22d817e-50da-4a55-a371-94c946b35f61")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -21626,8 +21663,9 @@
 			(uuid "3629ed86-0c71-44a6-abae-f4eb64bc247f")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -44590,7 +44628,7 @@
 			(uuid "9c68b9ce-1384-474e-903f-5143152591cb")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -44603,7 +44641,7 @@
 			(uuid "f72fa573-1858-4a94-86d4-88246490845b")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -44616,7 +44654,7 @@
 			(uuid "e6adb175-f4c7-4fa7-9018-57b6a1155719")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -44629,7 +44667,7 @@
 			(uuid "6604579f-34cf-4384-88b2-0a2d4598ff79")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -44642,8 +44680,9 @@
 			(uuid "d6df78e7-df50-4d0e-aac5-8cf5a9527db0")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -47963,6 +48002,7 @@
 		)
 		(embedded_fonts no)
 		(model "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Horizontal.step"
+			(hide yes)
 			(offset
 				(xyz 0 0 0)
 			)
@@ -47973,73 +48013,85 @@
 				(xyz 0 0 0)
 			)
 		)
+		(model "/Users/andreapiccini/dev/SpaghettiLAB.3dshapes/CONN-TH_PR5L5015-5P-C-H.step"
+			(offset
+				(xyz 2.8 -5 0.4)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 -180 -90)
+			)
+		)
 	)
 	(footprint "kobee-studio-6AB0032A"
 		(layer "F.Cu")
 		(uuid "d802e33b-ec61-40c6-a35b-c2cf5dbfcfcd")
 		(at 176.87 110.71 -90)
 		(property "Reference" "kobee-studio-6AB00481"
-			(at 0 0 -90)
+			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "0cf9907e-c1d9-4618-920b-612e2e4387af")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
 		)
 		(property "Value" "Kobee Studio"
-			(at 0 0 -90)
+			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "1b762365-aee7-4b83-a67f-13cee34c690b")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
 		)
 		(property "Datasheet" ""
-			(at 0 0 -90)
+			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "57b9dd7f-586c-46c0-bfd7-1ca6ab810b11")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
 		)
 		(property "Description" ""
-			(at 0 0 -90)
+			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "a83de591-a7a4-4995-9519-321e6e30c4fd")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
 		)
 		(property "KOBEE_STUDIO_DATA" "eyJkb2N1bWVudCI6eyJhbGlnbm1lbnQiOiJjZW50ZXIiLCJhbmNob3IiOnsieCI6MC4wLCJ5IjowLjB9LCJnZW5lcmF0b3JfdmVyc2lvbiI6IjEuNC4xIiwib2JqZWN0cyI6W3sia2luZCI6InRleHQiLCJvYmplY3RfaWQiOiJ0ZXh0LnByaW1hcnkiLCJwb3NpdGlvbiI6eyJ4IjowLjAsInkiOjAuMH0sInJvdGF0aW9uX2RlZyI6MC4wLCJzdHlsZV9yb2xlIjoicHJpbWFyeSIsInRleHQiOiIrNVYifSx7ImNvbnRlbnRfaWRzIjpbInRleHQucHJpbWFyeSJdLCJraW5kIjoic2hhcGUiLCJvYmplY3RfaWQiOiJzaGFwZS5iYWNrZ3JvdW5kIiwicG9zaXRpb24iOnsieCI6MC4wLCJ5IjowLjB9LCJyb3RhdGlvbl9kZWciOjAuMCwic2hhcGUiOiJwaWxsIiwic2l6ZSI6eyJoZWlnaHQiOjAuOTEyODc1NTM2NDgwNjg2Niwid2lkdGgiOjEuNTk0MjA2MDA4NTgzNjkxfX0seyJjaGlsZF9pZHMiOlsic2hhcGUuYmFja2dyb3VuZCIsInRleHQucHJpbWFyeSJdLCJraW5kIjoiZ3JvdXAiLCJvYmplY3RfaWQiOiJncm91cC5sYWJlbCIsInBvc2l0aW9uIjp7IngiOjAuMCwieSI6MC4wfSwicm90YXRpb25fZGVnIjowLjB9XSwib3JpZ2luIjp7IngiOjAuMCwieSI6MC4wfSwib3V0cHV0X2xheWVyIjoiRi5TaWxrUyIsInJvdGF0aW9uX2RlZyI6MC4wLCJzY2hlbWFfdmVyc2lvbiI6MSwic2l6ZSI6eyJoZWlnaHQiOjAuOTEyODc1NTM2NDgwNjg2Niwid2lkdGgiOjEuNTk0MjA2MDA4NTgzNjkxfSwic3R5bGUiOnsic2hhcGUiOnsiYm9yZGVyX3RoaWNrbmVzc19tbSI6MC4wLCJjb3JuZXJfcmFkaXVzX21tIjowLjIsImRpcmVjdGlvbiI6InJpZ2h0IiwiZW5kX2NhcCI6InJvdW5kZWQiLCJmZWF0dXJlX3NpemVfbW0iOjAuNzUsImZpbGxlZCI6dHJ1ZSwiaW52ZXJ0ZWQiOnRydWUsInBhZGRpbmciOnsiYm90dG9tIjowLjIsImxlZnQiOjAuMiwicmlnaHQiOjAuMiwidG9wIjowLjJ9LCJzdGFydF9jYXAiOiJzcXVhcmUifSwidHlwb2dyYXBoeSI6eyJhbGlnbm1lbnQiOiJjZW50ZXIiLCJmb250X25hbWUiOiJGcmVkZHlTcGFyay1SZWd1bGFyIiwiaGVpZ2h0X21tIjowLjUsImxpbmVfc3BhY2luZyI6MS4wLCJ3aWR0aF9tbSI6MC4wfX19LCJmb3JtYXQiOiJrb2JlZS1zdHVkaW8tY29tcG9zaXRpb24iLCJnZW5lcmF0b3JfdmVyc2lvbiI6IjEuNC4xIiwibGVnYWN5X3NldHRpbmdzIjp7IkFsaWdubWVudENob2ljZSI6IkNlbnRlciIsIkJvcmRlclRoaWNrbmVzc0N0cmwiOjAuMiwiQ29tcG9uZW50QXJyYXlDb3VudEN0cmwiOjMsIkNvbXBvbmVudEFycmF5T3JpZW50YXRpb25DaG9pY2UiOiJWZXJ0aWNhbCBzdGFjayIsIkNvbXBvbmVudEFycmF5UGl0Y2hDdHJsIjo1LjAsIkNvbXBvbmVudENsZWFyYW5jZUN0cmwiOjAuMywiQ29tcG9uZW50Q3V0b3V0Q2hvaWNlIjoiUm91bmRlZCByZWN0YW5nbGUiLCJDb21wb25lbnRDdXRvdXRSYWRpdXNDdHJsIjowLjIsIkNvbXBvbmVudEhlaWdodEN0cmwiOjEuMSwiQ29tcG9uZW50TWluSGVpZ2h0Q3RybCI6MC4wLCJDb21wb25lbnRNaW5XaWR0aEN0cmwiOjAuMCwiQ29tcG9uZW50UG9zaXRpb25DaG9pY2UiOiJMZWZ0IG9mIHRleHQiLCJDb21wb25lbnRQcmVzZXRDaG9pY2UiOiIwNjAzIC8gMTYwOCBtZXRyaWMiLCJDb21wb25lbnRUZXh0R2FwQ3RybCI6Mi42LCJDb21wb25lbnRXaWR0aEN0cmwiOjIuMiwiQ29udGVudExheW91dENob2ljZSI6IlNpbmdsZSB0ZXh0IiwiQ29udGVudE1vZGVDaG9pY2UiOiJMYWJlbCIsIkNvcm5lclJhZGl1c0N0cmwiOjAuMiwiRW5kQ2FwQ2hvaWNlIjoiUm91bmRlZCIsIkZlYXR1cmVTaXplQ3RybCI6MC43NSwiRm9udENvbWJvQm94IjoiRnJlZGR5U3BhcmstUmVndWxhciIsIkhlYWRlckNyb3NzU2l6ZUN0cmwiOjAuMCwiSGVhZGVyTGFiZWxPdXRlclBhZGRpbmdDdHJsIjowLjMsIkhlYWRlckxhYmVsUGFkZGluZ0N0cmwiOjAuMywiSGVhZGVyTGVhZGluZ1BhZGRpbmdDdHJsIjowLjMsIkhlYWRlck9wZW5pbmdDaG9pY2UiOiJDb250aW51b3VzIHBsdWcgb3BlbmluZyIsIkhlYWRlck9wZW5pbmdFbmRQYWRkaW5nQ3RybCI6MC4wLCJIZWFkZXJPcmllbnRhdGlvbkNob2ljZSI6IlZlcnRpY2FsIiwiSGVhZGVyUGFkQ2xlYXJhbmNlQ3RybCI6Mi4wLCJIZWFkZXJQaW4xQ2hvaWNlIjoiU3RhcnQiLCJIZWFkZXJQaW4xTWFya2VyQ2hlY2tib3giOnRydWUsIkhlYWRlclBpbkNvdW50Q3RybCI6NCwiSGVhZGVyUGluT3V0ZXJQYWRkaW5nQ3RybCI6MC4zLCJIZWFkZXJQaW5TaWRlQ2hvaWNlIjoiTGVmdCIsIkhlYWRlclBpblRvTGFiZWxHYXBDdHJsIjowLjMsIkhlYWRlclRyYWlsaW5nUGFkZGluZ0N0cmwiOjAuMywiSGVpZ2h0Q3RybCI6MC41LCJJY29uQ2hvaWNlIjoiUG93ZXIgLyBsaWdodG5pbmciLCJJY29uR2FwQ3RybCI6MC4zLCJJY29uSGVpZ2h0Q3RybCI6MC4wLCJJY29uUG9zaXRpb25DaG9pY2UiOiJMZWZ0IG9mIHRleHQiLCJJbmRlcGVuZGVudEVkZ2VzQ2hvaWNlIjoiTWF0Y2hlZCIsIkxheWVyQ29tYm9Cb3giOiJGLlNpbGtTIiwiTGluZVNwYWNpbmdDdHJsIjoxLjAsIk1hY2hpbmVDb2RlQmFySGVpZ2h0Q3RybCI6NC4wLCJNYWNoaW5lQ29kZUNhcHRpb25DdHJsIjoiU0NBTiBNRSIsIk1hY2hpbmVDb2RlQ2FwdGlvbkhlaWdodEN0cmwiOjEuMiwiTWFjaGluZUNvZGVDb250ZW50Q3RybCI6IiIsIk1hY2hpbmVDb2RlQ29udGVudEdhcEN0cmwiOjAuNSwiTWFjaGluZUNvZGVDb250ZW50SGVpZ2h0Q3RybCI6MC45LCJNYWNoaW5lQ29kZUZyYW1lUGFkZGluZ0N0cmwiOjAuMiwiTWFjaGluZUNvZGVNb2R1bGVTaXplQ3RybCI6MC4zNSwiTWFjaGluZUNvZGVQcmVzZW50YXRpb25DaG9pY2UiOiJQbGFpbiBjb2RlIiwiTWFjaGluZUNvZGVTaG93Q29udGVudENoZWNrYm94IjpmYWxzZSwiTWFjaGluZUNvZGVUeXBlQ2hvaWNlIjoiUVIgQ29kZSIsIk11bHRpTGluZVRleHQiOiIrNVYiLCJPdXRwdXRMYXllcnMiOlsiRi5TaWxrUyJdLCJQYWRkaW5nQm90dG9tQ3RybCI6MC4yLCJQYWRkaW5nTGVmdEN0cmwiOjAuMiwiUGFkZGluZ1JpZ2h0Q3RybCI6MC4yLCJQYWRkaW5nVG9wQ3RybCI6MC4yLCJQcmVzZXRMYWJlbENob2ljZSI6IlBvd2VyIFx1MjAxNCArNVYiLCJTaGFwZUNob2ljZSI6IlBpbGwiLCJTaGFwZURpcmVjdGlvbkNob2ljZSI6IlJpZ2h0IiwiU2hhcGVWYXJpYW50Q2hvaWNlIjoiSW52ZXJ0ZWQgZmlsbCIsIlN0YXJ0Q2FwQ2hvaWNlIjoiU3F1YXJlIiwiU3R1ZGlvRGVmYXVsdHNWZXJzaW9uIjo3LCJTdHVkaW9EaW1lbnNpb25zVmVyc2lvbiI6MiwiU3R1ZGlvTW9kZUNob2ljZSI6IkxhYmVsIiwiU3VidGl0bGVDdHJsIjoiIiwiU3VidGl0bGVGb250Q2hvaWNlIjoiTWF0Y2ggbWFpbiB0eXBlZmFjZSIsIlN1YnRpdGxlR2FwQ3RybCI6MC4yNSwiU3VidGl0bGVIZWlnaHRDdHJsIjowLjgsIlN1YnRpdGxlTGluZVNwYWNpbmdDdHJsIjoxLjIsIlN5bWJvbEFzc2V0SWQiOiJidWlsdGluLmxpZ2h0bmluZyIsIlN5bWJvbFZhcmlhbnQiOiJkZWZhdWx0IiwiVW5kZXJsaW5lQ2hlY2tib3giOmZhbHNlLCJVbmRlcmxpbmVHYXBDdHJsIjowLjEyLCJVbmRlcmxpbmVUaGlja25lc3NDdHJsIjowLjE1LCJXaWR0aEN0cmwiOjAuMCwiYWR2YW5jZWRDaGVja2JveCI6ZmFsc2UsImlubGluZUZvcm1hdFRleHRib3giOmZhbHNlLCJsaW5lb3ZlclN0eWxlQ2hvaWNlIjoiUm91bmRlZCIsImxpbmVvdmVyVGhpY2tuZXNzQ3RybCI6MX0sInNjaGVtYV92ZXJzaW9uIjoxfQ=="
-			(at 0 0 -90)
+			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "a930a8ab-64d3-44fc-910c-8c4f3f59a2b9")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -51570,7 +51622,7 @@
 			(uuid "f570b166-70bd-436f-a65c-2dfe6d4c5921")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -51583,7 +51635,7 @@
 			(uuid "5eaa479d-2321-4e86-91a6-7d130f53312f")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -51596,7 +51648,7 @@
 			(uuid "08b1d3c3-4bb2-4323-b3a1-35b054999231")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -51609,7 +51661,7 @@
 			(uuid "58c9ace5-1d78-4f80-b81b-693943d8d793")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -51622,8 +51674,9 @@
 			(uuid "1be5d00e-f3ff-4ba6-8dd8-b7c4f55ef3e4")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -53692,7 +53745,7 @@
 			(uuid "56cbcafb-054a-4a01-9016-c7895092d379")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -53705,7 +53758,7 @@
 			(uuid "456beb15-8318-4cf5-8712-23f873ad3ae6")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -53718,7 +53771,7 @@
 			(uuid "7d22f227-8686-4423-866a-9b15ab920338")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -53731,7 +53784,7 @@
 			(uuid "2d3cb03a-e918-4da5-92d0-c04310516336")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -53744,8 +53797,9 @@
 			(uuid "966b23a3-dc48-4366-bb0b-b2b25d1f9015")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
+					(thickness 0.15)
 				)
 			)
 		)
@@ -56015,6 +56069,7 @@
 		)
 		(embedded_fonts no)
 		(model "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x05_P2.54mm_Horizontal.step"
+			(hide yes)
 			(offset
 				(xyz 0 0 0)
 			)
@@ -56023,6 +56078,17 @@
 			)
 			(rotate
 				(xyz 0 0 0)
+			)
+		)
+		(model "/Users/andreapiccini/dev/SpaghettiLAB.3dshapes/CONN-TH_PR5L4015-5P-C-F.step"
+			(offset
+				(xyz -2.8 -5 0.4)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 90 -0 -90)
 			)
 		)
 	)
@@ -56038,7 +56104,7 @@
 			(uuid "d63d4f56-ee3a-4396-97a4-8ccd4d0058ce")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -56051,7 +56117,7 @@
 			(uuid "62c38500-8507-4fdc-b4ad-add35cc0faf0")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -56064,7 +56130,7 @@
 			(uuid "3865b004-0400-4547-a698-a85b02579000")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -56077,7 +56143,7 @@
 			(uuid "89f508da-0088-4bc5-a640-305f0c864a5f")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
 				)
 			)
@@ -56090,8 +56156,9 @@
 			(uuid "08503e4f-c005-496c-89f3-dd356c1d3869")
 			(effects
 				(font
-					(size 0 0)
+					(size 0.001 0.001)
 					(line_spacing 0)
+					(thickness 0.15)
 				)
 			)
 		)

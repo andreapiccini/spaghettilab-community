@@ -39,7 +39,7 @@ export function BackboneNetworkGraph({
         viewBox={`0 0 ${layout.width} ${layout.height}`}
         className="block h-[260px] w-full"
         role="img"
-        aria-label={copy.chainCaption(boards.length)}
+        aria-label={copy.clusterSummary(boards.length, boards.reduce((n, b) => n + (nfcByBoardId.get(b.id)?.length ?? 0), 0))}
       >
         <defs>
           <radialGradient id={`${uid}-glow`} cx="50%" cy="50%" r="50%">

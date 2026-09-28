@@ -2073,7 +2073,11 @@ static void handle_slup_command(const struct field_update_rx *msg)
 		for (i = 0U; i < tag_count; ++i) {
 			uint8_t part0[7];
 			uint8_t part1[7];
+			uint8_t part2[7];
 
+			if (tags[i].module_type_id == 0U) {
+				continue;
+			}
 			part0[0] = (uint8_t)((i << 4) | 0U);
 			part0[1] = tags[i].antenna;
 			part0[2] = tags[i].type;
@@ -2090,6 +2094,14 @@ static void handle_slup_command(const struct field_update_rx *msg)
 			part1[5] = (tags[i].uid_len > 7U) ? tags[i].uid[7] : 0U;
 			part1[6] = (tags[i].uid_len > 8U) ? tags[i].uid[8] : 0U;
 			slup_reply(SPAGHETTI_SLUP_RSP_NFC, part1, 7U);
+			part2[0] = (uint8_t)((i << 4) | 2U);
+			part2[1] = (uint8_t)(tags[i].module_type_id >> 24);
+			part2[2] = (uint8_t)(tags[i].module_type_id >> 16);
+			part2[3] = (uint8_t)(tags[i].module_type_id >> 8);
+			part2[4] = (uint8_t)tags[i].module_type_id;
+			part2[5] = (uint8_t)(tags[i].fallback_class >> 8);
+			part2[6] = (uint8_t)tags[i].fallback_class;
+			slup_reply(SPAGHETTI_SLUP_RSP_NFC, part2, 7U);
 		}
 		break;
 	}
@@ -2216,6 +2228,21 @@ static void handle_slup_response(const struct field_update_rx *msg)
 				}
 				if (msg->dlc > 7U) {
 					tag->uid[8] = msg->u.can[7];
+				}
+			} else if ((part == 2U) && (idx < slup_nfc_remote_count)) {
+				struct spaghetti_nfc_tag *tag =
+					&slup_nfc_remotes[slup_nfc_remote_count - 1U];
+
+				if (msg->dlc >= 7U) {
+					tag->module_type_id =
+						((uint32_t)msg->u.can[2] << 24) |
+						((uint32_t)msg->u.can[3] << 16) |
+						((uint32_t)msg->u.can[4] << 8) |
+						(uint32_t)msg->u.can[5];
+					tag->fallback_class =
+						(uint16_t)(((uint16_t)msg->u.can[6]
+							    << 8) |
+							   msg->u.can[7]);
 				}
 			}
 			k_mutex_unlock(&field_update_lock);

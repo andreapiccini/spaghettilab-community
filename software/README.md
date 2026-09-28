@@ -22,6 +22,7 @@ Due modelli: **ecosistema** (progettista implementa) e **turnkey Site Package**
 | Componente | Path | Roadmap |
 |---|---|---|
 | **React Flow** — configura Core, deploy, profili | [`micro-flow-editor/`](micro-flow-editor/) | [react-flow-v1](roadmap/react-flow-v1/README.md) |
+| **Module Tag Studio** — programma / verifica tag NFC SLM1 | [`module-tag-studio/`](module-tag-studio/) | [README](module-tag-studio/README.md) |
 | **Node-RED** — integrazioni, Telegram, logiche always-on | [`node-red/`](node-red/) | S112–S113 · [E060](roadmap/ecosystem-access-v1/tasks/E060-nodered-auth-scoped-access.md) |
 | **Dashboard** — UI Flutter, temi, viste, marketplace grafico | [`dashboard/`](dashboard/) | [dashboard-v1](dashboard/roadmap/dashboard-v1/README.md) |
 | **Access & turnkey** — ruoli, Site Package, Support Grant | — | [ecosystem-access-v1](roadmap/ecosystem-access-v1/README.md) |
@@ -65,6 +66,9 @@ Dettaglio e checklist completa: [**SOFTWARE_MASTER_INDEX.md § 6**](SOFTWARE_MAS
 ```sh
 # React Flow + USB bridge for Safari (Docker)
 cd software/micro-flow-editor && make up-d
+
+# Module Tag Studio (simulato)
+cd software/module-tag-studio && npm install && npm run dev
 
 # Node-RED locale
 cd software/node-red && docker compose up -d

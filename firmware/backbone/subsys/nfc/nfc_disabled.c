@@ -22,14 +22,8 @@ int spaghetti_nfc_copy_tags(struct spaghetti_nfc_tag *out, size_t max,
 	return 0;
 }
 
-const char *spaghetti_nfc_type_id(uint8_t type)
+const char *spaghetti_nfc_type_id(const struct spaghetti_nfc_tag *tag)
 {
-	if (type == SPAGHETTI_NFC_TYPE_T2T) {
-		return "t2t";
-	}
-	if (type == SPAGHETTI_NFC_TYPE_T4T) {
-		return "t4t";
-	}
-
+	(void)tag;
 	return "tag";
 }

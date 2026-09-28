@@ -290,10 +290,10 @@ export function ConnectCoreDialog({
                                   onChange={() => toggleUsb(root.deviceIdHex)}
                                 />
                                 <span className="min-w-0 flex-1">
-                                  <span className="block truncate font-body text-sm font-semibold text-ink">{copy.backbone(groupIndex + 1)}</span>
+                                  <span className="block truncate font-body text-sm font-semibold text-ink">{copy.masterBackbone}</span>
                                   <span className="flex items-center gap-1 font-body text-xs text-ink-muted">
                                     <Cable size={12} />
-                                    {root.version ? copy.commit(root.version) : copy.viaCable}
+                                    {root.version ? copy.fwVersion(root.version) : copy.viaCable}
                                   </span>
                                 </span>
                               </label>

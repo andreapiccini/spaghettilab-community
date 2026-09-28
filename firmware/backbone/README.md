@@ -63,6 +63,12 @@ make build
 The ECDSA P-256 private key is created in the ignored `.keys/` directory. Back it
 up securely: replacing it also requires provisioning a new MCUboot image over USB.
 
+Application version lives in [`VERSION`](VERSION) (`MAJOR.MINOR.PATCH+TWEAK`).
+Until a larger release, every incremental firmware drop bumps **`VERSION_MINOR`**
+so USB/`slup list` can tell an updated board from one left behind. Keep
+`VERSION_MAJOR` for breaking changes; use `PATCHLEVEL` only for hotfixes on the
+same minor.
+
 The default target is the physical Core V1. Build the simulated second topology
 without changing common firmware code with:
 

@@ -1,0 +1,27 @@
+{
+  "identity": {
+    "vendor_id": 1,
+    "module_type_id": 1001,
+    "definition_revision": 3
+  },
+  "hardware": {
+    "supported_revisions": [2, 3],
+    "ports": [{ "id": 1, "name": "CAN", "direction": "bidirectional" }],
+    "electrical_limits": { "max_voltage_v": 24 }
+  },
+  "functions": [{ "id": "status", "kind": "telemetry" }],
+  "configuration_schema": { "type": "object", "properties": {} },
+  "compatibility": { "min_backbone_fw": "0.1.0" },
+  "presentation": {
+    "name": "Backbone Demo Module",
+    "descriptions": {
+      "en": "Demo definition for Tag Studio",
+      "it": "Definizione demo per Tag Studio"
+    },
+    "icons": {}
+  },
+  "signature": {
+    "alg": "dev-hash",
+    "value": "12e72216a5f20807967f7c22228d9037"
+  }
+}

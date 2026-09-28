@@ -112,9 +112,22 @@ LOG_MODULE_REGISTER(spaghetti_nfc, CONFIG_SPAGHETTI_NFC_LOG_LEVEL);
 #define NFCA_NVB_SELECT 0x70U
 #define NFCA_SAK_CASCADE BIT(2)
 #define NFCA_SAK_T4T BIT(5)
+#define NFCA_T2T_READ 0x30U
 
 #define NFC_FALLBACK_PERIOD_MS 500U
 #define NFC_ANTENNAS 2U
+#define SLM_USER_BYTES 160U
+#define SLM_USER_FIRST_PAGE 4U
+#define SLM_READ_CHUNK 16U
+#define SLM_SCHEMA_MAJOR 1U
+
+/* Fixed NDEF envelope for Spaghetti LAB module records (blocks 4..10). */
+static const uint8_t slm_ndef_envelope[28] = {
+	0x03, 0x9a, 0xd4, 0x17, 0x80, 0x73, 0x70, 0x61, 0x67, 0x68, 0x65, 0x74,
+	0x74, 0x69, 0x6c, 0x61, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x3a, 0x6d, 0x6f,
+	0x64, 0x75, 0x6c, 0x65,
+};
+static const uint8_t slm_magic[4] = { 0x53, 0x4c, 0x4d, 0x31 }; /* SLM1 */
 
 #if DT_NODE_EXISTS(NFC_DT_NODE) && DT_NODE_HAS_STATUS(NFC_SPI_NODE, okay)
 
@@ -545,6 +558,90 @@ static int nfc_anticollision(uint8_t sel, uint8_t *uid4, uint8_t *sak)
 	return 0;
 }
 
+static uint16_t slm_be16(const uint8_t *p)
+{
+	return (uint16_t)(((uint16_t)p[0] << 8) | p[1]);
+}
+
+static uint32_t slm_be32(const uint8_t *p)
+{
+	return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) |
+	       ((uint32_t)p[2] << 8) | (uint32_t)p[3];
+}
+
+static int nfc_t2t_read_chunk(uint8_t page, uint8_t out[SLM_READ_CHUNK])
+{
+	uint8_t tx[2] = { NFCA_T2T_READ, page };
+	uint8_t rx[18];
+	size_t rx_len = 0U;
+	int err;
+
+	err = nfc_transceive(tx, 2U, 16U, rx, sizeof(rx), &rx_len, false, true);
+	if ((err < 0) || (rx_len < SLM_READ_CHUNK)) {
+		return (err < 0) ? err : -EBADMSG;
+	}
+	memcpy(out, rx, SLM_READ_CHUNK);
+	return 0;
+}
+
+/**
+ * Read ST25TN01K user memory and accept only SLM1 NDEF module records.
+ * Field must stay on after SELECT. Rejects blank / third-party tags.
+ */
+static int nfc_read_slm1(struct spaghetti_nfc_tag *tag)
+{
+	uint8_t mem[SLM_USER_BYTES];
+	uint8_t chunk;
+	uint16_t registry_id;
+	uint16_t vendor_id;
+	uint32_t module_type_id;
+	uint16_t fallback_class;
+
+	for (chunk = 0U; chunk < (SLM_USER_BYTES / SLM_READ_CHUNK); ++chunk) {
+		const uint8_t page =
+			(uint8_t)(SLM_USER_FIRST_PAGE + (chunk * 4U));
+
+		if (nfc_t2t_read_chunk(page, &mem[chunk * SLM_READ_CHUNK]) <
+		    0) {
+			return -EIO;
+		}
+	}
+
+	if (memcmp(mem, slm_ndef_envelope, sizeof(slm_ndef_envelope)) != 0) {
+		return -ENOENT;
+	}
+	if (mem[156] != 0xFEU) {
+		return -ENOENT;
+	}
+	if (memcmp(&mem[28], slm_magic, sizeof(slm_magic)) != 0) {
+		return -ENOENT;
+	}
+	if (mem[32] != SLM_SCHEMA_MAJOR) {
+		return -ENOENT;
+	}
+	if ((mem[34] & 0xF0U) != 0U) {
+		return -ENOENT;
+	}
+	if (mem[35] != 128U) {
+		return -ENOENT;
+	}
+
+	registry_id = slm_be16(&mem[36]);
+	vendor_id = slm_be16(&mem[38]);
+	module_type_id = slm_be32(&mem[40]);
+	fallback_class = slm_be16(&mem[112]);
+	if ((registry_id == 0U) || (vendor_id == 0U) ||
+	    (module_type_id == 0U)) {
+		return -ENOENT;
+	}
+
+	tag->registry_id = registry_id;
+	tag->vendor_id = vendor_id;
+	tag->module_type_id = module_type_id;
+	tag->fallback_class = fallback_class;
+	return 0;
+}
+
 static int nfc_scan_antenna(uint8_t antenna, struct spaghetti_nfc_tag *tag)
 {
 	uint8_t wupa = NFCA_WUPA;
@@ -615,15 +712,21 @@ static int nfc_scan_antenna(uint8_t antenna, struct spaghetti_nfc_tag *tag)
 		uid_len = 4U;
 	}
 
-	(void)nfc_field_off();
 	tag->antenna = antenna;
 	tag->uid_len = uid_len;
 	memcpy(tag->uid, uid, uid_len);
 	tag->local = true;
 	if ((sak & NFCA_SAK_T4T) != 0U) {
-		tag->type = SPAGHETTI_NFC_TYPE_T4T;
-	} else {
-		tag->type = SPAGHETTI_NFC_TYPE_T2T;
+		/* SLM1 lives on ST25TN01K Type 2 tags only. */
+		(void)nfc_field_off();
+		return -ENOENT;
+	}
+	tag->type = SPAGHETTI_NFC_TYPE_T2T;
+	err = nfc_read_slm1(tag);
+	(void)nfc_field_off();
+	if (err < 0) {
+		memset(tag, 0, sizeof(*tag));
+		return -ENOENT;
 	}
 	return 0;
 }
@@ -640,6 +743,8 @@ static bool nfc_tags_same(const struct spaghetti_nfc_tag *left, size_t left_n,
 		if ((left[i].antenna != right[i].antenna) ||
 		    (left[i].type != right[i].type) ||
 		    (left[i].uid_len != right[i].uid_len) ||
+		    (left[i].module_type_id != right[i].module_type_id) ||
+		    (left[i].fallback_class != right[i].fallback_class) ||
 		    (memcmp(left[i].uid, right[i].uid, left[i].uid_len) !=
 		     0)) {
 			return false;
@@ -1032,12 +1137,35 @@ int spaghetti_nfc_copy_tags(struct spaghetti_nfc_tag *out, size_t max,
 
 #endif
 
-const char *spaghetti_nfc_type_id(uint8_t type)
+const char *spaghetti_nfc_type_id(const struct spaghetti_nfc_tag *tag)
 {
-	if (type == SPAGHETTI_NFC_TYPE_T2T) {
+	if (tag == NULL) {
+		return "tag";
+	}
+	if (tag->module_type_id != 0U) {
+		switch (tag->fallback_class) {
+		case 0x0001U:
+			return "backbone";
+		case 0x0002U:
+			return "power";
+		case 0x0003U:
+			return "sensor";
+		case 0x0004U:
+			return "actuator";
+		case 0x0005U:
+			return "iface";
+		case 0x0006U:
+			return "ctrl";
+		case 0x0007U:
+			return "adapter";
+		default:
+			return "module";
+		}
+	}
+	if (tag->type == SPAGHETTI_NFC_TYPE_T2T) {
 		return "t2t";
 	}
-	if (type == SPAGHETTI_NFC_TYPE_T4T) {
+	if (tag->type == SPAGHETTI_NFC_TYPE_T4T) {
 		return "t4t";
 	}
 

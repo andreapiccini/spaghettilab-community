@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "mode": "guided",
+  "operator": "qa-line-1",
+  "definitionKey": "1:1:1001:3",
+  "fields": {
+    "registryId": 1,
+    "vendorId": 1,
+    "moduleTypeId": 1001,
+    "definitionRevision": 3,
+    "hardwareRevision": 2,
+    "serialNumber": "4812",
+    "manufacturingLot": 7,
+    "fallbackClass": 1,
+    "roleId": 0
+  }
+}

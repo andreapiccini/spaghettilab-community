@@ -53,28 +53,33 @@ type CoreConnectionsCopy = {
   /** USB/Wi-Fi host group in the connect dialog (not a Backbone identity). */
   readonly connectionGroup: (index: number) => string;
   readonly backbone: (index: number) => string;
-  readonly commit: (value: string) => string;
+  readonly masterBackbone: string;
+  readonly chainedBackbone: (index: number) => string;
+  /** Firmware version label (was "Commit"). */
+  readonly fwVersion: (value: string) => string;
   readonly viaCable: string;
   readonly viaWifi: string;
   readonly viaCanShort: string;
   readonly online: string;
-  /** Caption above the chain graph: how many Backbones are in this host link. */
-  readonly chainCaption: (count: number) => string;
+  /** One-line cluster summary under the header. */
+  readonly clusterSummary: (backbones: number, nfcModules: number) => string;
+  /** Card title for a host-linked cluster. */
+  readonly clusterTitle: (index: number) => string;
+  readonly linkToSoftware: (link: "cable" | "wifi") => string;
   readonly nfcTitle: string;
   readonly nfcEmpty: string;
   readonly nfcEmptyShort: string;
+  readonly nfcCountShort: (count: number) => string;
   readonly nfcReading: string;
   readonly nfcPort: (portId: number, label: string) => string;
-  readonly nfcPopupTitle: string;
-  readonly nfcPopupBody: string;
-  readonly nfcPopupAntenna: (portId: number) => string;
-  readonly nfcPopupUid: (uid: string) => string;
-  readonly nfcPopupBackbone: string;
-  readonly nfcPopupPosition: (current: number, total: number) => string;
-  readonly nfcPopupPrevious: string;
-  readonly nfcPopupNext: string;
-  readonly nfcPopupCloseAll: string;
-  readonly nfcPopupClose: string;
+  /** Position 1 on the Backbone (Connector Module). */
+  readonly connectorModule: string;
+  /** Position 2 on the Backbone (Interface Module). */
+  readonly interfaceModule: string;
+  readonly modulePositionShort: (portId: number) => string;
+  readonly modulePositionName: (portId: number) => string;
+  readonly detectedBanner: (moduleType: string, backbone: string, position: string) => string;
+  readonly detectedBannerDismiss: string;
   readonly addUsbPort: string;
   readonly cancel: string;
   readonly connecting: string;
@@ -85,15 +90,15 @@ type CoreConnectionsCopy = {
 };
 
 const IT: CoreConnectionsCopy = {
-  noCoreShort: "Nessuna Backbone",
-  coresOutOfSync: (total, outOfSync) => `${total} Backbone · ${outOfSync} non in sync`,
-  coresCount: (total) => `${total} Backbone`,
-  connectACore: "Connetti una Backbone",
-  screenTitle: "Backbone",
-  emptyTitle: "Nessuna Backbone connessa",
+  screenTitle: "Clusters",
+  emptyTitle: "Nessun cluster connesso",
   emptyBody:
-    "Connetti la tua prima Backbone per iniziare a sincronizzare questo progetto.",
-  connectFirst: "Connetti la tua prima Backbone",
+    "Connetti il primo cluster di Backbone per sincronizzare questo progetto.",
+  connectFirst: "Connetti il primo cluster",
+  connectACore: "Connetti un cluster",
+  noCoreShort: "Nessun cluster",
+  coresOutOfSync: (total, outOfSync) => `${total} Backbone · ${outOfSync} non in sync`,
+  coresCount: (total) => (total === 1 ? "1 Backbone in totale" : `${total} Backbone in totale`),
   disconnect: "Disconnetti",
   error: "ERRORE",
   actions: {
@@ -142,29 +147,33 @@ const IT: CoreConnectionsCopy = {
   retry: "Riprova",
   localBridge: "ponte locale",
   viaCan: (via) => `CAN · via ${via}`,
-  connectionGroup: (index) => `Connessione ${index}`,
+  connectionGroup: (index) => `Cluster ${index}`,
   backbone: (index) => `Backbone ${index}`,
-  commit: (value) => `Commit ${value}`,
+  masterBackbone: "Master Backbone",
+  chainedBackbone: (index) => `Backbone ${index}`,
+  fwVersion: (value) => `FW ${value}`,
   viaCable: "Cavo",
   viaWifi: "Wi-Fi",
-  viaCanShort: "Catena",
+  viaCanShort: "Catena CAN",
   online: "Online",
-  chainCaption: (count) => (count === 1 ? "1 Backbone" : `${count} Backbone`),
-  nfcTitle: "Nodi NFC",
-  nfcEmpty: "Nessun nodo connesso attualmente",
-  nfcEmptyShort: "nessun nodo",
-  nfcReading: "Lettura NFC…",
-  nfcPort: (portId, label) => `Porta ${portId} · ${label}`,
-  nfcPopupTitle: "Nuovo tag NFC letto",
-  nfcPopupBody: "Il tag è stato rilevato correttamente.",
-  nfcPopupAntenna: (portId) => `Antenna ${portId}`,
-  nfcPopupUid: (uid) => `UID ${uid}`,
-  nfcPopupBackbone: "Sulla Backbone",
-  nfcPopupPosition: (current, total) => `${current} di ${total}`,
-  nfcPopupPrevious: "Tag precedente",
-  nfcPopupNext: "Tag successivo",
-  nfcPopupCloseAll: "Chiudi tutti",
-  nfcPopupClose: "Chiudi questo tag",
+  clusterSummary: (backbones, nfcModules) =>
+    `${backbones === 1 ? "1 Backbone" : `${backbones} Backbone`} · ${nfcModules === 0 ? "0 moduli" : nfcModules === 1 ? "1 modulo" : `${nfcModules} moduli`}`,
+  clusterTitle: (index) => `Cluster ${index}`,
+  linkToSoftware: (link) => (link === "wifi" ? "Collegamento a Flow: Wi-Fi" : "Collegamento a Flow: Cavo"),
+  nfcTitle: "Moduli",
+  nfcEmpty: "Nessun modulo connesso",
+  nfcEmptyShort: "0 moduli",
+  nfcCountShort: (count) => (count === 0 ? "0 moduli" : count === 1 ? "1 modulo" : `${count} moduli`),
+  nfcReading: "Lettura moduli…",
+  nfcPort: (portId, label) => `Posizione ${portId} · ${label}`,
+  connectorModule: "Connector Module",
+  interfaceModule: "Interface Module",
+  modulePositionShort: (portId) => `${portId}`,
+  modulePositionName: (portId) =>
+    portId === 1 ? "Connector Module" : portId === 2 ? "Interface Module" : `Posizione ${portId}`,
+  detectedBanner: (moduleType, backbone, position) =>
+    `Detected ${moduleType} · ${backbone} · ${position}`,
+  detectedBannerDismiss: "Nascondi",
   addUsbPort: "Aggiungi porta USB…",
   cancel: "Annulla",
   connecting: "Connessione…",
@@ -176,14 +185,14 @@ const IT: CoreConnectionsCopy = {
 };
 
 const EN: CoreConnectionsCopy = {
-  noCoreShort: "No Backbone",
+  noCoreShort: "No clusters",
   coresOutOfSync: (total, outOfSync) => `${total} Backbone · ${outOfSync} out of sync`,
-  coresCount: (total) => `${total} Backbone`,
-  connectACore: "Connect a Backbone",
-  screenTitle: "Backbone",
-  emptyTitle: "No Backbone connected",
-  emptyBody: "Connect your first Backbone to start synchronizing this project.",
-  connectFirst: "Connect your first Backbone",
+  coresCount: (total) => (total === 1 ? "1 Backbone total" : `${total} Backbones total`),
+  connectACore: "Connect a cluster",
+  screenTitle: "Clusters",
+  emptyTitle: "No cluster connected",
+  emptyBody: "Connect your first Backbone cluster to start synchronizing this project.",
+  connectFirst: "Connect your first cluster",
   disconnect: "Disconnect",
   error: "ERROR",
   actions: {
@@ -232,29 +241,33 @@ const EN: CoreConnectionsCopy = {
   retry: "Retry",
   localBridge: "local bridge",
   viaCan: (via) => `CAN · via ${via}`,
-  connectionGroup: (index) => `Connection ${index}`,
+  connectionGroup: (index) => `Cluster ${index}`,
   backbone: (index) => `Backbone ${index}`,
-  commit: (value) => `Commit ${value}`,
+  masterBackbone: "Master Backbone",
+  chainedBackbone: (index) => `Backbone ${index}`,
+  fwVersion: (value) => `FW ${value}`,
   viaCable: "Cable",
   viaWifi: "Wi-Fi",
-  viaCanShort: "Chain",
+  viaCanShort: "CAN chain",
   online: "Online",
-  chainCaption: (count) => (count === 1 ? "1 Backbone" : `${count} Backbones`),
-  nfcTitle: "NFC nodes",
-  nfcEmpty: "No nodes connected right now",
-  nfcEmptyShort: "no nodes",
-  nfcReading: "Reading NFC…",
-  nfcPort: (portId, label) => `Port ${portId} · ${label}`,
-  nfcPopupTitle: "New NFC tag read",
-  nfcPopupBody: "The tag was read successfully.",
-  nfcPopupAntenna: (portId) => `Antenna ${portId}`,
-  nfcPopupUid: (uid) => `UID ${uid}`,
-  nfcPopupBackbone: "On the Backbone",
-  nfcPopupPosition: (current, total) => `${current} of ${total}`,
-  nfcPopupPrevious: "Previous tag",
-  nfcPopupNext: "Next tag",
-  nfcPopupCloseAll: "Close all",
-  nfcPopupClose: "Close this tag",
+  clusterSummary: (backbones, nfcModules) =>
+    `${backbones === 1 ? "1 Backbone" : `${backbones} Backbones`} · ${nfcModules === 0 ? "0 modules" : nfcModules === 1 ? "1 module" : `${nfcModules} modules`}`,
+  clusterTitle: (index) => `Cluster ${index}`,
+  linkToSoftware: (link) => (link === "wifi" ? "Link to Flow: Wi-Fi" : "Link to Flow: Cable"),
+  nfcTitle: "Modules",
+  nfcEmpty: "No modules connected",
+  nfcEmptyShort: "0 modules",
+  nfcCountShort: (count) => (count === 0 ? "0 modules" : count === 1 ? "1 module" : `${count} modules`),
+  nfcReading: "Reading modules…",
+  nfcPort: (portId, label) => `Position ${portId} · ${label}`,
+  connectorModule: "Connector Module",
+  interfaceModule: "Interface Module",
+  modulePositionShort: (portId) => `${portId}`,
+  modulePositionName: (portId) =>
+    portId === 1 ? "Connector Module" : portId === 2 ? "Interface Module" : `Position ${portId}`,
+  detectedBanner: (moduleType, backbone, position) =>
+    `Detected ${moduleType} · ${backbone} · ${position}`,
+  detectedBannerDismiss: "Dismiss",
   addUsbPort: "Add USB port…",
   cancel: "Cancel",
   connecting: "Connecting…",
