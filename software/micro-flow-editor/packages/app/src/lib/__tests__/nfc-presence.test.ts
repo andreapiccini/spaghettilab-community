@@ -3,15 +3,20 @@ import {
   collectNfcNodes,
   diffNfcNodes,
   dismissNfcPopup,
+  dismissAllNfcPopups,
   emptyNfcPopupQueue,
   enqueueNfcPopups,
   nfcEventsFromDiff,
   nfcNodesForBoard,
+  selectNfcPopup,
   type NfcPopupEvent,
 } from "../nfc-presence.js";
 
-function event(partial: Partial<NfcPopupEvent> & Pick<NfcPopupEvent, "id" | "kind">): NfcPopupEvent {
+function event(
+  partial: Partial<NfcPopupEvent> & Pick<NfcPopupEvent, "id">,
+): NfcPopupEvent {
   return {
+    kind: "read",
     node: { portId: 1, label: "sense-dial" },
     backboneMac: "90:70:69:e1:c5:2c",
     ...partial,
@@ -22,8 +27,14 @@ describe("collectNfcNodes", () => {
   it("merges status modules and discovery candidates without duplicates", () => {
     expect(
       collectNfcNodes(
-        [{ portId: 2, typeId: "relay" }, { portId: 3, typeId: "  " }],
-        [{ portId: 2, suggestedTypeId: "relay" }, { portId: 4, suggestedTypeId: "sense-dial" }],
+        [
+          { portId: 2, typeId: "relay" },
+          { portId: 3, typeId: "  " },
+        ],
+        [
+          { portId: 2, suggestedTypeId: "relay" },
+          { portId: 4, suggestedTypeId: "sense-dial" },
+        ],
       ),
     ).toEqual([
       { portId: 2, label: "relay" },
@@ -33,18 +44,56 @@ describe("collectNfcNodes", () => {
 
   it("prefers live GET_STATUS tags and maps t2t to a friendly label", () => {
     expect(
-      collectNfcNodes([], [], [{ portId: 1, typeId: "t2t", nodeId: 0xe18030, backboneMac: "90:70:69:e1:80:30" }]),
+      collectNfcNodes(
+        [],
+        [],
+        [
+          {
+            portId: 1,
+            typeId: "t2t",
+            uid: new Uint8Array([0x04, 0xab, 0x01]),
+            nodeId: 0xe18030,
+            backboneMac: "90:70:69:e1:80:30",
+          },
+        ],
+      ),
     ).toEqual([
-      { portId: 1, label: "Tag NFC", nodeId: 0xe18030, backboneMac: "90:70:69:e1:80:30" },
+      {
+        portId: 1,
+        label: "Tag NFC",
+        uid: "04AB01",
+        nodeId: 0xe18030,
+        backboneMac: "90:70:69:e1:80:30",
+      },
     ]);
   });
 });
 
 describe("nfcNodesForBoard", () => {
-  const master = { nodeId: 0xe1c52c, local: true, mac: "90:70:69:e1:c5:2c", deviceIdHex: "907069e1c52c" };
-  const slave = { nodeId: 0xe18030, local: false, mac: "90:70:69:e1:80:30", deviceIdHex: "907069e18030" };
-  const masterTag = { portId: 1, label: "Tag NFC", nodeId: 0xe1c52c, backboneMac: "90:70:69:e1:c5:2c" };
-  const slaveTag = { portId: 2, label: "Tag NFC", nodeId: 0xe18030, backboneMac: "90:70:69:e1:80:30" };
+  const master = {
+    nodeId: 0xe1c52c,
+    local: true,
+    mac: "90:70:69:e1:c5:2c",
+    deviceIdHex: "907069e1c52c",
+  };
+  const slave = {
+    nodeId: 0xe18030,
+    local: false,
+    mac: "90:70:69:e1:80:30",
+    deviceIdHex: "907069e18030",
+  };
+  const masterTag = {
+    portId: 1,
+    label: "Tag NFC",
+    nodeId: 0xe1c52c,
+    backboneMac: "90:70:69:e1:c5:2c",
+  };
+  const slaveTag = {
+    portId: 2,
+    label: "Tag NFC",
+    nodeId: 0xe18030,
+    backboneMac: "90:70:69:e1:80:30",
+  };
 
   it("keeps each tag on the backbone that reported it", () => {
     expect(nfcNodesForBoard(master, [masterTag, slaveTag])).toEqual([masterTag]);
@@ -52,7 +101,9 @@ describe("nfcNodesForBoard", () => {
   });
 
   it("still shows local tags when the USB row has no SLUP node id", () => {
-    expect(nfcNodesForBoard({ ...master, nodeId: 0 }, [masterTag, slaveTag])).toEqual([masterTag]);
+    expect(nfcNodesForBoard({ ...master, nodeId: 0 }, [masterTag, slaveTag])).toEqual([
+      masterTag,
+    ]);
   });
 });
 
@@ -78,44 +129,46 @@ describe("diffNfcNodes", () => {
 
 describe("nfc popup queue", () => {
   it("shows the first event immediately and queues the rest", () => {
-    const first = event({ id: "1", kind: "connected", node: { portId: 1, label: "a" } });
-    const second = event({ id: "2", kind: "connected", node: { portId: 2, label: "b" } });
-    const third = event({ id: "3", kind: "removed", node: { portId: 1, label: "a" } });
+    const first = event({ id: "1", node: { portId: 1, label: "a", uid: "01" } });
+    const second = event({ id: "2", node: { portId: 2, label: "b", uid: "02" } });
+    const third = event({ id: "3", node: { portId: 1, label: "a", uid: "03" } });
     const queued = enqueueNfcPopups(emptyNfcPopupQueue(), [first, second, third]);
-    expect(queued.current).toEqual(first);
-    expect(queued.pending).toEqual([second, third]);
+    expect(queued.items).toEqual([first, second, third]);
+    expect(queued.activeIndex).toBe(0);
   });
 
   it("advances to the next popup as soon as the current one is dismissed", () => {
-    const first = event({ id: "1", kind: "connected", node: { portId: 1, label: "a" } });
-    const second = event({ id: "2", kind: "removed", node: { portId: 2, label: "b" } });
+    const first = event({ id: "1", node: { portId: 1, label: "a" } });
+    const second = event({ id: "2", node: { portId: 2, label: "b" } });
     let queue = enqueueNfcPopups(emptyNfcPopupQueue(), [first, second]);
     queue = dismissNfcPopup(queue);
-    expect(queue.current).toEqual(second);
-    expect(queue.pending).toEqual([]);
+    expect(queue.items).toEqual([second]);
     queue = dismissNfcPopup(queue);
     expect(queue).toEqual(emptyNfcPopupQueue());
   });
 
-  it("does not stack an identical popup that is already open or waiting", () => {
-    const first = event({ id: "1", kind: "connected" });
-    const dup = event({ id: "2", kind: "connected" });
-    const queued = enqueueNfcPopups(enqueueNfcPopups(emptyNfcPopupQueue(), [first]), [dup]);
-    expect(queued.current).toEqual(first);
-    expect(queued.pending).toEqual([]);
+  it("queues repeated scans of the same tag as separate reads", () => {
+    const first = event({ id: "1" });
+    const dup = event({ id: "2" });
+    const queued = enqueueNfcPopups(enqueueNfcPopups(emptyNfcPopupQueue(), [first]), [
+      dup,
+    ]);
+    expect(queued.items).toEqual([first, dup]);
   });
 
-  it("keeps connect and remove of the same module as two sequential popups", () => {
-    const connected = event({ id: "1", kind: "connected" });
-    const removed = event({ id: "2", kind: "removed" });
-    const queued = enqueueNfcPopups(emptyNfcPopupQueue(), [connected, removed]);
-    expect(queued.current?.kind).toBe("connected");
-    expect(queued.pending).toEqual([removed]);
+  it("allows browsing without closing and can close the full stack", () => {
+    const first = event({ id: "1", node: { portId: 1, label: "Tag NFC", uid: "01" } });
+    const second = event({ id: "2", node: { portId: 1, label: "Tag NFC", uid: "02" } });
+    let queue = enqueueNfcPopups(emptyNfcPopupQueue(), [first, second]);
+    queue = selectNfcPopup(queue, 1);
+    expect(queue.items).toEqual([first, second]);
+    expect(queue.activeIndex).toBe(1);
+    expect(dismissAllNfcPopups()).toEqual(emptyNfcPopupQueue());
   });
 });
 
 describe("nfcEventsFromDiff", () => {
-  it("builds connected then removed events in that order", () => {
+  it("builds a popup only for newly read tags, not removals", () => {
     let n = 0;
     const events = nfcEventsFromDiff(
       "aa:bb",
@@ -123,8 +176,7 @@ describe("nfcEventsFromDiff", () => {
       [{ portId: 2, label: "new" }],
       () => String(++n),
     );
-    expect(events.map((e) => e.kind)).toEqual(["connected", "removed"]);
+    expect(events.map((e) => e.kind)).toEqual(["read"]);
     expect(events[0]?.node).toEqual({ portId: 2, label: "new" });
-    expect(events[1]?.node).toEqual({ portId: 1, label: "gone" });
   });
 });

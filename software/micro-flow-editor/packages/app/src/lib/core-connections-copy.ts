@@ -65,12 +65,15 @@ type CoreConnectionsCopy = {
   readonly nfcEmptyShort: string;
   readonly nfcReading: string;
   readonly nfcPort: (portId: number, label: string) => string;
-  readonly nfcPopupConnectedTitle: string;
-  readonly nfcPopupRemovedTitle: string;
-  readonly nfcPopupConnected: (label: string) => string;
-  readonly nfcPopupRemoved: (label: string) => string;
+  readonly nfcPopupTitle: string;
+  readonly nfcPopupBody: string;
+  readonly nfcPopupAntenna: (portId: number) => string;
+  readonly nfcPopupUid: (uid: string) => string;
   readonly nfcPopupBackbone: string;
-  readonly nfcPopupQueued: (count: number) => string;
+  readonly nfcPopupPosition: (current: number, total: number) => string;
+  readonly nfcPopupPrevious: string;
+  readonly nfcPopupNext: string;
+  readonly nfcPopupCloseAll: string;
   readonly nfcPopupClose: string;
   readonly addUsbPort: string;
   readonly cancel: string;
@@ -88,7 +91,8 @@ const IT: CoreConnectionsCopy = {
   connectACore: "Connetti una Backbone",
   screenTitle: "Backbone",
   emptyTitle: "Nessuna Backbone connessa",
-  emptyBody: "Connetti la tua prima Backbone per iniziare a sincronizzare questo progetto.",
+  emptyBody:
+    "Connetti la tua prima Backbone per iniziare a sincronizzare questo progetto.",
   connectFirst: "Connetti la tua prima Backbone",
   disconnect: "Disconnetti",
   error: "ERRORE",
@@ -117,7 +121,8 @@ const IT: CoreConnectionsCopy = {
     `Relazione: ${relation} — il Config letto dalla Backbone non si è decodificato: ${reason}`,
   relationCompileFailed: (relation, reason) =>
     `Relazione: ${relation} — il progetto non compila in questo momento: ${reason}`,
-  relationNoLive: (relation) => `Relazione: ${relation} — nessuna sessione live per questa Backbone in questo momento.`,
+  relationNoLive: (relation) =>
+    `Relazione: ${relation} — nessuna sessione live per questa Backbone in questo momento.`,
   na: "n/d",
   compileFailedFallback: "il dry-run del progetto ha errori",
   dialogTitle: "Connetti una Backbone",
@@ -132,7 +137,8 @@ const IT: CoreConnectionsCopy = {
     "Safari non apre la USB da solo. Avvia Flow con make up-d (parte il ponte USB). Chiudi make monitor, poi riprova.",
   autoHelp:
     "Auto interroga le porte USB già autorizzate e il ponte locale avviato con make up-d. Per una Backbone nuova usa «Backbone via cavo».",
-  usbHelp: "Autorizza la porta USB della Backbone. In Safari il ponte parte con make up-d. Chiudi make monitor prima.",
+  usbHelp:
+    "Autorizza la porta USB della Backbone. In Safari il ponte parte con make up-d. Chiudi make monitor prima.",
   retry: "Riprova",
   localBridge: "ponte locale",
   viaCan: (via) => `CAN · via ${via}`,
@@ -149,19 +155,23 @@ const IT: CoreConnectionsCopy = {
   nfcEmptyShort: "nessun nodo",
   nfcReading: "Lettura NFC…",
   nfcPort: (portId, label) => `Porta ${portId} · ${label}`,
-  nfcPopupConnectedTitle: "Modulo connesso",
-  nfcPopupRemovedTitle: "Modulo rimosso",
-  nfcPopupConnected: (label) => `È stato identificato ${label}.`,
-  nfcPopupRemoved: (label) => `${label} è stato rimosso.`,
+  nfcPopupTitle: "Nuovo tag NFC letto",
+  nfcPopupBody: "Il tag è stato rilevato correttamente.",
+  nfcPopupAntenna: (portId) => `Antenna ${portId}`,
+  nfcPopupUid: (uid) => `UID ${uid}`,
   nfcPopupBackbone: "Sulla Backbone",
-  nfcPopupQueued: (count) => (count === 1 ? "1 altro modulo in coda" : `${count} altri moduli in coda`),
-  nfcPopupClose: "OK",
+  nfcPopupPosition: (current, total) => `${current} di ${total}`,
+  nfcPopupPrevious: "Tag precedente",
+  nfcPopupNext: "Tag successivo",
+  nfcPopupCloseAll: "Chiudi tutti",
+  nfcPopupClose: "Chiudi questo tag",
   addUsbPort: "Aggiungi porta USB…",
   cancel: "Annulla",
   connecting: "Connessione…",
   connectCount: (count) => `Connetti ${count} Backbone`,
   connect: "Connetti",
-  usbSerialUnavailable: "Web Serial non è disponibile in questo browser. Usa Chrome o Edge su HTTPS o localhost.",
+  usbSerialUnavailable:
+    "Web Serial non è disponibile in questo browser. Usa Chrome o Edge su HTTPS o localhost.",
   usbNotACore: "La porta risponde, ma non è una Backbone Spaghetti (Protocol V1).",
 };
 
@@ -201,7 +211,8 @@ const EN: CoreConnectionsCopy = {
     `Relationship: ${relation} — the Config read from the Backbone did not decode: ${reason}`,
   relationCompileFailed: (relation, reason) =>
     `Relationship: ${relation} — the project does not compile right now: ${reason}`,
-  relationNoLive: (relation) => `Relationship: ${relation} — no live session for this Backbone right now.`,
+  relationNoLive: (relation) =>
+    `Relationship: ${relation} — no live session for this Backbone right now.`,
   na: "n/a",
   compileFailedFallback: "the project dry-run has errors",
   dialogTitle: "Connect a Backbone",
@@ -216,7 +227,8 @@ const EN: CoreConnectionsCopy = {
     "Safari does not open USB by itself. Start Flow with make up-d (the USB bridge starts). Close make monitor, then retry.",
   autoHelp:
     "Auto queries already-authorized USB ports and the local bridge started with make up-d. For a new Backbone use “Wired Backbone”.",
-  usbHelp: "Authorize the Backbone's USB port. In Safari the bridge starts with make up-d. Close make monitor first.",
+  usbHelp:
+    "Authorize the Backbone's USB port. In Safari the bridge starts with make up-d. Close make monitor first.",
   retry: "Retry",
   localBridge: "local bridge",
   viaCan: (via) => `CAN · via ${via}`,
@@ -233,19 +245,23 @@ const EN: CoreConnectionsCopy = {
   nfcEmptyShort: "no nodes",
   nfcReading: "Reading NFC…",
   nfcPort: (portId, label) => `Port ${portId} · ${label}`,
-  nfcPopupConnectedTitle: "Module connected",
-  nfcPopupRemovedTitle: "Module removed",
-  nfcPopupConnected: (label) => `${label} was identified.`,
-  nfcPopupRemoved: (label) => `${label} was removed.`,
+  nfcPopupTitle: "New NFC tag read",
+  nfcPopupBody: "The tag was read successfully.",
+  nfcPopupAntenna: (portId) => `Antenna ${portId}`,
+  nfcPopupUid: (uid) => `UID ${uid}`,
   nfcPopupBackbone: "On the Backbone",
-  nfcPopupQueued: (count) => (count === 1 ? "1 more module queued" : `${count} more modules queued`),
-  nfcPopupClose: "OK",
+  nfcPopupPosition: (current, total) => `${current} of ${total}`,
+  nfcPopupPrevious: "Previous tag",
+  nfcPopupNext: "Next tag",
+  nfcPopupCloseAll: "Close all",
+  nfcPopupClose: "Close this tag",
   addUsbPort: "Add USB port…",
   cancel: "Cancel",
   connecting: "Connecting…",
   connectCount: (count) => `Connect ${count} Backbones`,
   connect: "Connect",
-  usbSerialUnavailable: "Web Serial is not available in this browser. Use Chrome or Edge on HTTPS or localhost.",
+  usbSerialUnavailable:
+    "Web Serial is not available in this browser. Use Chrome or Edge on HTTPS or localhost.",
   usbNotACore: "The port answers, but it is not a Spaghetti Backbone (Protocol V1).",
 };
 

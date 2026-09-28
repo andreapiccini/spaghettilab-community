@@ -190,18 +190,24 @@ static const struct gpio_dt_spec slup_led =
 #define SPAGHETTI_SLUP_LED_IDLE 0
 #define SPAGHETTI_SLUP_LED_LOAD 1
 #define SPAGHETTI_SLUP_LED_HOLD 2
+#define SPAGHETTI_SLUP_LED_NFC 3
 #define SPAGHETTI_SLUP_LED_PWM_US 1000U
 #define SPAGHETTI_SLUP_LED_BREATH_STEPS 128U
 #define SPAGHETTI_SLUP_LED_BREATH_HOLD 10U
 #define SPAGHETTI_SLUP_LED_LOAD_MS 120U
+#define SPAGHETTI_SLUP_LED_NFC_PHASE_MS 125U
+#define SPAGHETTI_SLUP_LED_NFC_PHASES 8
 #define SPAGHETTI_SLUP_LED_STACK 1024
 
 static atomic_t slup_led_mode = ATOMIC_INIT(SPAGHETTI_SLUP_LED_IDLE);
 static uint16_t slup_led_phase;
 static uint8_t slup_led_pwm_tick;
+static atomic_t slup_led_nfc_phase;
 static struct k_thread slup_led_thread;
 static k_tid_t slup_led_tid;
 K_THREAD_STACK_DEFINE(slup_led_stack, SPAGHETTI_SLUP_LED_STACK);
+
+static void slup_led_set_mode(int mode);
 
 static void slup_led_pin(bool on)
 {
@@ -278,6 +284,20 @@ static void slup_led_thread_fn(void *p1, void *p2, void *p3)
 			k_sleep(K_MSEC(SPAGHETTI_SLUP_LED_LOAD_MS));
 			continue;
 		}
+		if (mode == SPAGHETTI_SLUP_LED_NFC) {
+			const int phase = atomic_inc(&slup_led_nfc_phase);
+
+			slup_led_pin((phase % 2) == 0);
+			k_sleep(K_MSEC(SPAGHETTI_SLUP_LED_NFC_PHASE_MS));
+			if ((atomic_get(&slup_led_mode) ==
+			     SPAGHETTI_SLUP_LED_NFC) &&
+			    (atomic_get(&slup_led_nfc_phase) >=
+			     SPAGHETTI_SLUP_LED_NFC_PHASES)) {
+				slup_led_pin(false);
+				slup_led_set_mode(SPAGHETTI_SLUP_LED_IDLE);
+			}
+			continue;
+		}
 		slup_led_idle_slice();
 	}
 }
@@ -291,6 +311,16 @@ static void slup_led_set_mode(int mode)
 		slup_led_phase = 0U;
 		slup_led_pwm_tick = 0U;
 	}
+}
+
+void spaghetti_field_update_nfc_feedback(void)
+{
+	if (slup_led_tid == NULL) {
+		return;
+	}
+
+	atomic_set(&slup_led_nfc_phase, 0);
+	slup_led_set_mode(SPAGHETTI_SLUP_LED_NFC);
 }
 
 static void slup_led_start(void)

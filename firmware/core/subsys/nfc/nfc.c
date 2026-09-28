@@ -5,6 +5,9 @@
 #include <string.h>
 
 #include <spaghetti/communication.h>
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+#include <spaghetti/field_update.h>
+#endif
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
@@ -22,6 +25,7 @@ LOG_MODULE_REGISTER(spaghetti_nfc, CONFIG_SPAGHETTI_NFC_LOG_LEVEL);
 #define ST25_CMD_SET_DEFAULT 0x60U
 #define ST25_CMD_STOP 0x62U
 #define ST25_CMD_CLEAR_FIFO 0x64U
+#define ST25_CMD_CLEAR_RX_GAIN 0x66U
 #define ST25_CMD_ADJUST_REGULATORS 0x68U
 #define ST25_CMD_TRANSMIT 0x6AU
 #define ST25_CMD_UNMASK_RX 0x72U
@@ -109,7 +113,7 @@ LOG_MODULE_REGISTER(spaghetti_nfc, CONFIG_SPAGHETTI_NFC_LOG_LEVEL);
 #define NFCA_SAK_CASCADE BIT(2)
 #define NFCA_SAK_T4T BIT(5)
 
-#define NFC_FALLBACK_PERIOD_MS 2000U
+#define NFC_FALLBACK_PERIOD_MS 500U
 #define NFC_ANTENNAS 2U
 
 #if DT_NODE_EXISTS(NFC_DT_NODE) && DT_NODE_HAS_STATUS(NFC_SPI_NODE, okay)
@@ -126,6 +130,12 @@ static const struct gpio_dt_spec nfc_irq =
 #endif
 static const struct gpio_dt_spec nfc_cs =
 	GPIO_DT_SPEC_GET_BY_IDX(NFC_SPI_NODE, cs_gpios, 0);
+static const struct gpio_dt_spec nfc_sck =
+	GPIO_DT_SPEC_GET(NFC_DT_NODE, nfc_sck_gpios);
+static const struct gpio_dt_spec nfc_mosi =
+	GPIO_DT_SPEC_GET(NFC_DT_NODE, nfc_mosi_gpios);
+static const struct gpio_dt_spec nfc_miso =
+	GPIO_DT_SPEC_GET(NFC_DT_NODE, nfc_miso_gpios);
 
 static struct spi_config nfc_spi_cfg = {
 	.frequency = 1000000U,
@@ -139,6 +149,7 @@ static bool nfc_initialized;
 static bool nfc_irq_armed;
 static bool nfc_wum_on;
 static bool nfc_tag_present;
+static bool nfc_software_spi;
 static uint8_t nfc_wum_antenna = 1U;
 static uint32_t nfc_generation = 1U;
 static struct spaghetti_nfc_tag nfc_tags[NFC_ANTENNAS];
@@ -153,8 +164,38 @@ static void nfc_fallback_work(struct k_work *work);
 static K_WORK_DEFINE(nfc_irq_work, nfc_irq_work_fn);
 static K_WORK_DELAYABLE_DEFINE(nfc_fallback_dwork, nfc_fallback_work);
 
+static int nfc_software_spi_xfer(const uint8_t *tx, uint8_t *rx, size_t length)
+{
+	size_t byte;
+
+	gpio_pin_set_raw(nfc_cs.port, nfc_cs.pin, 0);
+	for (byte = 0U; byte < length; ++byte) {
+		uint8_t input = 0U;
+		uint8_t mask;
+
+		for (mask = BIT(7); mask != 0U; mask >>= 1U) {
+			/* ST25R100 SPI mode 1: change on rising, sample on falling. */
+			gpio_pin_set_raw(nfc_sck.port, nfc_sck.pin, 1);
+			gpio_pin_set_raw(nfc_mosi.port, nfc_mosi.pin,
+					 (tx[byte] & mask) != 0U);
+			k_busy_wait(2U);
+			gpio_pin_set_raw(nfc_sck.port, nfc_sck.pin, 0);
+			k_busy_wait(2U);
+			if (gpio_pin_get_raw(nfc_miso.port, nfc_miso.pin) > 0) {
+				input |= mask;
+			}
+		}
+		if (rx != NULL) {
+			rx[byte] = input;
+		}
+	}
+	gpio_pin_set_raw(nfc_cs.port, nfc_cs.pin, 1);
+	return 0;
+}
+
 static int nfc_spi_xfer(const uint8_t *tx, uint8_t *rx, size_t length)
 {
+	int err;
 	const struct spi_buf tx_buf = {
 		.buf = (uint8_t *)tx,
 		.len = length,
@@ -172,8 +213,36 @@ static int nfc_spi_xfer(const uint8_t *tx, uint8_t *rx, size_t length)
 		.count = 1U,
 	};
 
-	return spi_transceive(nfc_spi, &nfc_spi_cfg, &tx_set,
-			      (rx != NULL) ? &rx_set : NULL);
+	if (nfc_software_spi) {
+		return nfc_software_spi_xfer(tx, rx, length);
+	}
+
+	/*
+	 * Keep CS under our control so the ST25R100 sees one uninterrupted low
+	 * pulse for the complete command and response transaction.
+	 */
+	gpio_pin_set_raw(nfc_cs.port, nfc_cs.pin, 0);
+	err = spi_transceive(nfc_spi, &nfc_spi_cfg, &tx_set,
+			     (rx != NULL) ? &rx_set : NULL);
+	gpio_pin_set_raw(nfc_cs.port, nfc_cs.pin, 1);
+
+	return err;
+}
+
+static int nfc_enable_software_spi(void)
+{
+	if (!gpio_is_ready_dt(&nfc_sck) || !gpio_is_ready_dt(&nfc_mosi) ||
+	    !gpio_is_ready_dt(&nfc_miso)) {
+		return -ENODEV;
+	}
+
+	if ((gpio_pin_configure_dt(&nfc_sck, GPIO_OUTPUT_INACTIVE) < 0) ||
+	    (gpio_pin_configure_dt(&nfc_mosi, GPIO_OUTPUT_INACTIVE) < 0) ||
+	    (gpio_pin_configure_dt(&nfc_miso, GPIO_INPUT) < 0)) {
+		return -EIO;
+	}
+	nfc_software_spi = true;
+	return 0;
 }
 
 static int nfc_write_reg(uint8_t addr, uint8_t value)
@@ -370,6 +439,9 @@ static int nfc_transceive(const uint8_t *tx, size_t tx_len, uint16_t tx_bits,
 	*rx_len = 0U;
 	err = nfc_cmd(ST25_CMD_STOP);
 	if (err == 0) {
+		err = nfc_cmd(ST25_CMD_CLEAR_RX_GAIN);
+	}
+	if (err == 0) {
 		err = nfc_cmd(ST25_CMD_CLEAR_FIFO);
 	}
 	if (err < 0) {
@@ -379,12 +451,14 @@ static int nfc_transceive(const uint8_t *tx, size_t tx_len, uint16_t tx_bits,
 
 	err = nfc_modify(ST25_REG_PROTOCOL_TX1,
 			 (uint8_t)(ST25_TX1_PAR | ST25_TX1_CRC),
-			 crc ? (uint8_t)(ST25_TX1_PAR | ST25_TX1_CRC) : 0U);
+			 (uint8_t)(ST25_TX1_PAR |
+				   (crc ? ST25_TX1_CRC : 0U)));
 	if (err == 0) {
 		err = nfc_modify(ST25_REG_PROTOCOL_RX1,
 				 (uint8_t)(ST25_RX1_PAR | ST25_RX1_CRC |
 					   ST25_RX1_ANTCL),
-				 (uint8_t)((crc ? (ST25_RX1_PAR | ST25_RX1_CRC) : 0U) |
+				 (uint8_t)(ST25_RX1_PAR |
+					   (crc ? ST25_RX1_CRC : 0U) |
 					   (anticoll ? ST25_RX1_ANTCL : 0U)));
 	}
 	if (err == 0) {
@@ -713,6 +787,12 @@ static void nfc_store_scan(const struct spaghetti_nfc_tag *found, size_t count)
 	}
 	k_mutex_unlock(&nfc_lock);
 	if (changed) {
+		if (count > 0U) {
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+			spaghetti_field_update_nfc_feedback();
+#endif
+			LOG_INF("NFC tag read on antenna %u", found[0].antenna);
+		}
 		nfc_notify_host((count > 0U) ? found[0].antenna : 0U);
 	}
 }
@@ -818,9 +898,6 @@ static int nfc_probe_chip(void)
 		return -ENODEV;
 	}
 
-	nfc_spi_cfg.cs.gpio = nfc_cs;
-	nfc_spi_cfg.cs.delay = 0U;
-
 	(void)gpio_pin_configure(nfc_rst.port, nfc_rst.pin, GPIO_OUTPUT);
 #if SPAGHETTI_NFC_HAS_IRQ_GPIO
 	if (gpio_is_ready_dt(&nfc_irq)) {
@@ -841,6 +918,14 @@ static int nfc_probe_chip(void)
 	k_sleep(K_MSEC(5));
 
 	err = nfc_read_reg(ST25_REG_IC_ID, &ic_id);
+	if ((err < 0) || ((ic_id & ST25_IC_TYPE_MASK) != ST25_IC_TYPE_OK)) {
+		LOG_WRN("hardware SPI probe returned ic_id=0x%02x err=%d; trying software SPI",
+			ic_id, err);
+		if (nfc_enable_software_spi() == 0) {
+			ic_id = 0U;
+			err = nfc_read_reg(ST25_REG_IC_ID, &ic_id);
+		}
+	}
 	if ((err < 0) || ((ic_id & ST25_IC_TYPE_MASK) != ST25_IC_TYPE_OK)) {
 		LOG_WRN("ST25R100 missing ic_id=0x%02x err=%d", ic_id, err);
 		gpio_pin_set_raw(nfc_rst.port, nfc_rst.pin, 1);
@@ -864,7 +949,8 @@ static int nfc_probe_chip(void)
 	}
 	k_sleep(K_MSEC(5));
 	nfc_clear_irq();
-	LOG_INF("ST25R100 ready ic_id=0x%02x", ic_id);
+	LOG_INF("ST25R100 ready ic_id=0x%02x spi=%s", ic_id,
+		nfc_software_spi ? "software" : "hardware");
 	return 0;
 }
 

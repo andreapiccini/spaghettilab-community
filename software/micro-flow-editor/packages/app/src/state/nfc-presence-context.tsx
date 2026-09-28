@@ -1,12 +1,23 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { formatDeviceId, macBytesToColon } from "../lib/core-identity.js";
 import { attachedFromStatus } from "./core-sessions-context.js";
 import {
   collectNfcNodes,
+  dismissAllNfcPopups,
   dismissNfcPopup,
   emptyNfcPopupQueue,
   enqueueNfcPopups,
   nfcEventsFromDiff,
+  selectNfcPopup,
   type NfcNode,
   type NfcPopupQueue,
 } from "../lib/nfc-presence.js";
@@ -20,14 +31,30 @@ type NfcPresenceContextValue = {
   readonly loadingBindings: ReadonlySet<CoreBindingId>;
   readonly queue: NfcPopupQueue;
   dismissCurrent(): void;
+  dismissAll(): void;
+  selectPopup(index: number): void;
 };
 
-const NfcPresenceContext = createContext<NfcPresenceContextValue | undefined>(undefined);
+const NfcPresenceContext = createContext<NfcPresenceContextValue | undefined>(
+  undefined,
+);
 
 export function NfcPresenceProvider({ children }: { readonly children: ReactNode }) {
-  const { rows, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones, observeStatus, onDiscoveryEvent } = useCoreSessions();
-  const [nodesByBinding, setNodesByBinding] = useState<ReadonlyMap<CoreBindingId, readonly NfcNode[]>>(new Map());
-  const [loadingBindings, setLoadingBindings] = useState<ReadonlySet<CoreBindingId>>(new Set());
+  const {
+    rows,
+    getClient,
+    getSnapshot,
+    listDiscoveryCandidates,
+    setAttachedBackbones,
+    observeStatus,
+    onDiscoveryEvent,
+  } = useCoreSessions();
+  const [nodesByBinding, setNodesByBinding] = useState<
+    ReadonlyMap<CoreBindingId, readonly NfcNode[]>
+  >(new Map());
+  const [loadingBindings, setLoadingBindings] = useState<ReadonlySet<CoreBindingId>>(
+    new Set(),
+  );
   const [queue, setQueue] = useState<NfcPopupQueue>(emptyNfcPopupQueue);
   const lastNodesRef = useRef(new Map<CoreBindingId, readonly NfcNode[]>());
   const primedRef = useRef(new Set<CoreBindingId>());
@@ -111,7 +138,9 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
           }
           try {
             const client = getClient(bindingId);
-            const status = client ? await client.getStatus() : getSnapshot(bindingId)?.status;
+            const status = client
+              ? await client.getStatus()
+              : getSnapshot(bindingId)?.status;
             if (cancelled) return;
             if (status) {
               observeStatus(bindingId, status);
@@ -135,8 +164,11 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
               (status?.nfcTags ?? []).map((tag) => ({
                 portId: tag.portId,
                 typeId: tag.typeId,
+                uid: tag.uid,
                 nodeId: tag.nodeId,
-                backboneMac: peerMacByNode.get(tag.nodeId) ?? formatDeviceId(row.binding.expectedDeviceId),
+                backboneMac:
+                  peerMacByNode.get(tag.nodeId) ??
+                  formatDeviceId(row.binding.expectedDeviceId),
               })),
             );
             const previous = lastNodesRef.current.get(bindingId) ?? [];
@@ -184,7 +216,14 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [readyKey, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones, observeStatus]);
+  }, [
+    readyKey,
+    getClient,
+    getSnapshot,
+    listDiscoveryCandidates,
+    setAttachedBackbones,
+    observeStatus,
+  ]);
 
   useEffect(() => {
     const unsubs: (() => void)[] = [];
@@ -203,12 +242,29 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
     setQueue((q) => dismissNfcPopup(q));
   }, []);
 
+  const dismissAll = useCallback(() => {
+    setQueue(dismissAllNfcPopups());
+  }, []);
+
+  const selectPopup = useCallback((index: number) => {
+    setQueue((q) => selectNfcPopup(q, index));
+  }, []);
+
   const value = useMemo<NfcPresenceContextValue>(
-    () => ({ nodesByBinding, loadingBindings, queue, dismissCurrent }),
-    [nodesByBinding, loadingBindings, queue, dismissCurrent],
+    () => ({
+      nodesByBinding,
+      loadingBindings,
+      queue,
+      dismissCurrent,
+      dismissAll,
+      selectPopup,
+    }),
+    [nodesByBinding, loadingBindings, queue, dismissCurrent, dismissAll, selectPopup],
   );
 
-  return <NfcPresenceContext.Provider value={value}>{children}</NfcPresenceContext.Provider>;
+  return (
+    <NfcPresenceContext.Provider value={value}>{children}</NfcPresenceContext.Provider>
+  );
 }
 
 export function useNfcPresence(): NfcPresenceContextValue {

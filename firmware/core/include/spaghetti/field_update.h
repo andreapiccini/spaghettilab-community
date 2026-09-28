@@ -180,6 +180,17 @@ int spaghetti_field_update_copy_nfc_tags(struct spaghetti_nfc_tag *out,
 					 size_t max, size_t *count);
 
 /**
+ * @brief Flash the status LED after a successful NFC read.
+ *
+ * The LED performs four fast flashes (eight on/off phases) in one second,
+ * then returns to its normal idle indication. Repeated reads restart the
+ * feedback sequence without blocking the NFC worker.
+ *
+ * @note Thread-safe and non-blocking after field-update initialization.
+ */
+void spaghetti_field_update_nfc_feedback(void);
+
+/**
  * @brief Put one addressed Backbone into SLUP load mode.
  *
  * Sends the existing EnterUpdate command (0x03) on the CAN transceiver.

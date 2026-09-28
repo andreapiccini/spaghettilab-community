@@ -50,8 +50,11 @@
 	 */
 	spaghetti_nfc: spaghetti_nfc {
 		compatible = "spaghettilab,nfc";
-		nfc-reset-gpios = <&gpio0 1 GPIO_ACTIVE_LOW>;
+		nfc-reset-gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>;
 		nfc-irq-gpios = <&gpio0 5 GPIO_ACTIVE_HIGH>;
+		nfc-sck-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+		nfc-mosi-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
+		nfc-miso-gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
 	};
 
 	spaghetti_ports {

@@ -14,3 +14,18 @@ properties:
     type: phandle-array
     required: true
     description: ST25R100 IRQ, active high
+
+  nfc-sck-gpios:
+    type: phandle-array
+    required: true
+    description: ST25R100 SPI clock used by the software fallback
+
+  nfc-mosi-gpios:
+    type: phandle-array
+    required: true
+    description: ST25R100 SPI controller-to-reader data used by the software fallback
+
+  nfc-miso-gpios:
+    type: phandle-array
+    required: true
+    description: ST25R100 SPI reader-to-controller data used by the software fallback

@@ -1,6 +1,7 @@
 export type NfcNode = {
   readonly portId: number;
   readonly label: string;
+  readonly uid?: string;
   readonly nodeId?: number;
   readonly backboneMac?: string;
 };
@@ -8,11 +9,12 @@ export type NfcNode = {
 export type NfcTagInput = {
   readonly portId: number;
   readonly typeId: string;
+  readonly uid?: Uint8Array | string;
   readonly nodeId?: number;
   readonly backboneMac?: string;
 };
 
-export type NfcPopupKind = "connected" | "removed";
+export type NfcPopupKind = "read";
 
 export type NfcPopupEvent = {
   readonly id: string;
@@ -22,12 +24,20 @@ export type NfcPopupEvent = {
 };
 
 export type NfcPopupQueue = {
-  readonly current: NfcPopupEvent | null;
-  readonly pending: readonly NfcPopupEvent[];
+  readonly items: readonly NfcPopupEvent[];
+  readonly activeIndex: number;
 };
 
 export function nfcNodeKey(node: NfcNode): string {
-  return `${node.nodeId ?? ""}\0${node.portId}\0${node.label}`;
+  return `${node.nodeId ?? ""}\0${node.portId}\0${node.label}\0${node.uid ?? ""}`;
+}
+
+function uidHex(uid: Uint8Array | string | undefined): string | undefined {
+  if (uid === undefined) return undefined;
+  if (typeof uid === "string") return uid.toUpperCase();
+  return Array.from(uid, (byte) => byte.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
 }
 
 function nfcLabel(typeId: string): string {
@@ -74,6 +84,7 @@ export function collectNfcNodes(
     const node = {
       portId: tag.portId,
       label,
+      ...(tag.uid !== undefined ? { uid: uidHex(tag.uid) } : {}),
       ...(tag.nodeId !== undefined ? { nodeId: tag.nodeId } : {}),
       ...(tag.backboneMac ? { backboneMac: tag.backboneMac } : {}),
     };
@@ -116,34 +127,40 @@ export function diffNfcNodes(
 }
 
 export function emptyNfcPopupQueue(): NfcPopupQueue {
-  return { current: null, pending: [] };
+  return { items: [], activeIndex: 0 };
 }
 
-function popupIdentity(event: Pick<NfcPopupEvent, "kind" | "node" | "backboneMac">): string {
-  return `${event.kind}\0${event.backboneMac}\0${nfcNodeKey(event.node)}`;
-}
-
-function alreadyQueued(queue: NfcPopupQueue, event: Pick<NfcPopupEvent, "kind" | "node" | "backboneMac">): boolean {
-  const id = popupIdentity(event);
-  if (queue.current && popupIdentity(queue.current) === id) return true;
-  return queue.pending.some((item) => popupIdentity(item) === id);
-}
-
-export function enqueueNfcPopups(queue: NfcPopupQueue, events: readonly NfcPopupEvent[]): NfcPopupQueue {
-  const pending = [...queue.pending];
-  let current = queue.current;
+export function enqueueNfcPopups(
+  queue: NfcPopupQueue,
+  events: readonly NfcPopupEvent[],
+): NfcPopupQueue {
+  const items = [...queue.items];
   for (const event of events) {
-    if (alreadyQueued({ current, pending }, event)) continue;
-    if (current === null) current = event;
-    else pending.push(event);
+    if (items.some((item) => item.id === event.id)) continue;
+    items.push(event);
   }
-  return { current, pending };
+  return { items, activeIndex: queue.activeIndex };
 }
 
 export function dismissNfcPopup(queue: NfcPopupQueue): NfcPopupQueue {
-  if (queue.current === null) return queue;
-  const [next, ...rest] = queue.pending;
-  return { current: next ?? null, pending: rest };
+  if (queue.items.length === 0) return queue;
+  const items = queue.items.filter((_, index) => index !== queue.activeIndex);
+  return {
+    items,
+    activeIndex: Math.min(queue.activeIndex, Math.max(0, items.length - 1)),
+  };
+}
+
+export function selectNfcPopup(queue: NfcPopupQueue, index: number): NfcPopupQueue {
+  if (queue.items.length === 0) return queue;
+  return {
+    ...queue,
+    activeIndex: Math.max(0, Math.min(index, queue.items.length - 1)),
+  };
+}
+
+export function dismissAllNfcPopups(): NfcPopupQueue {
+  return emptyNfcPopupQueue();
 }
 
 export function nfcEventsFromDiff(
@@ -152,19 +169,11 @@ export function nfcEventsFromDiff(
   next: readonly NfcNode[],
   nextId: () => string,
 ): NfcPopupEvent[] {
-  const { added, removed } = diffNfcNodes(previous, next);
-  return [
-    ...added.map((node) => ({
-      id: nextId(),
-      kind: "connected" as const,
-      node,
-      backboneMac: node.backboneMac ?? backboneMac,
-    })),
-    ...removed.map((node) => ({
-      id: nextId(),
-      kind: "removed" as const,
-      node,
-      backboneMac: node.backboneMac ?? backboneMac,
-    })),
-  ];
+  const { added } = diffNfcNodes(previous, next);
+  return added.map((node) => ({
+    id: nextId(),
+    kind: "read" as const,
+    node,
+    backboneMac: node.backboneMac ?? backboneMac,
+  }));
 }
