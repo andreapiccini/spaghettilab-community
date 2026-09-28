@@ -6,6 +6,7 @@ import { coreConnectionsCopy } from "../../lib/core-connections-copy.js";
 import type { AttachedBackbone, CoreRowState } from "../../state/core-sessions-context.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
+import { nfcNodesForBoard } from "../../lib/nfc-presence.js";
 import { useNfcPresence } from "../../state/nfc-presence-context.js";
 import { BackboneNetworkGraph } from "./BackboneNetworkGraph.js";
 import { rowActionId, rowActionLabel, sessionBadgeStyle } from "./session-badge.js";
@@ -14,12 +15,10 @@ const TRANSITIONAL = new Set(["CONNECTING", "AUTHENTICATING", "SYNCHRONIZING", "
 
 export function CoreRow({
   row,
-  groupIndex,
   attached,
   onConnect,
 }: {
   readonly row: CoreRowState;
-  readonly groupIndex: number;
   readonly attached: readonly AttachedBackbone[];
   readonly onConnect: () => void;
 }) {
@@ -29,7 +28,7 @@ export function CoreRow({
   const copy = coreConnectionsCopy(locale);
   const nfcNodes = nodesByBinding.get(row.binding.bindingId) ?? [];
   const nfcLoading = loadingBindings.has(row.binding.bindingId);
-  const hasError = row.error !== null && row.sessionState === "DISCONNECTED";
+  const hasError = row.error !== null && (row.sessionState === "DISCONNECTED" || row.sessionState === "ERROR");
   const badge = sessionBadgeStyle(row.sessionState, copy.online);
   const actionId = row.sessionState === "READY" ? null : rowActionId(row.sessionState, row.stale, row.syncRelationship, hasError);
   const action = actionId ? rowActionLabel(actionId, locale) : null;
@@ -45,7 +44,7 @@ export function CoreRow({
     else if (actionId === "cancel") cancel(row.binding.bindingId);
   }
 
-  let slaveIndex = 0;
+  const boardLabels = chain.map((_board, index) => copy.backbone(index + 1));
 
   return (
     <motion.div
@@ -59,10 +58,13 @@ export function CoreRow({
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="truncate font-body text-sm font-semibold text-ink">{copy.groupTitle(groupIndex)}</div>
+          <div className="truncate font-body text-sm font-semibold text-ink">
+            {boardLabels.join(" · ")}
+          </div>
           <div className="flex items-center gap-1.5 font-body text-xs text-ink-muted">
             <HostIcon size={12} />
             {row.hostLink === "wifi" ? copy.viaWifi : copy.viaCable}
+            {row.displayName ? ` · ${row.displayName}` : null}
           </div>
         </div>
 
@@ -107,21 +109,39 @@ export function CoreRow({
       )}
 
       <div className="mt-4 border-t border-border pt-3">
-        <p className="mb-2 font-body text-xs font-semibold text-ink-muted">{copy.attachedCount(chain.length)}</p>
-        <BackboneNetworkGraph
-          boards={chain.map((board) => {
-            const role = board.local ? copy.master : copy.slave(++slaveIndex);
-            const link = board.local ? (row.hostLink === "wifi" ? copy.viaWifi : copy.viaCable) : copy.viaCanShort;
-            return {
-              id: board.deviceIdHex,
-              label: role,
-              sublabel: board.version ? board.version : link,
-              local: board.local,
-              hostLink: board.local ? row.hostLink : "can",
-            };
+        <p className="mb-2 font-body text-xs font-semibold text-ink-muted">{copy.chainCaption(chain.length)}</p>
+        <ul className="mb-3 flex flex-col gap-1.5">
+          {chain.map((board, index) => {
+            const label = boardLabels[index] ?? board.mac;
+            const boardNfc = nfcNodesForBoard(board, nfcNodes);
+            return (
+              <li key={board.deviceIdHex} className="flex min-h-8 items-center gap-2 rounded-slsm bg-surface-sunken px-2.5 py-1.5">
+                <Cpu size={14} className="shrink-0 text-brand-blue" />
+                <span className="min-w-0 flex-1 truncate font-body text-sm font-semibold text-ink">{label}</span>
+                {board.version?.trim() ? (
+                  <span className="shrink-0 font-body text-xs text-ink-muted">{copy.commit(board.version.trim())}</span>
+                ) : null}
+                <span className="shrink-0 font-body text-xs text-ink-faint">
+                  {board.local ? (row.hostLink === "wifi" ? copy.viaWifi : copy.viaCable) : copy.viaCanShort}
+                </span>
+                <span className="shrink-0 font-body text-xs text-ink-faint">
+                  {boardNfc.length === 0 ? copy.nfcEmptyShort : copy.nfcTitle}
+                  {boardNfc.length > 0 ? ` · ${boardNfc.length}` : ""}
+                </span>
+              </li>
+            );
           })}
-          nfcByBoardId={new Map(chain.filter((board) => board.local).map((board) => [board.deviceIdHex, nfcNodes]))}
-          nfcLoading={nfcLoading && row.sessionState === "READY"}
+        </ul>
+        <BackboneNetworkGraph
+          boards={chain.map((board, index) => ({
+            id: board.deviceIdHex,
+            label: boardLabels[index] ?? board.mac,
+            sublabel: board.version?.trim() ? copy.commit(board.version.trim()) : "",
+            local: board.local,
+            hostLink: board.local ? row.hostLink : "can",
+          }))}
+          nfcByBoardId={new Map(chain.map((board) => [board.deviceIdHex, nfcNodesForBoard(board, nfcNodes)]))}
+          nfcLoading={nfcLoading && (row.sessionState === "READY" || row.sessionState === "SYNCHRONIZING")}
           locale={locale}
         />
       </div>

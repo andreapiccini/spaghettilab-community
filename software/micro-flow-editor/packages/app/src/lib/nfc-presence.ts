@@ -36,6 +36,31 @@ function nfcLabel(typeId: string): string {
   return label;
 }
 
+export function nfcNodesForBoard(
+  board: {
+    readonly nodeId: number;
+    readonly local: boolean;
+    readonly mac: string;
+    readonly deviceIdHex: string;
+  },
+  nodes: readonly NfcNode[],
+): NfcNode[] {
+  const compact = (value: string) => value.replace(/[^a-fA-F0-9]/g, "").toLowerCase();
+  const boardMac = compact(board.mac);
+  const boardHex = compact(board.deviceIdHex);
+  return nodes.filter((node) => {
+    if (node.nodeId !== undefined && node.nodeId !== 0) {
+      if (node.nodeId === board.nodeId) return true;
+      if (!board.local || board.nodeId !== 0) return false;
+    }
+    if (node.backboneMac) {
+      const mac = compact(node.backboneMac);
+      return mac === boardMac || mac === boardHex;
+    }
+    return board.local;
+  });
+}
+
 export function collectNfcNodes(
   modules: readonly { readonly portId: number; readonly typeId: string }[],
   candidates: readonly { readonly portId: number; readonly suggestedTypeId: string }[],

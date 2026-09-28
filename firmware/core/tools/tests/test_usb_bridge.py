@@ -26,7 +26,8 @@ from tools.usb_bridge import (
     BoundCore,
     SlupPeer,
     UsbBridge,
-    _slup_list_sync,
+    _read_serial_chunks,
+    _status_peers_sync,
     encode_usb_frame,
     make_handler,
     make_process_request,
@@ -63,7 +64,7 @@ class SlupListParseTest(unittest.TestCase):
         self.assertEqual(len(peers), 1)
         self.assertEqual(peers[0].version, "")
 
-    def test_empty_list_keeps_cached_peers(self) -> None:
+    def test_status_without_remotes_clears_cached_slave(self) -> None:
         cached = (
             SlupPeer(
                 device_id_hex="907069e18030" + ("0" * 52),
@@ -84,7 +85,7 @@ class SlupListParseTest(unittest.TestCase):
             slup_peers=cached,
             slup_peers_at=0.0,
         )
-        self.assertEqual(_slup_list_sync(core), cached)
+        self.assertEqual(_status_peers_sync(core), ())
 
 
 class FramingTest(unittest.TestCase):
@@ -111,6 +112,13 @@ class FramingTest(unittest.TestCase):
         self.assertEqual(len(buffer), 4)
         buffer.extend(frame[4:])
         parsed = pop_usb_frame(buffer)
+        self.assertEqual(parsed, (KIND_RESPONSE, envelope))
+
+    def test_accepts_get_status_larger_than_old_576_limit(self) -> None:
+        envelope = bytes([0xA0]) + (b"\x00" * 700)
+        frame = encode_usb_frame(KIND_RESPONSE, envelope)
+        self.assertGreater(len(envelope), 576)
+        parsed = pop_usb_frame(bytearray(frame))
         self.assertEqual(parsed, (KIND_RESPONSE, envelope))
 
     def test_oversize_length_is_skipped(self) -> None:
@@ -184,6 +192,66 @@ def _run(coro):
 
 
 class BridgeSessionTest(unittest.TestCase):
+    def test_missing_serial_port_ends_only_the_active_pipe(self) -> None:
+        async def scenario() -> None:
+            queue: asyncio.Queue[bytes] = asyncio.Queue()
+            stop = threading.Event()
+            loop = asyncio.get_running_loop()
+
+            with mock.patch("tools.usb_bridge.serial_ports", return_value=[]):
+                await asyncio.to_thread(
+                    _read_serial_chunks,
+                    FakeSerial(),
+                    "/dev/cu.usbmodem-removed",
+                    stop,
+                    queue,
+                    loop,
+                )
+
+            self.assertEqual(await asyncio.wait_for(queue.get(), timeout=1), b"")
+
+        _run(scenario())
+
+    def test_refresh_rekeys_a_replaced_board_on_the_same_usb_path(self) -> None:
+        old_id = "ff" * 32
+        serial = FakeSerial()
+        bridge = UsbBridge()
+        bridge.cores[old_id] = BoundCore(
+            device_id_hex=old_id,
+            device_name="Old",
+            version="old",
+            port="/dev/cu.usbmodem-fake",
+            connection=serial,
+            write_lock=threading.Lock(),
+        )
+
+        with mock.patch(
+            "tools.usb_bridge.serial_ports",
+            return_value=["/dev/cu.usbmodem-fake"],
+        ):
+            document = bridge.cores_document()
+
+        self.assertIsNone(bridge.get(old_id))
+        self.assertIsNotNone(bridge.get(DEVICE_ID_HEX))
+        self.assertEqual(document["cores"][0]["deviceIdHex"], DEVICE_ID_HEX)
+        self.assertEqual(document["cores"][0]["deviceName"], "BridgeCore")
+
+    def test_resolve_old_identity_to_the_only_live_usb_root(self) -> None:
+        bridge = UsbBridge()
+        core = BoundCore(
+            device_id_hex=DEVICE_ID_HEX,
+            device_name="BridgeCore",
+            version="test",
+            port="/dev/cu.usbmodem-fake",
+            connection=FakeSerial(),
+            write_lock=threading.Lock(),
+        )
+        bridge.cores[DEVICE_ID_HEX] = core
+
+        resolved = bridge.resolve("ff" * 32)
+
+        self.assertEqual(resolved, (DEVICE_ID_HEX, core))
+
     def test_list_and_core_pipe(self) -> None:
         async def scenario() -> None:
             serial = FakeSerial()
@@ -228,7 +296,7 @@ class BridgeSessionTest(unittest.TestCase):
         with mock.patch(
             "tools.usb_bridge.serial_ports",
             return_value=["/dev/cu.usbmodem-fake"],
-        ), mock.patch("tools.usb_bridge._slup_list_sync", return_value=()):
+        ), mock.patch("tools.usb_bridge._status_peers_sync", return_value=()):
             _run(scenario())
 
     def test_http_list(self) -> None:
@@ -264,8 +332,38 @@ class BridgeSessionTest(unittest.TestCase):
         with mock.patch(
             "tools.usb_bridge.serial_ports",
             return_value=["/dev/cu.usbmodem-fake"],
-        ), mock.patch("tools.usb_bridge._slup_list_sync", return_value=()):
+        ), mock.patch("tools.usb_bridge._status_peers_sync", return_value=()):
             _run(scenario())
+
+    def test_busy_core_omits_cached_peers(self) -> None:
+        bridge = UsbBridge()
+        bridge.cores[DEVICE_ID_HEX] = BoundCore(
+            device_id_hex=DEVICE_ID_HEX,
+            device_name="BridgeCore",
+            version="test",
+            port="/dev/cu.usbmodem-fake",
+            connection=FakeSerial(),
+            write_lock=threading.Lock(),
+            slup_peers=(
+                SlupPeer(
+                    device_id_hex="907069e18030" + ("0" * 52),
+                    device_name="",
+                    node_id=0xE18030,
+                    mac="90:70:69:e1:80:30",
+                    role="peer",
+                    version="0.1.0+0",
+                ),
+            ),
+        )
+        bridge._busy.add(DEVICE_ID_HEX)
+
+        with mock.patch(
+            "tools.usb_bridge.serial_ports",
+            return_value=["/dev/cu.usbmodem-fake"],
+        ), mock.patch("tools.usb_bridge._status_peers_sync") as sync:
+            document = bridge.cores_document()
+            sync.assert_not_called()
+            self.assertEqual(document["cores"][0]["peers"], [])
 
 
 if __name__ == "__main__":

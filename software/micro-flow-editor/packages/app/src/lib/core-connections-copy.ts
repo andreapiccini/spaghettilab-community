@@ -50,14 +50,16 @@ type CoreConnectionsCopy = {
   readonly retry: string;
   readonly localBridge: string;
   readonly viaCan: (via: string) => string;
-  readonly groupTitle: (index: number) => string;
-  readonly master: string;
-  readonly slave: (index: number) => string;
+  /** USB/Wi-Fi host group in the connect dialog (not a Backbone identity). */
+  readonly connectionGroup: (index: number) => string;
+  readonly backbone: (index: number) => string;
+  readonly commit: (value: string) => string;
   readonly viaCable: string;
   readonly viaWifi: string;
   readonly viaCanShort: string;
   readonly online: string;
-  readonly attachedCount: (count: number) => string;
+  /** Caption above the chain graph: how many Backbones are in this host link. */
+  readonly chainCaption: (count: number) => string;
   readonly nfcTitle: string;
   readonly nfcEmpty: string;
   readonly nfcEmptyShort: string;
@@ -134,14 +136,14 @@ const IT: CoreConnectionsCopy = {
   retry: "Riprova",
   localBridge: "ponte locale",
   viaCan: (via) => `CAN · via ${via}`,
-  groupTitle: (index) => `Backbone ${index}`,
-  master: "Master",
-  slave: (index) => `Slave ${index}`,
+  connectionGroup: (index) => `Connessione ${index}`,
+  backbone: (index) => `Backbone ${index}`,
+  commit: (value) => `Commit ${value}`,
   viaCable: "Cavo",
   viaWifi: "Wi-Fi",
   viaCanShort: "Catena",
   online: "Online",
-  attachedCount: (count) => (count === 1 ? "1 Backbone in catena" : `${count} Backbone in catena`),
+  chainCaption: (count) => (count === 1 ? "1 Backbone" : `${count} Backbone`),
   nfcTitle: "Nodi NFC",
   nfcEmpty: "Nessun nodo connesso attualmente",
   nfcEmptyShort: "nessun nodo",
@@ -218,14 +220,14 @@ const EN: CoreConnectionsCopy = {
   retry: "Retry",
   localBridge: "local bridge",
   viaCan: (via) => `CAN · via ${via}`,
-  groupTitle: (index) => `Backbone ${index}`,
-  master: "Master",
-  slave: (index) => `Slave ${index}`,
+  connectionGroup: (index) => `Connection ${index}`,
+  backbone: (index) => `Backbone ${index}`,
+  commit: (value) => `Commit ${value}`,
   viaCable: "Cable",
   viaWifi: "Wi-Fi",
   viaCanShort: "Chain",
   online: "Online",
-  attachedCount: (count) => (count === 1 ? "1 Backbone in the chain" : `${count} Backbones in the chain`),
+  chainCaption: (count) => (count === 1 ? "1 Backbone" : `${count} Backbones`),
   nfcTitle: "NFC nodes",
   nfcEmpty: "No nodes connected right now",
   nfcEmptyShort: "no nodes",

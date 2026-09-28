@@ -914,6 +914,24 @@ class ModuleStatus:
 
 
 @dataclass
+class ChainPeerStatus:
+    node_id: int = 0
+    mac: bytes = b""
+    flags: int = 0
+    local: bool = False
+    version: str = ""
+
+
+@dataclass
+class NfcTagStatus:
+    port_id: int = 0
+    type_id: str = ""
+    uid: bytes = b""
+    node_id: int = 0
+    local: bool = False
+
+
+@dataclass
 class CoreStatus:
     state: int = 0
     mode: int = 0
@@ -928,6 +946,8 @@ class CoreStatus:
     boot_id: int | None = None
     device_id: bytes | None = None
     device_name: str = ""
+    chain_peers: list[ChainPeerStatus] = field(default_factory=list)
+    nfc_tags: list[NfcTagStatus] = field(default_factory=list)
 
 
 @dataclass
@@ -999,6 +1019,28 @@ def encode_get_status_response(status: CoreStatus) -> bytes:
         document[10] = status.boot_id
     if status.device_name:
         document[11] = status.device_name
+    if status.chain_peers:
+        document[12] = [
+            {
+                0: peer.node_id,
+                1: peer.mac,
+                2: peer.flags,
+                3: peer.local,
+                4: peer.version,
+            }
+            for peer in status.chain_peers
+        ]
+    if status.nfc_tags:
+        document[13] = [
+            {
+                0: tag.port_id,
+                1: tag.type_id,
+                2: tag.uid,
+                3: tag.node_id,
+                4: tag.local,
+            }
+            for tag in status.nfc_tags
+        ]
     return cbor2.dumps(document, canonical=True)
 
 
@@ -1027,6 +1069,34 @@ def decode_get_status_response(payload: bytes) -> CoreStatus:
         boot_id = None
     raw_name = document.get(11)
     device_name = str(raw_name) if isinstance(raw_name, str) else ""
+    chain_peers: list[ChainPeerStatus] = []
+    for raw in document.get(12, []) or []:
+        if not isinstance(raw, dict):
+            continue
+        mac = raw.get(1, b"")
+        chain_peers.append(
+            ChainPeerStatus(
+                node_id=int(raw.get(0, 0)),
+                mac=bytes(mac) if isinstance(mac, (bytes, bytearray)) else b"",
+                flags=int(raw.get(2, 0)),
+                local=bool(raw.get(3, False)),
+                version=str(raw.get(4, "") or ""),
+            )
+        )
+    nfc_tags: list[NfcTagStatus] = []
+    for raw in document.get(13, []) or []:
+        if not isinstance(raw, dict):
+            continue
+        uid = raw.get(2, b"")
+        nfc_tags.append(
+            NfcTagStatus(
+                port_id=int(raw.get(0, 0)),
+                type_id=str(raw.get(1, "") or ""),
+                uid=bytes(uid) if isinstance(uid, (bytes, bytearray)) else b"",
+                node_id=int(raw.get(3, 0)),
+                local=bool(raw.get(4, False)),
+            )
+        )
     return CoreStatus(
         state=int(document.get(0, 0)),
         mode=int(document.get(1, 0)),
@@ -1041,6 +1111,8 @@ def decode_get_status_response(payload: bytes) -> CoreStatus:
         boot_id=boot_id,
         device_id=bytes(device_id) if device_id is not None else None,
         device_name=device_name,
+        chain_peers=chain_peers,
+        nfc_tags=nfc_tags,
     )
 
 

@@ -14,26 +14,27 @@ import {
 } from "@spaghettilab/core-admin";
 import type { DeviceProfileDraft } from "@spaghettilab/device-profile-authoring-model";
 import { installProfile as installProfileWorkflow, removeProfile as removeProfileWorkflow, type InstallProfileResult } from "@spaghettilab/device-profile-install";
-import type {
-  AcceptDiscoveryRequest,
-  AcceptDiscoveryResponse,
-  AuditLogEntry,
-  DeviceProfileSummary,
-  DiscoveryCandidate,
-  EventStream,
-  GetCapabilitiesResponse,
-  GetCatalogResponse,
-  GetConfigResponse,
-  GetConnectivityStatusResponse,
-  GetFeaturesResponse,
-  GetJobStatusResponse,
-  GetResourcesResponse,
-  GetStatusResponse,
-  GetTopologyResponse,
-  GetUpdateStatusResponse,
-  DiscoveryEventPayload,
-  RecordEventPayload,
-  SpaghettiClient,
+import {
+  type AcceptDiscoveryRequest,
+  type AcceptDiscoveryResponse,
+  type AuditLogEntry,
+  type DeviceProfileSummary,
+  type DiscoveryCandidate,
+  type EventStream,
+  type GetCapabilitiesResponse,
+  type GetCatalogResponse,
+  type GetConfigResponse,
+  type GetConnectivityStatusResponse,
+  type GetFeaturesResponse,
+  type GetJobStatusResponse,
+  type GetResourcesResponse,
+  type GetStatusResponse,
+  type GetTopologyResponse,
+  type GetUpdateStatusResponse,
+  type DiscoveryEventPayload,
+  type RecordEventPayload,
+  type SpaghettiClient,
+  SpaghettiClientError,
 } from "@spaghettilab/protocol-sdk";
 import { CatalogCache } from "./catalog-cache.js";
 import { CoreSessionError, CoreSessionErrorCode } from "./errors.js";
@@ -50,6 +51,8 @@ export type CoreSessionSnapshot = {
   readonly config?: GetConfigResponse;
   readonly resources?: GetResourcesResponse;
 };
+
+export type DeviceIdentityPolicy = "strict" | "accept-current";
 
 /**
  * Owns connection and synchronization for one Core (`REACT_FLOW_ARCHITECTURE.md`
@@ -85,6 +88,7 @@ export class CoreSession {
     readonly client: SpaghettiClient,
     private readonly eventStream: EventStream,
     private readonly catalogCache: CatalogCache,
+    private readonly deviceIdentityPolicy: DeviceIdentityPolicy = "strict",
   ) {
     this.eventLoop = this.consumeEvents();
   }
@@ -101,6 +105,11 @@ export class CoreSession {
   /** Last known good data, retained across disconnects — never cleared by `disconnect()`. */
   get lastKnownSnapshot(): CoreSessionSnapshot {
     return this.snapshot;
+  }
+
+  /** Keep the latest GET_STATUS without re-running the full sync. */
+  observeStatus(status: GetStatusResponse): void {
+    this.snapshot = { ...this.snapshot, status };
   }
 
   get syncRelationship(): SyncRelationship | null {
@@ -210,7 +219,8 @@ export class CoreSession {
         this.deviceId = status.deviceId;
       }
 
-      if (this.deviceId !== null && this.binding.expectedDeviceId !== "" &&
+      if (this.deviceIdentityPolicy === "strict" &&
+          this.deviceId !== null && this.binding.expectedDeviceId !== "" &&
           !bytesEqualHex(this.deviceId, this.binding.expectedDeviceId)) {
         this._state = "ERROR";
         throw new CoreSessionError(
@@ -228,6 +238,15 @@ export class CoreSession {
       this._state = "READY";
       this._stale = false;
     } catch (cause) {
+      if (
+        this.snapshot.status &&
+        cause instanceof SpaghettiClientError &&
+        (cause.code === "TIMEOUT" || cause.code === "REBOOT_DURING_REQUEST")
+      ) {
+        this._stale = true;
+        this._state = "READY";
+        return;
+      }
       if (this._state !== "ERROR") this._state = "ERROR";
       throw cause;
     }

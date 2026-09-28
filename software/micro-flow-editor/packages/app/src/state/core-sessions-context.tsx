@@ -2,15 +2,15 @@ import type { CompileConfigInput } from "@spaghettilab/config-compiler";
 import type { DeploymentContext, DeploymentResult } from "@spaghettilab/config-deployment";
 import type { CommandOutcome, RunCommandRequest, ScanOutcome } from "@spaghettilab/core-actions";
 import type { DestructiveConfirmation, LeaseOutcome, MaintenanceOutcome, ResetScopeOutcome } from "@spaghettilab/core-admin";
-import { CatalogCache, CoreSession, type CoreSessionSnapshot, type SessionState, type SyncRelationship } from "@spaghettilab/core-session";
+import { bytesToHex, CatalogCache, CoreSession, type CoreSessionSnapshot, type SessionState, type SyncRelationship } from "@spaghettilab/core-session";
 import type { DeviceProfileDraft } from "@spaghettilab/device-profile-authoring-model";
 import type { InstallProfileResult } from "@spaghettilab/device-profile-install";
 import type { CoreBindingId, CoreBindingRecord, DomainError, PermissionSet, Result } from "@spaghettilab/domain";
-import { EventStream, SpaghettiClient, WebSerialProtocolTransport, WebSocketProtocolTransport, type AcceptDiscoveryRequest, type AcceptDiscoveryResponse, type AuditLogEntry, type DeviceProfileSummary, type DiscoveryCandidate, type DiscoveryEventPayload, type GetConnectivityStatusResponse, type GetJobStatusResponse, type GetUpdateStatusResponse, type ProtocolTransport, type RecordEventPayload } from "@spaghettilab/protocol-sdk";
+import { EventStream, SpaghettiClient, WebSerialProtocolTransport, WebSocketProtocolTransport, type AcceptDiscoveryRequest, type AcceptDiscoveryResponse, type AuditLogEntry, type DeviceProfileSummary, type DiscoveryCandidate, type DiscoveryEventPayload, type GetConnectivityStatusResponse, type GetJobStatusResponse, type GetStatusResponse, type GetUpdateStatusResponse, type ProtocolTransport, type RecordEventPayload } from "@spaghettilab/protocol-sdk";
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { connectBrowserWebSocket } from "../lib/browser-websocket-connection.js";
 import { openBrowserSerial, type UsbSerialPort } from "../lib/browser-serial-connection.js";
-import { coreDisplayName } from "../lib/core-identity.js";
+import { coreDisplayName, formatDeviceId, macBytesToColon, macToDeviceIdHex } from "../lib/core-identity.js";
 import { useSession } from "./session-context.js";
 
 export type CoreLink =
@@ -32,6 +32,42 @@ export type AttachedBackbone = {
   readonly local: boolean;
   readonly version?: string;
 };
+
+export function retainAttachedVersions(
+  previous: readonly AttachedBackbone[],
+  next: readonly AttachedBackbone[],
+): AttachedBackbone[] {
+  const prior = new Map(previous.map((peer) => [peer.deviceIdHex, peer.version]));
+  return next.map((peer) => {
+    const version = peer.version?.trim() || prior.get(peer.deviceIdHex)?.trim();
+    return version ? { ...peer, version } : peer;
+  });
+}
+
+export function attachedFromStatus(status: GetStatusResponse | undefined, expectedDeviceId: string): AttachedBackbone[] | null {
+  if (!status?.chainPeers?.length) return null;
+  const currentDeviceId = status.deviceId?.length ? bytesToHex(status.deviceId) : expectedDeviceId;
+  return status.chainPeers.map((peer) => {
+    const mac = macBytesToColon(peer.mac);
+    const version = (peer.version?.trim() || (peer.local ? status.version : undefined))?.trim();
+    return {
+      deviceIdHex: peer.local ? currentDeviceId : macToDeviceIdHex(mac),
+      mac,
+      nodeId: peer.nodeId,
+      local: peer.local,
+      ...(version ? { version } : {}),
+    };
+  });
+}
+
+/** Live GET_STATUS chain is authoritative. An empty list is only the USB/Wi-Fi root. */
+export function liveAttachedChain(
+  attached: readonly AttachedBackbone[],
+  fallback: AttachedBackbone,
+): AttachedBackbone[] {
+  if (attached.length === 0) return [fallback];
+  return [...attached];
+}
 
 function hostLinkFromCoreLink(link: CoreLink): HostLink {
   if (link.kind === "usb") return "usb";
@@ -57,6 +93,7 @@ type CoreSessionsContextValue = {
   rows: readonly CoreRowState[];
   connect(binding: CoreBindingRecord, link: CoreLink): Promise<void>;
   setAttachedBackbones(bindingId: CoreBindingId, peers: readonly AttachedBackbone[]): void;
+  observeStatus(bindingId: CoreBindingId, status: GetStatusResponse): void;
   cancel(bindingId: CoreBindingId): void;
   fail(bindingId: CoreBindingId, message: string): void;
   getSnapshot(bindingId: CoreBindingId): CoreSessionSnapshot | undefined;
@@ -151,6 +188,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
       sessionsRef.current.delete(binding.bindingId);
       disposersRef.current.get(binding.bindingId)?.();
       disposersRef.current.delete(binding.bindingId);
+      attachedRef.current.delete(binding.bindingId);
       if (link.kind === "can") {
         canViaRef.current.set(binding.bindingId, { viaDeviceIdHex: link.viaDeviceIdHex, nodeId: link.nodeId });
         rerender();
@@ -163,7 +201,8 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
         disposersRef.current.set(binding.bindingId, opened.dispose);
         const client = new SpaghettiClient(opened.transport, usbBridgeClientOptions(link));
         const eventStream = new EventStream(opened.transport);
-        const coreSession = new CoreSession(binding, client, eventStream, sharedCatalogCache);
+        const identityPolicy = hostLinkFromCoreLink(link) === "usb" ? "accept-current" : "strict";
+        const coreSession = new CoreSession(binding, client, eventStream, sharedCatalogCache, identityPolicy);
         sessionsRef.current.set(binding.bindingId, coreSession);
         opened.onDisconnected(() => {
           // Ignore a stale close from an already-superseded socket (e.g. a
@@ -171,19 +210,55 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
           // one's close event fired).
           if (sessionsRef.current.get(binding.bindingId) !== coreSession) return;
           coreSession.disconnect();
+          attachedRef.current.delete(binding.bindingId);
+          setErrors((prev) => {
+            if (!prev.has(binding.bindingId)) return prev;
+            const next = new Map(prev);
+            next.delete(binding.bindingId);
+            return next;
+          });
           rerender();
         });
         rerender();
 
         await coreSession.connect();
         if (session) coreSession.syncWithProject(session.stack.current, true);
+        const status = coreSession.lastKnownSnapshot.status;
+        const peers = attachedFromStatus(status, binding.expectedDeviceId);
+        attachedRef.current.set(
+          binding.bindingId,
+          peers ?? [
+            {
+              deviceIdHex: binding.expectedDeviceId,
+              mac: formatDeviceId(binding.expectedDeviceId),
+              nodeId: 0,
+              local: true,
+              ...(status?.version ? { version: status.version } : {}),
+            },
+          ],
+        );
         rerender();
       } catch (cause) {
-        sessionsRef.current.get(binding.bindingId)?.disconnect();
-        sessionsRef.current.get(binding.bindingId)?.dispose();
-        sessionsRef.current.delete(binding.bindingId);
-        disposersRef.current.get(binding.bindingId)?.();
-        disposersRef.current.delete(binding.bindingId);
+        const timeout = cause instanceof Error && cause.message.includes("TIMEOUT");
+        const quietUsbDisconnect = hostLinkFromCoreLink(link) === "usb";
+        if (!timeout || quietUsbDisconnect) {
+          sessionsRef.current.get(binding.bindingId)?.disconnect();
+          sessionsRef.current.get(binding.bindingId)?.dispose();
+          sessionsRef.current.delete(binding.bindingId);
+          disposersRef.current.get(binding.bindingId)?.();
+          disposersRef.current.delete(binding.bindingId);
+        }
+        if (quietUsbDisconnect) {
+          attachedRef.current.delete(binding.bindingId);
+          setErrors((prev) => {
+            if (!prev.has(binding.bindingId)) return prev;
+            const next = new Map(prev);
+            next.delete(binding.bindingId);
+            return next;
+          });
+          rerender();
+          return;
+        }
         setErrors((prev) => new Map(prev).set(binding.bindingId, cause instanceof Error ? cause.message : String(cause)));
         rerender();
       }
@@ -201,6 +276,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
       disposersRef.current.delete(bindingId);
       canViaRef.current.delete(bindingId);
       hostLinkRef.current.delete(bindingId);
+      attachedRef.current.delete(bindingId);
       rerender();
     },
     [rerender],
@@ -212,18 +288,30 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
   }, [rerender]);
 
   const setAttachedBackbones = useCallback((bindingId: CoreBindingId, peers: readonly AttachedBackbone[]) => {
-    attachedRef.current.set(bindingId, peers);
+    const next = retainAttachedVersions(attachedRef.current.get(bindingId) ?? [], peers);
+    const prev = attachedRef.current.get(bindingId) ?? [];
+    const same =
+      next.length === prev.length &&
+      next.every((peer, index) => peer.deviceIdHex === prev[index]?.deviceIdHex && peer.version === prev[index]?.version && peer.local === prev[index]?.local);
+    if (same) return;
+    attachedRef.current.set(bindingId, next);
     rerender();
   }, [rerender]);
+
+  const observeStatus = useCallback((bindingId: CoreBindingId, status: GetStatusResponse) => {
+    sessionsRef.current.get(bindingId)?.observeStatus(status);
+  }, []);
 
   const rows = useMemo<readonly CoreRowState[]>(() => {
     const bindings = session?.stack.current.coreBindings ?? [];
     return bindings.map((binding) => {
       const coreSession = sessionsRef.current.get(binding.bindingId);
       const deviceName = coreSession?.lastKnownSnapshot.status?.deviceName;
+      const currentDeviceId = coreSession?.lastKnownSnapshot.status?.deviceId;
+      const displayDeviceId = currentDeviceId?.length ? bytesToHex(currentDeviceId) : binding.expectedDeviceId;
       return {
         binding,
-        displayName: coreDisplayName(deviceName, binding.expectedDeviceId),
+        displayName: coreDisplayName(deviceName, displayDeviceId),
         sessionState: coreSession?.state ?? "DISCONNECTED",
         stale: coreSession?.stale ?? false,
         syncRelationship: coreSession?.syncRelationship ?? null,
@@ -285,6 +373,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     rows,
     connect,
     setAttachedBackbones,
+    observeStatus,
     cancel,
     fail,
     getSnapshot,

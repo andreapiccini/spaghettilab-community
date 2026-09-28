@@ -202,7 +202,7 @@ ZTEST(field_update, test_crc_mismatch_and_missing_backend)
 	zassert_equal(finish_calls, 0);
 	zassert_equal(spaghetti_field_update_send(
 		SPAGHETTI_UPDATE_TRANSPORT_CAN,
-		SPAGHETTI_FIELD_UPDATE_BROADCAST), -EINVAL);
+		SPAGHETTI_FIELD_UPDATE_BROADCAST), -ENOTSUP);
 	zassert_equal(spaghetti_field_update_send(
 		SPAGHETTI_UPDATE_TRANSPORT_CAN, 0x445566U), -ENOTSUP);
 	zassert_equal(spaghetti_field_update_send(

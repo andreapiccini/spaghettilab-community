@@ -804,10 +804,8 @@ static void nfc_fallback_work(struct k_work *work)
 	}
 
 	nfc_handle_wakeup(true);
-	if (!nfc_irq_armed) {
-		(void)k_work_schedule(&nfc_fallback_dwork,
-				      K_MSEC(NFC_FALLBACK_PERIOD_MS));
-	}
+	(void)k_work_schedule(&nfc_fallback_dwork,
+			      K_MSEC(NFC_FALLBACK_PERIOD_MS));
 }
 
 static int nfc_probe_chip(void)
@@ -889,19 +887,16 @@ int spaghetti_nfc_init(void)
 	if (nfc_wum_start(1U) < 0) {
 		LOG_WRN("wake-up mode failed, polling Type-A");
 		nfc_irq_armed = false;
-		(void)k_work_schedule(&nfc_fallback_dwork, K_MSEC(200));
-		return 0;
-	}
-	if (!nfc_irq_armed) {
+	} else if (!nfc_irq_armed) {
 		LOG_WRN("NFC IRQ GPIO missing, polling Type-A");
-		(void)k_work_schedule(&nfc_fallback_dwork, K_MSEC(200));
 	} else {
 #if SPAGHETTI_NFC_HAS_IRQ_GPIO
-		LOG_INF("NFC waiting on IRQ GPIO%u", nfc_irq.pin);
+		LOG_INF("NFC IRQ GPIO%u plus Type-A poll", nfc_irq.pin);
 #else
-		LOG_INF("NFC waiting on IRQ");
+		LOG_INF("NFC waiting on IRQ plus Type-A poll");
 #endif
 	}
+	(void)k_work_schedule(&nfc_fallback_dwork, K_MSEC(200));
 	return 0;
 }
 

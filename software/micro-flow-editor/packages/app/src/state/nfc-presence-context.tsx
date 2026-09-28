@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { formatDeviceId, macBytesToColon, macToDeviceIdHex } from "../lib/core-identity.js";
-import type { AttachedBackbone } from "./core-sessions-context.js";
+import { formatDeviceId, macBytesToColon } from "../lib/core-identity.js";
+import { attachedFromStatus } from "./core-sessions-context.js";
 import {
   collectNfcNodes,
   dismissNfcPopup,
@@ -13,7 +13,7 @@ import {
 import type { CoreBindingId } from "@spaghettilab/domain";
 import { useCoreSessions } from "./core-sessions-context.js";
 
-const POLL_MS = 4000;
+const POLL_MS = 1500;
 
 type NfcPresenceContextValue = {
   readonly nodesByBinding: ReadonlyMap<CoreBindingId, readonly NfcNode[]>;
@@ -25,7 +25,7 @@ type NfcPresenceContextValue = {
 const NfcPresenceContext = createContext<NfcPresenceContextValue | undefined>(undefined);
 
 export function NfcPresenceProvider({ children }: { readonly children: ReactNode }) {
-  const { rows, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones, onDiscoveryEvent } = useCoreSessions();
+  const { rows, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones, observeStatus, onDiscoveryEvent } = useCoreSessions();
   const [nodesByBinding, setNodesByBinding] = useState<ReadonlyMap<CoreBindingId, readonly NfcNode[]>>(new Map());
   const [loadingBindings, setLoadingBindings] = useState<ReadonlySet<CoreBindingId>>(new Set());
   const [queue, setQueue] = useState<NfcPopupQueue>(emptyNfcPopupQueue);
@@ -36,17 +36,34 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
   const refreshRef = useRef(() => {});
 
   const readyRoots = useMemo(
-    () => rows.filter((row) => row.sessionState === "READY" && row.viaCan === null),
+    () =>
+      rows.filter(
+        (row) =>
+          row.viaCan === null &&
+          (row.sessionState === "READY" || row.sessionState === "SYNCHRONIZING"),
+      ),
     [rows],
   );
   const readyKey = readyRoots.map((row) => row.binding.bindingId).join("|");
   const readyRootsRef = useRef(readyRoots);
   readyRootsRef.current = readyRoots;
+  const keepNfcIds = useMemo(
+    () =>
+      new Set(
+        rows
+          .filter(
+            (row) =>
+              row.viaCan === null &&
+              (row.sessionState === "READY" || row.sessionState === "SYNCHRONIZING"),
+          )
+          .map((row) => row.binding.bindingId),
+      ),
+    [rows],
+  );
 
   useEffect(() => {
-    const readyIds = new Set(readyRoots.map((row) => row.binding.bindingId));
     for (const id of [...primedRef.current]) {
-      if (readyIds.has(id)) continue;
+      if (keepNfcIds.has(id)) continue;
       primedRef.current.delete(id);
       lastNodesRef.current.delete(id);
     }
@@ -54,7 +71,7 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
       let changed = false;
       const next = new Map(prev);
       for (const id of next.keys()) {
-        if (readyIds.has(id)) continue;
+        if (keepNfcIds.has(id)) continue;
         next.delete(id);
         changed = true;
       }
@@ -64,13 +81,13 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
       let changed = false;
       const next = new Set(prev);
       for (const id of next) {
-        if (readyIds.has(id)) continue;
+        if (keepNfcIds.has(id)) continue;
         next.delete(id);
         changed = true;
       }
       return changed ? next : prev;
     });
-  }, [readyKey, readyRoots]);
+  }, [keepNfcIds]);
 
   useEffect(() => {
     if (readyRoots.length === 0) return undefined;
@@ -95,6 +112,12 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
           try {
             const client = getClient(bindingId);
             const status = client ? await client.getStatus() : getSnapshot(bindingId)?.status;
+            if (cancelled) return;
+            if (status) {
+              observeStatus(bindingId, status);
+              const peers = attachedFromStatus(status, row.binding.expectedDeviceId);
+              if (peers) setAttachedBackbones(bindingId, peers);
+            }
             let candidates: readonly { portId: number; suggestedTypeId: string }[] = [];
             try {
               candidates = (await listDiscoveryCandidates(bindingId)) ?? [];
@@ -118,23 +141,6 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
             );
             const previous = lastNodesRef.current.get(bindingId) ?? [];
             lastNodesRef.current.set(bindingId, nodes);
-            if (status?.chainPeers && status.chainPeers.length > 0) {
-              const attached: AttachedBackbone[] = status.chainPeers.map((peer) => {
-                const mac = macBytesToColon(peer.mac);
-                return {
-                  deviceIdHex: peer.local ? row.binding.expectedDeviceId : macToDeviceIdHex(mac),
-                  mac,
-                  nodeId: peer.nodeId,
-                  local: peer.local,
-                  ...(peer.version ? { version: peer.version } : {}),
-                };
-              });
-              const remotes = attached.filter((peer) => !peer.local);
-              const alreadyHadRemotes = row.attachedBackbones.some((peer) => !peer.local);
-              if (!firstLook || remotes.length > 0 || !alreadyHadRemotes) {
-                setAttachedBackbones(bindingId, attached);
-              }
-            }
             setNodesByBinding((prev) => {
               const next = new Map(prev);
               next.set(bindingId, nodes);
@@ -178,7 +184,7 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [readyKey, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones]);
+  }, [readyKey, getClient, getSnapshot, listDiscoveryCandidates, setAttachedBackbones, observeStatus]);
 
   useEffect(() => {
     const unsubs: (() => void)[] = [];

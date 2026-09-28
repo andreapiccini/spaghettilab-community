@@ -65,21 +65,13 @@ export async function probeUsbBridgeCores(): Promise<readonly FoundUsbCore[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   try {
-    const response = await fetch(usbBridgeListUrl(), { signal: controller.signal });
+    const response = await fetch(usbBridgeListUrl(), { signal: controller.signal, cache: "no-store" });
     if (!response.ok) return [];
     const document = (await response.json()) as {
       cores?: readonly {
         deviceIdHex?: string;
         deviceName?: string;
         version?: string;
-        peers?: readonly {
-          deviceIdHex?: string;
-          deviceName?: string;
-          nodeId?: number;
-          mac?: string;
-          role?: string;
-          version?: string;
-        }[];
       }[];
     };
     const cores: FoundUsbCore[] = [];
@@ -93,19 +85,9 @@ export async function probeUsbBridgeCores(): Promise<readonly FoundUsbCore[]> {
         deviceName: item.deviceName?.trim() ?? "",
         version: item.version ?? "",
       });
-      for (const peer of item.peers ?? []) {
-        const peerId = peer.deviceIdHex?.toLowerCase();
-        if (!peerId || peerId === deviceIdHex || peer.role === "master") continue;
-        cores.push({
-          source: "can",
-          viaDeviceIdHex: deviceIdHex,
-          nodeId: peer.nodeId ?? 0,
-          mac: peer.mac ?? "",
-          deviceIdHex: peerId,
-          deviceName: peer.deviceName?.trim() ?? "",
-          version: peer.version?.trim() ?? "",
-        });
-      }
+      // CAN peers are not connect targets. Live chainPeers after USB/Wi-Fi
+      // connect drive the Master/Slave list — stale bridge peers must not
+      // appear in the Connetti picker.
     }
     return cores;
   } catch {

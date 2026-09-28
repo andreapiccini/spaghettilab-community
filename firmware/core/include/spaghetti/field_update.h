@@ -139,10 +139,12 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 				    size_t *count);
 
 /**
- * @brief Copy the last Discover table without touching the CAN bus.
+ * @brief Copy the last completed Discover table without touching the CAN bus.
  *
- * Used by GET_STATUS so the host can drop peers that stopped answering
- * the periodic sweep. The local row is always present after init.
+ * Used by GET_STATUS after the serialized periodic presence sweep publishes a
+ * complete snapshot. Event delivery is asynchronous, so the protocol request
+ * never blocks behind a CAN discovery window. The local row is always present
+ * after init.
  *
  * @param[out] out Caller-owned table, or NULL when only @p count is needed.
  * @param[in] max Number of entries at @p out; ignored when @p out is NULL.

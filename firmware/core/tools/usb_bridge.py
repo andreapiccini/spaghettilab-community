@@ -28,7 +28,10 @@ from dataclasses import dataclass
 from typing import Any
 
 from tools.device import open_serial_without_reset, serial_ports
+import cbor2
+
 from tools.spaghetti_protocol import (
+    CoreStatus,
     Operation,
     decode_get_status_response,
     decode_response,
@@ -41,7 +44,7 @@ KIND_RESPONSE = 0x00
 KIND_EVENT = 0x01
 KIND_REQUEST = 0x02
 HEADER_SIZE = 5
-ENVELOPE_MAX = 512 + 64
+ENVELOPE_MAX = 2048 + 64
 DEFAULT_LISTEN = "127.0.0.1:8766"
 IDENTIFY_TIMEOUT_S = 4.0
 RESPONSE_WAIT_S = 8.0
@@ -114,9 +117,7 @@ _SLUP_PEER_LINE = re.compile(
     r"(?:\s+(\S+))?\s*$",
     re.MULTILINE,
 )
-SLUP_LIST_TIMEOUT_S = 2.5
-SLUP_LIST_GIVE_UP_S = 0.4
-SLUP_LIST_CACHE_S = 30.0
+STATUS_PEERS_TIMEOUT_S = 2.5
 
 
 def _drain_serial(connection: Any, settle_s: float = 0.15) -> None:
@@ -171,46 +172,82 @@ def parse_slup_list(text: str) -> tuple[SlupPeer, ...]:
     return tuple(peers)
 
 
-def _slup_list_sync(core: BoundCore) -> tuple[SlupPeer, ...]:
-    """Leave Protocol mode briefly and run the existing `slup list` shell command."""
-    now = time.monotonic()
-    if core.slup_peers and (now - core.slup_peers_at) < SLUP_LIST_CACHE_S:
-        return core.slup_peers
+def _mac_device_id(mac: bytes) -> str:
+    hex_id = mac.hex()
+    return hex_id + ("0" * max(0, 64 - len(hex_id)))
 
+
+def peers_from_status(status: CoreStatus, fallback_id: str) -> tuple[SlupPeer, ...]:
+    peers: list[SlupPeer] = []
+    for peer in status.chain_peers:
+        mac = ":".join(f"{byte:02x}" for byte in peer.mac[:6]) if peer.mac else ""
+        device_id = _mac_device_id(peer.mac) if peer.mac else fallback_id
+        peers.append(
+            SlupPeer(
+                device_id_hex=device_id,
+                device_name="",
+                node_id=peer.node_id,
+                mac=mac,
+                role="master" if peer.local else "peer",
+                version=peer.version,
+            )
+        )
+    return tuple(peers)
+
+
+def _apply_status(core: BoundCore, status: CoreStatus) -> None:
+    if status.device_id:
+        core.device_id_hex = status.device_id.hex()
+    if status.device_name is not None:
+        core.device_name = status.device_name
+    if status.version:
+        core.version = status.version
+    core.slup_peers = peers_from_status(status, core.device_id_hex)
+    core.slup_peers_at = time.monotonic()
+
+
+def _get_status_sync(core: BoundCore) -> CoreStatus | None:
+    """Read one live status from an idle USB root."""
     conn = core.connection
     buffer = bytearray()
     try:
         with core.write_lock:
-            conn.write(b"\x03")
-            conn.flush()
-            time.sleep(0.12)
             if hasattr(conn, "reset_input_buffer"):
                 conn.reset_input_buffer()
-            conn.write(b"slup list\r\n")
+            envelope = encode_request(
+                IDENTIFY_CORRELATION, Operation.GET_STATUS, EMPTY_MAP_PAYLOAD
+            )
+            conn.write(encode_usb_frame(KIND_REQUEST, envelope))
             conn.flush()
-            deadline = time.monotonic() + SLUP_LIST_TIMEOUT_S
-            started = time.monotonic()
+            deadline = time.monotonic() + STATUS_PEERS_TIMEOUT_S
             while time.monotonic() < deadline:
                 waiting = getattr(conn, "in_waiting", 0) or 0
                 chunk = conn.read(waiting if waiting else 1)
-                if chunk:
-                    buffer.extend(chunk)
-                    text = bytes(buffer).decode("utf-8", errors="replace")
-                    if "load/blink" in text or "SLUP list failed" in text:
+                if not chunk:
+                    time.sleep(0.01)
+                    continue
+                buffer.extend(chunk)
+                while True:
+                    parsed = pop_usb_frame(buffer)
+                    if parsed is None:
                         break
-                elif (time.monotonic() - started) > SLUP_LIST_GIVE_UP_S and not buffer:
-                    break
+                    kind, body = parsed
+                    if kind != KIND_RESPONSE:
+                        continue
+                    _corr, name, _code, payload = decode_response(body)
+                    if name != "ok":
+                        return None
+                    return decode_get_status_response(payload)
     except Exception as exc:  # noqa: BLE001
-        logger.debug("slup list failed port=%s: %s", core.port, exc)
-        return core.slup_peers
-    finally:
-        _drain_serial(conn)
+        logger.debug("GET_STATUS failed port=%s: %s", core.port, exc)
+    return None
 
-    peers = parse_slup_list(bytes(buffer).decode("utf-8", errors="replace"))
-    if peers:
-        core.slup_peers = peers
-        core.slup_peers_at = time.monotonic()
-        return peers
+
+def _status_peers_sync(core: BoundCore) -> tuple[SlupPeer, ...]:
+    """Read live chainPeers from GET_STATUS without leaving Protocol mode."""
+    status = _get_status_sync(core)
+    if status is not None:
+        _apply_status(core, status)
     return core.slup_peers
 
 
@@ -264,7 +301,7 @@ def _identify_sync(port: str) -> BoundCore | None:
                     device_id = status.device_id.hex()
                 else:
                     device_id = f"usb-{port.rsplit('/', 1)[-1]}"
-                return BoundCore(
+                core = BoundCore(
                     device_id_hex=device_id,
                     device_name=status.device_name or "",
                     version=status.version,
@@ -272,6 +309,8 @@ def _identify_sync(port: str) -> BoundCore | None:
                     connection=conn,
                     write_lock=threading.Lock(),
                 )
+                _apply_status(core, status)
+                return core
         _close_quiet(conn)
         return None
     except Exception as exc:  # noqa: BLE001
@@ -303,6 +342,43 @@ class UsbBridge:
             for device_id in stale:
                 _close_quiet(self.cores[device_id].connection)
                 del self.cores[device_id]
+
+            # A macOS USB serial path is commonly reused when boards are
+            # swapped. Revalidate every idle root instead of treating the
+            # path as a permanent device identity.
+            idle = [
+                (device_id, core)
+                for device_id, core in self.cores.items()
+                if device_id not in self._busy and core.port in present
+            ]
+
+        for old_device_id, core in idle:
+            status = _get_status_sync(core)
+            if status is None:
+                _close_quiet(core.connection)
+                with self._lock:
+                    if self.cores.get(old_device_id) is core:
+                        del self.cores[old_device_id]
+                continue
+
+            _apply_status(core, status)
+            if core.device_id_hex == old_device_id:
+                continue
+            with self._lock:
+                if self.cores.get(old_device_id) is core:
+                    del self.cores[old_device_id]
+                replaced = self.cores.get(core.device_id_hex)
+                if replaced is not None and replaced is not core:
+                    _close_quiet(replaced.connection)
+                self.cores[core.device_id_hex] = core
+            logger.info(
+                "core on %s changed identity %s -> %s",
+                core.port,
+                old_device_id[:12],
+                core.device_id_hex[:12],
+            )
+
+        with self._lock:
             known_ports = {core.port for core in self.cores.values()}
 
         for path in present:
@@ -334,7 +410,10 @@ class UsbBridge:
             busy = False
             with self._lock:
                 busy = core.device_id_hex in self._busy
-            peers = core.slup_peers if busy else _slup_list_sync(core)
+            # While a Flow session owns the port we cannot refresh GET_STATUS.
+            # Serving the last cached peers makes unplugged slaves linger in the
+            # Connetti picker — omit them until the port is free again.
+            peers = () if busy else core.slup_peers
             document.append(
                 {
                     "deviceIdHex": core.device_id_hex,
@@ -362,6 +441,17 @@ class UsbBridge:
         with self._lock:
             return self.cores.get(device_id_hex)
 
+    def resolve(self, device_id_hex: str) -> tuple[str, BoundCore] | None:
+        """Resolve an exact root, or the sole live USB root after a board swap."""
+        with self._lock:
+            core = self.cores.get(device_id_hex)
+            if core is not None:
+                return device_id_hex, core
+            if len(self.cores) == 1:
+                actual_id, actual_core = next(iter(self.cores.items()))
+                return actual_id, actual_core
+            return None
+
     def try_acquire(self, device_id_hex: str) -> BoundCore | None:
         with self._lock:
             core = self.cores.get(device_id_hex)
@@ -385,18 +475,37 @@ class UsbBridge:
 
 def _read_serial_chunks(
     connection: Any,
+    port: str,
     stop: threading.Event,
     queue: asyncio.Queue[bytes],
     loop: asyncio.AbstractEventLoop,
 ) -> None:
+    last_presence_check = 0.0
+
+    def publish(chunk: bytes) -> bool:
+        try:
+            loop.call_soon_threadsafe(queue.put_nowait, chunk)
+            return True
+        except RuntimeError:
+            return False
+
     try:
         while not stop.is_set():
             waiting = connection.in_waiting
             chunk = connection.read(waiting if waiting else 1)
             if chunk:
-                loop.call_soon_threadsafe(queue.put_nowait, bytes(chunk))
+                if not publish(bytes(chunk)):
+                    return
+                continue
+            now = time.monotonic()
+            if now - last_presence_check < 0.5:
+                continue
+            last_presence_check = now
+            if port not in set(serial_ports()):
+                publish(b"")
+                return
     except Exception:  # noqa: BLE001
-        loop.call_soon_threadsafe(queue.put_nowait, b"")
+        publish(b"")
 
 
 async def _pipe_core(websocket: Any, core: BoundCore) -> None:
@@ -406,7 +515,7 @@ async def _pipe_core(websocket: Any, core: BoundCore) -> None:
     loop = asyncio.get_running_loop()
     reader = threading.Thread(
         target=_read_serial_chunks,
-        args=(core.connection, stop, incoming, loop),
+        args=(core.connection, core.port, stop, incoming, loop),
         daemon=True,
     )
     reader.start()
@@ -418,6 +527,7 @@ async def _pipe_core(websocket: Any, core: BoundCore) -> None:
         while True:
             chunk = await incoming.get()
             if not chunk:
+                await websocket.close(1011, "serial disconnected")
                 return
             buffer.extend(chunk)
             while True:
@@ -427,6 +537,19 @@ async def _pipe_core(websocket: Any, core: BoundCore) -> None:
                 kind, envelope = parsed
                 if kind == KIND_RESPONSE:
                     idle.set()
+                    try:
+                        _corr, name, _code, payload = decode_response(envelope)
+                        if name == "ok":
+                            document = cbor2.loads(payload)
+                            if (
+                                isinstance(document, dict)
+                                and 5 in document
+                                and 8 in document
+                                and 9 in document
+                            ):
+                                _apply_status(core, decode_get_status_response(payload))
+                    except Exception:  # noqa: BLE001
+                        pass
                 await websocket.send(bytes([kind]) + envelope)
 
     serial_task = asyncio.create_task(pump_serial())
@@ -459,6 +582,7 @@ async def _pipe_core(websocket: Any, core: BoundCore) -> None:
             await serial_task
         except asyncio.CancelledError:
             pass
+        await asyncio.to_thread(reader.join, 1.0)
 
 
 def make_handler(bridge: UsbBridge):
@@ -475,14 +599,21 @@ def make_handler(bridge: UsbBridge):
                 await websocket.send(json.dumps(document))
                 return
             if path.startswith("/core/"):
-                device_id = path[len("/core/") :].lower()
-                core = bridge.get(device_id)
-                if core is None:
+                requested_id = path[len("/core/") :].lower()
+                resolved = bridge.resolve(requested_id)
+                if resolved is None:
                     await asyncio.to_thread(bridge.refresh)
-                    core = bridge.get(device_id)
-                if core is None:
+                    resolved = bridge.resolve(requested_id)
+                if resolved is None:
                     await websocket.close(4404, "unknown core")
                     return
+                device_id, core = resolved
+                if device_id != requested_id:
+                    logger.info(
+                        "routing replaced USB root %s -> %s",
+                        requested_id[:12],
+                        device_id[:12],
+                    )
                 previous = bridge.take_session(device_id)
                 if previous is not None:
                     try:

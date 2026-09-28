@@ -6,6 +6,7 @@ import {
   emptyNfcPopupQueue,
   enqueueNfcPopups,
   nfcEventsFromDiff,
+  nfcNodesForBoard,
   type NfcPopupEvent,
 } from "../nfc-presence.js";
 
@@ -36,6 +37,22 @@ describe("collectNfcNodes", () => {
     ).toEqual([
       { portId: 1, label: "Tag NFC", nodeId: 0xe18030, backboneMac: "90:70:69:e1:80:30" },
     ]);
+  });
+});
+
+describe("nfcNodesForBoard", () => {
+  const master = { nodeId: 0xe1c52c, local: true, mac: "90:70:69:e1:c5:2c", deviceIdHex: "907069e1c52c" };
+  const slave = { nodeId: 0xe18030, local: false, mac: "90:70:69:e1:80:30", deviceIdHex: "907069e18030" };
+  const masterTag = { portId: 1, label: "Tag NFC", nodeId: 0xe1c52c, backboneMac: "90:70:69:e1:c5:2c" };
+  const slaveTag = { portId: 2, label: "Tag NFC", nodeId: 0xe18030, backboneMac: "90:70:69:e1:80:30" };
+
+  it("keeps each tag on the backbone that reported it", () => {
+    expect(nfcNodesForBoard(master, [masterTag, slaveTag])).toEqual([masterTag]);
+    expect(nfcNodesForBoard(slave, [masterTag, slaveTag])).toEqual([slaveTag]);
+  });
+
+  it("still shows local tags when the USB row has no SLUP node id", () => {
+    expect(nfcNodesForBoard({ ...master, nodeId: 0 }, [masterTag, slaveTag])).toEqual([masterTag]);
   });
 });
 

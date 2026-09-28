@@ -39,17 +39,13 @@ export function BackboneNetworkGraph({
         viewBox={`0 0 ${layout.width} ${layout.height}`}
         className="block h-[260px] w-full"
         role="img"
-        aria-label={copy.attachedCount(boards.length)}
+        aria-label={copy.chainCaption(boards.length)}
       >
         <defs>
           <radialGradient id={`${uid}-glow`} cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="var(--color-brand-cyan-glow)" stopOpacity="0.22" />
             <stop offset="100%" stopColor="var(--color-brand-cyan-glow)" stopOpacity="0" />
           </radialGradient>
-          <linearGradient id={`${uid}-can`} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="var(--color-brand-blue)" />
-            <stop offset="100%" stopColor="var(--color-brand-cyan-glow)" />
-          </linearGradient>
         </defs>
 
         {layout.nodes
@@ -70,16 +66,28 @@ export function BackboneNetworkGraph({
               <path
                 d={path}
                 fill="none"
-                stroke={can ? `url(#${uid}-can)` : host ? "var(--color-ink-muted)" : "var(--color-border-strong)"}
-                strokeWidth={can ? 4 : host ? 2.5 : 1.5}
+                stroke={can ? "var(--color-brand-blue)" : host ? "var(--color-ink-muted)" : "var(--color-border-strong)"}
+                strokeWidth={can ? 3 : host ? 2.5 : 1.5}
                 strokeLinecap="round"
-                strokeDasharray={can ? "7 7" : host ? undefined : "3 5"}
-                style={can || !host ? { animation: `${flow} ${can ? 1.4 : 2.2}s linear infinite` } : undefined}
+                strokeDasharray={host ? undefined : can ? undefined : "3 5"}
+                style={!can && !host ? { animation: `${flow} 2.2s linear infinite` } : undefined}
               />
               {can && (
-                <circle r="3.5" fill="var(--color-brand-cyan-glow)">
-                  <animateMotion dur="2.2s" repeatCount="indefinite" path={path} />
-                </circle>
+                <>
+                  <circle r="3.5" fill="var(--color-brand-blue)">
+                    <animateMotion dur="2.4s" repeatCount="indefinite" path={path} />
+                  </circle>
+                  <circle r="3.5" fill="var(--color-brand-cyan-glow)">
+                    <animateMotion
+                      dur="2.4s"
+                      repeatCount="indefinite"
+                      path={path}
+                      keyPoints="1;0"
+                      keyTimes="0;1"
+                      calcMode="linear"
+                    />
+                  </circle>
+                </>
               )}
             </g>
           );

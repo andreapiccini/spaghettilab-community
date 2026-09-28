@@ -13,7 +13,7 @@ import { probeUsbCores, requestUsbCorePort, usbSerialSupported, type FoundUsbCor
 import { uuidGenerator } from "../../lib/repository.js";
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
-import type { AttachedBackbone, CoreLink } from "../../state/core-sessions-context.js";
+import type { CoreLink } from "../../state/core-sessions-context.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 
 type Method = "auto" | "network" | "usb";
@@ -53,7 +53,7 @@ export function ConnectCoreDialog({
       .then((found) => {
         if (cancelled) return;
         setUsbCores(found);
-        setSelectedIds(new Set(found.map((core) => core.deviceIdHex)));
+        setSelectedIds(new Set(found.filter((core) => core.source !== "can").map((core) => core.deviceIdHex)));
       })
       .catch((cause: unknown) => {
         if (cancelled) return;
@@ -162,7 +162,6 @@ export function ConnectCoreDialog({
       } else {
         const nick = nickname.trim();
         const usbSelected = selectedUsb.filter((core) => core.source !== "can");
-        const canSelected = selectedUsb.filter((core) => core.source === "can");
         for (const core of usbSelected) {
           const displayName = usbSelected.length === 1 && nick ? nick : coreDisplayName(core.deviceName, core.deviceIdHex);
           const binding = await bindAndConnect({
@@ -174,19 +173,9 @@ export function ConnectCoreDialog({
             port: 1,
           });
           if (!binding) continue;
-          const peers: AttachedBackbone[] = [
+          setAttachedBackbones(binding.bindingId, [
             { deviceIdHex: core.deviceIdHex, mac: formatDeviceId(core.deviceIdHex), nodeId: 0, local: true, version: core.version || undefined },
-            ...canSelected
-              .filter((peer) => peer.viaDeviceIdHex === core.deviceIdHex)
-              .map((peer) => ({
-                deviceIdHex: peer.deviceIdHex,
-                mac: peer.mac || formatDeviceId(peer.deviceIdHex),
-                nodeId: peer.nodeId,
-                local: false,
-                version: peer.version || undefined,
-              })),
-          ];
-          setAttachedBackbones(binding.bindingId, peers);
+          ]);
         }
       }
       setNickname("");
@@ -274,7 +263,7 @@ export function ConnectCoreDialog({
                           void probeUsbCores()
                             .then((found) => {
                               setUsbCores(found);
-                              setSelectedIds(new Set(found.map((core) => core.deviceIdHex)));
+                              setSelectedIds(new Set(found.filter((core) => core.source !== "can").map((core) => core.deviceIdHex)));
                             })
                             .catch((cause: unknown) => {
                               setError(localizeUsbError(cause, copy));
@@ -289,50 +278,27 @@ export function ConnectCoreDialog({
                     <ul className="flex max-h-56 flex-col gap-3 overflow-auto">
                       {usbCores
                         .filter((core) => core.source !== "can")
-                        .map((master, groupIndex) => {
-                          const slaves = usbCores.filter(
-                            (core) => core.source === "can" && core.viaDeviceIdHex === master.deviceIdHex,
-                          );
-                          return (
-                            <li key={master.deviceIdHex} className="rounded-slsm bg-surface-sunken px-2 py-2">
+                        .map((root, groupIndex) => (
+                            <li key={root.deviceIdHex} className="rounded-slsm bg-surface-sunken px-2 py-2">
                               <p className="px-1 pb-1 font-body text-xs font-semibold text-ink-muted">
-                                {copy.groupTitle(groupIndex + 1)}
+                                {copy.connectionGroup(groupIndex + 1)}
                               </p>
                               <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-slsm px-2 hover:bg-surface-raised">
                                 <input
                                   type="checkbox"
-                                  checked={selectedIds.has(master.deviceIdHex)}
-                                  onChange={() => toggleUsb(master.deviceIdHex)}
+                                  checked={selectedIds.has(root.deviceIdHex)}
+                                  onChange={() => toggleUsb(root.deviceIdHex)}
                                 />
                                 <span className="min-w-0 flex-1">
-                                  <span className="block truncate font-body text-sm font-semibold text-ink">{copy.master}</span>
+                                  <span className="block truncate font-body text-sm font-semibold text-ink">{copy.backbone(groupIndex + 1)}</span>
                                   <span className="flex items-center gap-1 font-body text-xs text-ink-muted">
                                     <Cable size={12} />
-                                    {master.version || copy.viaCable}
+                                    {root.version ? copy.commit(root.version) : copy.viaCable}
                                   </span>
                                 </span>
                               </label>
-                              {slaves.map((slave, slaveIndex) => (
-                                <label
-                                  key={slave.deviceIdHex}
-                                  className="flex min-h-10 cursor-pointer items-center gap-3 rounded-slsm px-2 pl-8 hover:bg-surface-raised"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedIds.has(slave.deviceIdHex)}
-                                    onChange={() => toggleUsb(slave.deviceIdHex)}
-                                  />
-                                  <span className="min-w-0">
-                                    <span className="block font-body text-sm text-ink">{copy.slave(slaveIndex + 1)}</span>
-                                    {slave.version ? (
-                                      <span className="block font-body text-xs text-ink-muted">{slave.version}</span>
-                                    ) : null}
-                                  </span>
-                                </label>
-                              ))}
                             </li>
-                          );
-                        })}
+                          ))}
                     </ul>
                   )}
                   {method === "usb" && usbSerialSupported() && (

@@ -40,9 +40,11 @@ struct spaghetti_nfc_tag {
  * @brief Probe the ST25R100 and arm low-power card detection on IRQ.
  *
  * The chip sits in wake-up mode and asserts the IRQ GPIO when I/Q load
- * changes. The work item then runs Type-A and notifies the host. Missing
- * Devicetree wiring or a missing chip is not a boot failure: the table
- * stays empty and later copies succeed with a zero count.
+ * changes. The work item then runs Type-A and notifies the host. A
+ * periodic Type-A scan still runs so a missed wake-up does not hide a
+ * tag that is already on the antenna. Missing Devicetree wiring or a
+ * missing chip is not a boot failure: the table stays empty and later
+ * copies succeed with a zero count.
  *
  * @retval 0 Wake-up mode is armed, or this image has no NFC hardware.
  * @retval -EALREADY Initialization already completed.

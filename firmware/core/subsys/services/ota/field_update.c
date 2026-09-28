@@ -128,11 +128,24 @@ static atomic_t slup_progress_can;
 static atomic_t slup_xfer_active;
 static struct spaghetti_slup_peer slup_peers[SPAGHETTI_SLUP_PEERS_MAX];
 static size_t slup_peer_count;
+static bool slup_peer_live[SPAGHETTI_SLUP_PEERS_MAX];
+static int64_t slup_peer_seen_ms[SPAGHETTI_SLUP_PEERS_MAX];
+static struct spaghetti_slup_peer slup_peers_pub[SPAGHETTI_SLUP_PEERS_MAX];
+static size_t slup_peer_pub_count;
+static int64_t slup_peer_pub_seen_ms[SPAGHETTI_SLUP_PEERS_MAX];
 static struct spaghetti_nfc_tag slup_nfc_remotes[SPAGHETTI_NFC_TAGS_MAX];
 static size_t slup_nfc_remote_count;
 
+static void slup_publish_peers_locked(void);
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
+	defined(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
+static void slup_mark_peer_live_locked(uint32_t node_id);
+#endif
+static void slup_prune_unconfirmed_locked(void);
+
 #define SLUP_PRESENCE_PERIOD_MS 2000U
 #define SLUP_PRESENCE_FIRST_MS 400U
+#define SLUP_PRESENCE_EXPIRE_MS 5000U
 
 static void slup_presence_work(struct k_work *work);
 static K_WORK_DELAYABLE_DEFINE(slup_presence_dwork, slup_presence_work);
@@ -333,6 +346,7 @@ static void slup_ui_bind(const void *shell)
 }
 #endif
 K_MUTEX_DEFINE(field_update_lock);
+K_MUTEX_DEFINE(slup_discovery_lock);
 K_SEM_DEFINE(field_update_ack_sem, 0, 1);
 
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
@@ -595,7 +609,8 @@ static void slup_fill_self(struct spaghetti_slup_peer *peer)
 #if defined(CONFIG_SHELL) || defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
 	defined(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
 static void slup_note_peer_locked(uint32_t node_id, const uint8_t mac[6],
-				  uint8_t flags, uint8_t chain_index)
+				  uint8_t flags, uint8_t chain_index,
+				  bool create)
 {
 	size_t i;
 
@@ -614,7 +629,7 @@ static void slup_note_peer_locked(uint32_t node_id, const uint8_t mac[6],
 			return;
 		}
 	}
-	if (slup_peer_count >= SPAGHETTI_SLUP_PEERS_MAX) {
+	if (!create || (slup_peer_count >= SPAGHETTI_SLUP_PEERS_MAX)) {
 		return;
 	}
 	slup_peers[slup_peer_count].node_id = node_id;
@@ -628,9 +643,67 @@ static void slup_note_peer_locked(uint32_t node_id, const uint8_t mac[6],
 	slup_peers[slup_peer_count].chain_index = chain_index;
 	memset(slup_peers[slup_peer_count].version, 0,
 	       sizeof(slup_peers[slup_peer_count].version));
+	slup_peer_live[slup_peer_count] = false;
+	slup_peer_seen_ms[slup_peer_count] = 0;
 	slup_peer_count += 1U;
 }
 #endif
+
+struct slup_version_cache {
+	uint32_t node_id;
+	char version[SPAGHETTI_SLUP_VERSION_SIZE];
+};
+
+static void slup_cache_versions(struct slup_version_cache *cache, size_t *count)
+{
+	size_t i;
+
+	*count = slup_peer_count;
+	for (i = 0U; i < slup_peer_count; ++i) {
+		cache[i].node_id = slup_peers[i].node_id;
+		memcpy(cache[i].version, slup_peers[i].version,
+		       SPAGHETTI_SLUP_VERSION_SIZE);
+	}
+}
+
+static void slup_restore_versions(const struct slup_version_cache *cache,
+				  size_t count)
+{
+	size_t i;
+	size_t j;
+
+	for (i = 0U; i < slup_peer_count; ++i) {
+		if (slup_peers[i].version[0] != '\0') {
+			continue;
+		}
+		for (j = 0U; j < count; ++j) {
+			if ((cache[j].node_id == slup_peers[i].node_id) &&
+			    (cache[j].version[0] != '\0')) {
+				memcpy(slup_peers[i].version, cache[j].version,
+				       SPAGHETTI_SLUP_VERSION_SIZE);
+				break;
+			}
+		}
+	}
+}
+
+static bool slup_peer_has_version(uint32_t node_id)
+{
+	bool have = false;
+	size_t i;
+
+	node_id &= SPAGHETTI_SLUP_NODE_MASK;
+	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	for (i = 0U; i < slup_peer_count; ++i) {
+		if ((slup_peers[i].node_id == node_id) &&
+		    (slup_peers[i].version[0] != '\0')) {
+			have = true;
+			break;
+		}
+	}
+	k_mutex_unlock(&field_update_lock);
+	return have;
+}
 
 static int slup_peer_order(const struct spaghetti_slup_peer *left,
 			   const struct spaghetti_slup_peer *right)
@@ -659,24 +732,86 @@ static void slup_sort_peers_locked(void)
 
 	for (i = 1U; i < slup_peer_count; ++i) {
 		struct spaghetti_slup_peer key = slup_peers[i];
+		const bool key_live = slup_peer_live[i];
+		const int64_t key_seen_ms = slup_peer_seen_ms[i];
 
 		j = i;
 		while ((j > 0U) &&
 		       (slup_peer_order(&key, &slup_peers[j - 1U]) < 0)) {
 			slup_peers[j] = slup_peers[j - 1U];
+			slup_peer_live[j] = slup_peer_live[j - 1U];
+			slup_peer_seen_ms[j] = slup_peer_seen_ms[j - 1U];
 			j -= 1U;
 		}
 		slup_peers[j] = key;
+		slup_peer_live[j] = key_live;
+		slup_peer_seen_ms[j] = key_seen_ms;
 	}
+}
+
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
+	defined(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
+static void slup_mark_peer_live_locked(uint32_t node_id)
+{
+	size_t i;
+
+	node_id &= SPAGHETTI_SLUP_NODE_MASK;
+	for (i = 0U; i < slup_peer_count; ++i) {
+		if (slup_peers[i].node_id == node_id) {
+			slup_peer_live[i] = true;
+			slup_peer_seen_ms[i] = k_uptime_get();
+			return;
+		}
+	}
+}
+#endif
+
+static void slup_prune_unconfirmed_locked(void)
+{
+	size_t read;
+	size_t write = 0U;
+
+	for (read = 0U; read < slup_peer_count; ++read) {
+		const bool local =
+			(slup_peers[read].flags & SPAGHETTI_SLUP_FLAG_LOCAL) !=
+			0U;
+
+		if (!local && !slup_peer_live[read]) {
+			continue;
+		}
+		if (write != read) {
+			slup_peers[write] = slup_peers[read];
+			slup_peer_live[write] = slup_peer_live[read];
+			slup_peer_seen_ms[write] = slup_peer_seen_ms[read];
+		}
+		write += 1U;
+	}
+	slup_peer_count = write;
+}
+
+static void slup_publish_peers_locked(void)
+{
+	if (slup_peer_count == 0U) {
+		slup_fill_self(&slup_peers[0]);
+		slup_peer_count = 1U;
+		slup_peer_live[0] = true;
+		slup_peer_seen_ms[0] = k_uptime_get();
+	}
+	slup_sort_peers_locked();
+	slup_peer_pub_count = slup_peer_count;
+	memcpy(slup_peers_pub, slup_peers,
+	       slup_peer_count * sizeof(slup_peers[0]));
+	memcpy(slup_peer_pub_seen_ms, slup_peer_seen_ms,
+	       slup_peer_count * sizeof(slup_peer_seen_ms[0]));
 }
 
 #if defined(CONFIG_SHELL) || defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
 	defined(CONFIG_SPAGHETTI_FIELD_UPDATE_ESPNOW)
 static void slup_note_peer(uint32_t node_id, const uint8_t mac[6],
-			   uint8_t flags, uint8_t chain_index)
+			   uint8_t flags, uint8_t chain_index, bool create)
 {
 	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
-	slup_note_peer_locked(node_id, mac, flags, chain_index);
+	slup_note_peer_locked(node_id, mac, flags, chain_index, create);
 	k_mutex_unlock(&field_update_lock);
 }
 #endif
@@ -766,7 +901,8 @@ static int slup_fetch_peer_version(uint32_t dest_node_id, char *out)
 		return -EINVAL;
 	}
 
-	slup_note_peer(dest_node_id, NULL, 0U, SPAGHETTI_SLUP_CHAIN_UNKNOWN);
+	slup_note_peer(dest_node_id, NULL, 0U, SPAGHETTI_SLUP_CHAIN_UNKNOWN,
+		       true);
 	slup_clear_peer_version(dest_node_id);
 	err = spaghetti_field_update_can_ctrl(dest_node_id,
 					      SPAGHETTI_SLUP_CMD_VERSION,
@@ -1073,10 +1209,24 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 		return -EINVAL;
 	}
 
+	/* GET_STATUS and the periodic presence worker may request a sweep at the
+	 * same time. Keep the reset / reply window / publish sequence atomic as a
+	 * whole, otherwise two overlapping sweeps can republish an old peer.
+	 */
+	(void)k_mutex_lock(&slup_discovery_lock, K_FOREVER);
+
+	struct slup_version_cache versions[SPAGHETTI_SLUP_PEERS_MAX];
+	size_t version_count = 0U;
+
 	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	slup_cache_versions(versions, &version_count);
 	slup_peer_count = 0U;
 	slup_nfc_remote_count = 0U;
+	memset(slup_peer_live, 0, sizeof(slup_peer_live));
+	memset(slup_peer_seen_ms, 0, sizeof(slup_peer_seen_ms));
 	slup_fill_self(&slup_peers[0]);
+	slup_peer_live[0] = true;
+	slup_peer_seen_ms[0] = k_uptime_get();
 	slup_peer_count = 1U;
 	k_mutex_unlock(&field_update_lock);
 
@@ -1091,6 +1241,7 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 		k_sleep(K_MSEC(SPAGHETTI_SLUP_DISCOVER_MS));
 
 		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+		slup_restore_versions(versions, version_count);
 		for (i = 0U; i < slup_peer_count; ++i) {
 			if ((slup_peers[i].flags & SPAGHETTI_SLUP_FLAG_LOCAL) !=
 			    0U) {
@@ -1113,7 +1264,13 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 			(void)spaghetti_field_update_can_ctrl(
 				remotes[i].node_id, SPAGHETTI_SLUP_CMD_VERSION,
 				NULL, 0U);
-			k_sleep(K_MSEC(40));
+			for (uint8_t tries = 0U; tries < 8U; ++tries) {
+				k_sleep(K_MSEC(40));
+				if (slup_peer_has_version(remotes[i].node_id) ||
+				    slup_xfer_is_active()) {
+					break;
+				}
+			}
 			if (slup_xfer_is_active()) {
 				break;
 			}
@@ -1124,33 +1281,50 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 		}
 	} else if ((err != 0) && (err != -ENOTSUP) && (err != -EACCES) &&
 		   (err != -ENODEV)) {
-		return err;
+		/*
+		 * Unplugging the last peer often leaves nobody to ACK the
+		 * broadcast, so can_send times out. This sweep already dropped
+		 * every remote; publish it anyway or GET_STATUS keeps the
+		 * previous chain forever.
+		 */
+		LOG_WRN("SLUP discover send failed: %d", err);
 	}
 
 	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	slup_restore_versions(versions, version_count);
 	{
 		size_t i;
 
 		for (i = 0U; i < slup_peer_count; ++i) {
 			if (slup_peers[i].node_id == session.node_id) {
 				slup_fill_self(&slup_peers[i]);
+				slup_peer_live[i] = true;
 			}
 		}
 	}
-	slup_sort_peers_locked();
+	/* Discover alone is not enough: keep remotes that answered STATUS in
+	 * this sweep so an unplugged board cannot linger in GET_STATUS.
+	 */
+	slup_prune_unconfirmed_locked();
+	slup_publish_peers_locked();
 	if (out == NULL) {
-		*count = slup_peer_count;
+		*count = slup_peer_pub_count;
 	} else {
-		*count = MIN(slup_peer_count, max);
-		memcpy(out, slup_peers, (*count) * sizeof(*out));
+		*count = MIN(slup_peer_pub_count, max);
+		memcpy(out, slup_peers_pub, (*count) * sizeof(*out));
 	}
 	k_mutex_unlock(&field_update_lock);
+	k_mutex_unlock(&slup_discovery_lock);
 	return 0;
 }
 
 int spaghetti_field_update_copy_peers(struct spaghetti_slup_peer *out,
 				      size_t max, size_t *count)
 {
+	const int64_t now_ms = k_uptime_get();
+	size_t copied = 0U;
+	size_t i;
+
 	if (count == NULL) {
 		return -EINVAL;
 	}
@@ -1158,22 +1332,36 @@ int spaghetti_field_update_copy_peers(struct spaghetti_slup_peer *out,
 		return -EINVAL;
 	}
 
-	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	if (k_mutex_lock(&field_update_lock, K_MSEC(30)) < 0) {
+		*count = 0U;
+		return -EAGAIN;
+	}
 	if (!session.initialized) {
 		k_mutex_unlock(&field_update_lock);
 		*count = 0U;
 		return -EAGAIN;
 	}
-	if (slup_peer_count == 0U) {
-		slup_fill_self(&slup_peers[0]);
-		slup_peer_count = 1U;
+	if (slup_peer_pub_count == 0U) {
+		slup_fill_self(&slup_peers_pub[0]);
+		slup_peer_pub_count = 1U;
+		slup_peer_pub_seen_ms[0] = now_ms;
 	}
-	if (out == NULL) {
-		*count = slup_peer_count;
-	} else {
-		*count = MIN(slup_peer_count, max);
-		memcpy(out, slup_peers, (*count) * sizeof(*out));
+	for (i = 0U; i < slup_peer_pub_count; ++i) {
+		const bool local =
+			(slup_peers_pub[i].flags & SPAGHETTI_SLUP_FLAG_LOCAL) != 0U;
+		const bool fresh = slup_peer_pub_seen_ms[i] > 0 &&
+			(now_ms - slup_peer_pub_seen_ms[i]) <=
+				SLUP_PRESENCE_EXPIRE_MS;
+
+		if (!local && !fresh) {
+			continue;
+		}
+		if ((out != NULL) && (copied < max)) {
+			out[copied] = slup_peers_pub[i];
+		}
+		copied += 1U;
 	}
+	*count = (out == NULL) ? copied : MIN(copied, max);
 	k_mutex_unlock(&field_update_lock);
 	return 0;
 }
@@ -1193,7 +1381,18 @@ int spaghetti_field_update_copy_nfc_tags(struct spaghetti_nfc_tag *out,
 	}
 
 	(void)spaghetti_nfc_copy_tags(local, ARRAY_SIZE(local), &local_count);
-	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	if (k_mutex_lock(&field_update_lock, K_MSEC(30)) < 0) {
+		if (out == NULL) {
+			*count = local_count;
+			return 0;
+		}
+		*count = MIN(local_count, max);
+		for (size_t i = 0U; i < *count; ++i) {
+			out[i] = local[i];
+			out[i].local = true;
+		}
+		return 0;
+	}
 	if (out == NULL) {
 		*count = local_count + slup_nfc_remote_count;
 		k_mutex_unlock(&field_update_lock);
@@ -1900,14 +2099,21 @@ static void handle_slup_response(const struct field_update_rx *msg)
 
 	if (cmd == SPAGHETTI_SLUP_RSP_DISCOVER) {
 		if (msg->dlc >= 8U) {
+			/* Only Discover may create peers. Late STATUS after a
+			 * sweep reset must not resurrect an unplugged board.
+			 */
 			slup_note_peer(node, &msg->u.can[2], 0U,
-				       SPAGHETTI_SLUP_CHAIN_UNKNOWN);
+				       SPAGHETTI_SLUP_CHAIN_UNKNOWN, true);
 		}
 		return;
 	}
 	if (cmd == SPAGHETTI_SLUP_RSP_STATUS) {
 		if (msg->dlc >= 3U) {
-			slup_note_peer(node, NULL, msg->u.can[1], msg->u.can[2]);
+			slup_note_peer(node, NULL, msg->u.can[1], msg->u.can[2],
+				       false);
+			(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+			slup_mark_peer_live_locked(node);
+			k_mutex_unlock(&field_update_lock);
 		}
 		if (!slup_xfer_is_active()) {
 			spaghetti_field_update_note_ack(
@@ -2229,6 +2435,9 @@ int spaghetti_field_update_init(void)
 	session.load_armed = false;
 	session.chain_index = slup_usb_present() ? 1U : SPAGHETTI_SLUP_CHAIN_UNKNOWN;
 	session.initialized = true;
+	slup_fill_self(&slup_peers[0]);
+	slup_peer_count = 1U;
+	slup_publish_peers_locked();
 	k_mutex_unlock(&field_update_lock);
 	slup_led_start();
 

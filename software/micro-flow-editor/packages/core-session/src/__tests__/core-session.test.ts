@@ -112,6 +112,7 @@ function fakeConfig(hashByte: number): GetConfigResponse {
 /** Drains `transport.sent`, answering every not-yet-answered request via the given per-operation responder. */
 class FakeCoreResponder {
   private readonly answered = new Set<number>();
+  readonly silent = new Set<Operation>();
 
   constructor(
     private readonly transport: FakeTransport,
@@ -122,6 +123,7 @@ class FakeCoreResponder {
     for (const bytes of this.transport.sent) {
       const request = decodeRequest(bytes);
       if (this.answered.has(request.correlationId)) continue;
+      if (this.silent.has(request.operation)) continue;
       const handler = this.handlers[request.operation];
       if (!handler) continue;
       this.answered.add(request.correlationId);
@@ -225,6 +227,27 @@ describe("CoreSession — identity", () => {
     await expect(runToCompletion(() => session.connect(), responder)).rejects.toThrow();
     expect(session.state).toBe("ERROR");
   });
+
+  it("accepts the current device when a USB connection slot changes board", async () => {
+    const transport = new FakeTransport();
+    const client = new SpaghettiClient(transport, { defaultTimeoutMs: 5000, attemptTimeoutMs: 5000 });
+    const eventStream = new EventStream(transport);
+    const binding: CoreBindingRecord = {
+      bindingId: BINDING_ID.value,
+      expectedDeviceId: "00112233",
+      connectionProfileId: "profile-1",
+    };
+    const session = new CoreSession(binding, client, eventStream, new CatalogCache(), "accept-current");
+    const responder = new FakeCoreResponder(transport, {
+      ...FULL_HANDLERS(1, 1),
+      [Operation.GET_STATUS]: () => encodeGetStatusResponse({ ...STATUS, deviceId: DEVICE_ID }),
+    });
+
+    await runToCompletion(() => session.connect(), responder);
+
+    expect(session.state).toBe("READY");
+    expect(session.lastKnownSnapshot.status?.deviceId).toEqual(DEVICE_ID);
+  });
 });
 
 describe("CoreSession — disconnect / stale", () => {
@@ -274,6 +297,28 @@ describe("CoreSession — reboot mid-READY", () => {
     }
 
     expect(session.state).toBe("READY");
+  });
+
+  it("keeps READY with the last snapshot when a later GET_STATUS times out", async () => {
+    const transport = new FakeTransport();
+    const client = new SpaghettiClient(transport, { defaultTimeoutMs: 80, attemptTimeoutMs: 80, maxRetries: 0 });
+    const eventStream = new EventStream(transport);
+    const bindingRecord: CoreBindingRecord = {
+      bindingId: BINDING_ID.value,
+      expectedDeviceId: bytesToHex(DEVICE_ID),
+      connectionProfileId: "profile-1",
+    };
+    const session = new CoreSession(bindingRecord, client, eventStream, new CatalogCache());
+    const responder = new FakeCoreResponder(transport, FULL_HANDLERS(1, 1));
+    transport.deliverEvent(fakeStatusEvent(1, 1n, 0, 0, DEVICE_ID));
+    await runToCompletion(() => session.connect(), responder);
+    expect(session.state).toBe("READY");
+
+    responder.silent.add(Operation.GET_STATUS);
+    await expect(session.connect()).resolves.toBeUndefined();
+    expect(session.state).toBe("READY");
+    expect(session.stale).toBe(true);
+    expect(session.lastKnownSnapshot.status).toEqual(STATUS);
   });
 });
 

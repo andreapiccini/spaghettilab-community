@@ -368,6 +368,28 @@ def cmd_status(client: SpaghettiClient, args: argparse.Namespace) -> int:
         document["device_id"] = status.device_id.hex()
     if status.device_name:
         document["device_name"] = status.device_name
+    if status.chain_peers:
+        document["chain_peers"] = [
+            {
+                "node_id": peer.node_id,
+                "mac": peer.mac.hex(),
+                "flags": peer.flags,
+                "local": peer.local,
+                "version": peer.version,
+            }
+            for peer in status.chain_peers
+        ]
+    if status.nfc_tags:
+        document["nfc_tags"] = [
+            {
+                "port_id": tag.port_id,
+                "type_id": tag.type_id,
+                "uid": tag.uid.hex(),
+                "node_id": tag.node_id,
+                "local": tag.local,
+            }
+            for tag in status.nfc_tags
+        ]
     if args.json:
         _emit_json(document, args.quiet)
     else:
