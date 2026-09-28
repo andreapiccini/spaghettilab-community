@@ -4,9 +4,9 @@
  * no field values at all. The real record
  * (`struct spaghetti_record { source_id, source_key, boot_id, timestamp_ms,
  * sequence, payload: {kind, schema_id, schema_version, values} }`,
- * `firmware/core/include/spaghetti/schema.h`) is delivered out-of-band per
+ * `firmware/backbone/include/spaghetti/schema.h`) is delivered out-of-band per
  * consumer (`spaghetti_record_delivery_peek`/`ack`,
- * `firmware/core/include/spaghetti/record_delivery.h` — one bounded ring
+ * `firmware/backbone/include/spaghetti/record_delivery.h` — one bounded ring
  * with independent cursors for the MQTT and BLE consumers) — there is no
  * `GET_RECORD`-style Protocol V1 operation in `protocol-sdk` today, and no
  * MQTT-payload CBOR decoder either. This package therefore cannot decode

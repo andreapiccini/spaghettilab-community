@@ -2,7 +2,7 @@ import { checkPermission, domainError, type DomainError, type PermissionSet } fr
 import { CoreStatusErrorCode } from "./errors.js";
 
 /**
- * `FACTORY_RESET`'s `scope` (op 15, `firmware/core/include/spaghetti/factory_reset.h:18-24`)
+ * `FACTORY_RESET`'s `scope` (op 15, `firmware/backbone/include/spaghetti/factory_reset.h:18-24`)
  * is a bitmask, not an enum with a distinct "diagnostic" value. There is no
  * separate diagnostic-reset scope in the firmware at all — confirmed
  * directly against `reset_ops.c`, which gates the whole operation with one

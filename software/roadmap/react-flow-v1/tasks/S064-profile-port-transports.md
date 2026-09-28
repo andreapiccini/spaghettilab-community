@@ -1,12 +1,12 @@
 # S064 — Device Profile: famiglie Port complete (1-Wire, UART_READ, SPI mode, WAIT_GPIO)
 
 **Stato:** ✅ DONE
-**Dipende da:** S063, firmware [393](../../../../firmware/core/roadmap/393-device-profile-port-transports/README.md)
+**Dipende da:** S063, firmware [393](../../../../firmware/backbone/roadmap/393-device-profile-port-transports/README.md)
 
 ## Obiettivo
 
 Lo Studio e l'authoring model dichiarano già `PortTransport.W1` / `PortCapability.W1`
-(`transport.ts`, da `port.h`). Firmware [393](../../../../firmware/core/roadmap/393-device-profile-port-transports/README.md)
+(`transport.ts`, da `port.h`). Firmware [393](../../../../firmware/backbone/roadmap/393-device-profile-port-transports/README.md)
 ha aggiunto opcode 23–25 e `SPI_TRANSCEIVE.imm3`. L'authoring model e il selettore
 step dello Studio sono allineati. Il campo Config Inspector `w1_rom` è sul Module
 `declarative-device` (8 byte hex, binding di istanza).

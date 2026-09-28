@@ -35,5 +35,5 @@ Quando si apre la fase 342 (Firmware) o si progetta un nuovo Rule driver
 concreto (fase 340), rileggere questa tabella come checklist di "categorie che
 probabilmente servono", non come specifica — ogni singolo blocco reale va
 comunque progettato secondo i vincoli già stabiliti (bounded, senza formule
-libere, schema-driven) descritti in `firmware/core/roadmap/340-*` e
+libere, schema-driven) descritti in `firmware/backbone/roadmap/340-*` e
 `342-*` quando esisteranno con contenuto.

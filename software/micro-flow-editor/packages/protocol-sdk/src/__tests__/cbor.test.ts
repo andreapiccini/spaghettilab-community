@@ -111,7 +111,7 @@ describe("maps and arrays", () => {
 });
 
 describe("firmware-observed test vector", () => {
-  it('decodes {0xA1, 0x00, 0x01} — a real byte sequence quoted verbatim from firmware/core/tests/protocol/src/main.c\'s "malformed" envelope test — as the valid single-key CBOR map {0: 1} at the raw CBOR layer (the envelope layer separately rejects it for missing keys 1/2/3, see envelope.test.ts)', () => {
+  it('decodes {0xA1, 0x00, 0x01} — a real byte sequence quoted verbatim from firmware/backbone/tests/protocol/src/main.c\'s "malformed" envelope test — as the valid single-key CBOR map {0: 1} at the raw CBOR layer (the envelope layer separately rejects it for missing keys 1/2/3, see envelope.test.ts)', () => {
     const malformed = new Uint8Array([0xa1, 0x00, 0x01]);
     const decoded = decodeOne(malformed);
     expect(decoded.kind).toBe("map");

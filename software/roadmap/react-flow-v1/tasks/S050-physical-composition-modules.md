@@ -71,7 +71,7 @@ composizioni richieste dal punto 6.
 
 **Power** (`power.ts`): `RailAssurance`/`PowerAdmission` risolvono i numeri raw che
 `catalog-model` passa attraverso senza normalizzare (`assurance`/`admission`),
-recuperati leggendo direttamente `firmware/core/include/spaghetti/power.h`
+recuperati leggendo direttamente `firmware/backbone/include/spaghetti/power.h`
 (`enum spaghetti_power_assurance`, `enum spaghetti_power_admission_state`) invece di
 indovinarli — nessuna modifica ai pacchetti a monte, che restano raw-passthrough.
 `requiresPowerAcknowledgement()` è vero per `UNMANAGED` (power passivo).

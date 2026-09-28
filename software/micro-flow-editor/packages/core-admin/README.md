@@ -16,7 +16,7 @@ without having first displayed the real target and gotten it echoed back.
 
 ## Lease (`lease.ts`) — reversible, no confirmation needed
 
-`firmware/core/include/spaghetti/connectivity.h:79`: acquiring a lease returns
+`firmware/backbone/include/spaghetti/connectivity.h:79`: acquiring a lease returns
 `-EBUSY` if one is already active rather than forcibly evicting another principal, and
 it always auto-expires. Confirmed not destructive, so `acquireLease()`/`releaseLease()`
 only check the `core.admin.lease` permission — no `DestructiveConfirmation`. Firmware
@@ -49,7 +49,7 @@ both as the unrelated `{0: job_id}` shape — fixed as part of this task (see
 ## Reset scope (`reset-scope.ts`) — destructive, requires confirmation
 
 `describeResetScope()` turns `FACTORY_RESET`'s `scope` bitmask
-(`firmware/core/include/spaghetti/factory_reset.h`) into a human-readable label like
+(`firmware/backbone/include/spaghetti/factory_reset.h`) into a human-readable label like
 `"CONFIG+NETWORK"` or `"ALL"` — the visible target a caller must display before asking
 for confirmation. `requestFactoryResetWithConfirmation()` composes
 `@spaghettilab/core-status`'s `requestFactoryReset()` (which already enforces
@@ -60,10 +60,10 @@ call last — same ordering as `openNetworkMaintenance()`.
 
 ## Credential/provisioning (`credential-provisioning.ts`) — no wire operation exists
 
-Exhaustive search of `firmware/core/subsys/communication/operations/` (14 files) found
+Exhaustive search of `firmware/backbone/subsys/communication/operations/` (14 files) found
 no operation for setting Wi-Fi/MQTT/OTA/remote-console credentials or BLE bonds. Real
 provisioning only happens out-of-band over the Maintenance Link's local serial shell
-(`firmware/core/subsys/services/maintenance_link/README.md:42-55`), never reachable
+(`firmware/backbone/subsys/services/maintenance_link/README.md:42-55`), never reachable
 from this app's BLE/MQTT/WebSocket transports. `checkCredentialProvisioningAvailability()`
 still checks `core.admin.credential-provisioning` first — even the fact that
 provisioning needs physical access shouldn't be disclosed to a caller without the

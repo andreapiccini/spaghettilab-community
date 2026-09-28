@@ -35,7 +35,7 @@ Nuovo pacchetto `@spaghettilab/core-status`
 (`software/micro-flow-editor/packages/core-status/`), che dipende da `domain` e
 `protocol-sdk`.
 
-**Enum reali risolti da `firmware/core/include/spaghetti/{core,health,module}.h`**
+**Enum reali risolti da `firmware/backbone/include/spaghetti/{core,health,module}.h`**
 (`status-labels.ts`): `spaghetti_core_state`, `spaghetti_core_mode`,
 `spaghetti_core_image_state`, `spaghetti_health_state`, `spaghetti_module_state`,
 `spaghetti_module_endpoint_kind` — prima lasciati come numeri grezzi in
@@ -69,14 +69,14 @@ specificamente un job di discovery).
 (modules/rules/blocks/profiles/records/workspace) restano `{capacity, used, peak}`
 distinti, mai sommati — rispecchia il commento già presente su `ResourcePool` in
 `protocol-sdk`. `allocationFailures` è confermato monotono e sticky leggendo
-`firmware/core/subsys/resources/resources.c`: `spaghetti_resources_note_failure()` lo
+`firmware/backbone/subsys/resources/resources.c`: `spaghetti_resources_note_failure()` lo
 incrementa soltanto, `spaghetti_resources_reset_high_water()` lo lascia esplicitamente
 intatto (`resources.h:96`) — si azzera solo con un reboot completo. Quindi "una
 allocation failure passata è visibile anche dopo che la condizione è rientrata" vale
 per costruzione. `highWaterRegressed()` permette di verificare che il high-water di un
 pool non torni mai indietro fra osservazioni successive.
 
-**Reset diagnostico**: verificato contro `firmware/core/include/spaghetti/factory_reset.h`
+**Reset diagnostico**: verificato contro `firmware/backbone/include/spaghetti/factory_reset.h`
 e `reset_ops.c` che `FACTORY_RESET`'s `scope` è una bitmask
 (CONFIG/NETWORK/CREDENTIALS/BLE_BONDS/ALL), **non** un enum con un valore "diagnostico"
 separato — il firmware controlla l'intera operazione con un solo permesso
@@ -91,7 +91,7 @@ wire: `requestFactoryReset()` richiede sempre lo scope `core.admin.factory-reset
 `static_ram_budget_bytes`), ma `execute_get_resources` (`resources_ops.c:36-72`) non li
 serializza mai sul wire `GET_RESOURCES` — verificato direttamente contro il sorgente C.
 Non tracciato altrove: aggiunta la fase Firmware
-[392](../../../../firmware/core/roadmap/392-resources-flash-ram-wire-exposure/README.md)
+[392](../../../../firmware/backbone/roadmap/392-resources-flash-ram-wire-exposure/README.md)
 per esporli. Finché non è chiusa, `ResourceMonitorView.flashAndStaticRam` è
 `{ available: false, reason: "..." }` — mai un numero inventato né un'omissione
 silenziosa.

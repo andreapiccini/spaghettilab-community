@@ -20,5 +20,5 @@ Run the contract checks from the repository root:
 
 ```sh
 python contracts/firmware-extension-v1/verify_contract.py
-python firmware/core/tools/test_firmware_extension_contract.py
+python firmware/backbone/tools/test_firmware_extension_contract.py
 ```

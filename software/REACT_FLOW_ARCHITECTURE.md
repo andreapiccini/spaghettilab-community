@@ -1,7 +1,7 @@
 # Architettura funzionale React Flow SpaghettiLAB V1
 
 [Roadmap e task](roadmap/react-flow-v1/README.md) ·
-[Firmware platform closure](../firmware/core/roadmap/V1-PLATFORM-CLOSURE.md)
+[Firmware platform closure](../firmware/backbone/roadmap/V1-PLATFORM-CLOSURE.md)
 
 ## Scopo
 

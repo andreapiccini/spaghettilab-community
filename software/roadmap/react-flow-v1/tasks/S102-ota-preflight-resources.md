@@ -67,7 +67,7 @@ proprio `BudgetDelta` esplicito (available/required/margin), mai un unico numero
 sommato o un generico "non c'è spazio".
 
 **Downgrade — gap onestamente riconosciuto**: la vera prevenzione anti-downgrade è
-`CONFIG_MCUBOOT_BOOTLOADER_NO_DOWNGRADE=y` (`firmware/core/prj.conf:82`), applicata dal
+`CONFIG_MCUBOOT_BOOTLOADER_NO_DOWNGRADE=y` (`firmware/backbone/prj.conf:82`), applicata dal
 bootloader; non esiste un campo security-counter esposto pre-trasferimento
 (`fw_version` nel manifest è una stringa semplice). Il controllo di questo pacchetto è
 un'euristica di ordinamento stringhe, un avviso anticipato, non una garanzia — il vero

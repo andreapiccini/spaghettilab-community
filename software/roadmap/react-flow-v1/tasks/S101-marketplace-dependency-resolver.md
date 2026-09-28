@@ -58,7 +58,7 @@ esso ogni pack è `"UNVERIFIABLE"`, mai un `"TRUSTED"` indovinato.
 **Gap wire reale confermato durante l'implementazione**: `GET_FEATURES` riporta solo
 `moduleTypeCount` (un conteggio) per ogni Capability Pack installato, mai i veri
 `typeId` di Block/Rule forniti — verificato contro
-`firmware/core/subsys/communication/operations/features_ops.c`, coerente con il gap già
+`firmware/backbone/subsys/communication/operations/features_ops.c`, coerente con il gap già
 documentato nel README di S041/`catalog-model`. `computeRequiredArtifacts()` può
 verificare solo i Module Driver contro dati wire reali (`GET_CATALOG`); Block/Rule
 richiedono un set installato fornito dal chiamante, opzionale — senza di esso ogni uso

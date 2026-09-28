@@ -5,8 +5,8 @@ value round-trips. Languages that must consume them:
 
 | Language | Consumer |
 |---|---|
-| TypeScript | `firmware/core/tools/sdk/typescript/test/vectors.test.ts` |
-| Python | `firmware/core/tools/tests/test_protocol_vectors.py` |
-| C | `firmware/core/tests/protocol` (`test_envelope_golden_vectors`) + fuzz corpus decode |
+| TypeScript | `firmware/backbone/tools/sdk/typescript/test/vectors.test.ts` |
+| Python | `firmware/backbone/tools/tests/test_protocol_vectors.py` |
+| C | `firmware/backbone/tests/protocol` (`test_envelope_golden_vectors`) + fuzz corpus decode |
 
 Do not fork per-language copies of these files.

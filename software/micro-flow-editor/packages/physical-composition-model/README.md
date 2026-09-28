@@ -30,7 +30,7 @@ whatever external device is wired to it can change without touching a Module's
 `catalog-model` (S041 deliberately never coerces them). This file resolves what those
 numbers mean — `RailAssurance` (`UNMANAGED`/`SWITCHED`/`SWITCHED_AND_MEASURED`) and
 `PowerAdmission` (`NOT_REQUIRED`/`UNVERIFIED`/`ENFORCED`) — sourced directly from the
-firmware's own definition, `firmware/core/include/spaghetti/power.h`
+firmware's own definition, `firmware/backbone/include/spaghetti/power.h`
 (`enum spaghetti_power_assurance`, `enum spaghetti_power_admission_state`), not
 guessed. `catalog-model`'s pass-through contract is untouched; this is a local
 interpretation at the point of use. `requiresPowerAcknowledgement()` is true exactly

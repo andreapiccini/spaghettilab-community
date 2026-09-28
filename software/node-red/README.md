@@ -196,11 +196,11 @@ host gateway documented in Firmware. See
 
 Quick path:
 
-1. From `firmware/core`: `make host-tools`, then start
+1. From `firmware/backbone`: `make host-tools`, then start
    `spaghetti-gateway serve --listen 127.0.0.1:8765` (key via
    `SPAGHETTI_BLE_KEY_FILE`, never argv).
 2. Import
-   `firmware/core/examples/node_red/spaghetti_ble_v1_flow.json` into this
+   `firmware/backbone/examples/node_red/spaghetti_ble_v1_flow.json` into this
    Node-RED instance.
 3. Point the WebSocket client at `ws://127.0.0.1:8765/?token=…` and set the
    Core device id.

@@ -105,7 +105,7 @@ remote command that confirms the trial image.
 
 | ID | Transport | Action | Expected result | Status | Evidence |
 |---|---|---|---|---|---|
-| Q-S01 | Host | Run manifest checks and inspect committed files/artifacts. | No private signing key, PSK or Wi-Fi password is tracked or published. | PASS | 2026-08-14 host scan on `firmware/core`: `tracked_secret_candidates=[]`, `unsafe_private_file_modes=[]`. Full `update-qualification-manifest` not captured (working tree dirty with firmware stack fixes). |
+| Q-S01 | Host | Run manifest checks and inspect committed files/artifacts. | No private signing key, PSK or Wi-Fi password is tracked or published. | PASS | 2026-08-14 host scan on `firmware/backbone`: `tracked_secret_candidates=[]`, `unsafe_private_file_modes=[]`. Full `update-qualification-manifest` not captured (working tree dirty with firmware stack fixes). |
 | Q-S02 | UART/USB | Provision credentials while capturing logs and command history. | Secret input is hidden and no plaintext secret appears in logs/history. | NOT RUN | - |
 | Q-S03 | Common | Exercise initial USB provisioning, local update, Wi-Fi OTA, base recovery and documented factory recovery separately. | Each path has distinct authorization and preserves at least one bootable image. | NOT RUN | - |
 | Q-S04 | Wi-Fi | Attempt Config, key, Wi-Fi and image-confirm operations through the remote console and OTA transport. | Restricted parsers reject every operation outside their documented boundary. | NOT RUN | - |

@@ -12,7 +12,7 @@ Module instantiation, built on `@spaghettilab/device-profile-authoring-model` (S
 every earlier package in this chain (S061, S062) explicitly deferred. There is no CDDL
 file for Device Profiles; the map key order (0-13) and every op/field byte layout are
 sourced directly from
-`firmware/core/subsys/device_profiles/device_profile.c`'s `decode_profile_cbor`/
+`firmware/backbone/subsys/device_profiles/device_profile.c`'s `decode_profile_cbor`/
 `decode_op`/`decode_fields`, read as the ground truth rather than guessed. The decoder
 reads keys with `expect_key` sequentially — this is a strict-order sequence of pairs
 inside a CBOR map, not a free-order map, and the encoder matches that exactly.
@@ -57,7 +57,7 @@ locally) is enforced remotely: `REMOVE_DEVICE_PROFILE`'s `-EBUSY` surfaces as
 `ProtocolStatus.BUSY` and is translated to the same `PROFILE_IN_USE` error. The
 errno→status mapping used throughout (`BUSY`/`CONFLICT`/`RESOURCE_EXHAUSTED`/
 `UNSUPPORTED`) is read directly from
-`firmware/core/subsys/communication/protocol_status.c`'s
+`firmware/backbone/subsys/communication/protocol_status.c`'s
 `spaghetti_protocol_status_from_errno`, not guessed.
 
 ## Catalog (`catalog.ts`)
@@ -78,7 +78,7 @@ no field to carry a source through post-install.
 profile plus the Bay/rail/address a human chose (S063 point 2). `driverTypeId` is
 always `"declarative-device"` — read from
 `spaghetti_declarative_device_driver.type_id` in
-`firmware/core/spaghetti_modules/declarative_device/declarative_device.c`, the one
+`firmware/backbone/spaghetti_modules/declarative_device/declarative_device.c`, the one
 generic Module Driver every Device Profile instance runs under. Label lives in
 `AuthoringMetadata`, same as every other physical-composition entity, never a field
 here. Pure construction — the caller adds the result to a graph via the existing

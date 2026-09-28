@@ -27,7 +27,7 @@ export type RunCommandRequest = {
   readonly commandId: number;
   readonly permissionScope?: PermissionScope;
   /**
-   * `MODULE_COMMAND` (`firmware/core/subsys/communication/operations/module_command.c`,
+   * `MODULE_COMMAND` (`firmware/backbone/subsys/communication/operations/module_command.c`,
    * mirrored in `@spaghettilab/protocol-sdk`'s `ModuleCommandRequest`) has no
    * argument field on the wire at all today — set this `true` when the
    * command being invoked genuinely needs parameters, so this function

@@ -3,7 +3,7 @@ import type { DeviceProfileSummary } from "@spaghettilab/protocol-sdk";
 
 /**
  * `spaghetti_declarative_device_driver.type_id` (literally `"declarative-device"`,
- * `firmware/core/spaghetti_modules/declarative_device/declarative_device.c`) —
+ * `firmware/backbone/spaghetti_modules/declarative_device/declarative_device.c`) —
  * the one generic Module Driver every Device Profile instance runs under.
  * Never a per-sensor driver id: that is exactly the point of S061's
  * declarative acquisition plan.

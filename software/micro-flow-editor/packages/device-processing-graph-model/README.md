@@ -5,7 +5,7 @@ source, Block, Rule — the local, bounded behavior of one Core, authored as a g
 rejected before it can ever compile into an invalid Config.
 
 Every node type is grounded in the real Config structs
-(`firmware/core/include/spaghetti/config.h`, `block_driver.h`, `rule_driver.h`), read
+(`firmware/backbone/include/spaghetti/config.h`, `block_driver.h`, `rule_driver.h`), read
 directly rather than inferred from the task prose or the UX's node taxonomy alone —
 where the UX's 5-category taxonomy (Trigger/Read/Processing/Logic/Output) is richer than
 what firmware actually has, this package follows firmware (see Honest scope notes

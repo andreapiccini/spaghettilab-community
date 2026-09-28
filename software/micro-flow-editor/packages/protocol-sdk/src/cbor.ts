@@ -95,7 +95,7 @@ export function encodeText(value: string): Uint8Array {
  * in this build does **not** use canonical definite-length collections, it
  * emits `0x9F <items...> 0xFF` for arrays and `0xBF <pairs...> 0xFF` for
  * maps. This was confirmed by building and running
- * `firmware/core/tests/protocol` in `native_sim` and inspecting the actual
+ * `firmware/backbone/tests/protocol` in `native_sim` and inspecting the actual
  * encoded bytes — the initial source-reading-only research had assumed
  * canonical/definite-length, which turned out to be wrong.
  */

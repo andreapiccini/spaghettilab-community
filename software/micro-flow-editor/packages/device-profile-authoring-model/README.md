@@ -7,8 +7,8 @@ Module Driver (firmware phase 325, "Profili dispositivo dichiarativi"), never by
 writing new firmware code per sensor.
 
 Every type here is sourced directly from
-`firmware/core/include/spaghetti/device_profile.h`,
-`firmware/core/include/spaghetti/port.h`, and `firmware/core/include/spaghetti/schema.h`
+`firmware/backbone/include/spaghetti/device_profile.h`,
+`firmware/backbone/include/spaghetti/port.h`, and `firmware/backbone/include/spaghetti/schema.h`
 — not invented from the task prose alone. Where the shipped firmware struct is narrower
 than the task text or the phase-325 design doc, this package follows the struct, and
 says so (see Honest scope gaps below).
@@ -62,7 +62,7 @@ actually has today, not what a future MVP might add.
 
 ## Port families (firmware 393 / S064)
 
-Same matrix as `firmware/core/roadmap/393-device-profile-port-transports`. UART baud and
+Same matrix as `firmware/backbone/roadmap/393-device-profile-port-transports`. UART baud and
 pinout stay on the Port/DTS, never in the profile. Sample fields stay RAW
 (`int64`/`uint64`); no CAN/USB.
 

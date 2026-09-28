@@ -6,7 +6,7 @@
  * per-opcode mapping, never an arbitrary formula — S061 point 3).
  *
  * Operand meaning is grounded in the firmware's own **executor and
- * validator** (`firmware/core/subsys/device_profiles/device_profile_exec.c`'s
+ * validator** (`firmware/backbone/subsys/device_profiles/device_profile_exec.c`'s
  * `case` blocks and `device_profile.c`'s `accumulate_op_budget`), not just
  * the one-line comments on `enum spaghetti_device_profile_opcode` — an
  * earlier revision of this file was grounded only in those comments and got

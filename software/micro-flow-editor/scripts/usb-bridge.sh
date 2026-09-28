@@ -6,7 +6,7 @@
 set -e
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
-CORE=$(CDPATH= cd -- "$SCRIPT_DIR/../../../firmware/core" && pwd)
+CORE=$(CDPATH= cd -- "$SCRIPT_DIR/../../../firmware/backbone" && pwd)
 RUN="$CORE/.run"
 PIDFILE="$RUN/usb-bridge.pid"
 LOG="$RUN/usb-bridge.log"

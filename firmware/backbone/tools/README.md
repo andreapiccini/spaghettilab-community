@@ -36,7 +36,7 @@ bounded chunks with progress, cancel on Ctrl+C, and finalize as **trial** only.
 
 ## SLUP host load (PC file → USB master → CAN peer)
 
-Close `make monitor`. From `firmware/core`:
+Close `make monitor`. From `firmware/backbone`:
 
 ```sh
 make slup-list

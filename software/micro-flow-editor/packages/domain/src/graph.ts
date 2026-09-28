@@ -29,7 +29,7 @@ export type GraphEdge<Layer extends GraphLayer, Id extends string, EdgeId extend
    * whole nodes together). A multi-port node (e.g. a Device Processing Block
    * with several typed input/output ports, S071) needs these to disambiguate;
    * mirrors `struct spaghetti_edge_config`'s real
-   * `source_port_or_field`/`target_input` fields (`firmware/core/include/spaghetti/config.h`),
+   * `source_port_or_field`/`target_input` fields (`firmware/backbone/include/spaghetti/config.h`),
    * which is why this lives on the generic `GraphEdge` rather than being
    * bolted onto one layer's node `data`.
    */

@@ -5,8 +5,8 @@ documentato ogni pezzo, e **quali task mancano** da implementare. Aggiornare que
 file quando una roadmap cambia stato o ne nasce una nuova.
 
 [README](README.md) ·
-[Firmware / Protocol V1](../firmware/core/PROTOCOL_V1.md) ·
-[Platform report](../firmware/core/verification/v1/PLATFORM_REPORT.md)
+[Firmware / Protocol V1](../firmware/backbone/PROTOCOL_V1.md) ·
+[Platform report](../firmware/backbone/verification/v1/PLATFORM_REPORT.md)
 
 ---
 
@@ -352,8 +352,8 @@ prodotto commerciale turnkey.
 
 | Documento | Contenuto |
 |---|---|
-| [../firmware/core/PROTOCOL_V1.md](../firmware/core/PROTOCOL_V1.md) | Contratto congelato |
-| [../firmware/core/roadmap/README.md](../firmware/core/roadmap/README.md) | Roadmap firmware |
+| [../firmware/backbone/PROTOCOL_V1.md](../firmware/backbone/PROTOCOL_V1.md) | Contratto congelato |
+| [../firmware/backbone/roadmap/README.md](../firmware/backbone/roadmap/README.md) | Roadmap firmware |
 
 ---
 

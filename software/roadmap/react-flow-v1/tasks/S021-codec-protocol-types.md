@@ -43,7 +43,7 @@ TypeScript e firmware") non era soddisfacibile alla lettera: `tests/protocol/
 src/main.c` non pubblicava vettori di byte fissi — verificava solo determinismo
 interno (la stessa codifica prodotta più volte dà byte identici), non un
 riferimento pubblicato. **Ho risolto il gap aggiungendo io stesso un test
-`test_envelope_golden_vectors` al firmware** (`firmware/core/tests/protocol/
+`test_envelope_golden_vectors` al firmware** (`firmware/backbone/tests/protocol/
 src/main.c`, autorizzato esplicitamente dall'utente per questo task specifico),
 con vettori fissi per request/response dell'envelope, e l'ho **eseguito
 davvero in `native_sim`** (immagine `esp32c3-zephyr-dev`, `west twister -p

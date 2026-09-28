@@ -8,10 +8,10 @@ per-(Core, schema) telemetry buffers with explicit provenance and gaps (S091).
 `RecordEventPayload` (`@spaghettilab/protocol-sdk`'s `EventType.RECORD`) is a
 **notification only** — `{sourceKey, sequence, schemaId, schemaVersion}`, no field
 values at all. The real record with actual field values
-(`struct spaghetti_record`, `firmware/core/include/spaghetti/schema.h`) is delivered
+(`struct spaghetti_record`, `firmware/backbone/include/spaghetti/schema.h`) is delivered
 out-of-band per consumer via a bounded firmware-side ring with independent cursors
 (`spaghetti_record_delivery_peek`/`ack`,
-`firmware/core/include/spaghetti/record_delivery.h`, one ring for MQTT and one for
+`firmware/backbone/include/spaghetti/record_delivery.h`, one ring for MQTT and one for
 BLE). There is no `GET_RECORD`-style Protocol V1 operation in `protocol-sdk` today,
 and no MQTT-payload CBOR decoder either — checked directly, not assumed. This package
 therefore cannot decode field values itself: every `ResolveFields` call is

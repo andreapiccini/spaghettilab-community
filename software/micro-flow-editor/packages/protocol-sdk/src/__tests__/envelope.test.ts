@@ -52,7 +52,7 @@ describe("envelope — request/response/event round trip", () => {
     });
   });
 
-  it("produces the exact indefinite-length 4-key map layout the real firmware build emits, verified via firmware/core/tests/protocol's test_envelope_golden_vectors", () => {
+  it("produces the exact indefinite-length 4-key map layout the real firmware build emits, verified via firmware/backbone/tests/protocol's test_envelope_golden_vectors", () => {
     // {0:1, 1:1, 2:2, 3: bstr(0x A0)} — version=1, correlation=1, operation=2 (GET_STATUS), payload={0xA0}.
     // zcbor in this firmware build does NOT use canonical/definite-length
     // collections — it emits 0xBF <pairs...> 0xFF, confirmed by building and
@@ -118,7 +118,7 @@ describe("envelope — encode-side validation", () => {
 });
 
 describe("envelope — decode-side validation", () => {
-  it("rejects firmware/core/tests/protocol/src/main.c's literal \"malformed\" vector {0xA1, 0x00, 0x01} — a valid CBOR map {0:1} that is missing keys 1/2/3, exactly reproducing the firmware's own test_envelope_roundtrip_and_rejects assertion", () => {
+  it("rejects firmware/backbone/tests/protocol/src/main.c's literal \"malformed\" vector {0xA1, 0x00, 0x01} — a valid CBOR map {0:1} that is missing keys 1/2/3, exactly reproducing the firmware's own test_envelope_roundtrip_and_rejects assertion", () => {
     const malformed = new Uint8Array([0xa1, 0x00, 0x01]);
     expect(() => decodeRequest(malformed)).toThrow(ProtocolCodecError);
   });

@@ -7,8 +7,8 @@ ownership attribution, canonical debug JSON, and the exact wire-V3 CBOR bytes pl
 reproducible SHA-256 hash.
 
 Every field, map key, and encoding rule is read directly from
-`firmware/core/subsys/config/config_cbor.c`'s `spaghetti_config_encode_cbor` and
-`firmware/core/subsys/config/config.c` — **not** from the stale comment that used to
+`firmware/backbone/subsys/config/config_cbor.c`'s `spaghetti_config_encode_cbor` and
+`firmware/backbone/subsys/config/config.c` — **not** from the stale comment that used to
 live in `protocol-sdk`'s `GET_CONFIG` doc ("Config CDDL only goes up to v3... decoding
 not yet specified"). Phase 330 shipped a complete, real V2 wire codec; the on-wire
 version integer is `4` (`SPAGHETTI_CONFIG_CBOR_WIRE_VERSION_V3`), distinct from the

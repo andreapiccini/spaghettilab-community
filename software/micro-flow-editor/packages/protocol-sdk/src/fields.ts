@@ -124,7 +124,7 @@ export function decodeEmptyPayload(bytes: Uint8Array, context: string): void {
  * Shared `{0: job_id}` shape returned by an actual `SPAGHETTI_OPERATION_ASYNC_JOB`
  * handler. `SCAN_DISCOVERY` (op 5) is the only one of the 27 Protocol V1
  * operations that is genuinely `ASYNC_JOB`
- * (`firmware/core/subsys/communication/operations/discovery_ops.c`) —
+ * (`firmware/backbone/subsys/communication/operations/discovery_ops.c`) —
  * confirmed by grep across every `operations/*.c` file. `OPEN_NETWORK_MAINTENANCE`
  * and `OPEN_WIFI_UPDATE` were previously (and incorrectly) documented here
  * too; both are actually `SERIALIZED_MUTATION` and return a handover

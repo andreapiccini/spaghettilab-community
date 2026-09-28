@@ -484,7 +484,7 @@ export function isDirectPeripheral(peripheral: LogicalPeripheral): boolean {
   return isLinePeripheral(peripheral);
 }
 
-/** Matches `spaghetti_port_capability` in `firmware/core/include/spaghetti/port.h`. */
+/** Matches `spaghetti_port_capability` in `firmware/backbone/include/spaghetti/port.h`. */
 export const PORT_CAP = {
   I2C: 1 << 0,
   SPI: 1 << 1,

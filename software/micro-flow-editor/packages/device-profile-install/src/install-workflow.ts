@@ -27,7 +27,7 @@ function isProtocolError(e: unknown): e is WireError & { code: "PROTOCOL_ERROR";
 }
 
 /**
- * `firmware/core/subsys/communication/protocol_status.c`'s
+ * `firmware/backbone/subsys/communication/protocol_status.c`'s
  * `spaghetti_protocol_status_from_errno` — the real errno→`ProtocolStatus`
  * mapping, read directly rather than guessed. Only the entries relevant to
  * Device Profile install/remove are named here; every other status still

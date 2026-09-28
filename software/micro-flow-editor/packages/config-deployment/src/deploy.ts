@@ -25,7 +25,7 @@ type WireError = { readonly code?: string; readonly status?: number };
 function isProtocolError(e: unknown): e is WireError & { code: "PROTOCOL_ERROR"; status: number } {
   return typeof e === "object" && e !== null && (e as WireError).code === "PROTOCOL_ERROR" && typeof (e as WireError).status === "number";
 }
-/** `firmware/core/subsys/communication/protocol_status.c`: `-ESTALE`/`-EEXIST` → `CONFLICT` (4) — the same mapping `@spaghettilab/device-profile-install` uses. */
+/** `firmware/backbone/subsys/communication/protocol_status.c`: `-ESTALE`/`-EEXIST` → `CONFLICT` (4) — the same mapping `@spaghettilab/device-profile-install` uses. */
 const STATUS_CONFLICT = 4;
 
 function bytesToHex(bytes: Uint8Array): string {

@@ -8,7 +8,7 @@ import {
 
 /**
  * Protocol V1 envelope — the same 4-field CBOR map for request, response and
- * event, per `firmware/core/include/spaghetti/protocol.h` and
+ * event, per `firmware/backbone/include/spaghetti/protocol.h` and
  * `protocol_cbor.c`'s `encode_envelope`/`decode_envelope`. Field 1 means
  * `correlation_id` for request/response and `sequence` for events; field 2
  * means `operation`/`status`/`event type` respectively — the shape is

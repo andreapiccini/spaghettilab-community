@@ -9,7 +9,7 @@ import { FIELD_NAME_MAX_LENGTH, UNIT_NAME_MAX_LENGTH } from "./sample-field.js";
 /**
  * Mirrors `struct spaghetti_device_profile_budget` (`device_profile.h`) —
  * the same four counters `accumulate_op_budget`
- * (`firmware/core/subsys/device_profiles/device_profile.c`) computes.
+ * (`firmware/backbone/subsys/device_profiles/device_profile.c`) computes.
  */
 export type DeviceProfileBudget = {
   readonly totalTimeMs: number;

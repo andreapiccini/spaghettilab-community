@@ -11,8 +11,8 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = Path(__file__).with_name("manifest.json")
-HEADER = ROOT / "firmware/core/include/spaghetti/enrollment.h"
-SOURCE = ROOT / "firmware/core/subsys/services/identity/enrollment.c"
+HEADER = ROOT / "firmware/backbone/include/spaghetti/enrollment.h"
+SOURCE = ROOT / "firmware/backbone/subsys/services/identity/enrollment.c"
 
 
 def main() -> int:

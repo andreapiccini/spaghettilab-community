@@ -2,7 +2,7 @@
 
 ## Future node package layout
 
-Host nodes import `@spaghettilab/protocol` from `firmware/core/tools/sdk/typescript`
+Host nodes import `@spaghettilab/protocol` from `firmware/backbone/tools/sdk/typescript`
 (local compile; not published to npm). They must not reimplement CBOR, retry, or
 Config merge:
 
@@ -45,7 +45,7 @@ objects for debug/dashboard use.
 ## BLE gateway path
 
 Import `spaghetti_ble_v1_flow.json` when the Core speaks BLE (MQTT optional on the
-device). Run the host gateway from `firmware/core`:
+device). Run the host gateway from `firmware/backbone`:
 
 ```sh
 make host-tools

@@ -7,7 +7,7 @@ Config → authoring graph, plus a full local dry-run (S073).
 
 `decodeConfigCbor()` is the exact inverse of `config-compiler`'s `encodeConfigCbor()` —
 same map keys, same per-record shapes, read from the same source
-(`firmware/core/subsys/config/config_cbor.c`'s `decode_wire_v3`). This is the reverse
+(`firmware/backbone/subsys/config/config_cbor.c`'s `decode_wire_v3`). This is the reverse
 direction S072 explicitly left undone. While building it, `@spaghettilab/protocol-sdk`'s
 `CborReader` gained support for CBOR simple value 22 (`0xF6`, the wire `null`) — needed
 to decode an unspecified `bay_id`/`power_rail_id` (`config_cbor.c`'s

@@ -41,7 +41,7 @@ Nuovo pacchetto `@spaghettilab/device-profile-install`
 che ogni pacchetto precedente della catena (S061, S062) aveva esplicitamente rimandato.
 Non esiste un file CDDL per i Device Profile: l'ordine delle chiavi della mappa (0-13)
 e il layout byte di ogni op/field sono presi direttamente da
-`firmware/core/subsys/device_profiles/device_profile.c`'s `decode_profile_cbor`/
+`firmware/backbone/subsys/device_profiles/device_profile.c`'s `decode_profile_cbor`/
 `decode_op`/`decode_fields`, letti come verità di base invece che indovinati. Il
 decoder legge le chiavi con `expect_key` in sequenza stretta — non è una mappa a
 ordine libero nonostante il wire type. Aggiunta `fromRawOp()` (inversa di `toRawOp()`)
@@ -69,7 +69,7 @@ localmente, senza round-trip, quando il chiamante sa già che un Module del prog
 corrente referenzia il profilo; il lato Core ("Config live altrove lo referenzia", che
 questo pacchetto non può sapere in locale) resta applicato da remoto: `-EBUSY` diventa
 `ProtocolStatus.BUSY` (mappatura errno→status presa da
-`firmware/core/subsys/communication/protocol_status.c`, non indovinata) e viene
+`firmware/backbone/subsys/communication/protocol_status.c`, non indovinata) e viene
 tradotto nello stesso errore `PROFILE_IN_USE`.
 
 **Catalogo** (`catalog.ts`): `mergeProfileCatalog()` unifica sorgenti built-in/locali/
@@ -84,7 +84,7 @@ installati" — non per codice aggiunto qui, ma per la forma del tipo stesso.
 costruisce un `ModuleNodeData` (S050) da un profilo confermato dal Core più
 Bay/rail/indirizzo scelti da un umano (punto 2). `driverTypeId` è sempre
 `"declarative-device"` — preso da `spaghetti_declarative_device_driver.type_id` in
-`firmware/core/spaghetti_modules/declarative_device/declarative_device.c`, l'unico
+`firmware/backbone/spaghetti_modules/declarative_device/declarative_device.c`, l'unico
 driver generico su cui gira ogni istanza di Device Profile. Costruzione pura, nessun
 nuovo tipo di comando: il chiamante aggiunge il risultato al grafo con
 `addGraphNodeCommand` già esistente (`react-flow-adapter`).

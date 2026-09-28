@@ -1,4 +1,4 @@
-/** Local USB→WebSocket bridge (`make usb-bridge` in firmware/core). Safari has no Web Serial. */
+/** Local USB→WebSocket bridge (`make usb-bridge` in firmware/backbone). Safari has no Web Serial. */
 
 export const USB_BRIDGE_HOST = "127.0.0.1";
 export const USB_BRIDGE_PORT = 8766;

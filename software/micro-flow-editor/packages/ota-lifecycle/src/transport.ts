@@ -1,4 +1,4 @@
-/** `enum spaghetti_update_transport`, `firmware/core/include/spaghetti/update.h:17-22` — sequential 0..3. */
+/** `enum spaghetti_update_transport`, `firmware/backbone/include/spaghetti/update.h:17-22` — sequential 0..3. */
 export enum UpdateTransport {
   NONE = 0,
   UART = 1,

@@ -77,7 +77,7 @@ visto per S040/S050/S060/S070/S080).
   UI-S040/UI-S060/UI-S070. Il form Comandi richiede Module key e command ID
   inseriti manualmente.
 - **Provisioning credenziali non raggiungibile da questa app.** Ricerca esaustiva
-  di tutti i 14 file sotto `firmware/core/subsys/communication/operations/`: nessuna
+  di tutti i 14 file sotto `firmware/backbone/subsys/communication/operations/`: nessuna
   operazione wire per credenziali/provisioning. Il provisioning reale avviene solo
   fuori banda sul Maintenance Link fisico/seriale (comandi SMP). Il tab
   Amministrazione mostra questo come indisponibilità onesta con la remediation

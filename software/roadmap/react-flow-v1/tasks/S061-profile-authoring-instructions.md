@@ -36,7 +36,7 @@ già installati, senza ancora occuparsi di import/export o installazione.
 Nuovo pacchetto `@spaghettilab/device-profile-authoring-model`
 (`software/micro-flow-editor/packages/device-profile-authoring-model/`), che dipende
 solo da `domain`. Ogni tipo è preso direttamente da
-`firmware/core/include/spaghetti/device_profile.h`, `port.h` e `schema.h` (letti nel
+`firmware/backbone/include/spaghetti/device_profile.h`, `port.h` e `schema.h` (letti nel
 codice reale, non dedotti dal solo testo del task), non inventato.
 
 **Istruzioni** (`instruction.ts`, `opcodes.ts`, `raw-op.ts`): union discriminata con
@@ -91,7 +91,7 @@ l'eseguitore reale — risultato: diversi operandi erano sbagliati (`GPIO_SET` m
 come lettura di un temp slot invece di un booleano immediato in `imm0`; lo stop byte di
 `UART_READ_UNTIL` posizionato su `imm0` invece del vero `imm2`; `I2C_WRITE`/`I2C_READ`/
 `SPI_TRANSCEIVE`/`UART_WRITE`/`ADC_READ` senza l'operando `timeoutMs` che hanno
-davvero). Corretto leggendo `firmware/core/subsys/device_profiles/device_profile_exec.c`
+davvero). Corretto leggendo `firmware/backbone/subsys/device_profiles/device_profile_exec.c`
 (l'eseguitore) e `device_profile.c`'s `accumulate_op_budget` (il validatore reale) —
 non più solo l'enum degli opcode. `computeBudget()` ora rispecchia `accumulate_op_budget`
 esattamente, byte per byte, non più un'approssimazione. 21 test (5 nuovi) verificano la

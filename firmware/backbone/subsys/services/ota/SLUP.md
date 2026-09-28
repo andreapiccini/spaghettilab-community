@@ -6,7 +6,7 @@ Type every command on the **USB master** only: the Backbone with the PC cable
 and the serial shell. The other boards stay on the CAN bus. They do not need
 USB, a shell, or a second loop.
 
-From `firmware/core`, with that board plugged in:
+From `firmware/backbone`, with that board plugged in:
 
 ```sh
 BOARD=spaghettilab_backbone_v1/esp32s3/procpu make monitor
@@ -28,7 +28,7 @@ session. Index 1 is always this master. 2..N are the peers, each with its
 does not matter.
 
 The **image file lives on the PC**. The Zephyr shell cannot see that path.
-Close `make monitor`, then from `firmware/core`:
+Close `make monitor`, then from `firmware/backbone`:
 
 ```sh
 make slup-list

@@ -1,6 +1,6 @@
 /**
  * Real integer -> label mappings for `GET_STATUS`'s enum-shaped fields,
- * resolved directly against firmware headers (`firmware/core/include/spaghetti/`)
+ * resolved directly against firmware headers (`firmware/backbone/include/spaghetti/`)
  * for S093 — a follow-up to `protocol-sdk`'s `status.ts` comment noting these
  * fields were previously kept as raw numbers because only the enum *names*,
  * not their integer values, were known at the time.

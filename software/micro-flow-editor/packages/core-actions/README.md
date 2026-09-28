@@ -13,7 +13,7 @@ Verifiche) holds structurally: this function has no code path that could write
 
 `MODULE_COMMAND`'s request (`@spaghettilab/protocol-sdk`'s `ModuleCommandRequest`) is
 `{key, commandId}` only — checked directly against
-`firmware/core/subsys/communication/operations/module_command.c`: **no argument field
+`firmware/backbone/subsys/communication/operations/module_command.c`: **no argument field
 exists on the wire today**. `requiresArguments: true` on a request makes this function
 refuse up front (`UNSUPPORTED_ARGUMENTS`, no wire call at all) rather than silently
 invoking a parameterized command without its parameters — a typed argument-entry form
@@ -33,7 +33,7 @@ all* — "una scan invasiva richiede l'autorizzazione esplicita prevista dalla p
 (S092 § Verifiche). A non-invasive scan needs no such grant.
 
 `interpretJobStatus()` classifies a `GET_JOB_STATUS` response
-(`spaghetti_job_state`, `firmware/core/subsys/communication/communication.c`) into a
+(`spaghetti_job_state`, `firmware/backbone/subsys/communication/communication.c`) into a
 distinct outcome per state — `EXPIRED` (6) becomes `"TIMEOUT"` explicitly, never
 folded into `"FAILED"`; `FREE` (0, an unissued or already-reclaimed slot) becomes
 `"UNKNOWN"` rather than a guessed terminal state.
@@ -54,4 +54,4 @@ already exposes them directly with nothing this package would add.
   Module-command-specific.** The same `UNAUTHORIZED`/`RESOURCE_EXHAUSTED`/`TIMEOUT`
   → outcome mapping is reused for both command execution and discovery scan, since
   both are the same envelope-level `ProtocolStatus` vocabulary
-  (`firmware/core/subsys/communication/protocol_status.c`), not two different ones.
+  (`firmware/backbone/subsys/communication/protocol_status.c`), not two different ones.

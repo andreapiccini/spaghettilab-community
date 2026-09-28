@@ -2,7 +2,7 @@
  * `RailEntry.assurance` (`@spaghettilab/catalog-model`) is a raw Core-reported
  * number — S041 deliberately never coerces it. These names resolve that
  * number for validation purposes only, sourced directly from the firmware's
- * own definition (`firmware/core/include/spaghetti/power.h`,
+ * own definition (`firmware/backbone/include/spaghetti/power.h`,
  * `enum spaghetti_power_assurance`) rather than guessed: `UNMANAGED` (0) is a
  * passive/jumper rail firmware cannot verify, `SWITCHED` (1) it can
  * enable/disable, `SWITCHED_AND_MEASURED` (2) adds measurement. Nothing

@@ -53,7 +53,7 @@ export async function requestScan(
   }
 }
 
-/** `spaghetti_job_state` (`firmware/core/subsys/communication/communication.c`), mirrored in `@spaghettilab/protocol-sdk`'s `JobState`. */
+/** `spaghetti_job_state` (`firmware/backbone/subsys/communication/communication.c`), mirrored in `@spaghettilab/protocol-sdk`'s `JobState`. */
 export const JobProgressOutcomeKind = {
   PENDING: "PENDING",
   RUNNING: "RUNNING",

@@ -1,5 +1,5 @@
 /**
- * Sourced from `firmware/core/include/spaghetti/port.h`,
+ * Sourced from `firmware/backbone/include/spaghetti/port.h`,
  * `enum spaghetti_port_transport` — the electrical family a Device Profile
  * requires a Port to be running as. Distinct from
  * `@spaghettilab/physical-composition-model`'s caller-supplied `TransportOf`

@@ -37,7 +37,7 @@ Nuovo pacchetto `@spaghettilab/core-actions`
 operation che `APPLY_CONFIG` non tocca mai, quindi "l'esecuzione di un comando
 manuale non modifica Config o progetto" vale per costruzione: questa funzione non ha
 alcun percorso di codice che possa scrivere `ProjectV1` o passare da `CommandStack`.
-Verificato direttamente contro `firmware/core/subsys/communication/operations/module_command.c`:
+Verificato direttamente contro `firmware/backbone/subsys/communication/operations/module_command.c`:
 `MODULE_COMMAND` non ha alcun campo argomenti sul wire oggi. `requiresArguments: true`
 su una richiesta fa rifiutare subito (`UNSUPPORTED_ARGUMENTS`, nessuna chiamata wire)
 invece di invocare silenziosamente un comando parametrico senza i suoi parametri. Il

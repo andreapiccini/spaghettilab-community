@@ -10,7 +10,7 @@ Protocol V1 has no `VALIDATE_OTA_CANDIDATE`-style operation — unlike `VALIDATE
 (op 17) and `VALIDATE_DEVICE_PROFILE` (op 24), confirmed by the full 27-operation list
 in `envelope.ts`. The only real, authoritative check happens firmware-side, in
 `spaghetti_image_manifest_validate_candidate()`
-(`firmware/core/subsys/feature_registry/image_manifest.c:381-431`), and it only runs
+(`firmware/backbone/subsys/feature_registry/image_manifest.c:381-431`), and it only runs
 **after** the candidate has already been transferred (`spaghetti_update_finish()`).
 `preflightOtaCandidate()` predicts that later check locally, from data already read
 (`GET_CAPABILITIES`, `GET_RESOURCES`, `GET_UPDATE_STATUS`) plus the candidate's own
@@ -64,7 +64,7 @@ version floors, Config type retention, then budget — stopping at the first fai
 each with an explicit `reason`.
 
 **Downgrade**: real anti-downgrade enforcement is `CONFIG_MCUBOOT_BOOTLOADER_NO_DOWNGRADE=y`
-(`firmware/core/prj.conf:82`), a bootloader-level Kconfig gate — there is no app-visible
+(`firmware/backbone/prj.conf:82`), a bootloader-level Kconfig gate — there is no app-visible
 security-counter field to compare pre-transfer (`image_manifest.h`'s `fw_version` is a
 plain string, no numeric floor). This package's downgrade check is a **string-sort
 heuristic warning**, not a guarantee — real rejection only happens at MCUboot swap time,

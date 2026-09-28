@@ -13,7 +13,7 @@ import type {
 
 /**
  * Produces the exact wire-V3 CBOR bytes `spaghetti_config_encode_cbor`
- * (`firmware/core/subsys/config/config_cbor.c`) emits — map key order, per
+ * (`firmware/backbone/subsys/config/config_cbor.c`) emits — map key order, per
  * every sub-record shape, and the `properties` sort-by-field-id rule, all
  * read directly from that file rather than the (stale) CDDL-incompleteness
  * note previously carried in `protocol-sdk`. Decode is intentionally not

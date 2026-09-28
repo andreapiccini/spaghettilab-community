@@ -35,7 +35,7 @@ che non può mai compilare in un Config valido.
 Nuovo pacchetto `@spaghettilab/device-processing-graph-model`
 (`software/micro-flow-editor/packages/device-processing-graph-model/`), che dipende da
 `domain` ed `editor-model` (S042). Ogni tipo di nodo è preso direttamente dalle
-struct Config reali (`firmware/core/include/spaghetti/config.h`, `block_driver.h`,
+struct Config reali (`firmware/backbone/include/spaghetti/config.h`, `block_driver.h`,
 `rule_driver.h`), non dalla sola tassonomia UX a 5 categorie (che è più ricca di
 quanto il firmware abbia davvero).
 

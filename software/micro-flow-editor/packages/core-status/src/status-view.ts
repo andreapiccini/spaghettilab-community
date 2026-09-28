@@ -13,7 +13,7 @@ export type ModuleStatusView = {
 /**
  * Whether the hardware watchdog is armed cannot be read directly — the
  * firmware computes `hardware_watchdog_armed` internally
- * (`firmware/core/subsys/core/health.c`) but never puts it on the
+ * (`firmware/backbone/subsys/core/health.c`) but never puts it on the
  * `GET_STATUS` wire. `HealthState.HEALTHY` documents "components timely; HW
  * watchdog armed" and `DEGRADED` "components timely, no hardware WDT"
  * (`health.h:24-29`) — this is the only wire-visible signal, and it is an

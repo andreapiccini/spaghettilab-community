@@ -18,7 +18,7 @@ import { ConfigDecompilerErrorCode } from "./errors.js";
 /**
  * The exact inverse of `@spaghettilab/config-compiler`'s `encodeConfigCbor`
  * — same map key order, same per-record shapes, read from the same source
- * (`firmware/core/subsys/config/config_cbor.c`'s `decode_wire_v3`). This is
+ * (`firmware/backbone/subsys/config/config_cbor.c`'s `decode_wire_v3`). This is
  * the reverse direction S072 explicitly left undone.
  */
 

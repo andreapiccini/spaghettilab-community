@@ -2,7 +2,7 @@ import { checkPermission, domainError, type DomainError, type PermissionSet } fr
 import { CoreAdminErrorCode } from "./errors.js";
 
 /**
- * `enum spaghetti_connectivity_service` (`firmware/core/include/spaghetti/connectivity.h:21-26`) —
+ * `enum spaghetti_connectivity_service` (`firmware/backbone/include/spaghetti/connectivity.h:21-26`) —
  * a bitmask, combinable (e.g. `WIFI | REMOTE_CONSOLE`).
  */
 export const ConnectivityService = {

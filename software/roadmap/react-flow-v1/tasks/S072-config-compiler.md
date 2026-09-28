@@ -38,7 +38,7 @@ Nuovo pacchetto `@spaghettilab/config-compiler`
 (`software/micro-flow-editor/packages/config-compiler/`), che dipende da `domain`,
 `protocol-sdk`, `physical-composition-model` (S050) e `device-processing-graph-model`
 (S071). Ogni campo, chiave mappa e regola di codifica è preso direttamente da
-`firmware/core/subsys/config/config_cbor.c`'s `spaghetti_config_encode_cbor` e
+`firmware/backbone/subsys/config/config_cbor.c`'s `spaghetti_config_encode_cbor` e
 `config.c` — **non** dal commento ormai superato che viveva in `protocol-sdk` ("Config
 CDDL non decodificato"): la fase 330 ha spedito un codec wire V2 reale e completo, la
 versione wire è `4` (`SPAGHETTI_CONFIG_CBOR_WIRE_VERSION_V3`), distinta dalla

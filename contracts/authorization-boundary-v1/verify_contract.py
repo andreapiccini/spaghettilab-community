@@ -23,7 +23,7 @@ for required in ("PERMISSION_SCOPES", "PermissionSet", "checkPermission"):
     if required not in permission_source:
         raise SystemExit(f"missing public local authorization symbol: {required}")
 
-access_control = (ROOT / "firmware/core/include/spaghetti/access_control.h").read_text(encoding="utf-8")
+access_control = (ROOT / "firmware/backbone/include/spaghetti/access_control.h").read_text(encoding="utf-8")
 for required in ("spaghetti_role", "spaghetti_permission", "spaghetti_principal_authorize", "spaghetti_audit_record"):
     if required not in access_control:
         raise SystemExit(f"missing firmware local authorization symbol: {required}")

@@ -2,7 +2,7 @@
  * Node payloads for a `"device-processing"` `GraphState`
  * (`@spaghettilab/domain`, S013/S014, one graph per Core in
  * `project.deviceGraphs`). Every field is grounded in the real Config
- * structs (`firmware/core/include/spaghetti/config.h`), not invented from
+ * structs (`firmware/backbone/include/spaghetti/config.h`), not invented from
  * task prose — where firmware's structure is narrower than the UX's 5-node
  * taxonomy (Trigger/Read/Processing/Logic/Output), this package follows the
  * struct.

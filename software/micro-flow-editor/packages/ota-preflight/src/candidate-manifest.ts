@@ -1,6 +1,6 @@
 import type { PackArtifact, PackSignature } from "@spaghettilab/capability-marketplace";
 
-/** `enum spaghetti_config_migration_policy`, `firmware/core/include/spaghetti/image_manifest.h:29-32`. */
+/** `enum spaghetti_config_migration_policy`, `firmware/backbone/include/spaghetti/image_manifest.h:29-32`. */
 export enum ConfigMigrationPolicy {
   REJECT_REMOVAL = 0,
   EXPLICIT = 1,

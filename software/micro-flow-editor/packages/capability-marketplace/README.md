@@ -42,7 +42,7 @@ data — `@spaghettilab/catalog-model`'s `CatalogIndex`, from `GET_CATALOG`, gen
 enumerates installed Module Driver `typeId`s. **`GET_FEATURES` (the installed
 Capability Pack listing) only reports `moduleTypeCount` — a count, never the actual
 Block/Rule `typeId`s a pack provides** — confirmed directly against
-`firmware/core/subsys/communication/operations/features_ops.c` while building this
+`firmware/backbone/subsys/communication/operations/features_ops.c` while building this
 package, consistent with `catalog-model`'s own S041 README gap note ("no separate
 Rule/Block/opcode/operation/schema/field/command listing" exists on the wire). So
 `installedBlockRuleTypeIds` is caller-supplied and optional: without it, every

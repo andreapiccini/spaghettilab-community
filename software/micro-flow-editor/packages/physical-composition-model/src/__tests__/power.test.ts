@@ -11,7 +11,7 @@ describe("requiresPowerAcknowledgement", () => {
     expect(requiresPowerAcknowledgement(RailAssurance.SWITCHED_AND_MEASURED)).toBe(false);
   });
 
-  it("resolves the exact numeric values from firmware/core/include/spaghetti/power.h", () => {
+  it("resolves the exact numeric values from firmware/backbone/include/spaghetti/power.h", () => {
     expect(RailAssurance.UNMANAGED).toBe(0);
     expect(RailAssurance.SWITCHED).toBe(1);
     expect(RailAssurance.SWITCHED_AND_MEASURED).toBe(2);

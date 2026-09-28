@@ -13,7 +13,7 @@ documents how to wire Node-RED to it.
 - Firmware host tools on the machine that has BLE (or `--fake` for CI/smoke):
 
 ```sh
-cd firmware/core
+cd firmware/backbone
 make host-tools
 ```
 
@@ -36,7 +36,7 @@ export SPAGHETTI_GATEWAY_WS_TOKEN=local-dev-token
 ## Start the gateway
 
 ```sh
-cd firmware/core
+cd firmware/backbone
 # Real radio (requires bleak from make host-tools):
 .venv/bin/spaghetti-gateway serve --listen 127.0.0.1:8765
 # Or module form:
@@ -62,13 +62,13 @@ export SPAGHETTI_GATEWAY_MQTT_HOST=127.0.0.1
 
 1. Open http://127.0.0.1:1880
 2. Menu → Import → select
-   `firmware/core/examples/node_red/spaghetti_ble_v1_flow.json`
+   `firmware/backbone/examples/node_red/spaghetti_ble_v1_flow.json`
 3. Confirm the WebSocket client URL matches the gateway
    (`ws://127.0.0.1:8765/?token=…`)
 4. Set `SPAGHETTI_CORE_ID` (64-char lowercase hex device id) if your runtime
    injects env into function nodes; otherwise edit the init node
 
-Also see `firmware/core/examples/node_red/README.md`.
+Also see `firmware/backbone/examples/node_red/README.md`.
 
 ## Behaviour notes
 
@@ -84,7 +84,7 @@ Also see `firmware/core/examples/node_red/README.md`.
 ## Smoke (Firmware)
 
 ```sh
-cd firmware/core
+cd firmware/backbone
 make host-tools
 .venv/bin/python -m unittest discover -s tools/tests -v
 make node-red-ble-smoke

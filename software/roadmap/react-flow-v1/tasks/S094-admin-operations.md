@@ -66,10 +66,10 @@ conferma. `requestFactoryResetWithConfirmation()` compone il
 coincidere esattamente con `describeResetScope(scope)`.
 
 **Credential/provisioning** (`credential-provisioning.ts`): ricerca esaustiva di
-`firmware/core/subsys/communication/operations/` (14 file) conferma che non esiste
+`firmware/backbone/subsys/communication/operations/` (14 file) conferma che non esiste
 alcuna operazione wire per il provisioning di credenziali — avviene solo fuori banda
 via Maintenance Link seriale locale
-(`firmware/core/subsys/services/maintenance_link/README.md:42-55`), mai raggiungibile
+(`firmware/backbone/subsys/services/maintenance_link/README.md:42-55`), mai raggiungibile
 dai trasporti BLE/MQTT/WebSocket di questa app. `checkCredentialProvisioningAvailability()`
 controlla comunque il permesso `core.admin.credential-provisioning` prima di
 qualunque cosa, poi riporta `UNAVAILABLE_OVER_PROTOCOL_V1` con la remediation reale —

@@ -8,7 +8,7 @@
 
 | Item | Value |
 |---|---|
-| Tree | `firmware/core` |
+| Tree | `firmware/backbone` |
 | Zephyr | 4.4.0 (docker `dev` image) |
 | Board under test (fake) | `native_sim/native/64` |
 | Build-only board | `spaghettilab_core_v2_build_only/esp32c3` |

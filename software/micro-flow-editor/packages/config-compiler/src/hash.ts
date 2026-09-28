@@ -1,5 +1,5 @@
 /**
- * `compute_config_hash`/`compute_sha256` (`firmware/core/subsys/config/config.c`)
+ * `compute_config_hash`/`compute_sha256` (`firmware/backbone/subsys/config/config.c`)
  * — SHA-256 over exactly the canonical CBOR bytes `spaghetti_config_encode_cbor`
  * produces, the same pattern already used for Device Profile installs
  * (`@spaghettilab/device-profile-install`'s `hash.ts`). Web Crypto

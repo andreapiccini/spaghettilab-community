@@ -11,7 +11,7 @@ tracks, never a generic "installable RAM" summary (S093).
 Module's `state`/`endpointKind`) were previously left as raw numbers in
 `@spaghettilab/protocol-sdk` — that pass only had the enum *names* from the firmware
 source, not the integer→label mapping. This package resolves the real values, read
-directly from `firmware/core/include/spaghetti/core.h`, `health.h` and `module.h`:
+directly from `firmware/backbone/include/spaghetti/core.h`, `health.h` and `module.h`:
 
 - `spaghetti_core_state` (0 UNINITIALIZED .. 4 FAILED)
 - `spaghetti_core_mode` (0 UNPROVISIONED, 1 NORMAL, 2 MAINTENANCE)
@@ -24,7 +24,7 @@ An unrecognized integer becomes `"UNKNOWN(n)"` rather than throwing — a firmwa
 one version ahead of this SDK should stay readable, just less specific.
 
 **Watchdog** (`watchdogInferenceOf`): the firmware computes
-`hardware_watchdog_armed` internally (`firmware/core/subsys/core/health.c`) but never
+`hardware_watchdog_armed` internally (`firmware/backbone/subsys/core/health.c`) but never
 puts it on the wire. `HealthState.HEALTHY` documents "HW watchdog armed",
 `DEGRADED` "no hardware WDT" (`health.h:24-29`) — that is the only wire-visible signal,
 so this is an inference from `healthState`, not a direct field. `STARTING`/`STALE`
@@ -70,7 +70,7 @@ objects — never summed into one number, matching the doc comment already on
 `protocol-sdk`'s `ResourcePool` ("one distinct pool per resource kind, never summed").
 Config limits (`maxModules`/`maxPrincipals`) come from `GET_CAPABILITIES`.
 
-**Allocation failures are sticky.** `firmware/core/subsys/resources/resources.c`'s
+**Allocation failures are sticky.** `firmware/backbone/subsys/resources/resources.c`'s
 `spaghetti_resources_note_failure()` only ever increments the counter;
 `spaghetti_resources_reset_high_water()` explicitly leaves it untouched
 (`resources.h:96`). It clears only on a full reboot. So "a past allocation failure
@@ -87,7 +87,7 @@ only raised by firmware, never lowered except by an explicit
 
 `flash_slot_bytes`/`flash_image_budget_bytes`/`flash_headroom_bytes`/
 `static_ram_budget_bytes` are real `GET_RESOURCES` wire fields (keys 8-11) as of
-Firmware roadmap [phase 392](../../../../firmware/core/roadmap/392-resources-flash-ram-wire-exposure/README.md)
+Firmware roadmap [phase 392](../../../../firmware/backbone/roadmap/392-resources-flash-ram-wire-exposure/README.md)
 — previously a documented firmware gap (S093's original implementation note), now
 closed. `ResourceMonitorView.flashAndStaticRam` exposes all four as distinct numbers,
 same "never summed" rule as the six pools above — flash headroom and static RAM budget
@@ -97,7 +97,7 @@ totals or into each other.
 ## Reset authorization (`reset-authorization.ts`)
 
 `FACTORY_RESET` (op 15)'s `scope` is a bitmask
-(`firmware/core/include/spaghetti/factory_reset.h:18-24`: `CONFIG`/`NETWORK`/
+(`firmware/backbone/include/spaghetti/factory_reset.h:18-24`: `CONFIG`/`NETWORK`/
 `CREDENTIALS`/`BLE_BONDS`/`ALL`), **not** an enum with a distinct "diagnostic" value —
 `reset_ops.c` gates the whole operation with one permission
 (`SPAGHETTI_PERMISSION_PROVISION`) regardless of which scope bits are set. So S093 §

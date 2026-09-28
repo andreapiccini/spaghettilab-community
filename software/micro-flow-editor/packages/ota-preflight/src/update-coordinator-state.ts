@@ -1,4 +1,4 @@
-/** `enum spaghetti_update_state`, `firmware/core/include/spaghetti/update.h:25-33` — sequential 0..6. */
+/** `enum spaghetti_update_state`, `firmware/backbone/include/spaghetti/update.h:25-33` — sequential 0..6. */
 export enum UpdateState {
   IDLE = 0,
   ARMED = 1,

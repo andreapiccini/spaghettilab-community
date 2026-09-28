@@ -1,6 +1,6 @@
 /**
  * Bounded acquisition-plan opcode values, sourced directly from
- * `firmware/core/include/spaghetti/device_profile.h`
+ * `firmware/backbone/include/spaghetti/device_profile.h`
  * (`enum spaghetti_device_profile_opcode`), not guessed — this is a closed
  * vocabulary the firmware itself validates against: "unknown values are
  * rejected during validation. New opcodes require a firmware Capability

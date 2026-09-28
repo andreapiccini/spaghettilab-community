@@ -24,7 +24,7 @@ import { DeviceProfileInstallErrorCode } from "./errors.js";
 /**
  * Field key order for the top-level CBOR map, and the byte layout of one op
  * and one sample field — every value sourced by reading
- * `firmware/core/subsys/device_profiles/device_profile.c`'s
+ * `firmware/backbone/subsys/device_profiles/device_profile.c`'s
  * `decode_profile_cbor`/`decode_op`/`decode_fields` directly (not the CDDL —
  * there is no `.cddl` file for Device Profiles, only the zcbor decoder in
  * C), not guessed. The decoder reads these keys with `expect_key` in this

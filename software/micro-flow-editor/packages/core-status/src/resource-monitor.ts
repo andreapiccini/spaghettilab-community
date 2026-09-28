@@ -5,7 +5,7 @@ export type ResourcePoolView = ResourcePool;
 
 /**
  * `allocationFailures` is a monotonic, sticky counter
- * (`firmware/core/subsys/resources/resources.c`'s `spaghetti_resources_note_failure`
+ * (`firmware/backbone/subsys/resources/resources.c`'s `spaghetti_resources_note_failure`
  * only ever increments it; `spaghetti_resources_reset_high_water` explicitly
  * leaves it untouched, per `resources.h:96`'s own doc comment). It is
  * cleared only by a full reboot (`spaghetti_resources_init()`, which itself

@@ -2,7 +2,7 @@
 
 Host TypeScript SDK for Spaghetti LAB Communication Protocol V1.
 
-Compiled locally under `firmware/core/tools/sdk/typescript/`. **Not published to npm.**
+Compiled locally under `firmware/backbone/tools/sdk/typescript/`. **Not published to npm.**
 
 ## Layout
 

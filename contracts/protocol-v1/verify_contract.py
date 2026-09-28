@@ -11,10 +11,10 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT = Path(__file__).with_name("manifest.json")
-C_HEADER = ROOT / "firmware/core/include/spaghetti/protocol.h"
+C_HEADER = ROOT / "firmware/backbone/include/spaghetti/protocol.h"
 TS_ENVELOPE = ROOT / "software/micro-flow-editor/packages/protocol-sdk/src/envelope.ts"
-PYTHON_SDK = ROOT / "firmware/core/tools/spaghetti_protocol.py"
-CAPABILITIES_HEADER = ROOT / "firmware/core/include/spaghetti/capabilities.h"
+PYTHON_SDK = ROOT / "firmware/backbone/tools/spaghetti_protocol.py"
+CAPABILITIES_HEADER = ROOT / "firmware/backbone/include/spaghetti/capabilities.h"
 TS_CAPABILITIES = ROOT / "software/micro-flow-editor/packages/protocol-sdk/src/operations/capabilities.ts"
 
 

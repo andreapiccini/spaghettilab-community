@@ -1,6 +1,6 @@
 /**
  * Mirrors `struct spaghetti_config` and its wire-V3 CBOR encoding
- * (`firmware/core/subsys/config/config_cbor.c`'s
+ * (`firmware/backbone/subsys/config/config_cbor.c`'s
  * `spaghetti_config_encode_cbor`/`decode_wire_v3`) field for field — not
  * derived from the task prose. `SPAGHETTI_CONFIG_CBOR_WIRE_VERSION_V3` is 4,
  * distinct from the in-memory `SPAGHETTI_CONFIG_VERSION` (5); `version` here

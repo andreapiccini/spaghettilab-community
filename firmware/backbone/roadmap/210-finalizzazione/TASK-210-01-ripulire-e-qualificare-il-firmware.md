@@ -39,7 +39,7 @@ firmware di produzione.
 
 ### 2. Verificare automaticamente che non restino scorciatoie
 
-Esegui dalla root `firmware/core`:
+Esegui dalla root `firmware/backbone`:
 
 ```sh
 rg -n "TEMPORARY|SCORCIATOIA TEMPORANEA|spaghetti_.*_test_|sensor_sample_fetch|sensor_channel_get|SPAGHETTI_MODULE_CONTEXT_SIZE" \

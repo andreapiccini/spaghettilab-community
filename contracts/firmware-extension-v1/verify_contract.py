@@ -13,13 +13,13 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = Path(__file__).with_name("manifest.json")
 
 DEFINITIONS = {
-    "module_driver": ("firmware/core/include/spaghetti/module_driver.h", "SPAGHETTI_MODULE_DRIVER_API_VERSION"),
-    "rule_driver": ("firmware/core/include/spaghetti/rule_driver.h", "SPAGHETTI_RULE_DRIVER_API_VERSION"),
-    "block_driver": ("firmware/core/include/spaghetti/block_driver.h", "SPAGHETTI_BLOCK_DRIVER_API_VERSION"),
-    "discovery_provider": ("firmware/core/include/spaghetti/discovery.h", "SPAGHETTI_DISCOVERY_PROVIDER_API_VERSION"),
-    "feature_pack": ("firmware/core/include/spaghetti/feature_pack.h", "SPAGHETTI_FEATURE_PACK_ABI_VERSION"),
-    "protocol": ("firmware/core/include/spaghetti/protocol.h", "SPAGHETTI_PROTOCOL_VERSION"),
-    "enrollment_backend": ("firmware/core/include/spaghetti/enrollment.h", "SPAGHETTI_ENROLLMENT_BACKEND_API_VERSION"),
+    "module_driver": ("firmware/backbone/include/spaghetti/module_driver.h", "SPAGHETTI_MODULE_DRIVER_API_VERSION"),
+    "rule_driver": ("firmware/backbone/include/spaghetti/rule_driver.h", "SPAGHETTI_RULE_DRIVER_API_VERSION"),
+    "block_driver": ("firmware/backbone/include/spaghetti/block_driver.h", "SPAGHETTI_BLOCK_DRIVER_API_VERSION"),
+    "discovery_provider": ("firmware/backbone/include/spaghetti/discovery.h", "SPAGHETTI_DISCOVERY_PROVIDER_API_VERSION"),
+    "feature_pack": ("firmware/backbone/include/spaghetti/feature_pack.h", "SPAGHETTI_FEATURE_PACK_ABI_VERSION"),
+    "protocol": ("firmware/backbone/include/spaghetti/protocol.h", "SPAGHETTI_PROTOCOL_VERSION"),
+    "enrollment_backend": ("firmware/backbone/include/spaghetti/enrollment.h", "SPAGHETTI_ENROLLMENT_BACKEND_API_VERSION"),
 }
 
 
