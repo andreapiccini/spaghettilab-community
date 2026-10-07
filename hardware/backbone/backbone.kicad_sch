@@ -10095,7 +10095,7 @@
 		)
 		(uuid "59df9589-9e7b-4926-947b-dc8e242f64a8")
 	)
-	(text "ADC GPIO1 - GPIO10 \nNEXT REVIEW NEEDS THIS MODS"
+	(text "| ADC | Channels | GPIO |\n| ADC1 | CH0-CH9 | **GPIO1-GPIO10** |\n| ADC2 | CH0-CH9 | **GPIO11-GPIO20** |\nNEXT REVIEW NEEDS THIS MODS"
 		(exclude_from_sim no)
 		(at 77.47 205.74 0)
 		(effects
