@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppShell } from "./components/shell/AppShell.js";
 import { ScreenStub } from "./components/shell/ScreenStub.js";
+import { CommunityHubProvider } from "./state/community-hub-context.js";
 import { ProjectPicker } from "./components/project-picker/ProjectPicker.js";
 import { CoreConnectionsScreen } from "./components/core-connections/CoreConnectionsScreen.js";
 import { CatalogTopologyScreen } from "./components/catalog-topology/CatalogTopologyScreen.js";
@@ -17,22 +18,19 @@ import { SchematicPcbScreen } from "./components/coming-soon/SchematicPcbScreen.
 import { EducationScreen } from "./components/coming-soon/EducationScreen.js";
 import { DatasheetsScreen } from "./components/coming-soon/DatasheetsScreen.js";
 import { SettingsModal } from "./components/settings-modal/SettingsModal.js";
-import { NextStepHint } from "./components/shell/NextStepHint.js";
 import { TourOverlay } from "./components/shell/TourOverlay.js";
 import { isDemoOnlyEnabled, isScreenAllowedInDemo } from "./lib/demo-only.js";
 import { prepareDemoProject } from "./lib/open-demo.js";
 import { publicAsset } from "./lib/public-asset.js";
-import { isScreenVisibleInMode } from "./lib/ui-mode.js";
 import { CoreSessionsProvider } from "./state/core-sessions-context.js";
 import { NfcPresenceProvider } from "./state/nfc-presence-context.js";
-import { ModuleDetectBanner } from "./components/core-connections/ModuleDetectBanner.js";
 import { LocaleProvider } from "./state/locale-context.js";
 import { NodeRedRuntimeProvider } from "./state/node-red-runtime-context.js";
 import { PortProtocolProvider } from "./state/port-protocol-context.js";
 import { SessionProvider, useSession } from "./state/session-context.js";
 import { SettingsModalProvider } from "./state/settings-modal-context.js";
 import { TourProvider } from "./state/tour-context.js";
-import { UiModeProvider, useUiMode } from "./state/ui-mode-context.js";
+import { UiModeProvider } from "./state/ui-mode-context.js";
 import { productionExtensions } from "./extensions/registry.js";
 
 const SCREEN_TITLES: Record<string, { readonly title: string; readonly task: string }> =
@@ -58,11 +56,17 @@ function useDemoOnlyBootstrap() {
       const result = await prepareDemoProject();
       if (cancelled) return;
       if (!result.ok) {
-        setError(result.kind === "build" ? "Could not create the demo project." : `Could not create the demo project: ${result.detail}`);
+        setError(
+          result.kind === "build"
+            ? "Could not create the demo project."
+            : `Could not create the demo project: ${result.detail}`,
+        );
         setBooting(false);
         return;
       }
-      openProject(result.project.projectId, result.project, { screen: "processing-graph" });
+      openProject(result.project.projectId, result.project, {
+        screen: "processing-graph",
+      });
       setBooting(false);
     })();
     return () => {
@@ -76,15 +80,20 @@ function useDemoOnlyBootstrap() {
 function DemoBootScreen({ error }: { readonly error?: string | null }) {
   return (
     <div className="flex h-screen flex-col items-center justify-center gap-3 bg-surface">
-      <img src={publicAsset("ux-assets/logo-full.png")} alt="Spaghetti LAB" className="h-8" />
-      <p className="font-body text-sm text-ink-muted">{error ?? "Opening the Processing Graph demo…"}</p>
+      <img
+        src={publicAsset("ux-assets/logo-full.png")}
+        alt="Spaghetti LAB"
+        className="h-8"
+      />
+      <p className="font-body text-sm text-ink-muted">
+        {error ?? "Opening the Processing Graph demo…"}
+      </p>
     </div>
   );
 }
 
 function AppContent() {
   const { session, activeScreen, navigate } = useSession();
-  const { mode } = useUiMode();
   const demoOnly = isDemoOnlyEnabled();
   const { error: demoError, booting: demoBooting } = useDemoOnlyBootstrap();
 
@@ -93,10 +102,8 @@ function AppContent() {
       if (session && !isScreenAllowedInDemo(activeScreen)) navigate("processing-graph");
       return;
     }
-    if (!isScreenVisibleInMode(activeScreen, mode)) {
-      navigate("core-connections");
-    }
-  }, [activeScreen, mode, navigate, demoOnly, session]);
+    if (session && activeScreen === "community") navigate("core-connections");
+  }, [activeScreen, navigate, demoOnly, session]);
 
   if (demoOnly && (demoBooting || demoError || !session)) {
     return <DemoBootScreen error={demoError} />;
@@ -244,25 +251,25 @@ export default function App() {
   return (
     <UiModeProvider>
       <LocaleProvider>
-        <SettingsModalProvider>
-          <NodeRedRuntimeProvider>
-            <SessionProvider>
-              <PortProtocolProvider>
-                <TourProvider>
-                  <CoreSessionsProvider>
-                    <NfcPresenceProvider>
-                      <AppContent />
-                      {!isDemoOnlyEnabled() && <SettingsModal />}
-                      {!isDemoOnlyEnabled() && <TourOverlay />}
-                      {!isDemoOnlyEnabled() && <NextStepHint />}
-                      {!isDemoOnlyEnabled() && <ModuleDetectBanner />}
-                    </NfcPresenceProvider>
-                  </CoreSessionsProvider>
-                </TourProvider>
-              </PortProtocolProvider>
-            </SessionProvider>
-          </NodeRedRuntimeProvider>
-        </SettingsModalProvider>
+        <CommunityHubProvider>
+          <SettingsModalProvider>
+            <NodeRedRuntimeProvider>
+              <SessionProvider>
+                <PortProtocolProvider>
+                  <TourProvider>
+                    <CoreSessionsProvider>
+                      <NfcPresenceProvider>
+                        <AppContent />
+                        {!isDemoOnlyEnabled() && <SettingsModal />}
+                        {!isDemoOnlyEnabled() && <TourOverlay />}
+                      </NfcPresenceProvider>
+                    </CoreSessionsProvider>
+                  </TourProvider>
+                </PortProtocolProvider>
+              </SessionProvider>
+            </NodeRedRuntimeProvider>
+          </SettingsModalProvider>
+        </CommunityHubProvider>
       </LocaleProvider>
     </UiModeProvider>
   );

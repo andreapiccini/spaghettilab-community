@@ -50,6 +50,7 @@ target_sources(app PRIVATE
   spaghetti_blocks/blocks_logic.c
   spaghetti_blocks/blocks_table.c
   spaghetti_blocks/blocks_publish.c
+  spaghetti_blocks/blocks_physical_io.c
   spaghetti_blocks/blocks_kalman.c
   subsys/core/capabilities.c
   subsys/core/core.c
@@ -66,6 +67,7 @@ target_sources(app PRIVATE
   subsys/resources/resources.c
   subsys/resources/resources_note_weak.c
   subsys/port/port.c
+  subsys/topology/physical.c
   subsys/port/port_backend_board.c
   subsys/topology/topology.c
   subsys/schema/schema.c
@@ -118,6 +120,7 @@ target_sources(app PRIVATE
   subsys/communication/operations/audit_ops.c
   subsys/communication/operations/job_ops.c
   subsys/communication/operations/topology_ops.c
+  subsys/communication/operations/physical_ops.c
   subsys/communication/operations/resources_ops.c
   subsys/communication/operations/features_ops.c
   subsys/communication/operations/device_profile_ops.c

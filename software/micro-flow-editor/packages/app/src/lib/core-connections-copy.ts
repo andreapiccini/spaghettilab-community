@@ -90,7 +90,7 @@ type CoreConnectionsCopy = {
 };
 
 const IT: CoreConnectionsCopy = {
-  screenTitle: "Clusters",
+  screenTitle: "Discover",
   emptyTitle: "Nessun cluster connesso",
   emptyBody:
     "Connetti il primo cluster di Backbone per sincronizzare questo progetto.",
@@ -157,13 +157,13 @@ const IT: CoreConnectionsCopy = {
   viaCanShort: "Catena CAN",
   online: "Online",
   clusterSummary: (backbones, nfcModules) =>
-    `${backbones === 1 ? "1 Backbone" : `${backbones} Backbone`} · ${nfcModules === 0 ? "0 moduli" : nfcModules === 1 ? "1 modulo" : `${nfcModules} moduli`}`,
+    `${backbones === 1 ? "1 Backbone" : `${backbones} Backbone`} · ${nfcModules === 0 ? "moduli non identificati" : nfcModules === 1 ? "1 modulo NFC" : `${nfcModules} moduli NFC`}`,
   clusterTitle: (index) => `Cluster ${index}`,
   linkToSoftware: (link) => (link === "wifi" ? "Collegamento a Flow: Wi-Fi" : "Collegamento a Flow: Cavo"),
   nfcTitle: "Moduli",
   nfcEmpty: "Nessun modulo connesso",
-  nfcEmptyShort: "0 moduli",
-  nfcCountShort: (count) => (count === 0 ? "0 moduli" : count === 1 ? "1 modulo" : `${count} moduli`),
+  nfcEmptyShort: "Stato sconosciuto",
+  nfcCountShort: (count) => (count === 0 ? "NFC non rilevato" : count === 1 ? "1 modulo NFC" : `${count} moduli NFC`),
   nfcReading: "Lettura moduli…",
   nfcPort: (portId, label) => `Posizione ${portId} · ${label}`,
   connectorModule: "Connector Module",
@@ -189,7 +189,7 @@ const EN: CoreConnectionsCopy = {
   coresOutOfSync: (total, outOfSync) => `${total} Backbone · ${outOfSync} out of sync`,
   coresCount: (total) => (total === 1 ? "1 Backbone total" : `${total} Backbones total`),
   connectACore: "Connect a cluster",
-  screenTitle: "Clusters",
+  screenTitle: "Discover",
   emptyTitle: "No cluster connected",
   emptyBody: "Connect your first Backbone cluster to start synchronizing this project.",
   connectFirst: "Connect your first cluster",
@@ -251,13 +251,13 @@ const EN: CoreConnectionsCopy = {
   viaCanShort: "CAN chain",
   online: "Online",
   clusterSummary: (backbones, nfcModules) =>
-    `${backbones === 1 ? "1 Backbone" : `${backbones} Backbones`} · ${nfcModules === 0 ? "0 modules" : nfcModules === 1 ? "1 module" : `${nfcModules} modules`}`,
+    `${backbones === 1 ? "1 Backbone" : `${backbones} Backbones`} · ${nfcModules === 0 ? "modules not identified" : nfcModules === 1 ? "1 NFC module" : `${nfcModules} NFC modules`}`,
   clusterTitle: (index) => `Cluster ${index}`,
   linkToSoftware: (link) => (link === "wifi" ? "Link to Flow: Wi-Fi" : "Link to Flow: Cable"),
   nfcTitle: "Modules",
   nfcEmpty: "No modules connected",
-  nfcEmptyShort: "0 modules",
-  nfcCountShort: (count) => (count === 0 ? "0 modules" : count === 1 ? "1 module" : `${count} modules`),
+  nfcEmptyShort: "Unknown status",
+  nfcCountShort: (count) => (count === 0 ? "NFC not detected" : count === 1 ? "1 NFC module" : `${count} NFC modules`),
   nfcReading: "Reading modules…",
   nfcPort: (portId, label) => `Position ${portId} · ${label}`,
   connectorModule: "Connector Module",

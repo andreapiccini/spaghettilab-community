@@ -557,6 +557,13 @@ size_t spaghetti_device_profile_count(void)
 	return 0U;
 }
 
+int spaghetti_storage_probe_config(void) { return -ENOENT; }
+int spaghetti_device_profile_validate_cbor(const uint8_t *cbor, size_t size, struct spaghetti_device_profile_failure *failure)
+{
+	ARG_UNUSED(failure);
+	return cbor && size ? 0 : -EINVAL;
+}
+
 const struct spaghetti_device_profile *spaghetti_device_profile_get(size_t idx)
 {
 	ARG_UNUSED(idx);
@@ -827,6 +834,11 @@ ZTEST(protocol, test_envelope_roundtrip_and_rejects)
 	zassert_ok(spaghetti_protocol_decode_request(buffer, written, &decoded));
 	zassert_equal(decoded.correlation_id, 42U);
 	zassert_equal(decoded.operation, SPAGHETTI_PROTOCOL_GET_STATUS);
+	request.operation = SPAGHETTI_PROTOCOL_APPLY_PHYSICAL;
+	zassert_ok(spaghetti_protocol_encode_request(&request, buffer, sizeof(buffer), &written));
+	zassert_ok(spaghetti_protocol_decode_request(buffer, written, &decoded));
+	zassert_equal(decoded.operation, SPAGHETTI_PROTOCOL_APPLY_PHYSICAL);
+	request.operation = SPAGHETTI_PROTOCOL_GET_STATUS;
 
 	response.payload.size = 1U;
 	response.payload.bytes[0] = 0xA0U;

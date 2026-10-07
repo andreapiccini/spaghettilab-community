@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { isDemoOnlyEnabled } from "../../lib/demo-only.js";
-import { CommandPalette } from "./CommandPalette.js";
 import { LeftRail } from "./LeftRail.js";
 import { TopBar } from "./TopBar.js";
 
@@ -14,7 +13,6 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
         {!demoOnly && <LeftRail />}
         <main className={`min-h-0 flex-1 ${demoOnly ? "overflow-hidden" : "overflow-auto"}`}>{children}</main>
       </div>
-      {!demoOnly && <CommandPalette />}
     </div>
   );
 }

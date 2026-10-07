@@ -16,6 +16,7 @@ target_sources(app PRIVATE
   ../../spaghetti_blocks/blocks_table.c
   ../../spaghetti_blocks/blocks_publish.c
   ../../spaghetti_blocks/blocks_kalman.c
+  ../../spaghetti_blocks/blocks_physical_io.c
 )
 
 target_include_directories(app PRIVATE

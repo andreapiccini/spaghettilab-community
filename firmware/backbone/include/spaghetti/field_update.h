@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include <spaghetti/nfc.h>
+#include <spaghetti/physical.h>
 #include <spaghetti/update.h>
 
 /** Broadcast destination accepted by every listening peer. */
@@ -42,7 +43,23 @@ struct spaghetti_slup_peer {
 	uint8_t flags; /**< @ref SPAGHETTI_SLUP_FLAG_USB and LOCAL bits. */
 	uint8_t chain_index; /**< 1 = USB end, 2..N along the cable, or 0. */
 	char version[SPAGHETTI_SLUP_VERSION_SIZE]; /**< Signed image version, or empty. */
+	uint8_t physical[SPAGHETTI_PHYSICAL_SIZE]; /**< Version 0 means unavailable. */
+	uint8_t physical_parts; /**< Private CAN fragment reception mask. */
 };
+
+/**
+ * @brief Apply Function user pins on the selected CAN node, or the local board.
+ * @param[in] node_id Exact non-broadcast node; 0 selects the local board.
+ * @param[in] modes Non-NULL borrowed four-byte map of physical pins 2..5.
+ * @param[in] speed 0 = standard I2C, 1 = fast I2C.
+ * @param[in] expected Non-NULL borrowed 20-byte Function NFC snapshot.
+ * @retval 0 Applied by target; -EINVAL invalid args; -EBUSY update/sweep active;
+ * -ETIMEDOUT no matching acknowledgment; other target hardware errno.
+ * @note Thread-only, bounded 100ms serialization plus 800ms acknowledgment.
+ */
+int spaghetti_field_update_apply_physical_config(uint32_t node_id,
+					 const uint8_t modes[4], uint8_t speed,
+					 const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE], const uint8_t config[20]);
 
 /**
  * @brief Start the SLUP CAN listener and the optional ESP-NOW listener.
@@ -189,6 +206,9 @@ int spaghetti_field_update_copy_nfc_tags(struct spaghetti_nfc_tag *out,
  * @note Thread-safe and non-blocking after field-update initialization.
  */
 void spaghetti_field_update_nfc_feedback(void);
+
+/** Forward a local NFC insertion/removal notification to the USB master. */
+void spaghetti_field_update_nfc_changed(uint8_t port_id, uint32_t generation);
 
 /**
  * @brief Put one addressed Backbone into SLUP load mode.

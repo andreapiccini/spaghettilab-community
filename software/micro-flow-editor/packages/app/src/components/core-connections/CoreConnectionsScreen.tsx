@@ -59,7 +59,13 @@ export function CoreConnectionsScreen() {
       const current = root.attachedBackbones;
       const same =
         peers.length === current.length &&
-        peers.every((peer, index) => peer.deviceIdHex === current[index]?.deviceIdHex && peer.version === current[index]?.version && peer.local === current[index]?.local);
+        peers.every((peer, index) =>
+          peer.deviceIdHex === current[index]?.deviceIdHex &&
+          peer.mac === current[index]?.mac &&
+          peer.nodeId === current[index]?.nodeId &&
+          peer.version === current[index]?.version &&
+          peer.local === current[index]?.local,
+        );
       if (same) continue;
       setAttachedBackbones(root.binding.bindingId, peers);
     }

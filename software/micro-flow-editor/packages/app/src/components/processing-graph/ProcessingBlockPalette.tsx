@@ -1,4 +1,5 @@
 import {
+  findCatalogEntryById,
   isPlaceableOnDeviceGraph,
   searchCatalog,
   type ProcessingCatalogEntry,
@@ -11,6 +12,8 @@ import { DEMO_PALETTE_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
+import { useSession } from "../../state/session-context.js";
+import { physicalPinsForBinding } from "../../lib/physical-pin-bindings.js";
 import { FLOW_START_IDS } from "./dry-run-preview.js";
 import { visualForCatalogEntryId } from "./block-visuals.js";
 import { beginPaletteDrag, endPaletteDrag, encodePaletteDrag, PROCESSING_BLOCK_MIME } from "./catalog-to-node.js";
@@ -42,7 +45,9 @@ const FAMILY_ICONS: Record<FamilySectionId, LucideIcon> = {
 
 const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "bay"]);
 
-export function ProcessingBlockPalette() {
+export function ProcessingBlockPalette({ bindingId }: { readonly bindingId?: string }) {
+  const {session} = useSession();
+  const project = session?.stack.current;
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
@@ -62,14 +67,21 @@ export function ProcessingBlockPalette() {
     () =>
       searchCatalog(query).filter(
         (e) =>
-          (demoOnly ? (DEMO_PALETTE_IDS as readonly string[]).includes(e.id) : PALETTE_ALLOWED_IDS.has(e.id)) &&
+          (demoOnly ? (DEMO_PALETTE_IDS as readonly string[]).includes(e.id) : PALETTE_ALLOWED_IDS.has(e.id) || (e.id.startsWith("native.") && e.runtime === "core-block" && !e.id.startsWith("native.physical_"))) &&
           e.availability !== "unavailable" &&
           !FLOW_START_IDS.has(e.id) &&
           !FLOW_START_IDS.has(e.typeId ?? ""),
       ),
     [query, demoOnly],
   );
-  const placeables = useMemo(() => expandPalettePlaceables(filtered, locale), [filtered, locale]);
+  const placeables = useMemo(() => {
+    const pins = physicalPinsForBinding(project, bindingId).filter(pin => pin.local).flatMap(pin => {
+      const entry = findCatalogEntryById(pin.entryId);
+      if (!entry || !`${entry.label} ${pin.name} pin ${pin.pin}`.toLowerCase().includes(query.toLowerCase())) return [];
+      return expandPalettePlaceables([entry], locale).map(row => ({...row,rowKey:pin.id,physicalPinId:pin.id,label:`${entry.label} · pin ${pin.pin}`,subtitle:`${pin.name} · GPIO ${38-pin.channel}`}));
+    });
+    return [...expandPalettePlaceables(filtered, locale), ...pins];
+  }, [filtered, locale, project, bindingId, query]);
   const groups = useMemo(() => groupPlaceablesByFamily(placeables), [placeables]);
   const searching = query.trim() !== "";
 
@@ -204,7 +216,7 @@ function PaletteRow({
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
   const entry = row.entry;
-  const needsPort = catalogEntryNeedsConfiguredPort(entry);
+  const needsPort = !row.physicalPinId && catalogEntryNeedsConfiguredPort(entry);
   const placeable = isPlaceableOnDeviceGraph(entry) && (!needsPort || portsConfigured);
   const badge = !portsConfigured && needsPort ? copy.needsPort : availabilityBadge(entry, copy);
 
@@ -227,7 +239,7 @@ function PaletteRow({
             e.preventDefault();
             return;
           }
-          e.dataTransfer.setData(PROCESSING_BLOCK_MIME, encodePaletteDrag({ entryId: entry.id, baySide: row.baySide }));
+          e.dataTransfer.setData(PROCESSING_BLOCK_MIME, encodePaletteDrag({ entryId: entry.id, baySide: row.baySide, physicalPinId: row.physicalPinId }));
           e.dataTransfer.effectAllowed = "copy";
           e.currentTarget.style.opacity = "0.6";
           beginPaletteDrag(entry.nodeKind, row.baySide);

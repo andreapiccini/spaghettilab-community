@@ -2,6 +2,8 @@
 #define SPAGHETTI_PORT_BACKEND_H
 
 #include <spaghetti/port.h>
+int spaghetti_port_backend_user_map(spaghetti_port_id_t id, const uint8_t modes[4],
+	const uint8_t config[20]);
 
 /**
  * @brief Apply the board-default pinctrl/backend for one transport.

@@ -9,6 +9,7 @@ import { useLocale } from "../../state/locale-context.js";
 import { nfcNodesForBoard } from "../../lib/nfc-presence.js";
 import { useNfcPresence } from "../../state/nfc-presence-context.js";
 import { BackboneNetworkGraph } from "./BackboneNetworkGraph.js";
+import { useSession } from "../../state/session-context.js";
 import { rowActionId, rowActionLabel, sessionBadgeStyle } from "./session-badge.js";
 
 const TRANSITIONAL = new Set(["CONNECTING", "AUTHENTICATING", "SYNCHRONIZING", "VALIDATING", "APPLYING", "UPDATING", "REBOOTING", "TRIAL"]);
@@ -37,6 +38,7 @@ export function CoreRow({
   const { cancel } = useCoreSessions();
   const { nodesByBinding, loadingBindings } = useNfcPresence();
   const { locale } = useLocale();
+  const { openBackbonePhysical } = useSession();
   const copy = coreConnectionsCopy(locale);
   const nfcNodes = nodesByBinding.get(row.binding.bindingId) ?? [];
   const nfcLoading = loadingBindings.has(row.binding.bindingId);
@@ -130,6 +132,7 @@ export function CoreRow({
               id: board.deviceIdHex,
               label: roleLabel,
               sublabel: [
+                `ID ${board.mac || formatDeviceId(board.deviceIdHex)}`,
                 board.version?.trim() ? copy.fwVersion(board.version.trim()) : null,
                 copy.nfcCountShort(boardNfc.length),
               ]
@@ -142,6 +145,9 @@ export function CoreRow({
           nfcByBoardId={new Map(chain.map((board) => [board.deviceIdHex, nfcNodesForBoard(board, nfcNodes)]))}
           nfcLoading={nfcLoading && (row.sessionState === "READY" || row.sessionState === "SYNCHRONIZING")}
           locale={locale}
+          onBoardClick={(deviceIdHex) =>
+            openBackbonePhysical(row.binding.bindingId, deviceIdHex)
+          }
         />
       </div>
     </motion.div>

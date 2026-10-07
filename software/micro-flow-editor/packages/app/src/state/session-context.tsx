@@ -28,9 +28,13 @@ type SessionContextValue = {
   undo(): void;
   redo(): void;
   navigate(screen: ScreenId): void;
+  readonly physicalTarget: { readonly bindingId: string; readonly deviceIdHex: string } | null;
+  openBackbonePhysical(bindingId: string, deviceIdHex: string): void;
   /** Set on every execute()/undo()/redo() since the project was opened or last saved — drives the `beforeunload` warning below. */
   readonly dirty: boolean;
   markSaved(): void;
+  readonly deployRequestId: number;
+  requestDeploy(): void;
 };
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
@@ -40,17 +44,21 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
   const [activeScreen, setActiveScreen] = useState<ScreenId>("workspace");
   const [revision, setRevision] = useState(0);
   const [dirty, setDirty] = useState(false);
+  const [deployRequestId, setDeployRequestId] = useState(0);
+  const [physicalTarget, setPhysicalTarget] = useState<SessionContextValue["physicalTarget"]>(null);
 
   const openProject = useCallback((projectId: ProjectId, project: ProjectV1, options?: { readonly screen?: ScreenId }) => {
     setSession({ projectId, stack: new CommandStack(project) });
     setActiveScreen(options?.screen ?? "core-connections");
     setRevision((r) => r + 1);
     setDirty(false);
+    setPhysicalTarget(null);
   }, []);
 
   const closeProject = useCallback(() => {
     setSession(null);
     setActiveScreen("workspace");
+    setPhysicalTarget(null);
   }, []);
 
   const markSaved = useCallback(() => setDirty(false), []);
@@ -93,6 +101,14 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
   }, [dirty]);
 
   const navigate = useCallback((screen: ScreenId) => setActiveScreen(screen), []);
+  const openBackbonePhysical = useCallback((bindingId: string, deviceIdHex: string) => {
+    setPhysicalTarget({ bindingId, deviceIdHex });
+    setActiveScreen("physical-composition");
+  }, []);
+  const requestDeploy = useCallback(() => {
+    setDeployRequestId((value) => value + 1);
+    setActiveScreen("deploy-diff");
+  }, []);
 
   const value: SessionContextValue = {
     session,
@@ -104,8 +120,12 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
     undo,
     redo,
     navigate,
+    physicalTarget,
+    openBackbonePhysical,
     dirty,
     markSaved,
+    deployRequestId,
+    requestDeploy,
   };
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

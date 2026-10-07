@@ -45,6 +45,7 @@
 #endif
 
 #include <spaghetti/core.h>
+#include <spaghetti/communication.h>
 #include <spaghetti/identity.h>
 #include <spaghetti/nfc.h>
 
@@ -134,6 +135,7 @@ static struct spaghetti_slup_peer slup_peers_pub[SPAGHETTI_SLUP_PEERS_MAX];
 static size_t slup_peer_pub_count;
 static int64_t slup_peer_pub_seen_ms[SPAGHETTI_SLUP_PEERS_MAX];
 static struct spaghetti_nfc_tag slup_nfc_remotes[SPAGHETTI_NFC_TAGS_MAX];
+static uint8_t slup_nfc_remote_indices[SPAGHETTI_NFC_TAGS_MAX];
 static size_t slup_nfc_remote_count;
 
 static void slup_publish_peers_locked(void);
@@ -323,6 +325,27 @@ void spaghetti_field_update_nfc_feedback(void)
 	slup_led_set_mode(SPAGHETTI_SLUP_LED_NFC);
 }
 
+void spaghetti_field_update_nfc_changed(uint8_t port_id, uint32_t generation)
+{
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
+	uint8_t data[6];
+
+	/* The USB master publishes its local event directly. Slaves use one
+	 * unsolicited node response so the master can publish the same event.
+	 */
+	if ((spaghetti_field_update_local_flags() & SPAGHETTI_SLUP_FLAG_USB) != 0U) {
+		return;
+	}
+	data[0] = SPAGHETTI_SLUP_RSP_NFC_CHANGED;
+	data[1] = port_id;
+	sys_put_be32(generation, &data[2]);
+	(void)spaghetti_field_update_can_reply(session.node_id, data, sizeof(data));
+#else
+	ARG_UNUSED(port_id);
+	ARG_UNUSED(generation);
+#endif
+}
+
 static void slup_led_start(void)
 {
 #if DT_HAS_ALIAS(led0)
@@ -377,6 +400,84 @@ static void slup_ui_bind(const void *shell)
 #endif
 K_MUTEX_DEFINE(field_update_lock);
 K_MUTEX_DEFINE(slup_discovery_lock);
+K_SEM_DEFINE(physical_ack_sem, 0, 1);
+static uint32_t physical_pending_node;
+static uint8_t physical_transaction;
+static int physical_ack_error;
+static bool physical_pending;
+static uint8_t physical_staged_identity[40];
+static uint8_t physical_staged_token;
+static uint8_t physical_staged_parts;
+static int64_t physical_staged_until;
+
+int spaghetti_field_update_apply_physical_config(uint32_t node_id,
+					 const uint8_t modes[4], uint8_t speed,
+					 const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE], const uint8_t config[20])
+{
+	int err;
+
+	if ((modes == NULL) || (expected == NULL) || (speed > 1U) ||
+	    ((node_id & ~SPAGHETTI_SLUP_NODE_MASK) != 0U)) {
+		return -EINVAL;
+	}
+	if (slup_xfer_is_active() ||
+	    (k_mutex_lock(&slup_discovery_lock, K_MSEC(100)) != 0)) {
+		return -EBUSY;
+	}
+	if ((node_id == 0U) || (node_id == session.node_id)) {
+		err = spaghetti_physical_apply_config(modes, speed, expected, config);
+	} else {
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
+		uint8_t payload[6];
+		uint8_t staged[40] = {0}; memcpy(staged, expected, 20U); if (config) memcpy(&staged[20], config, 20U);
+
+		k_sem_reset(&physical_ack_sem);
+		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+		physical_pending_node = node_id;
+		physical_transaction++;
+		physical_pending = true;
+		physical_ack_error = -ETIMEDOUT;
+		payload[0] = physical_transaction;
+		k_mutex_unlock(&field_update_lock);
+		memcpy(&payload[1], modes, 4U);
+		payload[5] = speed;
+		err = 0;
+		for (uint8_t part = 0U; (part < (config ? 8U : 4U)) && (err == 0); ++part) {
+			uint8_t identity_part[7] = {payload[0], part};
+
+			memcpy(&identity_part[2], &staged[part * 5U], 5U);
+			err = spaghetti_field_update_can_ctrl(node_id,
+				SPAGHETTI_SLUP_CMD_PHYSICAL_IDENTITY, identity_part, sizeof(identity_part));
+		}
+		if (err == 0) {
+			err = spaghetti_field_update_can_ctrl(node_id,
+				SPAGHETTI_SLUP_CMD_APPLY_PHYSICAL, payload, sizeof(payload));
+		}
+		if (err == 0) {
+			err = k_sem_take(&physical_ack_sem, K_MSEC(800));
+			err = (err == 0) ? physical_ack_error : -ETIMEDOUT;
+		}
+		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+		physical_pending = false;
+		if (err == 0) {
+			for (size_t i = 0U; i < slup_peer_count; ++i) {
+				if (slup_peers[i].node_id == node_id && slup_peers[i].physical_parts == 63U) {
+					memcpy(&slup_peers[i].physical[7], modes, 4U);
+					slup_peers[i].physical[11] = speed;
+					slup_peers[i].physical[12] = expected[19] ? 2U : 1U;
+					if (config) memcpy(&slup_peers[i].physical[13], config, 20U);
+				}
+			}
+			slup_publish_peers_locked();
+		}
+		k_mutex_unlock(&field_update_lock);
+#else
+		err = -ENOTSUP;
+#endif
+	}
+	k_mutex_unlock(&slup_discovery_lock);
+	return err;
+}
 K_SEM_DEFINE(field_update_ack_sem, 0, 1);
 
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
@@ -634,6 +735,8 @@ static void slup_fill_self(struct spaghetti_slup_peer *peer)
 				SPAGHETTI_SLUP_FLAG_LOCAL);
 	peer->chain_index = session.chain_index;
 	slup_copy_local_version(peer->version);
+	(void)spaghetti_physical_describe(peer->physical);
+	peer->physical_parts = peer->physical[0] ? 63U : 0U;
 }
 
 #if defined(CONFIG_SHELL) || defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
@@ -673,6 +776,9 @@ static void slup_note_peer_locked(uint32_t node_id, const uint8_t mac[6],
 	slup_peers[slup_peer_count].chain_index = chain_index;
 	memset(slup_peers[slup_peer_count].version, 0,
 	       sizeof(slup_peers[slup_peer_count].version));
+	memset(slup_peers[slup_peer_count].physical, 0,
+	       sizeof(slup_peers[slup_peer_count].physical));
+	slup_peers[slup_peer_count].physical_parts = 0U;
 	slup_peer_live[slup_peer_count] = false;
 	slup_peer_seen_ms[slup_peer_count] = 0;
 	slup_peer_count += 1U;
@@ -1308,6 +1414,9 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 				remotes[i].node_id, SPAGHETTI_SLUP_CMD_NFC,
 				NULL, 0U);
 			k_sleep(K_MSEC(80));
+			(void)spaghetti_field_update_can_ctrl(remotes[i].node_id,
+				SPAGHETTI_SLUP_CMD_PHYSICAL, NULL, 0U);
+			k_sleep(K_MSEC(40));
 		}
 	} else if ((err != 0) && (err != -ENOTSUP) && (err != -EACCES) &&
 		   (err != -ENODEV)) {
@@ -1448,14 +1557,38 @@ int spaghetti_field_update_copy_nfc_tags(struct spaghetti_nfc_tag *out,
 static void slup_presence_work(struct k_work *work)
 {
 	bool armed;
+	size_t previous_count;
+	uint32_t previous_signature = 2166136261U;
+	uint32_t current_signature = 2166136261U;
 	size_t count = 0U;
 
 	ARG_UNUSED(work);
 	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
 	armed = session.load_armed;
+	previous_count = slup_peer_pub_count;
+	for (size_t i = 0U; i < slup_peer_pub_count; ++i) {
+		for (size_t j = 0U; j < sizeof(slup_peers_pub[i].mac); ++j) {
+			previous_signature =
+				(previous_signature ^ slup_peers_pub[i].mac[j]) * 16777619U;
+		}
+	}
 	k_mutex_unlock(&field_update_lock);
 	if (!armed && !slup_xfer_is_active()) {
 		(void)spaghetti_field_update_discover(NULL, 0U, &count);
+		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+		for (size_t i = 0U; i < slup_peer_pub_count; ++i) {
+			for (size_t j = 0U; j < sizeof(slup_peers_pub[i].mac); ++j) {
+				current_signature =
+					(current_signature ^ slup_peers_pub[i].mac[j]) * 16777619U;
+			}
+		}
+		k_mutex_unlock(&field_update_lock);
+		if ((spaghetti_field_update_local_flags() & SPAGHETTI_SLUP_FLAG_USB) != 0U &&
+		    ((count != previous_count) ||
+		     (current_signature != previous_signature))) {
+			(void)spaghetti_communication_emit_discovery(
+				session.node_id, 0U, (uint32_t)k_uptime_get_32());
+		}
 	}
 	(void)k_work_schedule(&slup_presence_dwork, K_MSEC(SLUP_PRESENCE_PERIOD_MS));
 }
@@ -2019,6 +2152,56 @@ static void handle_slup_command(const struct field_update_rx *msg)
 	case SPAGHETTI_SLUP_CMD_PING:
 		slup_reply(SPAGHETTI_SLUP_RSP_PONG, NULL, 0U);
 		break;
+	case SPAGHETTI_SLUP_CMD_PHYSICAL: {
+		uint8_t descriptor[SPAGHETTI_PHYSICAL_SIZE];
+
+		if (spaghetti_physical_describe(descriptor) == 0) {
+			for (uint8_t part = 0U; part < 6U; ++part) {
+				uint8_t payload[7] = {part};
+				const size_t offset = part * 6U;
+				const size_t length = MIN(6U, sizeof(descriptor) - offset);
+
+				memcpy(&payload[1], &descriptor[offset], length);
+				slup_reply(SPAGHETTI_SLUP_RSP_PHYSICAL, payload, 7U);
+			}
+		}
+		break;
+	}
+	case SPAGHETTI_SLUP_CMD_PHYSICAL_IDENTITY: {
+		if ((msg->dlc == 8U) && (msg->can_id != SPAGHETTI_SLUP_TWAI_CMD_ID)) {
+			const uint8_t part = msg->u.can[2];
+			const uint8_t token = msg->u.can[1];
+
+			if (part == 0U) {
+				physical_staged_parts = 0U;
+				physical_staged_token = token;
+				physical_staged_until = k_uptime_get() + 2000;
+			}
+			if ((part < 8U) && (token == physical_staged_token) &&
+			    (physical_staged_parts == part) && (k_uptime_get() < physical_staged_until)) {
+				memcpy(&physical_staged_identity[part * 5U], &msg->u.can[3], 5U);
+				physical_staged_parts++;
+			}
+		}
+		break;
+	}
+	case SPAGHETTI_SLUP_CMD_APPLY_PHYSICAL: {
+		if ((msg->dlc == 7U) && (msg->can_id != SPAGHETTI_SLUP_TWAI_CMD_ID)) {
+			int err = -ESTALE;
+
+			if (((physical_staged_parts == 4U) || (physical_staged_parts == 8U)) &&
+			    (msg->u.can[1] == physical_staged_token) &&
+			    (k_uptime_get() < physical_staged_until)) {
+				err = slup_xfer_is_active() ? -EBUSY :
+					spaghetti_physical_apply_config(&msg->u.can[2], msg->u.can[6], physical_staged_identity, physical_staged_parts == 8U ? &physical_staged_identity[20] : NULL);
+			}
+			physical_staged_parts = 0U;
+			uint8_t payload[2] = {msg->u.can[1], (uint8_t)(-err)};
+
+			slup_reply(SPAGHETTI_SLUP_RSP_APPLY_PHYSICAL, payload, 2U);
+		}
+		break;
+	}
 	case SPAGHETTI_SLUP_CMD_DISCOVER:
 		if (msg->can_id != SPAGHETTI_SLUP_TWAI_CMD_ID) {
 			break;
@@ -2074,6 +2257,7 @@ static void handle_slup_command(const struct field_update_rx *msg)
 			uint8_t part0[7];
 			uint8_t part1[7];
 			uint8_t part2[7];
+			uint8_t part3[7];
 
 			if (tags[i].module_type_id == 0U) {
 				continue;
@@ -2102,6 +2286,12 @@ static void handle_slup_command(const struct field_update_rx *msg)
 			part2[5] = (uint8_t)(tags[i].fallback_class >> 8);
 			part2[6] = (uint8_t)tags[i].fallback_class;
 			slup_reply(SPAGHETTI_SLUP_RSP_NFC, part2, 7U);
+			part3[0] = (uint8_t)((i << 4) | 3U);
+			sys_put_be16(tags[i].registry_id, &part3[1]);
+			sys_put_be16(tags[i].vendor_id, &part3[3]);
+			part3[5] = tags[i].uid_len > 9U ? tags[i].uid[9] : 0U;
+			part3[6] = 0U;
+			slup_reply(SPAGHETTI_SLUP_RSP_NFC, part3, 7U);
 		}
 		break;
 	}
@@ -2139,6 +2329,49 @@ static void handle_slup_response(const struct field_update_rx *msg)
 				      0U;
 	const uint8_t cmd = msg->u.can[0];
 
+	if ((cmd == SPAGHETTI_SLUP_RSP_NFC_CHANGED) && (msg->dlc == 6U)) {
+		(void)spaghetti_communication_emit_discovery(
+			node, msg->u.can[1], sys_get_be32(&msg->u.can[2]));
+		return;
+	}
+
+	if ((cmd == SPAGHETTI_SLUP_RSP_APPLY_PHYSICAL) && (msg->dlc == 3U)) {
+		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+		if (physical_pending && (node == physical_pending_node) &&
+		    (msg->u.can[1] == physical_transaction)) {
+			physical_ack_error = -(int)msg->u.can[2];
+			k_sem_give(&physical_ack_sem);
+		}
+		k_mutex_unlock(&field_update_lock);
+		return;
+	}
+	if ((cmd == SPAGHETTI_SLUP_RSP_PHYSICAL) && (msg->dlc == 8U)) {
+		const uint8_t part = msg->u.can[1];
+
+		if (part >= 6U) {
+			return;
+		}
+		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+		for (size_t i = 0U; i < slup_peer_count; ++i) {
+			struct spaghetti_slup_peer *peer = &slup_peers[i];
+
+			if (peer->node_id != node) {
+				continue;
+			}
+			if (part == 0U) {
+				peer->physical_parts = 0U;
+			}
+			if (peer->physical_parts != (BIT(part) - 1U)) {
+				break;
+			}
+			memcpy(&peer->physical[part * 6U], &msg->u.can[2],
+			       MIN(6U, SPAGHETTI_PHYSICAL_SIZE - part * 6U));
+			peer->physical_parts |= BIT(part);
+			break;
+		}
+		k_mutex_unlock(&field_update_lock);
+		return;
+	}
 	if (cmd == SPAGHETTI_SLUP_RSP_DISCOVER) {
 		if (msg->dlc >= 8U) {
 			/* Only Discover may create peers. Late STATUS after a
@@ -2205,11 +2438,23 @@ static void handle_slup_response(const struct field_update_rx *msg)
 					}
 					tag->node_id = node;
 					tag->local = false;
+					slup_nfc_remote_indices[slup_nfc_remote_count] = idx;
 					slup_nfc_remote_count += 1U;
 				}
-			} else if ((part == 1U) && (idx < slup_nfc_remote_count)) {
-				struct spaghetti_nfc_tag *tag =
-					&slup_nfc_remotes[slup_nfc_remote_count - 1U];
+			} else {
+				struct spaghetti_nfc_tag *tag = NULL;
+				for (size_t j = 0U; j < slup_nfc_remote_count; ++j) {
+					if ((slup_nfc_remotes[j].node_id == node) &&
+					    (slup_nfc_remote_indices[j] == idx)) {
+						tag = &slup_nfc_remotes[j];
+						break;
+					}
+				}
+				if (tag == NULL) {
+					k_mutex_unlock(&field_update_lock);
+					return;
+				}
+				if (part == 1U) {
 
 				if (msg->dlc > 2U) {
 					tag->uid[3] = msg->u.can[2];
@@ -2229,11 +2474,7 @@ static void handle_slup_response(const struct field_update_rx *msg)
 				if (msg->dlc > 7U) {
 					tag->uid[8] = msg->u.can[7];
 				}
-			} else if ((part == 2U) && (idx < slup_nfc_remote_count)) {
-				struct spaghetti_nfc_tag *tag =
-					&slup_nfc_remotes[slup_nfc_remote_count - 1U];
-
-				if (msg->dlc >= 7U) {
+				} else if ((part == 2U) && (msg->dlc == 8U)) {
 					tag->module_type_id =
 						((uint32_t)msg->u.can[2] << 24) |
 						((uint32_t)msg->u.can[3] << 16) |
@@ -2243,6 +2484,10 @@ static void handle_slup_response(const struct field_update_rx *msg)
 						(uint16_t)(((uint16_t)msg->u.can[6]
 							    << 8) |
 							   msg->u.can[7]);
+				} else if ((part == 3U) && (msg->dlc == 8U)) {
+					tag->registry_id = sys_get_be16(&msg->u.can[2]);
+					tag->vendor_id = sys_get_be16(&msg->u.can[4]);
+					tag->uid[9] = msg->u.can[6];
 				}
 			}
 			k_mutex_unlock(&field_update_lock);

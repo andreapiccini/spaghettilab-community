@@ -1,7 +1,14 @@
-import type { CatalogField, ProcessingCatalogEntry, ProcessingNodeKind, ProcessingRuntime } from "./types.js";
+import type {
+  CatalogField,
+  ProcessingCatalogEntry,
+  ProcessingNodeKind,
+  ProcessingRuntime,
+} from "./types.js";
 import { inPort, outPort, T } from "./ports.js";
 
-function nodeKindFromRuntime(runtime: ProcessingRuntime): ProcessingNodeKind | undefined {
+function nodeKindFromRuntime(
+  runtime: ProcessingRuntime,
+): ProcessingNodeKind | undefined {
   switch (runtime) {
     case "core-block":
       return "block";
@@ -20,21 +27,39 @@ function e(entry: Omit<ProcessingCatalogEntry, "nodeKind">): ProcessingCatalogEn
   return { ...entry, nodeKind: nodeKindFromRuntime(entry.runtime) };
 }
 
-const AUTHORING = "Authoring visibile sul blocco; il Config/firmware si aggancia in un passo successivo.";
+const AUTHORING =
+  "Authoring visibile sul blocco; il Config/firmware si aggancia in un passo successivo.";
 
 /** Firmware entry-point: Schedule / Event emit jolly `activation` to start a chain. */
-const ENTRY_OUTPUTS = [outPort("0", [T.activationTrigger, T.eventTrigger], "Attivazione")];
+const ENTRY_OUTPUTS = [
+  outPort("0", [T.activationTrigger, T.eventTrigger], "Attivazione"),
+];
 
-function sel(id: string, label: string, options: readonly { value: string; label: string }[], def?: string): CatalogField {
+function sel(
+  id: string,
+  label: string,
+  options: readonly { value: string; label: string }[],
+  def?: string,
+): CatalogField {
   return { id, label, type: "select", options, default: def };
 }
-function num(id: string, label: string, def?: number, placeholder?: string): CatalogField {
+function num(
+  id: string,
+  label: string,
+  def?: number,
+  placeholder?: string,
+): CatalogField {
   return { id, label, type: "number", default: def, placeholder };
 }
 function chk(id: string, label: string, def = false): CatalogField {
   return { id, label, type: "checkbox", default: def, placeholder: label };
 }
-function txt(id: string, label: string, def?: string, placeholder?: string): CatalogField {
+function txt(
+  id: string,
+  label: string,
+  def?: string,
+  placeholder?: string,
+): CatalogField {
   return { id, label, type: "text", default: def, placeholder };
 }
 function area(id: string, label: string, placeholder?: string): CatalogField {
@@ -47,6 +72,75 @@ function area(id: string, label: string, placeholder?: string): CatalogField {
  * Config/firmware mapping comes later. Vendor-only hardware is omitted.
  */
 export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
+  e({
+    id: "native.physical_gpio_input",
+    label: "GPIO IN",
+    subtitle: "Ingresso dalla bay Function 2",
+    category: "io",
+    runtime: "core-event",
+    availability: "shipped",
+    family: "bay",
+    bayIo: "input",
+    bayFamilyId: "bay.physical_gpio",
+    inputs: [],
+    outputs: [outPort("1", [T.digitalMisura, T.digitalComando], "Livello del pin")],
+    fields: [],
+    notes:
+      "Valore reale del pin configurato: entrambi i fronti vengono pubblicati dal firmware.",
+  }),
+  ...(
+    [
+      ["physical_gpio_out", "GPIO OUT", "Livello comandato dal grafico", "digital"],
+      ["physical_pwm_out", "PWM OUT", "Duty cycle 0–10000 (0–100%)", "analog"],
+      ["physical_uart_tx", "UART TX", "Invia byte 0–255 o un buffer", "bytes"],
+      ["physical_uart_rx", "UART RX", "Legge un byte a ogni attivazione", "bytes"],
+      ["physical_spi", "SPI", "Scambio di byte o buffer", "bytes"],
+    ] as const
+  ).map(([typeId, label, subtitle, domain]) =>
+    e({
+      id: `native.${typeId}`,
+      label,
+      subtitle,
+      category: "io",
+      runtime: "core-block",
+      availability: "shipped",
+      family: "bay",
+      bayIo: "output",
+      bayFamilyId: `bay.${typeId}`,
+      needsModule: false,
+      typeId,
+      inputs: [
+        inPort(
+          "0",
+          domain === "digital"
+            ? [T.digitalComando, T.digitalMisura]
+            : domain === "analog"
+              ? [T.analogComando, T.analogMisura]
+              : [
+                  { domain: "bytes", role: "comando" },
+                  { domain: "quantity", role: "comando" },
+                ],
+          { label: "Valore / attivazione" },
+        ),
+      ],
+      outputs:
+        typeId === "physical_uart_rx" || typeId === "physical_spi"
+          ? [
+              outPort(
+                "0",
+                [
+                  { domain: "quantity", role: "misura" },
+                  { domain: "bytes", role: "misura" },
+                ],
+                "Dati ricevuti",
+              ),
+            ]
+          : [],
+      fields: [],
+      notes:
+        "Pin configurato e confermato sulla backbone. L’indirizzo della bay viene assegnato quando inserisci il blocco.",
+    }),
+  ),
   e({
     id: "native.schedule",
     label: "Schedule",
@@ -69,7 +163,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     availability: "shipped",
     inputs: [],
     outputs: ENTRY_OUTPUTS,
-    notes: "Entry point firmware: Module che pubblica eventi (`spaghetti_module_manager_start_events`). Output = attivazione (jolly).",
+    notes:
+      "Entry point firmware: Module che pubblica eventi (`spaghetti_module_manager_start_events`). Output = attivazione (jolly).",
   }),
   e({
     id: "native.flow_start",
@@ -170,13 +265,18 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     typeId: "ab.variable_set",
     fields: [
       txt("variable", "Variabile"),
-      sel("op", "Operazione", [
-        { value: "set", label: "=" },
-        { value: "add", label: "+=" },
-        { value: "sub", label: "-=" },
-        { value: "mul", label: "×=" },
-        { value: "div", label: "÷=" },
-      ], "set"),
+      sel(
+        "op",
+        "Operazione",
+        [
+          { value: "set", label: "=" },
+          { value: "add", label: "+=" },
+          { value: "sub", label: "-=" },
+          { value: "mul", label: "×=" },
+          { value: "div", label: "÷=" },
+        ],
+        "set",
+      ),
       txt("value", "Valore"),
     ],
     notes: AUTHORING,
@@ -204,17 +304,23 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "comparison",
     typeId: "threshold",
     fields: [
-      sel("op", "Operatore", [
-        { value: "eq", label: "=" },
-        { value: "neq", label: "≠" },
-        { value: "gt", label: ">" },
-        { value: "lt", label: "<" },
-        { value: "gte", label: "≥" },
-        { value: "lte", label: "≤" },
-      ], "gte"),
+      sel(
+        "op",
+        "Operatore",
+        [
+          { value: "eq", label: "=" },
+          { value: "neq", label: "≠" },
+          { value: "gt", label: ">" },
+          { value: "lt", label: "<" },
+          { value: "gte", label: "≥" },
+          { value: "lte", label: "≤" },
+        ],
+        "gte",
+      ),
       { id: "1", label: "Valore", type: "number", default: 0 },
     ],
-    notes: "Il grafo Core è un DAG: `threshold` emette un bool. L'operatore è authoring; il firmware oggi applica ≥ sul field 1.",
+    notes:
+      "Il grafo Core è un DAG: `threshold` emette un bool. L'operatore è authoring; il firmware oggi applica ≥ sul field 1.",
   }),
   e({
     id: "appblocks.compound_condition",
@@ -226,10 +332,15 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "compound_condition",
     typeId: "ab.compound_condition",
     fields: [
-      sel("combinator", "Combinatore", [
-        { value: "and", label: "AND" },
-        { value: "or", label: "OR" },
-      ], "and"),
+      sel(
+        "combinator",
+        "Combinatore",
+        [
+          { value: "and", label: "AND" },
+          { value: "or", label: "OR" },
+        ],
+        "and",
+      ),
       area("expression", "Confronti", "es. temp > 20 AND umidità < 80"),
     ],
     notes: AUTHORING,
@@ -280,15 +391,21 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "arithmetic",
     typeId: "add",
     fields: [
-      sel("op", "Operazione", [
-        { value: "add", label: "+" },
-        { value: "sub", label: "−" },
-        { value: "mul", label: "×" },
-        { value: "div", label: "÷" },
-      ], "add"),
+      sel(
+        "op",
+        "Operazione",
+        [
+          { value: "add", label: "+" },
+          { value: "sub", label: "−" },
+          { value: "mul", label: "×" },
+          { value: "div", label: "÷" },
+        ],
+        "add",
+      ),
       txt("b", "Secondo operando", "", "valore o variabile"),
     ],
-    notes: "Firmware: Block `add` (e subtract/multiply/divide in palette). L'operatore è visibile in authoring.",
+    notes:
+      "Firmware: Block `add` (e subtract/multiply/divide in palette). L'operatore è visibile in authoring.",
   }),
   e({
     id: "block.subtract",
@@ -318,7 +435,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     runtime: "core-block",
     availability: "shipped",
     typeId: "divide",
-    notes: "Block firmware `divide`. Overflow/divisione per zero = errore bounded, non NaN silenzioso.",
+    notes:
+      "Block firmware `divide`. Overflow/divisione per zero = errore bounded, non NaN silenzioso.",
   }),
   e({
     id: "appblocks.bitwise",
@@ -330,14 +448,19 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "bitwise",
     typeId: "mask_shift",
     fields: [
-      sel("op", "Operazione", [
-        { value: "and", label: "AND" },
-        { value: "or", label: "OR" },
-        { value: "xor", label: "XOR" },
-        { value: "not", label: "NOT" },
-        { value: "shl", label: "Shift left" },
-        { value: "shr", label: "Shift right" },
-      ], "and"),
+      sel(
+        "op",
+        "Operazione",
+        [
+          { value: "and", label: "AND" },
+          { value: "or", label: "OR" },
+          { value: "xor", label: "XOR" },
+          { value: "not", label: "NOT" },
+          { value: "shl", label: "Shift left" },
+          { value: "shr", label: "Shift right" },
+        ],
+        "and",
+      ),
       txt("operand", "Operando", "", "mask / shift"),
     ],
     notes: "Block firmware `mask_shift`. Operazione visibile in authoring.",
@@ -363,7 +486,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     availability: "planned",
     appblocksId: "random",
     typeId: "random",
-    notes: "Driver `random` ancora da scrivere; il grafo si può già autorare con questo type_id.",
+    notes:
+      "Driver `random` ancora da scrivere; il grafo si può già autorare con questo type_id.",
   }),
   e({
     id: "block.scale_offset",
@@ -403,7 +527,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     runtime: "core-block",
     availability: "shipped",
     typeId: "unit_convert",
-    notes: "Block firmware nativo. Le conversioni restano nodi espliciti, mai implicite sull'edge.",
+    notes:
+      "Block firmware nativo. Le conversioni restano nodi espliciti, mai implicite sull'edge.",
   }),
   e({
     id: "block.combine_fields",
@@ -571,7 +696,10 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     availability: "planned",
     appblocksId: "datetime_format",
     typeId: "ab.datetime_format",
-    fields: [txt("source", "Sorgente"), txt("format", "Formato", "YYYY-MM-DD HH:mm:ss")],
+    fields: [
+      txt("source", "Sorgente"),
+      txt("format", "Formato", "YYYY-MM-DD HH:mm:ss"),
+    ],
     notes: AUTHORING,
   }),
 
@@ -617,10 +745,15 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     typeId: "ab.digital_line_set",
     fields: [
       txt("line", "Linea", "LED"),
-      sel("state", "Stato", [
-        { value: "high", label: "HIGH" },
-        { value: "low", label: "LOW" },
-      ], "high"),
+      sel(
+        "state",
+        "Stato",
+        [
+          { value: "high", label: "HIGH" },
+          { value: "low", label: "LOW" },
+        ],
+        "high",
+      ),
     ],
     notes: AUTHORING,
   }),
@@ -654,10 +787,15 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
         "astable",
       ),
       {
-        ...sel("initial", "Stato iniziale", [
-          { value: "high", label: "ON (dopo rising edge)" },
-          { value: "low", label: "OFF (dopo falling edge)" },
-        ], "high"),
+        ...sel(
+          "initial",
+          "Stato iniziale",
+          [
+            { value: "high", label: "ON (dopo rising edge)" },
+            { value: "low", label: "OFF (dopo falling edge)" },
+          ],
+          "high",
+        ),
         when: { field: "toggleMode", equals: "astable" },
       },
       {
@@ -809,8 +947,18 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
         0,
         "Attesa dopo il segnale OFF (comando < soglia) prima di soft stop",
       ),
-      num("softOnMs", "Soft start ON (ms)", 0, "Velocità di salita 0→100% (0 = istantaneo)"),
-      num("softOffMs", "Soft stop OFF (ms)", 0, "Velocità di decadimento 100%→0 (0 = istantaneo)"),
+      num(
+        "softOnMs",
+        "Soft start ON (ms)",
+        0,
+        "Velocità di salita 0→100% (0 = istantaneo)",
+      ),
+      num(
+        "softOffMs",
+        "Soft stop OFF (ms)",
+        0,
+        "Velocità di decadimento 100%→0 (0 = istantaneo)",
+      ),
     ],
     notes:
       "Sink su comando digitale (0/100) o analogico (0–100). Acceso se livello ≥ soglia. Ritardi ON/OFF rispetto al segnale, poi soft start/stop.",
@@ -895,7 +1043,12 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
         when: { field: "mode", equals: "preset" },
       },
       {
-        ...num("speedMs", "Velocità / periodo (ms)", 1200, "Breathe, blink, color cycle"),
+        ...num(
+          "speedMs",
+          "Velocità / periodo (ms)",
+          1200,
+          "Breathe, blink, color cycle",
+        ),
         when: { field: "preset", in: ["breathe", "blink", "color_cycle"] },
       },
       chk("loop", "Loop", true),
@@ -937,7 +1090,9 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
         "high",
       ),
     ],
-    notes: AUTHORING + " Relè hardware: chiuso se l’ingresso è HIGH, oppure chiuso se l’ingresso è LOW.",
+    notes:
+      AUTHORING +
+      " Relè hardware: chiuso se l’ingresso è HIGH, oppure chiuso se l’ingresso è LOW.",
   }),
   e({
     id: "appblocks.temperature_sensor",
@@ -955,7 +1110,9 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     inputs: [],
     outputs: [outPort("0", [T.analogMisura], "Temperatura")],
     fields: [num("testC", "Temperatura di prova (°C)", 22, "Valore per il dry-run")],
-    notes: AUTHORING + " Sensore hardware: si collega solo a un blocco IF. L’indicatore sotto il blocco serve a provare la temperatura.",
+    notes:
+      AUTHORING +
+      " Sensore hardware: si collega solo a un blocco IF. L’indicatore sotto il blocco serve a provare la temperatura.",
   }),
   e({
     id: "appblocks.terminal_block",
@@ -972,7 +1129,11 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     needsModule: false,
     inputs: [],
     outputs: [1, 2, 3, 4, 5, 6].map((n) =>
-      outPort(String(n - 1), [T.digitalMisura, T.analogMisura, T.powerMisura], `CH${n}`),
+      outPort(
+        String(n - 1),
+        [T.digitalMisura, T.analogMisura, T.powerMisura],
+        `CH${n}`,
+      ),
     ),
     fields: [1, 2, 3, 4, 5, 6].flatMap((n) => [
       txt(`ch${n}Name`, `Nome canale ${n}`, `CH${n}`, `Es. Sensore A`),
@@ -1018,7 +1179,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     availability: "planned",
     appblocksId: "num_round",
     typeId: "round",
-    notes: "Driver `round` pianificato (valore numerico bounded, non formattazione stringa libera).",
+    notes:
+      "Driver `round` pianificato (valore numerico bounded, non formattazione stringa libera).",
   }),
 
   e({
@@ -1054,7 +1216,19 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     availability: "planned",
     appblocksId: "lcd_text_widget",
     typeId: "ab.lcd_text_widget",
-    fields: [txt("widget", "Widget"), area("text", "Testo"), sel("visible", "Visibilità", [{ value: "show", label: "Visibile" }, { value: "hide", label: "Nascosto" }], "show")],
+    fields: [
+      txt("widget", "Widget"),
+      area("text", "Testo"),
+      sel(
+        "visible",
+        "Visibilità",
+        [
+          { value: "show", label: "Visibile" },
+          { value: "hide", label: "Nascosto" },
+        ],
+        "show",
+      ),
+    ],
     notes: AUTHORING,
   }),
   e({
@@ -1077,7 +1251,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     runtime: "out-of-scope",
     availability: "unavailable",
     appblocksId: "lcd_graph_widget",
-    notes: "Nessun LCD sul Core. Un display è un altro Core/Module, collegato via Node-RED.",
+    notes:
+      "Nessun LCD sul Core. Un display è un altro Core/Module, collegato via Node-RED.",
   }),
   e({
     id: "appblocks.lcd_graph_widget_clear",
@@ -1087,7 +1262,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     runtime: "out-of-scope",
     availability: "unavailable",
     appblocksId: "lcd_graph_widget_clear",
-    notes: "Nessun LCD sul Core. Un display è un altro Core/Module, collegato via Node-RED.",
+    notes:
+      "Nessun LCD sul Core. Un display è un altro Core/Module, collegato via Node-RED.",
   }),
 
   e({
@@ -1201,10 +1377,15 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "settings_init",
     typeId: "ab.settings_init",
     fields: [
-      sel("mode", "Modalità", [
-        { value: "defaults", label: "Valori di default" },
-        { value: "factory", label: "Factory reset" },
-      ], "defaults"),
+      sel(
+        "mode",
+        "Modalità",
+        [
+          { value: "defaults", label: "Valori di default" },
+          { value: "factory", label: "Factory reset" },
+        ],
+        "defaults",
+      ),
     ],
     notes: AUTHORING,
   }),
@@ -1278,11 +1459,16 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "network_changed",
     needsModule: false,
     fields: [
-      sel("when", "Quando", [
-        { value: "any", label: "Qualsiasi cambio" },
-        { value: "up", label: "Connesso" },
-        { value: "down", label: "Disconnesso" },
-      ], "any"),
+      sel(
+        "when",
+        "Quando",
+        [
+          { value: "any", label: "Qualsiasi cambio" },
+          { value: "up", label: "Connesso" },
+          { value: "down", label: "Disconnesso" },
+        ],
+        "any",
+      ),
     ],
     notes: AUTHORING,
   }),
@@ -1308,11 +1494,16 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "socket_event",
     needsModule: false,
     fields: [
-      sel("event", "Evento", [
-        { value: "connect", label: "Connesso" },
-        { value: "disconnect", label: "Disconnesso" },
-        { value: "error", label: "Errore" },
-      ], "connect"),
+      sel(
+        "event",
+        "Evento",
+        [
+          { value: "connect", label: "Connesso" },
+          { value: "disconnect", label: "Disconnesso" },
+          { value: "error", label: "Errore" },
+        ],
+        "connect",
+      ),
     ],
     notes: AUTHORING,
   }),
@@ -1326,12 +1517,17 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "http_server_endpoint",
     needsModule: false,
     fields: [
-      sel("method", "Metodo", [
-        { value: "GET", label: "GET" },
-        { value: "POST", label: "POST" },
-        { value: "PUT", label: "PUT" },
-        { value: "DELETE", label: "DELETE" },
-      ], "GET"),
+      sel(
+        "method",
+        "Metodo",
+        [
+          { value: "GET", label: "GET" },
+          { value: "POST", label: "POST" },
+          { value: "PUT", label: "PUT" },
+          { value: "DELETE", label: "DELETE" },
+        ],
+        "GET",
+      ),
       txt("path", "Percorso", "/"),
     ],
     notes: AUTHORING,
@@ -1370,12 +1566,17 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "http",
     typeId: "ab.http_request",
     fields: [
-      sel("method", "Metodo", [
-        { value: "GET", label: "GET" },
-        { value: "POST", label: "POST" },
-        { value: "PUT", label: "PUT" },
-        { value: "DELETE", label: "DELETE" },
-      ], "GET"),
+      sel(
+        "method",
+        "Metodo",
+        [
+          { value: "GET", label: "GET" },
+          { value: "POST", label: "POST" },
+          { value: "PUT", label: "PUT" },
+          { value: "DELETE", label: "DELETE" },
+        ],
+        "GET",
+      ),
       txt("url", "URL"),
       area("body", "Body"),
     ],
@@ -1414,11 +1615,16 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     appblocksId: "mqtt_change",
     needsModule: false,
     fields: [
-      sel("when", "Quando", [
-        { value: "any", label: "Qualsiasi cambio" },
-        { value: "connected", label: "Connesso" },
-        { value: "disconnected", label: "Disconnesso" },
-      ], "any"),
+      sel(
+        "when",
+        "Quando",
+        [
+          { value: "any", label: "Qualsiasi cambio" },
+          { value: "connected", label: "Connesso" },
+          { value: "disconnected", label: "Disconnesso" },
+        ],
+        "any",
+      ),
     ],
     notes: AUTHORING,
   }),
@@ -1489,7 +1695,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     runtime: "core-block",
     availability: "shipped",
     typeId: "publish_field",
-    notes: "Stesso driver di MQTT Publish; voce nativa per chi cerca il type_id firmware.",
+    notes:
+      "Stesso driver di MQTT Publish; voce nativa per chi cerca il type_id firmware.",
   }),
   e({
     id: "rule.threshold",
@@ -1500,19 +1707,30 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     availability: "shipped",
     typeId: "threshold",
     fields: [
-      sel("op", "Quando la misura è", [
-        { value: "gte", label: "≥  maggiore o uguale" },
-        { value: "gt", label: ">  maggiore" },
-        { value: "lte", label: "≤  minore o uguale" },
-        { value: "lt", label: "<  minore" },
-        { value: "eq", label: "=  uguale" },
-      ], "gte"),
+      sel(
+        "op",
+        "Quando la misura è",
+        [
+          { value: "gte", label: "≥  maggiore o uguale" },
+          { value: "gt", label: ">  maggiore" },
+          { value: "lte", label: "≤  minore o uguale" },
+          { value: "lt", label: "<  minore" },
+          { value: "eq", label: "=  uguale" },
+        ],
+        "gte",
+      ),
       { id: "level", label: "Soglia", type: "number", default: 0 },
-      sel("action", "allora il GPIO", [
-        { value: "high", label: "Va alto" },
-        { value: "low", label: "Va basso" },
-      ], "high"),
+      sel(
+        "action",
+        "allora il GPIO",
+        [
+          { value: "high", label: "Va alto" },
+          { value: "low", label: "Va basso" },
+        ],
+        "high",
+      ),
     ],
-    notes: "Soglia firmware (campi 3/4/8). Il GPIO può solo andare alto o basso — non diventa input.",
+    notes:
+      "Soglia firmware (campi 3/4/8). Il GPIO può solo andare alto o basso — non diventa input.",
   }),
 ];

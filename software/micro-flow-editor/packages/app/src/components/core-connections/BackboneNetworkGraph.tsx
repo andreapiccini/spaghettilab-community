@@ -19,11 +19,13 @@ export function BackboneNetworkGraph({
   nfcByBoardId,
   nfcLoading,
   locale,
+  onBoardClick,
 }: {
   readonly boards: readonly NetworkBoard[];
   readonly nfcByBoardId: ReadonlyMap<string, readonly NfcNode[]>;
   readonly nfcLoading: boolean;
   readonly locale: LocaleId;
+  readonly onBoardClick?: (boardId: string) => void;
 }) {
   const copy = coreConnectionsCopy(locale);
   const layout = useMemo(() => layoutBackboneNetwork(boards, nfcByBoardId), [boards, nfcByBoardId]);
@@ -112,6 +114,21 @@ export function BackboneNetworkGraph({
           return (
             <motion.g
               key={node.id}
+              role={isBackbone && onBoardClick ? "button" : undefined}
+              tabIndex={isBackbone && onBoardClick ? 0 : undefined}
+              aria-label={isBackbone && onBoardClick ? `${node.label}: ${node.sublabel ?? ""}` : undefined}
+              onClick={isBackbone && onBoardClick ? () => onBoardClick(node.id) : undefined}
+              onKeyDown={
+                isBackbone && onBoardClick
+                  ? (event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        onBoardClick(node.id);
+                      }
+                    }
+                  : undefined
+              }
+              className={isBackbone && onBoardClick ? "cursor-pointer outline-none" : undefined}
               initial={{ opacity: 0, scale: 0.86 }}
               animate={{ opacity: empty ? 0.55 : 1, scale: 1 }}
               transition={{ ...motionTokens.spring.smooth, delay: index * motionTokens.stagger.list }}

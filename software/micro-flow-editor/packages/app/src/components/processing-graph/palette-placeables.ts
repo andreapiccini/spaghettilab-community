@@ -15,6 +15,7 @@ export type PaletteDragPayload = {
   readonly entryId: string;
   /** Set when dragging a bay half (ingresso / uscita). */
   readonly baySide?: BaySide;
+  readonly physicalPinId?: string;
 };
 
 export function encodePaletteDrag(payload: PaletteDragPayload): string {
@@ -41,6 +42,7 @@ export type PalettePlaceable = {
   readonly rowKey: string;
   readonly label: string;
   readonly subtitle: string;
+  readonly physicalPinId?: string;
 };
 
 /** Expand bay both/either into separate palette rows; functionality stays one row. */

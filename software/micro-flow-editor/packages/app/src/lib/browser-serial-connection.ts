@@ -11,6 +11,8 @@ export type UsbSerialPort = {
 
 export type BrowserSerialConnection = RawByteStreamConnection & {
   close(): Promise<void>;
+  /** Fires once when the port is closed or the USB device is unplugged. */
+  onClose(handler: () => void): () => void;
 };
 
 const openByPort = new WeakMap<UsbSerialPort, BrowserSerialConnection>();
@@ -40,7 +42,23 @@ export async function openBrowserSerial(port: UsbSerialPort, baudRate = 115200):
   }
 
   const handlers = new Set<(chunk: Uint8Array) => void>();
+  const closeHandlers = new Set<() => void>();
   let closed = false;
+  let notifiedClose = false;
+
+  const notifyClose = () => {
+    if (notifiedClose) return;
+    notifiedClose = true;
+    for (const handler of [...closeHandlers]) handler();
+  };
+
+  const serialNav = (
+    navigator as Navigator & { serial?: EventTarget & BrowserSerialApi }
+  ).serial;
+  const onPortDisconnect = (event: Event) => {
+    if ((event.target as unknown) === port) notifyClose();
+  };
+  serialNav?.addEventListener("disconnect", onPortDisconnect);
 
   const readLoop = (async () => {
     try {
@@ -53,6 +71,8 @@ export async function openBrowserSerial(port: UsbSerialPort, baudRate = 115200):
       }
     } catch {
       // Port closed or device unplugged — subscribers just stop receiving.
+    } finally {
+      notifyClose();
     }
   })();
 
@@ -66,10 +86,21 @@ export async function openBrowserSerial(port: UsbSerialPort, baudRate = 115200):
         handlers.delete(handler);
       };
     },
+    onClose(handler) {
+      if (notifiedClose) {
+        handler();
+        return () => {};
+      }
+      closeHandlers.add(handler);
+      return () => {
+        closeHandlers.delete(handler);
+      };
+    },
     async close() {
       if (closed) return;
       closed = true;
       openByPort.delete(port);
+      serialNav?.removeEventListener("disconnect", onPortDisconnect);
       try {
         reader.releaseLock();
       } catch {
@@ -86,6 +117,7 @@ export async function openBrowserSerial(port: UsbSerialPort, baudRate = 115200):
       } catch {
         /* already closed */
       }
+      notifyClose();
     },
   };
 

@@ -31,6 +31,7 @@
 #include <spaghetti/mqtt.h>
 #include <spaghetti/ota.h>
 #include <spaghetti/port.h>
+#include <spaghetti/physical.h>
 #include <spaghetti/power.h>
 #include <spaghetti/block_registry.h>
 #include <spaghetti/processing.h>
@@ -291,6 +292,7 @@ int spaghetti_core_init(void)
 	if (err < 0) {
 		goto topology_failed;
 	}
+	(void)spaghetti_physical_init();
 #if defined(CONFIG_SPAGHETTI_POWER)
 	err = spaghetti_power_init();
 	if (err < 0) {

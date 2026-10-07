@@ -100,6 +100,33 @@ int spaghetti_port_init_all(void);
 size_t spaghetti_port_count(void);
 
 /**
+ * @brief Apply Function port 2 signal modes using the board's fixed GPIO/I2C wiring.
+ * @param[in] id DTS Port identifier.
+ * @param[in] modes Borrowed four-byte map; copied on success. Non-NULL.
+ * @param[in] speed 0 standard I2C, 1 fast I2C.
+ * @retval 0 Applied. -EINVAL invalid map; -ENOTSUP unsupported wiring;
+ * -EBUSY runtime owner or lock; hardware errno leaves lines disconnected.
+ * @note Thread-only, serialized by ports_lock with a 100ms bound.
+ */
+int spaghetti_port_apply_user_map(spaghetti_port_id_t id,
+				  const uint8_t modes[4], uint8_t speed);
+int spaghetti_port_apply_user_config(spaghetti_port_id_t id, const uint8_t modes[4],
+	uint8_t speed, const uint8_t config[20]);
+int spaghetti_port_copy_user_config(spaghetti_port_id_t id, uint8_t config[20]);
+int spaghetti_port_pwm_set(const struct spaghetti_port *port, uint8_t channel, uint16_t duty);
+
+/**
+ * @brief Copy the confirmed volatile user pin map.
+ * @param[in] id DTS Port identifier.
+ * @param[out] modes Non-NULL four-byte caller buffer.
+ * @param[out] speed Non-NULL caller speed byte.
+ * @retval 0 Copied; -EINVAL invalid pointers/Port; -EBUSY lock timeout.
+ * @note Thread-only, 100ms lock bound. Outputs change only on success.
+ */
+int spaghetti_port_copy_user_map(spaghetti_port_id_t id,
+				 uint8_t modes[4], uint8_t *speed);
+
+/**
  * @brief Get a Spaghetti Port by identifier.
  *
  * @param[in] id Port identifier.

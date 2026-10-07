@@ -30,6 +30,7 @@ export type ModuleStatus = {
 };
 
 export type ChainPeerStatus = {
+  readonly physical?: Uint8Array;
   readonly nodeId: number;
   readonly mac: Uint8Array;
   readonly flags: number;
@@ -39,6 +40,7 @@ export type ChainPeerStatus = {
 };
 
 export type GetStatusResponse = {
+  readonly physical?: Uint8Array;
   readonly state: number;
   readonly mode: number;
   readonly imageState: number;
@@ -116,6 +118,7 @@ export function encodeGetStatusResponse(r: GetStatusResponse): Uint8Array {
             u32Field(2, peer.flags),
             boolField(3, peer.local),
             ...(peer.version !== undefined ? [textField(4, peer.version)] : []),
+            ...(peer.physical !== undefined ? [bytesField(5, peer.physical)] : []),
           ]),
         ),
       ),
@@ -141,6 +144,7 @@ export function encodeGetStatusResponse(r: GetStatusResponse): Uint8Array {
       ),
     ]);
   }
+  if (r.physical !== undefined) fields.push(bytesField(14, r.physical));
   return encodeMap(fields);
 }
 
@@ -169,6 +173,7 @@ export function decodeGetStatusResponse(bytes: Uint8Array): GetStatusResponse {
     lastResetCause: requireU32(map, 7, "GetStatusResponse"),
     healthState: requireU32(map, 8, "GetStatusResponse"),
     modules,
+    ...(map.has(14) ? { physical: requireBytes(map, 14, "GetStatusResponse") } : {}),
     ...(map.get(10)?.kind === "bytes" ? { deviceId: requireBytes(map, 10, "GetStatusResponse") } : {}),
     ...(map.get(11)?.kind === "text" ? { deviceName: requireText(map, 11, "GetStatusResponse") } : {}),
     ...(map.get(12)?.kind === "array"
@@ -181,6 +186,7 @@ export function decodeGetStatusResponse(bytes: Uint8Array): GetStatusResponse {
               flags: requireU32(peer, 2, "ChainPeerStatus"),
               local: requireBool(peer, 3, "ChainPeerStatus"),
               ...(peer.get(4)?.kind === "text" ? { version: requireText(peer, 4, "ChainPeerStatus") } : {}),
+              ...(peer.has(5) ? { physical: requireBytes(peer, 5, "ChainPeerStatus") } : {}),
             };
           }),
         }

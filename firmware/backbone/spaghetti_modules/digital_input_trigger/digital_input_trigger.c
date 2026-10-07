@@ -25,6 +25,8 @@ struct spaghetti_digital_input_trigger_context {
 	struct spaghetti_module *module;
 	uint8_t channel;
 	bool trigger_high;
+	bool both_edges;
+	bool last_level;
 	bool armed;
 	bool running;
 	spaghetti_module_event_cb_t emit;
@@ -38,6 +40,7 @@ K_MEM_SLAB_DEFINE(digital_input_trigger_context_slab,
 		  __alignof__(struct spaghetti_digital_input_trigger_context));
 
 static const struct spaghetti_field_descriptor digital_input_trigger_config_fields[] = {
+	{ .field_id = 3U, .type = SPAGHETTI_VALUE_BOOL, .name = "both_edges", .description = "Publish every input transition", .unit = "" },
 	{
 		.field_id = SPAGHETTI_DIGITAL_INPUT_TRIGGER_CONFIG_CHANNEL,
 		.type = SPAGHETTI_VALUE_UINT64,
@@ -165,8 +168,8 @@ static void digital_input_trigger_poll(struct k_work *work)
 	err = spaghetti_port_digital_input_get(context->module->port,
 					       context->channel, &level);
 	if (err == 0) {
-		if (level == context->trigger_high) {
-			if (context->armed) {
+		if (level == context->trigger_high || context->both_edges) {
+			if (context->both_edges ? level != context->last_level : context->armed) {
 				struct spaghetti_record_payload payload = {0};
 
 				payload.kind = SPAGHETTI_RECORD_EVENT;
@@ -186,6 +189,7 @@ static void digital_input_trigger_poll(struct k_work *work)
 		} else {
 			context->armed = true;
 		}
+		context->last_level = level;
 	} else {
 		LOG_WRN("channel=%u poll error=%d", context->channel, err);
 	}
@@ -234,6 +238,9 @@ static int digital_input_trigger_init(
 	context->module = module;
 	context->channel = channel;
 	context->trigger_high = trigger_high;
+	const struct spaghetti_value *both = spaghetti_property_find(config, 3U);
+	context->both_edges = both && both->data.boolean;
+	context->last_level = level;
 	context->armed = (level != trigger_high);
 	context->running = false;
 	k_work_init_delayable(&context->work, digital_input_trigger_poll);
@@ -297,11 +304,27 @@ static int digital_input_trigger_deinit(struct spaghetti_module *module)
 	return 0;
 }
 
+static int digital_input_read(struct spaghetti_module *module, struct spaghetti_record_payload *out)
+{
+	if (!module || !module->context || !out) return -EINVAL;
+	const struct spaghetti_digital_input_trigger_context *ctx = module->context;
+	bool high; int err = spaghetti_port_digital_input_get(module->port, ctx->channel, &high); if (err) return err;
+	memset(out, 0, sizeof(*out)); out->kind = SPAGHETTI_RECORD_SAMPLE;
+	strcpy(out->schema_id, "spaghetti.digital_input.event"); out->schema_version = 1U; out->values.field_count = 1U;
+	out->values.fields[0] = (struct spaghetti_value){ .field_id = 1U, .type = SPAGHETTI_VALUE_BOOL, .data.boolean = high }; return 0;
+}
+
+static const struct spaghetti_field_descriptor digital_input_record_fields[] = {
+	{ .field_id = 1U, .type = SPAGHETTI_VALUE_BOOL, .flags = SPAGHETTI_FIELD_REQUIRED, .name = "level", .description = "Actual electrical input level", .unit = "" },
+};
+static const struct spaghetti_schema_descriptor digital_input_record_schema = { .schema_id = "spaghetti.digital_input.event", .version = 1U, .fields = digital_input_record_fields, .field_count = ARRAY_SIZE(digital_input_record_fields) };
+static const struct spaghetti_schema_descriptor *const digital_input_record_schemas[] = { &digital_input_record_schema };
+
 static const struct spaghetti_module_driver_ops digital_input_trigger_ops = {
 	.validate_config = digital_input_trigger_validate_config,
 	.describe_endpoint = digital_input_trigger_describe_endpoint,
 	.init = digital_input_trigger_init,
-	.read = NULL,
+	.read = digital_input_read,
 	.command = NULL,
 	.start = digital_input_trigger_start,
 	.stop = digital_input_trigger_stop,
@@ -315,8 +338,8 @@ SPAGHETTI_MODULE_DRIVER_DEFINE(spaghetti_digital_input_trigger_driver) = {
 	.transport = SPAGHETTI_PORT_TRANSPORT_GPIO,
 	.power_requirement = { .declared = false },
 	.config_schema = &digital_input_trigger_config_schema,
-	.record_schemas = NULL,
-	.record_schema_count = 0U,
+	.record_schemas = digital_input_record_schemas,
+	.record_schema_count = ARRAY_SIZE(digital_input_record_schemas),
 	.commands = NULL,
 	.command_count = 0U,
 	.ops = &digital_input_trigger_ops,

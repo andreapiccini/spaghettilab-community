@@ -19,6 +19,7 @@ import { useRef, useState } from "react";
 import { marketplaceCopy } from "../../lib/marketplace-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
+import { useCommunityHub } from "../../state/community-hub-context.js";
 import { useSession } from "../../state/session-context.js";
 import { ARTIFACT_KINDS, type ArtifactKindId } from "./artifact-kind.js";
 
@@ -38,6 +39,7 @@ type SubTabId = (typeof SUB_TAB_IDS)[number];
  * Device Profile Studio li autora/importa come pacchetto.
  */
 export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingId }) {
+  const hub = useCommunityHub();
   const { session } = useSession();
   const { getSnapshot, listDeviceProfiles } = useCoreSessions();
   const { locale } = useLocale();
@@ -53,7 +55,9 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
     { id: "richiesti" as const, label: copy.required },
   ];
   const [subTab, setSubTab] = useState<SubTabId>("disponibili");
-  const [catalog, setCatalog] = useState<MarketplaceCatalog | null>(null);
+  const [importedCatalog, setCatalog] = useState<MarketplaceCatalog | null>(null);
+  const synchronized = parseMarketplaceIndexJson(JSON.stringify({ packs: hub.snapshot?.packages.filter((item) => item.manifest && (item.kind === "capability-pack" || item.kind === "device-profile")).map((item) => ({ ...item.manifest, kind: item.kind === "capability-pack" ? "firmware-capability-pack" : "device-profile" })) ?? [] }));
+  const catalog = importedCatalog ?? (synchronized.ok ? synchronized.value : null);
   const [importError, setImportError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [kindFilter, setKindFilter] = useState<ArtifactKindId | null>(null);
@@ -167,7 +171,7 @@ export function MarketplaceTab({ bindingId }: { readonly bindingId: CoreBindingI
               />
             </div>
             <p className="font-body text-xs text-ink-muted">
-              {copy.availableGap}
+              {hub.snapshot ? (locale === "it" ? `Indice sincronizzato dal server community · revisione ${hub.snapshot.revision}. Puoi anche importare un indice locale.` : `Index synchronized from the community server · revision ${hub.snapshot.revision}. You can also import a local index.`) : copy.availableGap}
             </p>
             {importError && <p className="font-body text-xs text-error">{importError}</p>}
 

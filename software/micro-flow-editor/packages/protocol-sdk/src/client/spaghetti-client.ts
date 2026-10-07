@@ -2,6 +2,7 @@ import { decodeEvent, decodeResponse, encodeRequest, EventType, Operation, Proto
 import { decodeStatusEventPayload } from "../events.js";
 import { SpaghettiClientError } from "./errors.js";
 import type { ProtocolTransport } from "./transport.js";
+import { encodeApplyPhysicalRequest, decodeApplyPhysicalResponse, type ApplyPhysicalRequest } from "../operations/physical.js";
 
 import {
   encodeGetCatalogRequest,
@@ -350,6 +351,15 @@ export class SpaghettiClient {
   async getTopology(req: GetTopologyRequest = {}, signal?: AbortSignal): Promise<GetTopologyResponse> {
     const bytes = await this.request(Operation.GET_TOPOLOGY, encodeGetTopologyRequest(req), signal);
     return decodeGetTopologyResponse(bytes);
+  }
+
+  async applyPhysical(request: ApplyPhysicalRequest, signal?: AbortSignal): Promise<ApplyPhysicalRequest> {
+    const bytes = await this.request(Operation.APPLY_PHYSICAL, encodeApplyPhysicalRequest(request), signal);
+    const confirmed = decodeApplyPhysicalResponse(bytes);
+    if (confirmed.nodeId !== request.nodeId || confirmed.i2cSpeed !== request.i2cSpeed || confirmed.modes.some((mode, i) => mode !== request.modes[i])) {
+      throw new Error("Physical configuration acknowledgment does not match the selected Backbone");
+    }
+    return confirmed;
   }
 
   async getFullTopology(limit?: number, signal?: AbortSignal): Promise<TopologyFlow[]> {

@@ -58,6 +58,7 @@ export enum Operation {
   WRITE_BLE_UPDATE = 29,
   FINISH_BLE_UPDATE = 30,
   CANCEL_BLE_UPDATE = 31,
+  APPLY_PHYSICAL = 32,
 }
 
 /** `enum spaghetti_protocol_status`, `protocol.h` — 0..10. */
@@ -84,7 +85,7 @@ export enum EventType {
 }
 
 const OPERATION_MIN = Operation.GET_CATALOG;
-const OPERATION_MAX = Operation.CANCEL_BLE_UPDATE;
+const OPERATION_MAX = Operation.APPLY_PHYSICAL;
 
 export type RequestEnvelope = {
   readonly correlationId: number;

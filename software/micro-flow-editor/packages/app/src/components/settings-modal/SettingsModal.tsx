@@ -39,7 +39,7 @@ export function SettingsModal() {
       searchSettingsCategories(query, mode, (category) => {
         const texts = copy.categories[category.id];
         return `${texts.label} ${texts.title} ${texts.subtitle} ${copy.groups[category.groupId]}`;
-      }),
+      }).filter((category) => category.id === "general" || category.id === "language"),
     [query, mode, copy],
   );
   const groups = useMemo(() => groupSettingsCategories(matches), [matches]);

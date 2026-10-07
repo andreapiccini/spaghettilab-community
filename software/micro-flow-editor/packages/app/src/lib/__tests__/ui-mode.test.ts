@@ -55,7 +55,7 @@ describe("isScreenVisibleInMode", () => {
     expect(isScreenVisibleInMode("capability-marketplace", "base")).toBe(false);
     expect(isScreenVisibleInMode("cross-core-automation", "base")).toBe(false);
     expect(isScreenVisibleInMode("core-connections", "base")).toBe(true);
-    expect(isScreenVisibleInMode("physical-composition", "base")).toBe(false);
+    expect(isScreenVisibleInMode("physical-composition", "base")).toBe(true);
     expect(isScreenVisibleInMode("processing-graph", "base")).toBe(true);
     expect(isScreenVisibleInMode("deploy-diff", "base")).toBe(true);
     expect(isScreenVisibleInMode("runtime-diagnostics", "base")).toBe(true);

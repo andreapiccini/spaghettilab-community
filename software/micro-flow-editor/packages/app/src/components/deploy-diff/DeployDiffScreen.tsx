@@ -3,7 +3,7 @@ import { diffConfigs, isConfigDiffEmpty, DeploymentOutcomeKind, type ConfigDiff,
 import { decodeConfigCbor, dryRunConfig } from "@spaghettilab/config-decompiler";
 import { appendDeploymentRecord, canonicalProjectHash, deploymentId, type CoreBindingId, type CoreBindingRecord, type GraphState } from "@spaghettilab/domain";
 import { Check, PackageX, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
 import { deployDiffCopy } from "../../lib/deploy-diff-copy.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
@@ -36,14 +36,16 @@ type CoreCandidate = {
 export function DeployDiffScreen() {
   const { locale } = useLocale();
   const copy = deployDiffCopy(locale);
-  const { session, execute, navigate } = useSession();
-  const { getSnapshot, listDeviceProfiles, deployConfig } = useCoreSessions();
+  const { session, execute, navigate, deployRequestId } = useSession();
+  const { getSnapshot, listDeviceProfiles, deployConfig, discoverNetwork } = useCoreSessions();
   const bindings = session?.stack.current.coreBindings ?? EMPTY_BINDINGS;
 
   const [selected, setSelected] = useState<ReadonlySet<CoreBindingId>>(new Set());
   const [profilesByBinding, setProfilesByBinding] = useState<Map<CoreBindingId, ReadonlySet<string>>>(new Map());
   const [results, setResults] = useState<Map<CoreBindingId, DeploymentResult>>(new Map());
   const [running, setRunning] = useState<ReadonlySet<CoreBindingId>>(new Set());
+  const [deployError, setDeployError] = useState<string | null>(null);
+  const handledRequestRef = useRef(0);
 
   const candidates = useMemo<readonly CoreCandidate[]>(() => {
     if (!session) return [];
@@ -84,7 +86,7 @@ export function DeployDiffScreen() {
   const selectedCandidates = candidates.filter((c) => selected.has(c.binding.bindingId));
   const totalChanges = selectedCandidates.reduce((sum, c) => sum + c.diff.modules.added.length + c.diff.modules.removed.length + c.diff.modules.changed.length + c.diff.schedules.added.length + c.diff.schedules.removed.length + c.diff.schedules.changed.length + c.diff.rules.added.length + c.diff.rules.removed.length + c.diff.rules.changed.length + c.diff.blocks.added.length + c.diff.blocks.removed.length + c.diff.blocks.changed.length + c.diff.edges.added.length + c.diff.edges.removed.length, 0);
   const blockedCandidates = selectedCandidates.filter((c) => c.missingProfiles.length > 0);
-  const canDeploy = selectedCandidates.length > 0 && blockedCandidates.length === 0 && ![...selected].some((id) => running.has(id));
+  const canDeploy = running.size === 0;
 
   function toggle(bindingId: CoreBindingId) {
     setSelected((prev) => {
@@ -96,9 +98,39 @@ export function DeployDiffScreen() {
   }
 
   async function handleDeploy() {
-    setRunning(new Set(selectedCandidates.map((c) => c.binding.bindingId)));
+    setDeployError(null);
+    const discovered = await discoverNetwork();
+    if (discovered.length === 0) {
+      setDeployError("Nessuna Backbone rilevata. Deploy annullato.");
+      return;
+    }
+    const targets = selectedCandidates.length > 0 ? selectedCandidates : candidates;
+    if (targets.length === 0) {
+      setDeployError("La configurazione non contiene modifiche distribuibili.");
+      return;
+    }
+    const available = new Set(discovered.map(({ bindingId }) => bindingId));
+    const missing = targets.filter((candidate) => !available.has(candidate.binding.bindingId));
+    if (missing.length > 0) {
+      setDeployError(`Backbone richiesta non disponibile: ${missing.map((candidate) => candidate.binding.expectedDeviceId).join(", ")}.`);
+      return;
+    }
+    const profileChecks = await Promise.all(
+      targets.map(async (candidate) => {
+        const profiles = await listDeviceProfiles(candidate.binding.bindingId);
+        const validation = dryRunConfig(candidate.input, {
+          availableProfileIds: new Set((profiles ?? []).map((profile) => profile.profileId)),
+        });
+        return validation.issues.some((issue) => issue.code === "config-decompiler.missing_profile");
+      }),
+    );
+    if (profileChecks.some(Boolean)) {
+      setDeployError("Uno o più moduli configurati richiedono un profilo non disponibile.");
+      return;
+    }
+    setRunning(new Set(targets.map((c) => c.binding.bindingId)));
     await Promise.all(
-      selectedCandidates.map(async (c) => {
+      targets.map(async (c) => {
         const depId = deploymentId(crypto.randomUUID());
         if (!depId.ok || !session) return;
         const result = await deployConfig(c.binding.bindingId, c.input, {
@@ -121,6 +153,14 @@ export function DeployDiffScreen() {
     );
   }
 
+  useEffect(() => {
+    if (deployRequestId === 0 || deployRequestId === handledRequestRef.current) return;
+    handledRequestRef.current = deployRequestId;
+    void handleDeploy();
+    // The request id represents an explicit click; candidates are captured from that render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deployRequestId]);
+
   return (
     <div className="flex h-full flex-col overflow-auto">
       <div className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-4">
@@ -129,9 +169,15 @@ export function DeployDiffScreen() {
           {copy.changesCores(totalChanges, selectedCandidates.length)}
         </span>
         <button type="button" disabled={!canDeploy} onClick={() => void handleDeploy()} className="rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-40">
-          {copy.startDeploy}
+          Run Deploy
         </button>
       </div>
+
+      {deployError && (
+        <div role="alert" className="mx-6 mt-4 rounded-slsm border border-error bg-error/5 px-4 py-3 font-body text-sm text-error">
+          {deployError}
+        </div>
+      )}
 
       {candidates.length === 0 ? (
         <div className="flex flex-1 items-center justify-center">

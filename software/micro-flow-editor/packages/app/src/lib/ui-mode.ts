@@ -16,7 +16,6 @@ export const DEFAULT_UI_MODE: UiMode = "base";
 
 export const ADVANCED_ONLY_SCREEN_IDS = [
   "catalog-topology",
-  "physical-composition",
   "device-profile-studio",
   "capability-marketplace",
   "cross-core-automation",

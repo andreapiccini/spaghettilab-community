@@ -10,6 +10,10 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
+#include <zephyr/sys/byteorder.h>
+#if defined(CONFIG_PWM)
+#include <zephyr/drivers/pwm.h>
+#endif
 
 #if defined(CONFIG_ADC)
 #include <zephyr/drivers/adc.h>
@@ -49,6 +53,9 @@ struct spaghetti_port {
 	enum spaghetti_port_transport active_transport;
 	size_t owner_count;
 	spaghetti_port_owner_t owners[CONFIG_SPAGHETTI_MAX_MODULES];
+	uint8_t user_modes[4];
+	uint8_t user_speed;
+	uint8_t user_config[20];
 };
 
 struct spaghetti_port_controller_lock {
@@ -383,6 +390,141 @@ size_t spaghetti_port_count(void)
 	return ARRAY_SIZE(ports);
 }
 
+int spaghetti_port_copy_user_map(spaghetti_port_id_t id,
+				 uint8_t modes[4], uint8_t *speed)
+{
+	const struct spaghetti_port *port = spaghetti_port_get(id);
+
+	if ((port == NULL) || (modes == NULL) || (speed == NULL)) {
+		return -EINVAL;
+	}
+	if (k_mutex_lock(&ports_lock, K_MSEC(100)) != 0) {
+		return -EBUSY;
+	}
+	memcpy(modes, port->user_modes, 4U);
+	*speed = port->user_speed;
+	k_mutex_unlock(&ports_lock);
+	return 0;
+}
+
+int spaghetti_port_copy_user_config(spaghetti_port_id_t id, uint8_t config[20])
+{
+	const struct spaghetti_port *port = spaghetti_port_get(id);
+	if (port == NULL || config == NULL) return -EINVAL;
+	if (k_mutex_lock(&ports_lock, K_MSEC(100)) != 0) return -EBUSY;
+	memcpy(config, port->user_config, 20U);
+	k_mutex_unlock(&ports_lock);
+	return 0;
+}
+
+int spaghetti_port_apply_user_map(spaghetti_port_id_t id, const uint8_t modes[4], uint8_t speed)
+{
+	return spaghetti_port_apply_user_config(id, modes, speed, NULL);
+}
+
+int spaghetti_port_apply_user_config(spaghetti_port_id_t id,
+				  const uint8_t modes[4], uint8_t speed, const uint8_t config[20])
+{
+	struct spaghetti_port *port = port_mutable(spaghetti_port_get(id));
+	bool i2c_selected;
+	int err = 0;
+
+	if ((port == NULL) || (modes == NULL) || (speed > 1U)) {
+		return -EINVAL;
+	}
+	if ((port->digital_input_count != 4U) ||
+	    (port->digital_output_count != 4U)) {
+		return -ENOTSUP;
+	}
+	i2c_selected = false;
+	uint8_t count[16] = {0};
+	for (uint8_t i = 0U; i < 4U; ++i) count[modes[i] & 15U]++;
+	i2c_selected = count[4] || count[5];
+	if ((count[4] || count[5]) && (count[4] != 1U || count[5] != 1U)) return -EINVAL;
+	if ((count[6] || count[7]) && (count[6] != 1U || count[7] != 1U)) return -EINVAL;
+	if ((count[8] || count[9] || count[10] || count[11]) && (count[8] != 1U || count[9] != 1U || count[10] != 1U || count[11] != 1U)) return -EINVAL;
+	if (count[13] || count[14] || count[15]) return -ENOTSUP;
+	if ((count[6] || count[7]) && !port->uart) return -ENOTSUP;
+	if (count[8] && !port->spi) return -ENOTSUP;
+	if (config && (config[0] != 1U || sys_get_le32(&config[1]) < 1200U || sys_get_le32(&config[1]) > 2000000U || sys_get_le32(&config[5]) < 10000U || sys_get_le32(&config[5]) > 20000000U || sys_get_le32(&config[9]) < 1U || sys_get_le32(&config[9]) > 20000U || (config[13] != 7U && config[13] != 8U) || config[14] > 2U || (config[15] != 1U && config[15] != 2U) || config[16] > 3U || config[17] > 1U || config[18] > 1U || config[19])) return -EINVAL;
+	for (uint8_t i = 0U; i < 4U; ++i) {
+		const uint8_t mode = modes[i] & 15U;
+		const uint8_t pull = modes[i] & 0x30U;
+
+		if ((mode > 12U) || ((modes[i] & 0xC0U) != 0U) ||
+		    (pull == 0x30U) || ((mode != 1U) && (pull != 0U))) {
+			return -EINVAL;
+		}
+		if (!gpio_is_ready_dt(&port->digital_inputs[i])) {
+			return -ENODEV;
+		}
+	}
+	if (i2c_selected && ((port->i2c == NULL) || !device_is_ready(port->i2c))) {
+		return -ENOTSUP;
+	}
+	if (k_mutex_lock(&ports_lock, K_MSEC(100)) != 0) {
+		return -EBUSY;
+	}
+	if (port->owner_count != 0U) {
+		err = -EBUSY;
+		goto unlock_user;
+	}
+	for (uint8_t i = 0U; i < 4U; ++i) {
+		const uint8_t mode = modes[i] & 15U;
+		gpio_flags_t flags = GPIO_INPUT;
+
+		if (mode >= 4U) {
+			flags = GPIO_INPUT;
+		}
+		if (mode == 2U) {
+			flags = GPIO_OUTPUT_LOW;
+		} else if (mode == 3U) {
+			flags = GPIO_OUTPUT_HIGH;
+		} else if (mode == 1U) {
+			flags |= (modes[i] & 0x10U) ? GPIO_PULL_UP : 0U;
+			flags |= (modes[i] & 0x20U) ? GPIO_PULL_DOWN : 0U;
+		}
+		err = gpio_pin_configure_dt(&port->digital_inputs[i], flags);
+		if (err != 0) {
+			goto rollback_user;
+		}
+	}
+	uint8_t next_config[20] = {1, 0, 194, 1, 0, 64, 66, 15, 0, 232, 3, 0, 0, 8, 0, 1, 0, 0, 0, 0};
+	if (config) memcpy(next_config, config, 20U);
+	err = spaghetti_port_backend_user_map(id, modes, next_config);
+	if (err) goto rollback_user;
+	if (count[6]) {
+		const struct uart_config uart_settings = { .baudrate = sys_get_le32(&next_config[1]), .data_bits = next_config[13] == 7U ? UART_CFG_DATA_BITS_7 : UART_CFG_DATA_BITS_8, .parity = next_config[14] == 1U ? UART_CFG_PARITY_EVEN : next_config[14] == 2U ? UART_CFG_PARITY_ODD : UART_CFG_PARITY_NONE, .stop_bits = next_config[15] == 2U ? UART_CFG_STOP_BITS_2 : UART_CFG_STOP_BITS_1, .flow_ctrl = UART_CFG_FLOW_CTRL_NONE };
+		err = uart_configure(port->uart, &uart_settings);
+		if (err) goto rollback_user;
+	}
+	if (i2c_selected) {
+		err = 0;
+		if (err != 0) {
+			goto rollback_user;
+		}
+		err = i2c_configure(port->i2c, I2C_MODE_CONTROLLER |
+			I2C_SPEED_SET(speed ? I2C_SPEED_FAST : I2C_SPEED_STANDARD));
+		if (err != 0) {
+			goto rollback_user;
+		}
+	}
+	memcpy(port->user_config, next_config, 20U);
+	memcpy(port->user_modes, modes, 4U);
+	port->user_speed = speed;
+	goto unlock_user;
+
+rollback_user:
+	for (uint8_t i = 0U; i < 4U; ++i) {
+		(void)gpio_pin_configure_dt(&port->digital_inputs[i], GPIO_INPUT);
+	}
+	memset(port->user_modes, 0, 4U);
+	port->user_speed = 0U;
+unlock_user:
+	k_mutex_unlock(&ports_lock);
+	return err;
+}
+
 const struct spaghetti_port *spaghetti_port_get(spaghetti_port_id_t id)
 {
 	for (size_t port_idx = 0U; port_idx < ARRAY_SIZE(ports); ++port_idx) {
@@ -446,11 +588,11 @@ int spaghetti_port_acquire(
 	}
 
 	if (mutable_port->transport_active) {
-		if (mutable_port->active_transport != transport) {
+		if (mutable_port->active_transport != transport && mutable_port->user_config[0] != 1U) {
 			err = -EBUSY;
 			goto unlock;
 		}
-		if (!transport_is_shareable(transport) &&
+		if (mutable_port->user_config[0] != 1U && !transport_is_shareable(transport) &&
 		    (mutable_port->owner_count > 0U)) {
 			err = -EBUSY;
 			goto unlock;
@@ -634,6 +776,14 @@ int spaghetti_port_spi_transceive(
 	config.frequency = request->frequency_hz;
 	config.operation = request->operation;
 	ARG_UNUSED(cs_control);
+	if (port->user_config[0] == 1U) {
+		config.frequency = sys_get_le32(&port->user_config[5]);
+		config.operation &= ~(SPI_MODE_CPOL | SPI_MODE_CPHA | SPI_TRANSFER_LSB);
+		if (port->user_config[16] & 2U) config.operation |= SPI_MODE_CPOL;
+		if (port->user_config[16] & 1U) config.operation |= SPI_MODE_CPHA;
+		if (port->user_config[17]) config.operation |= SPI_TRANSFER_LSB;
+		for (uint8_t i = 0; i < 4U; ++i) if (port->user_modes[i] == 11U) { config.cs.gpio = port->digital_outputs[i]; config.cs.gpio.dt_flags = GPIO_ACTIVE_LOW; config.cs.cs_is_gpio = true; }
+	}
 
 	err = lock_controller(SPAGHETTI_PORT_TRANSPORT_SPI, port->spi, timeout);
 	if (err < 0) {
@@ -853,6 +1003,7 @@ int spaghetti_port_digital_output_set(
 	    (channel >= port->digital_output_count)) {
 		return -ENOTSUP;
 	}
+	if (port->user_config[0] == 1U && channel < 4U && port->user_modes[channel] != 2U && port->user_modes[channel] != 3U) return -ESTALE;
 	if (!gpio_is_ready_dt(&port->digital_outputs[channel])) {
 		return -ENODEV;
 	}
@@ -876,6 +1027,7 @@ int spaghetti_port_digital_input_get(
 	    (channel >= port->digital_input_count)) {
 		return -ENOTSUP;
 	}
+	if (port->user_config[0] == 1U && channel < 4U && (port->user_modes[channel] & 15U) != 1U) return -ESTALE;
 	if (!gpio_is_ready_dt(&port->digital_inputs[channel])) {
 		return -ENODEV;
 	}
@@ -1002,5 +1154,18 @@ int spaghetti_port_w1_write_read(
 	ARG_UNUSED(read_size);
 	ARG_UNUSED(timeout);
 	return -ENOTSUP;
+#endif
+}
+
+int spaghetti_port_pwm_set(const struct spaghetti_port *port, uint8_t channel, uint16_t duty)
+{
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+	if (!port || channel >= 4U || port->user_modes[channel] != 12U || duty > 10000U) return -EINVAL;
+	const uint32_t frequency = sys_get_le32(&port->user_config[9]);
+	if (!frequency) return -EINVAL;
+	const uint32_t period = 1000000000U / frequency;
+	return pwm_set(DEVICE_DT_GET(DT_NODELABEL(ledc0)), channel, period, (uint64_t)period * duty / 10000U, port->user_config[18] ? PWM_POLARITY_INVERTED : PWM_POLARITY_NORMAL);
+#else
+	ARG_UNUSED(port); ARG_UNUSED(channel); ARG_UNUSED(duty); return -ENOTSUP;
 #endif
 }

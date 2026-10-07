@@ -26,6 +26,7 @@ export type CanVia = {
 export type HostLink = "usb" | "wifi";
 
 export type AttachedBackbone = {
+  /** Stable board identity: factory MAC encoded as 64 lowercase hex chars. */
   readonly deviceIdHex: string;
   readonly mac: string;
   readonly nodeId: number;
@@ -46,12 +47,12 @@ export function retainAttachedVersions(
 
 export function attachedFromStatus(status: GetStatusResponse | undefined, expectedDeviceId: string): AttachedBackbone[] | null {
   if (!status?.chainPeers?.length) return null;
-  const currentDeviceId = status.deviceId?.length ? bytesToHex(status.deviceId) : expectedDeviceId;
+  void expectedDeviceId;
   return status.chainPeers.map((peer) => {
     const mac = macBytesToColon(peer.mac);
     const version = (peer.version?.trim() || (peer.local ? status.version : undefined))?.trim();
     return {
-      deviceIdHex: peer.local ? currentDeviceId : macToDeviceIdHex(mac),
+      deviceIdHex: macToDeviceIdHex(mac),
       mac,
       nodeId: peer.nodeId,
       local: peer.local,
@@ -117,6 +118,8 @@ type CoreSessionsContextValue = {
   requestFactoryReset(bindingId: CoreBindingId, scope: number, granted: PermissionSet, confirmation: DestructiveConfirmation): Promise<ResetScopeOutcome> | undefined;
   getUpdateStatus(bindingId: CoreBindingId): Promise<GetUpdateStatusResponse> | undefined;
   getClient(bindingId: CoreBindingId): SpaghettiClient | undefined;
+  /** One fresh GET_STATUS per connected host root, shared by Discover and Run Deploy. */
+  discoverNetwork(): Promise<readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]>;
 };
 
 const CoreSessionsContext = createContext<CoreSessionsContextValue | undefined>(undefined);
@@ -161,7 +164,9 @@ async function openLink(link: CoreLink): Promise<{ transport: ProtocolTransport;
       transport.dispose();
       void connection.close();
     },
-    onDisconnected: () => {},
+    // Web Serial has no socket "close" — unplug ends the read loop / fires
+    // navigator.serial "disconnect". Without this, Clusters stayed READY.
+    onDisconnected: (cb) => connection.onClose(cb),
   };
 }
 
@@ -172,6 +177,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
   const canViaRef = useRef(new Map<CoreBindingId, CanVia>());
   const attachedRef = useRef(new Map<CoreBindingId, readonly AttachedBackbone[]>());
   const hostLinkRef = useRef(new Map<CoreBindingId, HostLink>());
+  const discoveryRef = useRef<Promise<readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]> | null>(null);
   const [renderCount, forceRender] = useState(0);
   const rerender = useCallback(() => forceRender((n) => n + 1), []);
   const [errors, setErrors] = useState<Map<CoreBindingId, DomainError | string>>(new Map());
@@ -292,7 +298,13 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     const prev = attachedRef.current.get(bindingId) ?? [];
     const same =
       next.length === prev.length &&
-      next.every((peer, index) => peer.deviceIdHex === prev[index]?.deviceIdHex && peer.version === prev[index]?.version && peer.local === prev[index]?.local);
+      next.every((peer, index) =>
+        peer.deviceIdHex === prev[index]?.deviceIdHex &&
+        peer.mac === prev[index]?.mac &&
+        peer.nodeId === prev[index]?.nodeId &&
+        peer.version === prev[index]?.version &&
+        peer.local === prev[index]?.local,
+      );
     if (same) return;
     attachedRef.current.set(bindingId, next);
     rerender();
@@ -368,6 +380,36 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
   );
   const getUpdateStatus = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.getUpdateStatus(), []);
   const getClient = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.client, []);
+  const discoverNetwork = useCallback(() => {
+    if (discoveryRef.current) return discoveryRef.current;
+    const request = (async () => {
+      const discovered: { bindingId: CoreBindingId; status: GetStatusResponse }[] = [];
+      for (const [bindingId, coreSession] of sessionsRef.current) {
+        if (canViaRef.current.has(bindingId)) continue;
+        try {
+          const status = await coreSession.client.getStatus();
+          coreSession.observeStatus(status);
+          const peers = attachedFromStatus(status, coreSession.binding.expectedDeviceId);
+          if (peers) {
+            attachedRef.current.set(
+              bindingId,
+              retainAttachedVersions(attachedRef.current.get(bindingId) ?? [], peers),
+            );
+          }
+          discovered.push({ bindingId, status });
+        } catch {
+          // A failed request must not turn the previous topology into an empty network.
+        }
+      }
+      rerender();
+      return discovered;
+    })();
+    discoveryRef.current = request;
+    void request.finally(() => {
+      if (discoveryRef.current === request) discoveryRef.current = null;
+    });
+    return request;
+  }, [rerender]);
 
   const value: CoreSessionsContextValue = {
     rows,
@@ -397,6 +439,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     requestFactoryReset,
     getUpdateStatus,
     getClient,
+    discoverNetwork,
   };
   return <CoreSessionsContext.Provider value={value}>{children}</CoreSessionsContext.Provider>;
 }

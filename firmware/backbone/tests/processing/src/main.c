@@ -10,6 +10,20 @@
 #include <spaghetti/block_registry.h>
 #include <spaghetti/processing.h>
 #include <spaghetti/schema.h>
+#include <spaghetti/port.h>
+
+static uint8_t physical_modes[4];
+static int output_level;
+static uint16_t output_duty;
+const struct spaghetti_port *spaghetti_port_get(spaghetti_port_id_t id) { return id == 0U ? (const struct spaghetti_port *)physical_modes : NULL; }
+int spaghetti_port_copy_user_map(spaghetti_port_id_t id, uint8_t modes[4], uint8_t *speed) { ARG_UNUSED(id); memcpy(modes, physical_modes, 4U); *speed = 0U; return 0; }
+int spaghetti_port_acquire(const struct spaghetti_port *port, spaghetti_port_owner_t owner, enum spaghetti_port_transport transport) { ARG_UNUSED(port); ARG_UNUSED(owner); ARG_UNUSED(transport); return 0; }
+int spaghetti_port_release(const struct spaghetti_port *port, spaghetti_port_owner_t owner) { ARG_UNUSED(port); ARG_UNUSED(owner); return 0; }
+int spaghetti_port_digital_output_set(const struct spaghetti_port *port, uint8_t channel, bool high) { ARG_UNUSED(port); ARG_UNUSED(channel); output_level = high; return 0; }
+int spaghetti_port_pwm_set(const struct spaghetti_port *port, uint8_t channel, uint16_t duty) { ARG_UNUSED(port); ARG_UNUSED(channel); output_duty = duty; return 0; }
+int spaghetti_port_uart_read(const struct spaghetti_port *port, uint8_t *bytes, size_t size, k_timeout_t timeout) { ARG_UNUSED(port); ARG_UNUSED(bytes); ARG_UNUSED(size); ARG_UNUSED(timeout); return -ETIMEDOUT; }
+int spaghetti_port_uart_write(const struct spaghetti_port *port, const uint8_t *bytes, size_t size, k_timeout_t timeout) { ARG_UNUSED(port); ARG_UNUSED(bytes); ARG_UNUSED(size); ARG_UNUSED(timeout); return 0; }
+int spaghetti_port_spi_transceive(const struct spaghetti_port *port, const struct spaghetti_port_spi_request *request, k_timeout_t timeout) { ARG_UNUSED(port); ARG_UNUSED(request); ARG_UNUSED(timeout); return -ENOTSUP; }
 
 #include "block_registry_internal.h"
 
@@ -480,6 +494,27 @@ ZTEST(processing, test_cycle_missing_budget_rollback)
 		}
 		zassert_equal(spaghetti_processing_configure(heavy, count, NULL, 0U),
 			      -ENOSPC);
+	}
+}
+
+ZTEST(processing, test_physical_outputs_follow_records_and_reject_stale_modes)
+{
+	const char *types[] = {"physical_gpio_out", "physical_pwm_out"};
+	for (uint8_t index = 0U; index < 2U; ++index) {
+		const struct spaghetti_block_driver *driver = spaghetti_block_registry_find(types[index]);
+		zassert_not_null(driver);
+		struct spaghetti_property_set config = {0}; prop_u64(&config, 1U, 0U); prop_u64(&config, 2U, 1U);
+		uint64_t state[8] = {0}; physical_modes[1] = index ? 12U : 2U;
+		zassert_ok(driver->ops->init(&config, state));
+		struct spaghetti_value input = make_i64(0U, index ? 2500 : 1); bool valid = true;
+		zassert_ok(driver->ops->process(state,NULL,&input,&valid,1U,NULL,NULL,0U,NULL,NULL,NULL));
+		if (index) zassert_equal(output_duty,2500U); else zassert_equal(output_level,1);
+		input.data.signed_integer = 0;
+		zassert_ok(driver->ops->process(state,NULL,&input,&valid,1U,NULL,NULL,0U,NULL,NULL,NULL));
+		if (index) zassert_equal(output_duty,0U); else zassert_equal(output_level,0);
+		physical_modes[1] = 0U;
+		zassert_equal(driver->ops->process(state,NULL,&input,&valid,1U,NULL,NULL,0U,NULL,NULL,NULL),-ESTALE);
+		driver->ops->deinit(state);
 	}
 }
 

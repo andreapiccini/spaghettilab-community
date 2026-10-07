@@ -93,7 +93,7 @@ describe("envelope — encode-side validation", () => {
     expect(() =>
       encodeRequest({
         correlationId: 1,
-        operation: 32 as Operation,
+        operation: 33 as Operation,
         payload: new Uint8Array(),
       }),
     ).toThrow(ProtocolCodecError);

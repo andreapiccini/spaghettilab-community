@@ -31,6 +31,7 @@ static const char *const processing_basic_blocks[] = {
 	"polynomial",
 	"unit_convert",
 	"publish_field",
+	"physical_gpio_out", "physical_pwm_out", "physical_uart_tx", "physical_uart_rx", "physical_spi",
 };
 
 SPAGHETTI_FEATURE_PACK_DEFINE(spaghetti_pack_processing_basic) = {

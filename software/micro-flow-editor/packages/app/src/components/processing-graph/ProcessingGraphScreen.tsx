@@ -1,4 +1,5 @@
 import { encodeConfigCbor, sha256 } from "@spaghettilab/config-compiler";
+import { physicalPinsForBinding } from "../../lib/physical-pin-bindings.js";
 import { dryRunConfig, type DryRunResult } from "@spaghettilab/config-decompiler";
 import { isBlockNodeData, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import type { CoreBindingRecord, GraphNode, GraphState } from "@spaghettilab/domain";
@@ -112,7 +113,7 @@ export function ProcessingGraphScreen() {
 }
 
 function ProcessingGraphScreenInner() {
-  const { session, execute, navigate } = useSession();
+  const { session, execute, navigate, requestDeploy } = useSession();
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
@@ -926,12 +927,19 @@ function ProcessingGraphScreenInner() {
     entry: ProcessingCatalogEntry,
     requestedPosition = nextSpawnPosition(domainNodes.length),
     baySide = peekPaletteDragBaySide(),
+    physicalPinId?: string,
   ) {
     if (!execute || bindingIndex < 0) return;
     // Tick discs are spawned with each Schedule — never from the palette.
     if (entry.id === "native.flow_start" || entry.typeId === "ab.flow_start") return;
-    const data = nodeDataFromCatalogEntry(entry, moduleOptions[0]?.id, baySide);
+    let data = nodeDataFromCatalogEntry(entry, moduleOptions[0]?.id, baySide);
     if (!data) return;
+    if (physicalPinId) {
+      const pin = physicalPinsForBinding(session?.stack.current, selected?.bindingId).find(item => item.id === physicalPinId && item.local && item.entryId === entry.id);
+      if (!pin) return;
+      if (data.kind === "event-source") data = {...data,moduleNodeId:pin.moduleNodeId,properties:{...data.properties,physicalPinId}};
+      else if (data.kind === "block") data = {...data,properties:{...data.properties,"1":BigInt(pin.backendPortId),"2":BigInt(pin.channel),physicalPinId}};
+    }
 
     const id = `dp-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
     const bay = isBayEntry(entry);
@@ -1155,7 +1163,7 @@ function ProcessingGraphScreenInner() {
     const entry = findCatalogEntryById(payload.entryId);
     if (!entry) return;
     const flowPos = rf?.screenToFlowPosition({ x: event.clientX, y: event.clientY }) ?? { x: 80, y: 80 };
-    placeFromCatalog(entry, { x: snapToGrid(flowPos.x), y: snapToGrid(flowPos.y) }, payload.baySide);
+    placeFromCatalog(entry, { x: snapToGrid(flowPos.x), y: snapToGrid(flowPos.y) }, payload.baySide, payload.physicalPinId);
   }
 
   async function handleDryRun() {
@@ -1206,7 +1214,6 @@ function ProcessingGraphScreenInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoOnly, graphState.nodes.length]);
 
-  const canDeploy = dryRun !== null && errorCount === 0;
   const statusColor = simulating
     ? "#F5C518"
     : !dryRun
@@ -1231,6 +1238,12 @@ function ProcessingGraphScreenInner() {
         {!demoOnly && (
           <div className="shrink-0">
             <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
+          </div>
+        )}
+        {!demoOnly && (
+          <div className="flex shrink-0 gap-1">
+            <button type="button" className="rounded-slpill px-3 py-1 text-xs text-ink-muted" onClick={() => navigate("physical-composition")}>Modules</button>
+            <button type="button" className="rounded-slpill bg-brand-blue/10 px-3 py-1 text-xs text-brand-blue">Logic</button>
           </div>
         )}
         <div className="min-w-0">
@@ -1266,8 +1279,8 @@ function ProcessingGraphScreenInner() {
           </span>
         )}
         {!demoOnly && (
-          <button type="button" disabled={!canDeploy} onClick={() => navigate("deploy-diff")} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-            {copy.sendToDeploy}
+          <button type="button" onClick={requestDeploy} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
+            Run Deploy
           </button>
         )}
       </div>
@@ -1278,7 +1291,7 @@ function ProcessingGraphScreenInner() {
         </div>
       ) : (
         <div className="relative flex flex-1 overflow-hidden">
-          {!demoOnly && <ProcessingBlockPalette />}
+          {!demoOnly && <ProcessingBlockPalette bindingId={selected?.bindingId} />}
 
           <div className="relative flex-1" onDragOver={onCanvasDragOver} onDragLeave={() => { setDropPreview(null); setContainerHint(null); }} onDrop={onCanvasDrop}>
             <ReactFlow

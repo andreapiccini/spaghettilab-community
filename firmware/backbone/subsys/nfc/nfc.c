@@ -1,4 +1,5 @@
 #include <spaghetti/nfc.h>
+#include <spaghetti/physical.h>
 
 #include <errno.h>
 #include <stdbool.h>
@@ -776,6 +777,9 @@ static void nfc_notify_host(uint8_t port_id)
 		candidate_id = generation;
 	}
 
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+	spaghetti_field_update_nfc_changed(port_id, generation);
+#endif
 	(void)spaghetti_communication_emit_discovery(candidate_id, port_id,
 						     generation);
 }
@@ -891,6 +895,7 @@ static void nfc_store_scan(const struct spaghetti_nfc_tag *found, size_t count)
 		memcpy(nfc_tags, found, count * sizeof(found[0]));
 	}
 	k_mutex_unlock(&nfc_lock);
+	(void)spaghetti_physical_refresh();
 	if (changed) {
 		if (count > 0U) {
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)

@@ -18,6 +18,7 @@
 #include <spaghetti/module.h>
 #include <spaghetti/module_manager.h>
 #include <spaghetti/port.h>
+#include <spaghetti/physical.h>
 
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
 #include <spaghetti/field_update.h>
@@ -124,7 +125,10 @@ static int execute_get_status(
 			(spaghetti_nfc_copy_tags(nfc_tags, ARRAY_SIZE(nfc_tags),
 						 &nfc_count) == 0);
 #endif
+		uint8_t physical[SPAGHETTI_PHYSICAL_SIZE];
+		const bool have_physical = spaghetti_physical_describe(physical) == 0;
 		const size_t map_keys = (have_identity ? 12U : 10U) +
+					(have_physical ? 1U : 0U) +
 					(have_peers ? 1U : 0U) +
 					(have_nfc ? 1U : 0U);
 		ZCBOR_STATE_E(state, SPAGHETTI_OPS_CBOR_BACKUP, response->bytes,
@@ -214,7 +218,9 @@ static int execute_get_status(
 					(peer->flags & SPAGHETTI_SLUP_FLAG_LOCAL) !=
 					0U;
 
-				if (!zcbor_map_start_encode(state, 5U) ||
+				const bool have_layout = (peer->physical[0] == 1U && peer->physical_parts == 7U) || (peer->physical[0] == 2U && peer->physical_parts == 63U);
+				const size_t peer_keys = have_layout ? 6U : 5U;
+				if (!zcbor_map_start_encode(state, peer_keys) ||
 				    !zcbor_uint32_put(state, 0U) ||
 				    !zcbor_uint32_put(state, peer->node_id) ||
 				    !zcbor_uint32_put(state, 1U) ||
@@ -226,8 +232,15 @@ static int execute_get_status(
 				    !zcbor_bool_put(state, local) ||
 				    !zcbor_uint32_put(state, 4U) ||
 				    !zcbor_tstr_put_term(state, peer->version,
-							 SPAGHETTI_SLUP_VERSION_SIZE) ||
-				    !zcbor_map_end_encode(state, 5U)) {
+							 SPAGHETTI_SLUP_VERSION_SIZE)) {
+					return -EMSGSIZE;
+				}
+				if (have_layout && (!zcbor_uint32_put(state, 5U) ||
+				    !zcbor_bstr_encode_ptr(state, peer->physical,
+					peer->physical[0] == 1U ? 13U : SPAGHETTI_PHYSICAL_SIZE))) {
+					return -EMSGSIZE;
+				}
+				if (!zcbor_map_end_encode(state, peer_keys)) {
 					return -EMSGSIZE;
 				}
 			}
@@ -238,6 +251,10 @@ static int execute_get_status(
 #else
 		ARG_UNUSED(peer_count);
 #endif
+		if (have_physical && (!zcbor_uint32_put(state, 14U) ||
+		    !zcbor_bstr_encode_ptr(state, physical, sizeof(physical)))) {
+			return -EMSGSIZE;
+		}
 		if (have_nfc) {
 			size_t published = 0U;
 

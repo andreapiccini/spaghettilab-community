@@ -173,7 +173,7 @@ int spaghetti_protocol_decode_request(
 		return err;
 	}
 	if ((operation < (uint32_t)SPAGHETTI_PROTOCOL_GET_CATALOG) ||
-	    (operation > (uint32_t)SPAGHETTI_PROTOCOL_GET_FEATURES)) {
+	    (operation > (uint32_t)SPAGHETTI_PROTOCOL_APPLY_PHYSICAL)) {
 		return -ENOTSUP;
 	}
 

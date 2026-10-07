@@ -25,8 +25,9 @@ import {
 import type { CoreBindingId } from "@spaghettilab/domain";
 import { useCoreSessions } from "./core-sessions-context.js";
 import { useLocale } from "./locale-context.js";
+import { useSession } from "./session-context.js";
 
-const POLL_MS = 1500;
+const POLL_MS = 1000;
 
 type NfcPresenceContextValue = {
   readonly nodesByBinding: ReadonlyMap<CoreBindingId, readonly NfcNode[]>;
@@ -44,14 +45,14 @@ const NfcPresenceContext = createContext<NfcPresenceContextValue | undefined>(
 export function NfcPresenceProvider({ children }: { readonly children: ReactNode }) {
   const {
     rows,
-    getClient,
-    getSnapshot,
+    discoverNetwork,
     setAttachedBackbones,
     observeStatus,
     onDiscoveryEvent,
   } = useCoreSessions();
+  const { activeScreen } = useSession();
   const { locale } = useLocale();
-  const copy = coreConnectionsCopy(locale);
+  const copy = useMemo(() => coreConnectionsCopy(locale), [locale]);
   const [nodesByBinding, setNodesByBinding] = useState<
     ReadonlyMap<CoreBindingId, readonly NfcNode[]>
   >(new Map());
@@ -76,7 +77,9 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
   );
   const readyKey = readyRoots.map((row) => row.binding.bindingId).join("|");
   const readyRootsRef = useRef(readyRoots);
-  readyRootsRef.current = readyRoots;
+  useEffect(() => {
+    readyRootsRef.current = readyRoots;
+  }, [readyRoots]);
   const keepNfcIds = useMemo(
     () =>
       new Set(
@@ -91,42 +94,86 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
     [rows],
   );
 
+  const ingestStatus = useCallback(
+    (row: (typeof readyRoots)[number], status: Parameters<typeof observeStatus>[1]) => {
+      const bindingId = row.binding.bindingId;
+      const peers = attachedFromStatus(status, row.binding.expectedDeviceId);
+      observeStatus(bindingId, status);
+      if (peers) setAttachedBackbones(bindingId, peers);
+
+      const peerMacByNode = new Map<number, string>();
+      const peerLabelByNode = new Map<number, string>();
+      let remoteOrdinal = 1;
+      for (const peer of status.chainPeers ?? []) {
+        peerMacByNode.set(peer.nodeId, macBytesToColon(peer.mac));
+        if (peer.local) peerLabelByNode.set(peer.nodeId, copy.masterBackbone);
+        else {
+          remoteOrdinal += 1;
+          peerLabelByNode.set(peer.nodeId, copy.chainedBackbone(remoteOrdinal));
+        }
+      }
+      const masterMac = formatDeviceId(row.binding.expectedDeviceId);
+      const nodes = collectNfcNodes(
+        (status.nfcTags ?? []).map((tag) => ({
+          portId: tag.portId,
+          typeId: tag.typeId,
+          uid: tag.uid,
+          nodeId: tag.nodeId,
+          backboneMac: peerMacByNode.get(tag.nodeId) ?? masterMac,
+          backboneLabel:
+            peerLabelByNode.get(tag.nodeId) ??
+            (tag.local ? copy.masterBackbone : copy.chainedBackbone(2)),
+          moduleTypeId: tag.moduleTypeId,
+          vendorId: tag.vendorId,
+          fallbackClass: tag.fallbackClass,
+          registryId: tag.registryId,
+        })),
+      );
+      const previous = lastNodesRef.current.get(bindingId) ?? [];
+      const firstLook = !primedRef.current.has(bindingId);
+      lastNodesRef.current.set(bindingId, nodes);
+      setNodesByBinding((prev) => new Map(prev).set(bindingId, nodes));
+      if (firstLook) primedRef.current.add(bindingId);
+      else {
+        const events = nfcEventsFromDiff(
+          masterMac,
+          previous,
+          nodes,
+          () => `nfc-${++nextIdRef.current}`,
+        );
+        if (events.length > 0) setQueue((q) => enqueueNfcDetects(q, events));
+      }
+    },
+    [
+      observeStatus,
+      setAttachedBackbones,
+      copy,
+    ],
+  );
+
   useEffect(() => {
     for (const id of [...primedRef.current]) {
       if (keepNfcIds.has(id)) continue;
       primedRef.current.delete(id);
       lastNodesRef.current.delete(id);
     }
-    setNodesByBinding((prev) => {
-      let changed = false;
-      const next = new Map(prev);
-      for (const id of next.keys()) {
-        if (keepNfcIds.has(id)) continue;
-        next.delete(id);
-        changed = true;
-      }
-      return changed ? next : prev;
-    });
-    setLoadingBindings((prev) => {
-      let changed = false;
-      const next = new Set(prev);
-      for (const id of next) {
-        if (keepNfcIds.has(id)) continue;
-        next.delete(id);
-        changed = true;
-      }
-      return changed ? next : prev;
-    });
   }, [keepNfcIds]);
 
   useEffect(() => {
-    if (readyRoots.length === 0) return undefined;
+    if (
+      (activeScreen !== "core-connections" && activeScreen !== "physical-composition") ||
+      readyRoots.length === 0
+    )
+      return undefined;
     let cancelled = false;
 
     async function poll() {
       if (cancelled || inFlightRef.current) return;
       inFlightRef.current = true;
       try {
+        const fresh = new Map(
+          (await discoverNetwork()).map(({ bindingId, status }) => [bindingId, status]),
+        );
         for (const row of readyRootsRef.current) {
           if (cancelled) return;
           const bindingId = row.binding.bindingId;
@@ -140,65 +187,11 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
             });
           }
           try {
-            const client = getClient(bindingId);
-            const status = client
-              ? await client.getStatus()
-              : getSnapshot(bindingId)?.status;
+            const status = fresh.get(bindingId);
+            if (!status) throw new Error("Discovery did not return this Backbone");
             if (cancelled) return;
-            if (status) {
-              observeStatus(bindingId, status);
-              const peers = attachedFromStatus(status, row.binding.expectedDeviceId);
-              if (peers) setAttachedBackbones(bindingId, peers);
-            }
             if (cancelled) return;
-            const peerMacByNode = new Map<number, string>();
-            const peerLabelByNode = new Map<number, string>();
-            const chainPeers = status?.chainPeers ?? [];
-            let remoteOrdinal = 1;
-            for (const peer of chainPeers) {
-              peerMacByNode.set(peer.nodeId, macBytesToColon(peer.mac));
-              if (peer.local) {
-                peerLabelByNode.set(peer.nodeId, copy.masterBackbone);
-              } else {
-                remoteOrdinal += 1;
-                peerLabelByNode.set(peer.nodeId, copy.chainedBackbone(remoteOrdinal));
-              }
-            }
-            const masterMac = formatDeviceId(row.binding.expectedDeviceId);
-            const nodes = collectNfcNodes(
-              (status?.nfcTags ?? []).map((tag) => ({
-                portId: tag.portId,
-                typeId: tag.typeId,
-                uid: tag.uid,
-                nodeId: tag.nodeId,
-                backboneMac: peerMacByNode.get(tag.nodeId) ?? masterMac,
-                backboneLabel:
-                  peerLabelByNode.get(tag.nodeId) ??
-                  (tag.local ? copy.masterBackbone : copy.chainedBackbone(2)),
-                moduleTypeId: tag.moduleTypeId,
-                vendorId: tag.vendorId,
-                fallbackClass: tag.fallbackClass,
-                registryId: tag.registryId,
-              })),
-            );
-            const previous = lastNodesRef.current.get(bindingId) ?? [];
-            lastNodesRef.current.set(bindingId, nodes);
-            setNodesByBinding((prev) => {
-              const next = new Map(prev);
-              next.set(bindingId, nodes);
-              return next;
-            });
-            if (firstLook) {
-              primedRef.current.add(bindingId);
-            } else {
-              const events = nfcEventsFromDiff(
-                masterMac,
-                previous,
-                nodes,
-                () => `nfc-${++nextIdRef.current}`,
-              );
-              if (events.length > 0) setQueue((q) => enqueueNfcDetects(q, events));
-            }
+            ingestStatus(row, status);
           } catch {
             /* A failed poll must not look like every module vanished. */
           } finally {
@@ -228,26 +221,49 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
     };
   }, [
     readyKey,
-    getClient,
-    getSnapshot,
+    readyRoots.length,
+    activeScreen,
+    discoverNetwork,
     setAttachedBackbones,
     observeStatus,
     copy.masterBackbone,
     copy.chainedBackbone,
+    ingestStatus,
   ]);
 
   useEffect(() => {
     const unsubs: (() => void)[] = [];
     for (const row of readyRoots) {
       const off = onDiscoveryEvent(row.binding.bindingId, () => {
-        refreshRef.current();
+        if (
+          activeScreen === "core-connections" ||
+          activeScreen === "physical-composition"
+        ) {
+          refreshRef.current();
+          return;
+        }
+        // Events remain active on every screen. A single coalesced Discovery
+        // updates the authoritative network snapshot without starting polling.
+        void discoverNetwork().then((fresh) => {
+          const status = fresh.find(
+            (item) => item.bindingId === row.binding.bindingId,
+          )?.status;
+          if (status) ingestStatus(row, status);
+        });
       });
       if (off) unsubs.push(off);
     }
     return () => {
       for (const off of unsubs) off();
     };
-  }, [readyKey, readyRoots, onDiscoveryEvent]);
+  }, [
+    activeScreen,
+    readyKey,
+    readyRoots,
+    onDiscoveryEvent,
+    discoverNetwork,
+    ingestStatus,
+  ]);
 
   const dismissCurrent = useCallback(() => {
     setQueue((q) => dismissNfcDetect(q));
@@ -261,16 +277,35 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
     setQueue((q) => selectNfcDetect(q, index));
   }, []);
 
+  const visibleNodesByBinding = useMemo(
+    () =>
+      new Map(
+        [...nodesByBinding].filter(([bindingId]) => keepNfcIds.has(bindingId)),
+      ),
+    [nodesByBinding, keepNfcIds],
+  );
+  const visibleLoadingBindings = useMemo(
+    () => new Set([...loadingBindings].filter((id) => keepNfcIds.has(id))),
+    [loadingBindings, keepNfcIds],
+  );
+
   const value = useMemo<NfcPresenceContextValue>(
     () => ({
-      nodesByBinding,
-      loadingBindings,
+      nodesByBinding: visibleNodesByBinding,
+      loadingBindings: visibleLoadingBindings,
       queue,
       dismissCurrent,
       dismissAll,
       selectPopup,
     }),
-    [nodesByBinding, loadingBindings, queue, dismissCurrent, dismissAll, selectPopup],
+    [
+      visibleNodesByBinding,
+      visibleLoadingBindings,
+      queue,
+      dismissCurrent,
+      dismissAll,
+      selectPopup,
+    ],
   );
 
   return (

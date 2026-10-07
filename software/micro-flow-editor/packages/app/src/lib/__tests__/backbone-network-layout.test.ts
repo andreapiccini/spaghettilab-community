@@ -23,7 +23,7 @@ describe("layoutBackboneNetwork", () => {
     expect(layout.nodes.filter((n) => n.kind === "nfc-empty")).toHaveLength(2);
   });
 
-  it("fans identified NFC nodes above their backbone without port numbers", () => {
+  it("fans identified NFC nodes above their backbone with their positions", () => {
     const layout = layoutBackboneNetwork(
       [{ id: "usb", label: "Master", sublabel: "Cavo", local: true, hostLink: "usb" }],
       new Map([["usb", [{ portId: 1, label: "sense-dial" }, { portId: 2, label: "relay" }]]]),
@@ -31,7 +31,7 @@ describe("layoutBackboneNetwork", () => {
     const nfc = layout.nodes.filter((n) => n.kind === "nfc");
     expect(nfc).toHaveLength(2);
     expect(nfc.every((n) => n.y < 168)).toBe(true);
-    expect(nfc.every((n) => n.sublabel === "")).toBe(true);
+    expect(nfc.map((n) => n.sublabel)).toEqual(["1", "2"]);
     expect(layout.nodes.some((n) => n.kind === "nfc-empty")).toBe(false);
   });
 });

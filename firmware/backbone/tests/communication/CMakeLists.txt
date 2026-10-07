@@ -14,6 +14,8 @@ target_sources(app PRIVATE
   ../../subsys/communication/usb_protocol.c
   ../../subsys/communication/operations/catalog.c
   ../../subsys/communication/operations/status.c
+  ../../subsys/topology/physical.c
+  ../../subsys/communication/operations/physical_ops.c
   ../../subsys/nfc/nfc_disabled.c
   ../../subsys/communication/operations/config_ops.c
   ../../subsys/communication/operations/discovery_ops.c

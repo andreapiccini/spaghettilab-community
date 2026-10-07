@@ -12,6 +12,13 @@
 #include <zephyr/dt-bindings/pinctrl/esp32s3-gpio-sigmap.h>
 
 / {
+	physical_backbone: physical-backbone {
+		compatible = "spaghettilab,physical-backbone";
+		layout-version = <1>;
+		mcu-id = <1>;
+		nfc-antennas = <2>;
+		user-port = <&port0>;
+	};
 	model = "Spaghetti LAB Backbone V1";
 	compatible = "spaghettilab,backbone-v1", "espressif,esp32s3";
 
@@ -67,6 +74,9 @@
 			compatible = "spaghettilab,port";
 			reg = <0>;
 			i2c = <&i2c0>;
+			uart = <&uart2>;
+			spi = <&spi3>;
+			pwm = <&ledc0>;
 			input-gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>,
 				      <&gpio1 5 GPIO_ACTIVE_HIGH>,
 				      <&gpio1 4 GPIO_ACTIVE_HIGH>,
@@ -123,6 +133,9 @@
 };
 
 &pinctrl {
+	user_uart_default: user_uart_default { group1 { pinmux = <UART2_TX_GPIO38>, <UART2_RX_GPIO37>; }; };
+	user_spi_default: user_spi_default { group1 { pinmux = <SPIM3_SCLK_GPIO38>, <SPIM3_MOSI_GPIO37>, <SPIM3_MISO_GPIO36>; }; };
+	user_pwm_default: user_pwm_default { group1 { pinmux = <LEDC_CH0_GPIO38>, <LEDC_CH1_GPIO37>, <LEDC_CH2_GPIO36>, <LEDC_CH3_GPIO35>; output-enable; }; };
 	spaghetti_i2c0_default: spaghetti_i2c0_default {
 		group1 {
 			pinmux = <I2C0_SDA_GPIO38>, <I2C0_SCL_GPIO37>;
@@ -183,6 +196,17 @@
 	pinctrl-names = "default", "sleep";
 };
 
+&uart2 { status = "okay"; current-speed = <115200>; pinctrl-0 = <&user_uart_default>; pinctrl-names = "default"; };
+&spi3 { #address-cells = <1>; #size-cells = <0>; status = "okay"; pinctrl-0 = <&user_spi_default>; pinctrl-names = "default"; cs-gpios = <&gpio1 3 GPIO_ACTIVE_LOW>; };
+&ledc0 {
+	status = "okay"; pinctrl-0 = <&user_pwm_default>; pinctrl-names = "default";
+	#address-cells = <1>; #size-cells = <0>;
+	channel0@0 { reg = <0>; timer = <0>; };
+	channel1@1 { reg = <1>; timer = <0>; };
+	channel2@2 { reg = <2>; timer = <0>; };
+	channel3@3 { reg = <3>; timer = <0>; };
+};
+
 &spi2 {
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -221,3 +245,4 @@
 &esp32_bt_hci {
 	status = "okay";
 };
+
