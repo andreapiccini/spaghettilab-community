@@ -1,0 +1,3 @@
+mainmenu "Spaghetti physical Backbone tests"
+rsource "../../Kconfig.resources"
+source "Kconfig.zephyr"

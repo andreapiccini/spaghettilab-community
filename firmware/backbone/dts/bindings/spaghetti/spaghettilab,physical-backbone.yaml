@@ -1,0 +1,18 @@
+description: Physical removable module layout of a Backbone
+compatible: "spaghettilab,physical-backbone"
+include: base.yaml
+properties:
+  layout-version:
+    type: int
+    required: true
+    const: 1
+  mcu-id:
+    type: int
+    required: true
+    enum: [1, 2]
+  nfc-antennas:
+    type: int
+    required: true
+  user-port:
+    type: phandle
+    required: true

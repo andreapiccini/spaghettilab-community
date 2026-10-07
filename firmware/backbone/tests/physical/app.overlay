@@ -1,0 +1,16 @@
+/ {
+	physical-backbone {
+		compatible = "spaghettilab,physical-backbone";
+		layout-version = <1>;
+		mcu-id = <1>;
+		nfc-antennas = <2>;
+		user-port = <&test_user_port>;
+	};
+	test-ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		test_user_port: port@0 {
+			reg = <0>;
+		};
+	};
+};

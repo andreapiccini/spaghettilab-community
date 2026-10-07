@@ -1,0 +1,26 @@
+[
+  {
+    "registryId": 1,
+    "vendorId": 1,
+    "moduleTypeId": 1001,
+    "definitionRevision": 3,
+    "name": "Backbone Demo Module",
+    "nameIt": "Modulo Backbone (demo)",
+    "supportedHardwareRevisions": [2, 3],
+    "ports": [{ "id": 1, "name": "CAN", "direction": "bidirectional" }],
+    "maxVoltageV": 24,
+    "functions": [{ "id": "status", "kind": "telemetry" }]
+  },
+  {
+    "registryId": 1,
+    "vendorId": 1,
+    "moduleTypeId": 2001,
+    "definitionRevision": 1,
+    "name": "Sensor Demo Module",
+    "nameIt": "Modulo Sensor (demo)",
+    "supportedHardwareRevisions": [1, 2],
+    "ports": [{ "id": 1, "name": "I2C", "direction": "bidirectional" }],
+    "maxVoltageV": 5,
+    "functions": [{ "id": "sample", "kind": "telemetry" }]
+  }
+]
