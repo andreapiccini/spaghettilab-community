@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "SpaghettiLAB")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB.kicad_sym")(options "")(descr "Community hardware symbols"))
+)
