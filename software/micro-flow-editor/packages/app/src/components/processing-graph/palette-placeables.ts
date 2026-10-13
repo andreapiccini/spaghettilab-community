@@ -16,6 +16,8 @@ export type PaletteDragPayload = {
   /** Set when dragging a bay half (ingresso / uscita). */
   readonly baySide?: BaySide;
   readonly physicalPinId?: string;
+  /** Curated SensorRecipe id — places Backbone sensor block with channels. */
+  readonly sensorRecipeId?: string;
 };
 
 export function encodePaletteDrag(payload: PaletteDragPayload): string {
@@ -28,7 +30,10 @@ export function decodePaletteDrag(raw: string): PaletteDragPayload | null {
     const parsed = JSON.parse(raw) as unknown;
     if (parsed && typeof parsed === "object" && "entryId" in parsed && typeof (parsed as PaletteDragPayload).entryId === "string") {
       const p = parsed as PaletteDragPayload;
-      if (p.baySide === "input" || p.baySide === "output" || p.baySide === undefined) return p;
+      if (p.baySide === "input" || p.baySide === "output" || p.baySide === undefined) {
+        if (p.sensorRecipeId !== undefined && typeof p.sensorRecipeId !== "string") return null;
+        return p;
+      }
     }
   } catch {
     // Legacy: plain catalog entry id.
@@ -43,6 +48,7 @@ export type PalettePlaceable = {
   readonly label: string;
   readonly subtitle: string;
   readonly physicalPinId?: string;
+  readonly sensorRecipeId?: string;
 };
 
 /** Expand bay both/either into separate palette rows; functionality stays one row. */

@@ -5,7 +5,7 @@ import {
   type ProcessingCatalogEntry,
 } from "@spaghettilab/processing-block-catalog";
 import { AnimatePresence, motion } from "motion/react";
-import { Boxes, Cpu, Search, Zap, type LucideIcon } from "lucide-react";
+import { Boxes, ChefHat, Cpu, Search, Zap, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { DEMO_PALETTE_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
@@ -45,7 +45,14 @@ const FAMILY_ICONS: Record<FamilySectionId, LucideIcon> = {
 
 const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "bay"]);
 
-export function ProcessingBlockPalette({ bindingId }: { readonly bindingId?: string }) {
+export function ProcessingBlockPalette({
+  bindingId,
+  onCreateRecipe,
+}: {
+  readonly bindingId?: string;
+  /** Opens the sensor-recipe wizard on the create form. */
+  readonly onCreateRecipe?: () => void;
+}) {
   const {session} = useSession();
   const project = session?.stack.current;
   const { locale } = useLocale();
@@ -150,6 +157,25 @@ export function ProcessingBlockPalette({ bindingId }: { readonly bindingId?: str
                       transition={motionTokens.duration.base}
                       className="overflow-hidden"
                     >
+                      {id === "bay" && onCreateRecipe && !demoOnly ? (
+                        <button
+                          type="button"
+                          onClick={onCreateRecipe}
+                          className="mb-1 ml-4 flex h-11 w-[calc(100%-1rem)] items-center gap-2.5 rounded-lg border border-dashed border-brand-blue/50 bg-brand-blue/5 px-2 text-left hover:border-brand-blue hover:bg-brand-blue/10"
+                        >
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-blue text-white">
+                            <ChefHat size={14} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-body text-sm font-semibold text-brand-blue">
+                              {locale === "it" ? "Crea nuova ricetta" : "Create new recipe"}
+                            </span>
+                            <span className="block truncate font-body text-xs text-ink-faint">
+                              {locale === "it" ? "Editor I2C / SPI / GPIO" : "I2C / SPI / GPIO editor"}
+                            </span>
+                          </span>
+                        </button>
+                      ) : null}
                       {rows.map((row, entryIndex) => {
                         const kindConfig = row.entry.nodeKind ? PROCESSING_NODE_KIND_CONFIG[row.entry.nodeKind] : undefined;
                         const catalogVisual = visualForCatalogEntryId(row.entry.id);
@@ -239,7 +265,15 @@ function PaletteRow({
             e.preventDefault();
             return;
           }
-          e.dataTransfer.setData(PROCESSING_BLOCK_MIME, encodePaletteDrag({ entryId: entry.id, baySide: row.baySide, physicalPinId: row.physicalPinId }));
+          e.dataTransfer.setData(
+            PROCESSING_BLOCK_MIME,
+            encodePaletteDrag({
+              entryId: entry.id,
+              baySide: row.baySide,
+              physicalPinId: row.physicalPinId,
+              sensorRecipeId: row.sensorRecipeId,
+            }),
+          );
           e.dataTransfer.effectAllowed = "copy";
           e.currentTarget.style.opacity = "0.6";
           beginPaletteDrag(entry.nodeKind, row.baySide);

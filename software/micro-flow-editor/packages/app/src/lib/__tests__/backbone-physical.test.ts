@@ -8,6 +8,7 @@ import {
   availablePinsForSignal,
   catalogEntry,
   derivePortInterfaces,
+  draftModesForBinding,
   dropSignalOnPin,
   expectedFunctionTag,
   functionPinGrid,
@@ -16,11 +17,13 @@ import {
   functionPinHardware,
   kindForMode,
   modesForVariant,
+  modesProvideBus,
   parsePhysicalCatalog,
   pinVisualKind,
   signalModeIsPlaced,
   pinsForModes,
   removePortInterface,
+  STATUS_LED_GPIO,
   tagForSlot,
   topologyForBoard,
   validatePhysicalModes,
@@ -240,5 +243,35 @@ describe("physical composition", () => {
     expect(() =>
       parsePhysicalCatalog(JSON.stringify([{ ...entry, modes: [4, 0, 0, 0] }])),
     ).toThrow();
+  });
+
+  it("reports which buses Module Function modes already provide", () => {
+    expect(modesProvideBus(undefined, "i2c")).toBe(false);
+    expect(modesProvideBus([], "i2c")).toBe(false);
+    expect(modesProvideBus([4, 5, 0, 0], "i2c")).toBe(true);
+    expect(modesProvideBus([4, 5, 0, 0], "spi")).toBe(false);
+    expect(modesProvideBus([8, 9, 10, 11], "spi")).toBe(true);
+    expect(modesProvideBus([14, 0, 0, 0], "adc")).toBe(true);
+    expect(modesProvideBus([0, 0, 0, 0], "gpio")).toBe(true);
+    expect(STATUS_LED_GPIO).toBe(11);
+  });
+
+  it("reads the first draft modes for a core binding", () => {
+    expect(
+      draftModesForBinding(
+        {
+          drafts: {
+            "bind-a:deadbeef": {
+              name: "Backbone",
+              modes: [4, 5, 0, 0],
+              i2cSpeed: 0,
+            },
+          },
+          catalog: [],
+        },
+        "bind-a",
+      ),
+    ).toEqual([4, 5, 0, 0]);
+    expect(draftModesForBinding({ drafts: {}, catalog: [] }, "missing")).toBeUndefined();
   });
 });

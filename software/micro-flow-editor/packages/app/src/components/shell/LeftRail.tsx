@@ -1,4 +1,4 @@
-import { Cable, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
+import { Cable, CircuitBoard, Layers, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
 import { useState } from "react";
 import { chromeCopy } from "../../lib/chrome-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -13,7 +13,7 @@ type RailItem = {
   readonly icon: typeof Cable;
 };
 
-/** The MVP exposes only Discover, Run Deploy and Settings. */
+/** MVP rail: Discover, Physical Composition, Run Deploy, Settings. */
 export function LeftRail() {
   const { activeScreen, navigate } = useSession();
   const { openSettings } = useSettingsModal();
@@ -22,6 +22,8 @@ export function LeftRail() {
   const [expanded, setExpanded] = useState(false);
   const items: readonly RailItem[] = [
     { id: "core-connections", icon: Cable, label: "Discover" },
+    { id: "physical-composition", icon: Layers, label: copy.screens.physicalComposition },
+    { id: "device-recipe-editor", icon: CircuitBoard, label: locale === "it" ? "Dispositivi" : "Devices" },
     { id: "processing-graph", icon: Workflow, label: "Run Deploy" },
   ];
 
@@ -30,7 +32,9 @@ export function LeftRail() {
       <div className="flex flex-col gap-1 px-2">
         {items.map((item) => {
           const Icon = item.icon;
-          const active = activeScreen === item.id || (item.id === "processing-graph" && (activeScreen === "deploy-diff" || activeScreen === "physical-composition"));
+          const active =
+            activeScreen === item.id ||
+            (item.id === "processing-graph" && activeScreen === "deploy-diff");
           return (
             <button
               key={item.id}

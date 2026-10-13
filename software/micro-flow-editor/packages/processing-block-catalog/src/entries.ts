@@ -1115,6 +1115,31 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       " Sensore hardware: si collega solo a un blocco IF. L’indicatore sotto il blocco serve a provare la temperatura.",
   }),
   e({
+    id: "appblocks.backbone_sensor",
+    label: "Sensore Backbone",
+    subtitle: "Canali dalla ricetta sensore",
+    category: "io",
+    runtime: "core-block",
+    availability: "shipped",
+    family: "bay",
+    bayIo: "input",
+    bayFamilyId: "bay.backbone_sensor",
+    appblocksId: "backbone_sensor",
+    typeId: "ab.backbone_sensor",
+    needsModule: false,
+    // Ports are replaced at runtime from SensorRecipe.channels (node properties).
+    inputs: [],
+    outputs: [outPort("0", [T.analogMisura, T.digitalMisura], "Canale")],
+    fields: [
+      txt("sensorChip", "Chip", "Sensore"),
+      txt("backboneSensorModuleId", "Modulo", ""),
+      area("sensorChannelsJson", "Canali (JSON)", "[]"),
+    ],
+    notes:
+      AUTHORING +
+      " Creato dal pannello Backbone quando aggiungi una ricetta. Porte = canali read/write della ricetta. Non usare dalla palette.",
+  }),
+  e({
     id: "appblocks.terminal_block",
     label: "Terminal block",
     subtitle: "6 canali digital / analog / alimentazione",

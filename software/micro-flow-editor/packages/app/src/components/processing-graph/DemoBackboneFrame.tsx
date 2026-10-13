@@ -9,8 +9,9 @@ export type DemoBackboneFrameData = {
 };
 
 /**
- * Visitor-only dashed frame: the LED is a hardware module on the Backbone,
- * commanded by the firmware Flow on the left. Not a domain node.
+ * Dashed Backbone/Hardware frame around bay modules on the Flow canvas.
+ * Module tiles + recipe wizard live in BackboneModulesPanel (overlay).
+ * Not a domain node.
  */
 export function DemoBackboneFrame({ data }: NodeProps & { readonly data: DemoBackboneFrameData }) {
   return (

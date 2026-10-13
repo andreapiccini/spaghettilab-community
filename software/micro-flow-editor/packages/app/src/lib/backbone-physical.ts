@@ -578,6 +578,34 @@ function pushBusInstance(
   });
 }
 
+/** On-board STATUS indicator — fixed MCU pad, not a Module Function pin (IO11). */
+export const STATUS_LED_GPIO = 11;
+export const STATUS_LED_LABEL = "STATUS LED";
+
+/** True when Module Function modes already expose this bus/peripheral. */
+export function modesProvideBus(
+  modes: readonly number[] | undefined,
+  bus: "i2c" | "spi" | "uart" | "adc" | "gpio" | "w1",
+): boolean {
+  if (!modes || modes.length === 0) return false;
+  const kinds = new Set(derivePortInterfaces(modes).map((item) => item.kind));
+  if (bus === "gpio") return kinds.has("gpio") || freeConfigurablePinIndices(modes).length > 0;
+  return kinds.has(bus);
+}
+
+/** First saved draft for a core binding (any attached Backbone). */
+export function draftModesForBinding(
+  project: PhysicalProject,
+  bindingId: string | undefined | null,
+): readonly number[] | undefined {
+  if (!bindingId) return undefined;
+  const prefix = `${bindingId}:`;
+  for (const [key, draft] of Object.entries(project.drafts)) {
+    if (key.startsWith(prefix) && draft.modes?.length) return draft.modes;
+  }
+  return undefined;
+}
+
 /**
  * Derives interface instances from the firmware modes map (4 or 8 channels).
  * Mixed peripherals on one port are first-class (I2C + UART, I2C + GPIO + PWM, …).

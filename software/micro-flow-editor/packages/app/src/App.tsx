@@ -8,7 +8,15 @@ import { CatalogTopologyScreen } from "./components/catalog-topology/CatalogTopo
 import { PhysicalCompositionScreen } from "./components/physical-composition/PhysicalCompositionScreen.js";
 import { DeviceProfileStudioScreen } from "./components/device-profile-studio/DeviceProfileStudioScreen.js";
 import { ProcessingGraphScreen } from "./components/processing-graph/ProcessingGraphScreen.js";
+import { DeviceRecipeEditorScreen } from "./components/device-recipe-editor/DeviceRecipeEditorScreen.js";
 import { DeployDiffScreen } from "./components/deploy-diff/DeployDiffScreen.js";
+import {
+  DEVICE_RECIPE_DRAFT_META_KEY,
+  DEVICE_RECIPE_PENDING_CREATE_META_KEY,
+  parseDeviceRecipeDraft,
+  serializeDeviceRecipeDraft,
+  type DeviceRecipeDraft,
+} from "./lib/device-recipe-draft.js";
 import { RuntimeDiagnosticsScreen } from "./components/runtime-diagnostics/RuntimeDiagnosticsScreen.js";
 import { CapabilityMarketplaceScreen } from "./components/capability-marketplace/CapabilityMarketplaceScreen.js";
 import { CrossCoreAutomationScreen } from "./components/cross-core-automation/CrossCoreAutomationScreen.js";
@@ -92,6 +100,42 @@ function DemoBootScreen({ error }: { readonly error?: string | null }) {
   );
 }
 
+function DeviceRecipeEditorRoute({ initialDraft }: { readonly initialDraft?: DeviceRecipeDraft }) {
+  const { execute, navigate } = useSession();
+
+  function persistDraft(draft: DeviceRecipeDraft, pendingCreate: boolean) {
+    if (!execute) return;
+    execute({
+      kind: "SaveDeviceRecipeDraft",
+      apply: (project) => ({
+        ok: true,
+        value: {
+          ...project,
+          authoringMetadata: {
+            ...project.authoringMetadata,
+            [DEVICE_RECIPE_DRAFT_META_KEY]: { comment: serializeDeviceRecipeDraft(draft) },
+            [DEVICE_RECIPE_PENDING_CREATE_META_KEY]: pendingCreate ? { comment: "1" } : { comment: "" },
+          },
+        },
+      }),
+    });
+  }
+
+  return (
+    <DeviceRecipeEditorScreen
+      initialDraft={initialDraft}
+      onCancel={() => navigate("processing-graph")}
+      onSaveDraft={(draft) => {
+        persistDraft(draft, false);
+      }}
+      onCreate={(draft) => {
+        persistDraft(draft, true);
+        navigate("processing-graph");
+      }}
+    />
+  );
+}
+
 function AppContent() {
   const { session, activeScreen, navigate } = useSession();
   const demoOnly = isDemoOnlyEnabled();
@@ -131,6 +175,15 @@ function AppContent() {
     return (
       <AppShell>
         <PhysicalCompositionScreen />
+      </AppShell>
+    );
+  }
+
+  if (activeScreen === "device-recipe-editor") {
+    const draft = parseDeviceRecipeDraft(session?.stack.current.authoringMetadata[DEVICE_RECIPE_DRAFT_META_KEY]?.comment);
+    return (
+      <AppShell>
+        <DeviceRecipeEditorRoute initialDraft={draft ?? undefined} />
       </AppShell>
     );
   }

@@ -500,7 +500,9 @@ function BoardDetail({
       const variant = functionVariantOf(saved);
       return { ...saved, variant, modes: modesForVariant(saved.modes, variant) };
     }
-    const variant = DEFAULT_FUNCTION_VARIANT;
+    // Prefer V1 when the live board already reports a 4-signal map.
+    const variant =
+      topology?.modes?.length === 4 ? ("v1" as const) : DEFAULT_FUNCTION_VARIANT;
     // Authoring starts empty (all NC). Device topology modes are live state,
     // not a draft seed — otherwise GPIO often appears "already configured".
     return {
@@ -514,14 +516,25 @@ function BoardDetail({
   const [seeded, setSeeded] = useState(!!topology || !!saved);
   if (!seeded && topology) {
     setSeeded(true);
-    const variant = DEFAULT_FUNCTION_VARIANT;
-    setDraft((prev) => ({
-      ...prev,
-      variant,
-      // Keep empty / user modes; only sync speed + settings from the board.
-      i2cSpeed: topology.i2cSpeed,
-      settings: topology.settings ?? DEFAULT_PHYSICAL_SETTINGS,
-    }));
+    const variant =
+      topology.modes?.length === 4 ? ("v1" as const) : DEFAULT_FUNCTION_VARIANT;
+    setDraft((prev) => {
+      // Keep an explicit saved/user variant; only adopt V1 from a 4-pin board
+      // when the draft was still the default empty V2 shell.
+      const keepVariant =
+        prev.variant === "v1" ||
+        (prev.variant === "v2" && prev.modes.some((mode) => (mode & 15) !== 0))
+          ? functionVariantOf(prev)
+          : variant;
+      return {
+        ...prev,
+        variant: keepVariant,
+        modes: modesForVariant(prev.modes, keepVariant),
+        // Keep empty / user modes; only sync speed + settings from the board.
+        i2cSpeed: topology.i2cSpeed,
+        settings: topology.settings ?? DEFAULT_PHYSICAL_SETTINGS,
+      };
+    });
   }
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);

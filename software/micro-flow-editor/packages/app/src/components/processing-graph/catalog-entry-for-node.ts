@@ -1,24 +1,28 @@
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import { findCatalogEntriesByTypeId, findCatalogEntryById, type ProcessingCatalogEntry } from "@spaghettilab/processing-block-catalog";
+import { catalogEntryWithSensorChannels } from "../../lib/backbone-sensor-block.js";
 
 /** Catalog row this canvas node was placed from, or the firmware type_id fallback. */
 export function catalogEntryForNode(data: DeviceProcessingNodeData): ProcessingCatalogEntry | undefined {
+  let entry: ProcessingCatalogEntry | undefined;
   if (data.kind === "event-source" && data.catalogEntryId) {
-    const byId = findCatalogEntryById(data.catalogEntryId);
-    if (byId) return byId;
+    entry = findCatalogEntryById(data.catalogEntryId);
+  } else if (data.kind === "block" && data.catalogEntryId) {
+    entry = findCatalogEntryById(data.catalogEntryId);
+  } else if (data.kind === "block") {
+    entry = pickCatalogEntry(findCatalogEntriesByTypeId(data.blockTypeId), "block");
+  } else if (data.kind === "rule") {
+    entry = pickCatalogEntry(findCatalogEntriesByTypeId(data.ruleTypeId), "rule");
+  } else if (data.kind === "event-source") {
+    entry = findCatalogEntryById("native.event-source");
+  } else {
+    entry = findCatalogEntryById("native.schedule");
   }
-  if (data.kind === "block" && data.catalogEntryId) {
-    const byId = findCatalogEntryById(data.catalogEntryId);
-    if (byId) return byId;
+
+  if (entry && data.kind === "block") {
+    return catalogEntryWithSensorChannels(entry, data.properties);
   }
-  if (data.kind === "block") {
-    return pickCatalogEntry(findCatalogEntriesByTypeId(data.blockTypeId), "block");
-  }
-  if (data.kind === "rule") {
-    return pickCatalogEntry(findCatalogEntriesByTypeId(data.ruleTypeId), "rule");
-  }
-  if (data.kind === "event-source") return findCatalogEntryById("native.event-source");
-  return findCatalogEntryById("native.schedule");
+  return entry;
 }
 
 function pickCatalogEntry(

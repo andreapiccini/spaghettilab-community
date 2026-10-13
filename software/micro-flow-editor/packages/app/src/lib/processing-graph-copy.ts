@@ -145,7 +145,7 @@ const IT: ProcessingGraphCopy = {
   functionality: "Funzionalità",
   functionalityHint: "Azioni e logica del flusso",
   bay: "Bay",
-  bayHint: "Moduli hardware · ingresso a sinistra, uscita a destra",
+  bayHint: "Moduli I/O · crea una ricetta sensore se ti serve",
   dragToInsert: "Trascina sul canvas per inserire",
   configurePortFirst: "Configura prima una Porta in Composizione fisica.",
   needsPort: "serve una Porta",
@@ -254,7 +254,7 @@ const EN: ProcessingGraphCopy = {
   functionality: "Functionality",
   functionalityHint: "Flow actions and logic",
   bay: "Bay",
-  bayHint: "Hardware modules · input on the left, output on the right",
+  bayHint: "I/O modules · create a sensor recipe when you need one"
   dragToInsert: "Drag onto the canvas to insert",
   configurePortFirst: "Configure a Port in Physical Composition first.",
   needsPort: "needs a Port",

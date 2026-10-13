@@ -19,8 +19,42 @@ import { localizeCatalogEntry, localizedBaySideLabel } from "../../lib/processin
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { DEMO_VISITOR_PROJECT_NAME } from "../../lib/demo-project.js";
 import { DEMO_ADD_BLOCK_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
+import {
+  BACKBONE_SENSOR_MODULES_META_KEY,
+  createModuleFromRecipe,
+  modulesForBinding,
+  parseBackboneSensorModules,
+  removeModule,
+  resolveRecipe,
+  upsertModule,
+  type BackboneSensorModule,
+} from "../../lib/backbone-sensor-modules.js";
+import {
+  BACKBONE_SENSOR_BLOCK_CATALOG_ID,
+  propertiesForSensorModule,
+  SENSOR_MODULE_ID_PROP,
+} from "../../lib/backbone-sensor-block.js";
+import {
+  DEVICE_RECIPE_DRAFT_META_KEY,
+  DEVICE_RECIPE_PENDING_CREATE_META_KEY,
+  draftToSensorRecipe,
+  parseDeviceRecipeDraft,
+} from "../../lib/device-recipe-draft.js";
+import {
+  draftModesForBinding,
+  modesProvideBus,
+  parsePhysicalProject,
+  PHYSICAL_META_KEY,
+  STATUS_LED_GPIO,
+  STATUS_LED_LABEL,
+} from "../../lib/backbone-physical.js";
+import type { SensorBus, SensorRecipe } from "../../lib/sensor-recipe.js";
+import { findSensorRecipeById, recipeChannels } from "../../lib/sensor-recipe.js";
 import { VisitorDemoTour } from "./VisitorDemoTour.js";
 import { DemoRadialAdd } from "./DemoRadialAdd.js";
+import { BackboneModulesPanel } from "./BackboneModulesPanel.js";
+import { PhysicalBusMissingModal } from "./PhysicalBusMissingModal.js";
+import { SensorRecipeCard, SensorRecipeWizard } from "./SensorRecipeWizard.js";
 import { useLocale } from "../../state/locale-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
 import {
@@ -125,6 +159,10 @@ function ProcessingGraphScreenInner() {
   const bindingIndex = selected ? bindings.findIndex((b) => b.bindingId === selected.bindingId) : -1;
 
   const [inspector, setInspector] = useState<ProcessingInspectorMode | null>(null);
+  const [sensorWizardOpen, setSensorWizardOpen] = useState(false);
+  const [sensorWizardInitialStep, setSensorWizardInitialStep] = useState<"name" | "manual">("name");
+  const [sensorDetail, setSensorDetail] = useState<BackboneSensorModule | null>(null);
+  const [missingBus, setMissingBus] = useState<SensorBus | null>(null);
   const [dryRun, setDryRun] = useState<DryRunResult | null>(null);
   const [running, setRunning] = useState(false);
   const [simulating, setSimulating] = useState(false);
@@ -196,6 +234,200 @@ function ProcessingGraphScreenInner() {
   const moduleNodes = physicalGraphState.nodes as readonly GraphNode<"physical-composition", string, PhysicalCompositionNodeData>[];
   const projectAuthoringMetadata = session?.stack.current.authoringMetadata;
   const authoringMetadata = useMemo(() => projectAuthoringMetadata ?? {}, [projectAuthoringMetadata]);
+  const sensorModulesProject = useMemo(
+    () => parseBackboneSensorModules(authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment),
+    [authoringMetadata],
+  );
+  const backboneSensorModules = useMemo(
+    () => modulesForBinding(sensorModulesProject, selected?.bindingId),
+    [sensorModulesProject, selected?.bindingId],
+  );
+  const physicalProject = useMemo(
+    () => parsePhysicalProject(authoringMetadata[PHYSICAL_META_KEY]?.comment),
+    [authoringMetadata],
+  );
+  const physicalModes = useMemo(
+    () => draftModesForBinding(physicalProject, selected?.bindingId),
+    [physicalProject, selected?.bindingId],
+  );
+
+  const persistSensorModules = useCallback(
+    (next: ReturnType<typeof parseBackboneSensorModules>) => {
+      if (!execute) return;
+      execute({
+        kind: "SaveBackboneSensorModules",
+        apply: (project) => ({
+          ok: true,
+          value: {
+            ...project,
+            authoringMetadata: {
+              ...project.authoringMetadata,
+              [BACKBONE_SENSOR_MODULES_META_KEY]: { comment: JSON.stringify(next) },
+            },
+          },
+        }),
+      });
+    },
+    [execute],
+  );
+
+  function placeSensorRecipeOnCanvas(
+    recipe: SensorRecipe,
+    position?: { readonly x: number; readonly y: number },
+  ): boolean {
+    if (!selected) return false;
+    if (!modesProvideBus(physicalModes, recipe.bus)) {
+      setSensorWizardOpen(false);
+      setMissingBus(recipe.bus);
+      return false;
+    }
+    let module = createModuleFromRecipe(recipe);
+    const entry = findCatalogEntryById(BACKBONE_SENSOR_BLOCK_CATALOG_ID);
+    if (entry && recipeChannels(recipe).length > 0) {
+      const graphNodeId = placeFromCatalog(
+        entry,
+        position ?? nextSpawnPosition(domainNodes.length),
+        "input",
+        undefined,
+        {
+          comment: recipe.chip,
+          properties: propertiesForSensorModule(module, recipe),
+        },
+      );
+      if (graphNodeId) module = { ...module, graphNodeId };
+    }
+    persistSensorModules(upsertModule(sensorModulesProject, selected.bindingId, module));
+    return true;
+  }
+
+  function handleSensorRecipeConfirm(recipe: SensorRecipe): boolean {
+    return placeSensorRecipeOnCanvas(recipe);
+  }
+
+  useEffect(() => {
+    if (!execute || !selected) return;
+    const pending = authoringMetadata[DEVICE_RECIPE_PENDING_CREATE_META_KEY]?.comment === "1";
+    if (!pending) return;
+    const draft = parseDeviceRecipeDraft(authoringMetadata[DEVICE_RECIPE_DRAFT_META_KEY]?.comment);
+    if (!draft) return;
+    const recipe = draftToSensorRecipe(draft);
+    placeSensorRecipeOnCanvas(recipe);
+    execute({
+      kind: "ClearDeviceRecipePendingCreate",
+      apply: (project) => ({
+        ok: true,
+        value: {
+          ...project,
+          authoringMetadata: {
+            ...project.authoringMetadata,
+            [DEVICE_RECIPE_PENDING_CREATE_META_KEY]: { comment: "" },
+          },
+        },
+      }),
+    });
+    // Intentionally run once when landing with a pending create flag.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- place once from metadata handoff
+  }, [authoringMetadata[DEVICE_RECIPE_PENDING_CREATE_META_KEY]?.comment, selected?.bindingId, execute]);
+
+  function handleSensorModuleRemove(moduleId: string) {
+    if (!selected) return;
+    const existing = modulesForBinding(sensorModulesProject, selected.bindingId).find((item) => item.id === moduleId);
+    if (existing?.graphNodeId && execute && bindingIndex >= 0) {
+      execute(removeGraphNodeCommand(deviceGraphLens(bindingIndex), existing.graphNodeId));
+    } else if (execute && bindingIndex >= 0) {
+      // Fallback: find node by module id property
+      for (const node of domainNodes) {
+        if (!isBlockNodeData(node.data)) continue;
+        if (node.data.properties[SENSOR_MODULE_ID_PROP] === moduleId) {
+          execute(removeGraphNodeCommand(deviceGraphLens(bindingIndex), node.id));
+          break;
+        }
+      }
+    }
+    persistSensorModules(removeModule(sensorModulesProject, selected.bindingId, moduleId));
+    if (sensorDetail?.id === moduleId) setSensorDetail(null);
+  }
+
+  function handleSensorRecipeEdit(next: SensorRecipe) {
+    if (!selected || !sensorDetail) return;
+    const updated: BackboneSensorModule = {
+      ...sensorDetail,
+      recipe: next,
+      recipeId: next.id,
+      bus: next.bus,
+      label: next.chip,
+    };
+    setSensorDetail(updated);
+    persistSensorModules(upsertModule(sensorModulesProject, selected.bindingId, updated));
+    const nodeId =
+      updated.graphNodeId ??
+      domainNodes.find(
+        (node) => isBlockNodeData(node.data) && node.data.properties[SENSOR_MODULE_ID_PROP] === updated.id,
+      )?.id;
+    if (nodeId && execute && bindingIndex >= 0) {
+      const domainNode = domainNodes.find((node) => node.id === nodeId);
+      if (domainNode && isBlockNodeData(domainNode.data)) {
+        const data: DeviceProcessingNodeData = {
+          ...domainNode.data,
+          properties: { ...domainNode.data.properties, ...propertiesForSensorModule(updated, next) },
+        };
+        execute(updateGraphNodeCommand(deviceGraphLens(bindingIndex), { layer: "device-processing", id: nodeId, data }));
+        execute({
+          kind: "UpdateAuthoringMetadata",
+          apply: (project) => ({
+            ok: true,
+            value: {
+              ...project,
+              authoringMetadata: {
+                ...project.authoringMetadata,
+                [nodeId]: { ...project.authoringMetadata[nodeId], comment: next.chip },
+              },
+            },
+          }),
+        });
+      }
+    }
+  }
+
+  function findExistingStatusLedNodeId(): string | undefined {
+    for (const node of domainNodes) {
+      if (!isBlockNodeData(node.data) || !isLedBlock(node.data)) continue;
+      const props = node.data.properties;
+      if (props.statusLed === true || props.statusLed === "true" || props.statusLed === 1 || props.statusLed === 1n) {
+        return node.id;
+      }
+      const comment = authoringMetadata[node.id]?.comment ?? "";
+      if (comment.includes(STATUS_LED_LABEL) || comment.includes("STATUS LED")) return node.id;
+    }
+    return undefined;
+  }
+
+  function handleUseStatusLed() {
+    const existingId = findExistingStatusLedNodeId();
+    if (existingId) {
+      const existing = domainNodes.find((node) => node.id === existingId);
+      if (existing) {
+        setInspector({
+          kind: "edit",
+          nodeId: existingId,
+          data: existing.data,
+          comment: authoringMetadata[existingId]?.comment ?? STATUS_LED_LABEL,
+        });
+      }
+      return;
+    }
+    const entry = findCatalogEntryById("appblocks.led");
+    if (!entry) return;
+    placeFromCatalog(entry, nextSpawnPosition(domainNodes.length), "output", undefined, {
+      comment: `${STATUS_LED_LABEL} · IO${STATUS_LED_GPIO}`,
+      properties: {
+        statusLed: true,
+        gpio: STATUS_LED_GPIO,
+        color: "#22C55E",
+        line: "STATUS",
+      },
+    });
+  }
 
   useEffect(() => {
     if (!demoOnly || !rf) return;
@@ -928,17 +1160,24 @@ function ProcessingGraphScreenInner() {
     requestedPosition = nextSpawnPosition(domainNodes.length),
     baySide = peekPaletteDragBaySide(),
     physicalPinId?: string,
-  ) {
-    if (!execute || bindingIndex < 0) return;
+    overrides?: {
+      readonly comment?: string;
+      readonly properties?: Readonly<Record<string, string | number | boolean | bigint>>;
+    },
+  ): string | undefined {
+    if (!execute || bindingIndex < 0) return undefined;
     // Tick discs are spawned with each Schedule — never from the palette.
-    if (entry.id === "native.flow_start" || entry.typeId === "ab.flow_start") return;
+    if (entry.id === "native.flow_start" || entry.typeId === "ab.flow_start") return undefined;
     let data = nodeDataFromCatalogEntry(entry, moduleOptions[0]?.id, baySide);
-    if (!data) return;
+    if (!data) return undefined;
     if (physicalPinId) {
       const pin = physicalPinsForBinding(session?.stack.current, selected?.bindingId).find(item => item.id === physicalPinId && item.local && item.entryId === entry.id);
-      if (!pin) return;
+      if (!pin) return undefined;
       if (data.kind === "event-source") data = {...data,moduleNodeId:pin.moduleNodeId,properties:{...data.properties,physicalPinId}};
       else if (data.kind === "block") data = {...data,properties:{...data.properties,"1":BigInt(pin.backendPortId),"2":BigInt(pin.channel),physicalPinId}};
+    }
+    if (overrides?.properties && data.kind === "block") {
+      data = { ...data, properties: { ...data.properties, ...overrides.properties } };
     }
 
     const id = `dp-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
@@ -1010,9 +1249,10 @@ function ProcessingGraphScreenInner() {
     execute(addGraphNodeCommand(deviceGraphLens(bindingIndex), { layer: "device-processing", id, data }));
     if (attachEdgeCommand) execute(attachEdgeCommand);
     const comment =
-      demoOnly || !bay || !resolvedBaySide
+      overrides?.comment ??
+      (demoOnly || !bay || !resolvedBaySide
         ? localizeCatalogEntry(entry, locale).label
-        : `${localizeCatalogEntry(entry, locale).label} · ${localizedBaySideLabel(resolvedBaySide, locale)}`;
+        : `${localizeCatalogEntry(entry, locale).label} · ${localizedBaySideLabel(resolvedBaySide, locale)}`);
     execute({
       kind: "UpdateAuthoringMetadata",
       apply: (project) => ({
@@ -1032,6 +1272,7 @@ function ProcessingGraphScreenInner() {
     }
 
     setInspector({ kind: "edit", nodeId: id, data, comment });
+    return id;
   }
 
   /** Creates the fixed violet tick disc for a Schedule and wires Schedule → tick. */
@@ -1160,10 +1401,17 @@ function ProcessingGraphScreenInner() {
     setContainerHint(null);
     const payload = decodePaletteDrag(event.dataTransfer.getData(PROCESSING_BLOCK_MIME));
     if (!payload) return;
+    const flowPos = rf?.screenToFlowPosition({ x: event.clientX, y: event.clientY }) ?? { x: 80, y: 80 };
+    const position = { x: snapToGrid(flowPos.x), y: snapToGrid(flowPos.y) };
+    if (payload.sensorRecipeId) {
+      const recipe = findSensorRecipeById(payload.sensorRecipeId);
+      if (!recipe) return;
+      placeSensorRecipeOnCanvas(recipe, position);
+      return;
+    }
     const entry = findCatalogEntryById(payload.entryId);
     if (!entry) return;
-    const flowPos = rf?.screenToFlowPosition({ x: event.clientX, y: event.clientY }) ?? { x: 80, y: 80 };
-    placeFromCatalog(entry, { x: snapToGrid(flowPos.x), y: snapToGrid(flowPos.y) }, payload.baySide, payload.physicalPinId);
+    placeFromCatalog(entry, position, payload.baySide, payload.physicalPinId);
   }
 
   async function handleDryRun() {
@@ -1291,9 +1539,59 @@ function ProcessingGraphScreenInner() {
         </div>
       ) : (
         <div className="relative flex flex-1 overflow-hidden">
-          {!demoOnly && <ProcessingBlockPalette bindingId={selected?.bindingId} />}
+          {!demoOnly && (
+            <ProcessingBlockPalette
+              bindingId={selected?.bindingId}
+              onCreateRecipe={() => navigate("device-recipe-editor")}
+            />
+          )}
 
           <div className="relative flex-1" onDragOver={onCanvasDragOver} onDragLeave={() => { setDropPreview(null); setContainerHint(null); }} onDrop={onCanvasDrop}>
+            {!demoOnly && (
+              <BackboneModulesPanel
+                modules={backboneSensorModules}
+                onAdd={() => navigate("device-recipe-editor")}
+                onSelect={(module) => setSensorDetail(module)}
+                onRemove={handleSensorModuleRemove}
+                onUseStatusLed={handleUseStatusLed}
+              />
+            )}
+            <SensorRecipeWizard
+              open={sensorWizardOpen}
+              initialStep={sensorWizardInitialStep}
+              onClose={() => setSensorWizardOpen(false)}
+              onConfirm={handleSensorRecipeConfirm}
+            />
+            <PhysicalBusMissingModal
+              open={missingBus !== null}
+              bus={missingBus ?? "i2c"}
+              onClose={() => setMissingBus(null)}
+              onGoConfigure={() => {
+                setMissingBus(null);
+                setSensorWizardOpen(false);
+                navigate("physical-composition");
+              }}
+            />
+            {sensorDetail && (
+              <div className="absolute inset-0 z-40 flex items-center justify-center bg-ink/25 p-4">
+                <button type="button" aria-label="Close" className="absolute inset-0 cursor-default" onClick={() => setSensorDetail(null)} />
+                <div className="relative z-10 max-h-[min(90dvh,44rem)] w-full max-w-3xl overflow-y-auto rounded-slmd border border-border-strong bg-surface p-4 shadow-e2">
+                  <SensorRecipeCard
+                    recipe={resolveRecipe(sensorDetail)}
+                    it={locale === "it"}
+                    editable
+                    onRecipeChange={handleSensorRecipeEdit}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setSensorDetail(null)}
+                    className="mt-4 w-full rounded-slpill bg-brand-blue px-4 py-2 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
+                  >
+                    {locale === "it" ? "Chiudi" : "Close"}
+                  </button>
+                </div>
+              </div>
+            )}
             <ReactFlow
               nodeTypes={NODE_TYPES}
               edgeTypes={PROCESSING_EDGE_TYPES}

@@ -36,6 +36,7 @@ import {
   isBusPortKind,
   kindForMode,
   modeIndexToPinId,
+  modesForVariant,
   pinIdToModeIndex,
   numberedPeripheralName,
   PERIPHERAL_ACCENT,
@@ -48,6 +49,7 @@ import {
   validatePhysicalModes,
   type BackbonePhysicalDraft,
   type BusPortKind,
+  type FunctionModuleVariant,
   type PhysicalSignalDef,
   type PortInterfaceKind,
 } from "../../lib/backbone-physical.js";
@@ -152,6 +154,19 @@ export function PhysicalInterfaceEditor({
 
   const commitModes = (modes: readonly number[]) =>
     onChange({ ...draft, modes, variant, settings, applied: false });
+
+  const setVariant = (next: FunctionModuleVariant) => {
+    if (next === variant || disabled) return;
+    setPendingSignal(null);
+    setActive(null);
+    onChange({
+      ...draft,
+      variant: next,
+      modes: modesForVariant(draft.modes, next),
+      settings,
+      applied: false,
+    });
+  };
 
   const placeSignal = (signalMode: number, pinId: number) => {
     if (signalModeIsPlaced(draft.modes, signalMode)) {
@@ -461,12 +476,46 @@ export function PhysicalInterfaceEditor({
               {it ? "Module Function · Backbone" : "Module Function · Backbone"}
             </p>
           </div>
-          <p className="max-w-[16rem] rounded-slmd border border-border bg-white/90 px-2 py-1 text-[9px] leading-snug text-ink-muted backdrop-blur-sm">
-            <Info size={10} className="mr-1 inline align-text-top" />
-            {it
-              ? "Clicca un pin, oppure scegli un segnale a sinistra e poi il pin."
-              : "Click a pin, or pick a signal on the left then the pin."}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className="inline-flex rounded-slpill border border-border bg-white/95 p-0.5 shadow-e1 backdrop-blur-sm"
+              role="group"
+              aria-label={it ? "Versione connettore" : "Connector version"}
+            >
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => setVariant("v1")}
+                className={`rounded-slpill px-2.5 py-1 font-body text-[11px] font-semibold transition-colors disabled:opacity-40 ${
+                  variant === "v1"
+                    ? "bg-brand-blue text-white"
+                    : "text-ink-muted hover:bg-surface-raised hover:text-ink"
+                }`}
+                title={it ? "Module Function V1 · 6 pin (4 segnali)" : "Module Function V1 · 6 pins (4 signals)"}
+              >
+                V1 · 6 pin
+              </button>
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => setVariant("v2")}
+                className={`rounded-slpill px-2.5 py-1 font-body text-[11px] font-semibold transition-colors disabled:opacity-40 ${
+                  variant === "v2"
+                    ? "bg-brand-blue text-white"
+                    : "text-ink-muted hover:bg-surface-raised hover:text-ink"
+                }`}
+                title={it ? "Module Function V2 · 12 pin (A0–A7)" : "Module Function V2 · 12 pins (A0–A7)"}
+              >
+                V2 · 12 pin
+              </button>
+            </div>
+            <p className="max-w-[14rem] rounded-slmd border border-border bg-white/90 px-2 py-1 text-[9px] leading-snug text-ink-muted backdrop-blur-sm">
+              <Info size={10} className="mr-1 inline align-text-top" />
+              {it
+                ? "Clicca un pin, oppure scegli un segnale a sinistra e poi il pin."
+                : "Click a pin, or pick a signal on the left then the pin."}
+            </p>
+          </div>
         </div>
         <div className="relative z-[1] flex min-h-0 flex-1 items-center justify-center overflow-hidden">
           <div className="flex h-full w-full max-w-xl items-center justify-center">
