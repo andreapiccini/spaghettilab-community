@@ -10,6 +10,7 @@ import {
   derivePortInterfaces,
   draftModesForBinding,
   dropSignalOnPin,
+  ensureW1Config,
   expectedFunctionTag,
   functionPinGrid,
   busUnitLabel,
@@ -18,6 +19,7 @@ import {
   kindForMode,
   modesForVariant,
   modesProvideBus,
+  numberedPeripheralName,
   parsePhysicalCatalog,
   pinVisualKind,
   signalModeIsPlaced,
@@ -204,6 +206,15 @@ describe("physical composition", () => {
       "w1",
       "gpio",
     ]);
+    expect(numberedPeripheralName("w1", 1)).toBe("1-Wire 0");
+    const withW1 = ensureW1Config({
+      name: "Function",
+      modes,
+      i2cSpeed: 0,
+    });
+    expect(withW1.w1Config?.name).toBe("1-Wire 0");
+    expect(withW1.w1Config?.externalPullupRequired).toBe(true);
+    expect(withW1.w1Config?.parasiticSupported).toBe(false);
 
     modes = [4, 5, 0, 0];
     modes = addPortInterface(modes, "uart");

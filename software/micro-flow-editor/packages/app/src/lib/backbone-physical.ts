@@ -37,6 +37,31 @@ export type PhysicalBusUnits = {
   readonly i2c?: number;
   readonly spi?: number;
   readonly uart?: number;
+  /** Logical 1-Wire bus index (always 0 on Function bay today). */
+  readonly w1?: number;
+};
+
+/**
+ * Authoring config for a 1-Wire peripheral (distinct from GPIO).
+ * Multiple sensors share one bus — do not create one peripheral per ROM.
+ */
+export type W1PeripheralConfig = {
+  readonly id: string;
+  readonly name: string;
+  /** External power only until firmware exposes parasite-power strong pull-up. */
+  readonly powerMode: "external" | "parasitic";
+  /** Always true in UI: internal MCU pull-up is not sufficient for 1-Wire. */
+  readonly externalPullupRequired: true;
+  /** Runtime must opt-in; default false so parasitic stays disabled. */
+  readonly parasiticSupported: boolean;
+};
+
+export const DEFAULT_W1_CONFIG: W1PeripheralConfig = {
+  id: "w1-0",
+  name: "1-Wire 0",
+  powerMode: "external",
+  externalPullupRequired: true,
+  parasiticSupported: false,
 };
 
 export type BackbonePhysicalDraft = {
@@ -54,6 +79,8 @@ export type BackbonePhysicalDraft = {
   readonly settings?: PhysicalInterfaceSettings;
   /** Selected I2C / SPI / UART controller numbers (ESP32-S3). */
   readonly busUnits?: PhysicalBusUnits;
+  /** 1-Wire bus metadata (name, power, pull-up). Present when W1 is used or configured. */
+  readonly w1Config?: W1PeripheralConfig;
 };
 
 export function functionVariantOf(
@@ -681,7 +708,11 @@ export function numberedPeripheralName(
   kind: PortInterfaceKind,
   ordinal: number,
   busUnits?: PhysicalBusUnits,
+  w1Config?: W1PeripheralConfig,
 ): string {
+  if (kind === "w1") {
+    return w1Config?.name?.trim() || `1-Wire ${Math.max(0, (busUnits?.w1 ?? 0))}`;
+  }
   if (isBusPortKind(kind)) {
     return busUnitLabel(kind, selectedBusUnit({ busUnits }, kind));
   }
@@ -692,8 +723,9 @@ export function numberedPeripheralName(
 export function interfaceDisplayName(
   instance: PortInterfaceInstance,
   busUnits?: PhysicalBusUnits,
+  w1Config?: W1PeripheralConfig,
 ): string {
-  return numberedPeripheralName(instance.kind, instance.ordinal, busUnits);
+  return numberedPeripheralName(instance.kind, instance.ordinal, busUnits, w1Config);
 }
 
 export function peripheralLabel(kind: PortInterfaceKind): string {
@@ -703,10 +735,22 @@ export function peripheralLabel(kind: PortInterfaceKind): string {
     uart: "UART",
     spi: "SPI",
     pwm: "PWM",
-    w1: "W1",
+    w1: "1-Wire",
     adc: "ADC",
   };
   return labels[kind];
+}
+
+/** Ensure w1Config exists when a DQ pin is assigned. */
+export function ensureW1Config(draft: BackbonePhysicalDraft): BackbonePhysicalDraft {
+  const hasW1 = draft.modes.some((m) => (m & 15) === 13);
+  if (!hasW1) return draft;
+  if (draft.w1Config) return draft;
+  return {
+    ...draft,
+    busUnits: { ...draft.busUnits, w1: draft.busUnits?.w1 ?? 0 },
+    w1Config: { ...DEFAULT_W1_CONFIG },
+  };
 }
 
 /** Kinds that expose numbered ESP32-S3 controllers in the picker. */

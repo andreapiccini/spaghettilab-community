@@ -1,0 +1,70 @@
+import { cellFill, type ProtocolCell } from "../../lib/protocol-timing.js";
+
+/** Datasheet-style I2C/SPI transaction strip — same cells as the timing chart. */
+export function ProtocolFrameStrip({
+  cells,
+  selectedOpId,
+  onSelectOp,
+  title,
+  hint,
+}: {
+  readonly cells: readonly ProtocolCell[];
+  readonly selectedOpId: string | null;
+  readonly onSelectOp: (opId: string) => void;
+  readonly title: string;
+  readonly hint?: string;
+}) {
+  if (cells.length === 0) return null;
+  const totalUnits = cells.reduce((n, c) => n + c.units, 0);
+
+  return (
+    <section className="mb-4 rounded-slmd border border-border-strong bg-surface p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h2 className="font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">{title}</h2>
+        {hint ? <span className="font-body text-[10px] text-ink-faint">{hint}</span> : null}
+      </div>
+      <div className="overflow-x-auto">
+        <div className="inline-flex min-w-full border border-ink/80 bg-ink">
+          {cells.map((cell) => {
+            const selected = cell.opId === selectedOpId;
+            const flex = Math.max(cell.units, cell.kind === "ack" || cell.kind === "nack" ? 1.2 : cell.units);
+            return (
+              <button
+                key={cell.id}
+                type="button"
+                title={`${cell.label} · ${cell.kind}`}
+                onClick={() => onSelectOp(cell.opId)}
+                style={{
+                  flexGrow: flex,
+                  flexBasis: `${(cell.units / totalUnits) * 100}%`,
+                  backgroundColor: cellFill(cell.kind),
+                }}
+                className={`relative min-w-[1.75rem] border-r border-white/20 px-1 py-2.5 text-center font-mono text-[10px] font-semibold text-white transition ${
+                  selected ? "ring-2 ring-inset ring-sky-300" : "hover:brightness-110"
+                }`}
+              >
+                {cell.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-body text-[9px] text-ink-faint">
+        <Legend swatch="#1e3a5f" label="S / Sr / P" />
+        <Legend swatch="#2563eb" label="ADDR" />
+        <Legend swatch="#0d9488" label="ACK" />
+        <Legend swatch="#b45309" label="NACK" />
+        <Legend swatch="#334155" label="DATA" />
+      </div>
+    </section>
+  );
+}
+
+function Legend({ swatch, label }: { swatch: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: swatch }} />
+      {label}
+    </span>
+  );
+}

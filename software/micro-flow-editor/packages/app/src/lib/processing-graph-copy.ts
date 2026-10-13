@@ -254,7 +254,7 @@ const EN: ProcessingGraphCopy = {
   functionality: "Functionality",
   functionalityHint: "Flow actions and logic",
   bay: "Bay",
-  bayHint: "I/O modules · create a sensor recipe when you need one"
+  bayHint: "I/O modules · create a sensor recipe when you need one",
   dragToInsert: "Drag onto the canvas to insert",
   configurePortFirst: "Configure a Port in Physical Composition first.",
   needsPort: "needs a Port",

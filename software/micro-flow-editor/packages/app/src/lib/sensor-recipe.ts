@@ -35,6 +35,12 @@ export type SensorRecipeStep =
   | { readonly type: "adc_read"; readonly into: string }
   | { readonly type: "gpio_write"; readonly level: 0 | 1 }
   | { readonly type: "gpio_read"; readonly into: string }
+  /** Additive 1-Wire primitives — executed only if firmware exposes w1 adapters. */
+  | { readonly type: "w1_reset"; readonly intoPresence?: string }
+  | { readonly type: "w1_match_rom"; readonly rom: string }
+  | { readonly type: "w1_write"; readonly bytes: readonly string[] }
+  | { readonly type: "w1_read"; readonly len: number; readonly into: string }
+  | { readonly type: "w1_crc"; readonly input: string; readonly len: number }
   | { readonly type: "emit"; readonly outputId: string; readonly from: string };
 
 /** Typed multi-param command (additive to v1 — not a scalar write channel). */
@@ -395,6 +401,16 @@ export function describeStep(step: SensorRecipeStep): string {
       return `Imposta GPIO = ${step.level}`;
     case "gpio_read":
       return "Leggi GPIO";
+    case "w1_reset":
+      return "1-Wire reset / presenza";
+    case "w1_match_rom":
+      return `1-Wire Match ROM ${step.rom}`;
+    case "w1_write":
+      return `1-Wire scrivi ${step.bytes.join(" ")}`;
+    case "w1_read":
+      return `1-Wire leggi ${step.len}B → ${step.into}`;
+    case "w1_crc":
+      return `1-Wire CRC ${step.input} (${step.len}B)`;
     case "emit":
       return `Emessi valore «${step.outputId}»`;
     default:
@@ -421,6 +437,16 @@ export function stepBadge(step: SensorRecipeStep): string {
       return `GPIO=${step.level}`;
     case "gpio_read":
       return "GPIO";
+    case "w1_reset":
+      return "RST";
+    case "w1_match_rom":
+      return "ROM";
+    case "w1_write":
+      return `W ${step.bytes[0] ?? "?"}`;
+    case "w1_read":
+      return `R ${step.len}B`;
+    case "w1_crc":
+      return "CRC";
     case "emit":
       return `→ ${step.outputId}`;
     default:
@@ -442,6 +468,16 @@ export function defaultStep(type: SensorRecipeStepType, address = "0x00"): Senso
       return { type: "gpio_write", level: 1 };
     case "gpio_read":
       return { type: "gpio_read", into: "level" };
+    case "w1_reset":
+      return { type: "w1_reset", intoPresence: "presence" };
+    case "w1_match_rom":
+      return { type: "w1_match_rom", rom: address };
+    case "w1_write":
+      return { type: "w1_write", bytes: ["0x44"] };
+    case "w1_read":
+      return { type: "w1_read", len: 9, into: "scratch" };
+    case "w1_crc":
+      return { type: "w1_crc", input: "scratch", len: 9 };
     case "emit":
       return { type: "emit", outputId: "value", from: "raw" };
     default:
@@ -456,6 +492,8 @@ export function paletteStepTypes(bus: SensorBus): readonly SensorRecipeStepType[
       return ["wait", "i2c_write", "i2c_read", "emit"];
     case "adc":
       return ["wait", "adc_read", "emit"];
+    case "w1":
+      return ["wait", "w1_reset", "w1_match_rom", "w1_write", "w1_read", "w1_crc", "emit"];
     case "gpio":
       return ["wait", "gpio_write", "gpio_read", "emit"];
     default:

@@ -13,6 +13,7 @@ import { useState, type ReactNode } from "react";
 import {
   createAnalogLevelExample,
   createBlankDraft,
+  createDs18b20Example,
   createGpioDigitalExample,
   describeDeviceOp,
   hasValidAnalogAcquisition,
@@ -31,10 +32,13 @@ import {
   type DeviceRecipePhase,
   type GpioSignalDef,
 } from "../../lib/device-recipe-draft.js";
+import { validateOneWireRom } from "../../lib/onewire.js";
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
+import { buildProtocolTiming, isBusOp, isPostOp } from "../../lib/protocol-timing.js";
 import { DerivedSignalView } from "./DerivedSignalView.js";
 import { DisplayCenter, DisplayInspector, DisplayLeftSidebar } from "./DisplayRecipePanels.js";
+import { ProtocolFrameStrip } from "./ProtocolFrameStrip.js";
 
 type Props = {
   readonly initialDraft?: DeviceRecipeDraft;
@@ -107,6 +111,21 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
       });
       return;
     }
+    if (draft.binding.bus === "w1") {
+      setTryMessage(
+        it
+          ? "Prova 1-Wire non disponibile: adapter runtime assente. Possibili esiti reali (quando collegato): presenza assente, timeout, CRC errato, bus occupato — nessun successo inventato."
+          : "1-Wire test unavailable: runtime adapter missing. Real outcomes when connected: no presence, timeout, bad CRC, busy bus — no invented success.",
+      );
+      setDraft({
+        ...draft,
+        verification: {
+          status: "unavailable",
+          note: it ? "Prova 1-Wire indisponibile senza runtime" : "1-Wire test unavailable without runtime",
+        },
+      });
+      return;
+    }
     if (draft.binding.bus === "adc" && hasValidAnalogAcquisition(draft) && !calibOk) {
       setTryMessage(
         it
@@ -163,7 +182,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
         <NavChip active label={it ? "Dispositivi" : "Devices"} />
         <NavChip active={false} label="Flow" onClick={() => navigate("processing-graph")} />
         <div className="ml-auto flex items-center gap-1.5">
-          {(["i2c", "spi", "gpio", "adc", "display"] as const).map((mode) => {
+          {(["i2c", "spi", "gpio", "adc", "w1", "display"] as const).map((mode) => {
             const active = mode === "display" ? isDisplay : !isDisplay && draft.binding.bus === mode;
             return (
               <button
@@ -174,7 +193,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                   active ? "bg-brand-blue text-white" : "bg-surface-sunken text-ink-muted hover:text-ink"
                 }`}
               >
-                {mode === "adc" ? (it ? "analog" : "adc") : mode}
+                {mode === "adc" ? (it ? "analog" : "adc") : mode === "w1" ? "1-wire" : mode}
               </button>
             );
           })}
@@ -279,6 +298,22 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                 </button>
               </div>
             ) : null}
+            {draft.binding.bus === "w1" ? (
+              <div className="mt-3">
+                <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">{it ? "Modelli" : "Templates"}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = createDs18b20Example(draft.name);
+                    setDraft(next);
+                    setSelectedOpId(next.phases.sample[0]?.id ?? null);
+                  }}
+                  className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+                >
+                  DS18B20
+                </button>
+              </div>
+            ) : null}
           </section>
             </>
           )}
@@ -335,40 +370,97 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             ) : null}
           </div>
 
-          <section className="mb-4 rounded-slmd border border-border-strong bg-surface p-3">
-            <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-              {it ? `Sequenza ${draft.binding.bus.toUpperCase()}` : `${draft.binding.bus.toUpperCase()} sequence`}
-            </h2>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {ops.length === 0 ? (
-                <p className="font-body text-xs text-ink-faint">{it ? "Nessun passo — aggiungi dalla libreria." : "No steps — add from the library."}</p>
-              ) : (
-                ops.map((op, index) => (
-                  <div key={op.id} className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedOpId(op.id)}
-                      className={`rounded-slsm border px-2.5 py-2 text-left ${
-                        selectedOpId === op.id
-                          ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/25"
-                          : "border-border-strong bg-surface-sunken hover:border-brand-blue/40"
-                      }`}
-                    >
-                      <span className="block font-mono text-[9px] text-ink-faint">{index + 1}</span>
-                      <span className="block font-body text-xs font-semibold text-ink">{describeDeviceOp(op)}</span>
-                    </button>
-                    {index < ops.length - 1 ? <span className="text-ink-faint">→</span> : null}
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
+          {draft.binding.bus === "i2c" || draft.binding.bus === "spi" ? (
+            <>
+              <ProtocolFrameStrip
+                cells={buildProtocolTiming(draft, phase).cells}
+                selectedOpId={selectedOpId}
+                onSelectOp={setSelectedOpId}
+                title={
+                  draft.binding.bus === "i2c"
+                    ? it
+                      ? "Transazione I2C (vista datasheet)"
+                      : "I2C transaction (datasheet view)"
+                    : it
+                      ? "Transazione SPI (vista datasheet)"
+                      : "SPI transaction (datasheet view)"
+                }
+                hint={it ? "Stessi blocchi del grafico sotto" : "Same blocks as the chart below"}
+              />
+              <section className="mb-4 rounded-slmd border border-border-strong bg-surface p-3">
+                <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                  {it ? "Passi sequenza" : "Sequence steps"}
+                </h2>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {ops.length === 0 ? (
+                    <p className="font-body text-xs text-ink-faint">
+                      {it ? "Nessun passo — aggiungi dalla libreria." : "No steps — add from the library."}
+                    </p>
+                  ) : (
+                    ops.map((op, index) => (
+                      <div key={op.id} className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedOpId(op.id)}
+                          className={`rounded-slsm border px-2.5 py-2 text-left ${
+                            selectedOpId === op.id
+                              ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/25"
+                              : isBusOp(op)
+                                ? "border-ink/30 bg-ink text-white hover:bg-ink/90"
+                                : "border-border-strong bg-surface-sunken hover:border-brand-blue/40"
+                          }`}
+                        >
+                          <span className={`block font-mono text-[9px] ${isBusOp(op) && selectedOpId !== op.id ? "text-white/60" : "text-ink-faint"}`}>
+                            {index + 1}
+                            {isBusOp(op) ? " · bus" : isPostOp(op) ? " · data" : ""}
+                          </span>
+                          <span className={`block font-body text-xs font-semibold ${isBusOp(op) && selectedOpId !== op.id ? "text-white" : "text-ink"}`}>
+                            {describeDeviceOp(op)}
+                          </span>
+                        </button>
+                        {index < ops.length - 1 ? <span className="text-ink-faint">→</span> : null}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </section>
+            </>
+          ) : (
+            <section className="mb-4 rounded-slmd border border-border-strong bg-surface p-3">
+              <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                {it ? `Sequenza ${draft.binding.bus.toUpperCase()}` : `${draft.binding.bus.toUpperCase()} sequence`}
+              </h2>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {ops.length === 0 ? (
+                  <p className="font-body text-xs text-ink-faint">{it ? "Nessun passo — aggiungi dalla libreria." : "No steps — add from the library."}</p>
+                ) : (
+                  ops.map((op, index) => (
+                    <div key={op.id} className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOpId(op.id)}
+                        className={`rounded-slsm border px-2.5 py-2 text-left ${
+                          selectedOpId === op.id
+                            ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/25"
+                            : "border-border-strong bg-surface-sunken hover:border-brand-blue/40"
+                        }`}
+                      >
+                        <span className="block font-mono text-[9px] text-ink-faint">{index + 1}</span>
+                        <span className="block font-body text-xs font-semibold text-ink">{describeDeviceOp(op)}</span>
+                      </button>
+                      {index < ops.length - 1 ? <span className="text-ink-faint">→</span> : null}
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          )}
 
           {draft.binding.bus === "adc" && phase === "sample" ? (
             <AnalogSamplingSummary draft={draft} it={it} />
           ) : null}
 
-          <DerivedSignalView draft={draft} phase={phase} it={it} />
+          <DerivedSignalView draft={draft} phase={phase} it={it} selectedOpId={selectedOpId} />
 
           <section className="mt-4 rounded-slmd border border-border-strong bg-surface p-3">
             <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
@@ -625,6 +717,10 @@ function BindingPanel({
   it: boolean;
   onChange: (d: DeviceRecipeDraft) => void;
 }) {
+  if (draft.binding.bus === "w1" && draft.binding.w1) {
+    return <W1BindingPanel draft={draft} it={it} onChange={onChange} />;
+  }
+
   if (draft.binding.bus === "adc" && draft.binding.adc) {
     const adc = draft.binding.adc;
     return (
@@ -1177,6 +1273,217 @@ function StepInspector({
           {it ? "CS basso (assert)" : "Assert CS (low)"}
         </label>
       ) : null}
+
+      {op.type === "w1_reset" ? (
+        <Field label={it ? "Salva presenza in" : "Presence into"}>
+          <input value={op.intoPresence} onChange={(e) => onChange({ ...op, intoPresence: e.target.value })} className={inputClass} />
+        </Field>
+      ) : null}
+      {op.type === "w1_match_rom" ? (
+        <>
+          <Field label="ROM">
+            <input
+              value={op.rom}
+              placeholder={draft.binding.w1?.rom || (it ? "Usa ROM del binding" : "Use binding ROM")}
+              onChange={(e) => onChange({ ...op, rom: e.target.value })}
+              className={inputClass}
+            />
+          </Field>
+          <p className="font-body text-[10px] text-ink-faint">
+            {it ? "Vuoto = ROM del dispositivo nella sidebar." : "Empty = device ROM from the sidebar."}
+          </p>
+        </>
+      ) : null}
+      {op.type === "w1_write" ? (
+        <Field label={it ? "Byte (hex)" : "Bytes (hex)"}>
+          <input
+            value={op.bytes.join(" ")}
+            onChange={(e) =>
+              onChange({
+                ...op,
+                bytes: e.target.value
+                  .split(/\s+/)
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
+            className={inputClass}
+          />
+        </Field>
+      ) : null}
+      {op.type === "w1_read" ? (
+        <>
+          <Field label={it ? "Lunghezza" : "Length"}>
+            <input
+              type="number"
+              min={1}
+              value={op.len}
+              onChange={(e) => onChange({ ...op, len: Math.max(1, Number(e.target.value) || 1) })}
+              className={inputClass}
+            />
+          </Field>
+          <Field label={it ? "Salva in" : "Save to"}>
+            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+          </Field>
+        </>
+      ) : null}
+      {op.type === "w1_wait_convert" ? (
+        <>
+          <Field label={it ? "Strategia" : "Strategy"}>
+            <select
+              value={op.strategy}
+              onChange={(e) => onChange({ ...op, strategy: e.target.value as "fixed_max" | "poll" })}
+              className={inputClass}
+            >
+              <option value="fixed_max">{it ? "Timeout max (datasheet)" : "Fixed max (datasheet)"}</option>
+              <option value="poll" disabled>
+                {it ? "Poll (runtime non disponibile)" : "Poll (runtime unavailable)"}
+              </option>
+            </select>
+          </Field>
+          <Field label="timeout ms">
+            <input
+              type="number"
+              min={1}
+              value={op.timeoutMs}
+              onChange={(e) => onChange({ ...op, timeoutMs: Math.max(1, Number(e.target.value) || 1) })}
+              className={inputClass}
+            />
+          </Field>
+          <p className="font-body text-[10px] text-ink-faint">
+            {it
+              ? "DS18B20 @12-bit: max 750 ms (datasheet). Non usare ritardi UI."
+              : "DS18B20 @12-bit: max 750 ms (datasheet). Do not use UI delays."}
+          </p>
+        </>
+      ) : null}
+      {op.type === "w1_crc" ? (
+        <>
+          <Field label="Input">
+            <input value={op.input} onChange={(e) => onChange({ ...op, input: e.target.value })} className={inputClass} />
+          </Field>
+          <Field label={it ? "Byte (incl. CRC)" : "Bytes (incl. CRC)"}>
+            <input
+              type="number"
+              min={2}
+              value={op.len}
+              onChange={(e) => onChange({ ...op, len: Math.max(2, Number(e.target.value) || 2) })}
+              className={inputClass}
+            />
+          </Field>
+          <Field label={it ? "Esito in" : "OK into"}>
+            <input value={op.intoOk} onChange={(e) => onChange({ ...op, intoOk: e.target.value })} className={inputClass} />
+          </Field>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function W1BindingPanel({
+  draft,
+  it,
+  onChange,
+}: {
+  draft: DeviceRecipeDraft;
+  it: boolean;
+  onChange: (d: DeviceRecipeDraft) => void;
+}) {
+  const w1 = draft.binding.w1!;
+  const [romDraft, setRomDraft] = useState(w1.rom);
+  const [romError, setRomError] = useState<string | null>(null);
+  const [searchNote, setSearchNote] = useState<string | null>(null);
+  const { navigate } = useSession();
+
+  function applyRom(raw: string) {
+    setRomDraft(raw);
+    if (!raw.trim()) {
+      setRomError(null);
+      onChange({ ...draft, binding: { ...draft.binding, w1: { ...w1, rom: "" } } });
+      return;
+    }
+    const check = validateOneWireRom(raw);
+    if (!check.ok) {
+      setRomError(check.message);
+      onChange({ ...draft, binding: { ...draft.binding, w1: { ...w1, rom: raw } } });
+      return;
+    }
+    setRomError(null);
+    onChange({ ...draft, binding: { ...draft.binding, w1: { ...w1, rom: check.rom } } });
+    setRomDraft(check.rom);
+  }
+
+  return (
+    <div className="space-y-2 font-body text-xs">
+      <p className="font-semibold text-ink">{it ? "Tipo: 1-Wire" : "Type: 1-Wire"}</p>
+      <Field label={it ? "Bus (configuratore)" : "Bus (configurator)"}>
+        <input value={w1.busName} readOnly className={`${inputClass} opacity-70`} />
+      </Field>
+      <Field label="DQ">
+        <input value={w1.dqPinLabel} readOnly className={`${inputClass} opacity-70`} />
+      </Field>
+      <button
+        type="button"
+        onClick={() => navigate("physical-composition")}
+        className="w-full rounded-slsm border border-border-strong px-2 py-1.5 text-left font-body text-[11px] text-brand-blue hover:border-brand-blue"
+      >
+        {it ? "Modifica pin DQ nel Cablaggio →" : "Edit DQ pin in Wiring →"}
+      </button>
+      <p className="rounded-slsm bg-brand-blue/10 px-2 py-1.5 font-body text-[10px] text-ink-muted">
+        {it
+          ? "Pull-up esterno obbligatorio · open-drain · alimentazione esterna. Più dispositivi condividono questo bus."
+          : "External pull-up required · open-drain · external power. Multiple devices share this bus."}
+      </p>
+      <Field label={it ? "ROM dispositivo" : "Device ROM"}>
+        <input
+          value={romDraft}
+          placeholder="28 FF … CRC"
+          onChange={(e) => applyRom(e.target.value)}
+          className={inputClass}
+        />
+      </Field>
+      {romError ? <p className="font-body text-[10px] text-error">{romError}</p> : null}
+      <button
+        type="button"
+        onClick={() => {
+          setSearchNote(
+            it
+              ? "Cerca dispositivi: non disponibile senza runtime 1-Wire. Inserisci la ROM manualmente (nessun risultato inventato)."
+              : "Search devices: unavailable without 1-Wire runtime. Enter ROM manually (no invented results).",
+          );
+          onChange({
+            ...draft,
+            verification: {
+              status: "unavailable",
+              note: it ? "Search ROM non disponibile" : "ROM search unavailable",
+            },
+          });
+        }}
+        className="w-full rounded-slsm border border-dashed border-border-strong px-2 py-1.5 font-body text-[11px] text-ink-muted hover:border-brand-blue"
+      >
+        {it ? "Cerca dispositivi" : "Search devices"}
+      </button>
+      {searchNote ? <p className="font-body text-[10px] text-ink-faint">{searchNote}</p> : null}
+      <Field label={it ? "Risoluzione (°C)" : "Resolution"}>
+        <select
+          value={w1.resolutionBits ?? 12}
+          onChange={(e) =>
+            onChange({
+              ...draft,
+              binding: {
+                ...draft.binding,
+                w1: { ...w1, resolutionBits: Number(e.target.value) as 9 | 10 | 11 | 12 },
+              },
+            })
+          }
+          className={inputClass}
+        >
+          <option value={9}>9 bit · 93.75 ms</option>
+          <option value={10}>10 bit · 187.5 ms</option>
+          <option value={11}>11 bit · 375 ms</option>
+          <option value={12}>12 bit · 750 ms</option>
+        </select>
+      </Field>
     </div>
   );
 }

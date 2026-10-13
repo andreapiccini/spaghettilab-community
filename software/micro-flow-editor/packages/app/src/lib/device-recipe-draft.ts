@@ -15,6 +15,7 @@ import {
   type SensorRecipeStep,
   type SensorTransform,
 } from "./sensor-recipe.js";
+import { DS18B20_CMD, validateOneWireRom } from "./onewire.js";
 
 export const DEVICE_RECIPE_DRAFT_VERSION = "2" as const;
 export const DEVICE_RECIPE_DRAFT_META_KEY = "__deviceRecipeDraft";
@@ -23,7 +24,7 @@ export const DEVICE_RECIPE_PENDING_CREATE_META_KEY = "__deviceRecipePendingCreat
 
 export type DeviceRecipePhase = "init" | "sample" | "command";
 
-export type DeviceRecipeBus = "i2c" | "spi" | "gpio" | "adc";
+export type DeviceRecipeBus = "i2c" | "spi" | "gpio" | "adc" | "w1";
 /** Editor mode pill: buses + display category (display is not a bus). */
 export type DeviceRecipeMode = DeviceRecipeBus | "display";
 export type DeviceRecipeCategory = "sensor" | "display";
@@ -204,6 +205,46 @@ export type DeviceRecipeOp =
       readonly id: string;
       readonly type: "spi_transfer_buffer";
       readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "w1_reset";
+      readonly intoPresence: string;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "w1_match_rom";
+      /** Empty = use binding.w1.rom at run time. */
+      readonly rom: string;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "w1_write";
+      readonly bytes: readonly string[];
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "w1_read";
+      readonly len: number;
+      readonly into: string;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "w1_wait_convert";
+      /** Strategy: fixed max from resolution, or poll (runtime may not support poll). */
+      readonly strategy: "fixed_max" | "poll";
+      readonly timeoutMs: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "w1_crc";
+      readonly input: string;
+      readonly len: number;
+      readonly intoOk: string;
     };
 
 /** Typed public command with its own executable sequence (refs params by name). */
@@ -251,6 +292,19 @@ export type DeviceRecipeBinding = {
     readonly dcLabel: string;
     readonly resetLabel: string;
     readonly csLabel: string;
+  };
+  readonly w1?: {
+    /** Stable bus id from pin configurator (e.g. w1-0). */
+    readonly busId: string;
+    readonly busName: string;
+    /** Summary only — pin is owned by the configurator. */
+    readonly dqPinLabel: string;
+    /** 8-byte ROM formatted; empty = unset (draft ok). */
+    readonly rom: string;
+    readonly powerMode: "external" | "parasitic";
+    readonly externalPullupRequired: true;
+    /** DS18B20 resolution bits when using convert wait (9–12). */
+    readonly resolutionBits?: 9 | 10 | 11 | 12;
   };
   readonly gpioSignals: readonly GpioSignalDef[];
   readonly auxGpio: readonly GpioSignalDef[];
@@ -337,6 +391,18 @@ export function describeDeviceOp(op: DeviceRecipeOp): string {
       return `${op.pin}: ${op.level === 0 ? "basso" : "alto"}`;
     case "spi_transfer_buffer":
       return "Trasferisci buffer SPI";
+    case "w1_reset":
+      return "Reset / presenza";
+    case "w1_match_rom":
+      return op.rom ? `Seleziona ROM` : "Seleziona ROM (binding)";
+    case "w1_write":
+      return `Scrivi ${op.bytes.join(" ")}`;
+    case "w1_read":
+      return `Leggi ${op.len}B → ${op.into}`;
+    case "w1_wait_convert":
+      return `Attendi conversione (${op.timeoutMs} ms)`;
+    case "w1_crc":
+      return `Verifica CRC ${op.input}`;
     default:
       return "Passo";
   }
@@ -385,6 +451,7 @@ export function createBlankDraft(mode: DeviceRecipeMode, name?: string): DeviceR
   if (mode === "i2c") return createI2cTemperatureExample(name);
   if (mode === "spi") return createSpiPressureExample(name);
   if (mode === "adc") return createAnalogLevelExample(name);
+  if (mode === "w1") return createDs18b20Example(name);
   return createGpioDigitalExample(name);
 }
 
@@ -603,6 +670,83 @@ export function createGpioDigitalExample(name = "Dispositivo GPIO"): DeviceRecip
   };
 }
 
+/**
+ * DS18B20 (external power) — datasheet timings/commands.
+ * Convert T max 750 ms @ 12-bit; scratchpad 9 bytes; CRC over first 8.
+ * Search ROM is a hardware action, not part of the periodic sample sequence.
+ */
+export function createDs18b20Example(name = "Temperatura 1-Wire"): DeviceRecipeDraft {
+  const exampleRom = "28 FF 01 02 03 04 05 62";
+  return {
+    schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
+    id: newId("dr"),
+    name,
+    status: "draft",
+    ...sensorDraftBase(name),
+    sampleIntervalMs: 1000,
+    binding: {
+      bus: "w1",
+      w1: {
+        busId: "w1-0",
+        busName: "1-Wire 0",
+        dqPinLabel: "DQ (configuratore)",
+        rom: exampleRom,
+        powerMode: "external",
+        externalPullupRequired: true,
+        resolutionBits: 12,
+      },
+      gpioSignals: [],
+      auxGpio: [],
+    },
+    channels: [{ id: "temp_c", label: "Temperatura", unit: "°C", quantity: "temperature", direction: "read" }],
+    phases: {
+      init: [],
+      sample: [
+        { id: newId("op"), type: "w1_reset", intoPresence: "presence", timeoutMs: 5 },
+        { id: newId("op"), type: "w1_match_rom", rom: "", timeoutMs: 20 },
+        { id: newId("op"), type: "w1_write", bytes: [DS18B20_CMD.convertT], timeoutMs: 20 },
+        {
+          id: newId("op"),
+          type: "w1_wait_convert",
+          strategy: "fixed_max",
+          timeoutMs: DS18B20_CMD.convertMaxMs12bit,
+        },
+        { id: newId("op"), type: "w1_reset", intoPresence: "presence", timeoutMs: 5 },
+        { id: newId("op"), type: "w1_match_rom", rom: "", timeoutMs: 20 },
+        { id: newId("op"), type: "w1_write", bytes: [DS18B20_CMD.readScratchpad], timeoutMs: 20 },
+        { id: newId("op"), type: "w1_read", len: 9, into: "scratch", timeoutMs: 50 },
+        { id: newId("op"), type: "w1_crc", input: "scratch", len: 9, intoOk: "crc_ok" },
+        {
+          id: newId("op"),
+          type: "decode",
+          input: "scratch",
+          into: "temp_c",
+          byteOrder: "le",
+          signed: true,
+          startByte: 0,
+          endByte: 1,
+          multiply: 625,
+          divide: 10000,
+        },
+        { id: newId("op"), type: "emit", channelId: "temp_c", from: "temp_c" },
+      ],
+      command: [],
+    },
+    verification: { status: "untested", note: "Da provare sul dispositivo" },
+    updatedAt: Date.now(),
+    runtimeUnavailable: [
+      "w1_reset",
+      "w1_match_rom",
+      "w1_write",
+      "w1_read",
+      "w1_crc",
+      "w1_search_rom",
+      "w1_parasite_power",
+      "try_read_on_device",
+    ],
+  };
+}
+
 /** Graphic framebuffer display — category≠bus; exposes commands, not sensor channels. */
 export function createGraphicDisplayExample(name = "Display grafico"): DeviceRecipeDraft {
   const writeText: DeviceRecipeCommand = {
@@ -760,6 +904,18 @@ export function libraryOpsForBus(bus: DeviceRecipeBus): readonly { readonly type
         { type: "emit", label: "Emetti" },
         { type: "wait", label: "Attendi" },
       ];
+    case "w1":
+      return [
+        { type: "w1_reset", label: "Reset / presenza" },
+        { type: "w1_match_rom", label: "Seleziona ROM" },
+        { type: "w1_write", label: "Scrivi byte" },
+        { type: "w1_read", label: "Leggi byte" },
+        { type: "w1_wait_convert", label: "Attendi completamento" },
+        { type: "w1_crc", label: "Verifica CRC" },
+        { type: "decode", label: "Decodifica" },
+        { type: "emit", label: "Emetti" },
+        { type: "wait", label: "Attendi" },
+      ];
   }
 }
 
@@ -885,6 +1041,23 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
       return { id, type: "ctrl_pin", pin: "DC", level: 1 };
     case "spi_transfer_buffer":
       return { id, type: "spi_transfer_buffer", timeoutMs: 50 };
+    case "w1_reset":
+      return { id, type: "w1_reset", intoPresence: "presence", timeoutMs: 5 };
+    case "w1_match_rom":
+      return { id, type: "w1_match_rom", rom: draft.binding.w1?.rom ?? "", timeoutMs: 20 };
+    case "w1_write":
+      return { id, type: "w1_write", bytes: [DS18B20_CMD.convertT], timeoutMs: 20 };
+    case "w1_read":
+      return { id, type: "w1_read", len: 9, into: "scratch", timeoutMs: 50 };
+    case "w1_wait_convert":
+      return {
+        id,
+        type: "w1_wait_convert",
+        strategy: "fixed_max",
+        timeoutMs: DS18B20_CMD.convertMaxMs12bit,
+      };
+    case "w1_crc":
+      return { id, type: "w1_crc", input: "scratch", len: 9, intoOk: "crc_ok" };
   }
 }
 
@@ -1054,6 +1227,21 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
       });
     }
   }
+  if (draft.binding.bus === "w1") {
+    if (!draft.binding.w1?.busId) errors.push({ field: "w1_bus", message: "Seleziona un bus 1-Wire dal configuratore" });
+    const rom = draft.binding.w1?.rom?.trim() ?? "";
+    if (!rom) errors.push({ field: "w1_rom", message: "Identificativo ROM obbligatorio per creare il dispositivo" });
+    else {
+      const check = validateOneWireRom(rom);
+      if (!check.ok) errors.push({ field: "w1_rom", message: check.message });
+    }
+    if (draft.binding.w1?.powerMode === "parasitic") {
+      errors.push({
+        field: "w1_power",
+        message: "Alimentazione parassita non supportata dal runtime attuale",
+      });
+    }
+  }
   const hasEmit = draft.phases.sample.some((op) => op.type === "emit");
   if (!hasEmit) errors.push({ field: "emit", message: "Manca un passo Emetti in Lettura" });
   return errors;
@@ -1067,9 +1255,17 @@ export function hasValidAnalogAcquisition(draft: DeviceRecipeDraft): boolean {
 /** Map draft → SensorRecipe v1 (+ additive commands[]). Lossy for extended ops. */
 export function draftToSensorRecipe(draft: DeviceRecipeDraft): SensorRecipe {
   const sensorBus: SensorBus =
-    draft.binding.bus === "gpio" ? "gpio" : draft.binding.bus === "spi" ? "spi" : draft.binding.bus === "adc" ? "adc" : "i2c";
+    draft.binding.bus === "gpio"
+      ? "gpio"
+      : draft.binding.bus === "spi"
+        ? "spi"
+        : draft.binding.bus === "adc"
+          ? "adc"
+          : draft.binding.bus === "w1"
+            ? "w1"
+            : "i2c";
   const base = blankSensorRecipe(draft.name, sensorBus);
-  const address = draft.binding.i2c?.address;
+  const address = draft.binding.bus === "w1" ? draft.binding.w1?.rom : draft.binding.i2c?.address;
   const sample = draft.phases.sample.flatMap((op) => mapOpToV1(op, address));
   const init = draft.phases.init.flatMap((op) => mapOpToV1(op, address));
   const transforms: SensorTransform[] = draft.phases.sample
@@ -1088,6 +1284,13 @@ export function draftToSensorRecipe(draft: DeviceRecipeDraft): SensorRecipe {
   if (draft.category === "display") {
     unknown.push("Display: comandi tipizzati in commands[] — non ridotti a canale On/Off");
     unknown.push("Framebuffer / draw_text / flush non eseguiti finché il runtime non li supporta");
+  }
+  if (draft.binding.bus === "w1") {
+    unknown.push("1-Wire: timing bit-bang gestito dal firmware, non dall'UI");
+    unknown.push("Ricerca ROM (Search) non disponibile senza adapter runtime");
+    if (draft.binding.w1?.powerMode === "parasitic") {
+      unknown.push("Parasite power non supportato");
+    }
   }
 
   const commands = draft.commands.map((c) => ({
@@ -1162,6 +1365,7 @@ function mapOpToV1(op: DeviceRecipeOp, address?: string): SensorRecipeStep[] {
     case "display_power":
     case "ctrl_pin":
     case "spi_transfer_buffer":
+    case "w1_wait_convert":
       // No v1 primitive — skipped in adapter (kept in draft + unknown / commands).
       return [];
     case "adc_sample":
@@ -1171,6 +1375,16 @@ function mapOpToV1(op: DeviceRecipeOp, address?: string): SensorRecipeStep[] {
       return [{ type: "gpio_read", into: op.into }];
     case "gpio_write":
       return [{ type: "gpio_write", level: op.level }];
+    case "w1_reset":
+      return [{ type: "w1_reset", intoPresence: op.intoPresence }];
+    case "w1_match_rom":
+      return [{ type: "w1_match_rom", rom: op.rom || address || "" }];
+    case "w1_write":
+      return [{ type: "w1_write", bytes: op.bytes }];
+    case "w1_read":
+      return [{ type: "w1_read", len: op.len, into: op.into }];
+    case "w1_crc":
+      return [{ type: "w1_crc", input: op.input, len: op.len }];
     case "emit":
       return [{ type: "emit", outputId: op.channelId, from: op.from }];
   }

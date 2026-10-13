@@ -25,8 +25,10 @@ import {
   availablePeripheralKinds,
   busUnitLabel,
   clearPinAssignment,
+  DEFAULT_W1_CONFIG,
   derivePortInterfaces,
   dropSignalOnPin,
+  ensureW1Config,
   ESP32_S3_BUS_UNITS,
   formatPinLabel,
   freeConfigurablePinIndices,
@@ -52,6 +54,7 @@ import {
   type FunctionModuleVariant,
   type PhysicalSignalDef,
   type PortInterfaceKind,
+  type W1PeripheralConfig,
 } from "../../lib/backbone-physical.js";
 import { publicAsset } from "../../lib/public-asset.js";
 import { PhysicalConnectorPreview } from "./PhysicalConnectorPreview.js";
@@ -96,7 +99,7 @@ function peripheralBlurb(kind: PortInterfaceKind, it: boolean): string {
     uart: "TX / RX",
     spi: "SCK / MOSI / MISO / CS",
     pwm: "Uscita PWM",
-    w1: "Comunicazione 1-Wire",
+    w1: "Bus 1-Wire · pin DQ open-drain",
   };
   const enMap: Record<PortInterfaceKind, string> = {
     gpio: "Digital input / output",
@@ -105,13 +108,13 @@ function peripheralBlurb(kind: PortInterfaceKind, it: boolean): string {
     uart: "TX / RX",
     spi: "SCK / MOSI / MISO / CS",
     pwm: "PWM output",
-    w1: "1-Wire bus",
+    w1: "1-Wire bus · open-drain DQ",
   };
   return it ? itMap[kind] : enMap[kind];
 }
 
 function kindHasSettings(kind: PortInterfaceKind): boolean {
-  return kind === "gpio" || kind === "i2c" || kind === "uart" || kind === "spi" || kind === "pwm";
+  return kind === "gpio" || kind === "i2c" || kind === "uart" || kind === "spi" || kind === "pwm" || kind === "w1";
 }
 
 export function PhysicalInterfaceEditor({
@@ -153,7 +156,21 @@ export function PhysicalInterfaceEditor({
   const pendingAccent = activeKind ? PERIPHERAL_ACCENT[activeKind] : undefined;
 
   const commitModes = (modes: readonly number[]) =>
-    onChange({ ...draft, modes, variant, settings, applied: false });
+    onChange(ensureW1Config({ ...draft, modes, variant, settings, applied: false }));
+
+  const selectW1Peripheral = () => {
+    setPendingSignal(null);
+    setActive((prev) => (prev?.kind === "w1" ? null : { kind: "w1" }));
+    setSettingsOpen(true);
+    onChange(
+      ensureW1Config({
+        ...draft,
+        busUnits: { ...draft.busUnits, w1: 0 },
+        w1Config: draft.w1Config ?? { ...DEFAULT_W1_CONFIG },
+        applied: false,
+      }),
+    );
+  };
 
   const setVariant = (next: FunctionModuleVariant) => {
     if (next === variant || disabled) return;
@@ -192,6 +209,10 @@ export function PhysicalInterfaceEditor({
     onChange({ ...draft, settings: { ...settings, ...patch }, applied: false });
 
   const selectSimplePeripheral = (kind: Exclude<PortInterfaceKind, BusPortKind>) => {
+    if (kind === "w1") {
+      selectW1Peripheral();
+      return;
+    }
     setSettingsOpen(false);
     setPendingSignal(null);
     setActive((prev) => (prev?.kind === kind ? null : { kind }));
@@ -448,6 +469,14 @@ export function PhysicalInterfaceEditor({
                       onChange({ ...draft, i2cSpeed: speed, settings, applied: false })
                     }
                     onSettings={updateSettings}
+                    onW1Config={(w1Config) =>
+                      onChange({
+                        ...draft,
+                        busUnits: { ...draft.busUnits, w1: 0 },
+                        w1Config,
+                        applied: false,
+                      })
+                    }
                   />
                 </div>
               )}
@@ -654,7 +683,7 @@ export function PhysicalInterfaceEditor({
                     style={{ backgroundColor: PERIPHERAL_ACCENT[item.kind] }}
                   />
                   <strong className="text-ink">
-                    {interfaceDisplayName(item, draft.busUnits)}
+                    {interfaceDisplayName(item, draft.busUnits, draft.w1Config)}
                   </strong>
                   <span className="truncate text-ink-faint">
                     {item.signals
@@ -756,6 +785,7 @@ function PeripheralSettingsFields({
   onGpioSettings,
   onI2cSpeed,
   onSettings,
+  onW1Config,
 }: {
   readonly kind: PortInterfaceKind;
   readonly draft: BackbonePhysicalDraft;
@@ -767,6 +797,7 @@ function PeripheralSettingsFields({
   readonly onGpioSettings: (inMode: number, outMode: number) => void;
   readonly onI2cSpeed: (speed: number) => void;
   readonly onSettings: (patch: Partial<PhysicalInterfaceSettings>) => void;
+  readonly onW1Config?: (config: W1PeripheralConfig) => void;
 }): ReactNode {
   if (kind === "gpio") {
     return (
@@ -958,6 +989,53 @@ function PeripheralSettingsFields({
           />
           {it ? "Invertito" : "Inverted"}
         </label>
+      </>
+    );
+  }
+  if (kind === "w1") {
+    const w1 = draft.w1Config ?? DEFAULT_W1_CONFIG;
+    return (
+      <>
+        <label className="text-xs text-ink-muted">
+          {it ? "Nome bus" : "Bus name"}
+          <input
+            className={`${input} mt-1`}
+            disabled={disabled}
+            value={w1.name}
+            onChange={(event) =>
+              onW1Config?.({ ...w1, id: w1.id || "w1-0", name: event.target.value })
+            }
+          />
+        </label>
+        <p className="rounded-slsm bg-brand-blue/10 px-2 py-1.5 font-body text-[10px] text-ink-muted">
+          {it
+            ? "DQ è open-drain bidirezionale. Serve pull-up esterno (tip. 4,7 kΩ): il pull-up interno MCU non basta."
+            : "DQ is bidirectional open-drain. External pull-up required (typ. 4.7 kΩ): MCU internal pull-up is not enough."}
+        </p>
+        <label className="text-xs text-ink-muted">
+          {it ? "Alimentazione" : "Power"}
+          <select
+            className={`${input} mt-1`}
+            disabled={disabled || !w1.parasiticSupported}
+            value={w1.powerMode}
+            onChange={(event) =>
+              onW1Config?.({
+                ...w1,
+                powerMode: event.target.value as W1PeripheralConfig["powerMode"],
+              })
+            }
+          >
+            <option value="external">{it ? "Esterna (VDD)" : "External (VDD)"}</option>
+            <option value="parasitic" disabled={!w1.parasiticSupported}>
+              {it ? "Parassita (non supportata dal runtime)" : "Parasitic (runtime unsupported)"}
+            </option>
+          </select>
+        </label>
+        <p className="font-body text-[10px] text-ink-faint">
+          {it
+            ? "ID stabile: w1-0 · più sensori condividono lo stesso bus (ROM diverse nelle ricette)."
+            : "Stable id: w1-0 · multiple sensors share this bus (distinct ROMs in recipes)."}
+        </p>
       </>
     );
   }
