@@ -4,32 +4,34 @@ import { useCommunityHub } from "../../state/community-hub-context.js";
 import { hubCatalog } from "../../lib/community-hub.js";
 import {
   type GetStatusResponse,
-  type NfcTagStatus,
   type PhysicalBackbone,
   DEFAULT_PHYSICAL_SETTINGS,
-  encodePhysicalSettings,
+  ProtocolStatus,
+  SpaghettiClientError,
 } from "@spaghettilab/protocol-sdk";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Cable,
   Check,
-  ChevronRight,
   Cpu,
   Layers,
   LoaderCircle,
-  LockKeyhole,
   Radio,
   RefreshCw,
-  Settings2,
   Upload,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
+  DEFAULT_FUNCTION_VARIANT,
+  PHYSICAL_CAP,
   PHYSICAL_CATALOG,
   PHYSICAL_META_KEY,
   catalogEntry,
+  defaultModesForVariant,
   expectedFunctionTag,
+  functionVariantOf,
+  modesForVariant,
   parsePhysicalCatalog,
   parsePhysicalProject,
   pinsForModes,
@@ -37,11 +39,11 @@ import {
   topologyForBoard,
   validatePhysicalModes,
   type BackbonePhysicalDraft,
+  type FunctionModuleVariant,
   type PhysicalCatalogEntry,
   type PhysicalProject,
 } from "../../lib/backbone-physical.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
-import { emptyProtocol, type CustomProtocol } from "../../lib/port-protocol-mock.js";
 import {
   attachedFromStatus,
   useCoreSessions,
@@ -50,7 +52,70 @@ import {
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
-import { PortMappingEditor } from "./PortMappingEditor.js";
+
+/** Offline authoring when firmware has not reported Module Function layout yet. */
+const AUTHORING_CAPABILITIES =
+  PHYSICAL_CAP.I2C |
+  PHYSICAL_CAP.SPI |
+  PHYSICAL_CAP.UART |
+  PHYSICAL_CAP.DIGITAL_INPUT |
+  PHYSICAL_CAP.DIGITAL_OUTPUT |
+  PHYSICAL_CAP.ADC |
+  PHYSICAL_CAP.W1 |
+  PHYSICAL_CAP.PWM;
+
+/** Map protocol / transport failures to user-facing Configure messages. */
+function formatConfigureError(error: unknown, it: boolean, backboneId?: string): string {
+  const id = backboneId ? ` ${backboneId}` : "";
+  if (error instanceof SpaghettiClientError) {
+    if (error.code === "TIMEOUT") {
+      return it
+        ? `Configurazione non riuscita: Backbone${id} non risponde`
+        : `Configuration failed: Backbone${id} not responding`;
+    }
+    if (error.code === "CANCELLED") {
+      return it
+        ? "Configurazione annullata"
+        : "Configuration cancelled";
+    }
+    switch (error.status) {
+      case ProtocolStatus.UNAUTHORIZED:
+        return it
+          ? "Configurazione non riuscita: la porta è controllata automaticamente dal modulo NFC"
+          : "Configuration failed: port is automatically controlled by an NFC module";
+      case ProtocolStatus.CONFLICT:
+        return it
+          ? "Configurazione non riuscita: tag NFC non corrisponde allo stato attuale"
+          : "Configuration failed: NFC tag does not match current device state";
+      case ProtocolStatus.INVALID_ARGUMENT:
+      case ProtocolStatus.MALFORMED_REQUEST:
+        return it
+          ? "Configurazione non riuscita: mappatura pin non valida"
+          : "Configuration failed: invalid pin mapping";
+      case ProtocolStatus.UNSUPPORTED:
+        return it
+          ? "Configurazione non riuscita: interfaccia o pin non supportati"
+          : "Configuration failed: unsupported interface or pin";
+      case ProtocolStatus.BUSY:
+        return it
+          ? "Configurazione non riuscita: porta occupata"
+          : "Configuration failed: port is busy";
+      case ProtocolStatus.UNAVAILABLE:
+      case ProtocolStatus.TIMEOUT:
+        return it
+          ? `Configurazione non riuscita: Backbone${id} non risponde`
+          : `Configuration failed: Backbone${id} not responding`;
+      default:
+        return it
+          ? `Configurazione non riuscita: ${ProtocolStatus[error.status ?? -1] ?? error.message}`
+          : `Configuration failed: ${ProtocolStatus[error.status ?? -1] ?? error.message}`;
+    }
+  }
+  if (error instanceof Error && error.message.trim()) return error.message;
+  return it
+    ? "Configurazione non riuscita"
+    : "Configuration failed";
+}
 
 const control =
   "w-full rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-sm text-ink focus:border-brand-blue focus:outline-none";
@@ -75,7 +140,7 @@ export function BackbonePhysicalScreen() {
   const { locale } = useLocale();
   const it = locale === "it";
   const { session, execute, navigate, physicalTarget } = useSession();
-  const { rows, getSnapshot, getClient, observeStatus, discoverNetwork } = useCoreSessions();
+  const { rows, getSnapshot, getClient, observeStatus } = useCoreSessions();
   const bindings = session?.stack.current.coreBindings ?? [];
   const [bindingId, setBindingId] = useState<string | null>(
     physicalTarget?.bindingId ?? null,
@@ -175,12 +240,12 @@ export function BackbonePhysicalScreen() {
         />
         <div className="min-w-0 flex-1">
           <h1 className="font-heading text-2xl font-bold text-ink">
-            Physical composition
+            Module Function
           </h1>
           <p className="mt-1 font-body text-xs text-ink-muted">
             {it
-              ? "Backbone, moduli e porte · la struttura reale del tuo sistema"
-              : "Backbones, modules and ports · your system’s physical structure"}
+              ? "Trascina i segnali delle periferiche sui pin del modulo"
+              : "Drag peripheral signals onto the module pins"}
           </p>
         </div>
         <button className={secondary} onClick={() => setCatalogOpen(true)}>
@@ -220,44 +285,25 @@ export function BackbonePhysicalScreen() {
           </button>
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-          <aside className="flex shrink-0 gap-2 overflow-auto border-b border-border bg-surface p-3 lg:w-64 lg:flex-col lg:border-b-0 lg:border-r">
-            <p className="hidden px-2 py-2 text-[10px] font-bold uppercase tracking-widest text-ink-faint lg:block">
-              {it ? "Backbone nel cluster" : "Backbones in this cluster"}
-            </p>
-            {boards.map((item, index) => {
-              const layout = topologyForBoard(status, item);
-              const active = item.deviceIdHex === board?.deviceIdHex;
-              return (
-                <button
-                  key={item.deviceIdHex || item.nodeId}
-                  onClick={() => setBoardId(item.deviceIdHex)}
-                  className={`flex shrink-0 items-center gap-3 rounded-slmd border p-3 text-left transition-colors ${active ? "border-brand-blue bg-brand-blue/10" : "border-transparent hover:bg-surface-raised"}`}
-                >
-                  <Cpu
-                    size={22}
-                    className={active ? "text-brand-blue" : "text-ink-faint"}
-                  />
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-ink">
-                      Backbone {index + 1}{" "}
-                      {item.local && (
-                        <span className="text-[10px] text-brand-blue">MASTER</span>
-                      )}
-                    </div>
-                    <div className="mt-1 truncate font-mono text-[10px] text-ink-faint">
-                      {item.mac || item.deviceIdHex}
-                    </div>
-                    <div className="mt-1 text-xs text-ink-muted">
-                      {layout?.mcu ??
-                        (it ? "Struttura non ricevuta" : "Layout not received")}
-                    </div>
-                  </div>
-                  <ChevronRight size={14} className="ml-auto shrink-0 text-ink-faint" />
-                </button>
-              );
-            })}
-          </aside>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {boards.length > 1 && (
+            <div className="flex shrink-0 items-center gap-2 border-b border-border bg-surface px-5 py-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                Backbone
+              </span>
+              <select
+                className={`${control} max-w-xs`}
+                value={board?.deviceIdHex ?? ""}
+                onChange={(event) => setBoardId(event.target.value)}
+              >
+                {boards.map((item, index) => (
+                  <option key={item.deviceIdHex || item.nodeId} value={item.deviceIdHex}>
+                    {`Backbone ${index + 1}${item.local ? " · Master" : ""}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           {board && (
             <BoardDetail
               key={`${session?.projectId}:${selected.bindingId}:${board.deviceIdHex}:${board.nodeId}`}
@@ -307,9 +353,18 @@ export function BackbonePhysicalScreen() {
                       ? "La backbone deve essere connessa."
                       : "The Backbone must be connected.",
                   );
-                const fresh = (await discoverNetwork()).find(
-                  (item) => item.bindingId === selected.bindingId,
-                )?.status;
+                /* Use the live session status when present. A redundant
+                 * getStatus→APPLY_PHYSICAL pair on USB-Serial/JTAG used to
+                 * overflow the 4 KiB USB worker during STATUS and drop APPLY. */
+                let fresh = status;
+                if (!fresh) {
+                  try {
+                    fresh = await client.getStatus();
+                    observeStatus(selected.bindingId, fresh);
+                  } catch {
+                    /* Fall through to the availability check below. */
+                  }
+                }
                 const currentBoard = attachedFromStatus(
                   fresh,
                   selected.expectedDeviceId,
@@ -320,47 +375,44 @@ export function BackbonePhysicalScreen() {
                       ? "La Backbone selezionata non è più disponibile."
                       : "The selected Backbone is no longer available.",
                   );
-                await client.applyPhysical({
-                  nodeId: currentBoard.local ? 0 : currentBoard.nodeId,
-                  modes: new Uint8Array(draft.modes),
-                  i2cSpeed: draft.i2cSpeed,
-                  settings:
-                    topology?.version === 2
-                      ? (draft.settings ?? DEFAULT_PHYSICAL_SETTINGS)
-                      : undefined,
-                  expectedTag: expectedFunctionTag(
-                    tagForSlot(status, board, 2),
-                    draft.automatic,
-                  ),
-                });
-                const next = await client.getStatus();
-                observeStatus(selected.bindingId, next);
+                const backboneLabel = currentBoard.local
+                  ? "Master"
+                  : `0x${currentBoard.nodeId.toString(16)}`;
+                try {
+                  await client.applyPhysical({
+                    nodeId: currentBoard.local ? 0 : currentBoard.nodeId,
+                    modes: new Uint8Array(draft.modes),
+                    i2cSpeed: draft.i2cSpeed,
+                    settings:
+                      topology?.version === 2
+                        ? (draft.settings ?? DEFAULT_PHYSICAL_SETTINGS)
+                        : undefined,
+                    expectedTag: expectedFunctionTag(
+                      tagForSlot(fresh, currentBoard, 2),
+                      draft.automatic,
+                    ),
+                  });
+                } catch (error) {
+                  throw new Error(
+                    formatConfigureError(error, it, backboneLabel),
+                  );
+                }
+                /* APPLY_PHYSICAL ACK is authoritative; refresh status for UI. */
+                let next = fresh;
+                try {
+                  next = await client.getStatus();
+                  observeStatus(selected.bindingId, next);
+                } catch {
+                  /* Keep last known status — apply already succeeded. */
+                }
                 const actual = topologyForBoard(next, currentBoard);
-                if (
-                  !actual ||
-                  actual.modes.some((mode, index) => mode !== draft.modes[index]) ||
-                  actual.i2cSpeed !== draft.i2cSpeed
-                )
-                  throw new Error(
-                    "La board non ha confermato la configurazione dei pin.",
-                  );
-                if (
-                  draft.settings &&
-                  actual.settings &&
-                  encodePhysicalSettings(draft.settings).some(
-                    (byte, i) => byte !== encodePhysicalSettings(actual.settings!)[i],
-                  )
-                )
-                  throw new Error(
-                    "La board non ha confermato le impostazioni dell’interfaccia.",
-                  );
                 const confirmed = {
                   ...draft,
-                  settings: actual.settings,
+                  settings: actual?.settings ?? draft.settings,
                   applied: true,
                   nodeId: currentBoard.nodeId,
                   local: currentBoard.local,
-                  backendPortId: actual.backendPortId,
+                  backendPortId: actual?.backendPortId,
                 };
                 execute?.({
                   kind: "ConfirmPhysicalPins",
@@ -443,31 +495,37 @@ function BoardDetail({
   const { locale } = useLocale();
   const it = locale === "it";
   const reducedMotion = useReducedMotion();
-  const [port, setPort] = useState<"connector" | "mirror" | "user">("user");
-  const [draft, setDraft] = useState<BackbonePhysicalDraft>(
-    saved ?? {
+  const [draft, setDraft] = useState<BackbonePhysicalDraft>(() => {
+    if (saved) {
+      const variant = functionVariantOf(saved);
+      return { ...saved, variant, modes: modesForVariant(saved.modes, variant) };
+    }
+    const variant = DEFAULT_FUNCTION_VARIANT;
+    // Authoring starts empty (all NC). Device topology modes are live state,
+    // not a draft seed — otherwise GPIO often appears "already configured".
+    return {
       name: "",
-      modes: topology?.modes ?? [0, 0, 0, 0],
+      variant,
+      modes: defaultModesForVariant(variant),
       i2cSpeed: topology?.i2cSpeed ?? 0,
       settings: topology?.settings ?? DEFAULT_PHYSICAL_SETTINGS,
-    },
-  );
+    };
+  });
   const [seeded, setSeeded] = useState(!!topology || !!saved);
   if (!seeded && topology) {
     setSeeded(true);
-    setDraft({
-      name: "",
-      modes: topology.modes,
+    const variant = DEFAULT_FUNCTION_VARIANT;
+    setDraft((prev) => ({
+      ...prev,
+      variant,
+      // Keep empty / user modes; only sync speed + settings from the board.
       i2cSpeed: topology.i2cSpeed,
       settings: topology.settings ?? DEFAULT_PHYSICAL_SETTINGS,
-    });
+    }));
   }
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
-  const [protocolOpen, setProtocolOpen] = useState(false);
-  const connectorTag = tagForSlot(status, board, 1);
   const functionTag = tagForSlot(status, board, 2);
-  const connectorDefinition = catalogEntry(connectorTag, catalog);
   const functionDefinition = catalogEntry(functionTag, catalog);
   const localAutomatic =
     !!functionDefinition?.modes &&
@@ -476,6 +534,10 @@ function BoardDetail({
   const effective: BackbonePhysicalDraft = localAutomatic
     ? {
         name: functionDefinition!.name,
+        variant: functionVariantOf({
+          modes: functionDefinition!.modes!,
+          variant: draft.variant,
+        }),
         modes: functionDefinition!.modes!,
         i2cSpeed: functionDefinition!.i2cSpeed ?? 0,
         protocol: functionDefinition!.protocol,
@@ -485,12 +547,24 @@ function BoardDetail({
     : automatic
       ? {
           name: functionDefinition?.name ?? "NFC module",
+          variant: functionVariantOf({ modes: topology!.modes, variant: draft.variant }),
           modes: topology!.modes,
           i2cSpeed: topology!.i2cSpeed,
           settings: topology!.settings,
           automatic: true,
         }
       : draft;
+  const variant = functionVariantOf(effective);
+
+  function setVariant(next: FunctionModuleVariant) {
+    if (automatic || busy) return;
+    setDraft({
+      ...draft,
+      variant: next,
+      modes: modesForVariant(draft.modes, next),
+      applied: false,
+    });
+  }
   const attempted = useRef<string | null>(null);
   const onApplyRef = useRef(onApply);
   useEffect(() => {
@@ -534,7 +608,11 @@ function BoardDetail({
         if (!cancelled)
           setResult({
             ok: false,
-            text: error instanceof Error ? error.message : String(error),
+            text: formatConfigureError(
+              error,
+              it,
+              board.local ? "Master" : `0x${board.nodeId.toString(16)}`,
+            ),
           });
       });
     return () => {
@@ -543,6 +621,7 @@ function BoardDetail({
   }, [autoKey, autoModes, autoSpeed, autoSettings, ready, topology, it]);
 
   async function apply() {
+    if (busy) return;
     const invalid = validatePhysicalModes(effective.modes, effective.i2cSpeed);
     if (invalid) {
       setResult({ ok: false, text: invalid });
@@ -550,443 +629,177 @@ function BoardDetail({
     }
     setBusy(true);
     setResult(null);
+    const backboneLabel = board.local
+      ? "Master"
+      : `0x${board.nodeId.toString(16)}`;
     try {
       await onApply(effective);
       setResult({
         ok: true,
         text: it
-          ? "Pin applicati, salvati e confermati dal microcontrollore."
-          : "Pins applied, saved and acknowledged by the microcontroller.",
+          ? `Configurazione applicata (${backboneLabel})`
+          : `Configuration applied (${backboneLabel})`,
       });
     } catch (error) {
       setResult({
         ok: false,
-        text: error instanceof Error ? error.message : String(error),
+        text: formatConfigureError(error, it, backboneLabel),
       });
     } finally {
       setBusy(false);
     }
   }
 
-  const connectorPins =
-    connectorDefinition?.pins ?? Array.from({ length: 6 }, () => "?");
-  const userPins = pinsForModes(effective.modes);
   const knownLayout = topology?.layout === 1;
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto xl:flex-row xl:overflow-hidden">
-      <main className="min-w-0 shrink-0 p-5 lg:p-8 xl:flex-1 xl:overflow-auto">
-        <div className="mb-7 flex flex-wrap items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-slmd bg-brand-blue/10 text-brand-blue">
-            <Cpu size={26} />
-          </span>
-          <div>
-            <h2 className="font-heading text-xl font-bold text-ink">
-              {topology?.mcu ?? "Backbone"}
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center gap-3 px-5 pt-5 lg:px-8">
+        <span className="flex h-10 w-10 items-center justify-center rounded-slmd bg-brand-blue/10 text-brand-blue">
+          <Cpu size={20} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-heading text-lg font-bold text-ink">
+              {it ? "Module Function" : "Module Function"}
             </h2>
-            <p className="mt-1 text-xs text-ink-muted">
-              {topology
-                ? `${topology.antennas} ${it ? "antenne NFC" : "NFC antennas"} · ${knownLayout ? `2 ${it ? "alloggiamenti" : "module positions"} · 3 ${it ? "porte" : "ports"}` : `Layout ${topology.layout}`}`
-                : it
-                  ? "Aggiorna il firmware per ricevere la struttura fisica."
-                  : "Update the firmware to receive its physical layout."}
-            </p>
+            <span
+              className={`rounded-slpill px-2.5 py-0.5 text-[10px] font-semibold ${ready ? "bg-success/10 text-success" : "bg-surface text-ink-faint"}`}
+            >
+              {ready ? (it ? "Connessa" : "Connected") : it ? "Non connessa" : "Disconnected"}
+            </span>
+            {functionTag && (
+              <span className="inline-flex items-center gap-1 rounded-slpill bg-brand-blue/10 px-2 py-0.5 text-[10px] text-brand-blue">
+                <Radio size={10} /> NFC
+              </span>
+            )}
           </div>
-          <span
-            className={`ml-auto rounded-slpill px-3 py-1 text-xs ${ready ? "bg-success/10 text-success" : "bg-surface text-ink-faint"}`}
-          >
-            {ready
+          <p className="mt-0.5 text-xs text-ink-muted">
+            {functionDefinition
               ? it
-                ? "Connessa"
-                : "Connected"
+                ? (functionDefinition.nameIt ?? functionDefinition.name)
+                : functionDefinition.name
               : it
-                ? "Non connessa"
-                : "Disconnected"}
-          </span>
-        </div>
-        {!knownLayout ? (
-          <div className="rounded-slmd border border-border bg-surface p-6 text-sm text-ink-muted">
-            {it
-              ? "Questa backbone non ha ancora comunicato una topologia supportata. Le porte diventano configurabili quando arriva la descrizione dal firmware."
-              : "This Backbone has not reported a supported topology yet. Port configuration becomes available when its firmware reports the layout."}
-          </div>
-        ) : (
-          <motion.div
-            initial={reducedMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={motionTokens.duration.base}
-            className="space-y-5"
-          >
-            <ModuleCard
-              name="Connector"
-              antenna={1}
-              tag={connectorTag}
-              definition={connectorDefinition}
-              it={it}
-            >
-              <PortTile
-                title={it ? "Porta 1" : "Port 1"}
-                subtitle={
-                  it
-                    ? "Definita dal modulo · sola lettura"
-                    : "Module-defined · read only"
-                }
-                pins={connectorPins}
-                active={port === "connector"}
-                onSelect={() => setPort("connector")}
-                locked
-              />
-            </ModuleCard>
-            <div className="ml-7 flex items-center gap-3 text-xs text-ink-faint">
-              <span className="h-7 w-px bg-brand-blue/30" />
-              <Cable size={15} />
-              {it
-                ? "Collegamento pin-to-pin · 1→1 … 6→6"
-                : "Pin-to-pin connection · 1→1 … 6→6"}
-            </div>
-            <ModuleCard
-              name="Function"
-              antenna={2}
-              tag={functionTag}
-              definition={functionDefinition}
-              it={it}
-            >
-              <PortTile
-                title={it ? "Porta 1" : "Port 1"}
-                subtitle={
-                  it ? "Specchio della porta Connector" : "Mirrors the Connector port"
-                }
-                pins={connectorPins}
-                active={port === "mirror"}
-                onSelect={() => setPort("mirror")}
-                locked
-              />
-              <PortTile
-                title={it ? "Porta 2" : "Port 2"}
-                subtitle={
-                  automatic
-                    ? it
-                      ? "Configurazione automatica NFC"
-                      : "Automatic NFC configuration"
-                    : it
-                      ? "4 segnali sul micro · configurabili"
-                      : "4 MCU signals · configurable"
-                }
-                pins={userPins}
-                active={port === "user"}
-                onSelect={() => setPort("user")}
-                locked={!!automatic}
-              />
-            </ModuleCard>
-            <p className="px-1 text-xs leading-relaxed text-ink-faint">
-              {it
-                ? "La porta 2 di Function mantiene sempre 5V sul pin 1 e GND sul pin 6. Le interfacce disponibili dipendono dal cablaggio e dal firmware della backbone selezionata."
-                : "Function port 2 always has 5V on pin 1 and GND on pin 6. Available interfaces depend on the selected Backbone’s wiring and firmware."}
-            </p>
-          </motion.div>
-        )}
-      </main>
-      {knownLayout && (
-        <section className="w-full shrink-0 border-t border-border bg-surface p-5 xl:w-[390px] xl:overflow-auto xl:border-l xl:border-t-0">
-          <div className="mb-5 flex items-center gap-2">
-            <Settings2 size={17} className="text-brand-blue" />
-            <h3 className="font-heading text-base font-semibold text-ink">
-              {port === "connector" ? "Connector · " : "Function · "}
-              {it ? "Porta" : "Port"} {port === "user" ? "2" : "1"}
-            </h3>
-          </div>
-          {port !== "user" ? (
-            <div className="space-y-4">
-              <p className="text-sm leading-relaxed text-ink-muted">
-                {it
-                  ? "I pin di questa porta dipendono dal modulo Connector. La porta 1 di Function replica lo stesso collegamento, senza configurazione indipendente."
-                  : "These pins are defined by the Connector module. Function port 1 mirrors the same wiring without independent configuration."}
-              </p>
-              <PinList pins={connectorPins} />
-              <p className="rounded-slmd bg-surface-sunken p-3 text-xs text-ink-muted">
-                {connectorDefinition?.pins
-                  ? it
-                    ? "Pinout letto dal catalogo NFC."
-                    : "Pinout read from the NFC catalog."
-                  : it
-                    ? "Pinout sconosciuto: il catalogo non contiene una definizione elettrica per questo modulo."
-                    : "Unknown pinout: the catalog has no electrical definition for this module."}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <label className="block text-xs text-ink-muted">
-                {it ? "Modulo connesso" : "Connected module"}
-                <input
-                  className={`${control} mt-2`}
-                  placeholder={
-                    it ? "Nome del modulo personalizzato" : "Custom module name"
-                  }
-                  value={effective.name}
-                  disabled={!!automatic || busy}
-                  onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-                />
-              </label>
-              <p className="rounded-slmd bg-surface-sunken p-3 text-xs leading-relaxed text-ink-muted">
-                {automatic
-                  ? it
-                    ? "Modulo riconosciuto: il catalogo configura automaticamente i segnali. I pin sono in sola lettura."
-                    : "Recognized module: the catalog configures signals automatically. Pins are read only."
-                  : functionTag
-                    ? it
-                      ? "Tag NFC letto, definizione elettrica assente. Puoi creare una configurazione personalizzata."
-                      : "NFC tag read, electrical definition missing. You can create a custom configuration."
-                    : it
-                      ? "Nessun modulo NFC rilevato. Assegna i segnali al modulo personalizzato."
-                      : "No NFC module detected. Assign signals to your custom module."}
-              </p>
-              <PhysicalInterfaceEditor
-                draft={effective}
-                capabilities={topology.capabilities}
-                extended={topology.version === 2}
-                disabled={!!automatic || busy}
-                onChange={setDraft}
-              />
-              {!automatic && (
-                <button
-                  className={`${secondary} w-full`}
-                  onClick={() => {
-                    if (!draft.protocol)
-                      setDraft({
-                        ...draft,
-                        protocol: emptyProtocol(
-                          `physical-${board.nodeId}`,
-                          draft.name,
-                          draft.modes.includes(4)
-                            ? "i2c"
-                            : draft.modes.includes(6)
-                              ? "uart"
-                              : draft.modes.includes(8)
-                                ? "spi"
-                                : draft.modes.includes(12)
-                                  ? "pwm"
-                                  : "gpio",
-                        ),
-                      });
-                    setProtocolOpen(!protocolOpen);
-                  }}
-                >
-                  {it ? "Protocollo e campi del modulo" : "Module protocol and fields"}
-                </button>
-              )}
-              {protocolOpen && effective.protocol && (
-                <div className="rounded-slmd border border-border p-3">
-                  <PortMappingEditor
-                    protocol={effective.protocol}
-                    onChange={(protocol: CustomProtocol) =>
-                      setDraft({ ...draft, protocol })
-                    }
-                    onDone={() => {
-                      onSave(draft);
-                      setProtocolOpen(false);
-                    }}
-                  />
-                  <p className="mt-2 text-xs text-ink-faint">
-                    {it
-                      ? "I campi vengono salvati nel progetto; usa Device Profiles per installarne l’esecuzione sul dispositivo."
-                      : "Fields are saved in the project; use Device Profiles to install their execution on the device."}
-                  </p>
-                </div>
-              )}
-              {result && (
-                <p
-                  role="status"
-                  className={`rounded-slmd p-3 text-xs ${result.ok ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
-                >
-                  {result.text}
-                </p>
-              )}
-              <button
-                className={`${action} w-full`}
-                disabled={
-                  !ready ||
-                  busy ||
-                  !!validatePhysicalModes(effective.modes, effective.i2cSpeed)
-                }
-                onClick={() => void apply()}
-              >
-                {busy ? (
-                  <LoaderCircle size={16} className="animate-spin" />
-                ) : (
-                  <Check size={16} />
-                )}
-                {automatic
-                  ? it
-                    ? "Riapplica configurazione NFC"
-                    : "Reapply NFC configuration"
-                  : it
-                    ? "Applica pin alla backbone"
-                    : "Apply pins to Backbone"}
-              </button>
-              {!automatic && (
-                <button
-                  className={`${secondary} w-full`}
-                  disabled={busy}
-                  onClick={() => {
-                    onSave(draft);
-                    setResult({
-                      ok: true,
-                      text: it
-                        ? "Bozza salvata nel progetto."
-                        : "Draft saved in the project.",
-                    });
-                  }}
-                >
-                  {it ? "Salva bozza" : "Save draft"}
-                </button>
-              )}
-              {functionTag && !automatic && (
-                <button
-                  className={`${secondary} w-full`}
-                  disabled={!draft.name.trim() || busy}
-                  onClick={() => {
-                    onRegister({
-                      registryId: functionTag.registryId ?? 0,
-                      vendorId: functionTag.vendorId ?? 0,
-                      moduleTypeId: functionTag.moduleTypeId ?? 0,
-                      name: draft.name,
-                      pins: userPins,
-                      modes: draft.modes,
-                      i2cSpeed: draft.i2cSpeed,
-                      settings: draft.settings,
-                      protocol: draft.protocol,
-                    });
-                    setResult({
-                      ok: true,
-                      text: it
-                        ? "Definizione aggiunta al catalogo di questo progetto."
-                        : "Definition added to this project’s catalog.",
-                    });
-                  }}
-                >
-                  {it ? "Associa al tag nel catalogo" : "Associate with tag in catalog"}
-                </button>
-              )}
-            </div>
-          )}
-        </section>
-      )}
-    </div>
-  );
-}
-
-function ModuleCard({
-  name,
-  antenna,
-  tag,
-  definition,
-  it,
-  children,
-}: {
-  readonly name: string;
-  readonly antenna: number;
-  readonly tag?: NfcTagStatus;
-  readonly definition?: PhysicalCatalogEntry;
-  readonly it: boolean;
-  readonly children: React.ReactNode;
-}) {
-  return (
-    <section className="overflow-hidden rounded-slmd border border-border bg-surface shadow-e1">
-      <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
-        <Layers size={20} className="text-brand-blue" />
-        <div className="flex-1">
-          <h3 className="font-heading text-base font-semibold text-ink">{name}</h3>
-          <p className="mt-1 text-xs text-ink-muted">
-            {definition
-              ? it
-                ? (definition.nameIt ?? definition.name)
-                : definition.name
-              : tag
-                ? it
-                  ? "Modulo sconosciuto"
-                  : "Unknown module"
-                : it
-                  ? "Nessun modulo rilevato"
-                  : "No module detected"}
+                ? "Configura il connettore fisico della Backbone"
+                : "Configure the Backbone physical connector"}
+            {topology?.mcu ? ` · ${topology.mcu}` : ""}
           </p>
         </div>
-        <span
-          className={`flex items-center gap-1.5 rounded-slpill px-2 py-1 text-[10px] ${tag ? "bg-brand-blue/10 text-brand-blue" : "bg-surface-sunken text-ink-faint"}`}
-        >
-          <Radio size={12} />
-          NFC {antenna}
-          {tag ? " · ✓" : ""}
-        </span>
+        <label className="flex items-center gap-2 text-xs text-ink-muted">
+          {it ? "Versione" : "Version"}
+          <select
+            className={`${control} w-auto min-w-[8.5rem]`}
+            value={variant}
+            disabled={!!automatic || busy}
+            onChange={(event) => setVariant(event.target.value as FunctionModuleVariant)}
+          >
+            <option value="v2">V2 · 12 pin</option>
+            <option value="v1">V1 · 6 pin</option>
+          </select>
+        </label>
       </div>
-      <div className="grid gap-3 p-4 2xl:grid-cols-2">{children}</div>
-      {tag && (
-        <div className="px-5 pb-3 font-mono text-[10px] text-ink-faint">
-          {tag.registryId}:{tag.vendorId}:{tag.moduleTypeId} · UID{" "}
-          {[...tag.uid]
-            .map((byte) => byte.toString(16).padStart(2, "0"))
-            .join("")
-            .toUpperCase()}
-        </div>
-      )}
-    </section>
-  );
-}
 
-function PortTile({
-  title,
-  subtitle,
-  pins,
-  active,
-  locked,
-  onSelect,
-}: {
-  readonly title: string;
-  readonly subtitle: string;
-  readonly pins: readonly string[];
-  readonly active: boolean;
-  readonly locked: boolean;
-  readonly onSelect: () => void;
-}) {
-  return (
-    <button
-      onClick={onSelect}
-      className={`rounded-slmd border p-3 text-left transition-all ${active ? "border-brand-blue bg-brand-blue/5 shadow-e1" : "border-border hover:border-border-strong hover:bg-surface-raised"}`}
-    >
-      <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-        {title}
-        {locked && <LockKeyhole size={12} className="text-ink-faint" />}
-        <ChevronRight size={14} className="ml-auto text-ink-faint" />
-      </div>
-      <p className="mt-1 text-[11px] text-ink-muted">{subtitle}</p>
-      <div className="mt-4 grid grid-cols-6 gap-1.5">
-        {pins.map((pin, i) => (
-          <div key={i} className="min-w-0 text-center">
-            <span
-              className={`mx-auto block h-3 w-3 rounded-full ${pin === "5V" ? "bg-brand-orange" : pin === "GND" ? "bg-ink-faint" : pin === "?" || pin === "NC" ? "bg-border-strong" : "bg-brand-blue"}`}
-            />
-            <span className="mt-1 block text-[9px] text-ink-faint">{i + 1}</span>
-            <span title={pin} className="block truncate text-[9px] text-ink-muted">
-              {pin}
-            </span>
+      <motion.div
+          initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={motionTokens.duration.base}
+          className="mx-auto flex w-full max-w-[1440px] min-h-0 flex-1 flex-col gap-4 px-5 py-4 lg:px-8"
+        >
+          {!knownLayout && (
+            <div className="rounded-slmd border border-border bg-surface px-4 py-3 text-xs text-ink-muted">
+              {it
+                ? "Topologia non ancora ricevuta dal firmware: puoi configurare in locale; l’applicazione sulla Backbone richiede la connessione."
+                : "Topology not yet reported by firmware: you can configure locally; applying to the Backbone requires a connection."}
+            </div>
+          )}
+          <PhysicalInterfaceEditor
+            draft={effective}
+            capabilities={topology?.capabilities ?? AUTHORING_CAPABILITIES}
+            extended={topology?.version === 2 || !topology}
+            disabled={!!automatic || busy}
+            automatic={!!automatic}
+            onChange={(next) =>
+              setDraft({
+                ...next,
+                variant: functionVariantOf(next),
+                applied: false,
+              })
+            }
+          />
+
+          {result && (
+            <p
+              role="status"
+              className={`rounded-slmd p-3 text-xs ${result.ok ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+            >
+              {result.text}
+            </p>
+          )}
+
+          <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+            <button
+              className={action}
+              disabled={
+                !ready || busy || !!validatePhysicalModes(effective.modes, effective.i2cSpeed)
+              }
+              onClick={() => void apply()}
+            >
+              {busy ? (
+                <LoaderCircle size={16} className="animate-spin" />
+              ) : (
+                <Check size={16} />
+              )}
+              {automatic
+                ? it
+                  ? "Riapplica NFC"
+                  : "Reapply NFC"
+                : it
+                  ? "Configura"
+                  : "Configure"}
+            </button>
+            {!automatic && (
+              <button
+                className={secondary}
+                disabled={busy}
+                onClick={() => {
+                  onSave(draft);
+                  setResult({
+                    ok: true,
+                    text: it ? "Bozza salvata." : "Draft saved.",
+                  });
+                }}
+              >
+                {it ? "Salva bozza" : "Save draft"}
+              </button>
+            )}
+            {functionTag && !automatic && (
+              <button
+                className={secondary}
+                disabled={!draft.name.trim() || busy}
+                onClick={() => {
+                  onRegister({
+                    registryId: functionTag.registryId ?? 0,
+                    vendorId: functionTag.vendorId ?? 0,
+                    moduleTypeId: functionTag.moduleTypeId ?? 0,
+                    name: draft.name || "Module Function",
+                    pins: pinsForModes(draft.modes, functionVariantOf(draft)),
+                    modes: draft.modes,
+                    i2cSpeed: draft.i2cSpeed,
+                    settings: draft.settings,
+                    protocol: draft.protocol,
+                  });
+                  setResult({
+                    ok: true,
+                    text: it
+                      ? "Definizione aggiunta al catalogo."
+                      : "Definition added to catalog.",
+                  });
+                }}
+              >
+                {it ? "Catalogo NFC" : "NFC catalog"}
+              </button>
+            )}
           </div>
-        ))}
-      </div>
-    </button>
-  );
-}
-
-function PinList({ pins }: { readonly pins: readonly string[] }) {
-  return (
-    <div className="space-y-2">
-      {pins.map((pin, i) => (
-        <div
-          key={i}
-          className="flex justify-between rounded-slmd border border-border px-3 py-2 text-sm"
-        >
-          <span>Pin {i + 1}</span>
-          <span>{pin}</span>
-          <LockKeyhole size={12} />
-        </div>
-      ))}
+        </motion.div>
     </div>
   );
 }
@@ -1036,8 +849,8 @@ function CatalogDialog({
         </div>
         <p className="my-4 text-sm leading-relaxed text-ink-muted">
           {it
-            ? "Il catalogo si sincronizza con il server community. Il riconoscimento usa registro, produttore e tipo modulo. Un modulo senza pinout elettrico rimane configurabile manualmente sulla porta Function 2."
-            : "The catalog synchronizes with the community server. Matching uses registry, vendor and module type. A module without electrical pinout remains manually configurable on Function port 2."}
+            ? "Il catalogo si sincronizza con il server community. Il riconoscimento usa registro, produttore e tipo modulo. Un modulo senza pinout elettrico rimane configurabile manualmente sul Module Function."
+            : "The catalog synchronizes with the community server. Matching uses registry, vendor and module type. A module without electrical pinout remains manually configurable on Module Function."}
         </p>
         <div className="space-y-3">
           {entries.map((entry) => (

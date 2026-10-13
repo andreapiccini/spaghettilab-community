@@ -48,15 +48,12 @@ function nextSpawnPosition(existingNodeCount: number, perRow = 4, colStep = 260,
  * non cambia [questo] hash" — without claiming to be a compiled artifact it isn't.
  */
 export function PhysicalCompositionScreen() {
-  const { navigate } = useSession();
   return (
     <ReactFlowProvider>
       <div className="flex h-full min-h-0 flex-col">
-        <div className="flex shrink-0 gap-2 border-b border-border bg-surface px-4 py-2">
-          <button type="button" className="rounded-slpill bg-brand-blue/10 px-3 py-1 text-xs text-brand-blue">Modules</button>
-          <button type="button" className="rounded-slpill px-3 py-1 text-xs text-ink-muted" onClick={() => navigate("processing-graph")}>Logic</button>
+        <div className="min-h-0 flex-1">
+          <BackbonePhysicalScreen />
         </div>
-        <div className="min-h-0 flex-1"><BackbonePhysicalScreen /></div>
       </div>
     </ReactFlowProvider>
   );
@@ -333,11 +330,6 @@ export function PhysicalCompositionScreenInner() {
             <CircleAlert size={14} />
             {copy.addressConflicts(collisionCount)}
           </span>
-        )}
-        {selected && !noPorts && (
-          <button type="button" onClick={() => navigate("deploy-diff")} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
-            {copy.sendToDeploy}
-          </button>
         )}
       </div>
 
