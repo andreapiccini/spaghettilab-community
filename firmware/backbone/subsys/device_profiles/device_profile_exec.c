@@ -13,11 +13,19 @@ LOG_MODULE_DECLARE(spaghetti_device_profile,
 
 static struct spaghetti_profile_rx_capture init_rx;
 static k_tid_t capture_owner;
+static bool capture_commands;
 void spaghetti_device_profile_capture_begin(void)
 {
 	memset(&init_rx, 0, sizeof(init_rx));
 	capture_owner = k_current_get();
+	capture_commands = false;
 }
+void spaghetti_device_profile_capture_command_begin(void)
+{
+	spaghetti_device_profile_capture_begin();
+	capture_commands = true;
+}
+
 void spaghetti_device_profile_capture_finish(struct spaghetti_profile_rx_capture *out)
 {
 	if (capture_owner == k_current_get()) {
@@ -778,6 +786,13 @@ int spaghetti_device_profile_exec(
 				dst->size = 2U;
 			}
 			break;
+		case SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT:
+			err = temp_get(temps, op->dst, &dst);
+			if (err == 0) {
+				err = spaghetti_device_profile_pack_argument(op, binding->arguments, dst->bytes);
+				if (err == 0) dst->size = op->imm0;
+			}
+			break;
 		case SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD:
 			err = temp_get(temps, op->src_a, &src_a);
 			if (err == 0) {
@@ -806,7 +821,7 @@ int spaghetti_device_profile_exec(
 		if (err < 0) {
 			return err;
 		}
-		if (capture_owner == k_current_get() && ops == profile->init_ops &&
+		if (capture_owner == k_current_get() && (ops == profile->init_ops || capture_commands) &&
 		    (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_READ ||
 		     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ)) {
 			if (init_rx.count < SPAGHETTI_PROFILE_RX_MAX) {
@@ -819,5 +834,37 @@ int spaghetti_device_profile_exec(
 		}
 	}
 
+	return 0;
+}
+
+int spaghetti_device_profile_pack_argument(const struct spaghetti_device_profile_op *op, const struct spaghetti_property_set *arguments, uint8_t out[8])
+{
+	if (op == NULL || out == NULL || op->imm0 == 0U || op->imm0 > 8U) return -EINVAL;
+	const struct spaghetti_value *value = arguments ? spaghetti_property_find(arguments, op->src_a) : NULL;
+	uint64_t raw = (uint64_t)op->imm2 | ((uint64_t)op->imm3 << 32);
+	if (value == NULL) {
+		if (op->src_b) return -ENOENT;
+		if (op->imm0 < 8U && (raw >> (op->imm0 * 8U)) != 0U) return -ERANGE;
+	} else if (value->type == SPAGHETTI_VALUE_BYTES) {
+		if (value->data.bytes.size != op->imm0) return -ERANGE;
+		memcpy(out, value->data.bytes.bytes, op->imm0);
+		return 0;
+	} else if (value->type == SPAGHETTI_VALUE_UINT64) {
+		raw = value->data.unsigned_integer;
+		if (op->imm0 < 8U && (raw >> (op->imm0 * 8U)) != 0U) return -ERANGE;
+	} else if (value->type == SPAGHETTI_VALUE_INT64) {
+		int64_t signed_value = value->data.signed_integer;
+		if (op->imm0 < 8U) {
+			int64_t limit = 1LL << (op->imm0 * 8U - 1U);
+			if (signed_value < -limit || signed_value >= limit) return -ERANGE;
+		}
+		raw = (uint64_t)signed_value;
+	} else if (value->type == SPAGHETTI_VALUE_BOOL) {
+		raw = value->data.boolean ? 1U : 0U;
+	} else return -ENOTSUP;
+	for (size_t i = 0; i < op->imm0; ++i) {
+		size_t shift = op->imm1 ? i : op->imm0 - i - 1;
+		out[i] = (uint8_t)(raw >> (shift * 8U));
+	}
 	return 0;
 }

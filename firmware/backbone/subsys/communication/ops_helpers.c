@@ -289,3 +289,38 @@ void spaghetti_ops_sha256(const uint8_t *data, size_t size, uint8_t out[32])
 		out[(idx * 4U) + 3U] = (uint8_t)state[idx];
 	}
 }
+
+int spaghetti_ops_decode_arguments(const struct spaghetti_protocol_payload *payload, struct spaghetti_property_set *out)
+{
+	if (payload == NULL || out == NULL) return -EINVAL;
+	memset(out, 0, sizeof(*out));
+	ZCBOR_STATE_D(state, 6, payload->bytes, payload->size, 1U, 0U);
+	bool found = false;
+	if (!zcbor_map_start_decode(state)) return -EBADMSG;
+	while (!zcbor_array_at_end(state)) {
+		uint32_t key;
+		if (!zcbor_uint32_decode(state, &key)) return -EBADMSG;
+		if (key != 2U) { if (!zcbor_any_skip(state, NULL)) return -EBADMSG; continue; }
+		if (found || !zcbor_map_start_decode(state)) return -EBADMSG;
+		found = true;
+		while (!zcbor_array_at_end(state)) {
+			uint32_t id;
+			if (out->field_count >= SPAGHETTI_PROPERTY_MAX_FIELDS || !zcbor_uint32_decode(state, &id) || id == 0U || id > UINT16_MAX) return -EBADMSG;
+			for (size_t i = 0; i < out->field_count; ++i) if (out->fields[i].field_id == id) return -EEXIST;
+			struct spaghetti_value *value = &out->fields[out->field_count++];
+			value->field_id = id;
+			if (state->payload >= state->payload_end) return -EBADMSG;
+			zcbor_major_type_t major = ZCBOR_MAJOR_TYPE(*state->payload);
+			if (major == ZCBOR_MAJOR_TYPE_PINT) { value->type = SPAGHETTI_VALUE_UINT64; if (!zcbor_uint64_decode(state, &value->data.unsigned_integer)) return -EBADMSG; }
+			else if (major == ZCBOR_MAJOR_TYPE_NINT) { value->type = SPAGHETTI_VALUE_INT64; if (!zcbor_int64_decode(state, &value->data.signed_integer)) return -EBADMSG; }
+			else if (major == ZCBOR_MAJOR_TYPE_SIMPLE) { value->type = SPAGHETTI_VALUE_BOOL; if (!zcbor_bool_decode(state, &value->data.boolean)) return -EBADMSG; }
+			else if (major == ZCBOR_MAJOR_TYPE_BSTR) {
+				struct zcbor_string bytes;
+				if (!zcbor_bstr_decode(state, &bytes) || bytes.len > SPAGHETTI_VALUE_BYTES_MAX) return -EMSGSIZE;
+				value->type = SPAGHETTI_VALUE_BYTES; value->data.bytes.size = bytes.len; memcpy(value->data.bytes.bytes, bytes.value, bytes.len);
+			} else return -ENOTSUP;
+		}
+		if (!zcbor_map_end_decode(state)) return -EBADMSG;
+	}
+	return zcbor_map_end_decode(state) && state->payload == state->payload_end ? 0 : -EBADMSG;
+}

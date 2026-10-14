@@ -65,6 +65,8 @@ int spaghetti_ops_decode_bstr(
 	const uint8_t **out_bytes,
 	size_t *out_size);
 
+int spaghetti_ops_decode_arguments(const struct spaghetti_protocol_payload *payload, struct spaghetti_property_set *out);
+
 void spaghetti_ops_sha256(
 	const uint8_t *data,
 	size_t size,

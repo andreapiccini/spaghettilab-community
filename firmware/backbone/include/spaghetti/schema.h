@@ -157,6 +157,7 @@ struct spaghetti_record_payload {
 	enum spaghetti_record_kind kind; /**< Sample or event classification. */
 	char schema_id[SPAGHETTI_SCHEMA_ID_SIZE]; /**< Owned matching schema_id. */
 	uint16_t schema_version; /**< Matching schema version. */
+	uint16_t action_id; /**< 0 for legacy samples, otherwise completed profile action. */
 	struct spaghetti_property_set values; /**< Owned typed fields. */
 };
 
@@ -179,6 +180,7 @@ struct spaghetti_record {
 struct spaghetti_module_command {
 	uint16_t command_id; /**< Stable command identifier. */
 	struct spaghetti_property_set arguments; /**< Owned argument values. */
+	struct spaghetti_record_payload *result; /**< Optional borrowed output, valid only on success. */
 };
 
 /**

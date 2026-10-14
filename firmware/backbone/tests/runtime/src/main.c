@@ -509,4 +509,56 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	zassert_ok(zbus_obs_set_enable(&record_test_subscriber, false));
 }
 
+static unsigned action_emits;
+static int capture_action(const struct spaghetti_rule_action *action, void *user)
+{
+	ARG_UNUSED(user);
+	zassert_equal(action->target_key, 20U);
+	zassert_equal(action->command.command_id, 2U);
+	zassert_equal(action->command.arguments.fields[0].field_id, 1U);
+	zassert_equal(action->command.arguments.fields[0].data.signed_integer, -7);
+	action_emits++;
+	return 0;
+}
+ZTEST(runtime, test_device_action_filter_edge_and_parameter)
+{
+	const struct spaghetti_rule_driver *driver = spaghetti_rule_registry_find("device-action");
+	zassert_not_null(driver);
+	struct spaghetti_property_set config = { .field_count = 7U };
+	uint64_t settings[] = {10, 3, 20, 2, 1, 1, 1};
+	uint16_t ids[] = {1, 2, 3, 4, 5, 6, 8};
+	for (size_t i = 0; i < 7; i++) {
+		config.fields[i].field_id = ids[i];
+		config.fields[i].type = SPAGHETTI_VALUE_UINT64;
+		config.fields[i].data.unsigned_integer = settings[i];
+	}
+	void *context = NULL;
+	zassert_ok(driver->ops->init(&config, &context));
+	struct spaghetti_record record = { .source_key = 10U };
+	record.payload.action_id = 3;
+	record.payload.values.field_count = 1;
+	record.payload.values.fields[0].field_id = 1;
+	record.payload.values.fields[0].type = SPAGHETTI_VALUE_INT64;
+	record.payload.values.fields[0].data.signed_integer = -7;
+	action_emits = 0;
+	record.source_key = 11;
+	zassert_ok(driver->ops->on_record(context, &record, capture_action, NULL));
+	zassert_equal(action_emits, 0);
+	record.source_key = 10;
+	record.payload.action_id = 2;
+	zassert_ok(driver->ops->on_record(context, &record, capture_action, NULL));
+	zassert_equal(action_emits, 0);
+	record.payload.action_id = 3;
+	zassert_ok(driver->ops->on_record(context, &record, capture_action, NULL));
+	zassert_equal(action_emits, 1);
+	zassert_ok(driver->ops->on_record(context, &record, capture_action, NULL));
+	zassert_equal(action_emits, 1);
+	record.payload.values.fields[0].data.signed_integer = 0;
+	zassert_ok(driver->ops->on_record(context, &record, capture_action, NULL));
+	record.payload.values.fields[0].data.signed_integer = -7;
+	zassert_ok(driver->ops->on_record(context, &record, capture_action, NULL));
+	zassert_equal(action_emits, 2);
+	zassert_ok(driver->ops->deinit(context));
+}
+
 ZTEST_SUITE(runtime, NULL, NULL, NULL, NULL, NULL);

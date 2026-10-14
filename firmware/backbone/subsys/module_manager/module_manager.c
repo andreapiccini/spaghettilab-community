@@ -790,8 +790,9 @@ int spaghetti_module_manager_command(
 		goto unlock;
 	}
 
-	err = spaghetti_property_validate(&command->arguments,
-					  descriptor->argument_schema);
+	err = slot->module.driver->ops->validate_command != NULL ?
+		slot->module.driver->ops->validate_command(&slot->module, command) :
+		spaghetti_property_validate(&command->arguments, descriptor->argument_schema);
 	if (err < 0) {
 		goto unlock;
 	}

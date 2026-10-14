@@ -69,6 +69,7 @@ struct spaghetti_runtime_rule_slot {
 
 struct spaghetti_runtime_event {
 	spaghetti_module_id_t source_id;
+	uint8_t command_depth;
 	spaghetti_module_key_t source_key;
 	struct spaghetti_record_payload payload;
 };
@@ -146,17 +147,32 @@ static int emit_rule_action(const struct spaghetti_rule_action *action,
 		return (err < 0) ? err : -ENOENT;
 	}
 
-	err = spaghetti_module_manager_command(target.id, &action->command);
-	if (err < 0) {
-		LOG_WRN("rule action failed: key=%u err=%d", action->target_key,
-			err);
-		++action_errors;
+	uint8_t depth = user_data ? *(uint8_t *)user_data : 0U;
+	if (depth >= 8U) { ++action_errors; return -ELOOP; }
+	struct spaghetti_record_payload *result = k_calloc(1, sizeof(*result));
+	struct spaghetti_module_command *command = k_malloc(sizeof(*command));
+	if (result == NULL || command == NULL) { k_free(result); k_free(command); return -ENOMEM; }
+	*command = action->command;
+	command->result = result;
+	err = spaghetti_module_manager_command(target.id, command);
+	if (err == 0 && result->schema_id[0] != '\0') {
+		struct spaghetti_runtime_event *event = k_calloc(1, sizeof(*event));
+		if (event == NULL) err = -ENOMEM;
+		else {
+			event->source_id = target.id; event->source_key = target.key;
+			event->payload = *result; event->command_depth = depth + 1U;
+			err = k_msgq_put(&runtime_event_queue, event, K_NO_WAIT);
+			k_free(event);
+			if (err == 0) k_sem_give(&runtime_wake_sem);
+		}
 	}
+	k_free(command); k_free(result);
+	if (err < 0) { ++action_errors; LOG_WRN("rule action failed: key=%u err=%d", action->target_key, err); }
 
 	return err;
 }
 
-static void dispatch_rules(const struct spaghetti_record *record)
+static void dispatch_rules(const struct spaghetti_record *record, uint8_t depth)
 {
 	struct spaghetti_runtime_rule_slot local_slots[SPAGHETTI_CONFIG_MAX_RULES];
 	size_t local_count;
@@ -182,7 +198,7 @@ static void dispatch_rules(const struct spaghetti_record *record)
 		}
 
 		err = slot->driver->ops->on_record(slot->context, record,
-						   emit_rule_action, NULL);
+						   emit_rule_action, &depth);
 		if (err < 0) {
 			LOG_WRN("rule on_record failed: key=%u err=%d",
 				slot->key, err);
@@ -197,16 +213,16 @@ static int publish_derived_record(const struct spaghetti_record *record,
 {
 	int err;
 
-	ARG_UNUSED(user_data);
+	uint8_t depth = user_data != NULL ? *(const uint8_t *)user_data : 0U;
 	err = spaghetti_data_publish(record, K_NO_WAIT);
 	if (err < 0) {
 		return err;
 	}
-	dispatch_rules(record);
+	dispatch_rules(record, depth);
 	return 0;
 }
 
-static int publish_record(struct spaghetti_record *record)
+static int publish_record(struct spaghetti_record *record, uint8_t depth)
 {
 	int err;
 
@@ -219,8 +235,8 @@ static int publish_record(struct spaghetti_record *record)
 	}
 
 	(void)spaghetti_processing_on_record(record, publish_derived_record,
-					     NULL);
-	dispatch_rules(record);
+					     &depth);
+	dispatch_rules(record, depth);
 	return 0;
 }
 
@@ -264,7 +280,7 @@ static void process_event(struct spaghetti_runtime_event *event)
 			break;
 		}
 	}
-	if (job_idx == SIZE_MAX) {
+	if (job_idx == SIZE_MAX && event->command_depth == 0U) {
 		k_mutex_unlock(&runtime_lock);
 		return;
 	}
@@ -273,16 +289,18 @@ static void process_event(struct spaghetti_runtime_event *event)
 	record.source_id = event->source_id;
 	record.source_key = event->source_key;
 	record.timestamp_ms = k_uptime_get();
-	if (jobs[job_idx].sequence == UINT32_MAX) {
-		jobs[job_idx].sequence = 0U;
+	if (job_idx != SIZE_MAX) {
+		if (jobs[job_idx].sequence == UINT32_MAX) jobs[job_idx].sequence = 0U;
+		record.sequence = ++jobs[job_idx].sequence;
+	} else {
+		static uint32_t command_sequence;
+		record.sequence = ++command_sequence;
 	}
-	++jobs[job_idx].sequence;
-	record.sequence = jobs[job_idx].sequence;
 	record.payload = event->payload;
 	++active_operations;
 	k_mutex_unlock(&runtime_lock);
 
-	(void)publish_record(&record);
+	(void)publish_record(&record, event->command_depth);
 	complete_operation();
 }
 
@@ -333,7 +351,7 @@ static void process_due_jobs(int64_t now_ms)
 			LOG_WRN("sample read failed: key=%u err=%d",
 				job.source_key, err);
 		} else {
-			(void)publish_record(&record);
+			(void)publish_record(&record, 0U);
 		}
 
 		complete_operation();

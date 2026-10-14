@@ -38,6 +38,9 @@ struct spaghetti_port {
 };
 
 struct fake_bus {
+	uint32_t transfers;
+	uint8_t last_write[8];
+	size_t last_write_len;
 	uint8_t i2c_mem[0x80][256];
 	uint8_t spi_last_tx[16];
 	size_t spi_last_tx_len;
@@ -335,8 +338,11 @@ int spaghetti_port_i2c_transfer(
 		return bus.i2c_error;
 	}
 
+	++bus.transfers;
 	if ((request->message_count == 1U) &&
 	    ((request->messages[0].flags & I2C_MSG_READ) == 0U)) {
+		bus.last_write_len = request->messages[0].len;
+		memcpy(bus.last_write, request->messages[0].buf, MIN(bus.last_write_len, sizeof(bus.last_write)));
 		return 0;
 	}
 
@@ -1121,6 +1127,72 @@ ZTEST(device_profiles, test_init_rx_capture)
 	spaghetti_device_profile_capture_finish(&rx);
 	zassert_equal(rx.count, SPAGHETTI_PROFILE_RX_MAX);
 	zassert_true(rx.truncated);
+}
+
+
+ZTEST(device_profiles, test_actions_and_argument_preflight)
+{
+	struct spaghetti_device_profile profile;
+	fill_base(&profile, "actions", SPAGHETTI_PORT_TRANSPORT_I2C, SPAGHETTI_PORT_CAP_I2C);
+	profile.action_count = 2;
+	profile.actions[0] = (struct spaghetti_device_profile_action){ 1, 0, 4 };
+	profile.actions[1] = (struct spaghetti_device_profile_action){ 2, 4, 5 };
+	profile.sample_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 1, 0, 0x75, 0);
+	profile.sample_ops[1] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ, 1, 0, 0, 1, 1, 100, 0);
+	profile.sample_ops[2] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD, FIELD_VALUE, 1, 0, 1, 1, 0, 1);
+	profile.sample_ops[3] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD, 0, 0, 0, 0, 0, 0, 0);
+	profile.sample_ops[4] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 1, 0, 0x6b, 0);
+	profile.sample_ops[5] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT, 1, 1, 1, 1, 0, 0, 0);
+	profile.sample_ops[6] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_CONCAT, 2, 0, 1, 0, 0, 0, 0);
+	profile.sample_ops[7] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE, 0, 2, 0, 2, 100, 0, 0);
+	profile.sample_ops[8] = profile.sample_ops[3];
+	profile.sample_count = 9;
+	zassert_ok(spaghetti_device_profile_install_decoded(&profile));
+	bus.i2c_error = 0; bus.i2c_mem[0x68][0x75] = 0x68;
+	spaghetti_module_id_t module;
+	zassert_ok(configure_module(80, "actions", 0x68, 0xff, 0xff, &module));
+	struct spaghetti_record_payload output;
+	struct spaghetti_module_command command = { .command_id = 1, .result = &output };
+	zassert_ok(spaghetti_module_manager_command(module, &command));
+	zassert_equal(output.action_id, 1);
+	zassert_equal(output.values.fields[0].data.signed_integer, 0x68);
+	command.command_id = 2;
+	uint32_t before = bus.transfers;
+	zassert_equal(spaghetti_module_manager_command(module, &command), -ENOENT);
+	zassert_equal(bus.transfers, before);
+	command.arguments.field_count = 1;
+	command.arguments.fields[0] = (struct spaghetti_value){ .field_id = 1, .type = SPAGHETTI_VALUE_UINT64, .data.unsigned_integer = 256 };
+	zassert_equal(spaghetti_module_manager_command(module, &command), -ERANGE);
+	zassert_equal(bus.transfers, before);
+	command.arguments.fields[0].data.unsigned_integer = 0;
+	zassert_ok(spaghetti_module_manager_command(module, &command));
+	zassert_equal(output.action_id, 2);
+	zassert_equal(output.values.field_count, 0);
+	zassert_equal(bus.last_write_len, 2);
+	zassert_equal(bus.last_write[0], 0x6b); zassert_equal(bus.last_write[1], 0);
+	command.command_id = 8;
+	zassert_equal(spaghetti_module_manager_command(module, &command), -ENOTSUP);
+	zassert_ok(spaghetti_module_manager_remove(module, 1));
+	zassert_ok(spaghetti_device_profile_remove("actions", 1));
+	profile.actions[1].first = 3;
+	zassert_equal(spaghetti_device_profile_validate(&profile, NULL), -EINVAL);
+}
+
+ZTEST(device_profiles, test_argument_endian_signed_bytes)
+{
+	struct spaghetti_device_profile_op op = make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT, 0, 1, 1, 2, 0, 0, 0);
+	struct spaghetti_property_set args = { .field_count = 1, .fields = {{ .field_id = 1, .type = SPAGHETTI_VALUE_UINT64, .data.unsigned_integer = 0x1234 }} };
+	uint8_t out[8];
+	zassert_ok(spaghetti_device_profile_pack_argument(&op, &args, out));
+	zassert_equal(out[0], 0x12); zassert_equal(out[1], 0x34);
+	op.imm1 = 1;
+	zassert_ok(spaghetti_device_profile_pack_argument(&op, &args, out));
+	zassert_equal(out[0], 0x34); zassert_equal(out[1], 0x12);
+	args.fields[0].type = SPAGHETTI_VALUE_INT64; args.fields[0].data.signed_integer = -2;
+	zassert_ok(spaghetti_device_profile_pack_argument(&op, &args, out));
+	zassert_equal(out[0], 0xfe); zassert_equal(out[1], 0xff);
+	args.fields[0].type = SPAGHETTI_VALUE_BYTES; args.fields[0].data.bytes.size = 1;
+	zassert_equal(spaghetti_device_profile_pack_argument(&op, &args, out), -ERANGE);
 }
 
 ZTEST_SUITE(device_profiles, NULL, device_profiles_setup, NULL, NULL, NULL);

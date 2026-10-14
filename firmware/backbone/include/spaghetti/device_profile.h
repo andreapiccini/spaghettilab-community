@@ -27,10 +27,11 @@
 #define SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS 8U
 
 /** Opcode vocabulary revision understood by this firmware image. */
-#define SPAGHETTI_DEVICE_PROFILE_OPCODE_VERSION 2U
+#define SPAGHETTI_DEVICE_PROFILE_OPCODE_VERSION 3U
 
 /** Compact CBOR map wire revision decoded by install. */
-#define SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION 1U
+#define SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION 2U
+#define SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS 8U
 
 /** Maximum sample-record fields owned by one profile. */
 #define SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS SPAGHETTI_PROPERTY_MAX_FIELDS
@@ -77,6 +78,7 @@ enum spaghetti_device_profile_opcode {
 	SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD = 22U, /**< Finalize sample record. */
 	SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ = 23U, /**< 1-Wire write then read. */
 	SPAGHETTI_DEVICE_PROFILE_OP_UART_READ = 24U, /**< Read imm0 UART bytes. */
+	SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT = 26U, /**< Pack a command argument into temp. */
 	SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO = 25U, /**< Bounded digital-input poll. */
 };
 
@@ -117,6 +119,12 @@ struct spaghetti_device_profile_field {
  * never published until validation and hashing succeed. Instance Port, Bay,
  * label, and bus address are not part of this object.
  */
+struct spaghetti_device_profile_action {
+	uint8_t id; /**< Command ID 1..8, stable across profile revisions. */
+	uint8_t first; /**< Offset in the shared sample op pool. */
+	uint8_t count; /**< Bounded, independent action plan length. */
+};
+
 struct spaghetti_device_profile {
 	char profile_id[SPAGHETTI_DEVICE_PROFILE_ID_SIZE]; /**< Owned stable model ID. */
 	uint16_t version; /**< Incompatible profile revision. */
@@ -140,6 +148,8 @@ struct spaghetti_device_profile {
 	struct spaghetti_device_profile_field
 		sample_fields[SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS]; /**< Owned fields. */
 	size_t sample_field_count; /**< Valid entries in @ref sample_fields. */
+	uint8_t action_count;
+	struct spaghetti_device_profile_action actions[SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS];
 };
 
 /**
@@ -154,6 +164,8 @@ struct spaghetti_profile_rx_capture {
 	uint8_t bytes[SPAGHETTI_PROFILE_RX_MAX][SPAGHETTI_VALUE_BYTES_MAX];
 };
 void spaghetti_device_profile_capture_begin(void);
+void spaghetti_device_profile_capture_command_begin(void);
+int spaghetti_device_profile_pack_argument(const struct spaghetti_device_profile_op *op, const struct spaghetti_property_set *arguments, uint8_t out[8]);
 void spaghetti_device_profile_capture_finish(struct spaghetti_profile_rx_capture *out);
 
 struct spaghetti_device_profile_budget {
@@ -194,6 +206,7 @@ struct spaghetti_device_profile_failure {
  * Values come from Module config property fields, not from the shared profile.
  */
 struct spaghetti_device_profile_binding {
+	const struct spaghetti_property_set *arguments; /**< Borrowed for one command only. */
 	uint16_t i2c_address; /**< 7-bit I2C address when transport is I2C. */
 	uint8_t spi_cs; /**< Logical SPI chip-select index. */
 	uint8_t adc_channel; /**< Logical ADC channel index 0..4. */

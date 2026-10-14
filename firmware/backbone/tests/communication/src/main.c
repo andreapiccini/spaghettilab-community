@@ -49,6 +49,7 @@
 static uint32_t apply_generation = 7U;
 static int apply_error;
 void spaghetti_device_profile_capture_begin(void) {}
+void spaghetti_device_profile_capture_command_begin(void) {}
 void spaghetti_device_profile_capture_finish(struct spaghetti_profile_rx_capture *out) { memset(out, 0, sizeof(*out)); }
 static int last_audit_result;
 static unsigned int audit_record_count;

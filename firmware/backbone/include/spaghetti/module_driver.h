@@ -94,6 +94,7 @@ struct spaghetti_module_driver_ops {
 	spaghetti_module_start_cb_t start; /**< Optional event arming; paired with stop. */
 	spaghetti_module_stop_cb_t stop; /**< Optional event disarming; paired with start. */
 	spaghetti_module_deinit_cb_t deinit; /**< Safe-state and context release. */
+	spaghetti_module_command_cb_t validate_command; /**< Optional pure instance-specific argument validation. */
 };
 
 /**

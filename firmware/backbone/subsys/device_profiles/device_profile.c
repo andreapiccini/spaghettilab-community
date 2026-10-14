@@ -63,7 +63,7 @@ static bool profile_id_is_valid(const char *id)
 static bool opcode_is_known(uint8_t opcode)
 {
 	return (opcode >= SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE) &&
-	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO);
+	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT);
 }
 
 static bool temp_ok(uint8_t slot)
@@ -206,6 +206,9 @@ static int accumulate_op_budget(
 		}
 		transactions = op->imm0;
 		time_ms = (uint32_t)op->imm0 * (uint32_t)op->imm1;
+		break;
+	case SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT:
+		if (!temp_ok(op->dst) || op->src_a == 0U || op->src_a > SPAGHETTI_PROPERTY_MAX_FIELDS || op->src_b > 1U || op->imm0 == 0U || op->imm0 > 8U || op->imm1 > 1U) return -EINVAL;
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST:
 		if (!temp_ok(op->dst) || (op->imm0 == 0U) || (op->imm0 > 8U)) {
@@ -373,7 +376,7 @@ int spaghetti_device_profile_make_schema(
 		fields[idx].field_id = src->field_id;
 		fields[idx].type = src->type;
 		fields[idx].semantic = SPAGHETTI_FIELD_SEMANTIC_VALUE;
-		fields[idx].flags = SPAGHETTI_FIELD_REQUIRED;
+		fields[idx].flags = profile->action_count ? 0U : SPAGHETTI_FIELD_REQUIRED;
 		fields[idx].signed_minimum = INT64_MIN;
 		fields[idx].signed_maximum = INT64_MAX;
 		fields[idx].unsigned_minimum = 0U;
@@ -411,7 +414,7 @@ int spaghetti_device_profile_validate(
 	    (profile->max_total_time_ms == 0U) ||
 	    (profile->sample_schema_id[0] == '\0') ||
 	    (profile->sample_schema_version == 0U) ||
-	    (profile->sample_field_count == 0U)) {
+	    ((profile->sample_field_count == 0U) && (profile->action_count == 0U))) {
 		return -EINVAL;
 	}
 	if ((profile->transport == SPAGHETTI_PORT_TRANSPORT_W1) &&
@@ -443,7 +446,23 @@ int spaghetti_device_profile_validate(
 		return err;
 	}
 
-	if (!saw_emit_field) {
+	if (profile->action_count > SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS) return -E2BIG;
+	if (profile->action_count > 0U) {
+		size_t next = 0U;
+		uint16_t ids = 0U;
+		for (size_t i = 0; i < profile->action_count; ++i) {
+			const struct spaghetti_device_profile_action *action = &profile->actions[i];
+			if (action->id == 0U || action->id > 8U || (ids & BIT(action->id)) || action->first != next || action->count == 0U || action->count > profile->sample_count - next) return -EINVAL;
+			ids |= BIT(action->id);
+			next += action->count;
+			if (profile->sample_ops[next - 1].opcode != SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD) return -EINVAL;
+		}
+		if (next != profile->sample_count) return -EINVAL;
+	}
+	/* Arguments cannot influence startup or safe-stop plans. */
+	for (size_t i = 0; i < profile->init_count; ++i) if (profile->init_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) return -EINVAL;
+	for (size_t i = 0; i < profile->safe_stop_count; ++i) if (profile->safe_stop_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) return -EINVAL;
+	if (!saw_emit_field && profile->action_count == 0U) {
 		return -EPROTONOSUPPORT;
 	}
 	if ((budget.total_time_ms > profile->max_total_time_ms) ||
@@ -747,7 +766,7 @@ static int decode_profile_cbor(
 	if ((err < 0) || !zcbor_uint32_decode(states, &wire_version)) {
 		return -EBADMSG;
 	}
-	if (wire_version != SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION) {
+	if (wire_version != 1U && wire_version != SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION) {
 		return -ENOTSUP;
 	}
 
@@ -859,10 +878,16 @@ static int decode_profile_cbor(
 		return err;
 	}
 
-	if (!zcbor_map_end_decode(states)) {
-		return -EBADMSG;
+	if (wire_version == 2U) {
+		if (expect_key(states, 14U) < 0 || !zcbor_list_start_decode(states)) return -EBADMSG;
+		while (!zcbor_array_at_end(states)) {
+			uint32_t id, first, count;
+			if (out->action_count >= SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS || !zcbor_list_start_decode(states) || !zcbor_uint32_decode(states, &id) || !zcbor_uint32_decode(states, &first) || !zcbor_uint32_decode(states, &count) || !zcbor_list_end_decode(states) || id > 8U || first > UINT8_MAX || count > UINT8_MAX) return -EBADMSG;
+			out->actions[out->action_count++] = (struct spaghetti_device_profile_action){ .id = id, .first = first, .count = count };
+		}
+		if (!zcbor_list_end_decode(states)) return -EBADMSG;
 	}
-
+	if (!zcbor_map_end_decode(states) || states->payload != states->payload_end) return -EBADMSG;
 	return 0;
 }
 

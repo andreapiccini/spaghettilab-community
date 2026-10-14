@@ -44,6 +44,7 @@ target_sources(app PRIVATE
   spaghetti_modules/digital_line_set/digital_line_set.c
   spaghetti_modules/on_boot/on_boot.c
   spaghetti_rules/threshold/threshold.c
+  spaghetti_rules/device_action/device_action.c
   spaghetti_blocks/blocks_math.c
   spaghetti_blocks/blocks_bitwise.c
   spaghetti_blocks/blocks_filter.c

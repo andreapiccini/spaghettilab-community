@@ -12,6 +12,7 @@ target_sources(app PRIVATE
   ../../subsys/runtime/runtime.c
   ../../subsys/resources/resources_note_weak.c
   ../../spaghetti_rules/threshold/threshold.c
+  ../../spaghetti_rules/device_action/device_action.c
 )
 
 target_include_directories(app PRIVATE

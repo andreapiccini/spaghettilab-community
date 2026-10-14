@@ -387,6 +387,72 @@ static int declarative_init(
 	return 0;
 }
 
+
+static const struct spaghetti_device_profile_action *find_profile_action(const struct spaghetti_device_profile *profile, uint16_t id)
+{
+	for (size_t i = 0; i < profile->action_count; ++i) if (profile->actions[i].id == id) return &profile->actions[i];
+	return NULL;
+}
+
+static int declarative_validate_command(struct spaghetti_module *module, const struct spaghetti_module_command *command)
+{
+	if (module == NULL || module->context == NULL || command == NULL || command->arguments.field_count > SPAGHETTI_PROPERTY_MAX_FIELDS) return -EINVAL;
+	struct spaghetti_declarative_context *context = module->context;
+	const struct spaghetti_device_profile_action *action = find_profile_action(context->profile, command->command_id);
+	if (action == NULL) return -ENOTSUP;
+	uint16_t used = 0U;
+	uint8_t packed[8];
+	for (size_t i = action->first; i < action->first + action->count; ++i) {
+		const struct spaghetti_device_profile_op *op = &context->profile->sample_ops[i];
+		if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) {
+			int err = spaghetti_device_profile_pack_argument(op, &command->arguments, packed);
+			if (err < 0) return err;
+			used |= BIT(op->src_a);
+		}
+	}
+	uint16_t seen = 0U;
+	for (size_t i = 0; i < command->arguments.field_count; ++i) {
+		uint16_t id = command->arguments.fields[i].field_id;
+		if (id == 0U || id > SPAGHETTI_PROPERTY_MAX_FIELDS || !(used & BIT(id)) || (seen & BIT(id))) return -EINVAL;
+		seen |= BIT(id);
+	}
+	return 0;
+}
+
+static int declarative_command(struct spaghetti_module *module, const struct spaghetti_module_command *command)
+{
+	int err = declarative_validate_command(module, command);
+	if (err < 0) return err;
+	struct spaghetti_declarative_context *context = module->context;
+	const struct spaghetti_device_profile_action *action = find_profile_action(context->profile, command->command_id);
+	struct spaghetti_record_payload *out = command->result;
+	bool owned = out == NULL;
+	if (owned) out = k_malloc(sizeof(*out));
+	if (out == NULL) return -ENOMEM;
+	struct spaghetti_device_profile_binding binding = context->binding;
+	binding.arguments = &command->arguments;
+	err = spaghetti_device_profile_exec(context->profile, &context->profile->sample_ops[action->first], action->count, module->port, &binding, out);
+	if (err == 0) {
+		struct spaghetti_field_descriptor fields[SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS];
+		struct spaghetti_schema_descriptor schema;
+		err = spaghetti_device_profile_make_schema(context->profile, fields, &schema);
+		if (err == 0) err = spaghetti_record_payload_validate(out, &schema);
+		if (err == 0) { out->action_id = action->id; out->kind = SPAGHETTI_RECORD_EVENT; }
+	}
+	if (owned) k_free(out);
+	return err;
+}
+
+static const struct spaghetti_field_descriptor declarative_command_fields[1];
+static const struct spaghetti_schema_descriptor declarative_command_schema = {
+	.schema_id = "spaghetti.decl.command", .version = 1U, .fields = declarative_command_fields, .field_count = 0U,
+};
+#define ACTION_DESCRIPTOR(n) { .command_id = n, .name = "action_" #n, .argument_schema = &declarative_command_schema }
+static const struct spaghetti_command_descriptor declarative_commands[] = {
+	ACTION_DESCRIPTOR(1), ACTION_DESCRIPTOR(2), ACTION_DESCRIPTOR(3), ACTION_DESCRIPTOR(4),
+	ACTION_DESCRIPTOR(5), ACTION_DESCRIPTOR(6), ACTION_DESCRIPTOR(7), ACTION_DESCRIPTOR(8),
+};
+
 static int declarative_read(
 	struct spaghetti_module *module,
 	struct spaghetti_record_payload *out)
@@ -407,6 +473,15 @@ static int declarative_read(
 		return -EINVAL;
 	}
 
+	if (context->profile->action_count > 0U) {
+		struct spaghetti_module_command *command = k_calloc(1, sizeof(*command));
+		if (command == NULL) return -ENOMEM;
+		command->command_id = context->profile->actions[0].id;
+		command->result = out;
+		err = declarative_command(module, command);
+		k_free(command);
+		return err;
+	}
 	err = spaghetti_device_profile_exec(
 		context->profile, context->profile->sample_ops,
 		context->profile->sample_count, module->port, &context->binding,
@@ -447,7 +522,8 @@ static const struct spaghetti_module_driver_ops declarative_ops = {
 	.describe_endpoint = declarative_describe_endpoint,
 	.init = declarative_init,
 	.read = declarative_read,
-	.command = NULL,
+	.command = declarative_command,
+	.validate_command = declarative_validate_command,
 	.start = NULL,
 	.stop = NULL,
 	.deinit = declarative_deinit,
@@ -462,7 +538,7 @@ SPAGHETTI_MODULE_DRIVER_DEFINE(spaghetti_declarative_device_driver) = {
 	.config_schema = &declarative_config_schema,
 	.record_schemas = declarative_record_schemas,
 	.record_schema_count = ARRAY_SIZE(declarative_record_schemas),
-	.commands = NULL,
-	.command_count = 0U,
+	.commands = declarative_commands,
+	.command_count = ARRAY_SIZE(declarative_commands),
 	.ops = &declarative_ops,
 };
