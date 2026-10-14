@@ -170,10 +170,13 @@ struct spaghetti_config_revision {
 	uint8_t sha256[SPAGHETTI_CONFIG_HASH_SIZE]; /**< Hash of canonical CBOR. */
 };
 
-/** Caller-owned outcome of one successful Config apply. */
+/** Caller-owned outcome of Config apply, including transaction failures. */
 struct spaghetti_config_commit_result {
 	struct spaghetti_config_revision revision; /**< Live revision after apply. */
 	bool changed; /**< False when the candidate matched the live Config. */
+	const char *failure_phase; /**< Static label; NULL unless a transaction failed. */
+	int failure_errno; /**< Original failure, before rollback. */
+	int rollback_errno; /**< Zero when previous state was restored. */
 };
 
 /**

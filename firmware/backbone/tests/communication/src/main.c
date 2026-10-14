@@ -48,6 +48,10 @@
 
 static uint32_t apply_generation = 7U;
 static int apply_error;
+void spaghetti_device_profile_capture_begin(void) {}
+void spaghetti_device_profile_capture_finish(struct spaghetti_profile_rx_capture *out) { memset(out, 0, sizeof(*out)); }
+static int last_audit_result;
+static unsigned int audit_record_count;
 static int authorize_error;
 static uint32_t last_authorized_permissions;
 static bool resources_ready = true;
@@ -94,7 +98,8 @@ int spaghetti_audit_record(
 {
 	ARG_UNUSED(principal_id);
 	ARG_UNUSED(operation_id);
-	ARG_UNUSED(internal_result);
+	last_audit_result = internal_result;
+	++audit_record_count;
 	return 0;
 }
 
@@ -252,6 +257,11 @@ int spaghetti_config_apply(
 		return -ESTALE;
 	}
 	if (apply_error < 0) {
+		if (out_result != NULL) {
+			out_result->failure_phase = "activate_module";
+			out_result->failure_errno = apply_error;
+			out_result->rollback_errno = 0;
+		}
 		return apply_error;
 	}
 	if (out_result != NULL) {
@@ -620,6 +630,11 @@ size_t spaghetti_block_registry_count(void)
 enum spaghetti_maintenance_link_state spaghetti_maintenance_link_get_state(void)
 {
 	return SPAGHETTI_MAINTENANCE_LINK_ACTIVE;
+}
+
+int spaghetti_storage_probe_config(void)
+{
+	return -ENOENT;
 }
 
 int spaghetti_storage_read_config(struct spaghetti_config *out)
@@ -991,6 +1006,54 @@ ZTEST(communication, test_config_stale_and_apply)
 	zassert_ok(spaghetti_communication_handle_request(
 		&context, &request, &response));
 	zassert_equal(response.status, SPAGHETTI_PROTOCOL_STATUS_OK);
+}
+
+ZTEST(communication, test_apply_failure_preserves_errno_phase_and_replay)
+{
+	struct spaghetti_request_context context = make_context(all_permissions);
+	const int init_err = spaghetti_communication_init();
+	zassert_true((init_err == 0) || (init_err == -EALREADY));
+	struct spaghetti_protocol_request request = {
+		.version = SPAGHETTI_PROTOCOL_VERSION,
+		.correlation_id = 901U,
+		.operation = SPAGHETTI_PROTOCOL_APPLY_CONFIG,
+	};
+	struct spaghetti_protocol_response response, replay;
+	const uint8_t config_bytes[] = {0xA0};
+	ZCBOR_STATE_E(state, 4U, request.payload.bytes,
+		       sizeof(request.payload.bytes), 1U);
+	zassert_true(zcbor_map_start_encode(state, 2U));
+	zassert_true(zcbor_uint32_put(state, 0U));
+	zassert_true(zcbor_uint32_put(state, apply_generation));
+	zassert_true(zcbor_uint32_put(state, 1U));
+	zassert_true(zcbor_bstr_encode_ptr(state, config_bytes, sizeof(config_bytes)));
+	zassert_true(zcbor_map_end_encode(state, 2U));
+	request.payload.size = (size_t)(state->payload - request.payload.bytes);
+	apply_error = -EIO;
+	zassert_ok(spaghetti_communication_handle_request(&context, &request, &response));
+	apply_error = 0;
+	zassert_equal(response.status, SPAGHETTI_PROTOCOL_STATUS_INTERNAL_ERROR);
+	zassert_equal(last_audit_result, -EIO);
+	uint32_t key;
+	int32_t original_error, rollback_error;
+	struct zcbor_string phase;
+	ZCBOR_STATE_D(decoded, 4U, response.payload.bytes, response.payload.size, 1U, 0U);
+	zassert_true(zcbor_map_start_decode(decoded));
+	zassert_true(zcbor_uint32_decode(decoded, &key)); zassert_equal(key, 0U);
+	zassert_true(zcbor_int32_decode(decoded, &original_error)); zassert_equal(original_error, -EIO);
+	zassert_true(zcbor_uint32_decode(decoded, &key)); zassert_equal(key, 1U);
+	zassert_true(zcbor_tstr_decode(decoded, &phase));
+	zassert_equal(phase.len, strlen("activate_module"));
+	zassert_mem_equal(phase.value, "activate_module", phase.len);
+	zassert_true(zcbor_uint32_decode(decoded, &key)); zassert_equal(key, 2U);
+	zassert_true(zcbor_int32_decode(decoded, &rollback_error)); zassert_equal(rollback_error, 0);
+	zassert_true(zcbor_map_end_decode(decoded));
+	const unsigned int audit_before_replay = audit_record_count;
+	zassert_ok(spaghetti_communication_handle_request(&context, &request, &replay));
+	zassert_equal(audit_record_count, audit_before_replay);
+	zassert_equal(replay.status, response.status);
+	zassert_equal(replay.payload.size, response.payload.size);
+	zassert_mem_equal(replay.payload.bytes, response.payload.bytes, response.payload.size);
 }
 
 ZTEST(communication, test_events_and_max_payload_helper)

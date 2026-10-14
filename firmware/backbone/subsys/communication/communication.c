@@ -251,7 +251,8 @@ static void hash_request(
 	const struct spaghetti_protocol_request *request,
 	uint8_t out_hash[32])
 {
-	uint8_t encoded[SPAGHETTI_PROTOCOL_PAYLOAD_ABSOLUTE_MAX + 64U];
+	/* Requests are bounded by this image’s payload limit, not the wire maximum. */
+	uint8_t encoded[SPAGHETTI_PROTOCOL_PAYLOAD_MAX + 64U];
 	size_t written = 0U;
 	int err = spaghetti_protocol_encode_request(
 		request, encoded, sizeof(encoded), &written);
@@ -380,6 +381,9 @@ static int run_serialized_mutation(
 	if (slot->execute_err < 0) {
 		fill_error_response(response, request->correlation_id,
 				    slot->execute_err);
+		if (request->operation == SPAGHETTI_PROTOCOL_APPLY_CONFIG) {
+			response->payload = slot->response.payload;
+		}
 		err = slot->execute_err;
 	} else {
 		*response = slot->response;
@@ -679,6 +683,9 @@ int spaghetti_communication_handle_request(
 		break;
 	case SPAGHETTI_OPERATION_SERIALIZED_MUTATION:
 		err = run_serialized_mutation(handler, context, request, &result);
+		if ((err < 0) && (result.version == 0U)) {
+			fill_error_response(&result, request->correlation_id, err);
+		}
 		break;
 	case SPAGHETTI_OPERATION_ASYNC_JOB:
 		err = run_async_job(handler, context, request, &result);
@@ -693,8 +700,7 @@ int spaghetti_communication_handle_request(
 	if (operation_is_sensitive(request->operation)) {
 		(void)spaghetti_audit_record(context->principal_id,
 			(uint16_t)request->operation,
-			(result.status == SPAGHETTI_PROTOCOL_STATUS_OK) ? 0 :
-				-(int)result.status);
+			err);
 	}
 
 	k_mutex_lock(&communication_lock, K_FOREVER);

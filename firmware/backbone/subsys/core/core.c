@@ -344,11 +344,14 @@ int spaghetti_core_init(void)
 		goto health_failed;
 	}
 
+	/* Local APPLY_CONFIG also configures an empty runtime before provisioning.
+	 * Initialize it stopped in every boot mode; tasks still start explicitly. */
+	err = spaghetti_runtime_init();
+	if (err < 0) {
+		goto runtime_failed;
+	}
+
 	if (core_info.mode == SPAGHETTI_CORE_MODE_NORMAL) {
-		err = spaghetti_runtime_init();
-		if (err < 0) {
-			goto runtime_failed;
-		}
 		err = spaghetti_mqtt_init(&mqtt_disabled);
 		if (err < 0) {
 			goto mqtt_failed;

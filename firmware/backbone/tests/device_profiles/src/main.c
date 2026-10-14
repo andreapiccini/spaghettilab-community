@@ -343,6 +343,8 @@ int spaghetti_port_i2c_transfer(
 	if ((request->message_count == 2U) &&
 	    ((request->messages[0].flags & I2C_MSG_READ) == 0U) &&
 	    ((request->messages[1].flags & I2C_MSG_READ) != 0U)) {
+		zassert_true((request->messages[1].flags & I2C_MSG_RESTART) != 0U);
+		zassert_true((request->messages[0].flags & I2C_MSG_STOP) == 0U);
 		uint8_t reg = request->messages[0].buf[0];
 
 		memcpy(request->messages[1].buf,
@@ -1086,6 +1088,39 @@ ZTEST(device_profiles, test_w1_uart_spi_mode_wait_gpio)
 		make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD, FIELD_VALUE, 0, 0, 1, 1, 0, 1);
 	bad.sample_count = 2U;
 	zassert_equal(spaghetti_device_profile_validate(&bad, &budget), -EINVAL);
+}
+
+
+ZTEST(device_profiles, test_init_rx_capture)
+{
+	struct spaghetti_device_profile profile;
+	struct spaghetti_device_profile_binding binding = { .i2c_address = 0x68, .default_timeout_ms = 100 };
+	struct spaghetti_record_payload payload;
+	struct spaghetti_profile_rx_capture rx = {0};
+	fill_base(&profile, "capture", SPAGHETTI_PORT_TRANSPORT_I2C, SPAGHETTI_PORT_CAP_I2C);
+	profile.init_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 1, 0, 0x75, 0);
+	profile.init_ops[1] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ, 1, 0, 0, 1, 1, 100, 0);
+	bus.i2c_error = 0;
+	bus.i2c_mem[0x68][0x75] = 0x68;
+	spaghetti_device_profile_capture_begin();
+	zassert_ok(spaghetti_device_profile_exec(&profile, profile.init_ops, 2, &fake_port, &binding, &payload));
+	spaghetti_device_profile_capture_finish(&rx);
+	zassert_equal(rx.count, 1);
+	zassert_equal(rx.lengths[0], 1);
+	zassert_equal(rx.bytes[0][0], 0x68);
+	zassert_false(rx.truncated);
+	memcpy(profile.sample_ops, profile.init_ops, 2 * sizeof(profile.init_ops[0]));
+	spaghetti_device_profile_capture_begin();
+	zassert_ok(spaghetti_device_profile_exec(&profile, profile.sample_ops, 2, &fake_port, &binding, &payload));
+	spaghetti_device_profile_capture_finish(&rx);
+	zassert_equal(rx.count, 0);
+	spaghetti_device_profile_capture_begin();
+	for (int i = 0; i < SPAGHETTI_PROFILE_RX_MAX + 1; ++i) {
+		zassert_ok(spaghetti_device_profile_exec(&profile, profile.init_ops, 2, &fake_port, &binding, &payload));
+	}
+	spaghetti_device_profile_capture_finish(&rx);
+	zassert_equal(rx.count, SPAGHETTI_PROFILE_RX_MAX);
+	zassert_true(rx.truncated);
 }
 
 ZTEST_SUITE(device_profiles, NULL, device_profiles_setup, NULL, NULL, NULL);

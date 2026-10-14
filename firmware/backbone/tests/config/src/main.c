@@ -567,8 +567,11 @@ ZTEST(config, test_transaction_snapshot_cas_and_rules)
 	candidate = baseline;
 	candidate.schedules[0].period_ms = 2000U;
 	zassert_equal(spaghetti_config_apply(&candidate, revision.generation,
-					     NULL),
+					     &result),
 		      -ENOSPC);
+	zassert_equal(strcmp(result.failure_phase, "persist_config"), 0);
+	zassert_equal(result.failure_errno, -ENOSPC);
+	zassert_equal(result.rollback_errno, 0);
 	zassert_ok(spaghetti_config_get_snapshot(&snapshot, &revision));
 	zassert_equal(snapshot.schedules[0].period_ms, 1000U);
 }

@@ -11,6 +11,7 @@
 
 #include <spaghetti/access_control.h>
 #include <spaghetti/config.h>
+#include <spaghetti/device_profile.h>
 #include <spaghetti/config_codec.h>
 
 #include "../communication_internal.h"
@@ -137,6 +138,7 @@ static int execute_apply_config(
 	size_t config_size = 0U;
 	struct spaghetti_config *candidate;
 	struct spaghetti_config_commit_result commit = {0};
+	struct spaghetti_profile_rx_capture rx = {0};
 	int err;
 
 	ARG_UNUSED(context);
@@ -157,9 +159,25 @@ static int execute_apply_config(
 		spaghetti_ops_free_config(candidate);
 		return err;
 	}
+	spaghetti_device_profile_capture_begin();
 	err = spaghetti_config_apply(candidate, expected_generation, &commit);
+	spaghetti_device_profile_capture_finish(&rx);
 	spaghetti_ops_free_config(candidate);
 	if (err < 0) {
+		if (commit.failure_phase != NULL) {
+			ZCBOR_STATE_E(state, SPAGHETTI_OPS_CBOR_BACKUP, response->bytes,
+				       sizeof(response->bytes), 1U);
+			if (zcbor_map_start_encode(state, 3U) &&
+			    zcbor_uint32_put(state, 0U) &&
+			    zcbor_int32_put(state, commit.failure_errno) &&
+			    zcbor_uint32_put(state, 1U) &&
+			    zcbor_tstr_encode_ptr(state, commit.failure_phase, strlen(commit.failure_phase)) &&
+			    zcbor_uint32_put(state, 2U) &&
+			    zcbor_int32_put(state, commit.rollback_errno) &&
+			    zcbor_map_end_encode(state, 3U)) {
+				response->size = (size_t)(state->payload - response->bytes);
+			}
+		}
 		return err;
 	}
 
@@ -167,17 +185,23 @@ static int execute_apply_config(
 		ZCBOR_STATE_E(state, SPAGHETTI_OPS_CBOR_BACKUP, response->bytes,
 			       sizeof(response->bytes), 1U);
 
-		if (!zcbor_map_start_encode(state, 3U) ||
+		if (!zcbor_map_start_encode(state, 5U) ||
 		    !zcbor_uint32_put(state, 0U) ||
 		    !zcbor_bool_put(state, commit.changed) ||
 		    !zcbor_uint32_put(state, 1U) ||
 		    !zcbor_uint32_put(state, commit.revision.generation) ||
 		    !zcbor_uint32_put(state, 2U) ||
 		    !zcbor_bstr_encode_ptr(state, commit.revision.sha256,
-					   sizeof(commit.revision.sha256)) ||
-		    !zcbor_map_end_encode(state, 3U)) {
+					   sizeof(commit.revision.sha256))) {
 			return -EMSGSIZE;
 		}
+		if (!zcbor_uint32_put(state, 3U) || !zcbor_list_start_encode(state, rx.count)) return -EMSGSIZE;
+		for (uint8_t i = 0; i < rx.count; ++i) {
+			if (!zcbor_bstr_encode_ptr(state, rx.bytes[i], rx.lengths[i])) return -EMSGSIZE;
+		}
+		if (!zcbor_list_end_encode(state, rx.count) ||
+		    !zcbor_uint32_put(state, 4U) || !zcbor_bool_put(state, rx.truncated) ||
+		    !zcbor_map_end_encode(state, 5U)) return -EMSGSIZE;
 		response->size = (size_t)(state->payload - response->bytes);
 	}
 	return 0;

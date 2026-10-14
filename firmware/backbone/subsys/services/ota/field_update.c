@@ -420,13 +420,18 @@ int spaghetti_field_update_apply_physical_config(uint32_t node_id,
 	    ((node_id & ~SPAGHETTI_SLUP_NODE_MASK) != 0U)) {
 		return -EINVAL;
 	}
-	if (slup_xfer_is_active() ||
-	    (k_mutex_lock(&slup_discovery_lock, K_MSEC(100)) != 0)) {
+	if (slup_xfer_is_active()) {
 		return -EBUSY;
 	}
+	/* Local pin changes are serialized by Physical; a CAN discovery sweep
+	 * must not prevent configuring the directly connected board. */
 	if ((node_id == 0U) || (node_id == session.node_id)) {
-		err = spaghetti_physical_apply_config(modes, speed, expected, config);
-	} else {
+		return spaghetti_physical_apply_config(modes, speed, expected, config);
+	}
+	if (k_mutex_lock(&slup_discovery_lock, K_MSEC(100)) != 0) {
+		return -EBUSY;
+	}
+	{
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
 		uint8_t payload[6];
 		uint8_t staged[40] = {0}; memcpy(staged, expected, 20U); if (config) memcpy(&staged[20], config, 20U);

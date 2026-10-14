@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
 
@@ -940,7 +941,7 @@ int spaghetti_device_profile_validate_cbor(
 	size_t size,
 	struct spaghetti_device_profile_failure *failure)
 {
-	struct spaghetti_device_profile staging;
+	struct spaghetti_device_profile *staging;
 	int err;
 
 	if ((cbor == NULL) || (size == 0U)) {
@@ -954,13 +955,22 @@ int spaghetti_device_profile_validate_cbor(
 		return -EMSGSIZE;
 	}
 
-	err = decode_profile_cbor(cbor, size, &staging);
+	/* Validation runs on the USB worker too: do not stack a full profile
+	 * on top of the protocol envelope and schema validation frames. */
+	staging = k_malloc(sizeof(*staging));
+	if (staging == NULL) {
+		fill_validate_failure(-ENOMEM, failure);
+		return -ENOMEM;
+	}
+	err = decode_profile_cbor(cbor, size, staging);
 	if (err < 0) {
 		fill_decode_failure(err, failure);
+		k_free(staging);
 		return err;
 	}
 
-	err = spaghetti_device_profile_validate(&staging, NULL);
+	err = spaghetti_device_profile_validate(staging, NULL);
+	k_free(staging);
 	if (err < 0) {
 		fill_validate_failure(err, failure);
 		return err;

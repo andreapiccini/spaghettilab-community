@@ -145,6 +145,17 @@ struct spaghetti_device_profile {
 /**
  * @brief Worst-case budget computed by @ref spaghetti_device_profile_validate.
  */
+/** Bounded init-read capture owned by the APPLY_CONFIG mutation thread. */
+#define SPAGHETTI_PROFILE_RX_MAX 8U
+struct spaghetti_profile_rx_capture {
+	uint8_t count;
+	bool truncated;
+	uint8_t lengths[SPAGHETTI_PROFILE_RX_MAX];
+	uint8_t bytes[SPAGHETTI_PROFILE_RX_MAX][SPAGHETTI_VALUE_BYTES_MAX];
+};
+void spaghetti_device_profile_capture_begin(void);
+void spaghetti_device_profile_capture_finish(struct spaghetti_profile_rx_capture *out);
+
 struct spaghetti_device_profile_budget {
 	uint32_t total_time_ms; /**< Sum of delays, waits, and transfer timeouts. */
 	uint32_t transactions; /**< Count of Port bus operations including wait polls. */

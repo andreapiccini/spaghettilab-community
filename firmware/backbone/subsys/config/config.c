@@ -964,7 +964,12 @@ int spaghetti_config_apply(
 	bool candidate_persisted = false;
 	uint32_t next_generation;
 	int apply_error = 0;
+	const char *phase = "prepare";
 	int err;
+
+	if (out_result != NULL) {
+		memset(out_result, 0, sizeof(*out_result));
+	}
 
 	err = spaghetti_config_validate(candidate, NULL);
 	if (err < 0) {
@@ -1031,6 +1036,7 @@ int spaghetti_config_apply(
 		}
 	}
 
+	phase = "snapshot_modules";
 	for (size_t old_idx = 0U; old_idx < current_config.module_count; ++old_idx) {
 		err = spaghetti_module_manager_get_by_key(
 			current_config.modules[old_idx].key,
@@ -1054,6 +1060,7 @@ int spaghetti_config_apply(
 			continue;
 		}
 
+		phase = "remove_module";
 		err = remove_module(&transaction.old_live[old_idx]);
 		if ((err == 0) ||
 		    module_is_absent(current_config.modules[old_idx].key)) {
@@ -1079,6 +1086,7 @@ int spaghetti_config_apply(
 			continue;
 		}
 
+		phase = "activate_module";
 		err = configure_module(&candidate->modules[candidate_idx],
 				       next_generation,
 				       &transaction.candidate_live[candidate_idx]);
@@ -1089,6 +1097,7 @@ int spaghetti_config_apply(
 		transaction.candidate_added[candidate_idx] = true;
 	}
 
+	phase = "configure_runtime";
 	err = load_runtime(candidate);
 	if (err < 0) {
 		apply_error = err;
@@ -1097,6 +1106,7 @@ int spaghetti_config_apply(
 
 	if (mqtt_changed) {
 		mqtt_reconfigured = true;
+		phase = "configure_mqtt";
 		err = configure_mqtt(&candidate->mqtt);
 		if (err < 0) {
 			apply_error = err;
@@ -1106,6 +1116,7 @@ int spaghetti_config_apply(
 
 	if (connectivity_changed) {
 		connectivity_reconfigured = true;
+		phase = "connectivity";
 		err = apply_connectivity_policy(candidate->connectivity_policy);
 		if (err < 0) {
 			apply_error = err;
@@ -1113,6 +1124,7 @@ int spaghetti_config_apply(
 		}
 	}
 
+	phase = "persist_config";
 	err = spaghetti_storage_write_config(candidate);
 	if (err < 0) {
 		apply_error = err;
@@ -1120,6 +1132,7 @@ int spaghetti_config_apply(
 	}
 	candidate_persisted = true;
 
+	phase = "start_runtime";
 	err = start_runtime(candidate);
 	if (err < 0) {
 		apply_error = err;
@@ -1170,14 +1183,19 @@ rollback:
 		}
 	}
 	current_revision = old_revision;
+	if (out_result != NULL) {
+		out_result->failure_phase = phase;
+		out_result->failure_errno = apply_error;
+		out_result->rollback_errno = err;
+	}
 	k_mutex_unlock(&config_lock);
 	if (err < 0) {
-		LOG_ERR("apply failed: err=%d rollback=%d", apply_error, err);
+		LOG_ERR("apply failed: phase=%s err=%d rollback=%d", phase, apply_error, err);
 		return -EIO;
 	}
 
-	LOG_WRN("apply rejected and previous state restored: err=%d",
-		apply_error);
+	LOG_WRN("apply rejected and previous state restored: phase=%s err=%d",
+		phase, apply_error);
 	return apply_error;
 
 unlock:

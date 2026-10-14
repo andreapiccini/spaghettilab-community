@@ -11,9 +11,27 @@
 #include <spaghetti/core.h>
 #include <spaghetti/field_update.h>
 #include <spaghetti/identity.h>
+#include <spaghetti/physical.h>
 #include <spaghetti/update.h>
 
 #include "field_update_internal.h"
+
+static int physical_apply_calls;
+int spaghetti_physical_describe(uint8_t out[SPAGHETTI_PHYSICAL_SIZE])
+{
+	ARG_UNUSED(out);
+	return -ENOTSUP;
+}
+int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
+	const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE], const uint8_t config[20])
+{
+	zassert_not_null(modes);
+	zassert_not_null(expected);
+	zassert_equal(speed, 0U);
+	ARG_UNUSED(config);
+	++physical_apply_calls;
+	return 0;
+}
 
 static int arm_calls;
 static int begin_calls;
@@ -295,6 +313,15 @@ static void *field_update_setup(void)
 	reset_fakes();
 	zassert_ok(spaghetti_field_update_init());
 	return NULL;
+}
+
+ZTEST(field_update, test_local_physical_apply_routes_directly)
+{
+	const uint8_t modes[4] = {4, 5, 0, 0};
+	const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE] = {0};
+	const int before = physical_apply_calls;
+	zassert_ok(spaghetti_field_update_apply_physical_config(0, modes, 0, expected, NULL));
+	zassert_equal(physical_apply_calls, before + 1);
 }
 
 ZTEST_SUITE(field_update, NULL, field_update_setup, NULL, NULL, NULL);

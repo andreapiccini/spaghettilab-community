@@ -3,12 +3,28 @@
 #include <errno.h>
 #include <string.h>
 
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/util.h>
 
 LOG_MODULE_DECLARE(spaghetti_device_profile,
 		   CONFIG_SPAGHETTI_DEVICE_PROFILE_LOG_LEVEL);
+
+static struct spaghetti_profile_rx_capture init_rx;
+static k_tid_t capture_owner;
+void spaghetti_device_profile_capture_begin(void)
+{
+	memset(&init_rx, 0, sizeof(init_rx));
+	capture_owner = k_current_get();
+}
+void spaghetti_device_profile_capture_finish(struct spaghetti_profile_rx_capture *out)
+{
+	if (capture_owner == k_current_get()) {
+		*out = init_rx;
+		capture_owner = NULL;
+	}
+}
 
 struct spaghetti_device_profile_temp {
 	size_t size;
@@ -188,7 +204,7 @@ static int exec_i2c_write_read(
 	messages[0].flags = I2C_MSG_WRITE;
 	messages[1].buf = dst->bytes;
 	messages[1].len = read_len;
-	messages[1].flags = I2C_MSG_READ | I2C_MSG_STOP;
+	messages[1].flags = I2C_MSG_READ | I2C_MSG_RESTART | I2C_MSG_STOP;
 	request.address = binding->i2c_address;
 	request.messages = messages;
 	request.message_count = 2U;
@@ -789,6 +805,17 @@ int spaghetti_device_profile_exec(
 
 		if (err < 0) {
 			return err;
+		}
+		if (capture_owner == k_current_get() && ops == profile->init_ops &&
+		    (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_READ ||
+		     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ)) {
+			if (init_rx.count < SPAGHETTI_PROFILE_RX_MAX) {
+				const uint8_t index = init_rx.count++;
+				init_rx.lengths[index] = temps[op->dst].size;
+				memcpy(init_rx.bytes[index], temps[op->dst].bytes, temps[op->dst].size);
+			} else {
+				init_rx.truncated = true;
+			}
 		}
 	}
 

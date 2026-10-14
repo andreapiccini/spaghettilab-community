@@ -97,6 +97,11 @@ int spaghetti_port_init_all(void)
 	return record_step(STEP_PORT);
 }
 
+int spaghetti_physical_init(void)
+{
+	return 0;
+}
+
 int spaghetti_topology_init(void)
 {
 	return record_step(STEP_TOPOLOGY);
@@ -409,7 +414,7 @@ ZTEST(core, test_boot_order_and_nonfatal_stored_config_failure)
 			SPAGHETTI_CORE_IMAGE_CONFIRMED);
 	zassert_equal(strcmp(info.version, "1.2.3+4"), 0);
 	zassert_equal(spaghetti_core_init(), -EALREADY);
-	zassert_equal(step_count, normal ? 21U : 14U);
+	zassert_equal(step_count, normal ? 21U : 15U);
 	zassert_equal(steps[0], STEP_SECURE_WORKSPACE);
 	zassert_equal(steps[1], STEP_STORAGE);
 	zassert_equal(steps[2], STEP_UPDATE);
@@ -433,9 +438,10 @@ ZTEST(core, test_boot_order_and_nonfatal_stored_config_failure)
 		zassert_equal(steps[19], STEP_OTA_START);
 		zassert_equal(steps[20], STEP_CONNECTIVITY);
 	} else {
-		zassert_equal(steps[11], STEP_WIFI);
-		zassert_equal(steps[12], STEP_MAINTENANCE_ENTER);
-		zassert_equal(steps[13], STEP_COMMUNICATION);
+		zassert_equal(steps[11], STEP_RUNTIME);
+		zassert_equal(steps[12], STEP_WIFI);
+		zassert_equal(steps[13], STEP_MAINTENANCE_ENTER);
+		zassert_equal(steps[14], STEP_COMMUNICATION);
 	}
 	zassert_equal(initialized_defaults.version, SPAGHETTI_CONFIG_VERSION);
 	zassert_equal(initialized_defaults.module_count, 0U);

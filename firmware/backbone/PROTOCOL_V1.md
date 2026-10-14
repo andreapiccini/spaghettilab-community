@@ -270,3 +270,18 @@ shape here.
 | TypeScript | `tools/sdk/typescript/test/vectors.test.ts` |
 | Fuzz corpus | `tests/fuzz/` |
 | Extension proof | `tests/v1_extension/` |
+
+### APPLY_CONFIG diagnostics (firmware 0.3.4+10)
+
+Successful responses retain keys `0` (changed), `1` (generation), `2` (SHA-256),
+and add optional keys `3` (array of byte strings) and `4` (capture truncated).
+Key 3 contains successful I²C READ/WRITE_READ results from device-profile init,
+in execution order, bounded to eight reads of up to eight bytes each. Scheduled
+samples and safe-stop operations are excluded. Capture is reset per APPLY and
+returned only when the configuration transaction succeeds. Old clients may ignore
+these fields; new clients accept responses from older firmware without them.
+
+Failed configuration transactions may carry a map with `0` (signed errno),
+`1` (transaction phase) and `2` (rollback errno, zero on success), alongside the
+non-OK envelope status. Clients must not interpret INTERNAL_ERROR alone as an
+I²C NACK.
