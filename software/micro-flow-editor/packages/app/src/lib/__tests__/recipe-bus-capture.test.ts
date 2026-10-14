@@ -6,7 +6,8 @@ import { buildProtocolTimingFromOps } from "../protocol-timing.js";
 describe("buildRecipeBusCapture", () => {
   it("extracts RX slots from i2c_write_read", () => {
     const draft = createI2cGenericExample();
-    const capture = buildRecipeBusCapture(draft.phases.sample);
+    const steps = draft.commands[0]!.steps;
+    const capture = buildRecipeBusCapture(steps);
     const rx = rxBlocksOf(capture);
     expect(rx.length).toBe(2);
     expect(rx.every((b) => b.value === null)).toBe(true);
@@ -14,11 +15,12 @@ describe("buildRecipeBusCapture", () => {
 
   it("overlays measured RX into timing labels", () => {
     const draft = createI2cGenericExample();
-    const op = draft.phases.sample.find((o) => o.type === "i2c_write_read");
+    const steps = draft.commands[0]!.steps;
+    const op = steps.find((o) => o.type === "i2c_write_read");
     expect(op).toBeTruthy();
     const measured = { [op!.id]: [0x12, 0x34] };
-    const capture = buildRecipeBusCapture(draft.phases.sample, measured);
-    const model = buildProtocolTimingFromOps(draft, draft.phases.sample, {
+    const capture = buildRecipeBusCapture(steps, measured);
+    const model = buildProtocolTimingFromOps(draft, steps, {
       rxByOpId: capture.rxByOpId,
       emphasizeRx: true,
     });

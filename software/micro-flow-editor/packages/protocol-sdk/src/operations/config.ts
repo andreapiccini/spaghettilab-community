@@ -1,4 +1,4 @@
-import { decodeOne } from "../cbor.js";
+import { decodeOne, encodeArray, encodeBytes, ProtocolCodecError } from "../cbor.js";
 import {
   boolField,
   bytesField,
@@ -39,7 +39,11 @@ export type GetConfigResponse = {
 };
 
 export function encodeGetConfigResponse(r: GetConfigResponse): Uint8Array {
-  return encodeMap([u32Field(0, r.generation), bytesField(1, r.sha256), bytesField(2, r.configBytes)]);
+  return encodeMap([
+    u32Field(0, r.generation),
+    bytesField(1, r.sha256),
+    bytesField(2, r.configBytes),
+  ]);
 }
 
 export function decodeGetConfigResponse(bytes: Uint8Array): GetConfigResponse {
@@ -90,7 +94,9 @@ export function encodeValidateConfigResponse(r: ValidateConfigResponse): Uint8Ar
   ]);
 }
 
-export function decodeValidateConfigResponse(bytes: Uint8Array): ValidateConfigResponse {
+export function decodeValidateConfigResponse(
+  bytes: Uint8Array,
+): ValidateConfigResponse {
   const map = requireMap(decodeOne(bytes), "ValidateConfigResponse");
   const valid = requireBool(map, 0, "ValidateConfigResponse");
   if (valid) return { valid: true };
@@ -121,18 +127,45 @@ export function decodeApplyConfigRequest(bytes: Uint8Array): ApplyConfigRequest 
 }
 
 export type ApplyConfigResponse = {
+  readonly rxReads?: readonly Uint8Array[];
+  readonly rxTruncated?: boolean;
   readonly changed: boolean;
   readonly generation: number;
   readonly sha256: Uint8Array;
 };
 
 export function encodeApplyConfigResponse(r: ApplyConfigResponse): Uint8Array {
-  return encodeMap([boolField(0, r.changed), u32Field(1, r.generation), bytesField(2, r.sha256)]);
+  return encodeMap([
+    boolField(0, r.changed),
+    u32Field(1, r.generation),
+    bytesField(2, r.sha256),
+    ...(r.rxReads
+      ? [
+          [3, encodeArray(r.rxReads.map(encodeBytes))] as const,
+          boolField(4, r.rxTruncated ?? false),
+        ]
+      : []),
+  ]);
 }
 
 export function decodeApplyConfigResponse(bytes: Uint8Array): ApplyConfigResponse {
   const map = requireMap(decodeOne(bytes), "ApplyConfigResponse");
   return {
+    ...(map.has(3)
+      ? {
+          rxReads: (() => {
+            const value = map.get(3)!;
+            if (value.kind !== "array" || value.value.length > 8)
+              throw new ProtocolCodecError("ApplyConfigResponse: invalid RX capture");
+            return value.value.map((entry) => {
+              if (entry.kind !== "bytes" || entry.value.length > 8)
+                throw new ProtocolCodecError("ApplyConfigResponse: invalid RX bytes");
+              return entry.value;
+            });
+          })(),
+          rxTruncated: requireBool(map, 4, "ApplyConfigResponse"),
+        }
+      : {}),
     changed: requireBool(map, 0, "ApplyConfigResponse"),
     generation: requireU32(map, 1, "ApplyConfigResponse"),
     sha256: requireBytes(map, 2, "ApplyConfigResponse"),

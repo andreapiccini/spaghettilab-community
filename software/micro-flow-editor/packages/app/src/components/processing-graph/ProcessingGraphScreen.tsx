@@ -37,7 +37,7 @@ import {
 import {
   DEVICE_RECIPE_DRAFT_META_KEY,
   DEVICE_RECIPE_PENDING_CREATE_META_KEY,
-  draftToSensorRecipe,
+  draftToCanvasSensorRecipes,
   parseDeviceRecipeDraft,
 } from "../../lib/device-recipe-draft.js";
 import {
@@ -160,7 +160,7 @@ function ProcessingGraphScreenInner() {
 
   const [inspector, setInspector] = useState<ProcessingInspectorMode | null>(null);
   const [sensorWizardOpen, setSensorWizardOpen] = useState(false);
-  const [sensorWizardInitialStep, setSensorWizardInitialStep] = useState<"name" | "manual">("name");
+  const [sensorWizardInitialStep] = useState<"name" | "manual">("name");
   const [sensorDetail, setSensorDetail] = useState<BackboneSensorModule | null>(null);
   const [missingBus, setMissingBus] = useState<SensorBus | null>(null);
   const [dryRun, setDryRun] = useState<DryRunResult | null>(null);
@@ -310,8 +310,11 @@ function ProcessingGraphScreenInner() {
     if (!pending) return;
     const draft = parseDeviceRecipeDraft(authoringMetadata[DEVICE_RECIPE_DRAFT_META_KEY]?.comment);
     if (!draft) return;
-    const recipe = draftToSensorRecipe(draft);
-    placeSensorRecipeOnCanvas(recipe);
+    const recipes = draftToCanvasSensorRecipes(draft);
+    const base = nextSpawnPosition(domainNodes.length);
+    recipes.forEach((recipe, index) => {
+      placeSensorRecipeOnCanvas(recipe, { x: base.x + index * 220, y: base.y });
+    });
     execute({
       kind: "ClearDeviceRecipePendingCreate",
       apply: (project) => ({

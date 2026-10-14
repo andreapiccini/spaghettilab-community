@@ -2,12 +2,10 @@ import { Cpu, Monitor, Plus, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import {
   addCommand,
-  DEFAULT_ACTION_TRIGGER,
   describeDeviceOp,
   insertCommandStep,
   libraryOpsForDisplay,
   moveCommandStep,
-  normalizeActionTrigger,
   removeCommand,
   removeCommandStep,
   updateCommand,
@@ -18,7 +16,6 @@ import {
   type DeviceRecipeOp,
   type DisplayUpdateMode,
 } from "../../lib/device-recipe-draft.js";
-import { ActionTriggerFields } from "./ActionTriggerFields.js";
 
 const inputClass =
   "w-full rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-mono text-xs outline-none focus:border-brand-blue";
@@ -79,6 +76,7 @@ export function DisplayLeftSidebar(props: Shared) {
                       bus === "i2c"
                         ? draft.binding.i2c ?? {
                             address: "0x3C",
+                            addressBits: 7,
                             busUnit: "I2C0",
                             sdaLabel: "A0",
                             sclLabel: "A1",
@@ -155,16 +153,34 @@ export function DisplayLeftSidebar(props: Shared) {
           {draft.binding.bus === "i2c" && i2c ? (
             <div className="space-y-1">
               <Field label={it ? "Indirizzo" : "Address"}>
-                <input
-                  value={i2c.address}
-                  onChange={(e) =>
-                    onChange({
-                      ...draft,
-                      binding: { ...draft.binding, i2c: { ...i2c, address: e.target.value } },
-                    })
-                  }
-                  className={inputClass}
-                />
+                <div className="flex gap-1">
+                  <select
+                    value={i2c.addressBits === 10 ? 10 : 7}
+                    onChange={(e) =>
+                      onChange({
+                        ...draft,
+                        binding: {
+                          ...draft.binding,
+                          i2c: { ...i2c, addressBits: e.target.value === "10" ? 10 : 7 },
+                        },
+                      })
+                    }
+                    className={`${inputClass} w-20 shrink-0`}
+                  >
+                    <option value={7}>7 bit</option>
+                    <option value={10}>10 bit</option>
+                  </select>
+                  <input
+                    value={i2c.address}
+                    onChange={(e) =>
+                      onChange({
+                        ...draft,
+                        binding: { ...draft.binding, i2c: { ...i2c, address: e.target.value } },
+                      })
+                    }
+                    className={inputClass}
+                  />
+                </div>
               </Field>
               <Field label="SDA">
                 <input
@@ -336,7 +352,7 @@ function DisplayLibrary({
 }
 
 export function DisplayCenter(props: Shared) {
-  const { draft, it, onChange, selectedCommandId, onSelectCommand, selectedStepId, onSelectStep } = props;
+  const { draft, it, selectedCommandId, onSelectCommand, selectedStepId, onSelectStep } = props;
   const [phase, setPhase] = useState<"init" | "command">("command");
   const cmd = draft.commands.find((c) => c.id === selectedCommandId) ?? draft.commands[0] ?? null;
   const [simText, setSimText] = useState("Ciao!");
@@ -371,8 +387,8 @@ export function DisplayCenter(props: Shared) {
               id: "command" as const,
               label: it ? "Azione" : "Action",
               title: it
-                ? "Azione eseguita con un trigger esterno"
-                : "Action run by an external trigger",
+                ? "Azioni invocabili dal canvas"
+                : "Actions invokable from the canvas",
             },
           ] as const
         ).map((tab) => (
@@ -419,17 +435,9 @@ export function DisplayCenter(props: Shared) {
             <h2 className="font-heading text-base font-semibold text-ink">{cmd.label}</h2>
             <p className="font-body text-[11px] text-ink-faint">
               {cmd.description ||
-                (it
-                  ? "Azione compiuta quando arriva un trigger esterno."
-                  : "Action performed when an external trigger arrives.")}
+                (it ? "Sequenza di questa azione." : "Sequence for this action.")}
             </p>
           </div>
-
-          <ActionTriggerFields
-            it={it}
-            value={normalizeActionTrigger(cmd.trigger)}
-            onChange={(trigger) => onChange(updateCommand(draft, cmd.id, { ...cmd, trigger }))}
-          />
 
           <section className="rounded-slmd border border-border-strong bg-surface p-3">
             <p className="font-mono text-sm text-ink">
@@ -668,14 +676,6 @@ export function DisplayInspector(props: Shared & { readonly createBlocked: boole
             className={inputClass}
           />
         </Field>
-
-        <div className="mt-2">
-          <ActionTriggerFields
-            it={it}
-            value={normalizeActionTrigger(cmd.trigger ?? DEFAULT_ACTION_TRIGGER)}
-            onChange={(trigger) => onChange(updateCommand(draft, cmd.id, { ...cmd, trigger }))}
-          />
-        </div>
 
         <p className="mt-2 font-body text-[10px] font-semibold uppercase text-ink-faint">{it ? "Parametri" : "Parameters"}</p>
         <ul className="mt-1 space-y-2">

@@ -1,9 +1,9 @@
 import {
   multiSampleSpanMs,
   type DeviceRecipeDraft,
-  type DeviceRecipePhase,
+  type DeviceRecipeOp,
 } from "../../lib/device-recipe-draft.js";
-import { buildProtocolTiming } from "../../lib/protocol-timing.js";
+import { buildProtocolTimingFromOps } from "../../lib/protocol-timing.js";
 import {
   TimingScopeChart,
   durationFromLanes,
@@ -14,27 +14,28 @@ import {
 /** Illustrative signal lanes derived from sequence — same segments as datasheet strip. */
 export function DerivedSignalView({
   draft,
-  phase,
+  ops,
   it,
   selectedOpId = null,
+  onSelectOp,
 }: {
   readonly draft: DeviceRecipeDraft;
-  readonly phase: DeviceRecipePhase;
+  readonly ops: readonly DeviceRecipeOp[];
   readonly it: boolean;
   readonly selectedOpId?: string | null;
+  readonly onSelectOp?: (opId: string) => void;
 }) {
   const bus = draft.binding.bus;
 
   if (bus === "adc") {
     return (
       <section className="rounded-slmd border border-border-strong bg-surface p-3">
-        <AnalogSamplePreview draft={draft} phase={phase} it={it} />
+        <AnalogSamplePreview ops={ops} draft={draft} it={it} />
       </section>
     );
   }
 
   if (bus === "w1") {
-    const ops = draft.phases[phase];
     const resets = ops.filter((o) => o.type === "w1_reset").length;
     const writes = ops.filter((o) => o.type === "w1_write").length;
     const reads = ops.filter((o) => o.type === "w1_read").length;
@@ -77,7 +78,7 @@ export function DerivedSignalView({
   }
 
   if (bus === "i2c" || bus === "spi") {
-    const model = buildProtocolTiming(draft, phase);
+    const model = buildProtocolTimingFromOps(draft, ops);
     if (model.lanes.length === 0) {
       return (
         <section className="rounded-slmd border border-border-strong bg-surface p-3">
@@ -92,20 +93,36 @@ export function DerivedSignalView({
         <TimingScopeChart
           title={it ? "Segnali nel tempo" : "Signals over time"}
           caption={
-            it
-              ? "Le fasce in alto ripetono i blocchi datasheet (S, ADDR, ACK, DATA…). Schema illustrativo."
-              : "Top bands match the datasheet cells (S, ADDR, ACK, DATA…). Illustrative."
+            bus === "i2c"
+              ? it
+                ? "Riga STEP = passi ricetta · sotto S/Sr/P/A/N · SCL/SDA. Clicca un passo per selezionarlo."
+                : "STEP row = recipe steps · below S/Sr/P/A/N · SCL/SDA. Click a step to select it."
+              : it
+                ? "Riga STEP allineata a CS / byte. Clicca un passo per selezionarlo."
+                : "STEP row aligned with CS / bytes. Click a step to select it."
           }
           lanes={model.lanes}
           durationMs={model.durationMs}
           phaseBands={model.phaseBands}
+          stepSpans={model.stepSpans}
           highlightOpId={selectedOpId}
+          onSelectOp={onSelectOp}
         />
+        {bus === "i2c" ? (
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-body text-[10px] text-ink-muted">
+            <LegendDot color="#0f172ac6" label="STEP bus" />
+            <LegendDot color="#2563eb44" label="S START" />
+            <LegendDot color="#7c3aed44" label="Sr" />
+            <LegendDot color="#ea580c44" label="P STOP" />
+            <LegendDot color="#16a34a44" label="A ACK" />
+            <LegendDot color="#ca8a0444" label="N NACK" />
+          </div>
+        ) : null}
       </section>
     );
   }
 
-  const { lanes, durationMs, caption } = buildGpioLanes(draft, phase, it);
+  const { lanes, durationMs, caption } = buildGpioLanes(draft, ops, it);
 
   return (
     <section className="rounded-slmd border border-border-strong bg-surface p-3">
@@ -128,10 +145,9 @@ export function DerivedSignalView({
 
 function buildGpioLanes(
   draft: DeviceRecipeDraft,
-  phase: DeviceRecipePhase,
+  ops: readonly DeviceRecipeOp[],
   it: boolean,
 ): { lanes: TimingLane[]; durationMs: number; caption: string } {
-  const ops = draft.phases[phase];
   const lanes: TimingLane[] = [];
   for (const sig of draft.binding.gpioSignals) {
     const debounce = ops.find((op) => op.type === "gpio_debounce" && op.signalId === sig.id);
@@ -145,13 +161,13 @@ function buildGpioLanes(
         gpioDebounceLane({
           id: sig.id,
           label: sig.name,
-          sampleMs: debounce.sampleMs || draft.sampleIntervalMs || 5,
+          sampleMs: debounce.sampleMs || 5,
           stableMs: debounce.stableMs,
           stableLabel: it ? `Stabile per ${debounce.stableMs} ms` : `Stable for ${debounce.stableMs} ms`,
         }),
       );
     } else {
-      const sample = Math.max(2, draft.sampleIntervalMs || 5);
+      const sample = 5;
       lanes.push({
         id: sig.id,
         label: sig.name,
@@ -169,21 +185,21 @@ function buildGpioLanes(
     lanes,
     durationMs: durationFromLanes(lanes, 60),
     caption: it
-      ? `Campionamento ogni ${draft.sampleIntervalMs} ms · schema illustrativo (non in scala).`
-      : `Sample every ${draft.sampleIntervalMs} ms · illustrative (not to scale).`,
+      ? "Schema illustrativo (non in scala). Intervallo deciso sul canvas."
+      : "Illustrative (not to scale). Interval is set on the canvas.",
   };
 }
 
 function AnalogSamplePreview({
   draft,
-  phase,
+  ops,
   it,
 }: {
   readonly draft: DeviceRecipeDraft;
-  readonly phase: DeviceRecipePhase;
+  readonly ops: readonly DeviceRecipeOp[];
   readonly it: boolean;
 }) {
-  const multi = draft.phases[phase].find((op) => op.type === "adc_multi_sample");
+  const multi = ops.find((op) => op.type === "adc_multi_sample");
   const count = multi?.type === "adc_multi_sample" ? multi.count : 8;
   const intervalMs = multi?.type === "adc_multi_sample" ? multi.intervalMs : 1;
   const spanMs = multiSampleSpanMs(count, intervalMs);
@@ -255,5 +271,17 @@ function AnalogSamplePreview({
           : `${intervalMs} ms adjacent · span 1→${count} = ${spanMs} ms. Illustrative curve.`}
       </p>
     </div>
+  );
+}
+
+function LegendDot({ color, label }: { readonly color: string; readonly label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span
+        className="inline-block h-2.5 w-3.5 shrink-0 rounded-sm border border-ink/15"
+        style={{ backgroundColor: color }}
+      />
+      {label}
+    </span>
   );
 }

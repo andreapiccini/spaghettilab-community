@@ -477,7 +477,7 @@ function PcbConnectorInteractive({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reducedMotion ? undefined : { opacity: 0, y: 4, scale: 0.96 }}
             transition={motionTokens.duration.fast}
-            className="absolute z-30 w-52 -translate-x-1/2 rounded-slmd border border-border bg-surface p-2.5 shadow-e2"
+            className="absolute z-50 w-52 -translate-x-1/2 rounded-slmd border border-border bg-surface p-2.5 shadow-e2"
             style={{
               left: `${openSpot.x}%`,
               top: openSpot.y < 50 ? `${openSpot.y + 10}%` : undefined,

@@ -4,15 +4,22 @@ import {
   type DeviceProfileDraft,
   type Instruction,
 } from "@spaghettilab/device-profile-authoring-model";
-import { encodeConfigCbor, compileConfig, type CompileConfigInput } from "@spaghettilab/config-compiler";
-import type { DeviceRecipeDraft, DeviceRecipeOp } from "./device-recipe-draft.js";
+import {
+  encodeConfigCbor,
+  compileConfig,
+  type CanonicalConfig,
+  type CompileConfigInput,
+} from "@spaghettilab/config-compiler";
+import { decodeConfigCbor } from "@spaghettilab/config-decompiler";
+import { waitDurationMs, type DeviceRecipeDraft, type DeviceRecipeOp } from "./device-recipe-draft.js";
+import { hexStringsToBytes } from "./i2c-hex.js";
 
-function parseHexByte(raw: string): number {
-  const n = Number.parseInt(raw.trim().replace(/^0x/i, ""), 16);
-  return Number.isFinite(n) ? n & 0xff : 0;
-}
-
-/** Pack up to 8 bytes into LOAD_CONST low/high (little-endian). */
+/**
+ * Pack bytes into LOAD_CONST low/high (little-endian).
+ * Firmware temp slots hold at most 8 bytes — longer payloads are chunked into
+ * consecutive slots and emitted as back-to-back I2C_WRITE only when each chunk
+ * is its own transaction; for a single transaction we keep length ≤ 8.
+ */
 function loadConst(dst: number, bytes: readonly number[]): Instruction {
   const slice = bytes.slice(0, 8);
   let low = 0;
@@ -25,6 +32,19 @@ function loadConst(dst: number, bytes: readonly number[]): Instruction {
   return { op: "LOAD_CONST", dst, length: Math.max(1, slice.length), low: low >>> 0, high: high >>> 0 };
 }
 
+/** One I2C_WRITE transaction for up to 8 payload bytes (same START…STOP). */
+function mapI2cWritePayload(
+  payload: readonly number[],
+  timeoutMs: number,
+  take: () => number,
+): Instruction[] {
+  const bytes = payload.length > 0 ? [...payload] : [0];
+  // Temp slot = 8 bytes max; transmit as many as fit in one transaction.
+  const chunk = bytes.slice(0, 8);
+  const src = take();
+  return [loadConst(src, chunk), { op: "I2C_WRITE", src, length: chunk.length, timeoutMs }];
+}
+
 function mapOp(op: DeviceRecipeOp, temp: { next: number }): Instruction[] {
   const take = () => {
     const s = temp.next % 8;
@@ -33,39 +53,73 @@ function mapOp(op: DeviceRecipeOp, temp: { next: number }): Instruction[] {
   };
 
   switch (op.type) {
-    case "wait":
-      return [{ op: "DELAY_BOUNDED", milliseconds: Math.max(1, Math.min(op.ms, 60_000)) }];
+    case "wait": {
+      const ms = Math.max(1, Math.min(Math.ceil(waitDurationMs(op)), 60_000));
+      return [{ op: "DELAY_BOUNDED", milliseconds: ms }];
+    }
     case "i2c_write": {
-      const payload: number[] = [];
-      if (op.reg) payload.push(parseHexByte(op.reg));
-      for (const b of op.bytes) payload.push(parseHexByte(b));
-      if (payload.length === 0) payload.push(0);
-      const src = take();
-      return [loadConst(src, payload), { op: "I2C_WRITE", src, length: payload.length, timeoutMs: op.timeoutMs ?? 20 }];
+      const payload = hexStringsToBytes(op.bytes);
+      return mapI2cWritePayload(payload, op.timeoutMs ?? 20, take);
     }
     case "i2c_read": {
       const dst = take();
       return [{ op: "I2C_READ", dst, length: Math.max(1, op.len), timeoutMs: op.timeoutMs ?? 20 }];
     }
     case "i2c_write_read": {
-      const payload: number[] = [];
-      if (op.reg) payload.push(parseHexByte(op.reg));
-      for (const b of op.writeBytes) payload.push(parseHexByte(b));
+      // Single WRITE_READ opcode → firmware RESTART (no intermediate STOP).
+      const payload = hexStringsToBytes(op.writeBytes).slice(0, 8);
       const src = take();
       const dst = take();
-      const writeLength = payload.length;
+      const timeoutMs = op.timeoutMs ?? 20;
       const ops: Instruction[] = [];
-      if (writeLength > 0) ops.push(loadConst(src, payload));
-      else ops.push(loadConst(src, [0]));
+      if (payload.length > 0) ops.push(loadConst(src, payload));
       ops.push({
         op: "I2C_WRITE_READ",
         src,
         dst,
         readLength: Math.max(1, op.readLen),
-        writeLength: Math.max(1, writeLength || 1),
-        timeoutMs: op.timeoutMs ?? 20,
+        writeLength: payload.length,
+        timeoutMs,
       });
       return ops;
+    }
+    case "i2c_transaction": {
+      // Best-effort flatten: WRITE/READ phases → WRITE + WRITE_READ/READ; START/STOP/Sr implicit.
+      const timeoutMs = op.timeoutMs ?? 20;
+      const out: Instruction[] = [];
+      let pendingWrite: number[] = [];
+      const flushWrite = () => {
+        if (pendingWrite.length === 0) return;
+        out.push(...mapI2cWritePayload(pendingWrite, timeoutMs, take));
+        pendingWrite = [];
+      };
+      for (const phase of op.phases) {
+        if (phase.kind === "write") {
+          pendingWrite.push(...hexStringsToBytes(phase.bytes));
+        } else if (phase.kind === "read") {
+          const src = take();
+          const dst = take();
+          if (pendingWrite.length > 0) {
+            const chunk = pendingWrite.slice(0, 8);
+            out.push(loadConst(src, chunk));
+            out.push({
+              op: "I2C_WRITE_READ",
+              src,
+              dst,
+              readLength: Math.max(1, phase.len),
+              writeLength: chunk.length,
+              timeoutMs,
+            });
+            pendingWrite = [];
+          } else {
+            out.push({ op: "I2C_READ", dst, length: Math.max(1, phase.len), timeoutMs });
+          }
+        } else if (phase.kind === "restart" || phase.kind === "stop" || phase.kind === "start") {
+          flushWrite();
+        }
+      }
+      flushWrite();
+      return out;
     }
     default:
       return [];
@@ -115,8 +169,10 @@ export function recipePlanToTestProfile(
     const part = mapOp(op, temp);
     if (part.length === 0 && isExecutableCandidate(op)) skipped.push(op.type);
     mappedSample.push(...part);
-    if (op.type === "i2c_read" || op.type === "i2c_write_read") {
-      lastReadSlot = (before + (op.type === "i2c_write_read" ? 1 : 0)) % 8;
+    if (op.type === "i2c_read") {
+      lastReadSlot = before % 8;
+    } else if (op.type === "i2c_write_read" || op.type === "i2c_transaction") {
+      lastReadSlot = (before + 1) % 8;
     }
   }
 
@@ -131,10 +187,14 @@ export function recipePlanToTestProfile(
   mappedSample.push({ op: "EMIT_RECORD" });
 
   const { transport, caps } = transportOf(draft);
-  const profileId = `try.${draft.id.replace(/[^a-zA-Z0-9._-]/g, "").slice(0, 20)}` || "try.recipe";
+  // Short stable id (≤31): easier to match in declarative-device config properties / catalog cleanup.
+  const profileId = `try.${draft.binding.bus}`.slice(0, 31);
+  // Firmware stores version as uint16 and rejects 0 or >65535 in decode_profile_cbor (-EINVAL).
+  // Unique-ish each Testa run avoids CONFLICT when the same id was installed earlier.
+  const version = ((Date.now() + Math.floor(Math.random() * 997)) % 65535) + 1;
   const profile: DeviceProfileDraft = {
-    profileId: profileId.slice(0, 31),
-    version: 1,
+    profileId,
+    version,
     transport,
     requiredCapabilities: caps,
     maxTotalTimeMs: 5000,
@@ -143,7 +203,7 @@ export function recipePlanToTestProfile(
     initOps: mappedInit,
     sampleOps: mappedSample,
     safeStopOps: [],
-    sampleSchemaId: `${profileId.slice(0, 20)}.s`.slice(0, 31),
+    sampleSchemaId: `${profileId}.s`.slice(0, 31),
     sampleSchemaVersion: 1,
     sampleFields: [{ fieldId, type: "uint64", name: "raw", unit: "" }],
   };
@@ -155,6 +215,8 @@ function isExecutableCandidate(op: DeviceRecipeOp): boolean {
     op.type === "i2c_write" ||
     op.type === "i2c_read" ||
     op.type === "i2c_write_read" ||
+    op.type === "i2c_transaction" ||
+    op.type === "i2c_scan" ||
     op.type === "wait" ||
     op.type === "spi_transfer" ||
     op.type === "gpio_read" ||
@@ -166,19 +228,74 @@ function isExecutableCandidate(op: DeviceRecipeOp): boolean {
 
 export type RecipeTestConfigParams = {
   readonly profileId: string;
+  /** Installed Device Profile version (firmware uint16, required by declarative-device). */
+  readonly profileVersion: number;
   readonly i2cAddress?: number;
   readonly portId?: number;
-  readonly bayId?: number;
-  readonly railId?: number;
-  readonly periodMs?: number;
+  /**
+   * Sample period. Omit / `null` / `0` → no schedule (Testa runs ops in profile init once).
+   * A schedule forces `start_runtime`, which has failed with INTERNAL_ERROR on some cores
+   * even when VALIDATE_CONFIG succeeded.
+   */
+  readonly periodMs?: number | null;
+  /**
+   * Live config bytes from GET_CONFIG (parked). Used to keep mqtt/connectivity/energy
+   * unchanged and to prefer an already-valid Port for the test module.
+   */
+  readonly parkedConfigBytes?: Uint8Array;
 };
 
-/** Minimal one-module config: declarative-device + schedule. Does not touch the project canvas. */
+/** Port 0 is the I²C-capable connector on Backbone / Core boards; port 1 is often CAN or GPIO-only. */
+const DEFAULT_I2C_PORT_ID = 0;
+
+function pickTestPortId(explicit: number | undefined, parked: CanonicalConfig | null): number {
+  if (explicit !== undefined && Number.isInteger(explicit) && explicit >= 0 && explicit <= 255) {
+    return explicit;
+  }
+  const fromParked = parked?.modules[0]?.portId;
+  if (fromParked !== undefined && fromParked >= 0 && fromParked <= 255) return fromParked;
+  return DEFAULT_I2C_PORT_ID;
+}
+
+/**
+ * Minimal one-module config: declarative-device (+ optional schedule). Does not touch the canvas.
+ *
+ * Properties match `SPAGHETTI_DECLARATIVE_CONFIG_*` (profile_id / profile_version / i2c_address).
+ * Bay/rail are left unspecified on the wire (CBOR null) — authoring defaults like railId=1000
+ * exceed uint8 and the Core rejects them with MALFORMED_REQUEST.
+ */
 export function buildRecipeTestConfigBytes(params: RecipeTestConfigParams): Uint8Array | null {
-  const portId = params.portId ?? 1;
-  const bayId = params.bayId ?? 100;
-  const railId = params.railId ?? 1000;
-  const addr = params.i2cAddress ?? 0x48;
+  const parked = params.parkedConfigBytes
+    ? (() => {
+        const decoded = decodeConfigCbor(params.parkedConfigBytes!);
+        return decoded.ok ? decoded.value : null;
+      })()
+    : null;
+
+  const portId = pickTestPortId(params.portId, parked);
+  const version = Math.max(1, Math.min(params.profileVersion, 65535));
+  const addr = (params.i2cAddress ?? 0x48) & 0x7f;
+  const properties: Record<string, string | bigint> = {
+    "1": params.profileId,
+    "2": BigInt(version),
+    "4": BigInt(addr),
+  };
+
+  const mqtt = parked?.mqtt ?? { enabled: false, host: "", port: 0, baseTopic: "", security: 0, credentialId: 0 };
+  // Keep live connectivity/energy when possible — flipping LOW_ENERGY↔ONLINE during Testa
+  // can fail apply/rollback with opaque INTERNAL_ERROR on some images.
+  const connectivity = parked?.connectivity ?? 0;
+  const energy = parked?.energy ?? { bleAvailability: 0, advertisingWindowMs: 0, advertisingPeriodMs: 0 };
+  // LOW_ENERGY + mqtt.enabled is illegal; force mqtt off in that case.
+  const safeMqtt =
+    connectivity === 0 && mqtt.enabled
+      ? { ...mqtt, enabled: false }
+      : mqtt;
+
+  const periodMs = params.periodMs;
+  const withSchedule =
+    periodMs !== null && periodMs !== undefined && Number.isFinite(periodMs) && periodMs > 0;
+
   const input: CompileConfigInput = {
     physicalGraph: {
       layer: "physical-composition",
@@ -191,10 +308,11 @@ export function buildRecipeTestConfigBytes(params: RecipeTestConfigParams): Uint
             driverTypeId: "declarative-device",
             profileId: params.profileId,
             portId,
-            bayId,
-            railId,
+            // Placeholder authoring IDs — stripped before encode (see below).
+            bayId: 0,
+            railId: 0,
             electricalMode: "input-only",
-            properties: { "1": BigInt(addr) },
+            properties,
           },
         },
       ],
@@ -202,26 +320,35 @@ export function buildRecipeTestConfigBytes(params: RecipeTestConfigParams): Uint
     },
     processingGraph: {
       layer: "device-processing",
-      nodes: [
-        {
-          layer: "device-processing",
-          id: "try-sched",
-          data: {
-            kind: "schedule",
-            moduleNodeId: "try-mod",
-            periodMs: params.periodMs ?? 200,
-            enabled: true,
-          },
-        },
-      ],
+      nodes: withSchedule
+        ? [
+            {
+              layer: "device-processing",
+              id: "try-sched",
+              data: {
+                kind: "schedule",
+                moduleNodeId: "try-mod",
+                periodMs: periodMs!,
+                enabled: true,
+              },
+            },
+          ]
+        : [],
       edges: [],
     },
-    mqtt: { enabled: false, host: "", port: 0, baseTopic: "", security: 0, credentialId: 0 },
-    connectivity: 0,
-    energy: { bleAvailability: 0, advertisingWindowMs: 0, advertisingPeriodMs: 0 },
+    mqtt: safeMqtt,
+    connectivity,
+    energy,
   };
 
   const compiled = compileConfig(input);
   if (!compiled.ok) return null;
-  return encodeConfigCbor(compiled.value);
+  return encodeConfigCbor({
+    ...compiled.value,
+    modules: compiled.value.modules.map((m) => ({
+      ...m,
+      bayId: undefined,
+      powerRailId: undefined,
+    })),
+  });
 }

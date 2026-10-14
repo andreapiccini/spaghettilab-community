@@ -10,6 +10,7 @@ import {
   derivePortInterfaces,
   draftModesForBinding,
   dropSignalOnPin,
+  draftForBinding,
   ensureW1Config,
   expectedFunctionTag,
   functionPinGrid,
@@ -20,6 +21,8 @@ import {
   modesForVariant,
   modesProvideBus,
   numberedPeripheralName,
+  physicalLabelForSignalMode,
+  silkPinLabels,
   parsePhysicalCatalog,
   pinVisualKind,
   signalModeIsPlaced,
@@ -268,21 +271,20 @@ describe("physical composition", () => {
   });
 
   it("reads the first draft modes for a core binding", () => {
-    expect(
-      draftModesForBinding(
-        {
-          drafts: {
-            "bind-a:deadbeef": {
-              name: "Backbone",
-              modes: [4, 5, 0, 0],
-              i2cSpeed: 0,
-            },
-          },
-          catalog: [],
+    const project = {
+      drafts: {
+        "bind-a:deadbeef": {
+          name: "Backbone",
+          modes: [4, 5, 0, 0],
+          i2cSpeed: 0,
         },
-        "bind-a",
-      ),
-    ).toEqual([4, 5, 0, 0]);
+      },
+      catalog: [],
+    };
+    expect(draftModesForBinding(project, "bind-a")).toEqual([4, 5, 0, 0]);
+    expect(draftForBinding(project, "bind-a")?.name).toBe("Backbone");
     expect(draftModesForBinding({ drafts: {}, catalog: [] }, "missing")).toBeUndefined();
+    expect(silkPinLabels("v2")).toEqual(["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"]);
+    expect(physicalLabelForSignalMode([4, 5, 0, 0], 4, "v1")).toBe("Pin 2 · SDA");
   });
 });

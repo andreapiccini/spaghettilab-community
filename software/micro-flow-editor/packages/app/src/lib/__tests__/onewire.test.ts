@@ -26,8 +26,9 @@ describe("onewire", () => {
   it("seeds DS18B20 draft with datasheet convert wait and maps to SensorRecipe w1", () => {
     const draft = createDs18b20Example();
     expect(draft.binding.bus).toBe("w1");
-    expect(draft.phases.sample.some((op) => op.type === "w1_wait_convert" && op.timeoutMs === 750)).toBe(true);
-    expect(draft.phases.sample.filter((op) => op.type === "w1_reset")).toHaveLength(2);
+    const steps = draft.commands[0]?.steps ?? [];
+    expect(steps.some((op) => op.type === "w1_wait_convert" && op.timeoutMs === 750)).toBe(true);
+    expect(steps.filter((op) => op.type === "w1_reset")).toHaveLength(2);
     expect(validateDraftForCreate(draft)).toHaveLength(0);
     const recipe = draftToSensorRecipe(draft);
     expect(recipe.bus).toBe("w1");

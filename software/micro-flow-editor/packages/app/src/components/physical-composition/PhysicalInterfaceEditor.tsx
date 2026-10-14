@@ -487,7 +487,7 @@ export function PhysicalInterfaceEditor({
 
       {/* Center — physical connector */}
       <section
-        className="relative flex min-h-0 flex-col overflow-hidden rounded-slmd border border-border p-3 shadow-e1 sm:p-4"
+        className="relative flex min-h-0 flex-col overflow-visible rounded-slmd border border-border p-3 shadow-e1 sm:p-4"
         style={{
           backgroundColor: "#ffffff",
           backgroundImage: `url(${publicAsset("ux-assets/physical-configurator-bg.jpg")})`,
@@ -546,8 +546,8 @@ export function PhysicalInterfaceEditor({
             </p>
           </div>
         </div>
-        <div className="relative z-[1] flex min-h-0 flex-1 items-center justify-center overflow-hidden">
-          <div className="flex h-full w-full max-w-xl items-center justify-center">
+        <div className="relative z-[1] flex min-h-0 flex-1 items-center justify-center overflow-visible">
+          <div className="flex h-full w-full max-w-xl items-center justify-center overflow-visible">
             <PhysicalConnectorPreview
               modes={draft.modes}
               busUnits={draft.busUnits}

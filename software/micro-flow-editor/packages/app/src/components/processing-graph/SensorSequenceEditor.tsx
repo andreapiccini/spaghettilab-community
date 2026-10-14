@@ -25,6 +25,11 @@ const STEP_LABELS: Record<SensorRecipeStepType, { it: string; en: string }> = {
   adc_read: { it: "Leggi ADC", en: "ADC read" },
   gpio_write: { it: "GPIO out", en: "GPIO write" },
   gpio_read: { it: "GPIO in", en: "GPIO read" },
+  w1_reset: { it: "1-Wire reset", en: "1-Wire reset" },
+  w1_match_rom: { it: "1-Wire ROM", en: "1-Wire match ROM" },
+  w1_write: { it: "1-Wire scrivi", en: "1-Wire write" },
+  w1_read: { it: "1-Wire leggi", en: "1-Wire read" },
+  w1_crc: { it: "1-Wire CRC", en: "1-Wire CRC" },
   emit: { it: "Emetti", en: "Emit" },
 };
 
@@ -38,7 +43,13 @@ function stepTone(type: SensorRecipeStepType): { bg: string; border: string; tex
     case "i2c_read":
     case "adc_read":
     case "gpio_read":
+    case "w1_read":
       return { bg: "bg-teal-50", border: "border-teal-300", text: "text-teal-800" };
+    case "w1_write":
+    case "w1_match_rom":
+    case "w1_reset":
+    case "w1_crc":
+      return { bg: "bg-amber-50", border: "border-amber-300", text: "text-amber-900" };
     case "emit":
       return { bg: "bg-emerald-50", border: "border-emerald-300", text: "text-emerald-800" };
     default:
@@ -50,10 +61,14 @@ function hostArrow(step: SensorRecipeStep): "down" | "up" | "none" {
   switch (step.type) {
     case "i2c_write":
     case "gpio_write":
+    case "w1_write":
+    case "w1_match_rom":
+    case "w1_reset":
       return "down";
     case "i2c_read":
     case "adc_read":
     case "gpio_read":
+    case "w1_read":
       return "up";
     default:
       return "none";

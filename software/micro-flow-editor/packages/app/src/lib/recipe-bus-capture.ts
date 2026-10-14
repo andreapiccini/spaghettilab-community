@@ -1,4 +1,5 @@
 import type { DeviceRecipeOp } from "./device-recipe-draft.js";
+import { formatHexByte, hexStringsToBytes } from "./i2c-hex.js";
 
 /** One bus byte block in a test capture (TX toward sensor or RX from sensor). */
 export type RecipeBusBlock = {
@@ -17,13 +18,40 @@ export type RecipeBusCapture = {
   readonly txByOpId: Readonly<Record<string, readonly number[]>>;
 };
 
-function parseHexByte(raw: string): number {
-  const n = Number.parseInt(raw.trim().replace(/^0x/i, ""), 16);
-  return Number.isFinite(n) ? n & 0xff : 0;
+function pushTx(
+  blocks: RecipeBusBlock[],
+  txByOpId: Record<string, number[]>,
+  opId: string,
+  bytes: readonly string[],
+): void {
+  const tx = txByOpId[opId] ?? [];
+  for (const v of hexStringsToBytes(bytes)) {
+    tx.push(v);
+    blocks.push({ opId, direction: "tx", index: tx.length - 1, value: v, label: formatHexByte(v) });
+  }
+  txByOpId[opId] = tx;
 }
 
-function hexByte(n: number): string {
-  return `0x${(n & 0xff).toString(16).padStart(2, "0")}`;
+function pushRxSlots(
+  blocks: RecipeBusBlock[],
+  rxByOpId: Record<string, (number | null)[]>,
+  opId: string,
+  len: number,
+  measured?: readonly number[],
+): void {
+  const rx = rxByOpId[opId] ?? [];
+  for (let i = 0; i < len; i++) {
+    const v = measured?.[rx.length] ?? null;
+    rx.push(v);
+    blocks.push({
+      opId,
+      direction: "rx",
+      index: rx.length - 1,
+      value: v,
+      label: v === null ? `RX${rx.length - 1}` : formatHexByte(v),
+    });
+  }
+  rxByOpId[opId] = rx;
 }
 
 /**
@@ -40,66 +68,24 @@ export function buildRecipeBusCapture(
 
   for (const op of ops) {
     if (op.type === "i2c_write") {
-      const tx: number[] = [];
-      if (op.reg) {
-        const r = parseHexByte(op.reg);
-        tx.push(r);
-        blocks.push({ opId: op.id, direction: "tx", index: tx.length - 1, value: r, label: hexByte(r) });
-      }
-      for (const b of op.bytes) {
-        const v = parseHexByte(b);
-        tx.push(v);
-        blocks.push({ opId: op.id, direction: "tx", index: tx.length - 1, value: v, label: hexByte(v) });
-      }
-      txByOpId[op.id] = tx;
+      pushTx(blocks, txByOpId, op.id, op.bytes);
     } else if (op.type === "i2c_read") {
-      const measured = measuredRx?.[op.id];
-      const rx: (number | null)[] = [];
-      for (let i = 0; i < op.len; i++) {
-        const v = measured?.[i] ?? null;
-        rx.push(v);
-        blocks.push({
-          opId: op.id,
-          direction: "rx",
-          index: i,
-          value: v,
-          label: v === null ? `RX${i}` : hexByte(v),
-        });
-      }
-      rxByOpId[op.id] = rx;
+      pushRxSlots(blocks, rxByOpId, op.id, Math.max(1, op.len), measuredRx?.[op.id]);
     } else if (op.type === "i2c_write_read") {
-      const tx: number[] = [];
-      if (op.reg) {
-        const r = parseHexByte(op.reg);
-        tx.push(r);
-        blocks.push({ opId: op.id, direction: "tx", index: tx.length - 1, value: r, label: hexByte(r) });
+      pushTx(blocks, txByOpId, op.id, op.writeBytes);
+      pushRxSlots(blocks, rxByOpId, op.id, Math.max(1, op.readLen), measuredRx?.[op.id]);
+    } else if (op.type === "i2c_transaction") {
+      for (const phase of op.phases) {
+        if (phase.kind === "write") pushTx(blocks, txByOpId, op.id, phase.bytes);
+        if (phase.kind === "read") pushRxSlots(blocks, rxByOpId, op.id, Math.max(1, phase.len), measuredRx?.[op.id]);
       }
-      for (const b of op.writeBytes) {
-        const v = parseHexByte(b);
-        tx.push(v);
-        blocks.push({ opId: op.id, direction: "tx", index: tx.length - 1, value: v, label: hexByte(v) });
-      }
-      txByOpId[op.id] = tx;
-      const measured = measuredRx?.[op.id];
-      const rx: (number | null)[] = [];
-      for (let i = 0; i < op.readLen; i++) {
-        const v = measured?.[i] ?? null;
-        rx.push(v);
-        blocks.push({
-          opId: op.id,
-          direction: "rx",
-          index: i,
-          value: v,
-          label: v === null ? `RX${i}` : hexByte(v),
-        });
-      }
-      rxByOpId[op.id] = rx;
     } else if (op.type === "spi_transfer") {
       const tx: number[] = [];
-      for (let i = 0; i < op.txBytes.length; i++) {
-        const v = parseHexByte(op.txBytes[i]!);
+      const txBytes = hexStringsToBytes(op.txBytes);
+      for (let i = 0; i < txBytes.length; i++) {
+        const v = txBytes[i]!;
         tx.push(v);
-        blocks.push({ opId: op.id, direction: "tx", index: i, value: v, label: hexByte(v) });
+        blocks.push({ opId: op.id, direction: "tx", index: i, value: v, label: formatHexByte(v) });
       }
       txByOpId[op.id] = tx;
       const measured = measuredRx?.[op.id];
@@ -112,22 +98,7 @@ export function buildRecipeBusCapture(
           direction: "rx",
           index: i,
           value: v,
-          label: v === null ? `RX${i}` : hexByte(v),
-        });
-      }
-      if (rx.length) rxByOpId[op.id] = rx;
-    } else if (op.type === "w1_read") {
-      const measured = measuredRx?.[op.id];
-      const rx: (number | null)[] = [];
-      for (let i = 0; i < op.len; i++) {
-        const v = measured?.[i] ?? null;
-        rx.push(v);
-        blocks.push({
-          opId: op.id,
-          direction: "rx",
-          index: i,
-          value: v,
-          label: v === null ? `RX${i}` : hexByte(v),
+          label: v === null ? `RX${i}` : formatHexByte(v),
         });
       }
       rxByOpId[op.id] = rx;

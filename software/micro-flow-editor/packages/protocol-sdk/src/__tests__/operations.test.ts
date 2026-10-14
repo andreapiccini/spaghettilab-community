@@ -10,6 +10,7 @@
  * a byte sequence the firmware itself published.
  */
 import { describe, expect, it } from "vitest";
+import { boolField, encodeMap } from "../fields.js";
 import * as ops from "../operations/index.js";
 
 describe("GET_CATALOG", () => {
@@ -319,12 +320,15 @@ describe("device profile operations", () => {
     expect(ops.decodeGetDeviceProfileResponse(ops.encodeGetDeviceProfileResponse(response))).toEqual(response);
   });
 
-  it("round-trips VALIDATE_DEVICE_PROFILE — valid field is a uint, not a bool (the stub's real wire shape)", () => {
+  it("round-trips VALIDATE_DEVICE_PROFILE — accepts uint or bool for valid", () => {
     const request: ops.ValidateDeviceProfileRequest = { profileCbor: new Uint8Array([0xa0]) };
     expect(ops.decodeValidateDeviceProfileRequest(ops.encodeValidateDeviceProfileRequest(request))).toEqual(request);
     expect(ops.decodeValidateDeviceProfileResponse(ops.encodeValidateDeviceProfileResponse({ valid: 1 }))).toEqual({
       valid: 1,
     });
+    // Some Core builds send a CBOR bool (like VALIDATE_CONFIG).
+    expect(ops.decodeValidateDeviceProfileResponse(encodeMap([boolField(0, true)]))).toEqual({ valid: 1 });
+    expect(ops.decodeValidateDeviceProfileResponse(encodeMap([boolField(0, false)]))).toEqual({ valid: 0 });
   });
 
   it("round-trips INSTALL_DEVICE_PROFILE", () => {
@@ -388,5 +392,16 @@ describe("BLE OTA (ops 28-31)", () => {
   it("round-trips FINISH_BLE_UPDATE and CANCEL_BLE_UPDATE — both just {sessionId}", () => {
     const request: ops.BleUpdateSessionRequest = { sessionId: 3 };
     expect(ops.decodeBleUpdateSessionRequest(ops.encodeBleUpdateSessionRequest(request))).toEqual(request);
+  });
+});
+
+ describe("APPLY_CONFIG RX capture", () => {
+  it("roundtrips sensor bytes and truncation", () => {
+    const response: ops.ApplyConfigResponse = { changed: true, generation: 4, sha256: new Uint8Array(32), rxReads: [new Uint8Array([0x68]), new Uint8Array([0, 255])], rxTruncated: true };
+    expect(ops.decodeApplyConfigResponse(ops.encodeApplyConfigResponse(response))).toEqual(response);
+  });
+  it("rejects captures exceeding firmware bounds", () => {
+    const response: ops.ApplyConfigResponse = { changed: true, generation: 4, sha256: new Uint8Array(32), rxReads: [new Uint8Array(9)] };
+    expect(() => ops.decodeApplyConfigResponse(ops.encodeApplyConfigResponse(response))).toThrow("invalid RX bytes");
   });
 });

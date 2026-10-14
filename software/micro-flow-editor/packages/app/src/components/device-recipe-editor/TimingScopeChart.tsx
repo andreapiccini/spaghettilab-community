@@ -1,6 +1,6 @@
 /**
  * Logic-analyzer / oscilloscope-style timing diagram (illustrative SVG).
- * Phase bands align with datasheet ProtocolFrameStrip cells.
+ * Phase bands show protocol framing (START/STOP/Sr/ACK/NACK/ADDR/DATA).
  */
 
 import type {
@@ -8,18 +8,29 @@ import type {
   TimingLane,
   TimingLevel,
   TimingPhaseBand,
+  TimingStepSpan,
 } from "../../lib/timing-scope-types.js";
 
-export type { TimingEdge, TimingLane, TimingLevel, TimingPhaseBand, TimingSpanAnnotation } from "../../lib/timing-scope-types.js";
+export type {
+  TimingEdge,
+  TimingLane,
+  TimingLevel,
+  TimingPhaseBand,
+  TimingSpanAnnotation,
+  TimingStepSpan,
+} from "../../lib/timing-scope-types.js";
 
 type Props = {
   readonly title?: string;
   readonly caption?: string;
   readonly lanes: readonly TimingLane[];
   readonly durationMs: number;
-  /** Vertical phase markers shared with the datasheet strip. */
+  /** Protocol framing bands (START / ACK / …). */
   readonly phaseBands?: readonly TimingPhaseBand[];
+  /** Recipe steps aligned on the same time axis. */
+  readonly stepSpans?: readonly TimingStepSpan[];
   readonly highlightOpId?: string | null;
+  readonly onSelectOp?: (opId: string) => void;
   readonly className?: string;
 };
 
@@ -36,7 +47,9 @@ export function TimingScopeChart({
   lanes,
   durationMs,
   phaseBands = [],
+  stepSpans = [],
   highlightOpId = null,
+  onSelectOp,
   className,
 }: Props) {
   const dur = Math.max(1, durationMs);
@@ -44,15 +57,17 @@ export function TimingScopeChart({
   const levelW = 22;
   const left = labelW + levelW;
   const padR = 16;
-  /** Slightly compact so Task view shows steps + datasheet without as much scroll. */
   const laneH = 48;
-  const bandH = phaseBands.length ? 24 : 0;
-  const padTop = (title ? 22 : 4) + bandH;
+  const stepH = stepSpans.length ? 36 : 0;
+  const bandH = phaseBands.length ? 28 : 0;
+  const titleH = title ? 22 : 4;
+  const padTop = titleH + stepH + bandH;
   const padBot = caption ? 18 : 8;
   const plotW = 520;
   const width = left + plotW + padR;
   const height = padTop + lanes.length * laneH + padBot;
-  const bandY = title ? 20 : 2;
+  const stepY = titleH;
+  const bandY = titleH + stepH;
 
   const xAt = (t: number) => left + (Math.min(dur, Math.max(0, t)) / dur) * plotW;
   const yHigh = (laneIndex: number) => padTop + laneIndex * laneH + 12;
@@ -68,23 +83,113 @@ export function TimingScopeChart({
           </text>
         ) : null}
 
-        {/* Phase bands — same labels/order as datasheet strip */}
+        {/* Recipe steps — same time axis as SCL/SDA */}
+        {stepSpans.length > 0 ? (
+          <g>
+            <text
+              x={4}
+              y={stepY + 14}
+              fill={MUTED}
+              style={{ fontSize: 9, fontWeight: 700, fontFamily: "Manrope, sans-serif" }}
+            >
+              STEP
+            </text>
+            {stepSpans.map((step) => {
+              const x0 = xAt(step.t0);
+              const x1 = xAt(step.t1);
+              const w = Math.max(18, x1 - x0);
+              const hi = highlightOpId === step.opId;
+              const fill = hi
+                ? step.kind === "bus"
+                  ? "rgba(15,23,42,0.92)"
+                  : "rgba(37,99,235,0.18)"
+                : step.kind === "bus"
+                  ? "rgba(15,23,42,0.78)"
+                  : "rgba(148,163,184,0.18)";
+              const ink = step.kind === "bus" || hi ? "#fff" : INK;
+              const shortLabel =
+                w < 72
+                  ? `${step.index + 1}`
+                  : w < 120
+                    ? `${step.index + 1}. ${step.label.slice(0, 18)}${step.label.length > 18 ? "…" : ""}`
+                    : `${step.index + 1}. ${step.label}`;
+              return (
+                <g
+                  key={step.opId}
+                  style={{ cursor: onSelectOp ? "pointer" : "default" }}
+                  onClick={() => onSelectOp?.(step.opId)}
+                >
+                  <title>{`${step.index + 1}. ${step.label}`}</title>
+                  <rect
+                    x={x0}
+                    y={stepY + 2}
+                    width={w}
+                    height={stepH - 8}
+                    rx={4}
+                    fill={fill}
+                    stroke={hi ? TRACE : "rgba(15,23,42,0.15)"}
+                    strokeWidth={hi ? 1.5 : 0.75}
+                  />
+                  <text
+                    x={x0 + w / 2}
+                    y={stepY + 20}
+                    textAnchor="middle"
+                    fill={step.kind === "bus" ? "#fff" : ink}
+                    style={{ fontSize: 8, fontWeight: 700, fontFamily: "Manrope, sans-serif" }}
+                  >
+                    {shortLabel}
+                  </text>
+                  <line
+                    x1={x0}
+                    y1={stepY + stepH - 6}
+                    x2={x0}
+                    y2={plotBottom}
+                    stroke={hi ? TRACE : MUTED}
+                    strokeWidth={hi ? 1 : 0.5}
+                    strokeDasharray="2 3"
+                    opacity={0.4}
+                  />
+                </g>
+              );
+            })}
+          </g>
+        ) : null}
+
+        {/* Phase bands — START / STOP / Sr / ACK / NACK / ADDR / DATA */}
         {phaseBands.map((band) => {
           const x0 = xAt(band.t0);
           const x1 = xAt(band.t1);
           const w = Math.max(2, x1 - x0);
           const hi = highlightOpId && band.opId === highlightOpId;
           const fill = band.color ?? (hi ? "rgba(37,99,235,0.2)" : "rgba(148,163,184,0.12)");
+          const short = band.label.length <= 2;
+          const showLabel = short ? w >= 5 : w > 12;
           return (
-            <g key={band.id}>
-              <rect x={x0} y={bandY} width={w} height={bandH - 4} fill={fill} stroke={hi ? TRACE : "transparent"} strokeWidth={1} />
-              {w > 14 ? (
+            <g
+              key={band.id}
+              style={{ cursor: onSelectOp && band.opId ? "pointer" : "default" }}
+              onClick={() => band.opId && onSelectOp?.(band.opId)}
+            >
+              <rect
+                x={x0}
+                y={bandY}
+                width={w}
+                height={bandH - 4}
+                fill={fill}
+                stroke={hi ? TRACE : "rgba(15,23,42,0.12)"}
+                strokeWidth={hi ? 1 : 0.5}
+              />
+              {showLabel ? (
                 <text
                   x={x0 + w / 2}
-                  y={bandY + 14}
+                  y={bandY + 16}
                   textAnchor="middle"
-                  fill={hi ? TRACE : MUTED}
-                  style={{ fontSize: 8, fontWeight: 600, fontFamily: "ui-monospace, monospace" }}
+                  fill={hi ? TRACE : INK}
+                  style={{
+                    fontSize: short ? 8 : 7,
+                    fontWeight: 700,
+                    fontFamily: "ui-monospace, monospace",
+                  }}
                 >
                   {band.label}
                 </text>
@@ -95,8 +200,9 @@ export function TimingScopeChart({
                 x2={x0}
                 y2={plotBottom}
                 stroke={hi ? TRACE : MUTED}
-                strokeWidth={hi ? 1 : 0.75}
-                strokeDasharray="3 3"
+                strokeWidth={hi ? 1 : 0.5}
+                strokeDasharray={short ? "2 3" : "3 3"}
+                opacity={0.55}
               />
             </g>
           );

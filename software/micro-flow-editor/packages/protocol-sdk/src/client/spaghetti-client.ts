@@ -1,8 +1,19 @@
-import { decodeEvent, decodeResponse, encodeRequest, EventType, Operation, ProtocolStatus } from "../envelope.js";
+import {
+  decodeEvent,
+  decodeResponse,
+  encodeRequest,
+  EventType,
+  Operation,
+  ProtocolStatus,
+} from "../envelope.js";
 import { decodeStatusEventPayload } from "../events.js";
-import { SpaghettiClientError } from "./errors.js";
+import { decodeConfigApplyFailure, SpaghettiClientError } from "./errors.js";
 import type { ProtocolTransport } from "./transport.js";
-import { encodeApplyPhysicalRequest, decodeApplyPhysicalResponse, type ApplyPhysicalRequest } from "../operations/physical.js";
+import {
+  encodeApplyPhysicalRequest,
+  decodeApplyPhysicalResponse,
+  type ApplyPhysicalRequest,
+} from "../operations/physical.js";
 
 import {
   encodeGetCatalogRequest,
@@ -160,7 +171,9 @@ export class SpaghettiClient {
     private readonly transport: ProtocolTransport,
     private readonly options: SpaghettiClientOptions = {},
   ) {
-    this.unsubscribeResponse = transport.onResponse((bytes) => this.handleResponse(bytes));
+    this.unsubscribeResponse = transport.onResponse((bytes) =>
+      this.handleResponse(bytes),
+    );
     this.unsubscribeEvent = transport.onEvent((bytes) => this.handleEvent(bytes));
   }
 
@@ -169,14 +182,21 @@ export class SpaghettiClient {
     this.unsubscribeResponse();
     this.unsubscribeEvent();
     for (const [correlationId, entry] of this.pending) {
-      entry.reject(new SpaghettiClientError({ code: "CANCELLED", operation: entry.operation, correlationId }));
+      entry.reject(
+        new SpaghettiClientError({
+          code: "CANCELLED",
+          operation: entry.operation,
+          correlationId,
+        }),
+      );
     }
     this.pending.clear();
   }
 
   private allocateCorrelationId(): number {
     for (let i = 0; i < 0xffffffff; i++) {
-      this.nextCorrelationId = this.nextCorrelationId === 0xffffffff ? 1 : this.nextCorrelationId + 1;
+      this.nextCorrelationId =
+        this.nextCorrelationId === 0xffffffff ? 1 : this.nextCorrelationId + 1;
       if (!this.pending.has(this.nextCorrelationId)) return this.nextCorrelationId;
     }
     throw new SpaghettiClientError({ code: "CORRELATION_CONFLICT" });
@@ -204,6 +224,10 @@ export class SpaghettiClient {
           operation: entry.operation,
           correlationId: response.correlationId,
           status: response.status,
+          configFailure:
+            entry.operation === Operation.APPLY_CONFIG
+              ? decodeConfigApplyFailure(response.payload)
+              : undefined,
         }),
       );
     }
@@ -223,7 +247,8 @@ export class SpaghettiClient {
     } catch {
       return;
     }
-    const rebooted = this.lastKnownBootId !== null && statusPayload.bootId !== this.lastKnownBootId;
+    const rebooted =
+      this.lastKnownBootId !== null && statusPayload.bootId !== this.lastKnownBootId;
     this.lastKnownBootId = statusPayload.bootId;
     if (!rebooted) return;
     // A changed boot ID invalidates the firmware's replay cache for every
@@ -233,13 +258,21 @@ export class SpaghettiClient {
     // impedisce replay automatico pericoloso").
     for (const [correlationId, entry] of this.pending) {
       entry.reject(
-        new SpaghettiClientError({ code: "REBOOT_DURING_REQUEST", operation: entry.operation, correlationId }),
+        new SpaghettiClientError({
+          code: "REBOOT_DURING_REQUEST",
+          operation: entry.operation,
+          correlationId,
+        }),
       );
     }
     this.pending.clear();
   }
 
-  private async request(operation: Operation, payload: Uint8Array, signal?: AbortSignal): Promise<Uint8Array> {
+  private async request(
+    operation: Operation,
+    payload: Uint8Array,
+    signal?: AbortSignal,
+  ): Promise<Uint8Array> {
     if (signal?.aborted) {
       throw new SpaghettiClientError({ code: "CANCELLED", operation });
     }
@@ -279,7 +312,14 @@ export class SpaghettiClient {
       if (signal) {
         racers.push(
           new Promise<never>((_resolve, reject) => {
-            onAbort = () => reject(new SpaghettiClientError({ code: "CANCELLED", operation, correlationId }));
+            onAbort = () =>
+              reject(
+                new SpaghettiClientError({
+                  code: "CANCELLED",
+                  operation,
+                  correlationId,
+                }),
+              );
             signal.addEventListener("abort", onAbort);
           }),
         );
@@ -306,8 +346,15 @@ export class SpaghettiClient {
 
   // --- catalog / status / topology / config -------------------------------
 
-  async getCatalog(req: GetCatalogRequest = {}, signal?: AbortSignal): Promise<GetCatalogResponse> {
-    const bytes = await this.request(Operation.GET_CATALOG, encodeGetCatalogRequest(req), signal);
+  async getCatalog(
+    req: GetCatalogRequest = {},
+    signal?: AbortSignal,
+  ): Promise<GetCatalogResponse> {
+    const bytes = await this.request(
+      Operation.GET_CATALOG,
+      encodeGetCatalogRequest(req),
+      signal,
+    );
     return decodeGetCatalogResponse(bytes);
   }
 
@@ -318,7 +365,10 @@ export class SpaghettiClient {
    * mix of pages (S022 "catalog pagination che cambia fingerprint a metà
    * lettura riparte da zero").
    */
-  async getFullCatalog(limit?: number, signal?: AbortSignal): Promise<GetCatalogResponse> {
+  async getFullCatalog(
+    limit?: number,
+    signal?: AbortSignal,
+  ): Promise<GetCatalogResponse> {
     for (;;) {
       let cursor = 0;
       let fingerprint: Uint8Array | null = null;
@@ -344,20 +394,44 @@ export class SpaghettiClient {
   }
 
   async getStatus(signal?: AbortSignal): Promise<GetStatusResponse> {
-    const bytes = await this.request(Operation.GET_STATUS, encodeGetStatusRequest(), signal);
+    const bytes = await this.request(
+      Operation.GET_STATUS,
+      encodeGetStatusRequest(),
+      signal,
+    );
     return decodeGetStatusResponse(bytes);
   }
 
-  async getTopology(req: GetTopologyRequest = {}, signal?: AbortSignal): Promise<GetTopologyResponse> {
-    const bytes = await this.request(Operation.GET_TOPOLOGY, encodeGetTopologyRequest(req), signal);
+  async getTopology(
+    req: GetTopologyRequest = {},
+    signal?: AbortSignal,
+  ): Promise<GetTopologyResponse> {
+    const bytes = await this.request(
+      Operation.GET_TOPOLOGY,
+      encodeGetTopologyRequest(req),
+      signal,
+    );
     return decodeGetTopologyResponse(bytes);
   }
 
-  async applyPhysical(request: ApplyPhysicalRequest, signal?: AbortSignal): Promise<ApplyPhysicalRequest> {
-    const bytes = await this.request(Operation.APPLY_PHYSICAL, encodeApplyPhysicalRequest(request), signal);
+  async applyPhysical(
+    request: ApplyPhysicalRequest,
+    signal?: AbortSignal,
+  ): Promise<ApplyPhysicalRequest> {
+    const bytes = await this.request(
+      Operation.APPLY_PHYSICAL,
+      encodeApplyPhysicalRequest(request),
+      signal,
+    );
     const confirmed = decodeApplyPhysicalResponse(bytes);
-    if (confirmed.nodeId !== request.nodeId || confirmed.i2cSpeed !== request.i2cSpeed || confirmed.modes.some((mode, i) => mode !== request.modes[i])) {
-      throw new Error("Physical configuration acknowledgment does not match the selected Backbone");
+    if (
+      confirmed.nodeId !== request.nodeId ||
+      confirmed.i2cSpeed !== request.i2cSpeed ||
+      confirmed.modes.some((mode, i) => mode !== request.modes[i])
+    ) {
+      throw new Error(
+        "Physical configuration acknowledgment does not match the selected Backbone",
+      );
     }
     return confirmed;
   }
@@ -370,57 +444,112 @@ export class SpaghettiClient {
   }
 
   async getConfig(signal?: AbortSignal): Promise<GetConfigResponse> {
-    const bytes = await this.request(Operation.GET_CONFIG, encodeGetConfigRequest(), signal);
+    const bytes = await this.request(
+      Operation.GET_CONFIG,
+      encodeGetConfigRequest(),
+      signal,
+    );
     return decodeGetConfigResponse(bytes);
   }
 
-  async validateConfig(req: ValidateConfigRequest, signal?: AbortSignal): Promise<ValidateConfigResponse> {
-    const bytes = await this.request(Operation.VALIDATE_CONFIG, encodeValidateConfigRequest(req), signal);
+  async validateConfig(
+    req: ValidateConfigRequest,
+    signal?: AbortSignal,
+  ): Promise<ValidateConfigResponse> {
+    const bytes = await this.request(
+      Operation.VALIDATE_CONFIG,
+      encodeValidateConfigRequest(req),
+      signal,
+    );
     return decodeValidateConfigResponse(bytes);
   }
 
-  async applyConfig(req: ApplyConfigRequest, signal?: AbortSignal): Promise<ApplyConfigResponse> {
-    const bytes = await this.request(Operation.APPLY_CONFIG, encodeApplyConfigRequest(req), signal);
+  async applyConfig(
+    req: ApplyConfigRequest,
+    signal?: AbortSignal,
+  ): Promise<ApplyConfigResponse> {
+    const bytes = await this.request(
+      Operation.APPLY_CONFIG,
+      encodeApplyConfigRequest(req),
+      signal,
+    );
     return decodeApplyConfigResponse(bytes);
   }
 
   // --- discovery ------------------------------------------------------------
 
-  async listDiscovery(req: ListDiscoveryRequest = {}, signal?: AbortSignal): Promise<ListDiscoveryResponse> {
-    const bytes = await this.request(Operation.LIST_DISCOVERY, encodeListDiscoveryRequest(req), signal);
+  async listDiscovery(
+    req: ListDiscoveryRequest = {},
+    signal?: AbortSignal,
+  ): Promise<ListDiscoveryResponse> {
+    const bytes = await this.request(
+      Operation.LIST_DISCOVERY,
+      encodeListDiscoveryRequest(req),
+      signal,
+    );
     return decodeListDiscoveryResponse(bytes);
   }
 
-  async getFullDiscoveryList(limit?: number, signal?: AbortSignal): Promise<DiscoveryCandidate[]> {
+  async getFullDiscoveryList(
+    limit?: number,
+    signal?: AbortSignal,
+  ): Promise<DiscoveryCandidate[]> {
     return this.paginate<DiscoveryCandidate>(async (cursor) => {
       const page = await this.listDiscovery({ cursor, limit }, signal);
       return { items: page.candidates, nextCursor: page.nextCursor };
     });
   }
 
-  async scanDiscovery(req: ScanDiscoveryRequest, signal?: AbortSignal): Promise<ScanDiscoveryResponse> {
-    const bytes = await this.request(Operation.SCAN_DISCOVERY, encodeScanDiscoveryRequest(req), signal);
+  async scanDiscovery(
+    req: ScanDiscoveryRequest,
+    signal?: AbortSignal,
+  ): Promise<ScanDiscoveryResponse> {
+    const bytes = await this.request(
+      Operation.SCAN_DISCOVERY,
+      encodeScanDiscoveryRequest(req),
+      signal,
+    );
     return decodeScanDiscoveryResponse(bytes);
   }
 
-  async acceptDiscovery(req: AcceptDiscoveryRequest, signal?: AbortSignal): Promise<AcceptDiscoveryResponse> {
-    const bytes = await this.request(Operation.ACCEPT_DISCOVERY, encodeAcceptDiscoveryRequest(req), signal);
+  async acceptDiscovery(
+    req: AcceptDiscoveryRequest,
+    signal?: AbortSignal,
+  ): Promise<AcceptDiscoveryResponse> {
+    const bytes = await this.request(
+      Operation.ACCEPT_DISCOVERY,
+      encodeAcceptDiscoveryRequest(req),
+      signal,
+    );
     return decodeAcceptDiscoveryResponse(bytes);
   }
 
   // --- command / connectivity / maintenance ----------------------------------
 
   async moduleCommand(req: ModuleCommandRequest, signal?: AbortSignal): Promise<void> {
-    const bytes = await this.request(Operation.MODULE_COMMAND, encodeModuleCommandRequest(req), signal);
+    const bytes = await this.request(
+      Operation.MODULE_COMMAND,
+      encodeModuleCommandRequest(req),
+      signal,
+    );
     decodeModuleCommandResponse(bytes);
   }
 
-  async getConnectivityStatus(signal?: AbortSignal): Promise<GetConnectivityStatusResponse> {
-    const bytes = await this.request(Operation.GET_CONNECTIVITY_STATUS, encodeGetConnectivityStatusRequest(), signal);
+  async getConnectivityStatus(
+    signal?: AbortSignal,
+  ): Promise<GetConnectivityStatusResponse> {
+    const bytes = await this.request(
+      Operation.GET_CONNECTIVITY_STATUS,
+      encodeGetConnectivityStatusRequest(),
+      signal,
+    );
     return decodeGetConnectivityStatusResponse(bytes);
   }
 
-  async acquireConnectivityLease(req: AcquireConnectivityLeaseRequest, signal?: AbortSignal): Promise<void> {
+  async acquireConnectivityLease(
+    req: AcquireConnectivityLeaseRequest,
+    signal?: AbortSignal,
+  ): Promise<void> {
     const bytes = await this.request(
       Operation.ACQUIRE_CONNECTIVITY_LEASE,
       encodeAcquireConnectivityLeaseRequest(req),
@@ -438,7 +567,9 @@ export class SpaghettiClient {
     decodeConnectivityLeaseResponse(bytes);
   }
 
-  async openNetworkMaintenance(signal?: AbortSignal): Promise<OpenNetworkMaintenanceResponse> {
+  async openNetworkMaintenance(
+    signal?: AbortSignal,
+  ): Promise<OpenNetworkMaintenanceResponse> {
     const bytes = await this.request(
       Operation.OPEN_NETWORK_MAINTENANCE,
       encodeOpenNetworkMaintenanceRequest(),
@@ -448,26 +579,50 @@ export class SpaghettiClient {
   }
 
   async factoryReset(req: FactoryResetRequest, signal?: AbortSignal): Promise<void> {
-    const bytes = await this.request(Operation.FACTORY_RESET, encodeFactoryResetRequest(req), signal);
+    const bytes = await this.request(
+      Operation.FACTORY_RESET,
+      encodeFactoryResetRequest(req),
+      signal,
+    );
     decodeFactoryResetResponse(bytes);
   }
 
   // --- audit / job ------------------------------------------------------------
 
-  async getAuditLog(req: GetAuditLogRequest = {}, signal?: AbortSignal): Promise<GetAuditLogResponse> {
-    const bytes = await this.request(Operation.GET_AUDIT_LOG, encodeGetAuditLogRequest(req), signal);
+  async getAuditLog(
+    req: GetAuditLogRequest = {},
+    signal?: AbortSignal,
+  ): Promise<GetAuditLogResponse> {
+    const bytes = await this.request(
+      Operation.GET_AUDIT_LOG,
+      encodeGetAuditLogRequest(req),
+      signal,
+    );
     return decodeGetAuditLogResponse(bytes);
   }
 
-  async getFullAuditLog(limit?: number, signal?: AbortSignal): Promise<AuditLogEntry[]> {
+  async getFullAuditLog(
+    limit?: number,
+    signal?: AbortSignal,
+  ): Promise<AuditLogEntry[]> {
     return this.paginate<AuditLogEntry>(async (cursor) => {
-      const page = await this.getAuditLog({ cursor: cursor === 0 ? undefined : cursor, limit }, signal);
+      const page = await this.getAuditLog(
+        { cursor: cursor === 0 ? undefined : cursor, limit },
+        signal,
+      );
       return { items: page.entries, nextCursor: page.nextCursor };
     });
   }
 
-  async getJobStatus(req: GetJobStatusRequest, signal?: AbortSignal): Promise<GetJobStatusResponse> {
-    const bytes = await this.request(Operation.GET_JOB_STATUS, encodeGetJobStatusRequest(req), signal);
+  async getJobStatus(
+    req: GetJobStatusRequest,
+    signal?: AbortSignal,
+  ): Promise<GetJobStatusResponse> {
+    const bytes = await this.request(
+      Operation.GET_JOB_STATUS,
+      encodeGetJobStatusRequest(req),
+      signal,
+    );
     return decodeGetJobStatusResponse(bytes);
   }
 
@@ -477,19 +632,33 @@ export class SpaghettiClient {
     req: ListDeviceProfilesRequest = {},
     signal?: AbortSignal,
   ): Promise<ListDeviceProfilesResponse> {
-    const bytes = await this.request(Operation.LIST_DEVICE_PROFILES, encodeListDeviceProfilesRequest(req), signal);
+    const bytes = await this.request(
+      Operation.LIST_DEVICE_PROFILES,
+      encodeListDeviceProfilesRequest(req),
+      signal,
+    );
     return decodeListDeviceProfilesResponse(bytes);
   }
 
-  async getFullDeviceProfileList(limit?: number, signal?: AbortSignal): Promise<DeviceProfileSummary[]> {
+  async getFullDeviceProfileList(
+    limit?: number,
+    signal?: AbortSignal,
+  ): Promise<DeviceProfileSummary[]> {
     return this.paginate<DeviceProfileSummary>(async (cursor) => {
       const page = await this.listDeviceProfiles({ cursor, limit }, signal);
       return { items: page.profiles, nextCursor: page.nextCursor };
     });
   }
 
-  async getDeviceProfile(req: GetDeviceProfileRequest, signal?: AbortSignal): Promise<GetDeviceProfileResponse> {
-    const bytes = await this.request(Operation.GET_DEVICE_PROFILE, encodeGetDeviceProfileRequest(req), signal);
+  async getDeviceProfile(
+    req: GetDeviceProfileRequest,
+    signal?: AbortSignal,
+  ): Promise<GetDeviceProfileResponse> {
+    const bytes = await this.request(
+      Operation.GET_DEVICE_PROFILE,
+      encodeGetDeviceProfileRequest(req),
+      signal,
+    );
     return decodeGetDeviceProfileResponse(bytes);
   }
 
@@ -497,62 +666,131 @@ export class SpaghettiClient {
     req: ValidateDeviceProfileRequest,
     signal?: AbortSignal,
   ): Promise<ValidateDeviceProfileResponse> {
-    const bytes = await this.request(Operation.VALIDATE_DEVICE_PROFILE, encodeValidateDeviceProfileRequest(req), signal);
+    const bytes = await this.request(
+      Operation.VALIDATE_DEVICE_PROFILE,
+      encodeValidateDeviceProfileRequest(req),
+      signal,
+    );
     return decodeValidateDeviceProfileResponse(bytes);
   }
 
-  async installDeviceProfile(req: InstallDeviceProfileRequest, signal?: AbortSignal): Promise<void> {
-    const bytes = await this.request(Operation.INSTALL_DEVICE_PROFILE, encodeInstallDeviceProfileRequest(req), signal);
+  async installDeviceProfile(
+    req: InstallDeviceProfileRequest,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const bytes = await this.request(
+      Operation.INSTALL_DEVICE_PROFILE,
+      encodeInstallDeviceProfileRequest(req),
+      signal,
+    );
     decodeInstallDeviceProfileResponse(bytes);
   }
 
-  async removeDeviceProfile(req: RemoveDeviceProfileRequest, signal?: AbortSignal): Promise<void> {
-    const bytes = await this.request(Operation.REMOVE_DEVICE_PROFILE, encodeRemoveDeviceProfileRequest(req), signal);
+  async removeDeviceProfile(
+    req: RemoveDeviceProfileRequest,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const bytes = await this.request(
+      Operation.REMOVE_DEVICE_PROFILE,
+      encodeRemoveDeviceProfileRequest(req),
+      signal,
+    );
     decodeRemoveDeviceProfileResponse(bytes);
   }
 
   async getFeatures(signal?: AbortSignal): Promise<GetFeaturesResponse> {
-    const bytes = await this.request(Operation.GET_FEATURES, encodeGetFeaturesRequest(), signal);
+    const bytes = await this.request(
+      Operation.GET_FEATURES,
+      encodeGetFeaturesRequest(),
+      signal,
+    );
     return decodeGetFeaturesResponse(bytes);
   }
 
   async getResources(signal?: AbortSignal): Promise<GetResourcesResponse> {
-    const bytes = await this.request(Operation.GET_RESOURCES, encodeGetResourcesRequest(), signal);
+    const bytes = await this.request(
+      Operation.GET_RESOURCES,
+      encodeGetResourcesRequest(),
+      signal,
+    );
     return decodeGetResourcesResponse(bytes);
   }
 
   async getCapabilities(signal?: AbortSignal): Promise<GetCapabilitiesResponse> {
-    const bytes = await this.request(Operation.GET_CAPABILITIES, encodeGetCapabilitiesRequest(), signal);
+    const bytes = await this.request(
+      Operation.GET_CAPABILITIES,
+      encodeGetCapabilitiesRequest(),
+      signal,
+    );
     return decodeGetCapabilitiesResponse(bytes);
   }
 
   async getUpdateStatus(signal?: AbortSignal): Promise<GetUpdateStatusResponse> {
-    const bytes = await this.request(Operation.GET_UPDATE_STATUS, encodeGetUpdateStatusRequest(), signal);
+    const bytes = await this.request(
+      Operation.GET_UPDATE_STATUS,
+      encodeGetUpdateStatusRequest(),
+      signal,
+    );
     return decodeGetUpdateStatusResponse(bytes);
   }
 
-  async openWifiUpdate(req: OpenWifiUpdateRequest = {}, signal?: AbortSignal): Promise<OpenWifiUpdateResponse> {
-    const bytes = await this.request(Operation.OPEN_WIFI_UPDATE, encodeOpenWifiUpdateRequest(req), signal);
+  async openWifiUpdate(
+    req: OpenWifiUpdateRequest = {},
+    signal?: AbortSignal,
+  ): Promise<OpenWifiUpdateResponse> {
+    const bytes = await this.request(
+      Operation.OPEN_WIFI_UPDATE,
+      encodeOpenWifiUpdateRequest(req),
+      signal,
+    );
     return decodeOpenWifiUpdateResponse(bytes);
   }
 
-  async openBleUpdate(req: OpenBleUpdateRequest, signal?: AbortSignal): Promise<OpenBleUpdateResponse> {
-    const bytes = await this.request(Operation.OPEN_BLE_UPDATE, encodeOpenBleUpdateRequest(req), signal);
+  async openBleUpdate(
+    req: OpenBleUpdateRequest,
+    signal?: AbortSignal,
+  ): Promise<OpenBleUpdateResponse> {
+    const bytes = await this.request(
+      Operation.OPEN_BLE_UPDATE,
+      encodeOpenBleUpdateRequest(req),
+      signal,
+    );
     return decodeOpenBleUpdateResponse(bytes);
   }
 
-  async writeBleUpdate(req: WriteBleUpdateRequest, signal?: AbortSignal): Promise<void> {
-    const bytes = await this.request(Operation.WRITE_BLE_UPDATE, encodeWriteBleUpdateRequest(req), signal);
+  async writeBleUpdate(
+    req: WriteBleUpdateRequest,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const bytes = await this.request(
+      Operation.WRITE_BLE_UPDATE,
+      encodeWriteBleUpdateRequest(req),
+      signal,
+    );
     decodeBleUpdateEmptyResponse(bytes);
   }
 
-  async finishBleUpdate(req: BleUpdateSessionRequest, signal?: AbortSignal): Promise<void> {
-    const bytes = await this.request(Operation.FINISH_BLE_UPDATE, encodeBleUpdateSessionRequest(req), signal);
+  async finishBleUpdate(
+    req: BleUpdateSessionRequest,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const bytes = await this.request(
+      Operation.FINISH_BLE_UPDATE,
+      encodeBleUpdateSessionRequest(req),
+      signal,
+    );
     decodeBleUpdateEmptyResponse(bytes);
   }
 
-  async cancelBleUpdate(req: BleUpdateSessionRequest, signal?: AbortSignal): Promise<void> {
-    const bytes = await this.request(Operation.CANCEL_BLE_UPDATE, encodeBleUpdateSessionRequest(req), signal);
+  async cancelBleUpdate(
+    req: BleUpdateSessionRequest,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const bytes = await this.request(
+      Operation.CANCEL_BLE_UPDATE,
+      encodeBleUpdateSessionRequest(req),
+      signal,
+    );
     decodeBleUpdateEmptyResponse(bytes);
   }
 

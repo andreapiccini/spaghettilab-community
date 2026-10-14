@@ -10,50 +10,53 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
+  addCommand,
   createAnalogLevelExample,
   createBlankDraft,
   createDs18b20Example,
   createGpioDigitalExample,
   describeDeviceOp,
   ensureWriteChannel,
+  insertCommandStep,
   insertOp,
   isAnalogCalibrationComplete,
-  isVarRef,
   isVariableUsed,
   libraryOpsForBus,
+  moveCommandStep,
   moveOp,
   multiSampleSpanMs,
   normalizeRecipeVarName,
-  parseVarRef,
+  opsForEditorPane,
   recipeBlockPorts,
+  removeCommandStep,
   removeOp,
   removeRecipeVariable,
-  toVarRef,
+  updateCommandStep,
   updateOp,
+  updateOpAnywhere,
   upsertRecipeVariable,
   validateDraftForCreate,
+  validateI2cTransactionPhases,
   writeChannelsOf,
   type DeviceRecipeBus,
   type DeviceRecipeDraft,
+  type DeviceRecipeEditorPane,
   type DeviceRecipeMode,
   type DeviceRecipeOp,
-  type DeviceRecipePhase,
   type GpioSignalDef,
+  type I2cTransactionPhase,
+  type WaitTimeUnit,
   type RecipeVarType,
-  type RecipeVariable,
 } from "../../lib/device-recipe-draft.js";
 import type { SensorOutputKind } from "../../lib/sensor-recipe.js";
-import { ActionTriggerFields } from "./ActionTriggerFields.js";
 import {
-  busUnitLabel,
   draftForBinding,
   functionVariantOf,
   parsePhysicalProject,
   physicalLabelForSignalMode,
   PHYSICAL_META_KEY,
-  selectedBusUnit,
   silkPinLabels,
   type BackbonePhysicalDraft,
 } from "../../lib/backbone-physical.js";
@@ -68,15 +71,10 @@ import {
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
-import {
-  buildProtocolTiming,
-  buildProtocolTimingFromOps,
-  isBusOp,
-  isPostOp,
-} from "../../lib/protocol-timing.js";
+import { formatHexByte, parseHexByteToken } from "../../lib/i2c-hex.js";
+import { buildProtocolTimingFromOps } from "../../lib/protocol-timing.js";
 import { DerivedSignalView } from "./DerivedSignalView.js";
 import { DisplayCenter, DisplayInspector, DisplayLeftSidebar } from "./DisplayRecipePanels.js";
-import { ProtocolFrameStrip } from "./ProtocolFrameStrip.js";
 import { TimingScopeChart } from "./TimingScopeChart.js";
 
 type Props = {
@@ -93,7 +91,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   const { locale } = useLocale();
   const it = locale === "it";
   const { navigate, session } = useSession();
-  const { rows, getClient, installProfile } = useCoreSessions();
+  const { rows, getClient, installProfile, listDeviceProfiles, removeProfile } = useCoreSessions();
   const physicalDraft = useMemo(() => {
     const project = parsePhysicalProject(
       session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment,
@@ -109,11 +107,11 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
     return rows.find((r) => r.sessionState === "READY")?.binding.bindingId;
   }, [session, rows]);
   const [draft, setDraft] = useState<DeviceRecipeDraft>(() => initialDraft ?? createBlankDraft("i2c"));
-  const [phase, setPhase] = useState<DeviceRecipePhase>(
-    () => (initialDraft?.category === "display" ? "command" : "sample"),
-  );
-  const [selectedOpId, setSelectedOpId] = useState<string | null>(draft.phases.sample[0]?.id ?? null);
+  const [editorPane, setEditorPane] = useState<DeviceRecipeEditorPane>("actions");
   const [selectedCommandId, setSelectedCommandId] = useState<string | null>(draft.commands[0]?.id ?? null);
+  const [selectedOpId, setSelectedOpId] = useState<string | null>(
+    () => draft.commands[0]?.steps[0]?.id ?? draft.phases.init[0]?.id ?? null,
+  );
   const [selectedCommandStepId, setSelectedCommandStepId] = useState<string | null>(
     draft.commands[0]?.steps[0]?.id ?? null,
   );
@@ -125,14 +123,14 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   const [testResult, setTestResult] = useState<RecipeHardwareTestResult | null>(null);
 
   const isDisplay = draft.category === "display";
-  const ops = draft.phases[phase];
+  const activeActionId = selectedCommandId ?? draft.commands[0]?.id ?? null;
+  const ops = opsForEditorPane(draft, editorPane, activeActionId);
   const selected = ops.find((op) => op.id === selectedOpId) ?? null;
   const library = libraryOpsForBus(draft.binding.bus);
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
-
-  const phaseTabs: {
-    id: DeviceRecipePhase;
+  const paneTabs: {
+    id: DeviceRecipeEditorPane;
     label: string;
     hint: string;
     blurb: string;
@@ -141,65 +139,82 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
       id: "init",
       label: it ? "Inizializzazione" : "Initialization",
       hint: it
-        ? "Passi eseguiti una sola volta quando il sensore viene avviato / collegato."
-        : "Steps run once when the sensor is started / connected.",
+        ? "Eseguita una volta all’avvio, quando il blocco è sul canvas."
+        : "Runs once at startup when the block is on the canvas.",
       blurb: it
-        ? "Qui metti ciò che serve all’accensione: configurare registri, risolvere indirizzi, preparare il dispositivo. Non è un ciclo continuo."
-        : "Put power-on setup here: configure registers, resolve addresses, prepare the device. Not a continuous loop.",
+        ? "Setup all’accensione: registri, indirizzi, preparazione dispositivo. Non è un ciclo."
+        : "Power-on setup: registers, addresses, device prep. Not a loop.",
     },
     {
-      id: "sample",
-      label: "Task",
+      id: "actions",
+      label: it ? "Azioni" : "Actions",
       hint: it
-        ? "Compito periodico: gira da solo a intervallo fisso e pubblica i valori sul Flow."
-        : "Periodic task: runs on its own at a fixed interval and publishes values to Flow.",
+        ? "Sequenza eseguita quando il blocco viene attivato sul canvas."
+        : "Sequence run when the block is triggered on the canvas.",
       blurb: it
-        ? "È il compito di misura che il runtime esegue in background: ogni intervallo fa questa sequenza (es. scrivi registro → attendi → leggi → decodifica → emetti). Non va invocato a mano dal Flow."
-        : "This is the measurement job the runtime runs in the background: each interval runs this sequence (e.g. write register → wait → read → decode → emit). It is not invoked manually from Flow.",
-    },
-    {
-      id: "command",
-      label: it ? "Azione" : "Action",
-      hint: it
-        ? "Azione eseguita quando arriva un trigger esterno."
-        : "Action run when an external trigger arrives.",
-      blurb: it
-        ? "È un’azione che parte con un trigger esterno (non in automatico). Sotto puoi impostare tipo (fronte) e livello del trigger, come sui blocchi del canvas."
-        : "An action that starts on an external trigger (not automatically). Below you set trigger type (edge) and level, same as canvas blocks.",
+        ? "Sequenza del driver (scrivi / scrivi e leggi → variabili → uscita). L’intervallo lo decidi sul canvas."
+        : "Driver sequence (write / write-read → variables → output). Interval is set on the canvas.",
     },
   ];
-  const activePhaseTab = phaseTabs.find((tab) => tab.id === phase) ?? phaseTabs[1]!;
+  const activePaneTab = paneTabs.find((tab) => tab.id === editorPane) ?? paneTabs[1]!;
 
   function switchMode(mode: DeviceRecipeMode) {
     const next = createBlankDraft(mode, draft.name);
     setDraft({ ...next, name: draft.name || next.name });
-    setPhase(mode === "display" ? "command" : "sample");
-    setSelectedOpId(next.phases.sample[0]?.id ?? next.phases.init[0]?.id ?? null);
+    setEditorPane("actions");
     setSelectedCommandId(next.commands[0]?.id ?? null);
     setSelectedCommandStepId(next.commands[0]?.steps[0]?.id ?? null);
+    setSelectedOpId(next.commands[0]?.steps[0]?.id ?? next.phases.init[0]?.id ?? null);
     setFieldErrors([]);
     setTryMessage(null);
   }
 
   function patchSelected(next: DeviceRecipeOp) {
     if (!selected) return;
-    setDraft(updateOp(draft, phase, selected.id, next));
+    if (editorPane === "init") {
+      setDraft(updateOp(draft, "init", selected.id, next));
+      return;
+    }
+    if (!activeActionId) return;
+    setDraft(updateCommandStep(draft, activeActionId, selected.id, next));
+  }
+
+  function addLibraryOp(type: DeviceRecipeOp["type"]) {
+    if (editorPane === "init") {
+      const next = insertOp(draft, "init", type);
+      setDraft(next);
+      setSelectedOpId(next.phases.init[next.phases.init.length - 1]?.id ?? null);
+      return;
+    }
+    let base = draft;
+    let actionId = activeActionId;
+    if (!actionId) {
+      base = addCommand(draft, { name: "misura", label: it ? "Misura" : "Measure" });
+      actionId = base.commands[base.commands.length - 1]!.id;
+      setSelectedCommandId(actionId);
+    }
+    const next = insertCommandStep(base, actionId, type);
+    setDraft(next);
+    const steps = next.commands.find((c) => c.id === actionId)?.steps ?? [];
+    const added = steps[steps.length - 1];
+    setSelectedOpId(added?.id ?? null);
+    setSelectedCommandStepId(added?.id ?? null);
   }
 
   const testLabels = useMemo(
     () => ({
       init: it ? "Inizializzazione" : "Initialization",
-      task: "Task",
+      task: it ? "Azione" : "Action",
       action: it ? "Azione" : "Action",
     }),
     [it],
   );
 
   function currentTestSelection(): RecipeTestSelection {
-    const target: RecipeTestTarget =
-      isDisplay || phase === "command"
-        ? { kind: "action", commandId: selectedCommandId ?? draft.commands[0]?.id }
-        : { kind: "task" };
+    const target: RecipeTestTarget = {
+      kind: "action",
+      commandId: activeActionId ?? draft.commands[0]?.id,
+    };
     return { target, runInitFirst: testRunInitFirst };
   }
 
@@ -220,6 +235,21 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
         selection,
         labels: testLabels,
         i2cAddress: Number.isFinite(i2cAddress) ? i2cAddress : undefined,
+        preferredPhysicalModes: physicalDraft?.modes,
+        preferredI2cSpeed: physicalDraft?.i2cSpeed,
+        preferredPhysicalSettings: physicalDraft?.settings,
+        cleanupTryProfiles:
+          connectedBindingId
+            ? async () => {
+                const listed = await listDeviceProfiles(connectedBindingId);
+                for (const p of listed ?? []) {
+                  if (!p.profileId.startsWith("try.")) continue;
+                  await removeProfile(connectedBindingId, p.profileId, p.version, {
+                    isReferencedLocally: false,
+                  });
+                }
+              }
+            : undefined,
         installProfile: connectedBindingId
           ? async (profileDraft) => {
               const out = await installProfile(connectedBindingId, profileDraft);
@@ -375,12 +405,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
               library={library}
               bus={draft.binding.bus}
               it={it}
-              onAdd={(type) => {
-                const next = insertOp(draft, phase, type);
-                setDraft(next);
-                const added = next.phases[phase][next.phases[phase].length - 1];
-                setSelectedOpId(added?.id ?? null);
-              }}
+              onAdd={addLibraryOp}
             />
             {draft.binding.bus === "gpio" ? (
               <div className="mt-3">
@@ -390,7 +415,9 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                   onClick={() => {
                     const next = createGpioDigitalExample(draft.name);
                     setDraft(next);
-                    setSelectedOpId(next.phases.sample[0]?.id ?? null);
+                    setEditorPane("actions");
+                    setSelectedCommandId(next.commands[0]?.id ?? null);
+                    setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
                   }}
                   className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
                 >
@@ -406,7 +433,9 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                   onClick={() => {
                     const next = createAnalogLevelExample(draft.name);
                     setDraft(next);
-                    setSelectedOpId(next.phases.sample[0]?.id ?? null);
+                    setEditorPane("actions");
+                    setSelectedCommandId(next.commands[0]?.id ?? null);
+                    setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
                   }}
                   className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
                 >
@@ -422,7 +451,9 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                   onClick={() => {
                     const next = createDs18b20Example(draft.name);
                     setDraft(next);
-                    setSelectedOpId(next.phases.sample[0]?.id ?? null);
+                    setEditorPane("actions");
+                    setSelectedCommandId(next.commands[0]?.id ?? null);
+                    setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
                   }}
                   className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
                 >
@@ -456,115 +487,54 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
           <div className="mb-3 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex rounded-slpill border border-border-strong bg-surface p-0.5">
-                {phaseTabs.map((tab) => (
+                {paneTabs.map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
                     title={tab.hint}
                     onClick={() => {
-                      setPhase(tab.id);
-                      setSelectedOpId(draft.phases[tab.id][0]?.id ?? null);
+                      setEditorPane(tab.id);
+                      if (tab.id === "init") {
+                        setSelectedOpId(draft.phases.init[0]?.id ?? null);
+                      } else {
+                        setSelectedOpId(
+                          draft.commands.find((c) => c.id === activeActionId)?.steps[0]?.id ??
+                            draft.commands[0]?.steps[0]?.id ??
+                            null,
+                        );
+                      }
                     }}
                     className={`rounded-slpill px-3 py-1 font-body text-xs font-semibold ${
-                      phase === tab.id ? "bg-brand-blue text-white" : "text-ink-muted"
+                      editorPane === tab.id ? "bg-brand-blue text-white" : "text-ink-muted"
                     }`}
                   >
                     {tab.label}
                   </button>
                 ))}
               </div>
-              {phase === "sample" ? (
-                <label className="ml-auto flex items-center gap-2 font-body text-xs text-ink-muted">
-                  {it ? "Intervallo del Task" : "Task interval"}
-                  <input
-                    type="number"
-                    min={1}
-                    value={draft.sampleIntervalMs}
-                    onChange={(e) => setDraft({ ...draft, sampleIntervalMs: Math.max(1, Number(e.target.value) || 1) })}
-                    className="w-20 rounded-slsm border border-border-strong px-2 py-1 font-mono text-xs"
-                  />
-                  ms
-                </label>
-              ) : null}
             </div>
             <div className="flex gap-2 rounded-slmd border border-brand-blue/25 bg-brand-blue/5 px-3 py-2">
               <Info size={14} className="mt-0.5 shrink-0 text-brand-blue" aria-hidden />
               <div className="min-w-0">
-                <p className="font-body text-[11px] font-semibold text-ink">{activePhaseTab.label}</p>
-                <p className="mt-0.5 font-body text-[11px] leading-snug text-ink-muted">{activePhaseTab.blurb}</p>
+                <p className="font-body text-[11px] font-semibold text-ink">{activePaneTab.label}</p>
+                <p className="mt-0.5 font-body text-[11px] leading-snug text-ink-muted">{activePaneTab.blurb}</p>
               </div>
             </div>
-            {phase === "command" ? (
-              <ActionTriggerFields
-                it={it}
-                value={draft.actionTrigger}
-                onChange={(actionTrigger) => setDraft({ ...draft, actionTrigger })}
-              />
-            ) : null}
           </div>
 
-          <DerivedSignalView draft={draft} phase={phase} it={it} selectedOpId={selectedOpId} />
+          <DerivedSignalView
+            draft={draft}
+            ops={ops}
+            it={it}
+            selectedOpId={selectedOpId}
+            onSelectOp={setSelectedOpId}
+          />
 
-          {draft.binding.bus === "adc" && phase === "sample" ? (
-            <AnalogSamplingSummary draft={draft} it={it} />
+          {draft.binding.bus === "adc" && editorPane === "actions" ? (
+            <AnalogSamplingSummary ops={ops} it={it} />
           ) : null}
 
-          {draft.binding.bus === "i2c" || draft.binding.bus === "spi" ? (
-            <>
-              <section className="mb-4 mt-4 rounded-slmd border border-border-strong bg-surface p-3">
-                <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                  {it ? "Passi sequenza" : "Sequence steps"}
-                </h2>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {ops.length === 0 ? (
-                    <p className="font-body text-xs text-ink-faint">
-                      {it ? "Nessun passo — aggiungi dalla libreria." : "No steps — add from the library."}
-                    </p>
-                  ) : (
-                    ops.map((op, index) => (
-                      <div key={op.id} className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedOpId(op.id)}
-                          className={`rounded-slsm border px-2.5 py-2 text-left ${
-                            selectedOpId === op.id
-                              ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/25"
-                              : isBusOp(op)
-                                ? "border-ink/30 bg-ink text-white hover:bg-ink/90"
-                                : "border-border-strong bg-surface-sunken hover:border-brand-blue/40"
-                          }`}
-                        >
-                          <span className={`block font-mono text-[9px] ${isBusOp(op) && selectedOpId !== op.id ? "text-white/60" : "text-ink-faint"}`}>
-                            {index + 1}
-                            {isBusOp(op) ? " · bus" : isPostOp(op) ? " · data" : ""}
-                          </span>
-                          <span className={`block font-body text-xs font-semibold ${isBusOp(op) && selectedOpId !== op.id ? "text-white" : "text-ink"}`}>
-                            {describeDeviceOp(op)}
-                          </span>
-                        </button>
-                        {index < ops.length - 1 ? <span className="text-ink-faint">→</span> : null}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </section>
-              <ProtocolFrameStrip
-                cells={buildProtocolTiming(draft, phase).cells}
-                selectedOpId={selectedOpId}
-                onSelectOp={setSelectedOpId}
-                title={
-                  draft.binding.bus === "i2c"
-                    ? it
-                      ? "Transazione I2C (vista datasheet)"
-                      : "I2C transaction (datasheet view)"
-                    : it
-                      ? "Transazione SPI (vista datasheet)"
-                      : "SPI transaction (datasheet view)"
-                }
-                hint={it ? "Stessi segmenti del grafico sopra" : "Same segments as the chart above"}
-              />
-            </>
-          ) : (
+          {draft.binding.bus === "i2c" || draft.binding.bus === "spi" ? null : (
             <section className="mb-4 mt-4 rounded-slmd border border-border-strong bg-surface p-3">
               <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
                 {it ? `Sequenza ${draft.binding.bus.toUpperCase()}` : `${draft.binding.bus.toUpperCase()} sequence`}
@@ -639,10 +609,20 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                 onChange={patchSelected}
                 onDraftChange={setDraft}
                 onRemove={() => {
-                  setDraft(removeOp(draft, phase, selected.id));
+                  if (editorPane === "init") {
+                    setDraft(removeOp(draft, "init", selected.id));
+                  } else if (activeActionId) {
+                    setDraft(removeCommandStep(draft, activeActionId, selected.id));
+                  }
                   setSelectedOpId(null);
                 }}
-                onMove={(dir) => setDraft(moveOp(draft, phase, selected.id, dir))}
+                onMove={(dir) => {
+                  if (editorPane === "init") {
+                    setDraft(moveOp(draft, "init", selected.id, dir));
+                  } else if (activeActionId) {
+                    setDraft(moveCommandStep(draft, activeActionId, selected.id, dir));
+                  }
+                }}
               />
             ) : (
               <p className="font-body text-xs text-ink-faint">{it ? "Seleziona un passo nella sequenza." : "Select a step in the sequence."}</p>
@@ -665,10 +645,13 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                     onChange={(e) => {
                       const v = e.target.value === "" ? null : Number(e.target.value);
                       const adc = { ...draft.binding.adc!, calibMinMv: v };
-                      const sample = draft.phases.sample.map((op) =>
-                        op.type === "map_range" ? { ...op, inMin: v } : op,
-                      );
-                      setDraft({ ...draft, binding: { ...draft.binding, adc }, phases: { ...draft.phases, sample } });
+                      const commands = draft.commands.map((c) => ({
+                        ...c,
+                        steps: c.steps.map((op) =>
+                          op.type === "map_range" ? { ...op, inMin: v } : op,
+                        ),
+                      }));
+                      setDraft({ ...draft, binding: { ...draft.binding, adc }, commands });
                     }}
                     className={inputClass}
                   />
@@ -681,10 +664,13 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                     onChange={(e) => {
                       const v = e.target.value === "" ? null : Number(e.target.value);
                       const adc = { ...draft.binding.adc!, calibMaxMv: v };
-                      const sample = draft.phases.sample.map((op) =>
-                        op.type === "map_range" ? { ...op, inMax: v } : op,
-                      );
-                      setDraft({ ...draft, binding: { ...draft.binding, adc }, phases: { ...draft.phases, sample } });
+                      const commands = draft.commands.map((c) => ({
+                        ...c,
+                        steps: c.steps.map((op) =>
+                          op.type === "map_range" ? { ...op, inMax: v } : op,
+                        ),
+                      }));
+                      setDraft({ ...draft, binding: { ...draft.binding, adc }, commands });
                     }}
                     className={inputClass}
                   />
@@ -792,7 +778,13 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             className="inline-flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={14} />
-            {it ? "Genera blocco Flow" : "Generate Flow block"}
+            {draft.commands.length > 1
+              ? it
+                ? `Genera ${draft.commands.length} blocchi Flow`
+                : `Generate ${draft.commands.length} Flow blocks`
+              : it
+                ? "Genera blocco Flow"
+                : "Generate Flow block"}
           </button>
         </div>
       </footer>
@@ -853,7 +845,7 @@ function recipeTestNote(result: RecipeHardwareTestResult, it: boolean): string {
         ? "Diagramma pronto. Collega un Core READY per eseguire sul bus reale."
         : "Diagram ready. Connect a READY Core to run on the real bus.";
     case "empty_plan":
-      return it ? "Nessun passo da eseguire (scegli Task o Azione con operazioni)." : "No steps to run.";
+      return it ? "Nessun passo da eseguire (scegli un'azione con operazioni)." : "No steps to run.";
     case "profile_failed":
       return (it ? "Profilo/config di prova non installabile." : "Test profile/config could not be installed.") + err;
     case "restore_failed":
@@ -926,15 +918,22 @@ function RecipeTestResultModal({
                 </span>
               ))}
             </div>
+            {result.rxTruncated && (
+              <p className="mt-1 font-body text-xs text-amber-700">
+                {it ? "Cattura parziale: sono mostrate le prime 8 letture." : "Partial capture: only the first 8 reads are shown."}
+              </p>
+            )}
             <p className="mt-1 font-body text-[10px] text-ink-faint">
               {it
-                ? "I valori esatti dei byte non sono ancora sul wire di telemetria: gli slot RX sono quelli letti nella sequenza."
-                : "Exact byte values are not yet on the telemetry wire: RX slots match the read sequence."}
+                ? "I byte ricevuti realmente dal sensore sono mostrati in HEX. «—» indica un valore non disponibile."
+                : "Actual bytes received from the sensor are shown in HEX. “—” means unavailable."}
             </p>
           </div>
         ) : (
           <p className="mt-3 font-body text-xs text-ink-faint">
-            {it ? "Nessuna lettura bus in questa selezione." : "No bus reads in this selection."}
+            {it
+              ? "Solo scritture in questa selezione — nessuna lettura RX da mostrare (normale per Scrivi)."
+              : "Write-only selection — no RX bytes to show (expected for Write)."}
           </p>
         )}
 
@@ -944,22 +943,14 @@ function RecipeTestResultModal({
               title={it ? "Segnali nel tempo (risposta)" : "Signals over time (response)"}
               caption={
                 it
-                  ? "Fasce verdi = blocchi dati ricevuti dal sensore (RX)."
-                  : "Green bands = data blocks received from the sensor (RX)."
+                  ? "STEP allineati · fasce verdi = RX dal sensore."
+                  : "Aligned STEP · green bands = sensor RX."
               }
               lanes={timing.lanes}
               durationMs={timing.durationMs}
               phaseBands={timing.phaseBands}
+              stepSpans={timing.stepSpans}
             />
-            <div className="mt-3">
-              <ProtocolFrameStrip
-                cells={timing.cells}
-                selectedOpId={null}
-                onSelectOp={() => {}}
-                title={it ? "Transazione (blocchi)" : "Transaction (blocks)"}
-                hint={it ? "RX evidenziati in verde nel grafico sopra" : "RX highlighted green in the chart above"}
-              />
-            </div>
           </div>
         ) : null}
 
@@ -1052,27 +1043,43 @@ function BindingPanel({
 
   if (draft.binding.bus === "i2c" && draft.binding.i2c) {
     const i2c = draft.binding.i2c;
-    const physicalSda = physicalLabelForSignalMode(modes, 4, variant);
-    const physicalScl = physicalLabelForSignalMode(modes, 5, variant);
-    const physicalBus = physical
-      ? busUnitLabel("i2c", selectedBusUnit(physical, "i2c"))
-      : undefined;
+    const addressBits: 7 | 10 = i2c.addressBits === 10 ? 10 : 7;
     return (
       <div className="space-y-2 font-body text-xs">
-        <Field label={it ? "Indirizzo modulo" : "Module address"}>
+        <Field label={it ? "Bit indirizzo" : "Address bits"}>
+          <select
+            value={addressBits}
+            onChange={(e) => {
+              const nextBits = e.target.value === "10" ? 10 : 7;
+              onChange({
+                ...draft,
+                binding: {
+                  ...draft.binding,
+                  i2c: { ...i2c, addressBits: nextBits },
+                },
+              });
+            }}
+            className={inputClass}
+          >
+            <option value={7}>7 bit</option>
+            <option value={10}>10 bit</option>
+          </select>
+        </Field>
+        <Field label={it ? "Indirizzo" : "Address"}>
           <input
             value={i2c.address}
-            onChange={(e) => onChange({ ...draft, binding: { ...draft.binding, i2c: { ...i2c, address: e.target.value } } })}
+            onChange={(e) =>
+              onChange({
+                ...draft,
+                binding: { ...draft.binding, i2c: { ...i2c, address: e.target.value, addressBits } },
+              })
+            }
             className={inputClass}
-            placeholder="0x48"
+            placeholder={addressBits === 10 ? "0x048" : "0x48"}
+            spellCheck={false}
+            autoComplete="off"
           />
         </Field>
-        <div className="rounded-slsm border border-border bg-surface-sunken px-2 py-1.5 font-mono text-[10px] text-ink-muted">
-          <div>SDA · {physicalSda ?? (it ? "non assegnato" : "unassigned")}</div>
-          <div>SCL · {physicalScl ?? (it ? "non assegnato" : "unassigned")}</div>
-          <div>{it ? "Bus" : "Bus"} · {physicalBus ?? "—"}</div>
-        </div>
-        {physicalHint}
       </div>
     );
   }
@@ -1217,48 +1224,52 @@ function StepInspector({
       ) : null}
 
       {op.type === "i2c_write" ? (
+        <I2cWriteFields op={op} draft={draft} it={it} onChange={onChange} />
+      ) : null}
+
+      {op.type === "i2c_read" ? (
         <>
-          <RegOrVarField
-            it={it}
-            label={it ? "Registro" : "Register"}
-            value={op.reg ?? ""}
-            variables={draft.variables}
-            onChange={(reg) => onChange({ ...op, reg: reg || undefined })}
-          />
-          <Field label={it ? "Byte (hex o $var)" : "Bytes (hex or $var)"}>
+          <Field label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}>
             <input
-              value={op.bytes.join(" ")}
-              onChange={(e) =>
-                onChange({
-                  ...op,
-                  bytes: e.target.value
-                    .split(/\s+/)
-                    .map((s) => s.trim())
-                    .filter(Boolean),
-                })
-              }
+              value={op.address ?? draft.binding.i2c?.address ?? ""}
+              onChange={(e) => onChange({ ...op, address: e.target.value.trim() || undefined })}
+              className={inputClass}
+              placeholder="0x48"
+              spellCheck={false}
+            />
+          </Field>
+          <Field label={it ? "Byte da leggere" : "Bytes to read"}>
+            <input
+              type="number"
+              min={1}
+              value={op.len}
+              onChange={(e) => onChange({ ...op, len: Math.max(1, Number(e.target.value) || 1) })}
               className={inputClass}
             />
           </Field>
-          <Field label="Timeout">
-            <input
-              type="number"
-              value={op.timeoutMs ?? 20}
-              onChange={(e) => onChange({ ...op, timeoutMs: Number(e.target.value) || 20 })}
-              className={inputClass}
-            />
+          <Field label={it ? "Salva in" : "Save to"}>
+            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
           </Field>
         </>
       ) : null}
 
       {op.type === "i2c_write_read" ? (
         <>
-          <RegOrVarField
+          <Field label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}>
+            <input
+              value={op.address ?? draft.binding.i2c?.address ?? ""}
+              onChange={(e) => onChange({ ...op, address: e.target.value.trim() || undefined })}
+              className={inputClass}
+              placeholder="0x48"
+              spellCheck={false}
+            />
+          </Field>
+          <HexByteCellsEditor
+            opId={op.id}
+            bytes={op.writeBytes}
             it={it}
-            label={it ? "Registro" : "Register"}
-            value={op.reg ?? ""}
-            variables={draft.variables}
-            onChange={(reg) => onChange({ ...op, reg: reg || undefined })}
+            label={it ? "Byte da scrivere" : "Bytes to write"}
+            onChange={(writeBytes) => onChange({ ...op, writeBytes })}
           />
           <Field label={it ? "Byte da leggere" : "Bytes to read"}>
             <input
@@ -1269,22 +1280,47 @@ function StepInspector({
               className={inputClass}
             />
           </Field>
-          <label className="flex items-center gap-2 font-body text-[11px] text-ink-muted">
-            <input type="checkbox" checked={op.repeatedStart} onChange={(e) => onChange({ ...op, repeatedStart: e.target.checked })} />
-            {it ? "Riavvio ripetuto" : "Repeated start"}
-          </label>
           <Field label={it ? "Salva in" : "Save to"}>
             <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
           </Field>
-          <Field label="Timeout">
+          <p className="font-body text-[10px] text-ink-faint">
+            {it ? "RESTART generato automaticamente (nessuno STOP intermedio)." : "RESTART is generated automatically (no intermediate STOP)."}
+          </p>
+        </>
+      ) : null}
+
+      {op.type === "i2c_scan" ? (
+        <>
+          <Field label={it ? "Da indirizzo" : "From address"}>
             <input
-              type="number"
-              value={op.timeoutMs ?? 20}
-              onChange={(e) => onChange({ ...op, timeoutMs: Number(e.target.value) || 20 })}
+              value={op.fromAddress}
+              onChange={(e) => onChange({ ...op, fromAddress: e.target.value.trim() || "0x08" })}
+              className={inputClass}
+              placeholder="0x08"
+              spellCheck={false}
+            />
+          </Field>
+          <Field label={it ? "A indirizzo" : "To address"}>
+            <input
+              value={op.toAddress}
+              onChange={(e) => onChange({ ...op, toAddress: e.target.value.trim() || "0x77" })}
+              className={inputClass}
+              placeholder="0x77"
+              spellCheck={false}
+            />
+          </Field>
+          <Field label={it ? "Salva in" : "Save to"}>
+            <input
+              value={op.into ?? "found"}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
               className={inputClass}
             />
           </Field>
         </>
+      ) : null}
+
+      {op.type === "i2c_transaction" ? (
+        <I2cTransactionFields op={op} draft={draft} it={it} onChange={onChange} />
       ) : null}
 
       {op.type === "spi_transfer" ? (
@@ -1381,9 +1417,27 @@ function StepInspector({
       ) : null}
 
       {op.type === "wait" ? (
-        <Field label="ms">
-          <input type="number" value={op.ms} onChange={(e) => onChange({ ...op, ms: Number(e.target.value) || 0 })} className={inputClass} />
-        </Field>
+        <div className="flex gap-1.5">
+          <Field label={it ? "Durata" : "Duration"}>
+            <input
+              type="number"
+              min={0}
+              value={op.ms}
+              onChange={(e) => onChange({ ...op, ms: Math.max(0, Number(e.target.value) || 0) })}
+              className={inputClass}
+            />
+          </Field>
+          <Field label={it ? "Unità" : "Unit"}>
+            <select
+              value={op.unit === "us" ? "us" : "ms"}
+              onChange={(e) => onChange({ ...op, unit: e.target.value as WaitTimeUnit })}
+              className={inputClass}
+            >
+              <option value="ms">ms</option>
+              <option value="us">µs</option>
+            </select>
+          </Field>
+        </div>
       ) : null}
 
       {op.type === "adc_sample" ? (
@@ -1877,9 +1931,6 @@ function EmitOutputFields({
         className="w-full rounded-slsm border border-dashed border-border-strong py-1 font-body text-[10px] text-brand-blue"
         onClick={() => {
           const id = `out_${readChannels.length}`;
-          const phase = (["init", "sample", "command"] as const).find((p) =>
-            draft.phases[p].some((o) => o.id === op.id),
-          );
           const withChannel: DeviceRecipeDraft = {
             ...draft,
             channels: [
@@ -1893,9 +1944,7 @@ function EmitOutputFields({
               },
             ],
           };
-          onDraftChange(
-            phase ? updateOp(withChannel, phase, op.id, { ...op, channelId: id }) : withChannel,
-          );
+          onDraftChange(updateOpAnywhere(withChannel, op.id, { ...op, channelId: id }));
         }}
       >
         + {it ? "Nuovo output" : "New output"}
@@ -2168,60 +2217,325 @@ function EncodeFields({
   );
 }
 
-function RegOrVarField({
+function stripHexPrefix(raw: string): string {
+  return raw.trim().replace(/^0x/i, "").toUpperCase();
+}
+
+/**
+ * Per-byte HEX cells (local typing state). Avoids free-form parse-on-keystroke
+ * that pads `A` → `0x0A` and then drops the second digit as invalid.
+ */
+function HexByteCellsEditor({
+  opId,
+  bytes,
   it,
   label,
-  value,
-  variables,
   onChange,
 }: {
+  readonly opId: string;
+  readonly bytes: readonly string[];
   readonly it: boolean;
   readonly label: string;
-  readonly value: string;
-  readonly variables: readonly RecipeVariable[];
-  readonly onChange: (next: string) => void;
+  readonly onChange: (tokens: readonly string[]) => void;
 }) {
-  const mode = isVarRef(value) ? "var" : "literal";
-  const varName = parseVarRef(value) ?? variables[0]?.name ?? "";
+  const [cells, setCells] = useState<string[]>(() =>
+    (bytes.length > 0 ? bytes : ["0x00"]).map(stripHexPrefix),
+  );
+
+  useEffect(() => {
+    setCells((bytes.length > 0 ? bytes : ["0x00"]).map(stripHexPrefix));
+  }, [opId]);
+
+  function persist(nextCells: readonly string[]) {
+    const stored = nextCells.map((c) => {
+      const n = parseHexByteToken(c);
+      return n === null ? "0x00" : formatHexByte(n);
+    });
+    onChange(stored);
+  }
+
+  function updateCell(index: number, value: string) {
+    let v = value.replace(/^0x/i, "").toUpperCase();
+    v = v.replace(/[^0-9A-F]/g, "").slice(0, 2);
+    const next = [...cells];
+    next[index] = v;
+    setCells(next);
+    persist(next);
+  }
+
+  function addByte() {
+    const next = [...cells, ""];
+    setCells(next);
+    persist(next.map((c) => (c === "" ? "00" : c)));
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLInputElement>(
+        `[data-i2c-byte="${opId}-${cells.length}"]`,
+      );
+      el?.focus();
+      el?.select();
+    });
+  }
+
+  function removeByte(index: number) {
+    if (cells.length <= 1) return;
+    const next = cells.filter((_, i) => i !== index);
+    setCells(next);
+    persist(next);
+  }
+
   return (
-    <Field label={label}>
-      <div className="flex flex-col gap-1">
-        <select
-          value={mode}
-          onChange={(e) => {
-            if (e.target.value === "var") {
-              onChange(toVarRef(varName || variables[0]?.name || "reg"));
-            } else {
-              onChange(isVarRef(value) ? "0x00" : value || "0x00");
-            }
-          }}
+    <div className="space-y-1">
+      <span className="block font-body text-[10px] text-ink-muted">
+        {label}{" "}
+        <span className="text-ink-faint">
+          ({cells.length} {it ? "nella stessa transazione" : "in one transaction"})
+        </span>
+      </span>
+      <ul className="flex flex-col gap-1">
+        {cells.map((cell, index) => {
+          const valid = cell === "" || parseHexByteToken(cell) !== null;
+          return (
+            <li key={`${opId}-b${index}`} className="flex items-center gap-1.5">
+              <span className="w-4 shrink-0 text-right font-mono text-[10px] text-ink-faint">{index}</span>
+              <span className="font-mono text-[11px] text-ink-faint">0x</span>
+              <input
+                data-i2c-byte={`${opId}-${index}`}
+                value={cell}
+                onChange={(e) => updateCell(index, e.target.value)}
+                onBlur={() => {
+                  if (cell === "") {
+                    updateCell(index, "00");
+                    return;
+                  }
+                  if (cell.length === 1 && parseHexByteToken(cell) !== null) {
+                    updateCell(index, cell.padStart(2, "0"));
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || (e.key === " " && cell.length >= 2)) {
+                    e.preventDefault();
+                    if (index === cells.length - 1) addByte();
+                    else {
+                      document
+                        .querySelector<HTMLInputElement>(`[data-i2c-byte="${opId}-${index + 1}"]`)
+                        ?.focus();
+                      document
+                        .querySelector<HTMLInputElement>(`[data-i2c-byte="${opId}-${index + 1}"]`)
+                        ?.select();
+                    }
+                  }
+                  if (e.key === "Backspace" && cell === "" && cells.length > 1) {
+                    e.preventDefault();
+                    removeByte(index);
+                    requestAnimationFrame(() => {
+                      document
+                        .querySelector<HTMLInputElement>(
+                          `[data-i2c-byte="${opId}-${Math.max(0, index - 1)}"]`,
+                        )
+                        ?.focus();
+                    });
+                  }
+                }}
+                className={`${inputClass} w-14 text-center font-mono text-sm ${
+                  valid ? "" : "border-error"
+                }`}
+                placeholder="00"
+                spellCheck={false}
+                autoComplete="off"
+                autoCorrect="off"
+                inputMode="text"
+                maxLength={2}
+                aria-label={it ? `Byte ${index}` : `Byte ${index}`}
+              />
+              <button
+                type="button"
+                disabled={cells.length <= 1}
+                onClick={() => removeByte(index)}
+                className="rounded p-1 text-ink-faint hover:bg-surface-raised hover:text-error disabled:opacity-30"
+                aria-label={it ? "Rimuovi byte" : "Remove byte"}
+              >
+                <Trash2 size={12} />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <button
+        type="button"
+        onClick={addByte}
+        className="flex w-full items-center justify-center gap-1 rounded-slsm border border-dashed border-border-strong py-1.5 font-body text-[11px] text-brand-blue hover:bg-brand-blue/5"
+      >
+        <Plus size={12} />
+        {it ? "Aggiungi byte" : "Add byte"}
+      </button>
+      <p className="font-body text-[10px] text-ink-faint">
+        {it
+          ? "Due cifre HEX per campo (00–FF). Invio o spazio: campo successivo."
+          : "Two HEX digits per field (00–FF). Enter or space: next field."}
+      </p>
+    </div>
+  );
+}
+
+function I2cWriteFields({
+  op,
+  draft,
+  it,
+  onChange,
+}: {
+  readonly op: Extract<DeviceRecipeOp, { type: "i2c_write" }>;
+  readonly draft: DeviceRecipeDraft;
+  readonly it: boolean;
+  readonly onChange: (next: DeviceRecipeOp) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div>
+        <span className="mb-0.5 block font-body text-[10px] text-ink-muted">
+          {it ? "Indirizzo (7 bit HEX)" : "Address (7-bit HEX)"}
+        </span>
+        <input
+          value={op.address ?? draft.binding.i2c?.address ?? ""}
+          onChange={(e) => onChange({ ...op, address: e.target.value.trim() || undefined })}
           className={inputClass}
-        >
-          <option value="literal">{it ? "Letterale" : "Literal"}</option>
-          <option value="var">{it ? "Variabile" : "Variable"}</option>
-        </select>
-        {mode === "var" ? (
-          <select
-            value={varName}
-            onChange={(e) => onChange(toVarRef(e.target.value))}
-            className={inputClass}
-            disabled={variables.length === 0}
-          >
-            {variables.length === 0 ? (
-              <option value="">{it ? "Nessuna variabile — usa Campiona" : "No variables — use Campiona"}</option>
-            ) : (
-              variables.map((v) => (
-                <option key={v.id} value={v.name}>
-                  ${v.name} · {v.valueType}
-                </option>
-              ))
-            )}
-          </select>
+          placeholder="3C"
+          spellCheck={false}
+          autoComplete="off"
+        />
+      </div>
+      <HexByteCellsEditor
+        opId={op.id}
+        bytes={op.bytes}
+        it={it}
+        label={it ? "Byte da inviare" : "Bytes to send"}
+        onChange={(bytes) => onChange({ ...op, bytes })}
+      />
+    </div>
+  );
+}
+
+function I2cTransactionFields({
+  op,
+  draft,
+  it,
+  onChange,
+}: {
+  readonly op: Extract<DeviceRecipeOp, { type: "i2c_transaction" }>;
+  readonly draft: DeviceRecipeDraft;
+  readonly it: boolean;
+  readonly onChange: (next: DeviceRecipeOp) => void;
+}) {
+  const errors = validateI2cTransactionPhases(op.phases);
+  const setPhases = (phases: readonly I2cTransactionPhase[]) => onChange({ ...op, phases });
+  const patchPhase = (index: number, phase: I2cTransactionPhase) => {
+    const next = op.phases.map((p, i) => (i === index ? phase : p));
+    setPhases(next);
+  };
+  const removePhase = (index: number) => setPhases(op.phases.filter((_, i) => i !== index));
+  const addPhase = (kind: I2cTransactionPhase["kind"]) => {
+    const phase: I2cTransactionPhase =
+      kind === "write"
+        ? { kind: "write", bytes: ["0x00"] }
+        : kind === "read"
+          ? { kind: "read", len: 1 }
+          : { kind };
+    setPhases([...op.phases, phase]);
+  };
+
+  return (
+    <>
+      <Field label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}>
+        <input
+          value={op.address ?? draft.binding.i2c?.address ?? ""}
+          onChange={(e) => onChange({ ...op, address: e.target.value.trim() || undefined })}
+          className={inputClass}
+          placeholder="0x48"
+          spellCheck={false}
+        />
+      </Field>
+      <div className="space-y-1.5">
+        <p className="font-body text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
+          {it ? "Fasi" : "Phases"}
+        </p>
+        {op.phases.map((phase, index) => (
+          <div key={`${phase.kind}-${index}`} className="flex items-start gap-1 rounded-slsm border border-border bg-surface-sunken px-1.5 py-1">
+            <span className="w-14 shrink-0 pt-1 font-mono text-[10px] font-semibold uppercase text-ink">
+              {phase.kind === "restart" ? "Sr" : phase.kind}
+            </span>
+            {phase.kind === "write" ? (
+              <input
+                value={phase.bytes.join(" ")}
+                onChange={(e) =>
+                  patchPhase(index, {
+                    kind: "write",
+                    bytes: e.target.value.split(/\s+/).map((s) => s.trim()).filter(Boolean),
+                  })
+                }
+                className={`${inputClass} flex-1`}
+                placeholder="0x00 0x1A"
+                spellCheck={false}
+              />
+            ) : null}
+            {phase.kind === "read" ? (
+              <input
+                type="number"
+                min={1}
+                value={phase.len}
+                onChange={(e) => patchPhase(index, { kind: "read", len: Math.max(1, Number(e.target.value) || 1) })}
+                className={`${inputClass} w-20`}
+              />
+            ) : null}
+            {phase.kind === "start" || phase.kind === "restart" || phase.kind === "stop" ? (
+              <span className="flex-1 pt-1 font-body text-[10px] text-ink-faint">
+                {phase.kind === "start"
+                  ? "START"
+                  : phase.kind === "restart"
+                    ? "RESTART"
+                    : "STOP"}
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => removePhase(index)}
+              className="rounded p-1 text-ink-faint hover:bg-surface hover:text-error"
+              aria-label={it ? "Rimuovi fase" : "Remove phase"}
+            >
+              <Trash2 size={12} />
+            </button>
+          </div>
+        ))}
+        <div className="flex flex-wrap gap-1">
+          {(["start", "write", "read", "restart", "stop"] as const).map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => addPhase(kind)}
+              className="rounded-slsm border border-border px-1.5 py-0.5 font-mono text-[10px] uppercase text-ink-muted hover:border-brand-blue hover:text-brand-blue"
+            >
+              + {kind === "restart" ? "Sr" : kind}
+            </button>
+          ))}
+        </div>
+        {errors.length > 0 ? (
+          <ul className="space-y-0.5 font-body text-[10px] text-error">
+            {errors.map((msg) => (
+              <li key={msg}>{msg}</li>
+            ))}
+          </ul>
         ) : (
-          <input value={value} onChange={(e) => onChange(e.target.value)} className={inputClass} placeholder="0x00" />
+          <p className="font-body text-[10px] text-ink-faint">
+            {it ? "Sequenza valida." : "Sequence valid."}
+          </p>
         )}
       </div>
-    </Field>
+      <Field label={it ? "Salva in" : "Save to"}>
+        <input
+          value={op.into ?? "raw"}
+          onChange={(e) => onChange({ ...op, into: e.target.value })}
+          className={inputClass}
+        />
+      </Field>
+    </>
   );
 }
 
@@ -2243,8 +2557,8 @@ function SampleExternalFields({
     <>
       <p className="font-body text-[11px] leading-snug text-ink-muted">
         {it
-          ? "Legge un ingresso Flow e lo mette in una variabile globale (usabile in Task e Azione)."
-          : "Reads a Flow input into a global variable (usable in Task and Action)."}
+          ? "Legge un ingresso Flow e lo mette in una variabile (usabile in Init e Azioni)."
+          : "Reads a Flow input into a variable (usable in Init and Actions)."}
       </p>
       <Field label={it ? "Ingresso Flow" : "Flow input"}>
         <div className="flex gap-1">
@@ -2271,15 +2585,8 @@ function SampleExternalFields({
                 id: `ingresso_${writeChannels.length + 1}`,
                 label: it ? `Ingresso ${writeChannels.length + 1}` : `Input ${writeChannels.length + 1}`,
               });
-              const phase = (["init", "sample", "command"] as const).find((p) =>
-                ensured.draft.phases[p].some((o) => o.id === op.id),
-              );
-              if (!phase) {
-                onDraftChange(ensured.draft);
-                return;
-              }
               onDraftChange(
-                updateOp(ensured.draft, phase, op.id, { ...op, fromChannelId: ensured.channelId }),
+                updateOpAnywhere(ensured.draft, op.id, { ...op, fromChannelId: ensured.channelId }),
               );
             }}
           >
@@ -2304,9 +2611,6 @@ function SampleExternalFields({
           value={op.valueType}
           onChange={(e) => {
             const valueType = e.target.value as RecipeVarType;
-            const phase = (["init", "sample", "command"] as const).find((p) =>
-              draft.phases[p].some((o) => o.id === op.id),
-            );
             const channels = draft.channels.map((c) =>
               c.id === op.fromChannelId
                 ? {
@@ -2320,8 +2624,7 @@ function SampleExternalFields({
                   }
                 : c,
             );
-            const next = { ...draft, channels };
-            onDraftChange(phase ? updateOp(next, phase, op.id, { ...op, valueType }) : next);
+            onDraftChange(updateOpAnywhere({ ...draft, channels }, op.id, { ...op, valueType }));
           }}
           className={inputClass}
         >
@@ -2366,13 +2669,13 @@ function VariablesPanel({
       </h2>
       <p className="mb-2 font-body text-[10px] leading-snug text-ink-muted">
         {it
-          ? "Globali tra Inizializzazione, Task e Azione. Campiona le aggiorna da un ingresso Flow."
-          : "Shared across Initialization, Task and Action. Campiona fills them from a Flow input."}
+          ? "Globali tra Inizializzazione e Azioni. Ingresso le aggiorna da un ingresso Flow."
+          : "Shared across Initialization and Actions. Ingresso fills them from a Flow input."}
       </p>
       <ul className="mb-2 space-y-1.5">
         {draft.variables.length === 0 ? (
           <li className="font-body text-[11px] text-ink-faint">
-            {it ? "Nessuna — aggiungi Campiona o crea qui." : "None — add Campiona or create here."}
+            {it ? "Nessuna — aggiungi Ingresso o crea qui." : "None — add Ingresso or create here."}
           </li>
         ) : (
           draft.variables.map((v) => (
@@ -2489,20 +2792,28 @@ function libraryOpHint(type: DeviceRecipeOp["type"], it: boolean): string {
       en: "Copy a Flow input value into a variable usable in later steps (e.g. I2C register).",
     },
     i2c_write: {
-      it: "Invia uno o più byte al dispositivo su I2C (scrive un registro o un comando).",
-      en: "Send one or more bytes to the device over I2C (write a register or command).",
+      it: "START → ADDRESS+WRITE → DATA[] → STOP. Tutti i byte nella stessa transazione, senza STOP intermedi.",
+      en: "START → ADDRESS+WRITE → DATA[] → STOP. All bytes in one transaction, no intermediate STOPs.",
     },
     i2c_read: {
-      it: "Legge bytes dal dispositivo I2C e li salva in un buffer della sequenza.",
-      en: "Read bytes from the I2C device into a sequence buffer.",
+      it: "START → ADDRESS+READ → DATA[N] → STOP. ACK su ogni byte tranne l’ultimo (NACK).",
+      en: "START → ADDRESS+READ → DATA[N] → STOP. ACK on every byte except the last (NACK).",
     },
     i2c_write_read: {
-      it: "Scrive e subito dopo legge (transazione tipica: indirizzo registro + dati).",
-      en: "Write then immediately read (typical register-address + data transaction).",
+      it: "START → WRITE → RESTART → READ → STOP. Il RESTART è automatico (nessuno STOP intermedio).",
+      en: "START → WRITE → RESTART → READ → STOP. RESTART is automatic (no intermediate STOP).",
+    },
+    i2c_scan: {
+      it: "Scansiona un intervallo di indirizzi (default 0x08–0x77) e elenca i dispositivi che rispondono con ACK.",
+      en: "Scan an address range (default 0x08–0x77) and list devices that ACK.",
+    },
+    i2c_transaction: {
+      it: "Componi fasi START / WRITE / READ / RESTART / STOP. La sequenza viene validata.",
+      en: "Compose START / WRITE / READ / RESTART / STOP phases. The sequence is validated.",
     },
     wait: {
-      it: "Pausa la sequenza per un tempo fisso (es. conversione del sensore).",
-      en: "Pause the sequence for a fixed time (e.g. sensor conversion).",
+      it: "Ritardo tra due operazioni consecutive (ms o µs).",
+      en: "Delay between two consecutive operations (ms or µs).",
     },
     decode: {
       it: "Prende byte grezzi o una variabile interna e li converte in una variabile di uscita (prima di Emetti).",
@@ -2658,10 +2969,16 @@ function LibraryList({
 }
 
 /** Summary of acquire → average (average remains a single sequence step). */
-function AnalogSamplingSummary({ draft, it }: { readonly draft: DeviceRecipeDraft; readonly it: boolean }) {
-  const multi = draft.phases.sample.find((op) => op.type === "adc_multi_sample");
-  const single = draft.phases.sample.find((op) => op.type === "adc_sample");
-  const avg = draft.phases.sample.find((op) => op.type === "average");
+function AnalogSamplingSummary({
+  ops,
+  it,
+}: {
+  readonly ops: readonly DeviceRecipeOp[];
+  readonly it: boolean;
+}) {
+  const multi = ops.find((op) => op.type === "adc_multi_sample");
+  const single = ops.find((op) => op.type === "adc_sample");
+  const avg = ops.find((op) => op.type === "average");
   const count = multi?.type === "adc_multi_sample" ? multi.count : 1;
   const intervalMs = multi?.type === "adc_multi_sample" ? multi.intervalMs : 0;
   const into = multi?.type === "adc_multi_sample" ? multi.into : single?.type === "adc_sample" ? single.into : "samples";

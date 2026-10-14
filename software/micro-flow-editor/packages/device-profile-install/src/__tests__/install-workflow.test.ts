@@ -78,6 +78,33 @@ describe("installProfile — S063 point 1", () => {
     if (!result.ok) expect(result.error.code).toBe("device-profile-install.profile_in_use");
   });
 
+  it("translates client TIMEOUT into a clear remediation", async () => {
+    const client = fakeClient({
+      installDeviceProfile: vi.fn().mockRejectedValue({ code: "TIMEOUT", message: "SpaghettiClient TIMEOUT" }),
+    });
+    const result = await installProfile(client, draft());
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("device-profile-install.remote_validation_failed");
+      expect(result.error.remediation).toMatch(/timeout/i);
+    }
+  });
+
+  it("continues install when VALIDATE response decode fails (wire drift)", async () => {
+    const d = draft();
+    const expectedHash = await sha256(encodeDeviceProfileCbor(d));
+    const summary: DeviceProfileSummary = { profileId: d.profileId, version: d.version, hash: expectedHash };
+    const client = fakeClient({
+      validateDeviceProfile: vi
+        .fn()
+        .mockRejectedValue(new Error("ValidateDeviceProfileResponse: field 0 must be a uint")),
+      getFullDeviceProfileList: vi.fn().mockResolvedValue([summary]),
+    });
+    const result = await installProfile(client, d);
+    expect(result.ok).toBe(true);
+    expect(client.installDeviceProfile).toHaveBeenCalled();
+  });
+
   it("never changes what a caller sees as installed when interrupted — no local catalog cache exists to roll back", async () => {
     const client = fakeClient({ installDeviceProfile: vi.fn().mockRejectedValue(new Error("network drop")) });
     const before = await client.getFullDeviceProfileList();

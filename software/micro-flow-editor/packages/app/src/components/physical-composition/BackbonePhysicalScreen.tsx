@@ -748,12 +748,32 @@ function BoardDetail({
             </p>
           )}
 
-          <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+          <div className="flex flex-col gap-2 border-t border-border pt-3">
+            {(() => {
+              const modeError = validatePhysicalModes(effective.modes, effective.i2cSpeed);
+              const configureBlockedReason = !ready
+                ? it
+                  ? "Collega la Backbone (stato Connessa) per applicare la configurazione."
+                  : "Connect the Backbone (Connected status) to apply the configuration."
+                : modeError
+                  ? modeError
+                  : busy
+                    ? it
+                      ? "Configurazione in corso…"
+                      : "Configuration in progress…"
+                    : null;
+              return (
+                <>
+                  {configureBlockedReason ? (
+                    <p className="rounded-slsm bg-warning/15 px-2.5 py-1.5 font-body text-[11px] text-ink">
+                      {configureBlockedReason}
+                    </p>
+                  ) : null}
+                  <div className="flex flex-wrap gap-2">
             <button
               className={action}
-              disabled={
-                !ready || busy || !!validatePhysicalModes(effective.modes, effective.i2cSpeed)
-              }
+              disabled={Boolean(configureBlockedReason)}
+              title={configureBlockedReason ?? undefined}
               onClick={() => void apply()}
             >
               {busy ? (
@@ -811,6 +831,10 @@ function BoardDetail({
                 {it ? "Catalogo NFC" : "NFC catalog"}
               </button>
             )}
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </motion.div>
     </div>

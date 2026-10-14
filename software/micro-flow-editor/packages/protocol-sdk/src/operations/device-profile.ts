@@ -1,4 +1,4 @@
-import { decodeOne, encodeArray } from "../cbor.js";
+import { decodeOne, encodeArray, ProtocolCodecError } from "../cbor.js";
 import { bytesField, decodeEmptyPayload, encodeEmptyPayload, encodeMap, optionalU32, requireArray, requireBytes, requireMap, requireText, requireU32, textField, u32Field } from "../fields.js";
 
 /** `LIST_DEVICE_PROFILES` (op 22) request — `cursor` default 0, `limit` default 8. */
@@ -93,11 +93,12 @@ export function decodeValidateDeviceProfileRequest(bytes: Uint8Array): ValidateD
 /**
  * `VALIDATE_DEVICE_PROFILE` response — **this operation is a stub in the
  * firmware as implemented**: it only checks the request's `bstr` is
- * non-empty and always answers `valid: 1` (see the S021 research note's
- * incompleteness list). A caller cannot rely on it to catch a malformed
- * Device Profile. Also note the wire value is a `uint` (`1`), not a CBOR
- * boolean, unlike `VALIDATE_CONFIG`'s `valid` field — kept as `number` here
- * to match exactly what's on the wire, not "corrected" to a boolean.
+ * non-empty and answers “valid” (see the S021 research note's incompleteness
+ * list). A caller cannot rely on it to catch a malformed Device Profile.
+ *
+ * Wire field 0 may be either a CBOR `uint` (`1`/`0`, historical stub) or a
+ * CBOR `bool` (some Core builds mirror `VALIDATE_CONFIG`). Normalized to a
+ * number here so callers stay unchanged.
  */
 export type ValidateDeviceProfileResponse = { readonly valid: number };
 
@@ -107,7 +108,20 @@ export function encodeValidateDeviceProfileResponse(r: ValidateDeviceProfileResp
 
 export function decodeValidateDeviceProfileResponse(bytes: Uint8Array): ValidateDeviceProfileResponse {
   const map = requireMap(decodeOne(bytes), "ValidateDeviceProfileResponse");
-  return { valid: requireU32(map, 0, "ValidateDeviceProfileResponse") };
+  const value = map.get(0);
+  if (value === undefined) {
+    throw new ProtocolCodecError("ValidateDeviceProfileResponse: missing required field 0");
+  }
+  if (value.kind === "uint") {
+    if (value.value > 0xffffffffn) {
+      throw new ProtocolCodecError("ValidateDeviceProfileResponse: field 0 exceeds uint32 range");
+    }
+    return { valid: Number(value.value) };
+  }
+  if (value.kind === "bool") {
+    return { valid: value.value ? 1 : 0 };
+  }
+  throw new ProtocolCodecError("ValidateDeviceProfileResponse: field 0 must be a uint or bool");
 }
 
 /** `INSTALL_DEVICE_PROFILE` (op 25) request; response payload is an empty map. */

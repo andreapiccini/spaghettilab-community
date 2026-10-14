@@ -1,7 +1,18 @@
+import { encodeMap, encodeInt, encodeText } from "../../cbor.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { decodeRequest, encodeEvent, encodeResponse, EventType, ProtocolStatus } from "../../envelope.js";
+import {
+  decodeRequest,
+  encodeEvent,
+  encodeResponse,
+  EventType,
+  ProtocolStatus,
+} from "../../envelope.js";
 import { encodeStatusEventPayload } from "../../events.js";
-import { encodeGetCatalogResponse, encodeGetStatusResponse, type GetStatusResponse } from "../../operations/index.js";
+import {
+  encodeGetCatalogResponse,
+  encodeGetStatusResponse,
+  type GetStatusResponse,
+} from "../../operations/index.js";
 import { FakeTransport } from "../fakes/fake-transport.js";
 import { SpaghettiClient } from "../spaghetti-client.js";
 
@@ -22,7 +33,13 @@ function respondOkToLastRequest(transport: FakeTransport, payload: Uint8Array): 
   const lastSent = transport.sent.at(-1);
   if (!lastSent) throw new Error("no request was sent");
   const request = decodeRequest(lastSent);
-  transport.deliverResponse(encodeResponse({ correlationId: request.correlationId, status: ProtocolStatus.OK, payload }));
+  transport.deliverResponse(
+    encodeResponse({
+      correlationId: request.correlationId,
+      status: ProtocolStatus.OK,
+      payload,
+    }),
+  );
 }
 
 beforeEach(() => {
@@ -87,7 +104,11 @@ describe("SpaghettiClient — retry reuses the correlation ID", () => {
 
   it("rejects with TIMEOUT once retries are exhausted, never resolving silently", async () => {
     const transport = new FakeTransport();
-    const client = new SpaghettiClient(transport, { defaultTimeoutMs: 1000, retryDelayMs: 10, maxRetries: 1 });
+    const client = new SpaghettiClient(transport, {
+      defaultTimeoutMs: 1000,
+      retryDelayMs: 10,
+      maxRetries: 1,
+    });
 
     const promise = client.getStatus();
     promise.catch(() => {}); // avoid unhandled-rejection noise while advancing timers below
@@ -100,13 +121,28 @@ describe("SpaghettiClient — retry reuses the correlation ID", () => {
 describe("SpaghettiClient — non-OK status surfaces immediately, no retry", () => {
   it("rejects with PROTOCOL_ERROR on the first CONFLICT response, without sending a second request", async () => {
     const transport = new FakeTransport();
-    const client = new SpaghettiClient(transport, { defaultTimeoutMs: 10_000, retryDelayMs: 500 });
+    const client = new SpaghettiClient(transport, {
+      defaultTimeoutMs: 10_000,
+      retryDelayMs: 500,
+    });
 
-    const promise = client.applyConfig({ expectedGeneration: 1, configBytes: new Uint8Array([0xa0]) });
+    const promise = client.applyConfig({
+      expectedGeneration: 1,
+      configBytes: new Uint8Array([0xa0]),
+    });
     const correlationId = decodeRequest(transport.sent[0]!).correlationId;
-    transport.deliverResponse(encodeResponse({ correlationId, status: ProtocolStatus.CONFLICT, payload: new Uint8Array() }));
+    transport.deliverResponse(
+      encodeResponse({
+        correlationId,
+        status: ProtocolStatus.CONFLICT,
+        payload: new Uint8Array(),
+      }),
+    );
 
-    await expect(promise).rejects.toMatchObject({ code: "PROTOCOL_ERROR", status: ProtocolStatus.CONFLICT });
+    await expect(promise).rejects.toMatchObject({
+      code: "PROTOCOL_ERROR",
+      status: ProtocolStatus.CONFLICT,
+    });
     expect(transport.sent).toHaveLength(1);
   });
 });
@@ -121,7 +157,12 @@ describe("SpaghettiClient — reboot detection", () => {
       encodeEvent({
         sequence: 1,
         type: EventType.STATUS,
-        payload: encodeStatusEventPayload({ deviceId: new Uint8Array([1]), bootId: 1n, queueDepth: 0, dropCount: 0 }),
+        payload: encodeStatusEventPayload({
+          deviceId: new Uint8Array([1]),
+          bootId: 1n,
+          queueDepth: 0,
+          dropCount: 0,
+        }),
       }),
     );
 
@@ -134,7 +175,12 @@ describe("SpaghettiClient — reboot detection", () => {
       encodeEvent({
         sequence: 2,
         type: EventType.STATUS,
-        payload: encodeStatusEventPayload({ deviceId: new Uint8Array([1]), bootId: 2n, queueDepth: 0, dropCount: 0 }),
+        payload: encodeStatusEventPayload({
+          deviceId: new Uint8Array([1]),
+          bootId: 2n,
+          queueDepth: 0,
+          dropCount: 0,
+        }),
       }),
     );
 
@@ -204,12 +250,18 @@ describe("SpaghettiClient — catalog pagination restarts on fingerprint change"
 describe("SpaghettiClient — malformed/extra-key/oversized responses are dropped safely", () => {
   it("ignores an undecodable response instead of crashing, and the call eventually times out", async () => {
     const transport = new FakeTransport();
-    const client = new SpaghettiClient(transport, { defaultTimeoutMs: 500, retryDelayMs: 10, maxRetries: 0 });
+    const client = new SpaghettiClient(transport, {
+      defaultTimeoutMs: 500,
+      retryDelayMs: 10,
+      maxRetries: 0,
+    });
 
     const promise = client.getStatus();
     promise.catch(() => {});
 
-    expect(() => transport.deliverResponse(new Uint8Array([0xff, 0xff, 0xff]))).not.toThrow();
+    expect(() =>
+      transport.deliverResponse(new Uint8Array([0xff, 0xff, 0xff])),
+    ).not.toThrow();
 
     await vi.advanceTimersByTimeAsync(1000);
     await expect(promise).rejects.toMatchObject({ code: "TIMEOUT" });
@@ -217,7 +269,11 @@ describe("SpaghettiClient — malformed/extra-key/oversized responses are droppe
 
   it("ignores a response with an unexpected envelope key (>3) instead of crashing", async () => {
     const transport = new FakeTransport();
-    const client = new SpaghettiClient(transport, { defaultTimeoutMs: 500, retryDelayMs: 10, maxRetries: 0 });
+    const client = new SpaghettiClient(transport, {
+      defaultTimeoutMs: 500,
+      retryDelayMs: 10,
+      maxRetries: 0,
+    });
 
     const promise = client.getStatus();
     promise.catch(() => {});
@@ -225,7 +281,18 @@ describe("SpaghettiClient — malformed/extra-key/oversized responses are droppe
 
     // {0:1,1:correlationId,2:0,3:h'',4:0} — key 4 is not allowed on the wire.
     const extraKeyBytes = new Uint8Array([
-      0xbf, 0x00, 0x01, 0x01, ...encodeU32Field(correlationId), 0x02, 0x00, 0x03, 0x40, 0x04, 0x00, 0xff,
+      0xbf,
+      0x00,
+      0x01,
+      0x01,
+      ...encodeU32Field(correlationId),
+      0x02,
+      0x00,
+      0x03,
+      0x40,
+      0x04,
+      0x00,
+      0xff,
     ]);
     expect(() => transport.deliverResponse(extraKeyBytes)).not.toThrow();
 
@@ -252,7 +319,9 @@ describe("SpaghettiClient — cancellation", () => {
     const controller = new AbortController();
     controller.abort();
 
-    await expect(client.getStatus(controller.signal)).rejects.toMatchObject({ code: "CANCELLED" });
+    await expect(client.getStatus(controller.signal)).rejects.toMatchObject({
+      code: "CANCELLED",
+    });
     expect(transport.sent).toHaveLength(0);
   });
 });
@@ -274,5 +343,52 @@ function encodeU32Field(value: number): number[] {
   if (value < 24) return [value];
   if (value <= 0xff) return [0x18, value];
   if (value <= 0xffff) return [0x19, (value >> 8) & 0xff, value & 0xff];
-  return [0x1a, (value >>> 24) & 0xff, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff];
+  return [
+    0x1a,
+    (value >>> 24) & 0xff,
+    (value >>> 16) & 0xff,
+    (value >>> 8) & 0xff,
+    value & 0xff,
+  ];
 }
+
+describe("APPLY_CONFIG failure diagnostics", () => {
+  it.each([
+    [
+      encodeMap([
+        [0, encodeInt(-5n)],
+        [1, encodeText("activate_module")],
+        [2, encodeInt(0n)],
+      ]),
+      { errno: -5, phase: "activate_module", rollbackErrno: 0 },
+    ],
+    [new Uint8Array(), undefined],
+    [new Uint8Array([0xff]), undefined],
+    [encodeMap([[0, encodeText("invalid")]]), undefined],
+  ])(
+    "preserves protocol errors and accepts optional diagnostics",
+    async (payload, configFailure) => {
+      const transport = new FakeTransport();
+      const client = new SpaghettiClient(transport);
+      const promise = client.applyConfig({
+        expectedGeneration: 1,
+        configBytes: new Uint8Array([0xa0]),
+      });
+      const assertion = expect(promise).rejects.toMatchObject({
+        code: "PROTOCOL_ERROR",
+        status: ProtocolStatus.INTERNAL_ERROR,
+        configFailure,
+      });
+      const request = decodeRequest(transport.sent[0]!);
+      transport.deliverResponse(
+        encodeResponse({
+          correlationId: request.correlationId,
+          status: ProtocolStatus.INTERNAL_ERROR,
+          payload,
+        }),
+      );
+      await assertion;
+      client.dispose();
+    },
+  );
+});

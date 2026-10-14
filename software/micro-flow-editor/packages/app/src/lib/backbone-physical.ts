@@ -625,12 +625,42 @@ export function draftModesForBinding(
   project: PhysicalProject,
   bindingId: string | undefined | null,
 ): readonly number[] | undefined {
+  return draftForBinding(project, bindingId)?.modes;
+}
+
+/** Full physical draft for a core binding (first matching key). */
+export function draftForBinding(
+  project: PhysicalProject,
+  bindingId: string | undefined | null,
+): BackbonePhysicalDraft | undefined {
   if (!bindingId) return undefined;
   const prefix = `${bindingId}:`;
   for (const [key, draft] of Object.entries(project.drafts)) {
-    if (key.startsWith(prefix) && draft.modes?.length) return draft.modes;
+    if (key.startsWith(prefix) && draft.modes?.length) return draft;
   }
   return undefined;
+}
+
+/** Silk-screen labels for configurable Function pins (V1 Pin 2–5, V2 A0–A7). */
+export function silkPinLabels(variant: FunctionModuleVariant): readonly string[] {
+  const n = configurablePinCount(variant);
+  return Array.from({ length: n }, (_, index) => formatPinLabel(modeIndexToPinId(index, variant), variant));
+}
+
+/**
+ * Human label for where a signal mode (base nibble) is assigned, e.g. "A3 · ADC".
+ * Returns undefined when that signal is not placed.
+ */
+export function physicalLabelForSignalMode(
+  modes: readonly number[],
+  signalModeBase: number,
+  variant: FunctionModuleVariant = variantFromModes(modes),
+): string | undefined {
+  const base = signalModeBase & 15;
+  const index = modes.findIndex((mode) => (mode & 15) === base && base !== 0);
+  if (index < 0) return undefined;
+  const pinId = modeIndexToPinId(index, variant);
+  return `${formatPinLabel(pinId, variant)} · ${labelForMode(modes[index]!)}`;
 }
 
 /**

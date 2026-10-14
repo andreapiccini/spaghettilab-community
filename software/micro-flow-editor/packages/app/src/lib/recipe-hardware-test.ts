@@ -1,4 +1,18 @@
-import type { SpaghettiClient } from "@spaghettilab/protocol-sdk";
+import { encodeConfigCbor } from "@spaghettilab/config-compiler";
+import { decodeConfigCbor } from "@spaghettilab/config-decompiler";
+import {
+  DEFAULT_PHYSICAL_SETTINGS,
+  type PhysicalInterfaceSettings,
+  type SpaghettiClient,
+} from "@spaghettilab/protocol-sdk";
+import {
+  addPortInterface,
+  expectedFunctionTag,
+  modesForVariant,
+  modesProvideBus,
+  tagForSlot,
+  topologyForBoard,
+} from "./backbone-physical.js";
 import {
   describeDeviceOp,
   type DeviceRecipeDraft,
@@ -6,12 +20,139 @@ import {
   type DeviceRecipePhase,
 } from "./device-recipe-draft.js";
 import { buildRecipeBusCapture, type RecipeBusCapture } from "./recipe-bus-capture.js";
-import { buildRecipeTestConfigBytes, recipePlanToTestProfile } from "./recipe-to-test-profile.js";
+import { formatValidateConfigFailure } from "./recipe-test-config-errors.js";
+import {
+  buildRecipeTestConfigBytes,
+  recipePlanToTestProfile,
+} from "./recipe-to-test-profile.js";
+
+/** APPLY_PHYSICAL wire: exactly 4 bytes; SDK rejects mode base > 12 (ADC/W1). */
+function toApplyPhysicalModes(modes: readonly number[]): number[] {
+  return modesForVariant(modes, "v1")
+    .slice(0, 4)
+    .map((mode) => ((mode & 15) > 12 ? 0 : mode));
+}
+
+/** Wire modes for APPLY_PHYSICAL (firmware accepts exactly 4 pin bytes). */
+export function modesForRecipeTestI2c(
+  liveModes: readonly number[] | undefined,
+  preferredModes?: readonly number[],
+): number[] {
+  if (modesProvideBus(preferredModes, "i2c")) {
+    return toApplyPhysicalModes(preferredModes!);
+  }
+  if (modesProvideBus(liveModes, "i2c")) {
+    return toApplyPhysicalModes(liveModes!);
+  }
+  const base = liveModes?.length ? toApplyPhysicalModes(liveModes) : [0, 0, 0, 0];
+  try {
+    return toApplyPhysicalModes(addPortInterface(base, "i2c"));
+  } catch {
+    return [4, 5, 0, 0];
+  }
+}
+
+/** Firmware default `CONFIG_SPAGHETTI_CONFIG_MIN_WRITE_INTERVAL_MS` is 1000. */
+const CONFIG_WRITE_GAP_MS = 1100;
+
+async function releaseModulesForPhysical(
+  client: SpaghettiClient,
+  parkedConfigBytes: Uint8Array,
+  expectedGeneration: number,
+  signal?: AbortSignal,
+): Promise<{ readonly generation: number; readonly wrote: boolean }> {
+  const decoded = decodeConfigCbor(parkedConfigBytes);
+  if (!decoded.ok || decoded.value.modules.length === 0) {
+    return { generation: expectedGeneration, wrote: false };
+  }
+  const cleared = encodeConfigCbor({
+    ...decoded.value,
+    modules: [],
+    schedules: [],
+    rules: [],
+    blocks: [],
+    edges: [],
+  });
+  await client.applyConfig({ expectedGeneration, configBytes: cleared }, signal);
+  const fresh = await client.getConfig(signal);
+  return { generation: fresh.generation, wrote: true };
+}
+
+/**
+ * VALIDATE_CONFIG does not touch Port pinmux. On Core, once a physical map was
+ * saved (`user_config[0]==1`), I²C acquire re-applies that map — without SDA/SCL
+ * (modes 4/5) APPLY_CONFIG init/acquire often returns INTERNAL_ERROR.
+ * Ensure Port 0 has I²C before the test APPLY.
+ */
+export async function ensureRecipeTestI2cPhysical(
+  client: SpaghettiClient,
+  opts: {
+    readonly parkedConfigBytes: Uint8Array;
+    readonly expectedGeneration: number;
+    readonly preferredModes?: readonly number[];
+    readonly preferredI2cSpeed?: number;
+    readonly preferredSettings?: PhysicalInterfaceSettings;
+    readonly signal?: AbortSignal;
+  },
+): Promise<{
+  readonly applied: boolean;
+  readonly generation: number;
+  readonly modes?: readonly number[];
+}> {
+  const status = await client.getStatus(opts.signal);
+  const peer = status.chainPeers?.find((p) => p.local);
+  const board = { local: true as const, nodeId: peer?.nodeId ?? 0 };
+  const topology = topologyForBoard(status, board);
+  if (modesProvideBus(topology?.modes, "i2c")) {
+    return {
+      applied: false,
+      generation: opts.expectedGeneration,
+      modes: topology?.modes,
+    };
+  }
+
+  let generation = opts.expectedGeneration;
+  let wroteConfig = false;
+  try {
+    const released = await releaseModulesForPhysical(
+      client,
+      opts.parkedConfigBytes,
+      generation,
+      opts.signal,
+    );
+    generation = released.generation;
+    wroteConfig = released.wrote;
+  } catch {
+    // Best-effort: Port may already be free.
+  }
+
+  const modes = modesForRecipeTestI2c(topology?.modes, opts.preferredModes);
+  const tag = tagForSlot(status, board, 2);
+  const automatic = Boolean(tag?.registryId && tag?.vendorId && tag?.moduleTypeId);
+  await client.applyPhysical(
+    {
+      nodeId: 0,
+      modes: new Uint8Array(modes),
+      i2cSpeed: opts.preferredI2cSpeed ?? topology?.i2cSpeed ?? 0,
+      expectedTag: expectedFunctionTag(tag, automatic),
+      settings:
+        topology?.version === 2
+          ? (opts.preferredSettings ?? topology.settings ?? DEFAULT_PHYSICAL_SETTINGS)
+          : undefined,
+    },
+    opts.signal,
+  );
+  // Two APPLY_CONFIG within <1s → -EBUSY on stock firmware; wait out the gap.
+  if (wroteConfig) {
+    await sleep(CONFIG_WRITE_GAP_MS, opts.signal);
+  }
+  const fresh = await client.getConfig(opts.signal);
+  return { applied: true, generation: fresh.generation, modes };
+}
 
 /** What to execute once on the Backbone — never writes the Flow canvas. */
 export type RecipeTestTarget =
-  | { readonly kind: "task" }
-  | { readonly kind: "action"; readonly commandId?: string };
+  { readonly kind: "task" } | { readonly kind: "action"; readonly commandId?: string };
 
 export type RecipeTestSelection = {
   readonly target: RecipeTestTarget;
@@ -55,23 +196,35 @@ export type RecipeHardwareTestResult = {
   readonly note: string;
   readonly error?: string;
   readonly skippedOps?: readonly string[];
+  readonly rxTruncated?: boolean;
 };
 
-function phaseOps(draft: DeviceRecipeDraft, phase: DeviceRecipePhase): readonly DeviceRecipeOp[] {
+function phaseOps(
+  draft: DeviceRecipeDraft,
+  phase: DeviceRecipePhase,
+): readonly DeviceRecipeOp[] {
   return draft.phases[phase] ?? [];
 }
 
-function actionOps(draft: DeviceRecipeDraft, commandId?: string): readonly DeviceRecipeOp[] {
-  if (draft.category === "display" && draft.commands.length > 0) {
+function actionOps(
+  draft: DeviceRecipeDraft,
+  commandId?: string,
+): readonly DeviceRecipeOp[] {
+  if (draft.commands.length > 0) {
     const cmd =
-      (commandId ? draft.commands.find((c) => c.id === commandId) : undefined) ?? draft.commands[0];
+      (commandId ? draft.commands.find((c) => c.id === commandId) : undefined) ??
+      draft.commands[0];
     return cmd?.steps ?? [];
   }
-  return phaseOps(draft, "command");
+  // Legacy fallback before migrate
+  return phaseOps(draft, "command").length
+    ? phaseOps(draft, "command")
+    : phaseOps(draft, "sample");
 }
 
 /**
- * Flatten Init (optional) + one of Task / Action into an ordered plan.
+ * Flatten Init (optional) + one named Action into an ordered plan.
+ * Legacy `task` target maps to the first named action (or legacy sample).
  * Does not touch project / canvas state.
  */
 export function buildRecipeTestPlan(
@@ -92,34 +245,32 @@ export function buildRecipeTestPlan(
     }
   }
 
-  if (selection.target.kind === "task") {
-    for (const op of phaseOps(draft, "sample")) {
-      steps.push({
-        phase: "sample",
-        phaseLabel: labels.task,
-        op,
-        description: describeDeviceOp(op),
-      });
-    }
-  } else {
-    const cmdId = selection.target.commandId;
-    const cmd = cmdId ? draft.commands.find((c) => c.id === cmdId) : undefined;
-    const actionLabel = cmd ? `${labels.action}: ${cmd.label || cmd.name}` : labels.action;
-    for (const op of actionOps(draft, cmdId)) {
-      steps.push({
-        phase: draft.category === "display" ? "command_named" : "command",
-        phaseLabel: actionLabel,
-        op,
-        description: describeDeviceOp(op),
-      });
-    }
+  const cmdId =
+    selection.target.kind === "action"
+      ? selection.target.commandId
+      : draft.commands[0]?.id;
+  const cmd = cmdId ? draft.commands.find((c) => c.id === cmdId) : draft.commands[0];
+  const actionLabel = cmd
+    ? `${labels.action}: ${cmd.label || cmd.name}`
+    : selection.target.kind === "task"
+      ? labels.task
+      : labels.action;
+  for (const op of actionOps(draft, cmd?.id ?? cmdId)) {
+    steps.push({
+      phase: "command_named",
+      phaseLabel: actionLabel,
+      op,
+      description: describeDeviceOp(op),
+    });
   }
 
   return { selection, steps };
 }
 
 /** Snapshot live Backbone config — canvas / project are never modified. */
-export async function parkLiveConfig(client: SpaghettiClient): Promise<ParkedLiveConfig> {
+export async function parkLiveConfig(
+  client: SpaghettiClient,
+): Promise<ParkedLiveConfig> {
   const live = await client.getConfig();
   return {
     generation: live.generation,
@@ -144,15 +295,27 @@ export type RunRecipeHardwareTestInput = {
   readonly client: SpaghettiClient | undefined;
   readonly draft: DeviceRecipeDraft;
   readonly selection: RecipeTestSelection;
-  readonly labels: { readonly init: string; readonly task: string; readonly action: string };
+  readonly labels: {
+    readonly init: string;
+    readonly task: string;
+    readonly action: string;
+  };
   /** Optional MODULE_COMMAND when Action maps to an already-deployed module. */
   readonly moduleCommand?: { readonly key: number; readonly commandId: number };
-  readonly installProfile?: (draft: import("@spaghettilab/device-profile-authoring-model").DeviceProfileDraft) => Promise<{
+  readonly installProfile?: (
+    draft: import("@spaghettilab/device-profile-authoring-model").DeviceProfileDraft,
+  ) => Promise<{
     ok: boolean;
     error?: string;
   }>;
+  /** Optional: remove prior Testa profiles (`try.*`) so catalog slots stay free. */
+  readonly cleanupTryProfiles?: () => Promise<void>;
   readonly i2cAddress?: number;
   readonly portId?: number;
+  /** Preferred Module Function modes (from Cablaggio draft) when live Port lacks I²C. */
+  readonly preferredPhysicalModes?: readonly number[];
+  readonly preferredI2cSpeed?: number;
+  readonly preferredPhysicalSettings?: PhysicalInterfaceSettings;
   readonly signal?: AbortSignal;
   /** How long to leave the test config active so a sample can fire (ms). */
   readonly sampleWaitMs?: number;
@@ -251,9 +414,20 @@ export async function runRecipeHardwareTest(
   const bodyOps =
     input.selection.target.kind === "task"
       ? phaseOps(input.draft, "sample")
-      : actionOps(input.draft, input.selection.target.kind === "action" ? input.selection.target.commandId : undefined);
+      : actionOps(
+          input.draft,
+          input.selection.target.kind === "action"
+            ? input.selection.target.commandId
+            : undefined,
+        );
 
-  const { profile, skipped } = recipePlanToTestProfile(input.draft, initOps, bodyOps);
+  // Run the whole plan once in profile init during APPLY — no schedule/runtime.
+  // (A schedule + start_runtime has produced INTERNAL_ERROR after VALIDATE ok.)
+  const { profile, skipped } = recipePlanToTestProfile(
+    input.draft,
+    [...initOps, ...bodyOps],
+    [],
+  );
 
   let parked: ParkedLiveConfig;
   try {
@@ -270,6 +444,14 @@ export async function runRecipeHardwareTest(
       error: err instanceof Error ? err.message : String(err),
       skippedOps: skipped,
     };
+  }
+
+  if (input.cleanupTryProfiles) {
+    try {
+      await input.cleanupTryProfiles();
+    } catch {
+      // Best-effort: a full catalog should not block Testa.
+    }
   }
 
   if (input.installProfile) {
@@ -289,11 +471,47 @@ export async function runRecipeHardwareTest(
     }
   }
 
+  // Confirm the Core catalog actually has this id@version (APPLY validate uses find → -ENOENT → INTERNAL_ERROR).
+  try {
+    const listed = await input.client.getFullDeviceProfileList();
+    const found = listed.some(
+      (p) => p.profileId === profile.profileId && p.version === profile.version,
+    );
+    if (!found) {
+      return {
+        ok: false,
+        kind: "profile_failed",
+        plan,
+        capture,
+        parked,
+        restored: false,
+        note: "Profilo installato ma assente dal catalogo Core. Canvas invariato.",
+        error: `${profile.profileId}@${profile.version} non trovato dopo INSTALL_DEVICE_PROFILE`,
+        skippedOps: skipped,
+      };
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      kind: "profile_failed",
+      plan,
+      capture,
+      parked,
+      restored: false,
+      note: "Impossibile verificare il catalogo profili dopo l’install. Canvas invariato.",
+      error: err instanceof Error ? err.message : String(err),
+      skippedOps: skipped,
+    };
+  }
+
+  const testAddr = (input.i2cAddress ?? 0x48) & 0x7f;
   const testBytes = buildRecipeTestConfigBytes({
     profileId: profile.profileId,
-    i2cAddress: input.i2cAddress,
+    profileVersion: profile.version,
+    i2cAddress: testAddr,
     portId: input.portId,
-    periodMs: 150,
+    periodMs: null,
+    parkedConfigBytes: parked.configBytes,
   });
 
   if (!testBytes) {
@@ -309,38 +527,130 @@ export async function runRecipeHardwareTest(
     };
   }
 
+  try {
+    const validated = await input.client.validateConfig({ configBytes: testBytes });
+    if (!validated.valid) {
+      return {
+        ok: false,
+        kind: "apply_failed",
+        plan,
+        capture,
+        parked,
+        restored: false,
+        note: "Config di prova rifiutata da VALIDATE_CONFIG (nessuna modifica applicata). Canvas invariato.",
+        error: formatValidateConfigFailure(validated),
+        skippedOps: skipped,
+      };
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      kind: "apply_failed",
+      plan,
+      capture,
+      parked,
+      restored: false,
+      note: "VALIDATE_CONFIG fallita. Canvas invariato.",
+      error: err instanceof Error ? err.message : String(err),
+      skippedOps: skipped,
+    };
+  }
+
+  // Fresh generation after install/validate — avoid ESTALE if anything else touched Config.
+  // Keep the original parked snapshot for restore (do not replace configBytes with a
+  // post-release empty config).
+  let expectedGeneration = parked.generation;
+  const parkedForRestore = parked;
+  try {
+    const fresh = await input.client.getConfig();
+    expectedGeneration = fresh.generation;
+  } catch {
+    // Keep the original parked generation.
+  }
+
   let applied = false;
   try {
-    await input.client.applyConfig({
-      expectedGeneration: parked.generation,
+    if (input.draft.binding.bus === "i2c") {
+      try {
+        const physical = await ensureRecipeTestI2cPhysical(input.client, {
+          parkedConfigBytes: parkedForRestore.configBytes,
+          expectedGeneration,
+          preferredModes: input.preferredPhysicalModes,
+          preferredI2cSpeed: input.preferredI2cSpeed,
+          preferredSettings: input.preferredPhysicalSettings,
+          signal: input.signal,
+        });
+        expectedGeneration = physical.generation;
+      } catch (physErr) {
+        const raw = physErr instanceof Error ? physErr.message : String(physErr);
+        return {
+          ok: false,
+          kind: "apply_failed",
+          plan,
+          capture,
+          parked: parkedForRestore,
+          restored: false,
+          note: "Impossibile preparare SDA/SCL sul Port 0 prima della prova. Canvas invariato.",
+          error:
+            raw +
+            " — apri Cablaggio, posiziona SDA/SCL su Port 0 e premi Applica, poi riprova Testa.",
+          skippedOps: skipped,
+        };
+      }
+    }
+
+    const response = await input.client.applyConfig({
+      expectedGeneration,
       configBytes: testBytes,
     });
+    const measured: Record<string, number[]> = {};
+    let readIndex = 0;
+    for (const op of ops) {
+      const lengths =
+        op.type === "i2c_read"
+          ? [op.len]
+          : op.type === "i2c_write_read"
+            ? [op.readLen]
+            : op.type === "i2c_transaction"
+              ? op.phases.filter((p) => p.kind === "read").map((p) => p.len)
+              : [];
+      for (const length of lengths) {
+        const bytes = response?.rxReads?.[readIndex++];
+        if (bytes && bytes.length === length) (measured[op.id] ??= []).push(...bytes);
+      }
+    }
+    const measuredCapture = buildRecipeBusCapture(ops, measured);
     applied = true;
-    await sleep(input.sampleWaitMs ?? 400, input.signal);
-    await restoreParkedConfig(input.client, parked);
+    // Ops ran during APPLY. Restore is another persistent Config write,
+    // so it must respect the firmware write interval even for write-only tests.
+    await sleep(Math.max(CONFIG_WRITE_GAP_MS, input.sampleWaitMs ?? 0), input.signal);
+    await restoreParkedConfig(input.client, parkedForRestore);
     return {
       ok: true,
       kind: "applied",
       plan,
-      capture,
-      parked,
+      capture: measuredCapture,
+      rxTruncated: response?.rxTruncated,
+      parked: parkedForRestore,
       restored: true,
       note: "Prova eseguita sulla Backbone (config temporanea applicata e ripristinata). Canvas invariato.",
       skippedOps: skipped,
     };
   } catch (err) {
     let restored = false;
-    if (applied) {
-      try {
-        await restoreParkedConfig(input.client, parked);
-        restored = true;
-      } catch (restoreErr) {
+    try {
+      // Respect write-interval before restore if APPLY partially persisted.
+      await sleep(CONFIG_WRITE_GAP_MS, input.signal);
+      await restoreParkedConfig(input.client, parkedForRestore);
+      restored = true;
+    } catch (restoreErr) {
+      if (applied) {
         return {
           ok: false,
           kind: "restore_failed",
           plan,
           capture,
-          parked,
+          parked: parkedForRestore,
           restored: false,
           note: "Prova fallita e ripristino config non riuscito.",
           error:
@@ -351,17 +661,26 @@ export async function runRecipeHardwareTest(
         };
       }
     }
+    const raw = err instanceof Error ? err.message : String(err);
+    const addrHint = `0x${testAddr.toString(16).padStart(2, "0")}`;
+    const hint = /BUSY/i.test(raw)
+      ? " — Core occupato (intervallo minimo tra APPLY_CONFIG ≈1s). Riprova tra un secondo."
+      : /INTERNAL_ERROR/i.test(raw)
+        ? ` — APPLY_CONFIG non completato. Il solo INTERNAL_ERROR non identifica la causa; verifica la fase e il codice errno se presenti. Indirizzo di prova ${addrHint}.`
+        : /UNSUPPORTED/i.test(raw)
+          ? " — la Port scelta non espone I²C (usa Port 0 con SDA/SCL)."
+          : "";
     return {
       ok: false,
       kind: "apply_failed",
       plan,
       capture,
-      parked,
+      parked: parkedForRestore,
       restored,
       note: restored
         ? "Prova fallita; config precedente ripristinata. Canvas invariato."
         : "Prova fallita. Canvas invariato.",
-      error: err instanceof Error ? err.message : String(err),
+      error: raw + hint,
       skippedOps: skipped,
     };
   }

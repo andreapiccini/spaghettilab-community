@@ -20,6 +20,16 @@ export type TimingPhaseBand = {
   readonly color?: string;
 };
 
+/** Recipe step aligned to the same time axis as phase bands / lanes. */
+export type TimingStepSpan = {
+  readonly opId: string;
+  readonly index: number;
+  readonly label: string;
+  readonly t0: number;
+  readonly t1: number;
+  readonly kind: "bus" | "data";
+};
+
 export type TimingLane = {
   readonly id: string;
   readonly label: string;
