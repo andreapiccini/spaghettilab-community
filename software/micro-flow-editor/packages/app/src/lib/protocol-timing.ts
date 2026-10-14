@@ -163,7 +163,16 @@ export function isBusOp(op: DeviceRecipeOp): boolean {
 }
 
 export function isPostOp(op: DeviceRecipeOp): boolean {
-  return op.type === "decode" || op.type === "emit" || op.type === "average" || op.type === "filter" || op.type === "map_range" || op.type === "wait";
+  return (
+    op.type === "decode" ||
+    op.type === "encode" ||
+    op.type === "emit" ||
+    op.type === "average" ||
+    op.type === "filter" ||
+    op.type === "map_range" ||
+    op.type === "wait" ||
+    op.type === "sample_external"
+  );
 }
 
 export function buildProtocolTiming(
@@ -287,6 +296,28 @@ export function buildProtocolTiming(
   return { cells: [], phaseBands: [], lanes: [], durationMs: 1, busOps, postOps };
 }
 
+/** Dark translucent fills for the timing chart bands (independent of datasheet strip greys). */
+function timingBandFill(kind: ProtocolCellKind): string {
+  switch (kind) {
+    case "start":
+    case "restart":
+    case "stop":
+      return "#1e3a5f33";
+    case "addr_w":
+    case "addr_r":
+      return "#2563eb33";
+    case "data":
+    case "byte":
+      return "#33415533";
+    case "reg":
+      return "#47556933";
+    case "cs":
+      return "#1d4ed833";
+    default:
+      return "#64748b33";
+  }
+}
+
 export function phaseBandsFromCells(cells: readonly ProtocolCell[]): TimingPhaseBand[] {
   // Skip tiny ACK/NACK labels on the chart (still in datasheet strip) to keep the scope readable.
   return cells
@@ -297,7 +328,7 @@ export function phaseBandsFromCells(cells: readonly ProtocolCell[]): TimingPhase
       t1: c.t1,
       label: c.label,
       opId: c.opId,
-      color: `${cellFill(c.kind)}33`,
+      color: timingBandFill(c.kind),
     }));
 }
 
@@ -312,27 +343,48 @@ function mergeEdges(edges: TimingEdge[]): TimingEdge[] {
   return out;
 }
 
+/**
+ * Datasheet strip fills: pastel/washed for framing cells (S, ACK, …);
+ * near-white for address / data bytes.
+ */
 export function cellFill(kind: ProtocolCellKind): string {
   switch (kind) {
     case "start":
     case "restart":
     case "stop":
-      return "#1e3a5f";
+      return "#c9daf8"; // soft blue
+    case "ack":
+      return "#c5e8d4"; // soft mint
+    case "nack":
+      return "#f5d0c5"; // soft peach
+    case "cs":
+      return "#ddd6fe"; // soft lilac
+    case "idle":
+      return "#e8e8e8";
     case "addr_w":
     case "addr_r":
-      return "#2563eb";
-    case "ack":
-      return "#0d9488";
-    case "nack":
-      return "#b45309";
     case "data":
     case "byte":
-      return "#334155";
     case "reg":
-      return "#475569";
-    case "cs":
-      return "#1d4ed8";
+      return "#ffffff";
     default:
-      return "#64748b";
+      return "#f7f7f7";
+  }
+}
+
+export function cellInk(kind: ProtocolCellKind): string {
+  switch (kind) {
+    case "start":
+    case "restart":
+    case "stop":
+      return "#1e3a5f";
+    case "ack":
+      return "#14532d";
+    case "nack":
+      return "#7c2d12";
+    case "cs":
+      return "#4c1d95";
+    default:
+      return "#1f2937";
   }
 }

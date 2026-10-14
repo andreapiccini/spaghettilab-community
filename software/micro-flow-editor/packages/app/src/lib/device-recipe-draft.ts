@@ -22,6 +22,10 @@ export const DEVICE_RECIPE_DRAFT_META_KEY = "__deviceRecipeDraft";
 /** Set to "1" when Crea sensore should place a Flow block on next Processing Graph open. */
 export const DEVICE_RECIPE_PENDING_CREATE_META_KEY = "__deviceRecipePendingCreate";
 
+function newId(prefix: string): string {
+  return `${prefix}-${Date.now().toString(36)}-${Math.round(Math.random() * 1e5).toString(36)}`;
+}
+
 export type DeviceRecipePhase = "init" | "sample" | "command";
 
 export type DeviceRecipeBus = "i2c" | "spi" | "gpio" | "adc" | "w1";
@@ -31,6 +35,80 @@ export type DeviceRecipeCategory = "sensor" | "display";
 export type DisplayControllerProfile = "graphic_framebuffer" | "character" | "segment";
 export type DisplayUpdateMode = "auto" | "explicit";
 export type DeviceCommandParamType = "string" | "int" | "float" | "bool";
+
+/**
+ * External action trigger — same vocabulary as canvas blocks / GPIO pin settings
+ * (`triggerEdge` rising|falling, pin `edge` both, polarity high|low).
+ */
+export type DeviceActionTriggerEdge = "rising" | "falling" | "both";
+export type DeviceActionTriggerLevel = "high" | "low";
+export type DeviceActionTrigger = {
+  readonly edge: DeviceActionTriggerEdge;
+  readonly level: DeviceActionTriggerLevel;
+};
+
+export const DEFAULT_ACTION_TRIGGER: DeviceActionTrigger = {
+  edge: "rising",
+  level: "high",
+};
+
+export function normalizeActionTrigger(raw?: Partial<DeviceActionTrigger> | null): DeviceActionTrigger {
+  const edge =
+    raw?.edge === "falling" || raw?.edge === "both" || raw?.edge === "rising" ? raw.edge : DEFAULT_ACTION_TRIGGER.edge;
+  const level = raw?.level === "low" || raw?.level === "high" ? raw.level : DEFAULT_ACTION_TRIGGER.level;
+  return { edge, level };
+}
+
+/** Recipe-scoped variables shared across Inizializzazione / Task / Azione. */
+export type RecipeVarType = "number" | "hex" | "bool" | "string";
+
+export type RecipeVariable = {
+  readonly id: string;
+  readonly name: string;
+  readonly valueType: RecipeVarType;
+  readonly label: string;
+  readonly defaultValue?: string;
+};
+
+export const RECIPE_VAR_REF_PREFIX = "$";
+
+export function isVarRef(value: string | undefined | null): boolean {
+  return Boolean(value && value.startsWith(RECIPE_VAR_REF_PREFIX) && value.length > 1);
+}
+
+export function parseVarRef(value: string | undefined | null): string | null {
+  if (!isVarRef(value)) return null;
+  return value!.slice(1).trim() || null;
+}
+
+export function toVarRef(name: string): string {
+  const n = name.trim().replace(/^\$+/, "");
+  return `${RECIPE_VAR_REF_PREFIX}${n}`;
+}
+
+export function normalizeRecipeVarName(name: string): string {
+  return name
+    .trim()
+    .replace(/^\$-/, "")
+    .replace(/[^a-zA-Z0-9_]/g, "_")
+    .replace(/^(\d)/, "_$1")
+    .slice(0, 32) || "var";
+}
+
+export function normalizeRecipeVariable(raw?: Partial<RecipeVariable> | null): RecipeVariable {
+  const name = normalizeRecipeVarName(raw?.name ?? "var");
+  const valueType: RecipeVarType =
+    raw?.valueType === "number" || raw?.valueType === "hex" || raw?.valueType === "bool" || raw?.valueType === "string"
+      ? raw.valueType
+      : "hex";
+  return {
+    id: raw?.id && raw.id.trim() ? raw.id : newId("var"),
+    name,
+    valueType,
+    label: raw?.label?.trim() || name,
+    defaultValue: raw?.defaultValue,
+  };
+}
 
 export type DeviceCommandParam = {
   readonly id: string;
@@ -124,6 +202,10 @@ export type DeviceRecipeOp =
       readonly timeoutMs?: number;
     }
   | {
+      /**
+       * Decodifica: bytes grezzi / buffer / variabile interna → variabile di uscita
+       * (tipicamente prima di Emetti).
+       */
       readonly id: string;
       readonly type: "decode";
       readonly input: string;
@@ -132,6 +214,26 @@ export type DeviceRecipeOp =
       readonly signed: boolean;
       readonly startByte: number;
       readonly endByte: number;
+      readonly multiply?: number;
+      readonly divide?: number;
+      readonly offset?: number;
+      /** Tipo della variabile di uscita dopo la conversione. */
+      readonly outType?: RecipeVarType;
+    }
+  | {
+      /**
+       * Codifica: ingresso (variabile / valore Flow) → altra variabile,
+       * cambiando tipo o applicando regole (scala, packing byte).
+       */
+      readonly id: string;
+      readonly type: "encode";
+      readonly input: string;
+      readonly into: string;
+      readonly fromType: RecipeVarType;
+      readonly toType: RecipeVarType;
+      readonly byteOrder: "be" | "le";
+      /** Larghezza in byte quando toType è hex (packing). */
+      readonly widthBytes: number;
       readonly multiply?: number;
       readonly divide?: number;
       readonly offset?: number;
@@ -245,6 +347,14 @@ export type DeviceRecipeOp =
       readonly input: string;
       readonly len: number;
       readonly intoOk: string;
+    }
+  | {
+      /** Copy a Flow write-channel value into a recipe variable. */
+      readonly id: string;
+      readonly type: "sample_external";
+      readonly fromChannelId: string;
+      readonly into: string;
+      readonly valueType: RecipeVarType;
     };
 
 /** Typed public command with its own executable sequence (refs params by name). */
@@ -255,6 +365,8 @@ export type DeviceRecipeCommand = {
   readonly description: string;
   readonly params: readonly DeviceCommandParam[];
   readonly steps: readonly DeviceRecipeOp[];
+  /** When this azione is fired by an external trigger (Flow / GPIO / canvas). */
+  readonly trigger?: DeviceActionTrigger;
   readonly updateMode?: DisplayUpdateMode;
   readonly errorPolicy?: "abort" | "ignore" | "clamp";
 };
@@ -323,8 +435,15 @@ export type DeviceRecipeDraft = {
   readonly status: "draft" | "ready";
   readonly category: DeviceRecipeCategory;
   readonly sampleIntervalMs: number;
+  /**
+   * External trigger for the Azione phase (sensor recipes).
+   * Edge + level match canvas / pin configurator vocabulary.
+   */
+  readonly actionTrigger: DeviceActionTrigger;
   readonly binding: DeviceRecipeBinding;
   readonly channels: readonly SensorChannel[];
+  /** Named slots shared across phases; filled by Campiona (sample_external) or defaults. */
+  readonly variables: readonly RecipeVariable[];
   /** Typed commands (display / actuators). Source of truth for command UI + Flow preview. */
   readonly commands: readonly DeviceRecipeCommand[];
   readonly display?: DisplayProfile;
@@ -338,10 +457,6 @@ export type DeviceRecipeDraft = {
   /** Ops not executable on current firmware — listed for honesty. */
   readonly runtimeUnavailable: readonly string[];
 };
-
-function newId(prefix: string): string {
-  return `${prefix}-${Date.now().toString(36)}-${Math.round(Math.random() * 1e5).toString(36)}`;
-}
 
 export function describeDeviceOp(op: DeviceRecipeOp): string {
   switch (op.type) {
@@ -364,11 +479,15 @@ export function describeDeviceOp(op: DeviceRecipeOp): string {
     case "gpio_debounce":
       return `Antirimbalzo ${op.stableMs} ms`;
     case "decode":
-      return `Decodifica ${op.input} → ${op.into}`;
+      return `Decodifica ${op.input} → $${op.into}`;
+    case "encode":
+      return `Codifica ${op.input} (${op.fromType}→${op.toType}) → $${op.into}`;
     case "adc_sample":
-      return `Campiona (${op.format})`;
+      return `Campiona ADC (${op.format})`;
     case "adc_multi_sample":
       return `Acquisisci ${op.count} campioni`;
+    case "sample_external":
+      return `Campiona ${op.fromChannelId} → $${op.into}`;
     case "average":
       return `Media ${op.input}`;
     case "filter":
@@ -448,18 +567,19 @@ export function applyMapRange(
 
 export function createBlankDraft(mode: DeviceRecipeMode, name?: string): DeviceRecipeDraft {
   if (mode === "display") return createGraphicDisplayExample(name);
-  if (mode === "i2c") return createI2cTemperatureExample(name);
+  if (mode === "i2c") return createI2cGenericExample(name);
   if (mode === "spi") return createSpiPressureExample(name);
   if (mode === "adc") return createAnalogLevelExample(name);
   if (mode === "w1") return createDs18b20Example(name);
   return createGpioDigitalExample(name);
 }
 
-function sensorDraftBase(name: string): Pick<DeviceRecipeDraft, "category" | "commands" | "display"> {
+function sensorDraftBase(_name: string): Pick<DeviceRecipeDraft, "category" | "commands" | "display"> {
   return { category: "sensor", commands: [], display: undefined };
 }
 
-export function createI2cTemperatureExample(name = "Temperatura I2C"): DeviceRecipeDraft {
+/** Generic I2C skeleton — no assumed quantity (temperature, etc.). Outputs come from Emetti. */
+export function createI2cGenericExample(name = "Sensore I2C"): DeviceRecipeDraft {
   const rawInto = "raw";
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
@@ -468,18 +588,20 @@ export function createI2cTemperatureExample(name = "Temperatura I2C"): DeviceRec
     status: "draft",
     ...sensorDraftBase(name),
     sampleIntervalMs: 1000,
+    actionTrigger: DEFAULT_ACTION_TRIGGER,
+    variables: [],
     binding: {
       bus: "i2c",
       i2c: {
         address: "0x48",
-        busUnit: "I2C 0",
-        sdaLabel: "GPIO 21",
-        sclLabel: "GPIO 22",
+        busUnit: "I2C0",
+        sdaLabel: "A0",
+        sclLabel: "A1",
       },
       gpioSignals: [],
       auxGpio: [],
     },
-    channels: [{ id: "temp_c", label: "Temperatura", unit: "°C", quantity: "temperature", direction: "read" }],
+    channels: [{ id: "out_0", label: "Uscita", unit: "", quantity: "other", direction: "read" }],
     phases: {
       init: [],
       sample: [
@@ -493,18 +615,7 @@ export function createI2cTemperatureExample(name = "Temperatura I2C"): DeviceRec
           repeatedStart: true,
           timeoutMs: 20,
         },
-        {
-          id: newId("op"),
-          type: "decode",
-          input: rawInto,
-          into: "temp_scaled",
-          byteOrder: "be",
-          signed: true,
-          startByte: 0,
-          endByte: 1,
-          divide: 100,
-        },
-        { id: newId("op"), type: "emit", channelId: "temp_c", from: "temp_scaled" },
+        { id: newId("op"), type: "emit", channelId: "out_0", from: rawInto },
       ],
       command: [],
     },
@@ -514,7 +625,74 @@ export function createI2cTemperatureExample(name = "Temperatura I2C"): DeviceRec
   };
 }
 
-export function createSpiPressureExample(name = "Pressione SPI"): DeviceRecipeDraft {
+/** @deprecated Use createI2cGenericExample — kept for older tests/imports. */
+export function createI2cTemperatureExample(name = "Sensore I2C"): DeviceRecipeDraft {
+  return createI2cGenericExample(name);
+}
+
+export type RecipeBlockPort = {
+  readonly id: string;
+  readonly label: string;
+  readonly direction: "in" | "out";
+  readonly valueType: string;
+  readonly unit?: string;
+};
+
+/** Ports the Flow block will expose — inputs from Campiona, outputs from Emetti. */
+export function recipeBlockPorts(draft: DeviceRecipeDraft): {
+  readonly inputs: readonly RecipeBlockPort[];
+  readonly outputs: readonly RecipeBlockPort[];
+} {
+  const inputs: RecipeBlockPort[] = [];
+  const seenIn = new Set<string>();
+  for (const phase of ["init", "sample", "command"] as const) {
+    for (const op of draft.phases[phase]) {
+      if (op.type !== "sample_external") continue;
+      if (seenIn.has(op.fromChannelId)) continue;
+      seenIn.add(op.fromChannelId);
+      const ch = draft.channels.find((c) => c.id === op.fromChannelId);
+      inputs.push({
+        id: op.fromChannelId,
+        label: ch?.label ?? op.fromChannelId,
+        direction: "in",
+        valueType: op.valueType,
+        unit: ch?.unit,
+      });
+    }
+  }
+  for (const ch of draft.channels.filter((c) => c.direction === "write")) {
+    if (seenIn.has(ch.id)) continue;
+    seenIn.add(ch.id);
+    inputs.push({
+      id: ch.id,
+      label: ch.label,
+      direction: "in",
+      valueType: ch.quantity === "digital" ? "bool" : ch.quantity === "other" ? "number" : ch.quantity,
+      unit: ch.unit,
+    });
+  }
+
+  const outputs: RecipeBlockPort[] = [];
+  const seenOut = new Set<string>();
+  for (const phase of ["init", "sample", "command"] as const) {
+    for (const op of draft.phases[phase]) {
+      if (op.type !== "emit") continue;
+      if (seenOut.has(op.channelId)) continue;
+      seenOut.add(op.channelId);
+      const ch = draft.channels.find((c) => c.id === op.channelId);
+      outputs.push({
+        id: op.channelId,
+        label: ch?.label ?? op.channelId,
+        direction: "out",
+        valueType: ch?.quantity ?? "other",
+        unit: ch?.unit,
+      });
+    }
+  }
+  return { inputs, outputs };
+}
+
+export function createSpiPressureExample(name = "Sensore SPI"): DeviceRecipeDraft {
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
     id: newId("dr"),
@@ -522,16 +700,18 @@ export function createSpiPressureExample(name = "Pressione SPI"): DeviceRecipeDr
     status: "draft",
     ...sensorDraftBase(name),
     sampleIntervalMs: 100,
+    actionTrigger: DEFAULT_ACTION_TRIGGER,
+    variables: [],
     binding: {
       bus: "spi",
       spi: {
         mode: 0,
         freqHz: 1_000_000,
         bitOrder: "msb",
-        sckLabel: "GPIO 18",
-        mosiLabel: "GPIO 23",
-        misoLabel: "GPIO 19",
-        csLabel: "GPIO 5",
+        sckLabel: "A0",
+        mosiLabel: "A1",
+        misoLabel: "A2",
+        csLabel: "A3",
         misoRequired: true,
       },
       gpioSignals: [],
@@ -573,7 +753,7 @@ export function createSpiPressureExample(name = "Pressione SPI"): DeviceRecipeDr
   };
 }
 
-export function createAnalogLevelExample(name = "Livello analogico"): DeviceRecipeDraft {
+export function createAnalogLevelExample(name = "Sensore analogico"): DeviceRecipeDraft {
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
     id: newId("dr"),
@@ -581,11 +761,13 @@ export function createAnalogLevelExample(name = "Livello analogico"): DeviceReci
     status: "draft",
     ...sensorDraftBase(name),
     sampleIntervalMs: 100,
+    actionTrigger: DEFAULT_ACTION_TRIGGER,
+    variables: [],
     binding: {
       bus: "adc",
       adc: {
         signalName: "SIGNAL",
-        pinLabel: "GPIO 34 · ADC",
+        pinLabel: "A0",
         supportsMv: true,
         displayUnit: "mV",
         calibMinMv: null,
@@ -631,9 +813,9 @@ export function createAnalogLevelExample(name = "Livello analogico"): DeviceReci
 
 export function createGpioDigitalExample(name = "Dispositivo GPIO"): DeviceRecipeDraft {
   const signals: readonly GpioSignalDef[] = [
-    { id: "IN_A", name: "IN_A", role: "generico", direction: "in", pinLabel: "GPIO 18", pull: "up", activeLow: true },
-    { id: "IN_B", name: "IN_B", role: "generico", direction: "in", pinLabel: "GPIO 19", pull: "none", activeLow: false },
-    { id: "OUT_A", name: "OUT_A", role: "generico", direction: "out", pinLabel: "GPIO 23", pull: "none", activeLow: false },
+    { id: "IN_A", name: "IN_A", role: "generico", direction: "in", pinLabel: "A0", pull: "up", activeLow: true },
+    { id: "IN_B", name: "IN_B", role: "generico", direction: "in", pinLabel: "A1", pull: "none", activeLow: false },
+    { id: "OUT_A", name: "OUT_A", role: "generico", direction: "out", pinLabel: "A2", pull: "none", activeLow: false },
   ];
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
@@ -642,6 +824,8 @@ export function createGpioDigitalExample(name = "Dispositivo GPIO"): DeviceRecip
     status: "draft",
     ...sensorDraftBase(name),
     sampleIntervalMs: 5,
+    actionTrigger: DEFAULT_ACTION_TRIGGER,
+    variables: [],
     binding: {
       bus: "gpio",
       gpioSignals: signals,
@@ -675,7 +859,7 @@ export function createGpioDigitalExample(name = "Dispositivo GPIO"): DeviceRecip
  * Convert T max 750 ms @ 12-bit; scratchpad 9 bytes; CRC over first 8.
  * Search ROM is a hardware action, not part of the periodic sample sequence.
  */
-export function createDs18b20Example(name = "Temperatura 1-Wire"): DeviceRecipeDraft {
+export function createDs18b20Example(name = "Sensore 1-Wire"): DeviceRecipeDraft {
   const exampleRom = "28 FF 01 02 03 04 05 62";
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
@@ -684,6 +868,8 @@ export function createDs18b20Example(name = "Temperatura 1-Wire"): DeviceRecipeD
     status: "draft",
     ...sensorDraftBase(name),
     sampleIntervalMs: 1000,
+    actionTrigger: DEFAULT_ACTION_TRIGGER,
+    variables: [],
     binding: {
       bus: "w1",
       w1: {
@@ -815,6 +1001,8 @@ export function createGraphicDisplayExample(name = "Display grafico"): DeviceRec
     status: "draft",
     category: "display",
     sampleIntervalMs: 0,
+    actionTrigger: DEFAULT_ACTION_TRIGGER,
+    variables: [],
     binding: {
       bus: "spi",
       spi: {
@@ -830,12 +1018,15 @@ export function createGraphicDisplayExample(name = "Display grafico"): DeviceRec
       displayPins: { dcLabel: "GPIO15", resetLabel: "GPIO17", csLabel: "GPIO5" },
       gpioSignals: [],
       auxGpio: [
-        { id: "DC", name: "DC", role: "display_dc", direction: "out", pinLabel: "GPIO15", pull: "none", activeLow: false },
-        { id: "RESET", name: "RESET", role: "display_reset", direction: "out", pinLabel: "GPIO17", pull: "none", activeLow: true },
+        { id: "DC", name: "DC", role: "display_dc", direction: "out", pinLabel: "A0", pull: "none", activeLow: false },
+        { id: "RESET", name: "RESET", role: "display_reset", direction: "out", pinLabel: "A1", pull: "none", activeLow: true },
       ],
     },
     channels: [],
-    commands: [writeText, clearCmd, refreshCmd, powerCmd],
+    commands: [writeText, clearCmd, refreshCmd, powerCmd].map((c) => ({
+      ...c,
+      trigger: c.trigger ?? DEFAULT_ACTION_TRIGGER,
+    })),
     display: {
       controllerProfile: "graphic_framebuffer",
       widthPx: 128,
@@ -868,50 +1059,63 @@ export function createGraphicDisplayExample(name = "Display grafico"): DeviceRec
 }
 
 export function libraryOpsForBus(bus: DeviceRecipeBus): readonly { readonly type: DeviceRecipeOp["type"]; readonly label: string }[] {
+  const sampleExternal = { type: "sample_external" as const, label: "Campiona" };
   switch (bus) {
     case "i2c":
       return [
+        sampleExternal,
         { type: "i2c_write", label: "Scrivi" },
         { type: "i2c_read", label: "Leggi" },
         { type: "i2c_write_read", label: "Scrivi e leggi" },
         { type: "wait", label: "Attendi" },
+        { type: "encode", label: "Codifica" },
         { type: "decode", label: "Decodifica" },
         { type: "emit", label: "Emetti" },
       ];
     case "spi":
       return [
+        sampleExternal,
         { type: "spi_cs", label: "Seleziona CS" },
         { type: "spi_transfer", label: "Trasferisci" },
         { type: "wait", label: "Attendi" },
+        { type: "encode", label: "Codifica" },
         { type: "decode", label: "Decodifica" },
         { type: "emit", label: "Emetti" },
       ];
     case "gpio":
       return [
+        sampleExternal,
         { type: "gpio_read", label: "Leggi livello" },
         { type: "gpio_write", label: "Imposta livello" },
         { type: "gpio_debounce", label: "Antirimbalzo" },
         { type: "wait", label: "Attendi" },
+        { type: "encode", label: "Codifica" },
+        { type: "decode", label: "Decodifica" },
         { type: "emit", label: "Emetti" },
       ];
     case "adc":
       return [
-        { type: "adc_sample", label: "Campiona" },
+        sampleExternal,
+        { type: "adc_sample", label: "Campiona ADC" },
         { type: "adc_multi_sample", label: "Campiona più volte" },
         { type: "average", label: "Media" },
         { type: "filter", label: "Filtra" },
         { type: "map_range", label: "Mappa intervallo" },
+        { type: "encode", label: "Codifica" },
+        { type: "decode", label: "Decodifica" },
         { type: "emit", label: "Emetti" },
         { type: "wait", label: "Attendi" },
       ];
     case "w1":
       return [
+        sampleExternal,
         { type: "w1_reset", label: "Reset / presenza" },
         { type: "w1_match_rom", label: "Seleziona ROM" },
         { type: "w1_write", label: "Scrivi byte" },
         { type: "w1_read", label: "Leggi byte" },
         { type: "w1_wait_convert", label: "Attendi completamento" },
         { type: "w1_crc", label: "Verifica CRC" },
+        { type: "encode", label: "Codifica" },
         { type: "decode", label: "Decodifica" },
         { type: "emit", label: "Emetti" },
         { type: "wait", label: "Attendi" },
@@ -983,6 +1187,20 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
         signed: false,
         startByte: 0,
         endByte: 1,
+        outType: "number",
+        divide: 1,
+      };
+    case "encode":
+      return {
+        id,
+        type: "encode",
+        input: draft.variables[0]?.name ?? "ingresso",
+        into: "encoded",
+        fromType: draft.variables[0]?.valueType ?? "number",
+        toType: "hex",
+        byteOrder: "be",
+        widthBytes: 2,
+        multiply: 1,
       };
     case "adc_sample":
       return {
@@ -1020,6 +1238,17 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
       };
     case "emit":
       return { id, type: "emit", channelId, from: draft.binding.bus === "adc" ? "level_pct" : "scaled" };
+    case "sample_external": {
+      const writeCh = draft.channels.find((c) => c.direction === "write");
+      const into = draft.variables[0]?.name ?? "ingresso";
+      return {
+        id,
+        type: "sample_external",
+        fromChannelId: writeCh?.id ?? "ingresso",
+        into,
+        valueType: draft.variables[0]?.valueType ?? "hex",
+      };
+    }
     case "validate_params":
       return { id, type: "validate_params", paramNames: ["testo", "x", "y"] };
     case "buffer_draw_text":
@@ -1074,10 +1303,11 @@ export function addCommand(draft: DeviceRecipeDraft, seed?: Partial<DeviceRecipe
   const cmd: DeviceRecipeCommand = {
     id: newId("cmd"),
     name: seed?.name ?? `comando_${draft.commands.length + 1}`,
-    label: seed?.label ?? "Nuovo comando",
+    label: seed?.label ?? "Nuova azione",
     description: seed?.description ?? "",
     params: seed?.params ?? [],
     steps: seed?.steps ?? [{ id: newId("op"), type: "wait", ms: 1 }],
+    trigger: normalizeActionTrigger(seed?.trigger),
     updateMode: seed?.updateMode ?? draft.display?.updateModeDefault ?? "auto",
     errorPolicy: seed?.errorPolicy ?? "abort",
   };
@@ -1136,17 +1366,144 @@ export function moveCommandStep(
   return touch({ ...draft, commands });
 }
 
+export function upsertRecipeVariable(
+  draft: DeviceRecipeDraft,
+  patch: Partial<RecipeVariable> & { readonly name: string },
+): DeviceRecipeDraft {
+  const next = normalizeRecipeVariable(patch);
+  const existingIdx = draft.variables.findIndex((v) => v.name === next.name || v.id === patch.id);
+  const variables =
+    existingIdx >= 0
+      ? draft.variables.map((v, i) => (i === existingIdx ? { ...next, id: draft.variables[i]!.id } : v))
+      : [...draft.variables, next];
+  return touch({ ...draft, variables });
+}
+
+export function removeRecipeVariable(draft: DeviceRecipeDraft, varId: string): DeviceRecipeDraft {
+  return touch({ ...draft, variables: draft.variables.filter((v) => v.id !== varId) });
+}
+
+export function ensureWriteChannel(
+  draft: DeviceRecipeDraft,
+  seed?: { readonly id?: string; readonly label?: string; readonly unit?: string },
+): { readonly draft: DeviceRecipeDraft; readonly channelId: string } {
+  const existing = draft.channels.find((c) => c.direction === "write" && (!seed?.id || c.id === seed.id));
+  if (existing) return { draft, channelId: existing.id };
+  const id = normalizeRecipeVarName(seed?.id ?? seed?.label ?? `ingresso_${draft.channels.filter((c) => c.direction === "write").length + 1}`);
+  const channel: SensorChannel = {
+    id,
+    label: seed?.label ?? id,
+    unit: seed?.unit ?? "",
+    quantity: "other",
+    direction: "write",
+  };
+  return { draft: touch({ ...draft, channels: [...draft.channels, channel] }), channelId: id };
+}
+
+export function writeChannelsOf(draft: DeviceRecipeDraft): readonly SensorChannel[] {
+  return draft.channels.filter((c) => c.direction === "write");
+}
+
+/** Collect `$name` refs from ops that support variable substitution. */
+export function collectVarRefsFromOp(op: DeviceRecipeOp): readonly string[] {
+  const refs: string[] = [];
+  const push = (v?: string) => {
+    const n = parseVarRef(v);
+    if (n) refs.push(n);
+  };
+  switch (op.type) {
+    case "i2c_write":
+      push(op.reg);
+      for (const b of op.bytes) push(b);
+      break;
+    case "i2c_read":
+      push(op.reg);
+      break;
+    case "i2c_write_read":
+      push(op.reg);
+      for (const b of op.writeBytes) push(b);
+      break;
+    case "sample_external":
+      refs.push(op.into);
+      break;
+    case "decode":
+      // `into` is always a recipe variable; `input` may be a raw buffer name.
+      refs.push(op.into);
+      push(op.input);
+      break;
+    case "encode":
+      refs.push(op.into);
+      if (op.input.trim()) refs.push(normalizeRecipeVarName(op.input.replace(/^\$+/, "")));
+      break;
+    default:
+      break;
+  }
+  return refs;
+}
+
+export function collectAllVarRefs(draft: DeviceRecipeDraft): readonly string[] {
+  const names = new Set<string>();
+  for (const phase of ["init", "sample", "command"] as const) {
+    for (const op of draft.phases[phase]) {
+      for (const n of collectVarRefsFromOp(op)) names.add(n);
+    }
+  }
+  for (const cmd of draft.commands) {
+    for (const op of cmd.steps) {
+      for (const n of collectVarRefsFromOp(op)) names.add(n);
+    }
+  }
+  return [...names];
+}
+
+export function isVariableUsed(draft: DeviceRecipeDraft, name: string): boolean {
+  const n = normalizeRecipeVarName(name);
+  if (collectAllVarRefs(draft).includes(n)) return true;
+  for (const phase of ["init", "sample", "command"] as const) {
+    if (
+      draft.phases[phase].some(
+        (op) =>
+          (op.type === "sample_external" || op.type === "decode" || op.type === "encode") && op.into === n,
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function upsertIntoVariable(
+  draft: DeviceRecipeDraft,
+  name: string,
+  valueType: RecipeVarType,
+): DeviceRecipeDraft {
+  return upsertRecipeVariable(draft, { name, valueType, label: name });
+}
+
 export function insertOp(
   draft: DeviceRecipeDraft,
   phase: DeviceRecipePhase,
   type: DeviceRecipeOp["type"],
   atIndex?: number,
 ): DeviceRecipeDraft {
-  const list = [...draft.phases[phase]];
-  const op = defaultOp(type, draft);
+  let next = draft;
+  let op = defaultOp(type, next);
+  if (type === "sample_external" && op.type === "sample_external") {
+    const ensured = ensureWriteChannel(next, { id: op.fromChannelId, label: op.fromChannelId });
+    next = ensured.draft;
+    op = { ...op, fromChannelId: ensured.channelId };
+    next = upsertIntoVariable(next, op.into, op.valueType);
+  }
+  if (type === "decode" && op.type === "decode") {
+    next = upsertIntoVariable(next, op.into, op.outType ?? "number");
+  }
+  if (type === "encode" && op.type === "encode") {
+    next = upsertIntoVariable(next, op.into, op.toType);
+  }
+  const list = [...next.phases[phase]];
   const index = atIndex === undefined ? list.length : Math.max(0, Math.min(atIndex, list.length));
   list.splice(index, 0, op);
-  return touch({ ...draft, phases: { ...draft.phases, [phase]: list } });
+  return touch({ ...next, phases: { ...next.phases, [phase]: list } });
 }
 
 export function updateOp(
@@ -1155,8 +1512,21 @@ export function updateOp(
   opId: string,
   next: DeviceRecipeOp,
 ): DeviceRecipeDraft {
-  const list = draft.phases[phase].map((op) => (op.id === opId ? next : op));
-  return touch({ ...draft, phases: { ...draft.phases, [phase]: list } });
+  let base = draft;
+  if (next.type === "sample_external") {
+    const ensured = ensureWriteChannel(base, { id: next.fromChannelId, label: next.fromChannelId });
+    base = ensured.draft;
+    next = { ...next, fromChannelId: ensured.channelId };
+    base = upsertIntoVariable(base, next.into, next.valueType);
+  }
+  if (next.type === "decode") {
+    base = upsertIntoVariable(base, next.into, next.outType ?? "number");
+  }
+  if (next.type === "encode") {
+    base = upsertIntoVariable(base, next.into, next.toType);
+  }
+  const list = base.phases[phase].map((op) => (op.id === opId ? next : op));
+  return touch({ ...base, phases: { ...base.phases, [phase]: list } });
 }
 
 export function removeOp(draft: DeviceRecipeDraft, phase: DeviceRecipePhase, opId: string): DeviceRecipeDraft {
@@ -1211,7 +1581,7 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
   }
 
   if (draft.channels.length === 0) errors.push({ field: "channels", message: "Serve almeno un canale" });
-  if (draft.phases.sample.length === 0) errors.push({ field: "sample", message: "La sequenza Lettura è vuota" });
+  if (draft.phases.sample.length === 0) errors.push({ field: "sample", message: "La sequenza Task è vuota" });
   if (draft.binding.bus === "i2c" && !draft.binding.i2c?.address) {
     errors.push({ field: "address", message: "Indirizzo I2C mancante" });
   }
@@ -1243,7 +1613,25 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
     }
   }
   const hasEmit = draft.phases.sample.some((op) => op.type === "emit");
-  if (!hasEmit) errors.push({ field: "emit", message: "Manca un passo Emetti in Lettura" });
+  if (!hasEmit) errors.push({ field: "emit", message: "Manca un passo Emetti nel Task" });
+
+  const knownVars = new Set(draft.variables.map((v) => v.name));
+  for (const ref of collectAllVarRefs(draft)) {
+    if (!knownVars.has(ref)) {
+      errors.push({ field: "variables", message: `Variabile sconosciuta: $${ref}` });
+    }
+  }
+  for (const phase of ["init", "sample", "command"] as const) {
+    for (const op of draft.phases[phase]) {
+      if (op.type !== "sample_external") continue;
+      if (!draft.channels.some((c) => c.id === op.fromChannelId && c.direction === "write")) {
+        errors.push({
+          field: "sample_external",
+          message: `Campiona: ingresso Flow mancante (${op.fromChannelId})`,
+        });
+      }
+    }
+  }
   return errors;
 }
 
@@ -1291,6 +1679,14 @@ export function draftToSensorRecipe(draft: DeviceRecipeDraft): SensorRecipe {
     if (draft.binding.w1?.powerMode === "parasitic") {
       unknown.push("Parasite power non supportato");
     }
+  }
+  if (
+    draft.variables.length > 0 ||
+    draft.phases.init.some((op) => op.type === "sample_external") ||
+    draft.phases.sample.some((op) => op.type === "sample_external") ||
+    draft.phases.command.some((op) => op.type === "sample_external")
+  ) {
+    unknown.push("Campiona / variabili ricetta: authoring only finché il runtime non le supporta");
   }
 
   const commands = draft.commands.map((c) => ({
@@ -1366,6 +1762,8 @@ function mapOpToV1(op: DeviceRecipeOp, address?: string): SensorRecipeStep[] {
     case "ctrl_pin":
     case "spi_transfer_buffer":
     case "w1_wait_convert":
+    case "sample_external":
+    case "encode":
       // No v1 primitive — skipped in adapter (kept in draft + unknown / commands).
       return [];
     case "adc_sample":
@@ -1395,7 +1793,8 @@ export function parseDeviceRecipeDraft(raw: string | undefined | null): DeviceRe
   try {
     const parsed = JSON.parse(raw) as Partial<DeviceRecipeDraft> & { schemaVersion?: string };
     if (!parsed?.id || !parsed.binding) return null;
-    if (parsed.schemaVersion !== "1" && parsed.schemaVersion !== "2") return null;
+    const version = String(parsed.schemaVersion ?? "");
+    if (version !== "1" && version !== "2") return null;
     return migrateDraft(parsed);
   } catch {
     return null;
@@ -1405,6 +1804,25 @@ export function parseDeviceRecipeDraft(raw: string | undefined | null): DeviceRe
 /** Migrate v1 drafts → v2 (category + commands). */
 export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?: string }): DeviceRecipeDraft {
   const category: DeviceRecipeCategory = raw.category ?? "sensor";
+  const phases = raw.phases ?? { init: [], sample: [], command: [] };
+  const variablesFromOps: RecipeVariable[] = [];
+  for (const phase of ["init", "sample", "command"] as const) {
+    for (const op of phases[phase] ?? []) {
+      if (op.type === "sample_external") {
+        variablesFromOps.push(
+          normalizeRecipeVariable({ name: op.into, valueType: op.valueType, label: op.into }),
+        );
+      }
+    }
+  }
+  const variables = (raw.variables?.length ? raw.variables : variablesFromOps).map((v) => normalizeRecipeVariable(v));
+  // Dedupe by name
+  const seen = new Set<string>();
+  const uniqueVars = variables.filter((v) => {
+    if (seen.has(v.name)) return false;
+    seen.add(v.name);
+    return true;
+  });
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
     id: raw.id!,
@@ -1412,11 +1830,16 @@ export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?:
     status: raw.status === "ready" ? "ready" : "draft",
     category,
     sampleIntervalMs: raw.sampleIntervalMs ?? 1000,
+    actionTrigger: normalizeActionTrigger(raw.actionTrigger),
     binding: raw.binding!,
     channels: raw.channels ?? [],
-    commands: raw.commands ?? [],
+    variables: uniqueVars,
+    commands: (raw.commands ?? []).map((c) => ({
+      ...c,
+      trigger: normalizeActionTrigger(c.trigger),
+    })),
     display: raw.display,
-    phases: raw.phases ?? { init: [], sample: [], command: [] },
+    phases,
     verification: raw.verification ?? { status: "untested", note: "" },
     updatedAt: raw.updatedAt ?? Date.now(),
     runtimeUnavailable: raw.runtimeUnavailable ?? [],

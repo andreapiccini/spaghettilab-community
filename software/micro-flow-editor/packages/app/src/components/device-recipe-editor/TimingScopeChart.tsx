@@ -88,7 +88,15 @@ export function TimingScopeChart({
                   {band.label}
                 </text>
               ) : null}
-              <line x1={x0} y1={bandY} x2={x0} y2={plotBottom} stroke={hi ? TRACE : GRID} strokeWidth={hi ? 1.25 : 1} strokeDasharray={hi ? undefined : "2 3"} />
+              <line
+                x1={x0}
+                y1={bandY}
+                x2={x0}
+                y2={plotBottom}
+                stroke={hi ? TRACE : MUTED}
+                strokeWidth={hi ? 1 : 0.75}
+                strokeDasharray="3 3"
+              />
             </g>
           );
         })}
@@ -132,12 +140,12 @@ export function TimingScopeChart({
                 </g>
               ) : null}
 
-              <path d={path} fill="none" stroke={TRACE} strokeWidth={2} strokeLinejoin="miter" strokeLinecap="square" />
+              <path d={path} fill="none" stroke={TRACE} strokeWidth={1.15} strokeLinejoin="miter" strokeLinecap="square" />
 
               {(lane.sampleTimes ?? []).map((t, i) => {
                 const level = levelAt(lane.edges, t);
                 const y = level === 1 ? yh : yl;
-                return <circle key={`${lane.id}-s${i}`} cx={xAt(t)} cy={y} r={2.6} fill={TRACE} />;
+                return <circle key={`${lane.id}-s${i}`} cx={xAt(t)} cy={y} r={1.8} fill={TRACE} />;
               })}
             </g>
           );

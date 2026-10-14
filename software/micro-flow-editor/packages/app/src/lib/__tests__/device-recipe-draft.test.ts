@@ -10,19 +10,25 @@ import {
   hasValidAnalogAcquisition,
   insertOp,
   isAnalogCalibrationComplete,
+  libraryOpsForBus,
   migrateDraft,
   multiSampleSpanMs,
+  parseVarRef,
   serializeDeviceRecipeDraft,
   parseDeviceRecipeDraft,
+  toVarRef,
+  upsertRecipeVariable,
   validateDraftForCreate,
+  writeChannelsOf,
 } from "../device-recipe-draft.js";
 
 describe("device-recipe-draft", () => {
   it("seeds I2C / SPI / GPIO examples with channels and sample steps", () => {
     const i2c = createI2cTemperatureExample();
     expect(i2c.binding.bus).toBe("i2c");
-    expect(i2c.channels[0]?.quantity).toBe("temperature");
+    expect(i2c.channels[0]?.quantity).toBe("other");
     expect(i2c.phases.sample.some((op) => op.type === "i2c_write_read")).toBe(true);
+    expect(i2c.phases.sample.some((op) => op.type === "emit")).toBe(true);
 
     const spi = createSpiPressureExample();
     expect(spi.binding.bus).toBe("spi");
@@ -91,7 +97,7 @@ describe("device-recipe-draft", () => {
     const recipe = draftToSensorRecipe(createI2cTemperatureExample("TMP"));
     expect(recipe.chip).toBe("TMP");
     expect(recipe.bus).toBe("i2c");
-    expect(recipe.channels?.some((c) => c.id === "temp_c")).toBe(true);
+    expect(recipe.channels?.some((c) => c.id === "out_0")).toBe(true);
     expect(recipe.recipe.sample.some((s) => s.type === "emit")).toBe(true);
   });
 
@@ -135,7 +141,69 @@ describe("device-recipe-draft", () => {
     expect(migrated.schemaVersion).toBe("2");
     expect(migrated.category).toBe("sensor");
     expect(migrated.commands).toEqual([]);
+    expect(migrated.variables).toEqual([]);
     const roundTrip = parseDeviceRecipeDraft(serializeDeviceRecipeDraft(createGraphicDisplayExample()));
     expect(roundTrip?.category).toBe("display");
+    expect(roundTrip?.variables).toEqual([]);
+  });
+
+  it("exposes Campiona (sample_external) in every bus library; ADC keeps Campiona ADC", () => {
+    for (const bus of ["i2c", "spi", "gpio", "adc", "w1"] as const) {
+      const lib = libraryOpsForBus(bus);
+      expect(lib.some((x) => x.type === "sample_external" && x.label === "Campiona")).toBe(true);
+    }
+    expect(libraryOpsForBus("adc").some((x) => x.type === "adc_sample" && x.label === "Campiona ADC")).toBe(true);
+  });
+
+  it("inserts Campiona and upserts write channel + variable", () => {
+    let draft = createI2cTemperatureExample();
+    expect(draft.variables).toHaveLength(0);
+    expect(writeChannelsOf(draft)).toHaveLength(0);
+    draft = insertOp(draft, "command", "sample_external");
+    const op = draft.phases.command.at(-1);
+    expect(op?.type).toBe("sample_external");
+    if (op?.type !== "sample_external") throw new Error("expected sample_external");
+    expect(writeChannelsOf(draft).some((c) => c.id === op.fromChannelId)).toBe(true);
+    expect(draft.variables.some((v) => v.name === op.into)).toBe(true);
+  });
+
+  it("parses $var refs and validates unknown variables", () => {
+    expect(toVarRef("reg")).toBe("$reg");
+    expect(parseVarRef("$reg")).toBe("reg");
+    let draft = createI2cTemperatureExample();
+    draft = {
+      ...draft,
+      phases: {
+        ...draft.phases,
+        sample: draft.phases.sample.map((op) =>
+          op.type === "i2c_write_read" ? { ...op, reg: "$reg" } : op,
+        ),
+      },
+    };
+    expect(validateDraftForCreate(draft).some((e) => e.field === "variables")).toBe(true);
+    draft = upsertRecipeVariable(draft, { name: "reg", valueType: "hex", label: "Registro" });
+    expect(validateDraftForCreate(draft).some((e) => e.field === "variables")).toBe(false);
+  });
+
+  it("migrates sample_external ops into variables when missing", () => {
+    const base = createI2cTemperatureExample();
+    const raw = {
+      ...base,
+      variables: undefined,
+      phases: {
+        ...base.phases,
+        command: [
+          {
+            id: "op-1",
+            type: "sample_external" as const,
+            fromChannelId: "ingresso",
+            into: "setpoint",
+            valueType: "number" as const,
+          },
+        ],
+      },
+    };
+    const migrated = migrateDraft(raw);
+    expect(migrated.variables.some((v) => v.name === "setpoint" && v.valueType === "number")).toBe(true);
   });
 });

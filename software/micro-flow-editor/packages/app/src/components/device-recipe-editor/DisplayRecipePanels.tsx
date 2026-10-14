@@ -2,10 +2,12 @@ import { Cpu, Monitor, Plus, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import {
   addCommand,
+  DEFAULT_ACTION_TRIGGER,
   describeDeviceOp,
   insertCommandStep,
   libraryOpsForDisplay,
   moveCommandStep,
+  normalizeActionTrigger,
   removeCommand,
   removeCommandStep,
   updateCommand,
@@ -16,6 +18,7 @@ import {
   type DeviceRecipeOp,
   type DisplayUpdateMode,
 } from "../../lib/device-recipe-draft.js";
+import { ActionTriggerFields } from "./ActionTriggerFields.js";
 
 const inputClass =
   "w-full rounded-slsm border border-border-strong bg-surface px-1.5 py-1 font-mono text-xs outline-none focus:border-brand-blue";
@@ -65,10 +68,10 @@ export function DisplayLeftSidebar(props: Shared) {
                             mode: 0,
                             freqHz: 8_000_000,
                             bitOrder: "msb",
-                            sckLabel: "GPIO18",
-                            mosiLabel: "GPIO23",
+                            sckLabel: "A0",
+                            mosiLabel: "A1",
                             misoLabel: "",
-                            csLabel: "GPIO5",
+                            csLabel: "A3",
                             misoRequired: false,
                           }
                         : draft.binding.spi,
@@ -76,9 +79,9 @@ export function DisplayLeftSidebar(props: Shared) {
                       bus === "i2c"
                         ? draft.binding.i2c ?? {
                             address: "0x3C",
-                            busUnit: "I2C 0",
-                            sdaLabel: "GPIO21",
-                            sclLabel: "GPIO22",
+                            busUnit: "I2C0",
+                            sdaLabel: "A0",
+                            sclLabel: "A1",
                           }
                         : draft.binding.i2c,
                   },
@@ -333,7 +336,7 @@ function DisplayLibrary({
 }
 
 export function DisplayCenter(props: Shared) {
-  const { draft, it, selectedCommandId, onSelectCommand, selectedStepId, onSelectStep } = props;
+  const { draft, it, onChange, selectedCommandId, onSelectCommand, selectedStepId, onSelectStep } = props;
   const [phase, setPhase] = useState<"init" | "command">("command");
   const cmd = draft.commands.find((c) => c.id === selectedCommandId) ?? draft.commands[0] ?? null;
   const [simText, setSimText] = useState("Ciao!");
@@ -357,13 +360,26 @@ export function DisplayCenter(props: Shared) {
       <div className="inline-flex w-fit rounded-slpill border border-border-strong bg-surface p-0.5">
         {(
           [
-            { id: "init" as const, label: it ? "Avvio" : "Init" },
-            { id: "command" as const, label: it ? "Comandi" : "Commands" },
+            {
+              id: "init" as const,
+              label: it ? "Inizializzazione" : "Initialization",
+              title: it
+                ? "Eseguita una volta all’accensione del display"
+                : "Runs once when the display powers on",
+            },
+            {
+              id: "command" as const,
+              label: it ? "Azione" : "Action",
+              title: it
+                ? "Azione eseguita con un trigger esterno"
+                : "Action run by an external trigger",
+            },
           ] as const
         ).map((tab) => (
           <button
             key={tab.id}
             type="button"
+            title={tab.title}
             onClick={() => setPhase(tab.id)}
             className={`rounded-slpill px-3 py-1 font-body text-xs font-semibold ${
               phase === tab.id ? "bg-brand-blue text-white" : "text-ink-muted"
@@ -377,8 +393,13 @@ export function DisplayCenter(props: Shared) {
       {phase === "init" ? (
         <section className="rounded-slmd border border-border-strong bg-surface p-3">
           <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-            {it ? "Sequenza di avvio" : "Init sequence"}
+            {it ? "Sequenza di inizializzazione" : "Initialization sequence"}
           </h2>
+          <p className="mb-2 font-body text-[11px] text-ink-muted">
+            {it
+              ? "Passi eseguiti una sola volta quando il display viene inizializzato."
+              : "Steps run once when the display is initialized."}
+          </p>
           <div className="flex flex-wrap items-center gap-1.5">
             {draft.phases.init.map((op, i) => (
               <span key={op.id} className="rounded-slsm border border-border-strong bg-surface-sunken px-2.5 py-2 font-body text-xs">
@@ -396,8 +417,19 @@ export function DisplayCenter(props: Shared) {
         <>
           <div>
             <h2 className="font-heading text-base font-semibold text-ink">{cmd.label}</h2>
-            <p className="font-body text-[11px] text-ink-faint">{cmd.description}</p>
+            <p className="font-body text-[11px] text-ink-faint">
+              {cmd.description ||
+                (it
+                  ? "Azione compiuta quando arriva un trigger esterno."
+                  : "Action performed when an external trigger arrives.")}
+            </p>
           </div>
+
+          <ActionTriggerFields
+            it={it}
+            value={normalizeActionTrigger(cmd.trigger)}
+            onChange={(trigger) => onChange(updateCommand(draft, cmd.id, { ...cmd, trigger }))}
+          />
 
           <section className="rounded-slmd border border-border-strong bg-surface p-3">
             <p className="font-mono text-sm text-ink">
@@ -636,6 +668,14 @@ export function DisplayInspector(props: Shared & { readonly createBlocked: boole
             className={inputClass}
           />
         </Field>
+
+        <div className="mt-2">
+          <ActionTriggerFields
+            it={it}
+            value={normalizeActionTrigger(cmd.trigger ?? DEFAULT_ACTION_TRIGGER)}
+            onChange={(trigger) => onChange(updateCommand(draft, cmd.id, { ...cmd, trigger }))}
+          />
+        </div>
 
         <p className="mt-2 font-body text-[10px] font-semibold uppercase text-ink-faint">{it ? "Parametri" : "Parameters"}</p>
         <ul className="mt-1 space-y-2">

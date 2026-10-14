@@ -1,4 +1,4 @@
-import { cellFill, type ProtocolCell } from "../../lib/protocol-timing.js";
+import { cellFill, cellInk, type ProtocolCell } from "../../lib/protocol-timing.js";
 
 /** Datasheet-style I2C/SPI transaction strip — same cells as the timing chart. */
 export function ProtocolFrameStrip({
@@ -24,7 +24,7 @@ export function ProtocolFrameStrip({
         {hint ? <span className="font-body text-[10px] text-ink-faint">{hint}</span> : null}
       </div>
       <div className="overflow-x-auto">
-        <div className="inline-flex min-w-full border border-ink/80 bg-ink">
+        <div className="inline-flex min-w-full border border-ink/50 bg-white">
           {cells.map((cell) => {
             const selected = cell.opId === selectedOpId;
             const flex = Math.max(cell.units, cell.kind === "ack" || cell.kind === "nack" ? 1.2 : cell.units);
@@ -38,9 +38,10 @@ export function ProtocolFrameStrip({
                   flexGrow: flex,
                   flexBasis: `${(cell.units / totalUnits) * 100}%`,
                   backgroundColor: cellFill(cell.kind),
+                  color: cellInk(cell.kind),
                 }}
-                className={`relative min-w-[1.75rem] border-r border-white/20 px-1 py-2.5 text-center font-mono text-[10px] font-semibold text-white transition ${
-                  selected ? "ring-2 ring-inset ring-sky-300" : "hover:brightness-110"
+                className={`relative min-w-[1.5rem] border-r border-ink/25 px-1 py-2 text-center font-mono text-[10px] font-semibold transition ${
+                  selected ? "ring-2 ring-inset ring-brand-blue/60" : "hover:brightness-[0.98]"
                 }`}
               >
                 {cell.label}
@@ -49,12 +50,15 @@ export function ProtocolFrameStrip({
           })}
         </div>
       </div>
-      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-body text-[9px] text-ink-faint">
-        <Legend swatch="#1e3a5f" label="S / Sr / P" />
-        <Legend swatch="#2563eb" label="ADDR" />
-        <Legend swatch="#0d9488" label="ACK" />
-        <Legend swatch="#b45309" label="NACK" />
-        <Legend swatch="#334155" label="DATA" />
+      <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border pt-2 font-body text-[10px] text-ink-muted">
+        <span className="w-full font-semibold uppercase tracking-wide text-ink-faint">
+          Legenda
+        </span>
+        <Legend swatch={cellFill("start")} label="S / Sr / P — start, restart, stop" />
+        <Legend swatch={cellFill("addr_w")} label="ADDR / DATA — indirizzo e byte" />
+        <Legend swatch={cellFill("ack")} label="ACK" />
+        <Legend swatch={cellFill("nack")} label="NACK" />
+        <Legend swatch={cellFill("cs")} label="CS (SPI)" />
       </div>
     </section>
   );
@@ -62,8 +66,11 @@ export function ProtocolFrameStrip({
 
 function Legend({ swatch, label }: { swatch: string; label: string }) {
   return (
-    <span className="inline-flex items-center gap-1">
-      <span className="inline-block h-2 w-3 rounded-sm" style={{ backgroundColor: swatch }} />
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        className="inline-block h-2.5 w-3.5 shrink-0 rounded-sm border border-ink/20"
+        style={{ backgroundColor: swatch }}
+      />
       {label}
     </span>
   );

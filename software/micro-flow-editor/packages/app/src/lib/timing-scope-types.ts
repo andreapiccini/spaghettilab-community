@@ -26,4 +26,6 @@ export type TimingLane = {
   readonly edges: readonly TimingEdge[];
   readonly sampleTimes?: readonly number[];
   readonly annotation?: TimingSpanAnnotation;
+  /** Trace stroke — keep distinct when several lanes share the plot. */
+  readonly color?: string;
 };
