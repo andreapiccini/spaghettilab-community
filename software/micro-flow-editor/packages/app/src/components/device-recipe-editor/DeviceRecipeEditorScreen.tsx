@@ -18,7 +18,6 @@ import {
   createGpioDigitalExample,
   describeDeviceOp,
   ensureWriteChannel,
-  hasValidAnalogAcquisition,
   insertOp,
   isAnalogCalibrationComplete,
   isVarRef,
@@ -59,12 +58,26 @@ import {
   type BackbonePhysicalDraft,
 } from "../../lib/backbone-physical.js";
 import { validateOneWireRom } from "../../lib/onewire.js";
+import { rxBlocksOf } from "../../lib/recipe-bus-capture.js";
+import {
+  runRecipeHardwareTest,
+  type RecipeHardwareTestResult,
+  type RecipeTestSelection,
+  type RecipeTestTarget,
+} from "../../lib/recipe-hardware-test.js";
+import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
-import { buildProtocolTiming, isBusOp, isPostOp } from "../../lib/protocol-timing.js";
+import {
+  buildProtocolTiming,
+  buildProtocolTimingFromOps,
+  isBusOp,
+  isPostOp,
+} from "../../lib/protocol-timing.js";
 import { DerivedSignalView } from "./DerivedSignalView.js";
 import { DisplayCenter, DisplayInspector, DisplayLeftSidebar } from "./DisplayRecipePanels.js";
 import { ProtocolFrameStrip } from "./ProtocolFrameStrip.js";
+import { TimingScopeChart } from "./TimingScopeChart.js";
 
 type Props = {
   readonly initialDraft?: DeviceRecipeDraft;
@@ -80,6 +93,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   const { locale } = useLocale();
   const it = locale === "it";
   const { navigate, session } = useSession();
+  const { rows, getClient, installProfile } = useCoreSessions();
   const physicalDraft = useMemo(() => {
     const project = parsePhysicalProject(
       session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment,
@@ -87,6 +101,13 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
     const bindingId = session?.stack.current.coreBindings[0]?.bindingId;
     return draftForBinding(project, bindingId);
   }, [session]);
+  const connectedBindingId = useMemo(() => {
+    const fromSession = session?.stack.current.coreBindings[0]?.bindingId;
+    if (fromSession && rows.some((r) => r.binding.bindingId === fromSession && r.sessionState === "READY")) {
+      return fromSession;
+    }
+    return rows.find((r) => r.sessionState === "READY")?.binding.bindingId;
+  }, [session, rows]);
   const [draft, setDraft] = useState<DeviceRecipeDraft>(() => initialDraft ?? createBlankDraft("i2c"));
   const [phase, setPhase] = useState<DeviceRecipePhase>(
     () => (initialDraft?.category === "display" ? "command" : "sample"),
@@ -99,6 +120,9 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   const [fieldErrors, setFieldErrors] = useState<readonly { field: string; message: string }[]>([]);
   const [tryMessage, setTryMessage] = useState<string | null>(null);
   const [showBlockPreview, setShowBlockPreview] = useState(false);
+  const [testRunInitFirst, setTestRunInitFirst] = useState(false);
+  const [testRunning, setTestRunning] = useState(false);
+  const [testResult, setTestResult] = useState<RecipeHardwareTestResult | null>(null);
 
   const isDisplay = draft.category === "display";
   const ops = draft.phases[phase];
@@ -162,61 +186,73 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
     setDraft(updateOp(draft, phase, selected.id, next));
   }
 
-  function handleTry() {
-    if (isDisplay) {
-      setTryMessage(
-        it
-          ? "Prova comando non disponibile: runtime display non collegato. Usa Simula per anteprima locale (dichiarata)."
-          : "Command test unavailable: display runtime not connected. Use Simulate for local preview (declared).",
-      );
+  const testLabels = useMemo(
+    () => ({
+      init: it ? "Inizializzazione" : "Initialization",
+      task: "Task",
+      action: it ? "Azione" : "Action",
+    }),
+    [it],
+  );
+
+  function currentTestSelection(): RecipeTestSelection {
+    const target: RecipeTestTarget =
+      isDisplay || phase === "command"
+        ? { kind: "action", commandId: selectedCommandId ?? draft.commands[0]?.id }
+        : { kind: "task" };
+    return { target, runInitFirst: testRunInitFirst };
+  }
+
+  async function handleRunHardwareTest() {
+    setTestRunning(true);
+    setTryMessage(null);
+    setTestResult(null);
+    const selection = currentTestSelection();
+    try {
+      const client = connectedBindingId ? getClient(connectedBindingId) : undefined;
+      const addrRaw = draft.binding.i2c?.address;
+      const i2cAddress = addrRaw
+        ? Number.parseInt(addrRaw.replace(/^0x/i, ""), 16)
+        : undefined;
+      const result = await runRecipeHardwareTest({
+        client,
+        draft,
+        selection,
+        labels: testLabels,
+        i2cAddress: Number.isFinite(i2cAddress) ? i2cAddress : undefined,
+        installProfile: connectedBindingId
+          ? async (profileDraft) => {
+              const out = await installProfile(connectedBindingId, profileDraft);
+              if (!out) return { ok: false, error: "installProfile unavailable" };
+              if (!out.ok) {
+                return { ok: false, error: `${out.error.code}: ${out.error.remediation}` };
+              }
+              return { ok: true };
+            }
+          : undefined,
+      });
+
+      const note = recipeTestNote(result, it);
+      setTryMessage(note);
+      setTestResult(result);
+
+      if (result.ok) {
+        setDraft({
+          ...draft,
+          verification: { status: "passed", note, lastTriedAt: Date.now() },
+        });
+        return;
+      }
+
+      const status =
+        result.kind === "no_client" ? ("unavailable" as const) : ("failed" as const);
       setDraft({
         ...draft,
-        verification: {
-          status: "unavailable",
-          note: it ? "Prova HW indisponibile · simulazione locale separata" : "HW test unavailable · local simulation separate",
-        },
+        verification: { status, note, lastTriedAt: Date.now() },
       });
-      return;
+    } finally {
+      setTestRunning(false);
     }
-    if (draft.binding.bus === "w1") {
-      setTryMessage(
-        it
-          ? "Prova 1-Wire non disponibile: adapter runtime assente. Possibili esiti reali (quando collegato): presenza assente, timeout, CRC errato, bus occupato — nessun successo inventato."
-          : "1-Wire test unavailable: runtime adapter missing. Real outcomes when connected: no presence, timeout, bad CRC, busy bus — no invented success.",
-      );
-      setDraft({
-        ...draft,
-        verification: {
-          status: "unavailable",
-          note: it ? "Prova 1-Wire indisponibile senza runtime" : "1-Wire test unavailable without runtime",
-        },
-      });
-      return;
-    }
-    if (draft.binding.bus === "adc" && hasValidAnalogAcquisition(draft) && !calibOk) {
-      setTryMessage(
-        it
-          ? "Acquisizione grezza: prova non disponibile senza runtime. Canale calibrato (%) non disponibile finché min/max non sono impostati."
-          : "Raw acquisition: test unavailable without runtime. Calibrated channel (%) unavailable until min/max are set.",
-      );
-      setDraft({
-        ...draft,
-        verification: {
-          status: "unavailable",
-          note: it ? "Grezzo ok in bozza · calibrato bloccato" : "Raw ok in draft · calibrated blocked",
-        },
-      });
-      return;
-    }
-    setTryMessage(
-      it
-        ? "Prova lettura non disponibile: runtime dispositivo non collegato (nessun successo simulato)."
-        : "Test read unavailable: device runtime not connected (no fake success).",
-    );
-    setDraft({
-      ...draft,
-      verification: { status: "unavailable", note: it ? "Prova indisponibile senza hardware" : "Test unavailable without hardware" },
-    });
   }
 
   function handleSaveDraft() {
@@ -717,13 +753,22 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
           <button type="button" onClick={handleCancel} className="rounded-slpill px-3 py-1.5 font-body text-sm text-ink-muted hover:bg-surface-raised">
             {it ? "Annulla" : "Cancel"}
           </button>
+          <label className="inline-flex items-center gap-1.5 font-body text-xs text-ink-muted">
+            <input
+              type="checkbox"
+              checked={testRunInitFirst}
+              onChange={(e) => setTestRunInitFirst(e.target.checked)}
+            />
+            {it ? "con Init" : "with Init"}
+          </label>
           <button
             type="button"
-            onClick={handleTry}
-            className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue"
+            disabled={testRunning}
+            onClick={() => void handleRunHardwareTest()}
+            className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue disabled:opacity-40"
           >
             <Play size={14} />
-            {isDisplay ? (it ? "Prova comando" : "Test command") : it ? "Prova lettura" : "Test read"}
+            {testRunning ? (it ? "Test…" : "Testing…") : it ? "Testa" : "Test"}
           </button>
           <button
             type="button"
@@ -780,6 +825,154 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
           </div>
         </div>
       ) : null}
+
+      {testResult ? (
+        <RecipeTestResultModal
+          draft={draft}
+          result={testResult}
+          it={it}
+          onClose={() => setTestResult(null)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function recipeTestNote(result: RecipeHardwareTestResult, it: boolean): string {
+  const err = result.error ? ` (${result.error})` : "";
+  if (result.ok) {
+    return (
+      (it
+        ? "Prova eseguita sulla Backbone. Canvas invariato."
+        : "Test ran on Backbone. Canvas unchanged.") + err
+    );
+  }
+  switch (result.kind) {
+    case "no_client":
+      return it
+        ? "Diagramma pronto. Collega un Core READY per eseguire sul bus reale."
+        : "Diagram ready. Connect a READY Core to run on the real bus.";
+    case "empty_plan":
+      return it ? "Nessun passo da eseguire (scegli Task o Azione con operazioni)." : "No steps to run.";
+    case "profile_failed":
+      return (it ? "Profilo/config di prova non installabile." : "Test profile/config could not be installed.") + err;
+    case "restore_failed":
+      return (it ? "Prova fallita e ripristino config non riuscito." : "Test failed and config restore failed.") + err;
+    case "command_failed":
+      return (it ? "MODULE_COMMAND fallito. Canvas invariato." : "MODULE_COMMAND failed. Canvas unchanged.") + err;
+    case "apply_failed":
+      return (
+        (result.restored
+          ? it
+            ? "Prova fallita; config precedente ripristinata."
+            : "Test failed; previous config restored."
+          : it
+            ? "Prova fallita."
+            : "Test failed.") + err
+      );
+    default:
+      return result.note + err;
+  }
+}
+
+function RecipeTestResultModal({
+  draft,
+  result,
+  it,
+  onClose,
+}: {
+  readonly draft: DeviceRecipeDraft;
+  readonly result: RecipeHardwareTestResult;
+  readonly it: boolean;
+  readonly onClose: () => void;
+}) {
+  const ops = result.plan.steps.map((s) => s.op);
+  const timing = buildProtocolTimingFromOps(draft, ops, {
+    rxByOpId: result.capture.rxByOpId,
+    emphasizeRx: true,
+  });
+  const rx = rxBlocksOf(result.capture);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" role="dialog" aria-modal="true">
+      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-slmd border border-border-strong bg-surface p-4 shadow-e2">
+        <h2 className="font-body-strong text-base text-ink">
+          {it ? "Risultato prova" : "Test result"}
+          <span
+            className={`ml-2 rounded-slpill px-2 py-0.5 font-body text-[10px] font-semibold ${
+              result.ok ? "bg-emerald-500/15 text-emerald-700" : "bg-amber-500/15 text-amber-800"
+            }`}
+          >
+            {result.ok ? (it ? "OK" : "OK") : it ? "Attenzione" : "Notice"}
+          </span>
+        </h2>
+        <p className="mt-1 font-body text-[11px] leading-snug text-ink-muted">{recipeTestNote(result, it)}</p>
+
+        {rx.length > 0 ? (
+          <div className="mt-3">
+            <p className="mb-1.5 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+              {it ? "Blocchi ricevuti dal sensore" : "Blocks received from sensor"}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {rx.map((b) => (
+                <span
+                  key={`${b.opId}-${b.index}`}
+                  className="rounded-slsm border border-emerald-600/30 bg-emerald-500/10 px-2 py-1 font-mono text-[11px] text-ink"
+                >
+                  RX{b.index}
+                  <span className="ml-1.5 font-semibold text-emerald-700">
+                    {b.value === null ? "—" : b.label}
+                  </span>
+                </span>
+              ))}
+            </div>
+            <p className="mt-1 font-body text-[10px] text-ink-faint">
+              {it
+                ? "I valori esatti dei byte non sono ancora sul wire di telemetria: gli slot RX sono quelli letti nella sequenza."
+                : "Exact byte values are not yet on the telemetry wire: RX slots match the read sequence."}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-3 font-body text-xs text-ink-faint">
+            {it ? "Nessuna lettura bus in questa selezione." : "No bus reads in this selection."}
+          </p>
+        )}
+
+        {timing.lanes.length > 0 ? (
+          <div className="mt-4 rounded-slmd border border-border-strong bg-surface p-3">
+            <TimingScopeChart
+              title={it ? "Segnali nel tempo (risposta)" : "Signals over time (response)"}
+              caption={
+                it
+                  ? "Fasce verdi = blocchi dati ricevuti dal sensore (RX)."
+                  : "Green bands = data blocks received from the sensor (RX)."
+              }
+              lanes={timing.lanes}
+              durationMs={timing.durationMs}
+              phaseBands={timing.phaseBands}
+            />
+            <div className="mt-3">
+              <ProtocolFrameStrip
+                cells={timing.cells}
+                selectedOpId={null}
+                onSelectOp={() => {}}
+                title={it ? "Transazione (blocchi)" : "Transaction (blocks)"}
+                hint={it ? "RX evidenziati in verde nel grafico sopra" : "RX highlighted green in the chart above"}
+              />
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
+          >
+            {it ? "Chiudi" : "Close"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

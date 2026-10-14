@@ -44,19 +44,20 @@ export function TimingScopeChart({
   const levelW = 22;
   const left = labelW + levelW;
   const padR = 16;
-  const laneH = 64;
-  const bandH = phaseBands.length ? 28 : 0;
-  const padTop = (title ? 26 : 6) + bandH;
-  const padBot = caption ? 22 : 10;
+  /** Slightly compact so Task view shows steps + datasheet without as much scroll. */
+  const laneH = 48;
+  const bandH = phaseBands.length ? 24 : 0;
+  const padTop = (title ? 22 : 4) + bandH;
+  const padBot = caption ? 18 : 8;
   const plotW = 520;
   const width = left + plotW + padR;
   const height = padTop + lanes.length * laneH + padBot;
-  const bandY = title ? 24 : 4;
+  const bandY = title ? 20 : 2;
 
   const xAt = (t: number) => left + (Math.min(dur, Math.max(0, t)) / dur) * plotW;
-  const yHigh = (laneIndex: number) => padTop + laneIndex * laneH + 18;
-  const yLow = (laneIndex: number) => padTop + laneIndex * laneH + 46;
-  const plotBottom = padTop + lanes.length * laneH - 8;
+  const yHigh = (laneIndex: number) => padTop + laneIndex * laneH + 12;
+  const yLow = (laneIndex: number) => padTop + laneIndex * laneH + 34;
+  const plotBottom = padTop + lanes.length * laneH - 6;
 
   return (
     <div className={className}>

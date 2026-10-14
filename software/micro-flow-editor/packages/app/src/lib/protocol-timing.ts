@@ -46,19 +46,39 @@ function addr7(address?: string): string {
   return raw.toLowerCase().startsWith("0x") ? raw : `0x${raw}`;
 }
 
+export type ProtocolTimingOptions = {
+  /** Measured or captured RX bytes per op (null = slot known, value unknown). */
+  readonly rxByOpId?: Readonly<Record<string, readonly (number | null)[]>>;
+  /** Highlight RX data cells in phase bands (green tint). */
+  readonly emphasizeRx?: boolean;
+};
+
+function rxLabel(index: number, value: number | null | undefined, fallbackPattern: number): { label: string; bits: number } {
+  if (value === null) return { label: `RX${index}`, bits: 0 };
+  if (value === undefined) return { label: `D${index}`, bits: fallbackPattern & 0xff };
+  return { label: `0x${(value & 0xff).toString(16).padStart(2, "0")}`, bits: value & 0xff };
+}
+
 /** Expand one I2C op into datasheet cells + accumulate time cursor. */
-function expandI2cOp(op: DeviceRecipeOp, address: string, t0: number): { cells: ProtocolCell[]; t1: number; scl: TimingEdge[]; sda: TimingEdge[] } {
+function expandI2cOp(
+  op: DeviceRecipeOp,
+  address: string,
+  t0: number,
+  rxBytes?: readonly (number | null)[],
+): { cells: ProtocolCell[]; t1: number; scl: TimingEdge[]; sda: TimingEdge[]; rxCellIds: string[] } {
   const cells: ProtocolCell[] = [];
   const scl: TimingEdge[] = [];
   const sda: TimingEdge[] = [];
+  const rxCellIds: string[] = [];
   let t = t0;
 
-  const pushCell = (kind: ProtocolCellKind, label: string, units: number, bits?: TimingLevel[]) => {
+  const pushCell = (kind: ProtocolCellKind, label: string, units: number, bits?: TimingLevel[], isRx = false) => {
     const start = t;
     const end = t + units * BIT;
-    cells.push({ id: `${op.id}-${kind}-${cells.length}`, opId: op.id, kind, label, units, t0: start, t1: end });
+    const id = `${op.id}-${kind}-${cells.length}`;
+    cells.push({ id, opId: op.id, kind, label, units, t0: start, t1: end });
+    if (isRx) rxCellIds.push(id);
     if (bits) {
-      // SCL pulses for each data bit
       for (let i = 0; i < bits.length; i++) {
         const bt = start + i * BIT;
         scl.push({ t: bt, level: 0 }, { t: bt + BIT * 0.45, level: 1 }, { t: bt + BIT * 0.9, level: 0 });
@@ -102,12 +122,12 @@ function expandI2cOp(op: DeviceRecipeOp, address: string, t0: number): { cells: 
     pushCell("addr_r", `${address}+R`, 8, byteBits((addrNum << 1) | 1));
     pushCell("ack", "A", 1);
     for (let i = 0; i < op.len; i++) {
-      pushCell("data", `D${i}`, 8, byteBits(0xa0 + i));
+      const { label, bits } = rxLabel(i, rxBytes?.[i], 0xa0 + i);
+      pushCell("data", label, 8, byteBits(bits), true);
       pushCell(i === op.len - 1 ? "nack" : "ack", i === op.len - 1 ? "N" : "A", 1);
     }
     pushCell("stop", "P", 2);
   } else if (op.type === "i2c_write_read") {
-    // Classic datasheet: S · ADDR+W · A · [reg] · A · Sr · ADDR+R · A · DATA… · N · P
     pushCell("start", "S", 2);
     pushCell("addr_w", `${address}+W`, 8, byteBits((addrNum << 1) & 0xfe));
     pushCell("ack", "A", 1);
@@ -130,15 +150,16 @@ function expandI2cOp(op: DeviceRecipeOp, address: string, t0: number): { cells: 
     pushCell("addr_r", `${address}+R`, 8, byteBits((addrNum << 1) | 1));
     pushCell("ack", "A", 1);
     for (let i = 0; i < op.readLen; i++) {
-      pushCell("data", `D${i}`, 8, byteBits(0xc0 + i));
+      const { label, bits } = rxLabel(i, rxBytes?.[i], 0xc0 + i);
+      pushCell("data", label, 8, byteBits(bits), true);
       pushCell(i === op.readLen - 1 ? "nack" : "ack", i === op.readLen - 1 ? "N" : "A", 1);
     }
     pushCell("stop", "P", 2);
   } else {
-    return { cells: [], t1: t0, scl: [], sda: [] };
+    return { cells: [], t1: t0, scl: [], sda: [], rxCellIds: [] };
   }
 
-  return { cells, t1: t, scl, sda };
+  return { cells, t1: t, scl, sda, rxCellIds };
 }
 
 export function isBusOp(op: DeviceRecipeOp): boolean {
@@ -178,22 +199,35 @@ export function isPostOp(op: DeviceRecipeOp): boolean {
 export function buildProtocolTiming(
   draft: DeviceRecipeDraft,
   phase: DeviceRecipePhase,
+  options?: ProtocolTimingOptions,
 ): ProtocolTimingModel {
-  const ops = draft.phases[phase];
+  return buildProtocolTimingFromOps(draft, draft.phases[phase], options);
+}
+
+/** Timing model from an arbitrary op list (e.g. Testa plan = Init + Task). */
+export function buildProtocolTimingFromOps(
+  draft: DeviceRecipeDraft,
+  ops: readonly DeviceRecipeOp[],
+  options?: ProtocolTimingOptions,
+): ProtocolTimingModel {
   const busOps = ops.filter(isBusOp);
   const postOps = ops.filter(isPostOp);
   const bus = draft.binding.bus;
+  const rxByOpId = options?.rxByOpId;
+  const emphasizeRx = options?.emphasizeRx ?? Boolean(rxByOpId);
 
   if (bus === "i2c") {
     const address = addr7(draft.binding.i2c?.address);
     const cells: ProtocolCell[] = [];
     const sclEdges: TimingEdge[] = [{ t: 0, level: 1 }];
     const sdaEdges: TimingEdge[] = [{ t: 0, level: 1 }];
+    const rxCellIdSet = new Set<string>();
     let t = 2;
     for (const op of busOps) {
       if (op.type !== "i2c_write" && op.type !== "i2c_read" && op.type !== "i2c_write_read") continue;
-      const part = expandI2cOp(op, address, t);
+      const part = expandI2cOp(op, address, t, rxByOpId?.[op.id]);
       cells.push(...part.cells);
+      for (const id of part.rxCellIds) rxCellIdSet.add(id);
       sclEdges.push(...part.scl);
       sdaEdges.push(...part.sda);
       t = part.t1 + 2;
@@ -220,7 +254,16 @@ export function buildProtocolTiming(
       },
     ];
 
-    return { cells, phaseBands: phaseBandsFromCells(cells), lanes, durationMs, busOps, postOps };
+    const bands = phaseBandsFromCells(cells).map((band) => {
+      if (!emphasizeRx) return band;
+      const cell = cells.find((c) => c.id === band.id);
+      if (cell && rxCellIdSet.has(cell.id)) {
+        return { ...band, color: "rgba(16, 185, 129, 0.28)", label: cell.label };
+      }
+      return band;
+    });
+
+    return { cells, phaseBands: bands, lanes, durationMs, busOps, postOps };
   }
 
   if (bus === "spi" && draft.binding.spi) {
@@ -344,19 +387,21 @@ function mergeEdges(edges: TimingEdge[]): TimingEdge[] {
 }
 
 /**
- * Datasheet strip fills: pastel/washed for framing cells (S, ACK, …);
- * near-white for address / data bytes.
+ * Datasheet strip fills: pastel framing cells; light grey for ADDR/DATA bytes.
+ * Start / restart / stop each get a distinct pastel.
  */
 export function cellFill(kind: ProtocolCellKind): string {
   switch (kind) {
     case "start":
-    case "restart":
-    case "stop":
       return "#c9daf8"; // soft blue
+    case "restart":
+      return "#d4c4f7"; // soft violet
+    case "stop":
+      return "#f5d0c5"; // soft peach
     case "ack":
       return "#c5e8d4"; // soft mint
     case "nack":
-      return "#f5d0c5"; // soft peach
+      return "#fde68a"; // soft amber
     case "cs":
       return "#ddd6fe"; // soft lilac
     case "idle":
@@ -366,25 +411,27 @@ export function cellFill(kind: ProtocolCellKind): string {
     case "data":
     case "byte":
     case "reg":
-      return "#ffffff";
+      return "#e8e8e8"; // light grey
     default:
-      return "#f7f7f7";
+      return "#f0f0f0";
   }
 }
 
 export function cellInk(kind: ProtocolCellKind): string {
   switch (kind) {
     case "start":
-    case "restart":
-    case "stop":
       return "#1e3a5f";
+    case "restart":
+      return "#4c1d95";
+    case "stop":
+      return "#7c2d12";
     case "ack":
       return "#14532d";
     case "nack":
-      return "#7c2d12";
+      return "#78350f";
     case "cs":
       return "#4c1d95";
     default:
-      return "#1f2937";
+      return "#374151";
   }
 }

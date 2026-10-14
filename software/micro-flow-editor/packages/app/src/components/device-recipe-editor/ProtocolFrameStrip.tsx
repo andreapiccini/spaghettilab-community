@@ -54,8 +54,10 @@ export function ProtocolFrameStrip({
         <span className="w-full font-semibold uppercase tracking-wide text-ink-faint">
           Legenda
         </span>
-        <Legend swatch={cellFill("start")} label="S / Sr / P — start, restart, stop" />
-        <Legend swatch={cellFill("addr_w")} label="ADDR / DATA — indirizzo e byte" />
+        <Legend swatch={cellFill("start")} label="S — start" />
+        <Legend swatch={cellFill("restart")} label="Sr — restart" />
+        <Legend swatch={cellFill("stop")} label="P — stop" />
+        <Legend swatch={cellFill("addr_w")} label="ADDR / DATA" />
         <Legend swatch={cellFill("ack")} label="ACK" />
         <Legend swatch={cellFill("nack")} label="NACK" />
         <Legend swatch={cellFill("cs")} label="CS (SPI)" />
