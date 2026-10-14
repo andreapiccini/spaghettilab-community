@@ -15,6 +15,8 @@ export const BACKBONE_SENSOR_BLOCK_TYPE_ID = "ab.backbone_sensor";
 export const SENSOR_CHANNELS_JSON_PROP = "sensorChannelsJson";
 export const SENSOR_MODULE_ID_PROP = "backboneSensorModuleId";
 export const SENSOR_RECIPE_ID_PROP = "sensorRecipeId";
+export const SENSOR_ACTION_ID_PROP = "sensorActionId";
+export const SENSOR_DRIVER_INSTANCE_PROP = "sensorDriverInstanceId";
 export const SENSOR_CHIP_PROP = "sensorChip";
 
 export function portTypesForQuantity(quantity: SensorOutputKind, direction: "read" | "write"): readonly PortType[] {
@@ -100,6 +102,7 @@ export function propertiesForSensorModule(
   const channels = recipeChannels(recipe);
   return {
     [SENSOR_MODULE_ID_PROP]: module.id,
+    ...(recipe.actionId ? { [SENSOR_ACTION_ID_PROP]: recipe.actionId, [SENSOR_DRIVER_INSTANCE_PROP]: recipe.driverInstanceId ?? module.id } : {}),
     [SENSOR_RECIPE_ID_PROP]: recipe.id,
     [SENSOR_CHIP_PROP]: recipe.chip,
     [SENSOR_CHANNELS_JSON_PROP]: serializeSensorChannels(channels),
@@ -115,12 +118,13 @@ export function catalogEntryWithSensorChannels(
     return entry;
   }
   const channels = channelsFromNodeProperties(properties);
-  if (channels.length === 0) return entry;
+  const isAction = typeof properties[SENSOR_ACTION_ID_PROP] === "string";
+  if (channels.length === 0 && !isAction) return entry;
   const { inputs, outputs } = blockPortsFromChannels(channels);
   return {
     ...entry,
     label: typeof properties[SENSOR_CHIP_PROP] === "string" ? String(properties[SENSOR_CHIP_PROP]) : entry.label,
-    inputs,
+    inputs: isAction ? [inPort("execute", [T.activationTrigger, T.eventTrigger, T.digitalComando], { label: "Esegui", required: false }), ...inputs] : inputs,
     outputs,
   };
 }

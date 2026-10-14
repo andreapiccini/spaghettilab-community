@@ -1,3 +1,5 @@
+import { BACKBONE_SENSOR_BLOCK_CATALOG_ID } from "../../lib/backbone-sensor-block.js";
+import { BACKBONE_SENSOR_MODULES_META_KEY, parseBackboneSensorModules, modulesForBinding } from "../../lib/backbone-sensor-modules.js";
 import {
   findCatalogEntryById,
   isPlaceableOnDeviceGraph,
@@ -87,7 +89,9 @@ export function ProcessingBlockPalette({
       if (!entry || !`${entry.label} ${pin.name} pin ${pin.pin}`.toLowerCase().includes(query.toLowerCase())) return [];
       return expandPalettePlaceables([entry], locale).map(row => ({...row,rowKey:pin.id,physicalPinId:pin.id,label:`${entry.label} · pin ${pin.pin}`,subtitle:`${pin.name} · GPIO ${38-pin.channel}`}));
     });
-    return [...expandPalettePlaceables(filtered, locale), ...pins];
+    const driverEntry = findCatalogEntryById(BACKBONE_SENSOR_BLOCK_CATALOG_ID);
+    const driverActions: PalettePlaceable[] = driverEntry ? modulesForBinding(parseBackboneSensorModules(project?.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment), bindingId).flatMap(module => (module.actions ?? []).filter(recipe => recipe.chip.toLowerCase().includes(query.toLowerCase())).map(recipe => ({ entry: driverEntry, rowKey: `${module.id}:${recipe.actionId}`, label: recipe.chip, subtitle: locale === "it" ? "Azione del driver · dispositivo condiviso" : "Driver action · shared device", sensorRecipeId: recipe.id }))) : [];
+    return [...expandPalettePlaceables(filtered, locale), ...pins, ...driverActions];
   }, [filtered, locale, project, bindingId, query]);
   const groups = useMemo(() => groupPlaceablesByFamily(placeables), [placeables]);
   const searching = query.trim() !== "";

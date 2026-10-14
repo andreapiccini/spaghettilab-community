@@ -209,7 +209,7 @@ describe("device-recipe-draft", () => {
     expect(draftToCanvasSensorRecipes(multi)).toHaveLength(2);
   });
 
-  it("I2C library exposes only bus communication ops", () => {
+  it("I2C library exposes bus operations and output decoding", () => {
     const types = libraryOpsForBus("i2c").map((o) => o.type);
     expect(types).toEqual([
       "i2c_read",
@@ -218,6 +218,8 @@ describe("device-recipe-draft", () => {
       "wait",
       "i2c_scan",
       "i2c_transaction",
+      "decode",
+      "emit",
     ]);
   });
 

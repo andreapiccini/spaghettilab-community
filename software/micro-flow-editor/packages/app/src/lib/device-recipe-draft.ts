@@ -169,6 +169,7 @@ export type DeviceRecipeOp =
   | {
       readonly id: string;
       readonly type: "i2c_write";
+      readonly registerWidth?: 1 | 2;
       /** 7-bit device address HEX; empty → binding address. */
       readonly address?: string;
       readonly bytes: readonly string[];
@@ -185,6 +186,7 @@ export type DeviceRecipeOp =
   | {
       readonly id: string;
       readonly type: "i2c_write_read";
+      readonly registerWidth?: 1 | 2;
       readonly address?: string;
       readonly writeBytes: readonly string[];
       readonly readLen: number;
@@ -401,6 +403,7 @@ export type DeviceRecipeOp =
  * Each action is a canvas-schedulable unit; Init stays in `phases.init`.
  */
 export type DeviceRecipeCommand = {
+  readonly exposeOnCanvas?: boolean;
   readonly id: string;
   readonly name: string;
   readonly label: string;
@@ -418,6 +421,7 @@ export function createNamedAction(seed?: Partial<DeviceRecipeCommand>): DeviceRe
   return {
     id: seed?.id && seed.id.trim() ? seed.id : newId("cmd"),
     name: seed?.name ?? "azione",
+    exposeOnCanvas: seed?.exposeOnCanvas ?? true,
     label: seed?.label ?? "Azione",
     description: seed?.description ?? "",
     params: seed?.params ?? [],
@@ -777,7 +781,7 @@ function createBlankSensorDraft(bus: DeviceRecipeBus, name?: string): DeviceReci
     channels: [],
     verification: { status: "untested", note: "" },
     updatedAt: Date.now(),
-    runtimeUnavailable: ["try_read_on_device"],
+    runtimeUnavailable: bus === "i2c" ? [] : ["try_read_on_device"],
   };
 }
 
@@ -1360,6 +1364,8 @@ export function libraryOpsForBus(bus: DeviceRecipeBus): readonly { readonly type
         { type: "wait", label: "Attendi" },
         { type: "i2c_scan", label: "Scansiona" },
         { type: "i2c_transaction", label: "Transazione avanzata" },
+        { type: "decode", label: "Decodifica" },
+        { type: "emit", label: "Pubblica risultato" },
       ];
     case "spi":
       return [
@@ -1619,6 +1625,7 @@ export function updateCommand(
 export function addCommand(draft: DeviceRecipeDraft, seed?: Partial<DeviceRecipeCommand>): DeviceRecipeDraft {
   const cmd = createNamedAction({
     name: seed?.name ?? `azione_${draft.commands.length + 1}`,
+    exposeOnCanvas: seed?.exposeOnCanvas ?? true,
     label: seed?.label ?? "Nuova azione",
     description: seed?.description ?? "",
     params: seed?.params ?? [],
@@ -1931,11 +1938,15 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
     return errors;
   }
 
-  if (draft.channels.length === 0) errors.push({ field: "channels", message: "Serve almeno un canale" });
+
   if (draft.commands.length === 0) {
     errors.push({ field: "actions", message: "Serve almeno un'azione" });
   }
-  for (const cmd of draft.commands) {
+  if (!draft.commands.some(c => c.exposeOnCanvas !== false)) errors.push({ field: "actions", message: "Esponi almeno un’azione nel canvas" });
+  const actionNames = new Set<string>();
+  for (const cmd of draft.commands.filter(c => c.exposeOnCanvas !== false)) {
+    if (actionNames.has(cmd.name.trim())) errors.push({ field: `cmd.${cmd.id}.name`, message: `Identificatore azione duplicato: ${cmd.name}` });
+    actionNames.add(cmd.name.trim());
     if (!cmd.name.trim()) {
       errors.push({ field: `cmd.${cmd.id}.name`, message: `Nome azione obbligatorio (${cmd.label})` });
     }
@@ -1943,6 +1954,9 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
       errors.push({ field: `cmd.${cmd.id}.steps`, message: `Sequenza vuota: ${cmd.label}` });
     }
     for (const op of cmd.steps) {
+      if ((op.type === "i2c_read" && (op.len < 1 || op.len > 8)) || (op.type === "i2c_write_read" && (op.readLen < 1 || op.readLen > 8 || op.writeBytes.length > 8)) || (op.type === "i2c_write" && op.bytes.length > 8)) {
+        errors.push({ field: `cmd.${cmd.id}.${op.id}`, message: "Ogni transazione supporta da 1 a 8 byte" });
+      }
       if (op.type === "i2c_transaction") {
         for (const msg of validateI2cTransactionPhases(op.phases)) {
           errors.push({ field: `cmd.${cmd.id}.tx`, message: `${cmd.label}: ${msg}` });
@@ -1952,6 +1966,12 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
   }
   if (draft.binding.bus === "i2c" && !draft.binding.i2c?.address) {
     errors.push({ field: "address", message: "Indirizzo I2C mancante" });
+  }
+  if (draft.binding.bus === "i2c" && draft.binding.i2c?.address) {
+    const raw = draft.binding.i2c.address.replace(/^0x/i, "");
+    if (!/^[0-9a-f]{1,2}$/i.test(raw) || Number.parseInt(raw, 16) > 0x7f) {
+      errors.push({ field: "address", message: "Indirizzo I²C a 7 bit non valido (00–7F), senza bit lettura/scrittura." });
+    }
   }
   if (draft.binding.bus === "spi" && draft.binding.spi?.misoRequired && !draft.binding.spi.misoLabel) {
     errors.push({ field: "miso", message: "MISO richiesto per questa ricetta" });
@@ -1980,11 +2000,12 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
       });
     }
   }
-  let hasEmit = false;
-  forEachSequenceOp(draft, (op) => {
-    if (op.type === "emit") hasEmit = true;
-  });
-  if (!hasEmit) errors.push({ field: "emit", message: "Manca un passo Uscita in almeno un'azione" });
+  for (const cmd of draft.commands.filter(c => c.exposeOnCanvas !== false)) {
+    const reads = cmd.steps.some(op => ["i2c_read", "i2c_write_read", "spi_transfer", "adc_sample", "gpio_read", "w1_read"].includes(op.type));
+    if (reads && !cmd.steps.some(op => op.type === "emit")) {
+      errors.push({ field: `cmd.${cmd.id}.emit`, message: `Aggiungi Pubblica risultato a ${cmd.label}` });
+    }
+  }
 
   const knownVars = new Set(draft.variables.map((v) => v.name));
   for (const ref of collectAllVarRefs(draft)) {
@@ -2031,7 +2052,7 @@ export function draftToCanvasSensorRecipes(draft: DeviceRecipeDraft): readonly S
             steps: draft.phases.sample,
           }),
         ];
-  return actions.map((cmd) => {
+  return actions.filter(c => c.exposeOnCanvas !== false).map((cmd) => {
     const used = new Set<string>();
     for (const op of cmd.steps) {
       if (op.type === "emit") used.add(op.channelId);
@@ -2043,10 +2064,10 @@ export function draftToCanvasSensorRecipes(draft: DeviceRecipeDraft): readonly S
       id: `${draft.id}:${cmd.id}`,
       name: `${draft.name} · ${cmd.label}`,
       commands: [{ ...cmd, trigger: normalizeActionTrigger(cmd.trigger) }],
-      channels: channels.length > 0 ? channels : draft.channels,
+      channels,
       phases: { init: draft.phases.init, sample: [], command: [] },
     };
-    return draftToSensorRecipe(slice);
+    return { ...draftToSensorRecipe(slice), driverInstanceId: draft.id, actionId: cmd.id, deviceDraft: draft };
   });
 }
 
@@ -2239,6 +2260,7 @@ export function migrateRecipeOp(op: DeviceRecipeOp): DeviceRecipeOp {
       return {
         id: legacy.id,
         type: "i2c_write",
+        ...(legacy.registerWidth === 1 || legacy.registerWidth === 2 ? { registerWidth: legacy.registerWidth } : {}),
         address: legacy.address,
         bytes: bytes.length ? bytes : ["0x00"],
         timeoutMs: legacy.timeoutMs,
@@ -2273,6 +2295,7 @@ export function migrateRecipeOp(op: DeviceRecipeOp): DeviceRecipeOp {
       return {
         id: legacy.id,
         type: "i2c_write_read",
+        ...(legacy.registerWidth === 1 || legacy.registerWidth === 2 ? { registerWidth: legacy.registerWidth } : {}),
         address: legacy.address,
         writeBytes,
         readLen: Math.max(1, legacy.readLen),
@@ -2398,7 +2421,7 @@ export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?:
     },
     verification: raw.verification ?? { status: "untested", note: "" },
     updatedAt: raw.updatedAt ?? Date.now(),
-    runtimeUnavailable: raw.runtimeUnavailable ?? [],
+    runtimeUnavailable: (raw.runtimeUnavailable ?? []).filter(flag => !(raw.binding?.bus === "i2c" && flag === "try_read_on_device")),
   };
 }
 

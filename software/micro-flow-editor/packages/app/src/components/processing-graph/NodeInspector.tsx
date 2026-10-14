@@ -1,3 +1,5 @@
+import type { SensorRecipe } from "../../lib/sensor-recipe.js";
+import { DriverCanvasActionTest } from "./DriverCanvasActionTest.js";
 import type { DomainError, GraphEdge, GraphNode } from "@spaghettilab/domain";
 import { isBlockNodeData, isRuleNodeData, validateDeviceProcessingGraph, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import {
@@ -127,6 +129,8 @@ function withFieldDefaults(data: DeviceProcessingNodeData): DeviceProcessingNode
 }
 
 export function NodeInspector({
+  driverRecipe,
+  driverBindingId,
   mode,
   moduleOptions,
   existingNodes,
@@ -138,6 +142,8 @@ export function NodeInspector({
   onDelete,
   onClose,
 }: {
+  readonly driverRecipe?: SensorRecipe;
+  readonly driverBindingId?: string;
   readonly mode: ProcessingInspectorMode;
   readonly moduleOptions: readonly { readonly id: string; readonly label: string; readonly portId?: number }[];
   readonly existingNodes: readonly GraphNode<"device-processing", string, DeviceProcessingNodeData>[];
@@ -273,6 +279,7 @@ export function NodeInspector({
       </div>
 
       <div className="flex-1 overflow-auto p-4">
+        {driverRecipe && <DriverCanvasActionTest key={driverRecipe.id} recipe={driverRecipe} preferredBindingId={driverBindingId} />}
         <AnimatePresence>
           {errors.length > 0 && (
             <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={motionTokens.duration.base} className="mb-3 border-l-4 border-error bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] p-2 font-body text-xs text-ink">
@@ -362,7 +369,7 @@ export function NodeInspector({
 
         {data.kind === "block" && (
           <>
-            {!demoOnly && (
+            {!demoOnly && !driverRecipe && (
               <>
                 <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-blocktype">
                   Block
@@ -403,7 +410,7 @@ export function NodeInspector({
                 )}
               </>
             )}
-            {demoIfBlock ? (
+            {driverRecipe ? <p className="mb-3 font-body text-xs text-ink-muted">{driverRecipe.deviceDraft?.name} · I²C {driverRecipe.address}<br />{locale === "it" ? "La sequenza si modifica nell’editor Dispositivi." : "Edit the sequence in the Devices editor."}</p> : demoIfBlock ? (
               <DemoIfSentence
                 source={demoIfSource ?? "none"}
                 properties={data.properties}

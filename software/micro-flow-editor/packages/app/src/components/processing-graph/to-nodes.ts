@@ -1,3 +1,4 @@
+import { SENSOR_ACTION_ID_PROP, channelsFromNodeProperties } from "../../lib/backbone-sensor-block.js";
 import type { AuthoringMetadata, GraphState } from "@spaghettilab/domain";
 import { isBlockNodeData, isRuleNodeData, moduleReferenceOf, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import { formatFieldsSubtitle, isBayEntry, type BaySide } from "@spaghettilab/processing-block-catalog";
@@ -390,6 +391,10 @@ function subtitleFor(
     return [fromFields, module].filter((part): part is string => Boolean(part)).join(" · ") || entry?.subtitle || "—";
   }
   if (isBlockNodeData(data)) {
+    if (typeof data.properties[SENSOR_ACTION_ID_PROP] === "string") {
+      const channels = channelsFromNodeProperties(data.properties);
+      return channels.length ? channels.map(c => `${c.label}${c.unit ? ` (${c.unit})` : ""}`).join(" · ") : (locale === "it" ? "Azione di scrittura" : "Write action");
+    }
     if (isCompareIf(data)) return formatIfCondition(nodeId, data, graphState, locale);
     if (isRelayBlock(data)) return formatRelayClose(data, locale);
     if (isDigitalOutToggle(data)) return "";

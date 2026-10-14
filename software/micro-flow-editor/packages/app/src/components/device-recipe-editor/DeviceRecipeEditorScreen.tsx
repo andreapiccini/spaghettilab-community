@@ -75,6 +75,8 @@ import { formatHexByte, parseHexByteToken } from "../../lib/i2c-hex.js";
 import { buildProtocolTimingFromOps } from "../../lib/protocol-timing.js";
 import { DerivedSignalView } from "./DerivedSignalView.js";
 import { DisplayCenter, DisplayInspector, DisplayLeftSidebar } from "./DisplayRecipePanels.js";
+import { DriverActionsList, DriverActionSettings, DriverSequence, DriverCanvasPreview } from "./DriverActionsPanel.js";
+import { registerStep } from "../../lib/i2c-driver-actions.js";
 import { TimingScopeChart } from "./TimingScopeChart.js";
 
 type Props = {
@@ -123,12 +125,13 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   const [testResult, setTestResult] = useState<RecipeHardwareTestResult | null>(null);
 
   const isDisplay = draft.category === "display";
-  const activeActionId = selectedCommandId ?? draft.commands[0]?.id ?? null;
+  const activeActionId = draft.commands.find(c => c.id === selectedCommandId)?.id ?? draft.commands[0]?.id ?? null;
   const ops = opsForEditorPane(draft, editorPane, activeActionId);
-  const selected = ops.find((op) => op.id === selectedOpId) ?? null;
+  const selected = ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null;
   const library = libraryOpsForBus(draft.binding.bus);
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
+  const canvasActionCount = draft.commands.filter(c => c.exposeOnCanvas !== false).length;
   const paneTabs: {
     id: DeviceRecipeEditorPane;
     label: string;
@@ -167,6 +170,42 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
     setSelectedOpId(next.commands[0]?.steps[0]?.id ?? next.phases.init[0]?.id ?? null);
     setFieldErrors([]);
     setTryMessage(null);
+  }
+
+  function selectDriverAction(id: string) {
+    setSelectedCommandId(id);
+    setEditorPane("actions");
+    const first = draft.commands.find((c) => c.id === id)?.steps[0]?.id ?? null;
+    setSelectedOpId(first);
+    setSelectedCommandStepId(first);
+    setTestResult(null);
+    setTryMessage(null);
+  }
+
+  function addRegisterStep(kind: "read" | "write") {
+    const op = registerStep(kind);
+    if (editorPane === "init") {
+      setDraft({
+        ...draft,
+        phases: { ...draft.phases, init: [...draft.phases.init, op] },
+      });
+    } else {
+      const base = activeActionId
+        ? draft
+        : addCommand(draft, {
+            name: "azione",
+            label: it ? "Azione" : "Action",
+          });
+      const id = activeActionId ?? base.commands[0]!.id;
+      setDraft({
+        ...base,
+        commands: base.commands.map((c) =>
+          c.id === id ? { ...c, steps: [...c.steps, op] } : c,
+        ),
+      });
+      setSelectedCommandId(id);
+    }
+    setSelectedOpId(op.id);
   }
 
   function patchSelected(next: DeviceRecipeOp) {
@@ -211,7 +250,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   );
 
   function currentTestSelection(): RecipeTestSelection {
-    const target: RecipeTestTarget = {
+    const target: RecipeTestTarget = editorPane === "init" ? { kind: "init" } : {
       kind: "action",
       commandId: activeActionId ?? draft.commands[0]?.id,
     };
@@ -267,19 +306,19 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
       setTestResult(result);
 
       if (result.ok) {
-        setDraft({
-          ...draft,
+        setDraft(current => ({
+          ...current,
           verification: { status: "passed", note, lastTriedAt: Date.now() },
-        });
+        }));
         return;
       }
 
       const status =
         result.kind === "no_client" ? ("unavailable" as const) : ("failed" as const);
-      setDraft({
-        ...draft,
+      setDraft(current => ({
+        ...current,
         verification: { status, note, lastTriedAt: Date.now() },
-      });
+      }));
     } finally {
       setTestRunning(false);
     }
@@ -391,6 +430,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             />
           ) : (
             <>
+          <DriverActionsList draft={draft} it={it} activeId={editorPane === "actions" ? activeActionId : null} onChange={setDraft} onSelect={selectDriverAction} />
           <section className="rounded-slmd border border-border-strong p-3">
             <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
               {it ? "Connessioni" : "Connections"}
@@ -401,6 +441,10 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
               {it ? "Libreria operazioni" : "Operations library"}
             </h2>
+            {draft.binding.bus === "i2c" && <div className="mb-2 flex flex-wrap gap-2">
+              <button type="button" onClick={() => addRegisterStep("read")} className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink">{it ? "+ Leggi registro" : "+ Read register"}</button>
+              <button type="button" onClick={() => addRegisterStep("write")} className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink">{it ? "+ Scrivi registro" : "+ Write register"}</button>
+            </div>}
             <LibraryList
               library={library}
               bus={draft.binding.bus}
@@ -522,6 +566,12 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             </div>
           </div>
 
+          {draft.binding.bus === "i2c" && <>
+            {editorPane === "actions" && <DriverActionSettings draft={draft} it={it} activeId={activeActionId} onChange={setDraft} onSelect={selectDriverAction} />}
+            <DriverSequence draft={draft} ops={ops} it={it} selectedId={selected?.id ?? null} onSelect={setSelectedOpId} />
+          </>}
+          <details open={draft.binding.bus !== "i2c"} className="mb-3">
+            <summary className="mb-2 cursor-pointer font-body text-xs font-semibold text-ink-muted">{it ? "Dettagli del protocollo · SDA / SCL" : "Protocol details · SDA / SCL"}</summary>
           <DerivedSignalView
             draft={draft}
             ops={ops}
@@ -529,6 +579,8 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             selectedOpId={selectedOpId}
             onSelectOp={setSelectedOpId}
           />
+
+          </details>
 
           {draft.binding.bus === "adc" && editorPane === "actions" ? (
             <AnalogSamplingSummary ops={ops} it={it} />
@@ -690,6 +742,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
               {it ? "Anteprima nel Flow" : "Flow preview"}
             </h2>
+            {draft.binding.bus === "i2c" ? <DriverCanvasPreview draft={draft} it={it} /> : <>
             <div className="rounded-slmd border border-border-strong bg-surface-sunken p-3">
               <div className="flex items-center gap-2">
                 <Cpu size={16} className="text-brand-blue" />
@@ -720,6 +773,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                 {it ? "Stato:" : "Status:"} {draft.verification.note}
               </p>
             </div>
+            </>}
             {draft.runtimeUnavailable.length > 0 ? (
               <p className="mt-2 font-body text-[10px] text-ink-faint">
                 {it ? "Runtime non disponibile:" : "Runtime unavailable:"} {draft.runtimeUnavailable.join(", ")}
@@ -754,7 +808,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue disabled:opacity-40"
           >
             <Play size={14} />
-            {testRunning ? (it ? "Test…" : "Testing…") : it ? "Testa" : "Test"}
+            {testRunning ? (it ? "Test…" : "Testing…") : it ? (editorPane === "init" ? "Testa init" : "Testa azione") : (editorPane === "init" ? "Test init" : "Test action")}
           </button>
           <button
             type="button"
@@ -778,10 +832,10 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             className="inline-flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={14} />
-            {draft.commands.length > 1
+            {canvasActionCount > 1
               ? it
-                ? `Genera ${draft.commands.length} blocchi Flow`
-                : `Generate ${draft.commands.length} Flow blocks`
+                ? `Genera ${canvasActionCount} blocchi Flow`
+                : `Generate ${canvasActionCount} Flow blocks`
               : it
                 ? "Genera blocco Flow"
                 : "Generate Flow block"}
@@ -792,11 +846,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
       {showBlockPreview ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" role="dialog" aria-modal="true">
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-slmd border border-border-strong bg-surface p-4 shadow-e2">
-            <BlockPreviewCard
-              draft={draft}
-              it={it}
-              verified={draft.verification.status === "passed" || draft.verification.status === "simulated"}
-            />
+            {draft.binding.bus === "i2c" ? <DriverCanvasPreview draft={draft} it={it} /> : <BlockPreviewCard draft={draft} it={it} verified={draft.verification.status === "passed" || draft.verification.status === "simulated"} />}
             <div className="mt-4 flex flex-wrap justify-end gap-2">
               <button
                 type="button"
@@ -811,7 +861,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
                 className="inline-flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
               >
                 <Check size={14} />
-                {it ? "Salva sensore" : "Save sensor"}
+                {it ? "Crea blocchi nel canvas" : "Create canvas blocks"}
               </button>
             </div>
           </div>
@@ -936,6 +986,11 @@ function RecipeTestResultModal({
               : "Write-only selection — no RX bytes to show (expected for Write)."}
           </p>
         )}
+
+        {!!result.readResults?.length && <section className="mt-3 rounded-slmd border border-border-strong p-3">
+          <h3 className="mb-2 font-body text-xs font-semibold text-ink">{it ? "Risultati decodificati" : "Decoded results"}</h3>
+          {result.readResults.map((value, index) => <p key={`${value.id}-${index}`} className="font-body text-sm text-ink">{value.label}: <span className="font-mono">{value.value ?? "—"}</span> {value.unit}</p>)}
+        </section>}
 
         {timing.lanes.length > 0 ? (
           <div className="mt-4 rounded-slmd border border-border-strong bg-surface p-3">
@@ -1213,6 +1268,7 @@ function StepInspector({
         </button>
       </div>
 
+      {(op.type === "i2c_write" || op.type === "i2c_write_read") && op.registerWidth && <RegisterStepFields op={op} it={it} onChange={onChange} />}
       {op.type === "sample_external" ? (
         <SampleExternalFields
           op={op}
@@ -1223,7 +1279,7 @@ function StepInspector({
         />
       ) : null}
 
-      {op.type === "i2c_write" ? (
+      {op.type === "i2c_write" && !op.registerWidth ? (
         <I2cWriteFields op={op} draft={draft} it={it} onChange={onChange} />
       ) : null}
 
@@ -1253,7 +1309,7 @@ function StepInspector({
         </>
       ) : null}
 
-      {op.type === "i2c_write_read" ? (
+      {op.type === "i2c_write_read" && !op.registerWidth ? (
         <>
           <Field label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}>
             <input
@@ -2374,6 +2430,169 @@ function HexByteCellsEditor({
           : "Two HEX digits per field (00–FF). Enter or space: next field."}
       </p>
     </div>
+  );
+}
+
+function RegisterAddressField({
+  value,
+  width,
+  it,
+  onCommit,
+}: {
+  value: string;
+  width: number;
+  it: boolean;
+  onCommit: (value: string) => void;
+}) {
+  const [text, setText] = useState(value);
+  const [error, setError] = useState(false);
+  return (
+    <>
+      <input
+        aria-label={it ? "Registro HEX" : "Register HEX"}
+        aria-invalid={error}
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+          setError(false);
+        }}
+        onBlur={() => {
+          const raw = text.trim().replace(/^0x/i, "");
+          if (!new RegExp(`^[0-9a-fA-F]{1,${width * 2}}$`).test(raw)) {
+            setError(true);
+            return;
+          }
+          const normalized = raw.toUpperCase().padStart(width * 2, "0");
+          setText(normalized);
+          onCommit(normalized);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+        className={inputClass}
+        spellCheck={false}
+      />
+      {error && (
+        <p role="alert" className="font-body text-xs text-error">
+          {it
+            ? "Inserisci un indirizzo HEX valido."
+            : "Enter a valid HEX address."}
+        </p>
+      )}
+    </>
+  );
+}
+
+function RegisterStepFields({
+  op,
+  it,
+  onChange,
+}: {
+  op: Extract<DeviceRecipeOp, { type: "i2c_write" | "i2c_write_read" }>;
+  it: boolean;
+  onChange: (op: DeviceRecipeOp) => void;
+}) {
+  const width = op.registerWidth ?? 1;
+  const bytes = op.type === "i2c_write" ? op.bytes : op.writeBytes;
+  const register = bytes.slice(0, width);
+  const payload = bytes.slice(width);
+  function changeBytes(next: readonly string[]) {
+    onChange(
+      op.type === "i2c_write"
+        ? { ...op, bytes: next }
+        : { ...op, writeBytes: next },
+    );
+  }
+  return (
+    <>
+      <Field label={it ? "Indirizzo del registro" : "Register address"}>
+        <RegisterAddressField
+          key={`${op.id}-${width}`}
+          value={register.join("")}
+          width={width}
+          it={it}
+          onCommit={(raw) =>
+            changeBytes([
+              ...Array.from({ length: width }, (_, i) =>
+                raw.slice(i * 2, i * 2 + 2),
+              ),
+              ...payload,
+            ])
+          }
+        />
+      </Field>
+      <Field
+        label={it ? "Dimensione indirizzo registro" : "Register address width"}
+      >
+        <select
+          className={inputClass}
+          value={width}
+          onChange={(e) => {
+            const nextWidth = Number(e.target.value) as 1 | 2;
+            const nextRegister = register
+              .join("")
+              .padStart(nextWidth * 2, "0")
+              .slice(-nextWidth * 2);
+            const nextBytes = [
+              ...Array.from({ length: nextWidth }, (_, i) =>
+                nextRegister.slice(i * 2, i * 2 + 2),
+              ),
+              ...payload,
+            ];
+            onChange(
+              op.type === "i2c_write"
+                ? { ...op, registerWidth: nextWidth, bytes: nextBytes }
+                : { ...op, registerWidth: nextWidth, writeBytes: nextBytes },
+            );
+          }}
+        >
+          <option value={1}>8 bit</option>
+          <option value={2}>16 bit · MSB first</option>
+        </select>
+      </Field>
+      {op.type === "i2c_write" ? (
+        <HexByteCellsEditor
+          opId={op.id}
+          bytes={payload}
+          it={it}
+          label={it ? "Valore da scrivere" : "Value to write"}
+          onChange={(next) => changeBytes([...register, ...next])}
+        />
+      ) : (
+        <>
+          <Field label={it ? "Byte da leggere" : "Bytes to read"}>
+            <input
+              type="number"
+              min={1}
+              max={8}
+              value={op.readLen}
+              onChange={(e) =>
+                onChange({
+                  ...op,
+                  readLen: Math.max(
+                    1,
+                    Math.min(8, Number(e.target.value) || 1),
+                  ),
+                })
+              }
+              className={inputClass}
+            />
+          </Field>
+          <Field label={it ? "Salva byte in" : "Save bytes to"}>
+            <input
+              className={inputClass}
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+            />
+          </Field>
+          <p className="font-body text-xs text-ink-muted">
+            {it
+              ? "Scrittura del registro + RESTART + lettura. Usa Decodifica e Pubblica risultato per l’uscita."
+              : "Write register + RESTART + read. Use Decode and Publish result for the output."}
+          </p>
+        </>
+      )}
+    </>
   );
 }
 

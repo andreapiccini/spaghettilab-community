@@ -14,6 +14,8 @@ export type BackboneSensorModule = {
   readonly createdAt: number;
   /** Flow canvas node created for this module's channels (if any). */
   readonly graphNodeId?: string;
+  readonly graphNodeIds?: readonly string[];
+  readonly actions?: readonly SensorRecipe[];
 };
 
 export type BackboneSensorModulesProject = {

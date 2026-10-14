@@ -1,3 +1,4 @@
+import type { DeviceRecipeDraft } from "./device-recipe-draft.js";
 /**
  * SensorRecipe v1 — standard card the UI / “AI” / manual wizard all fill.
  * Runtime executes only typed steps; no free-form datasheet text in the app.
@@ -71,6 +72,9 @@ export type SensorTransform = {
 };
 
 export type SensorRecipe = {
+  readonly driverInstanceId?: string;
+  readonly actionId?: string;
+  readonly deviceDraft?: DeviceRecipeDraft;
   readonly schemaVersion: typeof SENSOR_RECIPE_SCHEMA_VERSION;
   readonly id: string;
   readonly chip: string;

@@ -1,3 +1,7 @@
+import {
+  evaluateRecipeReadResults,
+  type RecipeReadResult,
+} from "./recipe-read-results.js";
 import { encodeConfigCbor } from "@spaghettilab/config-compiler";
 import { decodeConfigCbor } from "@spaghettilab/config-decompiler";
 import {
@@ -152,7 +156,9 @@ export async function ensureRecipeTestI2cPhysical(
 
 /** What to execute once on the Backbone — never writes the Flow canvas. */
 export type RecipeTestTarget =
-  { readonly kind: "task" } | { readonly kind: "action"; readonly commandId?: string };
+  | { readonly kind: "init" }
+  | { readonly kind: "task" }
+  | { readonly kind: "action"; readonly commandId?: string };
 
 export type RecipeTestSelection = {
   readonly target: RecipeTestTarget;
@@ -197,6 +203,7 @@ export type RecipeHardwareTestResult = {
   readonly error?: string;
   readonly skippedOps?: readonly string[];
   readonly rxTruncated?: boolean;
+  readonly readResults?: readonly RecipeReadResult[];
 };
 
 function phaseOps(
@@ -234,7 +241,7 @@ export function buildRecipeTestPlan(
 ): RecipeTestPlan {
   const steps: RecipeTestPlanStep[] = [];
 
-  if (selection.runInitFirst) {
+  if (selection.runInitFirst || selection.target.kind === "init") {
     for (const op of phaseOps(draft, "init")) {
       steps.push({
         phase: "init",
@@ -244,6 +251,8 @@ export function buildRecipeTestPlan(
       });
     }
   }
+
+  if (selection.target.kind === "init") return { selection, steps };
 
   const cmdId =
     selection.target.kind === "action"
@@ -346,7 +355,34 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
  * 3. Install temp profile → APPLY mini-config → wait → restore.
  * Never mutates the Flow canvas / project graphs.
  */
+const activeHardwareTests = new WeakSet<SpaghettiClient>();
+
+/** One temporary config transaction at a time per connected Core, including restore. */
 export async function runRecipeHardwareTest(
+  input: RunRecipeHardwareTestInput,
+): Promise<RecipeHardwareTestResult> {
+  if (!input.client) return runRecipeHardwareTestUnlocked(input);
+  if (activeHardwareTests.has(input.client)) {
+    const plan = buildRecipeTestPlan(input.draft, input.selection, input.labels);
+    return {
+      ok: false,
+      kind: "apply_failed",
+      plan,
+      capture: buildRecipeBusCapture(plan.steps.map((s) => s.op)),
+      parked: null,
+      restored: false,
+      note: "Una prova è già in corso su questa Backbone. Attendi il suo completamento.",
+    };
+  }
+  activeHardwareTests.add(input.client);
+  try {
+    return await runRecipeHardwareTestUnlocked(input);
+  } finally {
+    activeHardwareTests.delete(input.client);
+  }
+}
+
+async function runRecipeHardwareTestUnlocked(
   input: RunRecipeHardwareTestInput,
 ): Promise<RecipeHardwareTestResult> {
   const plan = buildRecipeTestPlan(input.draft, input.selection, input.labels);
@@ -410,16 +446,44 @@ export async function runRecipeHardwareTest(
     }
   }
 
-  const initOps = input.selection.runInitFirst ? phaseOps(input.draft, "init") : [];
+  const invalidI2c = ops.some((op) => {
+    if (op.type === "i2c_read") return op.len < 1 || op.len > 8;
+    if (op.type === "i2c_write" || op.type === "i2c_write_read") {
+      const bytes = op.type === "i2c_write" ? op.bytes : op.writeBytes;
+      return (
+        bytes.length > 8 ||
+        bytes.some((b) => !/^(?:0x)?[0-9a-f]{1,2}$/i.test(b.trim())) ||
+        (op.type === "i2c_write_read" && (op.readLen < 1 || op.readLen > 8))
+      );
+    }
+    return false;
+  });
+  if (invalidI2c)
+    return {
+      ok: false,
+      kind: "profile_failed",
+      plan,
+      capture,
+      parked: null,
+      restored: false,
+      note: "Operazione I²C non valida: usa valori HEX costanti e al massimo 8 byte per transazione.",
+    };
+
+  const initOps =
+    input.selection.runInitFirst || input.selection.target.kind === "init"
+      ? phaseOps(input.draft, "init")
+      : [];
   const bodyOps =
-    input.selection.target.kind === "task"
-      ? phaseOps(input.draft, "sample")
-      : actionOps(
-          input.draft,
-          input.selection.target.kind === "action"
-            ? input.selection.target.commandId
-            : undefined,
-        );
+    input.selection.target.kind === "init"
+      ? []
+      : input.selection.target.kind === "task"
+        ? phaseOps(input.draft, "sample")
+        : actionOps(
+            input.draft,
+            input.selection.target.kind === "action"
+              ? input.selection.target.commandId
+              : undefined,
+          );
 
   // Run the whole plan once in profile init during APPLY — no schedule/runtime.
   // (A schedule + start_runtime has produced INTERNAL_ERROR after VALIDATE ok.)
@@ -631,6 +695,11 @@ export async function runRecipeHardwareTest(
       plan,
       capture: measuredCapture,
       rxTruncated: response?.rxTruncated,
+      readResults: evaluateRecipeReadResults(
+        input.draft,
+        ops,
+        measuredCapture.rxByOpId,
+      ),
       parked: parkedForRestore,
       restored: true,
       note: "Prova eseguita sulla Backbone (config temporanea applicata e ripristinata). Canvas invariato.",

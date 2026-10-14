@@ -29,6 +29,13 @@ describe("modesForRecipeTestI2c", () => {
 });
 
 describe("buildRecipeTestPlan", () => {
+  it("tests initialization alone without running an action", () => {
+    const base = createI2cGenericExample();
+    const draft = { ...base, phases: { ...base.phases, init: [{ id: "init-only", type: "wait" as const, ms: 10 }] } };
+    const plan = buildRecipeTestPlan(draft, { target: { kind: "init" }, runInitFirst: false }, labels);
+    expect(plan.steps.map(s => s.op.id)).toEqual(["init-only"]);
+    expect(plan.steps.every(s => s.phase === "init")).toBe(true);
+  });
   it("runs the selected Action alone without Init", () => {
     const draft = createI2cGenericExample();
     const plan = buildRecipeTestPlan(
@@ -140,4 +147,20 @@ describe("hardware test restore interval", () => {
       vi.useRealTimers();
     }
   });
+});
+
+it("does not overlap temporary configs when two canvas actions are tested", async () => {
+  const parked = buildRecipeTestConfigBytes({ profileId: "parked", profileVersion: 1 })!;
+  let release!: () => void;
+  const client = { getConfig: () => new Promise(resolve => { release = () => resolve({ generation: 1, configBytes: parked, sha256: new Uint8Array(32) }); }) } as unknown as SpaghettiClient;
+  const input = { client, draft: createI2cGenericExample(), selection: { target: { kind: "action" as const }, runInitFirst: false }, labels, installProfile: async () => ({ ok: false, error: "test-only stop before mutation" }) };
+  const first = runRecipeHardwareTest(input);
+  const overlapping = await runRecipeHardwareTest(input);
+  expect(overlapping.ok).toBe(false);
+  expect(overlapping.note).toContain("già in corso");
+  release();
+  expect((await first).kind).toBe("profile_failed");
+  const next = runRecipeHardwareTest(input);
+  release();
+  expect((await next).kind).toBe("profile_failed");
 });

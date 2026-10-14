@@ -1,3 +1,4 @@
+import { planDriverCanvasChanges } from "../../lib/driver-canvas-plan.js";
 import { encodeConfigCbor, sha256 } from "@spaghettilab/config-compiler";
 import { physicalPinsForBinding } from "../../lib/physical-pin-bindings.js";
 import { dryRunConfig, type DryRunResult } from "@spaghettilab/config-decompiler";
@@ -33,6 +34,7 @@ import {
   BACKBONE_SENSOR_BLOCK_CATALOG_ID,
   propertiesForSensorModule,
   SENSOR_MODULE_ID_PROP,
+  SENSOR_ACTION_ID_PROP,
 } from "../../lib/backbone-sensor-block.js";
 import {
   DEVICE_RECIPE_DRAFT_META_KEY,
@@ -152,6 +154,7 @@ function ProcessingGraphScreenInner() {
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
   const demoAutoStarted = useRef(false);
+  const createdDriverToken = useRef<string | null>(null);
   const { configuredPorts, pinMapOf, protocolFor, selectedBindingId, setSelectedBindingId } = usePortProtocol();
   const bindings = session?.stack.current.coreBindings ?? [];
 
@@ -276,14 +279,14 @@ function ProcessingGraphScreenInner() {
     position?: { readonly x: number; readonly y: number },
   ): boolean {
     if (!selected) return false;
-    if (!modesProvideBus(physicalModes, recipe.bus)) {
+    if (!recipe.driverInstanceId && !modesProvideBus(physicalModes, recipe.bus)) {
       setSensorWizardOpen(false);
       setMissingBus(recipe.bus);
       return false;
     }
-    let module = createModuleFromRecipe(recipe);
+    let module = backboneSensorModules.find(m => recipe.driverInstanceId && m.recipe.driverInstanceId === recipe.driverInstanceId) ?? createModuleFromRecipe(recipe);
     const entry = findCatalogEntryById(BACKBONE_SENSOR_BLOCK_CATALOG_ID);
-    if (entry && recipeChannels(recipe).length > 0) {
+    if (entry && (recipeChannels(recipe).length > 0 || recipe.actionId)) {
       const graphNodeId = placeFromCatalog(
         entry,
         position ?? nextSpawnPosition(domainNodes.length),
@@ -294,7 +297,7 @@ function ProcessingGraphScreenInner() {
           properties: propertiesForSensorModule(module, recipe),
         },
       );
-      if (graphNodeId) module = { ...module, graphNodeId };
+      if (graphNodeId) module = { ...module, graphNodeId: module.graphNodeId ?? graphNodeId, graphNodeIds: [...(module.graphNodeIds ?? (module.graphNodeId ? [module.graphNodeId] : [])), graphNodeId] };
     }
     persistSensorModules(upsertModule(sensorModulesProject, selected.bindingId, module));
     return true;
@@ -306,15 +309,103 @@ function ProcessingGraphScreenInner() {
 
   useEffect(() => {
     if (!execute || !selected) return;
-    const pending = authoringMetadata[DEVICE_RECIPE_PENDING_CREATE_META_KEY]?.comment === "1";
+    const pending =
+      authoringMetadata[DEVICE_RECIPE_PENDING_CREATE_META_KEY]?.comment === "1";
     if (!pending) return;
-    const draft = parseDeviceRecipeDraft(authoringMetadata[DEVICE_RECIPE_DRAFT_META_KEY]?.comment);
+    const draft = parseDeviceRecipeDraft(
+      authoringMetadata[DEVICE_RECIPE_DRAFT_META_KEY]?.comment,
+    );
     if (!draft) return;
     const recipes = draftToCanvasSensorRecipes(draft);
     const base = nextSpawnPosition(domainNodes.length);
-    recipes.forEach((recipe, index) => {
-      placeSensorRecipeOnCanvas(recipe, { x: base.x + index * 220, y: base.y });
+    const entry = findCatalogEntryById(BACKBONE_SENSOR_BLOCK_CATALOG_ID);
+    if (!entry || !recipes[0]) return;
+    const token = `${selected.bindingId}:${draft.id}:${draft.updatedAt}`;
+    if (createdDriverToken.current === token) return;
+    createdDriverToken.current = token;
+    const existing = backboneSensorModules.find(
+      (m) => m.recipe.driverInstanceId === draft.id,
+    );
+    let module = existing ?? createModuleFromRecipe(recipes[0]);
+    const graphNodeIds: string[] = [];
+    const changes = planDriverCanvasChanges(
+      recipes,
+      module.id,
+      domainNodes.flatMap((node) =>
+        isBlockNodeData(node.data)
+          ? [{ id: node.id, properties: node.data.properties }]
+          : [],
+      ),
+    );
+    for (const nodeId of changes.removals)
+      execute(removeGraphNodeCommand(deviceGraphLens(bindingIndex), nodeId));
+    for (const update of changes.updates) {
+      const node = domainNodes.find((n) => n.id === update.id);
+      if (!node || !isBlockNodeData(node.data)) continue;
+      execute(
+        updateGraphNodeCommand(deviceGraphLens(bindingIndex), {
+          layer: "device-processing",
+          id: node.id,
+          data: {
+            ...node.data,
+            properties: {
+              ...node.data.properties,
+              ...propertiesForSensorModule(module, update.recipe),
+            },
+          },
+        }),
+      );
+      graphNodeIds.push(node.id);
+      const oldRecipe = existing?.actions?.find(
+        (r) => r.actionId === update.recipe.actionId,
+      );
+      if (authoringMetadata[node.id]?.comment === oldRecipe?.chip) {
+        execute({
+          kind: "RenameDriverActionBlock",
+          apply: (project) => ({
+            ok: true,
+            value: {
+              ...project,
+              authoringMetadata: {
+                ...project.authoringMetadata,
+                [node.id]: {
+                  ...project.authoringMetadata[node.id],
+                  comment: update.recipe.chip,
+                },
+              },
+            },
+          }),
+        });
+      }
+    }
+    changes.additions.forEach((recipe, index) => {
+      const nodeId = placeFromCatalog(
+        entry,
+        {
+          x: base.x + (index % 3) * 240,
+          y: base.y + Math.floor(index / 3) * 180,
+        },
+        "input",
+        undefined,
+        {
+          comment: recipe.chip,
+          properties: propertiesForSensorModule(module, recipe),
+        },
+      );
+      if (nodeId) graphNodeIds.push(nodeId);
     });
+    module = {
+      ...module,
+      recipe: recipes[0],
+      recipeId: recipes[0].id,
+      label: draft.name,
+      actions: recipes,
+      graphNodeId: graphNodeIds[0],
+      graphNodeIds,
+    };
+    persistSensorModules(
+      upsertModule(sensorModulesProject, selected.bindingId, module),
+    );
     execute({
       kind: "ClearDeviceRecipePendingCreate",
       apply: (project) => ({
@@ -330,24 +421,52 @@ function ProcessingGraphScreenInner() {
     });
     // Intentionally run once when landing with a pending create flag.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- place once from metadata handoff
-  }, [authoringMetadata[DEVICE_RECIPE_PENDING_CREATE_META_KEY]?.comment, selected?.bindingId, execute]);
+  }, [
+    authoringMetadata[DEVICE_RECIPE_PENDING_CREATE_META_KEY]?.comment,
+    selected?.bindingId,
+    execute,
+  ]);
+
+  function recipeForActionNode(
+    data: DeviceProcessingNodeData,
+  ): SensorRecipe | undefined {
+    if (!isBlockNodeData(data)) return undefined;
+    const module = backboneSensorModules.find(
+      (m) => m.id === data.properties[SENSOR_MODULE_ID_PROP],
+    );
+    return module?.actions?.find(
+      (r) =>
+        r.actionId === data.properties[SENSOR_ACTION_ID_PROP] &&
+        r.deviceDraft?.binding.bus === "i2c",
+    );
+  }
 
   function handleSensorModuleRemove(moduleId: string) {
     if (!selected) return;
-    const existing = modulesForBinding(sensorModulesProject, selected.bindingId).find((item) => item.id === moduleId);
-    if (existing?.graphNodeId && execute && bindingIndex >= 0) {
-      execute(removeGraphNodeCommand(deviceGraphLens(bindingIndex), existing.graphNodeId));
-    } else if (execute && bindingIndex >= 0) {
-      // Fallback: find node by module id property
+    const existing = modulesForBinding(
+      sensorModulesProject,
+      selected.bindingId,
+    ).find((item) => item.id === moduleId);
+    if (execute && bindingIndex >= 0) {
+      const linked = new Set(
+        existing?.graphNodeIds ??
+          (existing?.graphNodeId ? [existing.graphNodeId] : []),
+      );
       for (const node of domainNodes) {
-        if (!isBlockNodeData(node.data)) continue;
-        if (node.data.properties[SENSOR_MODULE_ID_PROP] === moduleId) {
-          execute(removeGraphNodeCommand(deviceGraphLens(bindingIndex), node.id));
-          break;
+        if (
+          linked.has(node.id) ||
+          (isBlockNodeData(node.data) &&
+            node.data.properties[SENSOR_MODULE_ID_PROP] === moduleId)
+        ) {
+          execute(
+            removeGraphNodeCommand(deviceGraphLens(bindingIndex), node.id),
+          );
         }
       }
     }
-    persistSensorModules(removeModule(sensorModulesProject, selected.bindingId, moduleId));
+    persistSensorModules(
+      removeModule(sensorModulesProject, selected.bindingId, moduleId),
+    );
     if (sensorDetail?.id === moduleId) setSensorDetail(null);
   }
 
@@ -1407,7 +1526,7 @@ function ProcessingGraphScreenInner() {
     const flowPos = rf?.screenToFlowPosition({ x: event.clientX, y: event.clientY }) ?? { x: 80, y: 80 };
     const position = { x: snapToGrid(flowPos.x), y: snapToGrid(flowPos.y) };
     if (payload.sensorRecipeId) {
-      const recipe = findSensorRecipeById(payload.sensorRecipeId);
+      const recipe = findSensorRecipeById(payload.sensorRecipeId) ?? backboneSensorModules.flatMap(m => m.actions ?? [m.recipe]).find(r => r.id === payload.sensorRecipeId);
       if (!recipe) return;
       placeSensorRecipeOnCanvas(recipe, position);
       return;
@@ -1685,6 +1804,8 @@ function ProcessingGraphScreenInner() {
               onDismiss={() => setInspector(null)}
             >
               <NodeInspector
+                driverBindingId={selected?.bindingId}
+                driverRecipe={inspector.kind === "edit" ? recipeForActionNode(inspector.data) : undefined}
                 key={inspector.kind === "edit" ? inspector.nodeId : `create-${inspector.nodeKind}`}
                 mode={inspector}
                 moduleOptions={moduleOptions}
@@ -1700,6 +1821,8 @@ function ProcessingGraphScreenInner() {
           )}
           {inspector && !demoOnly && (
             <NodeInspector
+                driverBindingId={selected?.bindingId}
+                driverRecipe={inspector.kind === "edit" ? recipeForActionNode(inspector.data) : undefined}
               key={inspector.kind === "edit" ? inspector.nodeId : `create-${inspector.nodeKind}`}
               mode={inspector}
               moduleOptions={moduleOptions}
