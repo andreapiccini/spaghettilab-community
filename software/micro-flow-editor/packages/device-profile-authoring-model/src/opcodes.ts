@@ -33,4 +33,5 @@ export const DeviceProfileOpcode = {
   W1_WRITE_READ: 23,
   UART_READ: 24,
   WAIT_GPIO: 25,
+  LOAD_ARGUMENT: 26,
 } as const;

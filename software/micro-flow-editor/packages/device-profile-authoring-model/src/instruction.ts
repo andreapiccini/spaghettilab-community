@@ -114,10 +114,13 @@ export type SignExtendInstruction = Op<"SIGN_EXTEND"> & { readonly src: TempSlot
 export type Crc8Instruction = Op<"CRC8"> & { readonly src: TempSlot; readonly dst: TempSlot };
 export type Crc16Instruction = Op<"CRC16"> & { readonly src: TempSlot; readonly dst: TempSlot };
 /** `fieldId` must match a `SampleField.fieldId` declared on the owning `DeviceProfileDraft` — checked by `validate-profile.ts`, never assumed. */
-export type EmitFieldInstruction = Op<"EMIT_FIELD"> & { readonly src: TempSlot; readonly fieldId: number };
+export type EmitFieldInstruction = Op<"EMIT_FIELD"> & { readonly src: TempSlot; readonly fieldId: number; readonly width?: number; readonly byteOrder?: "be" | "le"; readonly signExtend?: boolean; readonly multiplier?: number };
 export type EmitRecordInstruction = Op<"EMIT_RECORD">;
 
+export type LoadArgumentInstruction = Op<"LOAD_ARGUMENT"> & { readonly dst: TempSlot; readonly argumentId: number; readonly length: number; readonly littleEndian: boolean; readonly required: boolean; readonly low: number; readonly high: number };
+
 export type Instruction =
+  | LoadArgumentInstruction
   | I2cWriteInstruction
   | I2cReadInstruction
   | I2cWriteReadInstruction

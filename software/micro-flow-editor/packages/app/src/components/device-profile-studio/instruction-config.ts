@@ -11,7 +11,11 @@ import type { Instruction } from "@spaghettilab/device-profile-authoring-model";
  */
 export type FieldKind = "tempSlot" | "number" | "boolean" | "direction" | "width24";
 
-export type FieldSpec = { readonly key: string; readonly label: string; readonly kind: FieldKind };
+export type FieldSpec = {
+  readonly key: string;
+  readonly label: string;
+  readonly kind: FieldKind;
+};
 
 export type StepCategory = {
   readonly label: string;
@@ -26,7 +30,10 @@ export const STEP_CATEGORIES: readonly StepCategory[] = [
   { label: "GPIO", ops: ["GPIO_GET", "GPIO_SET"] },
   { label: "ADC", ops: ["ADC_READ"] },
   { label: "Wait (bounded)", ops: ["DELAY_BOUNDED", "WAIT_FIELD_MASK", "WAIT_GPIO"] },
-  { label: "Byte operation", ops: ["LOAD_CONST", "COPY_BYTES", "CONCAT", "BYTE_SWAP"] },
+  {
+    label: "Byte operation",
+    ops: ["LOAD_CONST", "LOAD_ARGUMENT", "COPY_BYTES", "CONCAT", "BYTE_SWAP"],
+  },
   { label: "Mask/Shift/Sign", ops: ["MASK", "SHIFT", "SIGN_EXTEND"] },
   { label: "CRC", ops: ["CRC8", "CRC16"] },
   { label: "Emit", ops: ["EMIT_FIELD", "EMIT_RECORD"] },
@@ -48,6 +55,7 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
   WAIT_FIELD_MASK: "Wait field mask",
   WAIT_GPIO: "Wait GPIO",
   LOAD_CONST: "Load const",
+  LOAD_ARGUMENT: "Parametro azione",
   COPY_BYTES: "Copy bytes",
   CONCAT: "Concat",
   BYTE_SWAP: "Byte swap",
@@ -136,6 +144,15 @@ const FIELDS: Record<Instruction["op"], readonly FieldSpec[]> = {
     { key: "low", label: "low", kind: "number" },
     { key: "high", label: "high", kind: "number" },
   ],
+  LOAD_ARGUMENT: [
+    { key: "dst", label: "Destinazione", kind: "tempSlot" },
+    { key: "argumentId", label: "Parametro (1–8)", kind: "number" },
+    { key: "length", label: "Byte (1–8)", kind: "number" },
+    { key: "littleEndian", label: "Little endian", kind: "boolean" },
+    { key: "required", label: "Obbligatorio", kind: "boolean" },
+    { key: "low", label: "Default low", kind: "number" },
+    { key: "high", label: "Default high", kind: "number" },
+  ],
   COPY_BYTES: [
     { key: "src", label: "src (temp slot)", kind: "tempSlot" },
     { key: "dst", label: "dst (temp slot)", kind: "tempSlot" },
@@ -196,7 +213,15 @@ export function defaultInstruction(op: Instruction["op"]): Instruction {
     case "I2C_WRITE_READ":
       return { op, src: 0, dst: 1, readLength: 1, writeLength: 0, timeoutMs: 20 };
     case "SPI_TRANSCEIVE":
-      return { op, src: 0, dst: 1, length: 1, timeoutMs: 20, frequencyHz: 1000000, mode: 0 };
+      return {
+        op,
+        src: 0,
+        dst: 1,
+        length: 1,
+        timeoutMs: 20,
+        frequencyHz: 1000000,
+        mode: 0,
+      };
     case "UART_WRITE":
       return { op, src: 0, length: 0, timeoutMs: 20 };
     case "UART_READ_UNTIL":
@@ -214,11 +239,30 @@ export function defaultInstruction(op: Instruction["op"]): Instruction {
     case "DELAY_BOUNDED":
       return { op, milliseconds: 10 };
     case "WAIT_FIELD_MASK":
-      return { op, dst: 0, src: 0, mask: 0xff, expected: 0, attempts: 5, intervalMs: 10 };
+      return {
+        op,
+        dst: 0,
+        src: 0,
+        mask: 0xff,
+        expected: 0,
+        attempts: 5,
+        intervalMs: 10,
+      };
     case "WAIT_GPIO":
       return { op, dst: 0, attempts: 5, intervalMs: 10, expectedLevel: 1 };
     case "LOAD_CONST":
       return { op, dst: 0, length: 1, low: 0, high: 0 };
+    case "LOAD_ARGUMENT":
+      return {
+        op,
+        dst: 0,
+        argumentId: 1,
+        length: 1,
+        littleEndian: true,
+        required: true,
+        low: 0,
+        high: 0,
+      };
     case "COPY_BYTES":
       return { op, src: 0, dst: 1, length: 0 };
     case "CONCAT":
@@ -245,6 +289,9 @@ export function defaultInstruction(op: Instruction["op"]): Instruction {
 /** One-line summary shown on the collapsed step row — `ux/screens/S060-device-profile-studio/visual.md`: "non richiede aprire un dettaglio per capire cosa fa lo step". */
 export function summarize(instruction: Instruction): string {
   const fields = fieldsFor(instruction.op);
-  const parts = fields.map((f) => `${f.key}=${String((instruction as unknown as Record<string, unknown>)[f.key])}`);
+  const parts = fields.map(
+    (f) =>
+      `${f.key}=${String((instruction as unknown as Record<string, unknown>)[f.key])}`,
+  );
   return `${OP_LABEL[instruction.op]}${parts.length > 0 ? " · " + parts.join(", ") : ""}`;
 }

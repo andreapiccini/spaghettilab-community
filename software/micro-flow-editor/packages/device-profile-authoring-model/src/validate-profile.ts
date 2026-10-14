@@ -48,6 +48,7 @@ function tempSlots(instruction: Instruction): number[] {
     case "WAIT_FIELD_MASK":
       return [instruction.dst, instruction.src];
     case "WAIT_GPIO":
+    case "LOAD_ARGUMENT":
     case "LOAD_CONST":
       return [instruction.dst];
     case "CONCAT":
@@ -166,6 +167,8 @@ function structuralError(instruction: Instruction): { target: string; remediatio
       return instruction.readLength === 0 && instruction.op === "I2C_WRITE_READ"
         ? { target: "readLength", remediation: "readLength must be greater than zero" }
         : undefined;
+    case "LOAD_ARGUMENT":
+      return instruction.argumentId < 1 || instruction.argumentId > 8 || instruction.length < 1 || instruction.length > 8 ? { target: "LOAD_ARGUMENT", remediation: "Argument ID and width must be 1..8" } : undefined;
     case "LOAD_CONST":
       return instruction.length < 1 || instruction.length > 8
         ? { target: "length", remediation: "LOAD_CONST length must be 1-8 bytes" }
@@ -199,7 +202,7 @@ export function validateDeviceProfile(
   if (draft.profileId.length === 0 || draft.profileId.length > PROFILE_ID_MAX_LENGTH) {
     errors.push(failure(DeviceProfileErrorCode.INVALID_PROFILE_ID, ["profileId"], draft.profileId, `profileId must be 1-${PROFILE_ID_MAX_LENGTH} bytes`));
   }
-  if (draft.sampleFields.length > 0 && (draft.sampleSchemaId.length === 0 || draft.sampleSchemaId.length > SCHEMA_ID_MAX_LENGTH)) {
+  if ((draft.sampleFields.length > 0 || (draft.actions?.length ?? 0) > 0) && (draft.sampleSchemaId.length === 0 || draft.sampleSchemaId.length > SCHEMA_ID_MAX_LENGTH)) {
     errors.push(failure(DeviceProfileErrorCode.INVALID_SCHEMA_ID, ["sampleSchemaId"], draft.sampleSchemaId, `sampleSchemaId must be 1-${SCHEMA_ID_MAX_LENGTH} bytes`));
   }
 
@@ -262,6 +265,17 @@ export function validateDeviceProfile(
     }
   }
 
+  if (draft.actions) {
+    const ids = new Set<number>();
+    let next = 0;
+    let valid = draft.actions.length > 0 && draft.actions.length <= 8;
+    for (const action of draft.actions) {
+      valid &&= Number.isInteger(action.id) && action.id >= 1 && action.id <= 8 && !ids.has(action.id) && action.first === next && Number.isInteger(action.count) && action.count > 0 && action.first + action.count <= draft.sampleOps.length && draft.sampleOps[action.first + action.count - 1]?.op === "EMIT_RECORD";
+      ids.add(action.id); next += action.count;
+    }
+    valid &&= next === draft.sampleOps.length && ![...draft.initOps, ...draft.safeStopOps].some(op => op.op === "LOAD_ARGUMENT");
+    if (!valid) errors.push(failure(DeviceProfileErrorCode.INVALID_RAW_OPERAND, ["actions"], "actions", "Action slices must cover the sample pool exactly, use unique IDs 1..8 and end with EMIT_RECORD"));
+  }
   const budget = computeBudget(draft);
   if (budget.totalTimeMs > draft.maxTotalTimeMs) {
     errors.push(failure(DeviceProfileErrorCode.TIME_BUDGET_EXCEEDED, ["maxTotalTimeMs"], String(budget.totalTimeMs), `computed worst-case time ${budget.totalTimeMs}ms exceeds declared maxTotalTimeMs ${draft.maxTotalTimeMs}ms`));

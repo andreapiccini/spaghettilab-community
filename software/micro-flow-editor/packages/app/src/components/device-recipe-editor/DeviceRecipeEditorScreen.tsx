@@ -74,8 +74,17 @@ import { useSession } from "../../state/session-context.js";
 import { formatHexByte, parseHexByteToken } from "../../lib/i2c-hex.js";
 import { buildProtocolTimingFromOps } from "../../lib/protocol-timing.js";
 import { DerivedSignalView } from "./DerivedSignalView.js";
-import { DisplayCenter, DisplayInspector, DisplayLeftSidebar } from "./DisplayRecipePanels.js";
-import { DriverActionsList, DriverActionSettings, DriverSequence, DriverCanvasPreview } from "./DriverActionsPanel.js";
+import {
+  DisplayCenter,
+  DisplayInspector,
+  DisplayLeftSidebar,
+} from "./DisplayRecipePanels.js";
+import {
+  DriverActionsList,
+  DriverActionSettings,
+  DriverSequence,
+  DriverCanvasPreview,
+} from "./DriverActionsPanel.js";
 import { registerStep } from "../../lib/i2c-driver-actions.js";
 import { TimingScopeChart } from "./TimingScopeChart.js";
 
@@ -89,11 +98,17 @@ type Props = {
 /**
  * Full-screen device recipe editor (I2C / SPI / GPIO / ADC) — shared left/center/right layout.
  */
-export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, onCreate }: Props) {
+export function DeviceRecipeEditorScreen({
+  initialDraft,
+  onCancel,
+  onSaveDraft,
+  onCreate,
+}: Props) {
   const { locale } = useLocale();
   const it = locale === "it";
   const { navigate, session } = useSession();
-  const { rows, getClient, installProfile, listDeviceProfiles, removeProfile } = useCoreSessions();
+  const { rows, getClient, installProfile, listDeviceProfiles, removeProfile } =
+    useCoreSessions();
   const physicalDraft = useMemo(() => {
     const project = parsePhysicalProject(
       session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment,
@@ -103,21 +118,32 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   }, [session]);
   const connectedBindingId = useMemo(() => {
     const fromSession = session?.stack.current.coreBindings[0]?.bindingId;
-    if (fromSession && rows.some((r) => r.binding.bindingId === fromSession && r.sessionState === "READY")) {
+    if (
+      fromSession &&
+      rows.some(
+        (r) => r.binding.bindingId === fromSession && r.sessionState === "READY",
+      )
+    ) {
       return fromSession;
     }
     return rows.find((r) => r.sessionState === "READY")?.binding.bindingId;
   }, [session, rows]);
-  const [draft, setDraft] = useState<DeviceRecipeDraft>(() => initialDraft ?? createBlankDraft("i2c"));
+  const [draft, setDraft] = useState<DeviceRecipeDraft>(
+    () => initialDraft ?? createBlankDraft("i2c"),
+  );
   const [editorPane, setEditorPane] = useState<DeviceRecipeEditorPane>("actions");
-  const [selectedCommandId, setSelectedCommandId] = useState<string | null>(draft.commands[0]?.id ?? null);
+  const [selectedCommandId, setSelectedCommandId] = useState<string | null>(
+    draft.commands[0]?.id ?? null,
+  );
   const [selectedOpId, setSelectedOpId] = useState<string | null>(
     () => draft.commands[0]?.steps[0]?.id ?? draft.phases.init[0]?.id ?? null,
   );
   const [selectedCommandStepId, setSelectedCommandStepId] = useState<string | null>(
     draft.commands[0]?.steps[0]?.id ?? null,
   );
-  const [fieldErrors, setFieldErrors] = useState<readonly { field: string; message: string }[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<
+    readonly { field: string; message: string }[]
+  >([]);
   const [tryMessage, setTryMessage] = useState<string | null>(null);
   const [showBlockPreview, setShowBlockPreview] = useState(false);
   const [testRunInitFirst, setTestRunInitFirst] = useState(false);
@@ -125,13 +151,18 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   const [testResult, setTestResult] = useState<RecipeHardwareTestResult | null>(null);
 
   const isDisplay = draft.category === "display";
-  const activeActionId = draft.commands.find(c => c.id === selectedCommandId)?.id ?? draft.commands[0]?.id ?? null;
+  const activeActionId =
+    draft.commands.find((c) => c.id === selectedCommandId)?.id ??
+    draft.commands[0]?.id ??
+    null;
   const ops = opsForEditorPane(draft, editorPane, activeActionId);
   const selected = ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null;
   const library = libraryOpsForBus(draft.binding.bus);
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
-  const canvasActionCount = draft.commands.filter(c => c.exposeOnCanvas !== false).length;
+  const canvasActionCount = draft.commands.filter(
+    (c) => c.exposeOnCanvas !== false,
+  ).length;
   const paneTabs: {
     id: DeviceRecipeEditorPane;
     label: string;
@@ -159,7 +190,6 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
         : "Driver sequence (write / write-read → variables → output). Interval is set on the canvas.",
     },
   ];
-  const activePaneTab = paneTabs.find((tab) => tab.id === editorPane) ?? paneTabs[1]!;
 
   function switchMode(mode: DeviceRecipeMode) {
     const next = createBlankDraft(mode, draft.name);
@@ -250,10 +280,13 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
   );
 
   function currentTestSelection(): RecipeTestSelection {
-    const target: RecipeTestTarget = editorPane === "init" ? { kind: "init" } : {
-      kind: "action",
-      commandId: activeActionId ?? draft.commands[0]?.id,
-    };
+    const target: RecipeTestTarget =
+      editorPane === "init"
+        ? { kind: "init" }
+        : {
+            kind: "action",
+            commandId: activeActionId ?? draft.commands[0]?.id,
+          };
     return { target, runInitFirst: testRunInitFirst };
   }
 
@@ -277,24 +310,26 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
         preferredPhysicalModes: physicalDraft?.modes,
         preferredI2cSpeed: physicalDraft?.i2cSpeed,
         preferredPhysicalSettings: physicalDraft?.settings,
-        cleanupTryProfiles:
-          connectedBindingId
-            ? async () => {
-                const listed = await listDeviceProfiles(connectedBindingId);
-                for (const p of listed ?? []) {
-                  if (!p.profileId.startsWith("try.")) continue;
-                  await removeProfile(connectedBindingId, p.profileId, p.version, {
-                    isReferencedLocally: false,
-                  });
-                }
+        cleanupTryProfiles: connectedBindingId
+          ? async () => {
+              const listed = await listDeviceProfiles(connectedBindingId);
+              for (const p of listed ?? []) {
+                if (!p.profileId.startsWith("try.")) continue;
+                await removeProfile(connectedBindingId, p.profileId, p.version, {
+                  isReferencedLocally: false,
+                });
               }
-            : undefined,
+            }
+          : undefined,
         installProfile: connectedBindingId
           ? async (profileDraft) => {
               const out = await installProfile(connectedBindingId, profileDraft);
               if (!out) return { ok: false, error: "installProfile unavailable" };
               if (!out.ok) {
-                return { ok: false, error: `${out.error.code}: ${out.error.remediation}` };
+                return {
+                  ok: false,
+                  error: `${out.error.code}: ${out.error.remediation}`,
+                };
               }
               return { ok: true };
             }
@@ -306,7 +341,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
       setTestResult(result);
 
       if (result.ok) {
-        setDraft(current => ({
+        setDraft((current) => ({
           ...current,
           verification: { status: "passed", note, lastTriedAt: Date.now() },
         }));
@@ -315,7 +350,7 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
 
       const status =
         result.kind === "no_client" ? ("unavailable" as const) : ("failed" as const);
-      setDraft(current => ({
+      setDraft((current) => ({
         ...current,
         verification: { status, note, lastTriedAt: Date.now() },
       }));
@@ -358,57 +393,92 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface-sunken">
-      <header className="flex flex-wrap items-center gap-3 border-b border-border bg-surface px-5 py-4">
-        <span className="flex h-10 w-10 items-center justify-center rounded-slmd bg-brand-blue/10 text-brand-blue">
-          <CircuitBoard size={20} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-heading text-2xl font-bold text-ink">
-              {it ? "Dispositivi" : "Devices"}
-            </h1>
-            <span className="rounded-slpill bg-warning/20 px-2 py-0.5 font-body text-[10px] font-semibold text-ink">
-              {draft.status === "draft" ? (it ? "Bozza" : "Draft") : it ? "Pronta" : "Ready"}
-            </span>
-          </div>
-          <p className="mt-1 font-body text-xs text-ink-muted">
-            {isDisplay
-              ? it
-                ? "Definisci comandi tipizzati. Esponi l’interfaccia al Flow."
-                : "Define typed commands. Expose the interface to Flow."
-              : it
-                ? "Disegna il protocollo del sensore. Esponi le grandezze al Flow."
-                : "Draw the sensor protocol. Expose quantities to Flow."}
-          </p>
-          <label className="mt-2 block max-w-md">
-            <span className="font-body text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
-              {it ? "Nome sul canvas" : "Canvas name"}
-            </span>
-            <input
-              value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-              placeholder={it ? "Es. Nome dispositivo" : "e.g. Device name"}
-              className="mt-0.5 w-full rounded-slsm border border-border-strong bg-surface px-2.5 py-1.5 font-heading text-base font-semibold text-ink outline-none focus:border-brand-blue"
-            />
-          </label>
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {(["i2c", "spi", "gpio", "adc", "w1", "display"] as const).map((mode) => {
-            const active = mode === "display" ? isDisplay : !isDisplay && draft.binding.bus === mode;
-            return (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => switchMode(mode)}
-                className={`rounded-slpill px-2.5 py-1 font-mono text-[10px] font-bold uppercase ${
-                  active ? "bg-brand-blue text-white" : "bg-surface-sunken text-ink-muted hover:text-ink"
-                }`}
+      <header className="flex flex-wrap items-end gap-3 border-b border-border bg-surface px-4 py-2">
+        <CircuitBoard size={22} className="mb-2 shrink-0 text-brand-blue" aria-hidden />
+        <label className="min-w-40 flex-1 max-w-xs">
+          <span className="font-body text-[10px] text-ink-muted">
+            {it ? "Dispositivo · nome sul canvas" : "Device · canvas name"}
+          </span>
+          <input
+            aria-label={it ? "Nome dispositivo" : "Device name"}
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            className="w-full rounded-slsm border border-border-strong px-2 py-1 font-heading text-base font-semibold text-ink"
+          />
+        </label>
+        <label className="w-28 font-body text-[10px] text-ink-muted">
+          {it ? "Protocollo" : "Protocol"}
+          <select
+            aria-label={it ? "Protocollo" : "Protocol"}
+            value={isDisplay ? "display" : draft.binding.bus}
+            onChange={(e) =>
+              switchMode(
+                e.target.value as "i2c" | "spi" | "gpio" | "adc" | "w1" | "display",
+              )
+            }
+            className={inputClass}
+          >
+            {(["i2c", "spi", "gpio", "adc", "w1", "display"] as const).map((mode) => (
+              <option key={mode} value={mode}>
+                {mode.toUpperCase()}
+              </option>
+            ))}
+          </select>
+        </label>
+        {!isDisplay && draft.binding.bus === "i2c" && draft.binding.i2c && (
+          <>
+            <label className="w-24 font-body text-[10px] text-ink-muted">
+              {it ? "Indirizzo I²C" : "I²C address"}
+              <input
+                aria-label={it ? "Indirizzo I²C" : "I²C address"}
+                spellCheck={false}
+                value={draft.binding.i2c.address}
+                onChange={(e) =>
+                  setDraft({
+                    ...draft,
+                    binding: {
+                      ...draft.binding,
+                      i2c: { ...draft.binding.i2c!, address: e.target.value },
+                    },
+                  })
+                }
+                className={inputClass}
+              />
+            </label>
+            <label className="w-20 font-body text-[10px] text-ink-muted">
+              {it ? "Bit indirizzo" : "Address bits"}
+              <select
+                aria-label={it ? "Bit indirizzo" : "Address bits"}
+                value={draft.binding.i2c.addressBits ?? 7}
+                onChange={(e) =>
+                  setDraft({
+                    ...draft,
+                    binding: {
+                      ...draft.binding,
+                      i2c: {
+                        ...draft.binding.i2c!,
+                        addressBits: Number(e.target.value) as 7 | 10,
+                      },
+                    },
+                  })
+                }
+                className={inputClass}
               >
-                {mode === "adc" ? (it ? "analog" : "adc") : mode === "w1" ? "1-wire" : mode}
-              </button>
-            );
-          })}
-        </div>
+                <option value={7}>7 bit</option>
+                <option value={10}>10 bit</option>
+              </select>
+            </label>
+          </>
+        )}
+        <span className="mb-2 ml-auto rounded-slpill bg-warning/20 px-2 py-0.5 font-body text-[10px] text-ink">
+          {draft.status === "draft"
+            ? it
+              ? "Bozza"
+              : "Draft"
+            : it
+              ? "Pronta"
+              : "Ready"}
+        </span>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[272px_minmax(0,1fr)_300px]">
@@ -430,82 +500,125 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             />
           ) : (
             <>
-          <DriverActionsList draft={draft} it={it} activeId={editorPane === "actions" ? activeActionId : null} onChange={setDraft} onSelect={selectDriverAction} />
-          <section className="rounded-slmd border border-border-strong p-3">
-            <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-              {it ? "Connessioni" : "Connections"}
-            </h2>
-            <BindingPanel draft={draft} it={it} physical={physicalDraft} onChange={setDraft} onOpenPhysical={() => navigate("physical-composition")} />
-          </section>
-          <section className="rounded-slmd border border-border-strong p-3">
-            <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-              {it ? "Libreria operazioni" : "Operations library"}
-            </h2>
-            {draft.binding.bus === "i2c" && <div className="mb-2 flex flex-wrap gap-2">
-              <button type="button" onClick={() => addRegisterStep("read")} className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink">{it ? "+ Leggi registro" : "+ Read register"}</button>
-              <button type="button" onClick={() => addRegisterStep("write")} className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink">{it ? "+ Scrivi registro" : "+ Write register"}</button>
-            </div>}
-            <LibraryList
-              library={library}
-              bus={draft.binding.bus}
-              it={it}
-              onAdd={addLibraryOp}
-            />
-            {draft.binding.bus === "gpio" ? (
-              <div className="mt-3">
-                <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">{it ? "Modelli" : "Templates"}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = createGpioDigitalExample(draft.name);
-                    setDraft(next);
-                    setEditorPane("actions");
-                    setSelectedCommandId(next.commands[0]?.id ?? null);
-                    setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-                  }}
-                  className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-                >
-                  {it ? "Ingresso digitale" : "Digital input"}
-                </button>
-              </div>
-            ) : null}
-            {draft.binding.bus === "adc" ? (
-              <div className="mt-3">
-                <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">{it ? "Modelli" : "Templates"}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = createAnalogLevelExample(draft.name);
-                    setDraft(next);
-                    setEditorPane("actions");
-                    setSelectedCommandId(next.commands[0]?.id ?? null);
-                    setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-                  }}
-                  className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-                >
-                  {it ? "Livello analogico" : "Analog level"}
-                </button>
-              </div>
-            ) : null}
-            {draft.binding.bus === "w1" ? (
-              <div className="mt-3">
-                <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">{it ? "Modelli" : "Templates"}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = createDs18b20Example(draft.name);
-                    setDraft(next);
-                    setEditorPane("actions");
-                    setSelectedCommandId(next.commands[0]?.id ?? null);
-                    setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-                  }}
-                  className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-                >
-                  DS18B20
-                </button>
-              </div>
-            ) : null}
-          </section>
+              <DriverActionsList
+                draft={draft}
+                it={it}
+                activeId={editorPane === "actions" ? activeActionId : null}
+                onChange={setDraft}
+                onSelect={selectDriverAction}
+              />
+              {draft.binding.bus !== "i2c" && (
+                <>
+                  <section className="rounded-slmd border border-border-strong p-3">
+                    <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                      {it ? "Connessioni" : "Connections"}
+                    </h2>
+                    <BindingPanel
+                      draft={draft}
+                      it={it}
+                      physical={physicalDraft}
+                      onChange={setDraft}
+                      onOpenPhysical={() => navigate("physical-composition")}
+                    />
+                  </section>
+                </>
+              )}
+              <section className="rounded-slmd border border-border-strong p-3">
+                <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                  {it ? "Aggiungi un passo" : "Add a step"}
+                </h2>
+                {draft.binding.bus === "i2c" && (
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => addRegisterStep("read")}
+                      className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
+                    >
+                      {it ? "+ Leggi registro" : "+ Read register"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => addRegisterStep("write")}
+                      className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
+                    >
+                      {it ? "+ Scrivi registro" : "+ Write register"}
+                    </button>
+                  </div>
+                )}
+                <details open={draft.binding.bus !== "i2c"}>
+                  <summary className="mb-2 cursor-pointer font-body text-xs text-ink-muted">
+                    {it
+                      ? "Tutte le operazioni · avanzate"
+                      : "All operations · advanced"}
+                  </summary>
+                  <LibraryList
+                    library={library}
+                    bus={draft.binding.bus}
+                    it={it}
+                    onAdd={addLibraryOp}
+                  />
+                </details>
+                {draft.binding.bus === "gpio" ? (
+                  <div className="mt-3">
+                    <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+                      {it ? "Modelli" : "Templates"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = createGpioDigitalExample(draft.name);
+                        setDraft(next);
+                        setEditorPane("actions");
+                        setSelectedCommandId(next.commands[0]?.id ?? null);
+                        setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                      }}
+                      className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+                    >
+                      {it ? "Ingresso digitale" : "Digital input"}
+                    </button>
+                  </div>
+                ) : null}
+                {draft.binding.bus === "adc" ? (
+                  <div className="mt-3">
+                    <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+                      {it ? "Modelli" : "Templates"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = createAnalogLevelExample(draft.name);
+                        setDraft(next);
+                        setEditorPane("actions");
+                        setSelectedCommandId(next.commands[0]?.id ?? null);
+                        setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                      }}
+                      className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+                    >
+                      {it ? "Livello analogico" : "Analog level"}
+                    </button>
+                  </div>
+                ) : null}
+                {draft.binding.bus === "w1" ? (
+                  <div className="mt-3">
+                    <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+                      {it ? "Modelli" : "Templates"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = createDs18b20Example(draft.name);
+                        setDraft(next);
+                        setEditorPane("actions");
+                        setSelectedCommandId(next.commands[0]?.id ?? null);
+                        setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                      }}
+                      className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+                    >
+                      DS18B20
+                    </button>
+                  </div>
+                ) : null}
+              </section>
             </>
           )}
         </aside>
@@ -528,95 +641,115 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             />
           ) : (
             <>
-          <div className="mb-3 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex rounded-slpill border border-border-strong bg-surface p-0.5">
-                {paneTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    title={tab.hint}
-                    onClick={() => {
-                      setEditorPane(tab.id);
-                      if (tab.id === "init") {
-                        setSelectedOpId(draft.phases.init[0]?.id ?? null);
-                      } else {
-                        setSelectedOpId(
-                          draft.commands.find((c) => c.id === activeActionId)?.steps[0]?.id ??
-                            draft.commands[0]?.steps[0]?.id ??
-                            null,
-                        );
-                      }
-                    }}
-                    className={`rounded-slpill px-3 py-1 font-body text-xs font-semibold ${
-                      editorPane === tab.id ? "bg-brand-blue text-white" : "text-ink-muted"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-2 rounded-slmd border border-brand-blue/25 bg-brand-blue/5 px-3 py-2">
-              <Info size={14} className="mt-0.5 shrink-0 text-brand-blue" aria-hidden />
-              <div className="min-w-0">
-                <p className="font-body text-[11px] font-semibold text-ink">{activePaneTab.label}</p>
-                <p className="mt-0.5 font-body text-[11px] leading-snug text-ink-muted">{activePaneTab.blurb}</p>
-              </div>
-            </div>
-          </div>
-
-          {draft.binding.bus === "i2c" && <>
-            {editorPane === "actions" && <DriverActionSettings draft={draft} it={it} activeId={activeActionId} onChange={setDraft} onSelect={selectDriverAction} />}
-            <DriverSequence draft={draft} ops={ops} it={it} selectedId={selected?.id ?? null} onSelect={setSelectedOpId} />
-          </>}
-          <details open={draft.binding.bus !== "i2c"} className="mb-3">
-            <summary className="mb-2 cursor-pointer font-body text-xs font-semibold text-ink-muted">{it ? "Dettagli del protocollo · SDA / SCL" : "Protocol details · SDA / SCL"}</summary>
-          <DerivedSignalView
-            draft={draft}
-            ops={ops}
-            it={it}
-            selectedOpId={selectedOpId}
-            onSelectOp={setSelectedOpId}
-          />
-
-          </details>
-
-          {draft.binding.bus === "adc" && editorPane === "actions" ? (
-            <AnalogSamplingSummary ops={ops} it={it} />
-          ) : null}
-
-          {draft.binding.bus === "i2c" || draft.binding.bus === "spi" ? null : (
-            <section className="mb-4 mt-4 rounded-slmd border border-border-strong bg-surface p-3">
-              <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                {it ? `Sequenza ${draft.binding.bus.toUpperCase()}` : `${draft.binding.bus.toUpperCase()} sequence`}
-              </h2>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {ops.length === 0 ? (
-                  <p className="font-body text-xs text-ink-faint">{it ? "Nessun passo — aggiungi dalla libreria." : "No steps — add from the library."}</p>
-                ) : (
-                  ops.map((op, index) => (
-                    <div key={op.id} className="flex items-center gap-1">
+              <DerivedSignalView
+                draft={draft}
+                ops={ops}
+                it={it}
+                selectedOpId={selectedOpId}
+                onSelectOp={setSelectedOpId}
+              />
+              <div className="mb-3 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex rounded-slpill border border-border-strong bg-surface p-0.5">
+                    {paneTabs.map((tab) => (
                       <button
+                        key={tab.id}
                         type="button"
-                        onClick={() => setSelectedOpId(op.id)}
-                        className={`rounded-slsm border px-2.5 py-2 text-left ${
-                          selectedOpId === op.id
-                            ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/25"
-                            : "border-border-strong bg-surface-sunken hover:border-brand-blue/40"
+                        title={tab.hint}
+                        onClick={() => {
+                          setEditorPane(tab.id);
+                          if (tab.id === "init") {
+                            setSelectedOpId(draft.phases.init[0]?.id ?? null);
+                          } else {
+                            setSelectedOpId(
+                              draft.commands.find((c) => c.id === activeActionId)
+                                ?.steps[0]?.id ??
+                                draft.commands[0]?.steps[0]?.id ??
+                                null,
+                            );
+                          }
+                        }}
+                        className={`rounded-slpill px-3 py-1 font-body text-xs font-semibold ${
+                          editorPane === tab.id
+                            ? "bg-brand-blue text-white"
+                            : "text-ink-muted"
                         }`}
                       >
-                        <span className="block font-mono text-[9px] text-ink-faint">{index + 1}</span>
-                        <span className="block font-body text-xs font-semibold text-ink">{describeDeviceOp(op)}</span>
+                        {tab.label}
                       </button>
-                      {index < ops.length - 1 ? <span className="text-ink-faint">→</span> : null}
-                    </div>
-                  ))
-                )}
+                    ))}
+                  </div>
+                </div>
               </div>
-            </section>
-          )}
 
+              {draft.binding.bus === "i2c" && (
+                <>
+                  {editorPane === "actions" && (
+                    <DriverActionSettings
+                      draft={draft}
+                      it={it}
+                      activeId={activeActionId}
+                      onChange={setDraft}
+                      onSelect={selectDriverAction}
+                    />
+                  )}
+                  <DriverSequence
+                    initialization={editorPane === "init"}
+                    draft={draft}
+                    ops={ops}
+                    it={it}
+                    selectedId={selected?.id ?? null}
+                    onSelect={setSelectedOpId}
+                  />
+                </>
+              )}
+
+              {draft.binding.bus === "adc" && editorPane === "actions" ? (
+                <AnalogSamplingSummary ops={ops} it={it} />
+              ) : null}
+
+              {draft.binding.bus === "i2c" || draft.binding.bus === "spi" ? null : (
+                <section className="mb-4 mt-4 rounded-slmd border border-border-strong bg-surface p-3">
+                  <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                    {it
+                      ? `Sequenza ${draft.binding.bus.toUpperCase()}`
+                      : `${draft.binding.bus.toUpperCase()} sequence`}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {ops.length === 0 ? (
+                      <p className="font-body text-xs text-ink-faint">
+                        {it
+                          ? "Nessun passo — aggiungi dalla libreria."
+                          : "No steps — add from the library."}
+                      </p>
+                    ) : (
+                      ops.map((op, index) => (
+                        <div key={op.id} className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedOpId(op.id)}
+                            className={`rounded-slsm border px-2.5 py-2 text-left ${
+                              selectedOpId === op.id
+                                ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/25"
+                                : "border-border-strong bg-surface-sunken hover:border-brand-blue/40"
+                            }`}
+                          >
+                            <span className="block font-mono text-[9px] text-ink-faint">
+                              {index + 1}
+                            </span>
+                            <span className="block font-body text-xs font-semibold text-ink">
+                              {describeDeviceOp(op)}
+                            </span>
+                          </button>
+                          {index < ops.length - 1 ? (
+                            <span className="text-ink-faint">→</span>
+                          ) : null}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </section>
+              )}
             </>
           )}
 
@@ -630,7 +763,9 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             </ul>
           ) : null}
           {tryMessage ? (
-            <p className="mt-3 rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-xs text-ink-muted">{tryMessage}</p>
+            <p className="mt-3 rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-xs text-ink-muted">
+              {tryMessage}
+            </p>
           ) : null}
         </main>
 
@@ -649,137 +784,172 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             />
           ) : (
             <>
-          <section className="rounded-slmd border border-border-strong p-3">
-            <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-              {it ? "Passo selezionato" : "Selected step"}
-            </h2>
-            {selected ? (
-              <StepInspector
-                op={selected}
-                draft={draft}
-                it={it}
-                onChange={patchSelected}
-                onDraftChange={setDraft}
-                onRemove={() => {
-                  if (editorPane === "init") {
-                    setDraft(removeOp(draft, "init", selected.id));
-                  } else if (activeActionId) {
-                    setDraft(removeCommandStep(draft, activeActionId, selected.id));
-                  }
-                  setSelectedOpId(null);
-                }}
-                onMove={(dir) => {
-                  if (editorPane === "init") {
-                    setDraft(moveOp(draft, "init", selected.id, dir));
-                  } else if (activeActionId) {
-                    setDraft(moveCommandStep(draft, activeActionId, selected.id, dir));
-                  }
-                }}
-              />
-            ) : (
-              <p className="font-body text-xs text-ink-faint">{it ? "Seleziona un passo nella sequenza." : "Select a step in the sequence."}</p>
-            )}
-          </section>
-
-          <VariablesPanel draft={draft} it={it} onChange={setDraft} />
-
-          {draft.binding.bus === "adc" && draft.binding.adc ? (
-            <section className="rounded-slmd border border-border-strong p-3">
-              <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                {it ? "Calibrazione" : "Calibration"}
-              </h2>
-              <div className="space-y-2">
-                <Field label={it ? "Minimo (mV)" : "Minimum (mV)"}>
-                  <input
-                    type="number"
-                    placeholder={it ? "Da impostare" : "Unset"}
-                    value={draft.binding.adc.calibMinMv ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value === "" ? null : Number(e.target.value);
-                      const adc = { ...draft.binding.adc!, calibMinMv: v };
-                      const commands = draft.commands.map((c) => ({
-                        ...c,
-                        steps: c.steps.map((op) =>
-                          op.type === "map_range" ? { ...op, inMin: v } : op,
-                        ),
-                      }));
-                      setDraft({ ...draft, binding: { ...draft.binding, adc }, commands });
+              <section className="rounded-slmd border border-border-strong p-3">
+                <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                  {it ? "Configura il passo" : "Configure step"}
+                </h2>
+                {selected ? (
+                  <StepInspector
+                    op={selected}
+                    draft={draft}
+                    it={it}
+                    onChange={patchSelected}
+                    onDraftChange={setDraft}
+                    onRemove={() => {
+                      if (editorPane === "init") {
+                        setDraft(removeOp(draft, "init", selected.id));
+                      } else if (activeActionId) {
+                        setDraft(removeCommandStep(draft, activeActionId, selected.id));
+                      }
+                      setSelectedOpId(null);
                     }}
-                    className={inputClass}
-                  />
-                </Field>
-                <Field label={it ? "Massimo (mV)" : "Maximum (mV)"}>
-                  <input
-                    type="number"
-                    placeholder={it ? "Da impostare" : "Unset"}
-                    value={draft.binding.adc.calibMaxMv ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value === "" ? null : Number(e.target.value);
-                      const adc = { ...draft.binding.adc!, calibMaxMv: v };
-                      const commands = draft.commands.map((c) => ({
-                        ...c,
-                        steps: c.steps.map((op) =>
-                          op.type === "map_range" ? { ...op, inMax: v } : op,
-                        ),
-                      }));
-                      setDraft({ ...draft, binding: { ...draft.binding, adc }, commands });
+                    onMove={(dir) => {
+                      if (editorPane === "init") {
+                        setDraft(moveOp(draft, "init", selected.id, dir));
+                      } else if (activeActionId) {
+                        setDraft(
+                          moveCommandStep(draft, activeActionId, selected.id, dir),
+                        );
+                      }
                     }}
-                    className={inputClass}
                   />
-                </Field>
-                {!calibOk ? (
-                  <p className="rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[11px] text-ink">
+                ) : (
+                  <p className="font-body text-xs text-ink-faint">
                     {it
-                      ? "Calibrazione mancante — puoi salvare la bozza; Crea sensore resta bloccato. Canale % non disponibile."
-                      : "Calibration missing — draft save ok; Create sensor blocked. % channel unavailable."}
+                      ? "Seleziona un passo nella sequenza."
+                      : "Select a step in the sequence."}
+                  </p>
+                )}
+              </section>
+
+              <details className="rounded-slmd border border-border p-2">
+                <summary className="cursor-pointer font-body text-xs font-semibold text-ink">
+                  {it
+                    ? "Variabili e ingressi del canvas"
+                    : "Variables and canvas inputs"}
+                </summary>
+                <VariablesPanel draft={draft} it={it} onChange={setDraft} />
+              </details>
+
+              {draft.binding.bus === "adc" && draft.binding.adc ? (
+                <section className="rounded-slmd border border-border-strong p-3">
+                  <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                    {it ? "Calibrazione" : "Calibration"}
+                  </h2>
+                  <div className="space-y-2">
+                    <Field label={it ? "Minimo (mV)" : "Minimum (mV)"}>
+                      <input
+                        type="number"
+                        placeholder={it ? "Da impostare" : "Unset"}
+                        value={draft.binding.adc.calibMinMv ?? ""}
+                        onChange={(e) => {
+                          const v =
+                            e.target.value === "" ? null : Number(e.target.value);
+                          const adc = { ...draft.binding.adc!, calibMinMv: v };
+                          const commands = draft.commands.map((c) => ({
+                            ...c,
+                            steps: c.steps.map((op) =>
+                              op.type === "map_range" ? { ...op, inMin: v } : op,
+                            ),
+                          }));
+                          setDraft({
+                            ...draft,
+                            binding: { ...draft.binding, adc },
+                            commands,
+                          });
+                        }}
+                        className={inputClass}
+                      />
+                    </Field>
+                    <Field label={it ? "Massimo (mV)" : "Maximum (mV)"}>
+                      <input
+                        type="number"
+                        placeholder={it ? "Da impostare" : "Unset"}
+                        value={draft.binding.adc.calibMaxMv ?? ""}
+                        onChange={(e) => {
+                          const v =
+                            e.target.value === "" ? null : Number(e.target.value);
+                          const adc = { ...draft.binding.adc!, calibMaxMv: v };
+                          const commands = draft.commands.map((c) => ({
+                            ...c,
+                            steps: c.steps.map((op) =>
+                              op.type === "map_range" ? { ...op, inMax: v } : op,
+                            ),
+                          }));
+                          setDraft({
+                            ...draft,
+                            binding: { ...draft.binding, adc },
+                            commands,
+                          });
+                        }}
+                        className={inputClass}
+                      />
+                    </Field>
+                    {!calibOk ? (
+                      <p className="rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[11px] text-ink">
+                        {it
+                          ? "Calibrazione mancante — puoi salvare la bozza; Crea sensore resta bloccato. Canale % non disponibile."
+                          : "Calibration missing — draft save ok; Create sensor blocked. % channel unavailable."}
+                      </p>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
+
+              <section className="rounded-slmd border border-border-strong p-3">
+                <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                  {it ? "Anteprima nel Flow" : "Flow preview"}
+                </h2>
+                {draft.binding.bus === "i2c" ? (
+                  <DriverCanvasPreview draft={draft} it={it} />
+                ) : (
+                  <>
+                    <div className="rounded-slmd border border-border-strong bg-surface-sunken p-3">
+                      <div className="flex items-center gap-2">
+                        <Cpu size={16} className="text-brand-blue" />
+                        <span className="font-body text-sm font-semibold text-ink">
+                          {draft.name}
+                        </span>
+                      </div>
+                      <ul className="mt-2 space-y-1">
+                        {draft.channels
+                          .filter((ch) => ch.direction === "read")
+                          .map((ch) => {
+                            const calibratedBlocked =
+                              draft.binding.bus === "adc" && !calibOk;
+                            return (
+                              <li
+                                key={ch.id}
+                                className={`flex items-center justify-end gap-2 font-body text-xs ${
+                                  calibratedBlocked
+                                    ? "text-ink-faint line-through"
+                                    : "text-ink"
+                                }`}
+                              >
+                                {ch.label} · {ch.unit}
+                                {calibratedBlocked ? (
+                                  <span className="font-body text-[9px] no-underline">
+                                    {it ? "non disponibile" : "unavailable"}
+                                  </span>
+                                ) : null}
+                                <span className="h-2.5 w-2.5 rounded-full border-2 border-brand-blue bg-surface" />
+                              </li>
+                            );
+                          })}
+                      </ul>
+                      <p className="mt-3 rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[11px] text-ink-muted">
+                        {it ? "Stato:" : "Status:"} {draft.verification.note}
+                      </p>
+                    </div>
+                  </>
+                )}
+                {draft.runtimeUnavailable.length > 0 ? (
+                  <p className="mt-2 font-body text-[10px] text-ink-faint">
+                    {it ? "Runtime non disponibile:" : "Runtime unavailable:"}{" "}
+                    {draft.runtimeUnavailable.join(", ")}
                   </p>
                 ) : null}
-              </div>
-            </section>
-          ) : null}
-
-          <section className="rounded-slmd border border-border-strong p-3">
-            <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-              {it ? "Anteprima nel Flow" : "Flow preview"}
-            </h2>
-            {draft.binding.bus === "i2c" ? <DriverCanvasPreview draft={draft} it={it} /> : <>
-            <div className="rounded-slmd border border-border-strong bg-surface-sunken p-3">
-              <div className="flex items-center gap-2">
-                <Cpu size={16} className="text-brand-blue" />
-                <span className="font-body text-sm font-semibold text-ink">{draft.name}</span>
-              </div>
-              <ul className="mt-2 space-y-1">
-                {draft.channels
-                  .filter((ch) => ch.direction === "read")
-                  .map((ch) => {
-                    const calibratedBlocked = draft.binding.bus === "adc" && !calibOk;
-                    return (
-                      <li
-                        key={ch.id}
-                        className={`flex items-center justify-end gap-2 font-body text-xs ${
-                          calibratedBlocked ? "text-ink-faint line-through" : "text-ink"
-                        }`}
-                      >
-                        {ch.label} · {ch.unit}
-                        {calibratedBlocked ? (
-                          <span className="font-body text-[9px] no-underline">{it ? "non disponibile" : "unavailable"}</span>
-                        ) : null}
-                        <span className="h-2.5 w-2.5 rounded-full border-2 border-brand-blue bg-surface" />
-                      </li>
-                    );
-                  })}
-              </ul>
-              <p className="mt-3 rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[11px] text-ink-muted">
-                {it ? "Stato:" : "Status:"} {draft.verification.note}
-              </p>
-            </div>
-            </>}
-            {draft.runtimeUnavailable.length > 0 ? (
-              <p className="mt-2 font-body text-[10px] text-ink-faint">
-                {it ? "Runtime non disponibile:" : "Runtime unavailable:"} {draft.runtimeUnavailable.join(", ")}
-              </p>
-            ) : null}
-          </section>
+              </section>
             </>
           )}
         </aside>
@@ -787,10 +957,15 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
 
       <footer className="flex shrink-0 items-center justify-between gap-2 border-t border-border bg-surface px-4 py-2.5">
         <span className="font-body text-[11px] text-ink-faint">
-          {it ? "Ultima modifica:" : "Last edited:"} {new Date(draft.updatedAt).toLocaleString()}
+          {it ? "Ultima modifica:" : "Last edited:"}{" "}
+          {new Date(draft.updatedAt).toLocaleString()}
         </span>
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={handleCancel} className="rounded-slpill px-3 py-1.5 font-body text-sm text-ink-muted hover:bg-surface-raised">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="rounded-slpill px-3 py-1.5 font-body text-sm text-ink-muted hover:bg-surface-raised"
+          >
             {it ? "Annulla" : "Cancel"}
           </button>
           <label className="inline-flex items-center gap-1.5 font-body text-xs text-ink-muted">
@@ -808,7 +983,17 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
             className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue disabled:opacity-40"
           >
             <Play size={14} />
-            {testRunning ? (it ? "Test…" : "Testing…") : it ? (editorPane === "init" ? "Testa init" : "Testa azione") : (editorPane === "init" ? "Test init" : "Test action")}
+            {testRunning
+              ? it
+                ? "Test…"
+                : "Testing…"
+              : it
+                ? editorPane === "init"
+                  ? "Testa init"
+                  : "Testa azione"
+                : editorPane === "init"
+                  ? "Test init"
+                  : "Test action"}
           </button>
           <button
             type="button"
@@ -844,9 +1029,24 @@ export function DeviceRecipeEditorScreen({ initialDraft, onCancel, onSaveDraft, 
       </footer>
 
       {showBlockPreview ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" role="dialog" aria-modal="true">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-slmd border border-border-strong bg-surface p-4 shadow-e2">
-            {draft.binding.bus === "i2c" ? <DriverCanvasPreview draft={draft} it={it} /> : <BlockPreviewCard draft={draft} it={it} verified={draft.verification.status === "passed" || draft.verification.status === "simulated"} />}
+            {draft.binding.bus === "i2c" ? (
+              <DriverCanvasPreview draft={draft} it={it} />
+            ) : (
+              <BlockPreviewCard
+                draft={draft}
+                it={it}
+                verified={
+                  draft.verification.status === "passed" ||
+                  draft.verification.status === "simulated"
+                }
+              />
+            )}
             <div className="mt-4 flex flex-wrap justify-end gap-2">
               <button
                 type="button"
@@ -895,13 +1095,27 @@ function recipeTestNote(result: RecipeHardwareTestResult, it: boolean): string {
         ? "Diagramma pronto. Collega un Core READY per eseguire sul bus reale."
         : "Diagram ready. Connect a READY Core to run on the real bus.";
     case "empty_plan":
-      return it ? "Nessun passo da eseguire (scegli un'azione con operazioni)." : "No steps to run.";
+      return it
+        ? "Nessun passo da eseguire (scegli un'azione con operazioni)."
+        : "No steps to run.";
     case "profile_failed":
-      return (it ? "Profilo/config di prova non installabile." : "Test profile/config could not be installed.") + err;
+      return (
+        (it
+          ? "Profilo/config di prova non installabile."
+          : "Test profile/config could not be installed.") + err
+      );
     case "restore_failed":
-      return (it ? "Prova fallita e ripristino config non riuscito." : "Test failed and config restore failed.") + err;
+      return (
+        (it
+          ? "Prova fallita e ripristino config non riuscito."
+          : "Test failed and config restore failed.") + err
+      );
     case "command_failed":
-      return (it ? "MODULE_COMMAND fallito. Canvas invariato." : "MODULE_COMMAND failed. Canvas unchanged.") + err;
+      return (
+        (it
+          ? "MODULE_COMMAND fallito. Canvas invariato."
+          : "MODULE_COMMAND failed. Canvas unchanged.") + err
+      );
     case "apply_failed":
       return (
         (result.restored
@@ -936,19 +1150,27 @@ function RecipeTestResultModal({
   const rx = rxBlocksOf(result.capture);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-slmd border border-border-strong bg-surface p-4 shadow-e2">
         <h2 className="font-body-strong text-base text-ink">
           {it ? "Risultato prova" : "Test result"}
           <span
             className={`ml-2 rounded-slpill px-2 py-0.5 font-body text-[10px] font-semibold ${
-              result.ok ? "bg-emerald-500/15 text-emerald-700" : "bg-amber-500/15 text-amber-800"
+              result.ok
+                ? "bg-emerald-500/15 text-emerald-700"
+                : "bg-amber-500/15 text-amber-800"
             }`}
           >
             {result.ok ? (it ? "OK" : "OK") : it ? "Attenzione" : "Notice"}
           </span>
         </h2>
-        <p className="mt-1 font-body text-[11px] leading-snug text-ink-muted">{recipeTestNote(result, it)}</p>
+        <p className="mt-1 font-body text-[11px] leading-snug text-ink-muted">
+          {recipeTestNote(result, it)}
+        </p>
 
         {rx.length > 0 ? (
           <div className="mt-3">
@@ -970,7 +1192,9 @@ function RecipeTestResultModal({
             </div>
             {result.rxTruncated && (
               <p className="mt-1 font-body text-xs text-amber-700">
-                {it ? "Cattura parziale: sono mostrate le prime 8 letture." : "Partial capture: only the first 8 reads are shown."}
+                {it
+                  ? "Cattura parziale: sono mostrate le prime 8 letture."
+                  : "Partial capture: only the first 8 reads are shown."}
               </p>
             )}
             <p className="mt-1 font-body text-[10px] text-ink-faint">
@@ -987,15 +1211,26 @@ function RecipeTestResultModal({
           </p>
         )}
 
-        {!!result.readResults?.length && <section className="mt-3 rounded-slmd border border-border-strong p-3">
-          <h3 className="mb-2 font-body text-xs font-semibold text-ink">{it ? "Risultati decodificati" : "Decoded results"}</h3>
-          {result.readResults.map((value, index) => <p key={`${value.id}-${index}`} className="font-body text-sm text-ink">{value.label}: <span className="font-mono">{value.value ?? "—"}</span> {value.unit}</p>)}
-        </section>}
+        {!!result.readResults?.length && (
+          <section className="mt-3 rounded-slmd border border-border-strong p-3">
+            <h3 className="mb-2 font-body text-xs font-semibold text-ink">
+              {it ? "Risultati decodificati" : "Decoded results"}
+            </h3>
+            {result.readResults.map((value, index) => (
+              <p key={`${value.id}-${index}`} className="font-body text-sm text-ink">
+                {value.label}: <span className="font-mono">{value.value ?? "—"}</span>{" "}
+                {value.unit}
+              </p>
+            ))}
+          </section>
+        )}
 
         {timing.lanes.length > 0 ? (
           <div className="mt-4 rounded-slmd border border-border-strong bg-surface p-3">
             <TimingScopeChart
-              title={it ? "Segnali nel tempo (risposta)" : "Signals over time (response)"}
+              title={
+                it ? "Segnali nel tempo (risposta)" : "Signals over time (response)"
+              }
               caption={
                 it
                   ? "STEP allineati · fasce verdi = RX dal sensore."
@@ -1044,7 +1279,11 @@ function BindingPanel({
       {it
         ? "I pin sono quelli del Module Function (A0…). Assegnali nel configuratore fisico."
         : "Pins come from Module Function (A0…). Assign them in the physical configurator."}{" "}
-      <button type="button" className="font-semibold text-brand-blue underline" onClick={onOpenPhysical}>
+      <button
+        type="button"
+        className="font-semibold text-brand-blue underline"
+        onClick={onOpenPhysical}
+      >
         {it ? "Apri" : "Open"}
       </button>
     </p>
@@ -1059,14 +1298,19 @@ function BindingPanel({
     const physicalAdc = physicalLabelForSignalMode(modes, 14, variant);
     return (
       <div className="space-y-2 font-body text-xs">
-        <p className="font-semibold text-ink">{it ? "Tipo: Analogico" : "Type: Analog"}</p>
+        <p className="font-semibold text-ink">
+          {it ? "Tipo: Analogico" : "Type: Analog"}
+        </p>
         <Field label={it ? "Ruolo nel sensore" : "Sensor role"}>
           <input
             value={adc.signalName}
             onChange={(e) =>
               onChange({
                 ...draft,
-                binding: { ...draft.binding, adc: { ...adc, signalName: e.target.value || "SIGNAL" } },
+                binding: {
+                  ...draft.binding,
+                  adc: { ...adc, signalName: e.target.value || "SIGNAL" },
+                },
               })
             }
             className={inputClass}
@@ -1082,7 +1326,10 @@ function BindingPanel({
             onChange={(e) =>
               onChange({
                 ...draft,
-                binding: { ...draft.binding, adc: { ...adc, displayUnit: e.target.value as "raw" | "mV" } },
+                binding: {
+                  ...draft.binding,
+                  adc: { ...adc, displayUnit: e.target.value as "raw" | "mV" },
+                },
               })
             }
             className={inputClass}
@@ -1126,7 +1373,10 @@ function BindingPanel({
             onChange={(e) =>
               onChange({
                 ...draft,
-                binding: { ...draft.binding, i2c: { ...i2c, address: e.target.value, addressBits } },
+                binding: {
+                  ...draft.binding,
+                  i2c: { ...i2c, address: e.target.value, addressBits },
+                },
               })
             }
             className={inputClass}
@@ -1146,7 +1396,9 @@ function BindingPanel({
         <div className="rounded-slsm border border-border bg-surface-sunken px-2 py-1.5 font-mono text-[10px] text-ink-muted">
           {Object.entries(signalModes).map(([label, mode]) => (
             <div key={label}>
-              {label} · {physicalLabelForSignalMode(modes, mode, variant) ?? (it ? "non assegnato" : "unassigned")}
+              {label} ·{" "}
+              {physicalLabelForSignalMode(modes, mode, variant) ??
+                (it ? "non assegnato" : "unassigned")}
             </div>
           ))}
         </div>
@@ -1156,7 +1408,10 @@ function BindingPanel({
             onChange={(e) =>
               onChange({
                 ...draft,
-                binding: { ...draft.binding, spi: { ...spi, mode: Number(e.target.value) as 0 | 1 | 2 | 3 } },
+                binding: {
+                  ...draft.binding,
+                  spi: { ...spi, mode: Number(e.target.value) as 0 | 1 | 2 | 3 },
+                },
               })
             }
             className={inputClass}
@@ -1171,7 +1426,15 @@ function BindingPanel({
         <Field label={it ? "Frequenza" : "Frequency"}>
           <select
             value={spi.freqHz}
-            onChange={(e) => onChange({ ...draft, binding: { ...draft.binding, spi: { ...spi, freqHz: Number(e.target.value) } } })}
+            onChange={(e) =>
+              onChange({
+                ...draft,
+                binding: {
+                  ...draft.binding,
+                  spi: { ...spi, freqHz: Number(e.target.value) },
+                },
+              })
+            }
             className={inputClass}
           >
             <option value={1_000_000}>1 MHz</option>
@@ -1183,7 +1446,15 @@ function BindingPanel({
           <input
             type="checkbox"
             checked={spi.misoRequired}
-            onChange={(e) => onChange({ ...draft, binding: { ...draft.binding, spi: { ...spi, misoRequired: e.target.checked } } })}
+            onChange={(e) =>
+              onChange({
+                ...draft,
+                binding: {
+                  ...draft.binding,
+                  spi: { ...spi, misoRequired: e.target.checked },
+                },
+              })
+            }
           />
           {it ? "MISO obbligatorio" : "MISO required"}
         </label>
@@ -1206,7 +1477,15 @@ function BindingPanel({
           {draft.binding.gpioSignals.map((sig) => (
             <tr key={sig.id} className="text-ink">
               <td className="py-0.5 font-semibold">{sig.name}</td>
-              <td>{sig.direction === "in" ? (it ? "ingresso" : "in") : it ? "uscita" : "out"}</td>
+              <td>
+                {sig.direction === "in"
+                  ? it
+                    ? "ingresso"
+                    : "in"
+                  : it
+                    ? "uscita"
+                    : "out"}
+              </td>
               <td className="font-mono">{sig.pinLabel}</td>
             </tr>
           ))}
@@ -1225,7 +1504,13 @@ function BindingPanel({
             pull: "none",
             activeLow: false,
           };
-          onChange({ ...draft, binding: { ...draft.binding, gpioSignals: [...draft.binding.gpioSignals, sig] } });
+          onChange({
+            ...draft,
+            binding: {
+              ...draft.binding,
+              gpioSignals: [...draft.binding.gpioSignals, sig],
+            },
+          });
         }}
         className="inline-flex items-center gap-1 rounded-slsm border border-dashed border-border-strong px-2 py-1 font-body text-[11px] text-ink-muted hover:border-brand-blue"
       >
@@ -1256,19 +1541,37 @@ function StepInspector({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-1">
-        <span className="font-body text-xs font-semibold text-ink">{describeDeviceOp(op)}</span>
-        <button type="button" onClick={() => onMove(-1)} className="ml-auto rounded-slsm border border-border p-0.5 text-ink-faint">
+        <span className="font-body text-xs font-semibold text-ink">
+          {describeDeviceOp(op)}
+        </span>
+        <button
+          type="button"
+          aria-label={it ? "Sposta passo prima" : "Move step earlier"}
+          onClick={() => onMove(-1)}
+          className="ml-auto rounded-slsm border border-border p-0.5 text-ink-faint"
+        >
           <ArrowUp size={12} />
         </button>
-        <button type="button" onClick={() => onMove(1)} className="rounded-slsm border border-border p-0.5 text-ink-faint">
+        <button
+          type="button"
+          aria-label={it ? "Sposta passo dopo" : "Move step later"}
+          onClick={() => onMove(1)}
+          className="rounded-slsm border border-border p-0.5 text-ink-faint"
+        >
           <ArrowDown size={12} />
         </button>
-        <button type="button" onClick={onRemove} className="rounded-slsm border border-border p-0.5 text-error">
+        <button
+          type="button"
+          aria-label={it ? "Rimuovi passo" : "Remove step"}
+          onClick={onRemove}
+          className="rounded-slsm border border-border p-0.5 text-error"
+        >
           <Trash2 size={12} />
         </button>
       </div>
 
-      {(op.type === "i2c_write" || op.type === "i2c_write_read") && op.registerWidth && <RegisterStepFields op={op} it={it} onChange={onChange} />}
+      {(op.type === "i2c_write" || op.type === "i2c_write_read") &&
+        op.registerWidth && <RegisterStepFields op={op} it={it} onChange={onChange} />}
       {op.type === "sample_external" ? (
         <SampleExternalFields
           op={op}
@@ -1285,10 +1588,16 @@ function StepInspector({
 
       {op.type === "i2c_read" ? (
         <>
-          <Field label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}>
+          <Field
+            label={
+              it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"
+            }
+          >
             <input
               value={op.address ?? draft.binding.i2c?.address ?? ""}
-              onChange={(e) => onChange({ ...op, address: e.target.value.trim() || undefined })}
+              onChange={(e) =>
+                onChange({ ...op, address: e.target.value.trim() || undefined })
+              }
               className={inputClass}
               placeholder="0x48"
               spellCheck={false}
@@ -1299,22 +1608,34 @@ function StepInspector({
               type="number"
               min={1}
               value={op.len}
-              onChange={(e) => onChange({ ...op, len: Math.max(1, Number(e.target.value) || 1) })}
+              onChange={(e) =>
+                onChange({ ...op, len: Math.max(1, Number(e.target.value) || 1) })
+              }
               className={inputClass}
             />
           </Field>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
         </>
       ) : null}
 
       {op.type === "i2c_write_read" && !op.registerWidth ? (
         <>
-          <Field label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}>
+          <Field
+            label={
+              it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"
+            }
+          >
             <input
               value={op.address ?? draft.binding.i2c?.address ?? ""}
-              onChange={(e) => onChange({ ...op, address: e.target.value.trim() || undefined })}
+              onChange={(e) =>
+                onChange({ ...op, address: e.target.value.trim() || undefined })
+              }
               className={inputClass}
               placeholder="0x48"
               spellCheck={false}
@@ -1332,15 +1653,23 @@ function StepInspector({
               type="number"
               min={1}
               value={op.readLen}
-              onChange={(e) => onChange({ ...op, readLen: Math.max(1, Number(e.target.value) || 1) })}
+              onChange={(e) =>
+                onChange({ ...op, readLen: Math.max(1, Number(e.target.value) || 1) })
+              }
               className={inputClass}
             />
           </Field>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
           <p className="font-body text-[10px] text-ink-faint">
-            {it ? "RESTART generato automaticamente (nessuno STOP intermedio)." : "RESTART is generated automatically (no intermediate STOP)."}
+            {it
+              ? "RESTART generato automaticamente (nessuno STOP intermedio)."
+              : "RESTART is generated automatically (no intermediate STOP)."}
           </p>
         </>
       ) : null}
@@ -1350,7 +1679,9 @@ function StepInspector({
           <Field label={it ? "Da indirizzo" : "From address"}>
             <input
               value={op.fromAddress}
-              onChange={(e) => onChange({ ...op, fromAddress: e.target.value.trim() || "0x08" })}
+              onChange={(e) =>
+                onChange({ ...op, fromAddress: e.target.value.trim() || "0x08" })
+              }
               className={inputClass}
               placeholder="0x08"
               spellCheck={false}
@@ -1359,7 +1690,9 @@ function StepInspector({
           <Field label={it ? "A indirizzo" : "To address"}>
             <input
               value={op.toAddress}
-              onChange={(e) => onChange({ ...op, toAddress: e.target.value.trim() || "0x77" })}
+              onChange={(e) =>
+                onChange({ ...op, toAddress: e.target.value.trim() || "0x77" })
+              }
               className={inputClass}
               placeholder="0x77"
               spellCheck={false}
@@ -1398,18 +1731,30 @@ function StepInspector({
               type="number"
               min={0}
               value={op.rxLen}
-              onChange={(e) => onChange({ ...op, rxLen: Math.max(0, Number(e.target.value) || 0) })}
+              onChange={(e) =>
+                onChange({ ...op, rxLen: Math.max(0, Number(e.target.value) || 0) })
+              }
               className={inputClass}
             />
           </Field>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
           <label className="flex items-center gap-2 font-body text-[11px] text-ink-muted">
-            <input type="checkbox" checked={op.keepCs} onChange={(e) => onChange({ ...op, keepCs: e.target.checked })} />
+            <input
+              type="checkbox"
+              checked={op.keepCs}
+              onChange={(e) => onChange({ ...op, keepCs: e.target.checked })}
+            />
             {it ? "Mantieni CS attivo" : "Keep CS active"}
           </label>
-          <p className="font-body text-[10px] text-ink-faint">{it ? "Invio e ricezione avvengono insieme." : "TX and RX happen together."}</p>
+          <p className="font-body text-[10px] text-ink-faint">
+            {it ? "Invio e ricezione avvengono insieme." : "TX and RX happen together."}
+          </p>
         </>
       ) : null}
 
@@ -1434,7 +1779,9 @@ function StepInspector({
                 <input
                   type="number"
                   value={op.sampleMs}
-                  onChange={(e) => onChange({ ...op, sampleMs: Number(e.target.value) || 5 })}
+                  onChange={(e) =>
+                    onChange({ ...op, sampleMs: Number(e.target.value) || 5 })
+                  }
                   className={inputClass}
                 />
               </Field>
@@ -1442,14 +1789,20 @@ function StepInspector({
                 <input
                   type="number"
                   value={op.stableMs}
-                  onChange={(e) => onChange({ ...op, stableMs: Number(e.target.value) || 20 })}
+                  onChange={(e) =>
+                    onChange({ ...op, stableMs: Number(e.target.value) || 20 })
+                  }
                   className={inputClass}
                 />
               </Field>
             </>
           ) : null}
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
         </>
       ) : null}
@@ -1479,14 +1832,18 @@ function StepInspector({
               type="number"
               min={0}
               value={op.ms}
-              onChange={(e) => onChange({ ...op, ms: Math.max(0, Number(e.target.value) || 0) })}
+              onChange={(e) =>
+                onChange({ ...op, ms: Math.max(0, Number(e.target.value) || 0) })
+              }
               className={inputClass}
             />
           </Field>
           <Field label={it ? "Unità" : "Unit"}>
             <select
               value={op.unit === "us" ? "us" : "ms"}
-              onChange={(e) => onChange({ ...op, unit: e.target.value as WaitTimeUnit })}
+              onChange={(e) =>
+                onChange({ ...op, unit: e.target.value as WaitTimeUnit })
+              }
               className={inputClass}
             >
               <option value="ms">ms</option>
@@ -1499,12 +1856,18 @@ function StepInspector({
       {op.type === "adc_sample" ? (
         <>
           <Field label={it ? "Ingresso" : "Input"}>
-            <input value={draft.binding.adc?.signalName ?? "SIGNAL"} readOnly className={`${inputClass} opacity-70`} />
+            <input
+              value={draft.binding.adc?.signalName ?? "SIGNAL"}
+              readOnly
+              className={`${inputClass} opacity-70`}
+            />
           </Field>
           <Field label={it ? "Formato" : "Format"}>
             <select
               value={draft.binding.adc?.supportsMv ? op.format : "raw"}
-              onChange={(e) => onChange({ ...op, format: e.target.value as "raw" | "mV" })}
+              onChange={(e) =>
+                onChange({ ...op, format: e.target.value as "raw" | "mV" })
+              }
               className={inputClass}
               disabled={!draft.binding.adc?.supportsMv}
             >
@@ -1513,7 +1876,11 @@ function StepInspector({
             </select>
           </Field>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
         </>
       ) : null}
@@ -1521,23 +1888,36 @@ function StepInspector({
       {op.type === "adc_multi_sample" ? (
         <>
           <Field label={it ? "Ingresso" : "Input"}>
-            <input value={draft.binding.adc?.signalName ?? "SIGNAL"} readOnly className={`${inputClass} opacity-70`} />
+            <input
+              value={draft.binding.adc?.signalName ?? "SIGNAL"}
+              readOnly
+              className={`${inputClass} opacity-70`}
+            />
           </Field>
           <Field label={it ? "Numero campioni" : "Sample count"}>
             <input
               type="number"
               min={2}
               value={op.count}
-              onChange={(e) => onChange({ ...op, count: Math.max(2, Number(e.target.value) || 2) })}
+              onChange={(e) =>
+                onChange({ ...op, count: Math.max(2, Number(e.target.value) || 2) })
+              }
               className={inputClass}
             />
           </Field>
-          <Field label={it ? "Intervallo tra campioni (ms)" : "Gap between samples (ms)"}>
+          <Field
+            label={it ? "Intervallo tra campioni (ms)" : "Gap between samples (ms)"}
+          >
             <input
               type="number"
               min={0}
               value={op.intervalMs}
-              onChange={(e) => onChange({ ...op, intervalMs: Math.max(0, Number(e.target.value) || 0) })}
+              onChange={(e) =>
+                onChange({
+                  ...op,
+                  intervalMs: Math.max(0, Number(e.target.value) || 0),
+                })
+              }
               className={inputClass}
             />
           </Field>
@@ -1549,7 +1929,9 @@ function StepInspector({
           <Field label={it ? "Formato" : "Format"}>
             <select
               value={draft.binding.adc?.supportsMv ? op.format : "raw"}
-              onChange={(e) => onChange({ ...op, format: e.target.value as "raw" | "mV" })}
+              onChange={(e) =>
+                onChange({ ...op, format: e.target.value as "raw" | "mV" })
+              }
               className={inputClass}
               disabled={!draft.binding.adc?.supportsMv}
             >
@@ -1558,7 +1940,11 @@ function StepInspector({
             </select>
           </Field>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
         </>
       ) : null}
@@ -1566,13 +1952,23 @@ function StepInspector({
       {op.type === "average" ? (
         <>
           <Field label="Input">
-            <input value={op.input} onChange={(e) => onChange({ ...op, input: e.target.value })} className={inputClass} />
+            <input
+              value={op.input}
+              onChange={(e) => onChange({ ...op, input: e.target.value })}
+              className={inputClass}
+            />
           </Field>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
           <p className="font-body text-[10px] text-ink-faint">
-            {it ? "Un solo passo Media (anche se riassunto altrove)." : "Single Average step (even if summarized elsewhere)."}
+            {it
+              ? "Un solo passo Media (anche se riassunto altrove)."
+              : "Single Average step (even if summarized elsewhere)."}
           </p>
         </>
       ) : null}
@@ -1580,15 +1976,23 @@ function StepInspector({
       {op.type === "filter" ? (
         <>
           <Field label="Input">
-            <input value={op.input} onChange={(e) => onChange({ ...op, input: e.target.value })} className={inputClass} />
+            <input
+              value={op.input}
+              onChange={(e) => onChange({ ...op, input: e.target.value })}
+              className={inputClass}
+            />
           </Field>
           <Field label={it ? "Tipo" : "Kind"}>
             <select
               value={op.kind}
-              onChange={(e) => onChange({ ...op, kind: e.target.value as "moving_avg" | "median" })}
+              onChange={(e) =>
+                onChange({ ...op, kind: e.target.value as "moving_avg" | "median" })
+              }
               className={inputClass}
             >
-              <option value="moving_avg">{it ? "Media mobile" : "Moving average"}</option>
+              <option value="moving_avg">
+                {it ? "Media mobile" : "Moving average"}
+              </option>
               <option value="median">{it ? "Mediana" : "Median"}</option>
             </select>
           </Field>
@@ -1597,12 +2001,18 @@ function StepInspector({
               type="number"
               min={2}
               value={op.window}
-              onChange={(e) => onChange({ ...op, window: Math.max(2, Number(e.target.value) || 2) })}
+              onChange={(e) =>
+                onChange({ ...op, window: Math.max(2, Number(e.target.value) || 2) })
+              }
               className={inputClass}
             />
           </Field>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
         </>
       ) : null}
@@ -1610,20 +2020,28 @@ function StepInspector({
       {op.type === "map_range" ? (
         <>
           <Field label="Input">
-            <input value={op.input} onChange={(e) => onChange({ ...op, input: e.target.value })} className={inputClass} />
+            <input
+              value={op.input}
+              onChange={(e) => onChange({ ...op, input: e.target.value })}
+              className={inputClass}
+            />
           </Field>
           <Field label={it ? "Out min/max" : "Out min/max"}>
             <div className="flex gap-1">
               <input
                 type="number"
                 value={op.outMin}
-                onChange={(e) => onChange({ ...op, outMin: Number(e.target.value) || 0 })}
+                onChange={(e) =>
+                  onChange({ ...op, outMin: Number(e.target.value) || 0 })
+                }
                 className={inputClass}
               />
               <input
                 type="number"
                 value={op.outMax}
-                onChange={(e) => onChange({ ...op, outMax: Number(e.target.value) || 0 })}
+                onChange={(e) =>
+                  onChange({ ...op, outMax: Number(e.target.value) || 0 })
+                }
                 className={inputClass}
               />
             </div>
@@ -1634,25 +2052,43 @@ function StepInspector({
               : "In min/max from calibration (inverted range allowed; equal values invalid)."}
           </p>
           <label className="flex items-center gap-2 font-body text-[11px] text-ink-muted">
-            <input type="checkbox" checked={op.saturate} onChange={(e) => onChange({ ...op, saturate: e.target.checked })} />
-            {it ? "Saturazione esplicita fuori range" : "Explicit saturation outside range"}
+            <input
+              type="checkbox"
+              checked={op.saturate}
+              onChange={(e) => onChange({ ...op, saturate: e.target.checked })}
+            />
+            {it
+              ? "Saturazione esplicita fuori range"
+              : "Explicit saturation outside range"}
           </label>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
         </>
       ) : null}
 
       {op.type === "spi_cs" ? (
         <label className="flex items-center gap-2 font-body text-[11px] text-ink-muted">
-          <input type="checkbox" checked={op.assert} onChange={(e) => onChange({ ...op, assert: e.target.checked })} />
+          <input
+            type="checkbox"
+            checked={op.assert}
+            onChange={(e) => onChange({ ...op, assert: e.target.checked })}
+          />
           {it ? "CS basso (assert)" : "Assert CS (low)"}
         </label>
       ) : null}
 
       {op.type === "w1_reset" ? (
         <Field label={it ? "Salva presenza in" : "Presence into"}>
-          <input value={op.intoPresence} onChange={(e) => onChange({ ...op, intoPresence: e.target.value })} className={inputClass} />
+          <input
+            value={op.intoPresence}
+            onChange={(e) => onChange({ ...op, intoPresence: e.target.value })}
+            className={inputClass}
+          />
         </Field>
       ) : null}
       {op.type === "w1_match_rom" ? (
@@ -1660,13 +2096,18 @@ function StepInspector({
           <Field label="ROM">
             <input
               value={op.rom}
-              placeholder={draft.binding.w1?.rom || (it ? "Usa ROM del binding" : "Use binding ROM")}
+              placeholder={
+                draft.binding.w1?.rom ||
+                (it ? "Usa ROM del binding" : "Use binding ROM")
+              }
               onChange={(e) => onChange({ ...op, rom: e.target.value })}
               className={inputClass}
             />
           </Field>
           <p className="font-body text-[10px] text-ink-faint">
-            {it ? "Vuoto = ROM del dispositivo nella sidebar." : "Empty = device ROM from the sidebar."}
+            {it
+              ? "Vuoto = ROM del dispositivo nella sidebar."
+              : "Empty = device ROM from the sidebar."}
           </p>
         </>
       ) : null}
@@ -1694,12 +2135,18 @@ function StepInspector({
               type="number"
               min={1}
               value={op.len}
-              onChange={(e) => onChange({ ...op, len: Math.max(1, Number(e.target.value) || 1) })}
+              onChange={(e) =>
+                onChange({ ...op, len: Math.max(1, Number(e.target.value) || 1) })
+              }
               className={inputClass}
             />
           </Field>
           <Field label={it ? "Salva in" : "Save to"}>
-            <input value={op.into} onChange={(e) => onChange({ ...op, into: e.target.value })} className={inputClass} />
+            <input
+              value={op.into}
+              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              className={inputClass}
+            />
           </Field>
         </>
       ) : null}
@@ -1708,10 +2155,14 @@ function StepInspector({
           <Field label={it ? "Strategia" : "Strategy"}>
             <select
               value={op.strategy}
-              onChange={(e) => onChange({ ...op, strategy: e.target.value as "fixed_max" | "poll" })}
+              onChange={(e) =>
+                onChange({ ...op, strategy: e.target.value as "fixed_max" | "poll" })
+              }
               className={inputClass}
             >
-              <option value="fixed_max">{it ? "Timeout max (datasheet)" : "Fixed max (datasheet)"}</option>
+              <option value="fixed_max">
+                {it ? "Timeout max (datasheet)" : "Fixed max (datasheet)"}
+              </option>
               <option value="poll" disabled>
                 {it ? "Poll (runtime non disponibile)" : "Poll (runtime unavailable)"}
               </option>
@@ -1722,7 +2173,9 @@ function StepInspector({
               type="number"
               min={1}
               value={op.timeoutMs}
-              onChange={(e) => onChange({ ...op, timeoutMs: Math.max(1, Number(e.target.value) || 1) })}
+              onChange={(e) =>
+                onChange({ ...op, timeoutMs: Math.max(1, Number(e.target.value) || 1) })
+              }
               className={inputClass}
             />
           </Field>
@@ -1736,19 +2189,29 @@ function StepInspector({
       {op.type === "w1_crc" ? (
         <>
           <Field label="Input">
-            <input value={op.input} onChange={(e) => onChange({ ...op, input: e.target.value })} className={inputClass} />
+            <input
+              value={op.input}
+              onChange={(e) => onChange({ ...op, input: e.target.value })}
+              className={inputClass}
+            />
           </Field>
           <Field label={it ? "Byte (incl. CRC)" : "Bytes (incl. CRC)"}>
             <input
               type="number"
               min={2}
               value={op.len}
-              onChange={(e) => onChange({ ...op, len: Math.max(2, Number(e.target.value) || 2) })}
+              onChange={(e) =>
+                onChange({ ...op, len: Math.max(2, Number(e.target.value) || 2) })
+              }
               className={inputClass}
             />
           </Field>
           <Field label={it ? "Esito in" : "OK into"}>
-            <input value={op.intoOk} onChange={(e) => onChange({ ...op, intoOk: e.target.value })} className={inputClass} />
+            <input
+              value={op.intoOk}
+              onChange={(e) => onChange({ ...op, intoOk: e.target.value })}
+              className={inputClass}
+            />
           </Field>
         </>
       ) : null}
@@ -1785,7 +2248,10 @@ function W1BindingPanel({
       return;
     }
     setRomError(null);
-    onChange({ ...draft, binding: { ...draft.binding, w1: { ...w1, rom: check.rom } } });
+    onChange({
+      ...draft,
+      binding: { ...draft.binding, w1: { ...w1, rom: check.rom } },
+    });
     setRomDraft(check.rom);
   }
 
@@ -1839,7 +2305,9 @@ function W1BindingPanel({
       >
         {it ? "Cerca dispositivi" : "Search devices"}
       </button>
-      {searchNote ? <p className="font-body text-[10px] text-ink-faint">{searchNote}</p> : null}
+      {searchNote ? (
+        <p className="font-body text-[10px] text-ink-faint">{searchNote}</p>
+      ) : null}
       <Field label={it ? "Risoluzione (°C)" : "Resolution"}>
         <select
           value={w1.resolutionBits ?? 12}
@@ -1848,7 +2316,10 @@ function W1BindingPanel({
               ...draft,
               binding: {
                 ...draft.binding,
-                w1: { ...w1, resolutionBits: Number(e.target.value) as 9 | 10 | 11 | 12 },
+                w1: {
+                  ...w1,
+                  resolutionBits: Number(e.target.value) as 9 | 10 | 11 | 12,
+                },
               },
             })
           }
@@ -1897,28 +2368,52 @@ function BlockPreviewCard({
       <div className="mx-auto flex max-w-sm items-stretch gap-2">
         <div className="flex w-28 flex-col justify-center gap-1.5">
           {inputs.length === 0 ? (
-            <p className="font-body text-[10px] text-ink-faint">{it ? "Nessun input" : "No inputs"}</p>
+            <p className="font-body text-[10px] text-ink-faint">
+              {it ? "Nessun input" : "No inputs"}
+            </p>
           ) : (
             inputs.map((p) => (
-              <div key={p.id} className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 text-right">
-                <p className="font-body text-[10px] font-semibold text-ink">{p.label}</p>
-                <p className="font-mono text-[9px] text-ink-faint">{p.valueType}{p.unit ? ` · ${p.unit}` : ""}</p>
+              <div
+                key={p.id}
+                className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1 text-right"
+              >
+                <p className="font-body text-[10px] font-semibold text-ink">
+                  {p.label}
+                </p>
+                <p className="font-mono text-[9px] text-ink-faint">
+                  {p.valueType}
+                  {p.unit ? ` · ${p.unit}` : ""}
+                </p>
               </div>
             ))
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-center justify-center rounded-slmd border-2 border-ink bg-surface px-3 py-4 shadow-e1">
-          <p className="text-center font-heading text-sm font-bold text-ink">{draft.name || (it ? "Dispositivo" : "Device")}</p>
-          <p className="mt-0.5 font-mono text-[10px] uppercase text-ink-faint">{draft.binding.bus}</p>
+          <p className="text-center font-heading text-sm font-bold text-ink">
+            {draft.name || (it ? "Dispositivo" : "Device")}
+          </p>
+          <p className="mt-0.5 font-mono text-[10px] uppercase text-ink-faint">
+            {draft.binding.bus}
+          </p>
         </div>
         <div className="flex w-28 flex-col justify-center gap-1.5">
           {outputs.length === 0 ? (
-            <p className="font-body text-[10px] text-ink-faint">{it ? "Nessun output" : "No outputs"}</p>
+            <p className="font-body text-[10px] text-ink-faint">
+              {it ? "Nessun output" : "No outputs"}
+            </p>
           ) : (
             outputs.map((p) => (
-              <div key={p.id} className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1">
-                <p className="font-body text-[10px] font-semibold text-ink">{p.label}</p>
-                <p className="font-mono text-[9px] text-ink-faint">{p.valueType}{p.unit ? ` · ${p.unit}` : ""}</p>
+              <div
+                key={p.id}
+                className="rounded-slsm border border-border-strong bg-surface px-1.5 py-1"
+              >
+                <p className="font-body text-[10px] font-semibold text-ink">
+                  {p.label}
+                </p>
+                <p className="font-mono text-[9px] text-ink-faint">
+                  {p.valueType}
+                  {p.unit ? ` · ${p.unit}` : ""}
+                </p>
               </div>
             ))
           )}
@@ -1958,7 +2453,9 @@ function EmitOutputFields({
     if (!channel) return;
     onDraftChange({
       ...draft,
-      channels: draft.channels.map((c) => (c.id === channel.id ? { ...c, ...patch } : c)),
+      channels: draft.channels.map((c) =>
+        c.id === channel.id ? { ...c, ...patch } : c,
+      ),
     });
   }
 
@@ -1993,7 +2490,9 @@ function EmitOutputFields({
               ...draft.channels,
               {
                 id,
-                label: it ? `Uscita ${readChannels.length + 1}` : `Output ${readChannels.length + 1}`,
+                label: it
+                  ? `Uscita ${readChannels.length + 1}`
+                  : `Output ${readChannels.length + 1}`,
                 unit: "",
                 quantity: "other",
                 direction: "read",
@@ -2008,12 +2507,18 @@ function EmitOutputFields({
       {channel ? (
         <>
           <Field label={it ? "Etichetta sul blocco" : "Block label"}>
-            <input value={channel.label} onChange={(e) => patchChannel({ label: e.target.value })} className={inputClass} />
+            <input
+              value={channel.label}
+              onChange={(e) => patchChannel({ label: e.target.value })}
+              className={inputClass}
+            />
           </Field>
           <Field label={it ? "Tipo grandezza" : "Quantity type"}>
             <select
               value={channel.quantity}
-              onChange={(e) => patchChannel({ quantity: e.target.value as SensorOutputKind })}
+              onChange={(e) =>
+                patchChannel({ quantity: e.target.value as SensorOutputKind })
+              }
               className={inputClass}
             >
               {quantities.map((q) => (
@@ -2024,12 +2529,21 @@ function EmitOutputFields({
             </select>
           </Field>
           <Field label={it ? "Unità" : "Unit"}>
-            <input value={channel.unit} onChange={(e) => patchChannel({ unit: e.target.value })} className={inputClass} placeholder="°C, %, …" />
+            <input
+              value={channel.unit}
+              onChange={(e) => patchChannel({ unit: e.target.value })}
+              className={inputClass}
+              placeholder="°C, %, …"
+            />
           </Field>
         </>
       ) : null}
       <Field label="from">
-        <input value={op.from} onChange={(e) => onChange({ ...op, from: e.target.value })} className={inputClass} />
+        <input
+          value={op.from}
+          onChange={(e) => onChange({ ...op, from: e.target.value })}
+          className={inputClass}
+        />
       </Field>
     </>
   );
@@ -2071,14 +2585,18 @@ function DecodeFields({
       <Field label={it ? "Variabile di uscita" : "Output variable"}>
         <input
           value={op.into}
-          onChange={(e) => onChange({ ...op, into: normalizeRecipeVarName(e.target.value) })}
+          onChange={(e) =>
+            onChange({ ...op, into: normalizeRecipeVarName(e.target.value) })
+          }
           className={inputClass}
         />
       </Field>
       <Field label={it ? "Tipo uscita" : "Output type"}>
         <select
           value={op.outType ?? "number"}
-          onChange={(e) => onChange({ ...op, outType: e.target.value as RecipeVarType })}
+          onChange={(e) =>
+            onChange({ ...op, outType: e.target.value as RecipeVarType })
+          }
           className={inputClass}
         >
           <option value="number">number</option>
@@ -2092,7 +2610,9 @@ function DecodeFields({
           <input
             type="number"
             value={op.startByte}
-            onChange={(e) => onChange({ ...op, startByte: Number(e.target.value) || 0 })}
+            onChange={(e) =>
+              onChange({ ...op, startByte: Number(e.target.value) || 0 })
+            }
             className={inputClass}
           />
           <input
@@ -2106,7 +2626,9 @@ function DecodeFields({
       <Field label={it ? "Ordine byte" : "Byte order"}>
         <select
           value={op.byteOrder}
-          onChange={(e) => onChange({ ...op, byteOrder: e.target.value as "be" | "le" })}
+          onChange={(e) =>
+            onChange({ ...op, byteOrder: e.target.value as "be" | "le" })
+          }
           className={inputClass}
         >
           <option value="be">BE</option>
@@ -2191,7 +2713,9 @@ function EncodeFields({
       <Field label={it ? "Da tipo" : "From type"}>
         <select
           value={op.fromType}
-          onChange={(e) => onChange({ ...op, fromType: e.target.value as RecipeVarType })}
+          onChange={(e) =>
+            onChange({ ...op, fromType: e.target.value as RecipeVarType })
+          }
           className={inputClass}
         >
           <option value="number">number</option>
@@ -2215,7 +2739,9 @@ function EncodeFields({
       <Field label={it ? "Variabile destinazione" : "Destination variable"}>
         <input
           value={op.into}
-          onChange={(e) => onChange({ ...op, into: normalizeRecipeVarName(e.target.value) })}
+          onChange={(e) =>
+            onChange({ ...op, into: normalizeRecipeVarName(e.target.value) })
+          }
           className={inputClass}
         />
       </Field>
@@ -2227,14 +2753,21 @@ function EncodeFields({
               min={1}
               max={8}
               value={op.widthBytes}
-              onChange={(e) => onChange({ ...op, widthBytes: Math.max(1, Math.min(8, Number(e.target.value) || 1)) })}
+              onChange={(e) =>
+                onChange({
+                  ...op,
+                  widthBytes: Math.max(1, Math.min(8, Number(e.target.value) || 1)),
+                })
+              }
               className={inputClass}
             />
           </Field>
           <Field label={it ? "Ordine byte" : "Byte order"}>
             <select
               value={op.byteOrder}
-              onChange={(e) => onChange({ ...op, byteOrder: e.target.value as "be" | "le" })}
+              onChange={(e) =>
+                onChange({ ...op, byteOrder: e.target.value as "be" | "le" })
+              }
               className={inputClass}
             >
               <option value="be">BE</option>
@@ -2352,7 +2885,9 @@ function HexByteCellsEditor({
           const valid = cell === "" || parseHexByteToken(cell) !== null;
           return (
             <li key={`${opId}-b${index}`} className="flex items-center gap-1.5">
-              <span className="w-4 shrink-0 text-right font-mono text-[10px] text-ink-faint">{index}</span>
+              <span className="w-4 shrink-0 text-right font-mono text-[10px] text-ink-faint">
+                {index}
+              </span>
               <span className="font-mono text-[11px] text-ink-faint">0x</span>
               <input
                 data-i2c-byte={`${opId}-${index}`}
@@ -2373,10 +2908,14 @@ function HexByteCellsEditor({
                     if (index === cells.length - 1) addByte();
                     else {
                       document
-                        .querySelector<HTMLInputElement>(`[data-i2c-byte="${opId}-${index + 1}"]`)
+                        .querySelector<HTMLInputElement>(
+                          `[data-i2c-byte="${opId}-${index + 1}"]`,
+                        )
                         ?.focus();
                       document
-                        .querySelector<HTMLInputElement>(`[data-i2c-byte="${opId}-${index + 1}"]`)
+                        .querySelector<HTMLInputElement>(
+                          `[data-i2c-byte="${opId}-${index + 1}"]`,
+                        )
                         ?.select();
                     }
                   }
@@ -2474,9 +3013,7 @@ function RegisterAddressField({
       />
       {error && (
         <p role="alert" className="font-body text-xs text-error">
-          {it
-            ? "Inserisci un indirizzo HEX valido."
-            : "Enter a valid HEX address."}
+          {it ? "Inserisci un indirizzo HEX valido." : "Enter a valid HEX address."}
         </p>
       )}
     </>
@@ -2498,9 +3035,7 @@ function RegisterStepFields({
   const payload = bytes.slice(width);
   function changeBytes(next: readonly string[]) {
     onChange(
-      op.type === "i2c_write"
-        ? { ...op, bytes: next }
-        : { ...op, writeBytes: next },
+      op.type === "i2c_write" ? { ...op, bytes: next } : { ...op, writeBytes: next },
     );
   }
   return (
@@ -2513,42 +3048,11 @@ function RegisterStepFields({
           it={it}
           onCommit={(raw) =>
             changeBytes([
-              ...Array.from({ length: width }, (_, i) =>
-                raw.slice(i * 2, i * 2 + 2),
-              ),
+              ...Array.from({ length: width }, (_, i) => raw.slice(i * 2, i * 2 + 2)),
               ...payload,
             ])
           }
         />
-      </Field>
-      <Field
-        label={it ? "Dimensione indirizzo registro" : "Register address width"}
-      >
-        <select
-          className={inputClass}
-          value={width}
-          onChange={(e) => {
-            const nextWidth = Number(e.target.value) as 1 | 2;
-            const nextRegister = register
-              .join("")
-              .padStart(nextWidth * 2, "0")
-              .slice(-nextWidth * 2);
-            const nextBytes = [
-              ...Array.from({ length: nextWidth }, (_, i) =>
-                nextRegister.slice(i * 2, i * 2 + 2),
-              ),
-              ...payload,
-            ];
-            onChange(
-              op.type === "i2c_write"
-                ? { ...op, registerWidth: nextWidth, bytes: nextBytes }
-                : { ...op, registerWidth: nextWidth, writeBytes: nextBytes },
-            );
-          }}
-        >
-          <option value={1}>8 bit</option>
-          <option value={2}>16 bit · MSB first</option>
-        </select>
       </Field>
       {op.type === "i2c_write" ? (
         <HexByteCellsEditor
@@ -2569,10 +3073,7 @@ function RegisterStepFields({
               onChange={(e) =>
                 onChange({
                   ...op,
-                  readLen: Math.max(
-                    1,
-                    Math.min(8, Number(e.target.value) || 1),
-                  ),
+                  readLen: Math.max(1, Math.min(8, Number(e.target.value) || 1)),
                 })
               }
               className={inputClass}
@@ -2592,6 +3093,38 @@ function RegisterStepFields({
           </p>
         </>
       )}
+      <details className="rounded-slsm border border-border p-2">
+        <summary className="cursor-pointer font-body text-xs text-ink-muted">
+          {it ? "Dettagli tecnici del registro" : "Register technical details"}
+        </summary>{" "}
+        <Field label={it ? "Dimensione indirizzo registro" : "Register address width"}>
+          <select
+            className={inputClass}
+            value={width}
+            onChange={(e) => {
+              const nextWidth = Number(e.target.value) as 1 | 2;
+              const nextRegister = register
+                .join("")
+                .padStart(nextWidth * 2, "0")
+                .slice(-nextWidth * 2);
+              const nextBytes = [
+                ...Array.from({ length: nextWidth }, (_, i) =>
+                  nextRegister.slice(i * 2, i * 2 + 2),
+                ),
+                ...payload,
+              ];
+              onChange(
+                op.type === "i2c_write"
+                  ? { ...op, registerWidth: nextWidth, bytes: nextBytes }
+                  : { ...op, registerWidth: nextWidth, writeBytes: nextBytes },
+              );
+            }}
+          >
+            <option value={1}>8 bit</option>
+            <option value={2}>16 bit · MSB first</option>
+          </select>
+        </Field>
+      </details>
     </>
   );
 }
@@ -2615,7 +3148,9 @@ function I2cWriteFields({
         </span>
         <input
           value={op.address ?? draft.binding.i2c?.address ?? ""}
-          onChange={(e) => onChange({ ...op, address: e.target.value.trim() || undefined })}
+          onChange={(e) =>
+            onChange({ ...op, address: e.target.value.trim() || undefined })
+          }
           className={inputClass}
           placeholder="3C"
           spellCheck={false}
@@ -2645,12 +3180,14 @@ function I2cTransactionFields({
   readonly onChange: (next: DeviceRecipeOp) => void;
 }) {
   const errors = validateI2cTransactionPhases(op.phases);
-  const setPhases = (phases: readonly I2cTransactionPhase[]) => onChange({ ...op, phases });
+  const setPhases = (phases: readonly I2cTransactionPhase[]) =>
+    onChange({ ...op, phases });
   const patchPhase = (index: number, phase: I2cTransactionPhase) => {
     const next = op.phases.map((p, i) => (i === index ? phase : p));
     setPhases(next);
   };
-  const removePhase = (index: number) => setPhases(op.phases.filter((_, i) => i !== index));
+  const removePhase = (index: number) =>
+    setPhases(op.phases.filter((_, i) => i !== index));
   const addPhase = (kind: I2cTransactionPhase["kind"]) => {
     const phase: I2cTransactionPhase =
       kind === "write"
@@ -2663,10 +3200,14 @@ function I2cTransactionFields({
 
   return (
     <>
-      <Field label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}>
+      <Field
+        label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}
+      >
         <input
           value={op.address ?? draft.binding.i2c?.address ?? ""}
-          onChange={(e) => onChange({ ...op, address: e.target.value.trim() || undefined })}
+          onChange={(e) =>
+            onChange({ ...op, address: e.target.value.trim() || undefined })
+          }
           className={inputClass}
           placeholder="0x48"
           spellCheck={false}
@@ -2677,7 +3218,10 @@ function I2cTransactionFields({
           {it ? "Fasi" : "Phases"}
         </p>
         {op.phases.map((phase, index) => (
-          <div key={`${phase.kind}-${index}`} className="flex items-start gap-1 rounded-slsm border border-border bg-surface-sunken px-1.5 py-1">
+          <div
+            key={`${phase.kind}-${index}`}
+            className="flex items-start gap-1 rounded-slsm border border-border bg-surface-sunken px-1.5 py-1"
+          >
             <span className="w-14 shrink-0 pt-1 font-mono text-[10px] font-semibold uppercase text-ink">
               {phase.kind === "restart" ? "Sr" : phase.kind}
             </span>
@@ -2687,7 +3231,10 @@ function I2cTransactionFields({
                 onChange={(e) =>
                   patchPhase(index, {
                     kind: "write",
-                    bytes: e.target.value.split(/\s+/).map((s) => s.trim()).filter(Boolean),
+                    bytes: e.target.value
+                      .split(/\s+/)
+                      .map((s) => s.trim())
+                      .filter(Boolean),
                   })
                 }
                 className={`${inputClass} flex-1`}
@@ -2700,11 +3247,18 @@ function I2cTransactionFields({
                 type="number"
                 min={1}
                 value={phase.len}
-                onChange={(e) => patchPhase(index, { kind: "read", len: Math.max(1, Number(e.target.value) || 1) })}
+                onChange={(e) =>
+                  patchPhase(index, {
+                    kind: "read",
+                    len: Math.max(1, Number(e.target.value) || 1),
+                  })
+                }
                 className={`${inputClass} w-20`}
               />
             ) : null}
-            {phase.kind === "start" || phase.kind === "restart" || phase.kind === "stop" ? (
+            {phase.kind === "start" ||
+            phase.kind === "restart" ||
+            phase.kind === "stop" ? (
               <span className="flex-1 pt-1 font-body text-[10px] text-ink-faint">
                 {phase.kind === "start"
                   ? "START"
@@ -2802,10 +3356,15 @@ function SampleExternalFields({
             onClick={() => {
               const ensured = ensureWriteChannel(draft, {
                 id: `ingresso_${writeChannels.length + 1}`,
-                label: it ? `Ingresso ${writeChannels.length + 1}` : `Input ${writeChannels.length + 1}`,
+                label: it
+                  ? `Ingresso ${writeChannels.length + 1}`
+                  : `Input ${writeChannels.length + 1}`,
               });
               onDraftChange(
-                updateOpAnywhere(ensured.draft, op.id, { ...op, fromChannelId: ensured.channelId }),
+                updateOpAnywhere(ensured.draft, op.id, {
+                  ...op,
+                  fromChannelId: ensured.channelId,
+                }),
               );
             }}
           >
@@ -2843,7 +3402,9 @@ function SampleExternalFields({
                   }
                 : c,
             );
-            onDraftChange(updateOpAnywhere({ ...draft, channels }, op.id, { ...op, valueType }));
+            onDraftChange(
+              updateOpAnywhere({ ...draft, channels }, op.id, { ...op, valueType }),
+            );
           }}
           className={inputClass}
         >
@@ -2855,7 +3416,10 @@ function SampleExternalFields({
       </Field>
       <Field label={it ? "Etichetta ingresso" : "Input label"}>
         <input
-          value={draft.channels.find((c) => c.id === op.fromChannelId)?.label ?? op.fromChannelId}
+          value={
+            draft.channels.find((c) => c.id === op.fromChannelId)?.label ??
+            op.fromChannelId
+          }
           onChange={(e) => {
             onDraftChange({
               ...draft,
@@ -2894,7 +3458,9 @@ function VariablesPanel({
       <ul className="mb-2 space-y-1.5">
         {draft.variables.length === 0 ? (
           <li className="font-body text-[11px] text-ink-faint">
-            {it ? "Nessuna — aggiungi Ingresso o crea qui." : "None — add Ingresso or create here."}
+            {it
+              ? "Nessuna — aggiungi Ingresso o crea qui."
+              : "None — add Ingresso or create here."}
           </li>
         ) : (
           draft.variables.map((v) => (
@@ -2915,7 +3481,12 @@ function VariablesPanel({
                 <select
                   value={v.valueType}
                   onChange={(e) =>
-                    onChange(upsertRecipeVariable(draft, { ...v, valueType: e.target.value as RecipeVarType }))
+                    onChange(
+                      upsertRecipeVariable(draft, {
+                        ...v,
+                        valueType: e.target.value as RecipeVarType,
+                      }),
+                    )
                   }
                   className={`${inputClass} w-20`}
                 >
@@ -2946,7 +3517,12 @@ function VariablesPanel({
                 value={v.defaultValue ?? ""}
                 placeholder={it ? "Default (opzionale)" : "Default (optional)"}
                 onChange={(e) =>
-                  onChange(upsertRecipeVariable(draft, { ...v, defaultValue: e.target.value || undefined }))
+                  onChange(
+                    upsertRecipeVariable(draft, {
+                      ...v,
+                      defaultValue: e.target.value || undefined,
+                    }),
+                  )
                 }
                 className={`${inputClass} mt-1`}
               />
@@ -2974,14 +3550,21 @@ function VariablesPanel({
         {it ? "Ingressi Flow" : "Flow inputs"}
       </h3>
       <p className="mb-1 font-body text-[10px] text-ink-muted">
-        {it ? "Canali in scrittura esposti al canvas." : "Write channels exposed to the canvas."}
+        {it
+          ? "Canali in scrittura esposti al canvas."
+          : "Write channels exposed to the canvas."}
       </p>
       <ul className="mb-1 space-y-1">
         {writeChannels.length === 0 ? (
-          <li className="font-body text-[11px] text-ink-faint">{it ? "Nessun ingresso." : "No inputs."}</li>
+          <li className="font-body text-[11px] text-ink-faint">
+            {it ? "Nessun ingresso." : "No inputs."}
+          </li>
         ) : (
           writeChannels.map((ch) => (
-            <li key={ch.id} className="rounded-slpill bg-brand-blue/10 px-2 py-0.5 font-body text-[11px] text-brand-blue">
+            <li
+              key={ch.id}
+              className="rounded-slpill bg-brand-blue/10 px-2 py-0.5 font-body text-[11px] text-brand-blue"
+            >
               {ch.label} · {ch.id}
             </li>
           ))
@@ -2992,7 +3575,9 @@ function VariablesPanel({
         onClick={() => {
           const ensured = ensureWriteChannel(draft, {
             id: `ingresso_${writeChannels.length + 1}`,
-            label: it ? `Ingresso ${writeChannels.length + 1}` : `Input ${writeChannels.length + 1}`,
+            label: it
+              ? `Ingresso ${writeChannels.length + 1}`
+              : `Input ${writeChannels.length + 1}`,
           });
           onChange(ensured.draft);
         }}
@@ -3112,7 +3697,13 @@ function libraryOpHint(type: DeviceRecipeOp["type"], it: boolean): string {
     },
   };
   const hint = hints[type];
-  return hint ? (it ? hint.it : hint.en) : it ? "Aggiungi questo passo alla sequenza." : "Add this step to the sequence.";
+  return hint
+    ? it
+      ? hint.it
+      : hint.en
+    : it
+      ? "Aggiungi questo passo alla sequenza."
+      : "Add this step to the sequence.";
 }
 
 function LibraryList({
@@ -3139,7 +3730,15 @@ function LibraryList({
           },
           {
             title: it ? "Dati" : "Data",
-            types: ["average", "filter", "map_range", "encode", "decode", "emit", "wait"] as const,
+            types: [
+              "average",
+              "filter",
+              "map_range",
+              "encode",
+              "decode",
+              "emit",
+              "wait",
+            ] as const,
           },
         ]
       : [{ title: null as string | null, types: library.map((i) => i.type) }];
@@ -3147,12 +3746,16 @@ function LibraryList({
   return (
     <div className="flex flex-col gap-2">
       {groups.map((group) => {
-        const items = library.filter((item) => (group.types as readonly string[]).includes(item.type));
+        const items = library.filter((item) =>
+          (group.types as readonly string[]).includes(item.type),
+        );
         if (items.length === 0) return null;
         return (
           <div key={group.title ?? "all"}>
             {group.title ? (
-              <p className="mb-1 font-body text-[10px] font-semibold uppercase tracking-wide text-ink-muted">{group.title}</p>
+              <p className="mb-1 font-body text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
+                {group.title}
+              </p>
             ) : null}
             <ul className="flex flex-col gap-1">
               {items.map((item) => {
@@ -3200,7 +3803,12 @@ function AnalogSamplingSummary({
   const avg = ops.find((op) => op.type === "average");
   const count = multi?.type === "adc_multi_sample" ? multi.count : 1;
   const intervalMs = multi?.type === "adc_multi_sample" ? multi.intervalMs : 0;
-  const into = multi?.type === "adc_multi_sample" ? multi.into : single?.type === "adc_sample" ? single.into : "samples";
+  const into =
+    multi?.type === "adc_multi_sample"
+      ? multi.into
+      : single?.type === "adc_sample"
+        ? single.into
+        : "samples";
 
   return (
     <section className="mb-4 rounded-slmd border border-border-strong bg-surface p-3">
@@ -3212,7 +3820,8 @@ function AnalogSamplingSummary({
           1. {it ? `Acquisisci ${count} campioni` : `Acquire ${count} samples`}
           {multi ? (
             <span className="mt-0.5 block font-mono text-[10px] text-ink-faint">
-              {intervalMs} ms {it ? "tra adiacenti" : "adjacent"} · span {multiSampleSpanMs(count, intervalMs)} ms
+              {intervalMs} ms {it ? "tra adiacenti" : "adjacent"} · span{" "}
+              {multiSampleSpanMs(count, intervalMs)} ms
             </span>
           ) : null}
         </span>

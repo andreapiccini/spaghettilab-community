@@ -526,13 +526,13 @@ export class SpaghettiClient {
 
   // --- command / connectivity / maintenance ----------------------------------
 
-  async moduleCommand(req: ModuleCommandRequest, signal?: AbortSignal): Promise<void> {
+  async moduleCommand(req: ModuleCommandRequest, signal?: AbortSignal): Promise<ReturnType<typeof decodeModuleCommandResponse>> {
     const bytes = await this.request(
       Operation.MODULE_COMMAND,
       encodeModuleCommandRequest(req),
       signal,
     );
-    decodeModuleCommandResponse(bytes);
+    return decodeModuleCommandResponse(bytes);
   }
 
   async getConnectivityStatus(

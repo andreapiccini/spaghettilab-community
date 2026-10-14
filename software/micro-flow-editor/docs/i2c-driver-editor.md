@@ -44,11 +44,23 @@ usata quella selezionata; non viene scelta arbitrariamente un’altra scheda.
 - Le scritture della prova richiedono byte HEX costanti; riferimenti a variabili
   non risolti non vengono trasformati silenziosamente in dati da inviare.
 - Questo aggiornamento completa l’authoring dei blocchi e le prove manuali reali.
-  L’esecuzione automatica delle azioni tramite i collegamenti e Run Deploy richiede
-  ancora la compilazione dei driver multi-azione e il dispatch nel runtime firmware.
-  Non vengono introdotti comandi firmware o risultati di completamento simulati.
+  Il firmware 0.3.5 supporta profili multi-azione, parametri e dispatch tramite
+  regole `device-action`. Run Deploy richiede ancora il collegamento del compilatore
+  del canvas a questi profili e regole; i blocchi di authoring da soli non lo attivano.
 
 ## Verifica
 
 Sul GY-521, indirizzo 0x68, SDA GPIO38 e SCL GPIO37, il modello di lettura con
 registro 0x75 e lunghezza 1 restituisce RX 0x68 e valore decodificato 104.
+
+## Organizzazione dell’editor
+
+Nome, protocollo, indirizzo I²C e bit sono riuniti nella barra compatta superiore.
+Il grafico Segnali nel tempo è sempre aperto in cima all’area centrale.
+A sinistra si scelgono le azioni del sensore; ogni voce indica se genera un blocco
+del canvas. La libreria distingue l’aggiunta di un passo dalla creazione di
+un’azione: lettura/scrittura registro in evidenza, operazioni avanzate espandibili.
+Il pannello destro configura il passo selezionato; larghezza del registro,
+variabili e ingressi sono accessibili nei dettagli. Le impostazioni dell’azione
+(nome, identificatore, esposizione e duplicazione) restano disponibili sotto il
+grafico senza occupare tutto lo spazio iniziale.

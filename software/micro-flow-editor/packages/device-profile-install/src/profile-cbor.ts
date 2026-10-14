@@ -18,7 +18,13 @@ import {
   type RawDeviceProfileOp,
   type SampleField,
 } from "@spaghettilab/device-profile-authoring-model";
-import { domainError, err, ok, type DomainError, type Result } from "@spaghettilab/domain";
+import {
+  domainError,
+  err,
+  ok,
+  type DomainError,
+  type Result,
+} from "@spaghettilab/domain";
 import { DeviceProfileInstallErrorCode } from "./errors.js";
 
 /**
@@ -53,14 +59,26 @@ export const DEVICE_PROFILE_WIRE_VERSION = 1;
 
 /** `enum spaghetti_value_type` (`schema.h`): `BOOL=0, INT64=1, UINT64=2, TEXT=3, BYTES=4`. Device Profile sample fields only ever use `INT64`/`UINT64` (S061's `SampleFieldType`). */
 const VALUE_TYPE = { int64: 1, uint64: 2 } as const;
-const VALUE_TYPE_REVERSE: Record<number, "int64" | "uint64"> = { 1: "int64", 2: "uint64" };
+const VALUE_TYPE_REVERSE: Record<number, "int64" | "uint64"> = {
+  1: "int64",
+  2: "uint64",
+};
 
 function u32(value: number): Uint8Array {
   return encodeUint(BigInt(value));
 }
 
 function encodeOp(raw: RawDeviceProfileOp): Uint8Array {
-  return encodeArray([u32(raw.opcode), u32(raw.dst), u32(raw.srcA), u32(raw.srcB), u32(raw.imm0), u32(raw.imm1), u32(raw.imm2), u32(raw.imm3)]);
+  return encodeArray([
+    u32(raw.opcode),
+    u32(raw.dst),
+    u32(raw.srcA),
+    u32(raw.srcB),
+    u32(raw.imm0),
+    u32(raw.imm1),
+    u32(raw.imm2),
+    u32(raw.imm3),
+  ]);
 }
 
 function encodeOps(ops: readonly Instruction[]): Uint8Array {
@@ -68,7 +86,12 @@ function encodeOps(ops: readonly Instruction[]): Uint8Array {
 }
 
 function encodeField(field: SampleField): Uint8Array {
-  return encodeArray([u32(field.fieldId), u32(VALUE_TYPE[field.type]), encodeText(field.name), encodeText(field.unit ?? "")]);
+  return encodeArray([
+    u32(field.fieldId),
+    u32(VALUE_TYPE[field.type]),
+    encodeText(field.name),
+    encodeText(field.unit ?? ""),
+  ]);
 }
 
 /**
@@ -80,7 +103,7 @@ function encodeField(field: SampleField): Uint8Array {
  */
 export function encodeDeviceProfileCbor(draft: DeviceProfileDraft): Uint8Array {
   return encodeMap([
-    [KEY.WIRE, u32(DEVICE_PROFILE_WIRE_VERSION)],
+    [KEY.WIRE, u32(draft.actions ? 2 : DEVICE_PROFILE_WIRE_VERSION)],
     [KEY.ID, encodeText(draft.profileId)],
     [KEY.VERSION, u32(draft.version)],
     [KEY.TRANSPORT, u32(draft.transport)],
@@ -94,26 +117,61 @@ export function encodeDeviceProfileCbor(draft: DeviceProfileDraft): Uint8Array {
     [KEY.SCHEMA_ID, encodeText(draft.sampleSchemaId)],
     [KEY.SCHEMA_VER, u32(draft.sampleSchemaVersion)],
     [KEY.FIELDS, encodeArray(draft.sampleFields.map(encodeField))],
+    ...(draft.actions
+      ? [
+          [
+            14,
+            encodeArray(
+              draft.actions.map((action) =>
+                encodeArray([u32(action.id), u32(action.first), u32(action.count)]),
+              ),
+            ),
+          ] as const,
+        ]
+      : []),
   ]);
 }
 
 function malformed(target: string, remediation: string): DomainError {
-  return domainError({ code: DeviceProfileInstallErrorCode.MALFORMED_CBOR, path: ["device-profile-install", "cbor"], target, remediation });
+  return domainError({
+    code: DeviceProfileInstallErrorCode.MALFORMED_CBOR,
+    path: ["device-profile-install", "cbor"],
+    target,
+    remediation,
+  });
 }
 
 function decodeOpValue(value: CborValue): Result<RawDeviceProfileOp, DomainError> {
   if (value.kind !== "array" || value.value.length !== 8) {
-    return err(malformed("op", "expected an 8-element array [opcode,dst,srcA,srcB,imm0,imm1,imm2,imm3]"));
+    return err(
+      malformed(
+        "op",
+        "expected an 8-element array [opcode,dst,srcA,srcB,imm0,imm1,imm2,imm3]",
+      ),
+    );
   }
-  const numbers = value.value.map((v) => (v.kind === "uint" ? Number(v.value) : undefined));
+  const numbers = value.value.map((v) =>
+    v.kind === "uint" ? Number(v.value) : undefined,
+  );
   if (numbers.some((n) => n === undefined)) {
     return err(malformed("op", "every op field must be a uint"));
   }
   const [opcode, dst, srcA, srcB, imm0, imm1, imm2, imm3] = numbers as number[];
-  return ok({ opcode: opcode!, dst: dst!, srcA: srcA!, srcB: srcB!, imm0: imm0!, imm1: imm1!, imm2: imm2!, imm3: imm3! });
+  return ok({
+    opcode: opcode!,
+    dst: dst!,
+    srcA: srcA!,
+    srcB: srcB!,
+    imm0: imm0!,
+    imm1: imm1!,
+    imm2: imm2!,
+    imm3: imm3!,
+  });
 }
 
-function decodeOpsValue(items: readonly CborValue[]): Result<Instruction[], DomainError> {
+function decodeOpsValue(
+  items: readonly CborValue[],
+): Result<Instruction[], DomainError> {
   const instructions: Instruction[] = [];
   for (const opValue of items) {
     const raw = decodeOpValue(opValue);
@@ -127,18 +185,40 @@ function decodeOpsValue(items: readonly CborValue[]): Result<Instruction[], Doma
 
 function decodeFieldValue(value: CborValue): Result<SampleField, DomainError> {
   if (value.kind !== "array" || value.value.length !== 4) {
-    return err(malformed("sampleField", "expected a 4-element array [fieldId,type,name,unit]"));
+    return err(
+      malformed("sampleField", "expected a 4-element array [fieldId,type,name,unit]"),
+    );
   }
-  const [fieldIdValue, typeValue, nameValue, unitValue] = value.value as readonly [CborValue, CborValue, CborValue, CborValue];
-  if (fieldIdValue.kind !== "uint" || typeValue.kind !== "uint" || nameValue.kind !== "text" || unitValue.kind !== "text") {
+  const [fieldIdValue, typeValue, nameValue, unitValue] = value.value as readonly [
+    CborValue,
+    CborValue,
+    CborValue,
+    CborValue,
+  ];
+  if (
+    fieldIdValue.kind !== "uint" ||
+    typeValue.kind !== "uint" ||
+    nameValue.kind !== "text" ||
+    unitValue.kind !== "text"
+  ) {
     return err(malformed("sampleField", "expected [uint, uint, text, text]"));
   }
   const type = VALUE_TYPE_REVERSE[Number(typeValue.value)];
   if (type === undefined) {
-    return err(malformed("sampleField.type", `unsupported value type ${typeValue.value} — Device Profile sample fields are INT64/UINT64 only`));
+    return err(
+      malformed(
+        "sampleField.type",
+        `unsupported value type ${typeValue.value} — Device Profile sample fields are INT64/UINT64 only`,
+      ),
+    );
   }
   const unit = unitValue.value;
-  return ok({ fieldId: Number(fieldIdValue.value), type, name: nameValue.value, unit: unit.length > 0 ? unit : undefined });
+  return ok({
+    fieldId: Number(fieldIdValue.value),
+    type,
+    name: nameValue.value,
+    unit: unit.length > 0 ? unit : undefined,
+  });
 }
 
 /**
@@ -149,12 +229,22 @@ function decodeFieldValue(value: CborValue): Result<SampleField, DomainError> {
  * and structural mapping only, the same "no eval, no dynamic import"
  * guarantee `@spaghettilab/device-profile-package`'s import path has.
  */
-export function decodeDeviceProfileCbor(bytes: Uint8Array): Result<DeviceProfileDraft, DomainError> {
+export function decodeDeviceProfileCbor(
+  bytes: Uint8Array,
+): Result<DeviceProfileDraft, DomainError> {
   let root: CborValue;
   try {
     root = decodeOne(bytes);
   } catch (cause) {
-    return err(domainError({ code: DeviceProfileInstallErrorCode.MALFORMED_CBOR, path: ["device-profile-install", "cbor"], target: "bytes", remediation: "not valid CBOR", cause }));
+    return err(
+      domainError({
+        code: DeviceProfileInstallErrorCode.MALFORMED_CBOR,
+        path: ["device-profile-install", "cbor"],
+        target: "bytes",
+        remediation: "not valid CBOR",
+        cause,
+      }),
+    );
   }
   let map: ReturnType<typeof requireMap>;
   try {
@@ -165,7 +255,7 @@ export function decodeDeviceProfileCbor(bytes: Uint8Array): Result<DeviceProfile
 
   try {
     const wireVersion = requireU32(map, KEY.WIRE, "DeviceProfileCbor");
-    if (wireVersion !== DEVICE_PROFILE_WIRE_VERSION) {
+    if (wireVersion !== DEVICE_PROFILE_WIRE_VERSION && wireVersion !== 2) {
       return err(
         domainError({
           code: DeviceProfileInstallErrorCode.UNSUPPORTED_WIRE_VERSION,
@@ -178,9 +268,13 @@ export function decodeDeviceProfileCbor(bytes: Uint8Array): Result<DeviceProfile
 
     const initOps = decodeOpsValue(requireArray(map, KEY.INIT, "DeviceProfileCbor"));
     if (!initOps.ok) return initOps;
-    const sampleOps = decodeOpsValue(requireArray(map, KEY.SAMPLE, "DeviceProfileCbor"));
+    const sampleOps = decodeOpsValue(
+      requireArray(map, KEY.SAMPLE, "DeviceProfileCbor"),
+    );
     if (!sampleOps.ok) return sampleOps;
-    const safeStopOps = decodeOpsValue(requireArray(map, KEY.STOP, "DeviceProfileCbor"));
+    const safeStopOps = decodeOpsValue(
+      requireArray(map, KEY.STOP, "DeviceProfileCbor"),
+    );
     if (!safeStopOps.ok) return safeStopOps;
 
     const fieldsValue = requireArray(map, KEY.FIELDS, "DeviceProfileCbor");
@@ -205,9 +299,33 @@ export function decodeDeviceProfileCbor(bytes: Uint8Array): Result<DeviceProfile
       sampleSchemaId: requireText(map, KEY.SCHEMA_ID, "DeviceProfileCbor"),
       sampleSchemaVersion: requireU32(map, KEY.SCHEMA_VER, "DeviceProfileCbor"),
       sampleFields,
+      ...(wireVersion === 2
+        ? {
+            actions: requireArray(map, 14, "DeviceProfileCbor").map((value) => {
+              if (
+                value.kind !== "array" ||
+                value.value.length !== 3 ||
+                value.value.some((entry) => entry.kind !== "uint")
+              )
+                throw new Error("Invalid action table");
+              const entries = value.value.map((entry) =>
+                entry.kind === "uint" ? Number(entry.value) : -1,
+              );
+              return { id: entries[0]!, first: entries[1]!, count: entries[2]! };
+            }),
+          }
+        : {}),
     };
     return ok(draft);
   } catch (cause) {
-    return err(domainError({ code: DeviceProfileInstallErrorCode.MALFORMED_CBOR, path: ["device-profile-install", "cbor"], target: "root", remediation: "a required field is missing or has the wrong CBOR type", cause }));
+    return err(
+      domainError({
+        code: DeviceProfileInstallErrorCode.MALFORMED_CBOR,
+        path: ["device-profile-install", "cbor"],
+        target: "root",
+        remediation: "a required field is missing or has the wrong CBOR type",
+        cause,
+      }),
+    );
   }
 }

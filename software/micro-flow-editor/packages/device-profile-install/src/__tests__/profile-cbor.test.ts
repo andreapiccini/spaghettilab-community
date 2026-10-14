@@ -1,6 +1,11 @@
 import type { DeviceProfileDraft } from "@spaghettilab/device-profile-authoring-model";
 import { PortTransport } from "@spaghettilab/device-profile-authoring-model";
-import { encodeArray, encodeMap, encodeText, encodeUint } from "@spaghettilab/protocol-sdk";
+import {
+  encodeArray,
+  encodeMap,
+  encodeText,
+  encodeUint,
+} from "@spaghettilab/protocol-sdk";
 import { describe, expect, it } from "vitest";
 import { decodeDeviceProfileCbor, encodeDeviceProfileCbor } from "../profile-cbor.js";
 
@@ -49,11 +54,37 @@ function fullDraft(): DeviceProfileDraft {
 }
 
 describe("encodeDeviceProfileCbor / decodeDeviceProfileCbor — S063 wire encoder", () => {
+  it("round-trips wire-v2 action slices and parameter loads", () => {
+    const draft: DeviceProfileDraft = {
+      ...minimalDraft(),
+      sampleSchemaId: "actions",
+      sampleOps: [
+        {
+          op: "LOAD_ARGUMENT",
+          dst: 0,
+          argumentId: 1,
+          length: 1,
+          littleEndian: true,
+          required: true,
+          low: 0,
+          high: 0,
+        },
+        { op: "EMIT_RECORD" },
+      ],
+      actions: [{ id: 2, first: 0, count: 2 }],
+    };
+    expect(decodeDeviceProfileCbor(encodeDeviceProfileCbor(draft))).toEqual({
+      ok: true,
+      value: draft,
+    });
+  });
   it("round-trips a minimal draft byte-for-byte reproducibly", () => {
     const bytes = encodeDeviceProfileCbor(minimalDraft());
     const decoded = decodeDeviceProfileCbor(bytes);
     expect(decoded).toEqual({ ok: true, value: minimalDraft() });
-    expect(encodeDeviceProfileCbor(decoded.ok ? decoded.value : minimalDraft())).toEqual(bytes);
+    expect(
+      encodeDeviceProfileCbor(decoded.ok ? decoded.value : minimalDraft()),
+    ).toEqual(bytes);
   });
 
   it("round-trips a full draft (ops, fields, non-empty every plan) with no loss", () => {
@@ -72,14 +103,15 @@ describe("encodeDeviceProfileCbor / decodeDeviceProfileCbor — S063 wire encode
     expect(bytes[bytes.length - 1]).toBe(0xff); // break
   });
 
-  it("rejects a wire version other than 1", () => {
+  it("rejects an unsupported wire version", () => {
     const bytes = encodeDeviceProfileCbor(minimalDraft());
-    // Byte 2 is the WIRE field's value (uint 1, single byte 0x01) — corrupt it to 2.
+    // Byte 2 is the WIRE field's value (uint 1, single byte 0x01) — corrupt it to 3.
     const tampered = new Uint8Array(bytes);
-    tampered[2] = 2;
+    tampered[2] = 3;
     const result = decodeDeviceProfileCbor(tampered);
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error.code).toBe("device-profile-install.unsupported_wire_version");
+    if (!result.ok)
+      expect(result.error.code).toBe("device-profile-install.unsupported_wire_version");
   });
 
   it("rejects malformed CBOR with a structured error, not a thrown exception", () => {

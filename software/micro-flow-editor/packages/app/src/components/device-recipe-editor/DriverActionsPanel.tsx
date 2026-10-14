@@ -1,4 +1,12 @@
-import { Plus, Copy, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Copy,
+  Trash2,
+  Blocks,
+  BookOpen,
+  ArrowDownToLine,
+  Pencil,
+} from "lucide-react";
 import {
   addCommand,
   removeCommand,
@@ -35,8 +43,14 @@ export function DriverActionsList({ draft, it, activeId, onChange, onSelect }: P
   return (
     <section className="rounded-slmd border border-border-strong p-3">
       <h2 className="mb-2 font-body text-xs font-semibold text-ink">
-        {it ? "Azioni del driver" : "Driver actions"}
+        <Blocks size={14} className="mr-1 inline text-brand-blue" aria-hidden />
+        {it ? "Azioni del sensore" : "Sensor actions"}
       </h2>
+      <p className="mb-3 font-body text-[11px] leading-snug text-ink-muted">
+        {it
+          ? "Questo è l’elenco delle azioni del driver. Ogni azione può diventare un blocco del canvas: scegli quale modificare."
+          : "These are your driver actions. Each can become a canvas block: select one to edit."}
+      </p>
       <div className="space-y-1">
         {draft.commands.map((action) => (
           <button
@@ -48,7 +62,14 @@ export function DriverActionsList({ draft, it, activeId, onChange, onSelect }: P
           >
             <span className="block font-semibold">{action.label || action.name}</span>
             <span className="text-ink-muted">
-              {action.steps.length} {it ? "passi" : "steps"}
+              {action.steps.length} {it ? "passi" : "steps"} ·{" "}
+              {action.exposeOnCanvas === false
+                ? it
+                  ? "solo driver"
+                  : "driver only"
+                : it
+                  ? "blocco canvas"
+                  : "canvas block"}
             </span>
           </button>
         ))}
@@ -61,9 +82,11 @@ export function DriverActionsList({ draft, it, activeId, onChange, onSelect }: P
         {draft.binding.bus === "i2c" && (
           <>
             <button type="button" className={button} onClick={() => add("read")}>
+              <ArrowDownToLine size={12} className="mr-1 inline" aria-hidden />
               {it ? "Leggi registro" : "Read register"}
             </button>
             <button type="button" className={button} onClick={() => add("write")}>
+              <Pencil size={12} className="mr-1 inline" aria-hidden />
               {it ? "Scrivi registro" : "Write register"}
             </button>
           </>
@@ -85,8 +108,8 @@ export function DriverActionSettings({
   const ports = actionPorts(draft, action);
   return (
     <section className="mb-3 rounded-slmd border border-border-strong bg-surface p-3">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-heading text-lg font-semibold text-ink">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-heading text-sm font-semibold text-ink">
           {it ? "Azione" : "Action"}: {action.label}
         </h2>
         <div className="flex gap-2">
@@ -116,57 +139,77 @@ export function DriverActionSettings({
           </button>
         </div>
       </div>
-      <label className="mb-3 flex items-center gap-2 font-body text-xs text-ink-muted">
-        <input
-          type="checkbox"
-          checked={action.exposeOnCanvas !== false}
-          onChange={(e) =>
-            onChange(
-              updateCommand(draft, action.id, {
-                ...action,
-                exposeOnCanvas: e.target.checked,
-              }),
-            )
-          }
-        />
-        {it
-          ? "Esponi questa azione come blocco nel canvas"
-          : "Expose this action as a canvas block"}
-      </label>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="font-body text-xs text-ink-muted">
-          {it ? "Nome del blocco" : "Block label"}
-          <input
-            aria-label={it ? "Nome azione" : "Action label"}
-            className={input}
-            value={action.label}
-            onChange={(e) =>
-              onChange(
-                updateCommand(draft, action.id, { ...action, label: e.target.value }),
-              )
-            }
-          />
-        </label>
-        <label className="font-body text-xs text-ink-muted">
-          {it ? "Identificatore" : "Identifier"}
-          <input
-            className={input}
-            value={action.name}
-            onChange={(e) =>
-              onChange(
-                updateCommand(draft, action.id, { ...action, name: e.target.value }),
-              )
-            }
-          />
-        </label>
-      </div>
-      <p className="mt-2 font-body text-xs text-ink-muted">
-        {it ? "Ingressi" : "Inputs"}:{" "}
-        {ports.inputs.map((p) => p.label).join(", ") || "—"} ·{" "}
-        {it ? "Risultati" : "Results"}:{" "}
-        {ports.outputs.map((p) => p.label).join(", ") ||
-          (it ? "Nessuna uscita" : "No output")}
-      </p>
+      <details>
+        <summary className="cursor-pointer font-body text-xs text-ink-muted">
+          {it
+            ? "Nome, blocco canvas e dettagli dell’azione"
+            : "Name, canvas block and action details"}
+        </summary>
+        <div className="mt-2">
+          <label className="mb-3 flex items-center gap-2 font-body text-xs text-ink-muted">
+            <input
+              type="checkbox"
+              checked={action.exposeOnCanvas !== false}
+              onChange={(e) =>
+                onChange(
+                  updateCommand(draft, action.id, {
+                    ...action,
+                    exposeOnCanvas: e.target.checked,
+                  }),
+                )
+              }
+            />
+            {it
+              ? "Esponi questa azione come blocco nel canvas"
+              : "Expose this action as a canvas block"}
+          </label>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="font-body text-xs text-ink-muted">
+              {it ? "Nome del blocco" : "Block label"}
+              <input
+                aria-label={it ? "Nome azione" : "Action label"}
+                className={input}
+                value={action.label}
+                onChange={(e) =>
+                  onChange(
+                    updateCommand(draft, action.id, {
+                      ...action,
+                      label: e.target.value,
+                    }),
+                  )
+                }
+              />
+            </label>
+            <details>
+              <summary className="cursor-pointer font-body text-xs text-ink-muted">
+                {it ? "Identificatore tecnico" : "Technical identifier"}
+              </summary>{" "}
+              <label className="font-body text-xs text-ink-muted">
+                {it ? "Identificatore" : "Identifier"}
+                <input
+                  className={input}
+                  value={action.name}
+                  onChange={(e) =>
+                    onChange(
+                      updateCommand(draft, action.id, {
+                        ...action,
+                        name: e.target.value,
+                      }),
+                    )
+                  }
+                />
+              </label>
+            </details>
+          </div>
+          <p className="mt-2 font-body text-xs text-ink-muted">
+            {it ? "Ingressi" : "Inputs"}:{" "}
+            {ports.inputs.map((p) => p.label).join(", ") || "—"} ·{" "}
+            {it ? "Risultati" : "Results"}:{" "}
+            {ports.outputs.map((p) => p.label).join(", ") ||
+              (it ? "Nessuna uscita" : "No output")}
+          </p>
+        </div>
+      </details>
     </section>
   );
 }
@@ -177,31 +220,40 @@ export function DriverSequence({
   it,
   selectedId,
   onSelect,
+  initialization = false,
 }: {
   draft: DeviceRecipeDraft;
   ops: DeviceRecipeDraft["commands"][number]["steps"];
   it: boolean;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  initialization?: boolean;
 }) {
   return (
     <section className="mb-3 rounded-slmd border border-border-strong bg-surface p-3">
       <h2 className="mb-2 font-body text-xs font-semibold text-ink">
-        {it ? "Sequenza di esecuzione" : "Execution sequence"}
+        <BookOpen size={14} className="mr-1 inline text-brand-blue" aria-hidden />
+        {initialization
+          ? it
+            ? "Passi di avvio · eseguiti una volta"
+            : "Startup steps · run once"
+          : it
+            ? "Passi dell’azione selezionata"
+            : "Selected action steps"}
       </h2>
       {!ops.length && (
         <p className="font-body text-xs text-ink-muted">
           {it ? "Aggiungi un passo dalla libreria." : "Add a step from the library."}
         </p>
       )}
-      <ol className="space-y-2">
+      <ol className="space-y-1">
         {ops.map((op, i) => (
           <li key={op.id}>
             <button
               type="button"
               onClick={() => onSelect(op.id)}
               aria-pressed={selectedId === op.id}
-              className={`flex w-full items-center gap-3 rounded-slsm border p-3 text-left ${selectedId === op.id ? "border-brand-blue bg-brand-blue/5" : "border-border bg-surface-sunken"}`}
+              className={`flex w-full items-center gap-3 rounded-slsm border px-2 py-1.5 text-left ${selectedId === op.id ? "border-brand-blue bg-brand-blue/5" : "border-border bg-surface-sunken"}`}
             >
               <span className="font-mono text-xs text-ink-muted">{i + 1}</span>
               <span className="font-body text-xs text-ink">
@@ -233,7 +285,7 @@ export function DriverCanvasPreview({
 }) {
   return (
     <section className="space-y-3">
-      <h2 className="font-heading text-lg font-semibold text-ink">{draft.name}</h2>
+      <h2 className="font-heading text-sm font-semibold text-ink">{draft.name}</h2>
       <p className="font-body text-xs text-ink-muted">
         {it
           ? "Un dispositivo, un blocco per ogni azione."

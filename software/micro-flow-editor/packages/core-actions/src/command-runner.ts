@@ -4,7 +4,11 @@ import { CoreActionsErrorCode, classifyWireError, wireFailure } from "./wire-err
 
 /** The narrow slice of `SpaghettiClient` this runner calls. */
 export type CommandWireClient = {
-  moduleCommand(req: { readonly key: number; readonly commandId: number }): Promise<void>;
+  moduleCommand(req: {
+    readonly key: number;
+    readonly commandId: number;
+    readonly arguments?: Readonly<Record<number, bigint | boolean | Uint8Array>>;
+  }): Promise<unknown>;
 };
 
 export const CommandOutcomeKind = {
@@ -15,7 +19,8 @@ export const CommandOutcomeKind = {
   UNSUPPORTED_ARGUMENTS: "UNSUPPORTED_ARGUMENTS",
   REMOTE_ERROR: "REMOTE_ERROR",
 } as const;
-export type CommandOutcomeKind = (typeof CommandOutcomeKind)[keyof typeof CommandOutcomeKind];
+export type CommandOutcomeKind =
+  (typeof CommandOutcomeKind)[keyof typeof CommandOutcomeKind];
 
 export type CommandOutcome = {
   readonly kind: CommandOutcomeKind;
@@ -26,16 +31,7 @@ export type RunCommandRequest = {
   readonly moduleKey: number;
   readonly commandId: number;
   readonly permissionScope?: PermissionScope;
-  /**
-   * `MODULE_COMMAND` (`firmware/backbone/subsys/communication/operations/module_command.c`,
-   * mirrored in `@spaghettilab/protocol-sdk`'s `ModuleCommandRequest`) has no
-   * argument field on the wire at all today — set this `true` when the
-   * command being invoked genuinely needs parameters, so this function
-   * refuses up front (`UNSUPPORTED_ARGUMENTS`) instead of silently invoking
-   * the command without them. A typed argument-entry form can still exist
-   * client-side for when the wire eventually supports it; this is the one
-   * place that stays honest about it not doing so yet.
-   */
+  readonly arguments?: Readonly<Record<number, bigint | boolean | Uint8Array>>;
   readonly requiresArguments?: boolean;
 };
 
@@ -58,7 +54,7 @@ export async function runCommand(
     return { kind: CommandOutcomeKind.PERMISSION_DENIED, issues: [permission.error] };
   }
 
-  if (req.requiresArguments) {
+  if (req.requiresArguments && !req.arguments) {
     return {
       kind: CommandOutcomeKind.UNSUPPORTED_ARGUMENTS,
       issues: [
@@ -66,20 +62,32 @@ export async function runCommand(
           CoreActionsErrorCode.UNSUPPORTED_ARGUMENTS,
           ["core-actions", "runCommand"],
           String(req.commandId),
-          `MODULE_COMMAND has no argument field on the wire — command ${req.commandId} needs arguments this call cannot send`,
+          `Command ${req.commandId} requires arguments; supply them before execution`,
         ),
       ],
     };
   }
 
   try {
-    await client.moduleCommand({ key: req.moduleKey, commandId: req.commandId });
+    await client.moduleCommand({
+      key: req.moduleKey,
+      commandId: req.commandId,
+      ...(req.arguments ? { arguments: req.arguments } : {}),
+    });
     return { kind: CommandOutcomeKind.SUCCESS, issues: [] };
   } catch (cause) {
     const classified = classifyWireError(cause);
     return {
       kind: CommandOutcomeKind[classified],
-      issues: [wireFailure(CoreActionsErrorCode[classified], ["core-actions", "runCommand"], String(req.commandId), `moduleCommand failed: ${classified}`, cause)],
+      issues: [
+        wireFailure(
+          CoreActionsErrorCode[classified],
+          ["core-actions", "runCommand"],
+          String(req.commandId),
+          `moduleCommand failed: ${classified}`,
+          cause,
+        ),
+      ],
     };
   }
 }

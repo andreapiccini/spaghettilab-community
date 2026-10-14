@@ -110,6 +110,8 @@ export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
         imm1: instruction.intervalMs,
         imm2: instruction.expectedLevel,
       };
+    case "LOAD_ARGUMENT":
+      return { ...base, opcode: DeviceProfileOpcode.LOAD_ARGUMENT, dst: instruction.dst, srcA: instruction.argumentId, srcB: instruction.required ? 1 : 0, imm0: instruction.length, imm1: instruction.littleEndian ? 1 : 0, imm2: instruction.low, imm3: instruction.high };
     case "LOAD_CONST":
       return { ...base, opcode: DeviceProfileOpcode.LOAD_CONST, dst: instruction.dst, imm0: instruction.length, imm2: instruction.low, imm3: instruction.high };
     case "COPY_BYTES":
@@ -136,7 +138,7 @@ export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
     case "CRC16":
       return { ...base, opcode: DeviceProfileOpcode.CRC16, srcA: instruction.src, dst: instruction.dst };
     case "EMIT_FIELD":
-      return { ...base, opcode: DeviceProfileOpcode.EMIT_FIELD, srcA: instruction.src, dst: instruction.fieldId };
+      return { ...base, opcode: DeviceProfileOpcode.EMIT_FIELD, srcA: instruction.src, dst: instruction.fieldId, imm0: instruction.width ?? 0, imm1: instruction.byteOrder === "be" ? 1 : 0, imm2: instruction.signExtend ? 1 : 0, imm3: instruction.multiplier ?? 0 };
     case "EMIT_RECORD":
       return { ...base, opcode: DeviceProfileOpcode.EMIT_RECORD };
   }
@@ -190,6 +192,9 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
         return err(invalidOperand(String(raw.imm2), "WAIT_GPIO expectedLevel (imm2) must be 0 or 1"));
       }
       return ok({ op: "WAIT_GPIO", dst: raw.dst, attempts: raw.imm0, intervalMs: raw.imm1, expectedLevel: raw.imm2 });
+    case DeviceProfileOpcode.LOAD_ARGUMENT:
+      if (raw.srcA < 1 || raw.srcA > 8 || raw.srcB > 1 || raw.imm0 < 1 || raw.imm0 > 8 || raw.imm1 > 1) return err(invalidOperand("LOAD_ARGUMENT", "Invalid argument packing"));
+      return ok({ op: "LOAD_ARGUMENT", dst: raw.dst, argumentId: raw.srcA, required: raw.srcB === 1, length: raw.imm0, littleEndian: raw.imm1 === 1, low: raw.imm2, high: raw.imm3 });
     case DeviceProfileOpcode.LOAD_CONST:
       return ok({ op: "LOAD_CONST", dst: raw.dst, length: raw.imm0, low: raw.imm2, high: raw.imm3 });
     case DeviceProfileOpcode.COPY_BYTES:
@@ -212,7 +217,7 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
     case DeviceProfileOpcode.CRC16:
       return ok({ op: "CRC16", src: raw.srcA, dst: raw.dst });
     case DeviceProfileOpcode.EMIT_FIELD:
-      return ok({ op: "EMIT_FIELD", src: raw.srcA, fieldId: raw.dst });
+      return ok({ op: "EMIT_FIELD", src: raw.srcA, fieldId: raw.dst, ...(raw.imm0 ? { width: raw.imm0, byteOrder: raw.imm1 ? "be" as const : "le" as const, signExtend: raw.imm2 !== 0, multiplier: raw.imm3 } : {}) });
     case DeviceProfileOpcode.EMIT_RECORD:
       return ok({ op: "EMIT_RECORD" });
     default:
