@@ -2,6 +2,8 @@ import {
   addCommand,
   createNamedAction,
   normalizeRecipeVarName,
+  ensureWriteChannel,
+  upsertRecipeVariable,
   type DeviceRecipeCommand,
   type DeviceRecipeDraft,
   type DeviceRecipeOp,
@@ -115,4 +117,85 @@ export function actionPorts(draft: DeviceRecipeDraft, action: DeviceRecipeComman
     inputs: draft.channels.filter((c) => inputs.has(c.id)),
     outputs: draft.channels.filter((c) => outputs.has(c.id)),
   };
+}
+
+/** Bind an external port to an encoder through an ordered, reusable input step. */
+export function bindEncoderFlowInput(
+  draft: DeviceRecipeDraft,
+  encoderId: string,
+  channelId?: string,
+): DeviceRecipeDraft {
+  if (
+    ![
+      ...draft.phases.init,
+      ...draft.phases.sample,
+      ...draft.phases.command,
+      ...draft.commands.flatMap((c) => c.steps),
+    ].some((op) => op.id === encoderId && op.type === "encode")
+  )
+    return draft;
+  let next = draft;
+  if (!channelId) {
+    let index = 1;
+    while (draft.channels.some((c) => c.id === `ingresso_${index}`)) index++;
+    const ensured = ensureWriteChannel(draft, {
+      id: `ingresso_${index}`,
+      label: `Ingresso ${index}`,
+    });
+    next = ensured.draft;
+    channelId = ensured.channelId;
+  }
+  const channel = next.channels.find(
+    (c) => c.id === channelId && c.direction === "write",
+  );
+  if (!channel) return draft;
+  function connect(steps: readonly DeviceRecipeOp[]): readonly DeviceRecipeOp[] {
+    const index = steps.findIndex((op) => op.id === encoderId && op.type === "encode");
+    if (index < 0) return steps;
+    const encoder = steps[index] as Extract<DeviceRecipeOp, { type: "encode" }>;
+    const existing = steps
+      .slice(0, index)
+      .find((op) => op.type === "sample_external" && op.fromChannelId === channel!.id);
+    const valueType =
+      channel!.quantity === "digital" ? ("bool" as const) : ("number" as const);
+    let rawName = `flow_${normalizeRecipeVarName(channel!.id)}`;
+    if (!existing) {
+      let suffix = 2;
+      const base = rawName;
+      while (next.variables.some((v) => v.name === rawName))
+        rawName = `${base}_${suffix++}`;
+    }
+    const source =
+      existing?.type === "sample_external"
+        ? existing
+        : {
+            id: id("input"),
+            type: "sample_external" as const,
+            fromChannelId: channel!.id,
+            into: rawName,
+            valueType,
+          };
+    next = upsertRecipeVariable(next, {
+      name: source.into,
+      valueType: source.valueType,
+      label: source.into,
+    });
+    const patched = { ...encoder, input: source.into, fromType: source.valueType };
+    return [
+      ...steps.slice(0, index),
+      ...(existing ? [] : [source]),
+      patched,
+      ...steps.slice(index + 1),
+    ];
+  }
+  const commands = next.commands.map((command) => ({
+    ...command,
+    steps: connect(command.steps),
+  }));
+  const phases = {
+    init: connect(next.phases.init),
+    sample: connect(next.phases.sample),
+    command: connect(next.phases.command),
+  };
+  return { ...next, commands, phases, updatedAt: Date.now() };
 }

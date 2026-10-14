@@ -212,6 +212,8 @@ describe("device-recipe-draft", () => {
   it("I2C library exposes bus operations and output decoding", () => {
     const types = libraryOpsForBus("i2c").map((o) => o.type);
     expect(types).toEqual([
+      "sample_external",
+      "encode",
       "i2c_read",
       "i2c_write",
       "i2c_write_read",
@@ -263,7 +265,7 @@ describe("device-recipe-draft", () => {
       expect(lib.some((x) => x.type === "sample_external" && x.label === "Ingresso")).toBe(true);
       expect(lib.some((x) => x.type === "emit" && x.label === "Uscita")).toBe(true);
     }
-    expect(libraryOpsForBus("i2c").some((x) => x.type === "sample_external")).toBe(false);
+    expect(libraryOpsForBus("i2c").some((x) => x.type === "sample_external")).toBe(true);
     expect(libraryOpsForBus("adc").some((x) => x.type === "adc_sample" && x.label === "Campiona ADC")).toBe(true);
   });
 

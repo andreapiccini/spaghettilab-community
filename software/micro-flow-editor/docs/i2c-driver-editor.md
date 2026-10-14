@@ -64,3 +64,19 @@ Il pannello destro configura il passo selezionato; larghezza del registro,
 variabili e ingressi sono accessibili nei dettagli. Le impostazioni dell’azione
 (nome, identificatore, esposizione e duplicazione) restano disponibili sotto il
 grafico senza occupare tutto lo spazio iniziale.
+
+### Azione, passi e porte
+
+L’elenco offre solo **+ Azione**. La libreria dei passi appare nella stessa
+scheda dell’azione selezionata, ne riporta il nome e contiene lettura/scrittura
+registro, Ingresso, Encoder, Decoder e Uscita. L’indirizzo I²C è condiviso e si
+imposta soltanto in alto; eventuali vecchi indirizzi salvati nei passi non
+scavalcano questa impostazione nel grafico o nella conversione della ricetta.
+
+L’encoder collega un ingresso Flow alla variabile codificata. L’acquisizione
+dell’ingresso precede l’encoder nella sequenza, è riutilizzata quando possibile
+e le destinazioni di encoder diversi sono distinte. Il decoder converte i byte
+del sensore in una variabile; Uscita pubblica quella variabile all’esterno.
+Aggiungendo Uscita si crea una porta distinta quando quelle esistenti sono già
+usate. L’anteprima laterale mostra il blocco dell’azione selezionata, con ogni
+ingresso e uscita su una riga; la conferma di creazione mostra tutte le azioni.

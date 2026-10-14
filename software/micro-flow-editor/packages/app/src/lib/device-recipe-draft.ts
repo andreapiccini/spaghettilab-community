@@ -566,10 +566,10 @@ export function forEachSequenceOp(
 
 /** Resolve per-op I²C address, falling back to binding. */
 export function resolveI2cOpAddress(
-  op: { readonly address?: string },
+  _op: { readonly address?: string },
   draft: DeviceRecipeDraft,
 ): string {
-  const raw = (op.address ?? draft.binding.i2c?.address ?? "0x00").trim();
+  const raw = (draft.binding.i2c?.address ?? "0x00").trim();
   if (!raw) return draft.binding.i2c?.address?.trim() || "0x00";
   return raw.toLowerCase().startsWith("0x") ? raw : `0x${raw}`;
 }
@@ -1358,6 +1358,8 @@ export function libraryOpsForBus(bus: DeviceRecipeBus): readonly { readonly type
   switch (bus) {
     case "i2c":
       return [
+        inputOp,
+        { type: "encode", label: "Encoder" },
         { type: "i2c_read", label: "Leggi" },
         { type: "i2c_write", label: "Scrivi" },
         { type: "i2c_write_read", label: "Scrivi e leggi" },
@@ -1443,7 +1445,6 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
       return {
         id,
         type: "i2c_write",
-        address: draft.binding.i2c?.address ?? "0x48",
         bytes: ["0x00"],
         timeoutMs: 20,
       };
@@ -1451,7 +1452,6 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
       return {
         id,
         type: "i2c_read",
-        address: draft.binding.i2c?.address ?? "0x48",
         len: 2,
         into: "raw",
         timeoutMs: 20,
@@ -1460,7 +1460,6 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
       return {
         id,
         type: "i2c_write_read",
-        address: draft.binding.i2c?.address ?? "0x48",
         writeBytes: ["0x00"],
         readLen: 2,
         into: "raw",
@@ -1479,7 +1478,6 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
       return {
         id,
         type: "i2c_transaction",
-        address: draft.binding.i2c?.address ?? "0x48",
         phases: [
           { kind: "start" },
           { kind: "write", bytes: ["0x00"] },
@@ -1647,10 +1645,16 @@ export function updateCommandStep(
   stepId: string,
   next: DeviceRecipeOp,
 ): DeviceRecipeDraft {
-  const commands = draft.commands.map((c) =>
+  let base = draft;
+  if (next.type === "encode" || next.type === "decode") base = upsertIntoVariable(base, next.into, next.type === "encode" ? next.toType : next.outType ?? "number");
+  if (next.type === "sample_external") {
+    const ensured = ensureWriteChannel(base, { id: next.fromChannelId, label: next.fromChannelId });
+    base = upsertIntoVariable(ensured.draft, next.into, next.valueType);
+  }
+  const commands = base.commands.map((c) =>
     c.id === commandId ? { ...c, steps: c.steps.map((s) => (s.id === stepId ? next : s)) } : c,
   );
-  return touch({ ...draft, commands });
+  return touch({ ...base, commands });
 }
 
 function ensureReadChannelForI2cOp(draft: DeviceRecipeDraft, op: DeviceRecipeOp): DeviceRecipeDraft {
@@ -1674,8 +1678,40 @@ export function insertCommandStep(
   commandId: string,
   type: DeviceRecipeOp["type"],
 ): DeviceRecipeDraft {
-  const op = defaultOp(type, draft);
-  const withChannel = ensureReadChannelForI2cOp(draft, op);
+  let op = defaultOp(type, draft);
+  let base = draft;
+  const previous = draft.commands.find(c => c.id === commandId)?.steps ?? [];
+  if (op.type === "decode") {
+    const read = [...previous].reverse().find(step => step.type === "i2c_read" || step.type === "i2c_write_read");
+    if (read?.type === "i2c_read" || read?.type === "i2c_write_read") op = { ...op, input: read.into, endByte: (read.type === "i2c_read" ? read.len : read.readLen) - 1 };
+  }
+  if (op.type === "emit") {
+    const used = new Set(previous.flatMap(step => step.type === "emit" ? [step.channelId] : []));
+    const available = base.channels.find(c => c.direction === "read" && !used.has(c.id));
+    const decoded = [...previous].reverse().find(step => step.type === "decode");
+    const from = decoded?.type === "decode" ? decoded.into : op.from;
+    let index = 1;
+    while (base.channels.some(c => c.id === `uscita_${index}`)) index++;
+    const channelId = available?.id ?? `uscita_${index}`;
+    if (!available) base = { ...base, channels: [...base.channels, { id: channelId, label: from, unit: "", quantity: "other", direction: "read" }] };
+    op = { ...op, channelId, from };
+  }
+  if (op.type === "encode" || op.type === "decode") {
+    const root = op.into;
+    let into = root, index = 2;
+    while (base.variables.some(v => v.name === into)) into = `${root}_${index++}`;
+    op = { ...op, into };
+    base = upsertIntoVariable(base, into, op.type === "encode" ? op.toType : op.outType ?? "number");
+  }
+  if (op.type === "sample_external") {
+    let index = 1;
+    while (base.channels.some(c => c.id === `ingresso_${index}`) || base.variables.some(v => v.name === `ingresso_${index}`)) index++;
+    const name = `ingresso_${index}`;
+    const ensured = ensureWriteChannel(base, { id: name, label: `Ingresso ${index}` });
+    op = { ...op, fromChannelId: ensured.channelId, into: name, valueType: "number" };
+    base = upsertIntoVariable(ensured.draft, op.into, op.valueType);
+  }
+  const withChannel = ensureReadChannelForI2cOp(base, op);
   const commands = withChannel.commands.map((c) => (c.id === commandId ? { ...c, steps: [...c.steps, op] } : c));
   return touch({ ...withChannel, commands });
 }
@@ -1753,14 +1789,11 @@ export function collectVarRefsFromOp(op: DeviceRecipeOp): readonly string[] {
   };
   switch (op.type) {
     case "i2c_write":
-      push(op.address);
       for (const b of op.bytes) push(b);
       break;
     case "i2c_read":
-      push(op.address);
       break;
     case "i2c_write_read":
-      push(op.address);
       for (const b of op.writeBytes) push(b);
       break;
     case "i2c_scan":
@@ -1768,7 +1801,6 @@ export function collectVarRefsFromOp(op: DeviceRecipeOp): readonly string[] {
       push(op.toAddress);
       break;
     case "i2c_transaction":
-      push(op.address);
       for (const phase of op.phases) {
         if (phase.kind === "write") for (const b of phase.bytes) push(b);
       }
@@ -2170,15 +2202,15 @@ function mapOpToV1(op: DeviceRecipeOp, address?: string): SensorRecipeStep[] {
     case "wait":
       return [{ type: "wait", ms: Math.max(1, Math.ceil(waitDurationMs(op))) }];
     case "i2c_write":
-      return [{ type: "i2c_write", addr: op.address ?? addr, bytes: op.bytes }];
+      return [{ type: "i2c_write", addr, bytes: op.bytes }];
     case "i2c_read":
-      return [{ type: "i2c_read", addr: op.address ?? addr, len: op.len, into: op.into }];
+      return [{ type: "i2c_read", addr, len: op.len, into: op.into }];
     case "i2c_write_read":
       return [
         ...(op.writeBytes.length
-          ? [{ type: "i2c_write" as const, addr: op.address ?? addr, bytes: op.writeBytes }]
+          ? [{ type: "i2c_write" as const, addr, bytes: op.writeBytes }]
           : []),
-        { type: "i2c_read", addr: op.address ?? addr, len: op.readLen, into: op.into },
+        { type: "i2c_read", addr, len: op.readLen, into: op.into },
       ];
     case "i2c_scan":
     case "i2c_transaction":

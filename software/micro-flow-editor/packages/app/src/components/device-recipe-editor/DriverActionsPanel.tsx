@@ -1,12 +1,5 @@
-import {
-  Plus,
-  Copy,
-  Trash2,
-  Blocks,
-  BookOpen,
-  ArrowDownToLine,
-  Pencil,
-} from "lucide-react";
+import type { ReactNode } from "react";
+import { Plus, Copy, Trash2, Blocks, BookOpen } from "lucide-react";
 import {
   addCommand,
   removeCommand,
@@ -14,11 +7,7 @@ import {
   describeDeviceOp,
   type DeviceRecipeDraft,
 } from "../../lib/device-recipe-draft.js";
-import {
-  actionPorts,
-  addRegisterAction,
-  duplicateDriverAction,
-} from "../../lib/i2c-driver-actions.js";
+import { actionPorts, duplicateDriverAction } from "../../lib/i2c-driver-actions.js";
 
 const button =
   "rounded-slsm border border-border-strong px-2 py-1.5 font-body text-xs text-ink hover:border-brand-blue";
@@ -30,13 +19,21 @@ type Props = {
   activeId: string | null;
   onChange: (d: DeviceRecipeDraft) => void;
   onSelect: (id: string) => void;
+  children?: ReactNode;
 };
 
-export function DriverActionsList({ draft, it, activeId, onChange, onSelect }: Props) {
-  function add(kind?: "read" | "write") {
-    const next = kind
-      ? addRegisterAction(draft, kind, it)
-      : addCommand(draft, { label: it ? "Nuova azione" : "New action" });
+export function DriverActionsList({
+  draft,
+  it,
+  activeId,
+  onChange,
+  onSelect,
+  children,
+}: Props) {
+  function add() {
+    const next = addCommand(draft, {
+      label: `${it ? "Azione" : "Action"} ${draft.commands.length + 1}`,
+    });
     onChange(next);
     onSelect(next.commands[next.commands.length - 1]!.id);
   }
@@ -79,19 +76,8 @@ export function DriverActionsList({ draft, it, activeId, onChange, onSelect }: P
           <Plus size={12} className="mr-1 inline" />
           {it ? "Azione" : "Action"}
         </button>
-        {draft.binding.bus === "i2c" && (
-          <>
-            <button type="button" className={button} onClick={() => add("read")}>
-              <ArrowDownToLine size={12} className="mr-1 inline" aria-hidden />
-              {it ? "Leggi registro" : "Read register"}
-            </button>
-            <button type="button" className={button} onClick={() => add("write")}>
-              <Pencil size={12} className="mr-1 inline" aria-hidden />
-              {it ? "Scrivi registro" : "Write register"}
-            </button>
-          </>
-        )}
       </div>
+      {children}
     </section>
   );
 }
@@ -279,9 +265,11 @@ export function DriverSequence({
 export function DriverCanvasPreview({
   draft,
   it,
+  activeId,
 }: {
   draft: DeviceRecipeDraft;
   it: boolean;
+  activeId?: string | null;
 }) {
   return (
     <section className="space-y-3">
@@ -292,7 +280,11 @@ export function DriverCanvasPreview({
           : "One device, one block per action."}
       </p>
       {draft.commands
-        .filter((action) => action.exposeOnCanvas !== false)
+        .filter((action) =>
+          activeId !== undefined
+            ? action.id === activeId
+            : action.exposeOnCanvas !== false,
+        )
         .map((action) => {
           const ports = actionPorts(draft, action);
           return (
@@ -303,24 +295,45 @@ export function DriverCanvasPreview({
               <h3 className="font-body text-sm font-semibold text-ink">
                 {draft.name} · {action.label}
               </h3>
-              <div className="mt-2 flex flex-wrap justify-between gap-2 font-body text-xs text-ink-muted">
-                <span>
-                  → {it ? "Esegui" : "Run"}
-                  {ports.inputs.length
-                    ? `, ${ports.inputs.map((p) => p.label).join(", ")}`
-                    : ""}
-                </span>
-                <span>
-                  {ports.outputs.length
-                    ? ports.outputs
-                        .map((p) => `${p.label}${p.unit ? ` (${p.unit})` : ""}`)
-                        .join(", ")
-                    : it
-                      ? "Scrittura"
-                      : "Write"}{" "}
-                  →
-                </span>
+              <div className="mt-3 grid grid-cols-2 gap-3 font-body text-xs">
+                <div>
+                  <p className="mb-2 text-ink-muted">{it ? "Ingressi" : "Inputs"}</p>
+                  <div className="mb-1 rounded-slsm border border-border px-2 py-1">
+                    → {it ? "Esegui" : "Run"}
+                  </div>
+                  {ports.inputs.map((p) => (
+                    <div
+                      key={p.id}
+                      className="mb-1 rounded-slsm border border-brand-blue/30 px-2 py-1 text-brand-blue"
+                    >
+                      → {p.label}
+                      {p.unit ? ` (${p.unit})` : ""}
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <p className="mb-2 text-ink-muted">{it ? "Uscite" : "Outputs"}</p>
+                  {ports.outputs.map((p) => (
+                    <div
+                      key={p.id}
+                      className="mb-1 rounded-slsm border border-success/30 px-2 py-1 text-ink"
+                    >
+                      {p.label}
+                      {p.unit ? ` (${p.unit})` : ""} →
+                    </div>
+                  ))}
+                  {!ports.outputs.length && (
+                    <p className="text-ink-faint">
+                      {it ? "Nessuna uscita pubblicata" : "No published outputs"}
+                    </p>
+                  )}
+                </div>
               </div>
+              <p className="mt-3 font-body text-[10px] text-ink-muted">
+                {it
+                  ? "Ingressi → Encoder → variabili interne · Sensore → Decoder → variabili → Uscite"
+                  : "Inputs → Encoder → internal variables · Sensor → Decoder → variables → Outputs"}
+              </p>
             </div>
           );
         })}

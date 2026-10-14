@@ -2,6 +2,9 @@ import { planDriverCanvasChanges } from "../driver-canvas-plan.js";
 import { describe, expect, it } from "vitest";
 import {
   createBlankDraft,
+  addCommand,
+  insertCommandStep,
+  resolveI2cOpAddress,
   draftToCanvasSensorRecipes,
   parseDeviceRecipeDraft,
   serializeDeviceRecipeDraft,
@@ -9,6 +12,7 @@ import {
 } from "../device-recipe-draft.js";
 import {
   addRegisterAction,
+  bindEncoderFlowInput,
   duplicateDriverAction,
   actionPorts,
 } from "../i2c-driver-actions.js";
@@ -45,6 +49,55 @@ describe("I2C driver actions", () => {
     expect(parseDeviceRecipeDraft(serializeDeviceRecipeDraft(draft))?.commands).toEqual(
       draft.commands,
     );
+  });
+  it("uses the shared address even for older steps with an address snapshot", () => {
+    const draft = createBlankDraft("i2c");
+    const shared = {
+      ...draft,
+      binding: { ...draft.binding, i2c: { ...draft.binding.i2c!, address: "0x68" } },
+    };
+    expect(resolveI2cOpAddress({ address: "0x3c" }, shared)).toBe("0x68");
+  });
+  it("binds multiple external inputs to distinct encoded variables and exposes them on the same action", () => {
+    let draft = addCommand(createBlankDraft("i2c"), { label: "Configura" });
+    const actionId = draft.commands.at(-1)!.id;
+    for (let i = 0; i < 2; i++) {
+      draft = insertCommandStep(draft, actionId, "encode");
+      const encoder = draft.commands.find((c) => c.id === actionId)!.steps.at(-1)!;
+      draft = bindEncoderFlowInput(draft, encoder.id);
+    }
+    const action = draft.commands.find((c) => c.id === actionId)!;
+    expect(action.steps.map((step) => step.type)).toEqual([
+      "sample_external",
+      "encode",
+      "sample_external",
+      "encode",
+    ]);
+    expect(actionPorts(draft, action).inputs).toHaveLength(2);
+    const encoders = action.steps.filter((step) => step.type === "encode");
+    expect(new Set(encoders.map((step) => step.into)).size).toBe(2);
+    const rebound = bindEncoderFlowInput(
+      draft,
+      encoders[0]!.id,
+      actionPorts(draft, action).inputs[0]!.id,
+    );
+    expect(rebound.commands.find((c) => c.id === actionId)?.steps).toHaveLength(4);
+    expect(
+      draftToCanvasSensorRecipes(draft)
+        .find((r) => r.actionId === actionId)
+        ?.channels.filter((c) => c.direction === "write"),
+    ).toHaveLength(2);
+  });
+  it("publishes two decoded variables as two separate output ports", () => {
+    let draft = addRegisterAction(createBlankDraft("i2c"), "read", true);
+    const actionId = draft.commands[0]!.id;
+    draft = insertCommandStep(draft, actionId, "decode");
+    draft = insertCommandStep(draft, actionId, "emit");
+    const action = draft.commands[0]!;
+    expect(actionPorts(draft, action).outputs).toHaveLength(2);
+    const decode = action.steps.findLast((op) => op.type === "decode")!;
+    expect(decode.endByte).toBe(0);
+    expect(action.steps.at(-1)).toMatchObject({ type: "emit", from: decode.into });
   });
   it("duplicates an action with independent step identities and keeps its output contract", () => {
     const draft = addRegisterAction(createBlankDraft("i2c"), "read", true);

@@ -85,7 +85,7 @@ import {
   DriverSequence,
   DriverCanvasPreview,
 } from "./DriverActionsPanel.js";
-import { registerStep } from "../../lib/i2c-driver-actions.js";
+import { bindEncoderFlowInput, registerStep } from "../../lib/i2c-driver-actions.js";
 import { TimingScopeChart } from "./TimingScopeChart.js";
 
 type Props = {
@@ -262,7 +262,26 @@ export function DeviceRecipeEditorScreen({
       actionId = base.commands[base.commands.length - 1]!.id;
       setSelectedCommandId(actionId);
     }
-    const next = insertCommandStep(base, actionId, type);
+    let next = insertCommandStep(base, actionId, type);
+    if (type === "encode") {
+      const encoder = next.commands.find((c) => c.id === actionId)?.steps.at(-1);
+      if (encoder) {
+        const steps = next.commands.find((c) => c.id === actionId)?.steps ?? [];
+        const encoded = new Set(
+          steps.flatMap((step) =>
+            step.type === "encode" && step.id !== encoder.id ? [step.input] : [],
+          ),
+        );
+        const source = steps.find(
+          (step) => step.type === "sample_external" && !encoded.has(step.into),
+        );
+        next = bindEncoderFlowInput(
+          next,
+          encoder.id,
+          source?.type === "sample_external" ? source.fromChannelId : undefined,
+        );
+      }
+    }
     setDraft(next);
     const steps = next.commands.find((c) => c.id === actionId)?.steps ?? [];
     const added = steps[steps.length - 1];
@@ -506,7 +525,144 @@ export function DeviceRecipeEditorScreen({
                 activeId={editorPane === "actions" ? activeActionId : null}
                 onChange={setDraft}
                 onSelect={selectDriverAction}
-              />
+              >
+                {(editorPane === "init" || activeActionId) && (
+                  <>
+                    <section className="mt-3 border-t border-brand-blue/25 pt-3">
+                      <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                        {editorPane === "init"
+                          ? it
+                            ? "Aggiungi un passo di avvio"
+                            : "Add a startup step"
+                          : it
+                            ? `Aggiungi un passo a «${draft.commands.find((c) => c.id === activeActionId)?.label ?? ""}»`
+                            : `Add a step to “${draft.commands.find((c) => c.id === activeActionId)?.label ?? ""}”`}
+                      </h2>
+                      {draft.binding.bus === "i2c" && (
+                        <div className="mb-2 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => addRegisterStep("read")}
+                            className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
+                          >
+                            {it ? "+ Leggi registro" : "+ Read register"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => addRegisterStep("write")}
+                            className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
+                          >
+                            {it ? "+ Scrivi registro" : "+ Write register"}
+                          </button>
+                        </div>
+                      )}
+                      <p className="mb-2 font-body text-[10px] text-ink-muted">
+                        {it
+                          ? editorPane === "init"
+                            ? "Questi passi vengono eseguiti all’avvio del dispositivo."
+                            : "I passi qui aggiunti appartengono solo a questa azione."
+                          : editorPane === "init"
+                            ? "These steps run at device startup."
+                            : "Steps added here belong only to this action."}
+                      </p>
+                      <div className="mb-2 flex flex-wrap gap-1">
+                        {(["sample_external", "encode", "decode", "emit"] as const).map(
+                          (type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => addLibraryOp(type)}
+                              className="rounded-slsm border border-border-strong px-2 py-1.5 font-body text-xs text-ink"
+                            >
+                              {
+                                {
+                                  sample_external: it ? "+ Ingresso" : "+ Input",
+                                  encode: "+ Encoder",
+                                  decode: "+ Decoder",
+                                  emit: it ? "+ Uscita" : "+ Output",
+                                }[type]
+                              }
+                            </button>
+                          ),
+                        )}
+                      </div>
+                      <details open={draft.binding.bus !== "i2c"}>
+                        <summary className="mb-2 cursor-pointer font-body text-xs text-ink-muted">
+                          {it
+                            ? "Tutte le operazioni · avanzate"
+                            : "All operations · advanced"}
+                        </summary>
+                        <LibraryList
+                          library={library}
+                          bus={draft.binding.bus}
+                          it={it}
+                          onAdd={addLibraryOp}
+                        />
+                      </details>
+                      {draft.binding.bus === "gpio" ? (
+                        <div className="mt-3">
+                          <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+                            {it ? "Modelli" : "Templates"}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = createGpioDigitalExample(draft.name);
+                              setDraft(next);
+                              setEditorPane("actions");
+                              setSelectedCommandId(next.commands[0]?.id ?? null);
+                              setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                            }}
+                            className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+                          >
+                            {it ? "Ingresso digitale" : "Digital input"}
+                          </button>
+                        </div>
+                      ) : null}
+                      {draft.binding.bus === "adc" ? (
+                        <div className="mt-3">
+                          <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+                            {it ? "Modelli" : "Templates"}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = createAnalogLevelExample(draft.name);
+                              setDraft(next);
+                              setEditorPane("actions");
+                              setSelectedCommandId(next.commands[0]?.id ?? null);
+                              setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                            }}
+                            className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+                          >
+                            {it ? "Livello analogico" : "Analog level"}
+                          </button>
+                        </div>
+                      ) : null}
+                      {draft.binding.bus === "w1" ? (
+                        <div className="mt-3">
+                          <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+                            {it ? "Modelli" : "Templates"}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = createDs18b20Example(draft.name);
+                              setDraft(next);
+                              setEditorPane("actions");
+                              setSelectedCommandId(next.commands[0]?.id ?? null);
+                              setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                            }}
+                            className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+                          >
+                            DS18B20
+                          </button>
+                        </div>
+                      ) : null}
+                    </section>{" "}
+                  </>
+                )}
+              </DriverActionsList>
               {draft.binding.bus !== "i2c" && (
                 <>
                   <section className="rounded-slmd border border-border-strong p-3">
@@ -523,102 +679,6 @@ export function DeviceRecipeEditorScreen({
                   </section>
                 </>
               )}
-              <section className="rounded-slmd border border-border-strong p-3">
-                <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                  {it ? "Aggiungi un passo" : "Add a step"}
-                </h2>
-                {draft.binding.bus === "i2c" && (
-                  <div className="mb-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => addRegisterStep("read")}
-                      className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
-                    >
-                      {it ? "+ Leggi registro" : "+ Read register"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => addRegisterStep("write")}
-                      className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
-                    >
-                      {it ? "+ Scrivi registro" : "+ Write register"}
-                    </button>
-                  </div>
-                )}
-                <details open={draft.binding.bus !== "i2c"}>
-                  <summary className="mb-2 cursor-pointer font-body text-xs text-ink-muted">
-                    {it
-                      ? "Tutte le operazioni · avanzate"
-                      : "All operations · advanced"}
-                  </summary>
-                  <LibraryList
-                    library={library}
-                    bus={draft.binding.bus}
-                    it={it}
-                    onAdd={addLibraryOp}
-                  />
-                </details>
-                {draft.binding.bus === "gpio" ? (
-                  <div className="mt-3">
-                    <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
-                      {it ? "Modelli" : "Templates"}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const next = createGpioDigitalExample(draft.name);
-                        setDraft(next);
-                        setEditorPane("actions");
-                        setSelectedCommandId(next.commands[0]?.id ?? null);
-                        setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-                      }}
-                      className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-                    >
-                      {it ? "Ingresso digitale" : "Digital input"}
-                    </button>
-                  </div>
-                ) : null}
-                {draft.binding.bus === "adc" ? (
-                  <div className="mt-3">
-                    <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
-                      {it ? "Modelli" : "Templates"}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const next = createAnalogLevelExample(draft.name);
-                        setDraft(next);
-                        setEditorPane("actions");
-                        setSelectedCommandId(next.commands[0]?.id ?? null);
-                        setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-                      }}
-                      className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-                    >
-                      {it ? "Livello analogico" : "Analog level"}
-                    </button>
-                  </div>
-                ) : null}
-                {draft.binding.bus === "w1" ? (
-                  <div className="mt-3">
-                    <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
-                      {it ? "Modelli" : "Templates"}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const next = createDs18b20Example(draft.name);
-                        setDraft(next);
-                        setEditorPane("actions");
-                        setSelectedCommandId(next.commands[0]?.id ?? null);
-                        setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-                      }}
-                      className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-                    >
-                      DS18B20
-                    </button>
-                  </div>
-                ) : null}
-              </section>
             </>
           )}
         </aside>
@@ -901,7 +961,11 @@ export function DeviceRecipeEditorScreen({
                   {it ? "Anteprima nel Flow" : "Flow preview"}
                 </h2>
                 {draft.binding.bus === "i2c" ? (
-                  <DriverCanvasPreview draft={draft} it={it} />
+                  <DriverCanvasPreview
+                    draft={draft}
+                    it={it}
+                    activeId={activeActionId}
+                  />
                 ) : (
                   <>
                     <div className="rounded-slmd border border-border-strong bg-surface-sunken p-3">
@@ -1583,26 +1647,11 @@ function StepInspector({
       ) : null}
 
       {op.type === "i2c_write" && !op.registerWidth ? (
-        <I2cWriteFields op={op} draft={draft} it={it} onChange={onChange} />
+        <I2cWriteFields op={op} it={it} onChange={onChange} />
       ) : null}
 
       {op.type === "i2c_read" ? (
         <>
-          <Field
-            label={
-              it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"
-            }
-          >
-            <input
-              value={op.address ?? draft.binding.i2c?.address ?? ""}
-              onChange={(e) =>
-                onChange({ ...op, address: e.target.value.trim() || undefined })
-              }
-              className={inputClass}
-              placeholder="0x48"
-              spellCheck={false}
-            />
-          </Field>
           <Field label={it ? "Byte da leggere" : "Bytes to read"}>
             <input
               type="number"
@@ -1626,21 +1675,6 @@ function StepInspector({
 
       {op.type === "i2c_write_read" && !op.registerWidth ? (
         <>
-          <Field
-            label={
-              it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"
-            }
-          >
-            <input
-              value={op.address ?? draft.binding.i2c?.address ?? ""}
-              onChange={(e) =>
-                onChange({ ...op, address: e.target.value.trim() || undefined })
-              }
-              className={inputClass}
-              placeholder="0x48"
-              spellCheck={false}
-            />
-          </Field>
           <HexByteCellsEditor
             opId={op.id}
             bytes={op.writeBytes}
@@ -1709,7 +1743,7 @@ function StepInspector({
       ) : null}
 
       {op.type === "i2c_transaction" ? (
-        <I2cTransactionFields op={op} draft={draft} it={it} onChange={onChange} />
+        <I2cTransactionFields op={op} it={it} onChange={onChange} />
       ) : null}
 
       {op.type === "spi_transfer" ? (
@@ -1812,7 +1846,13 @@ function StepInspector({
       ) : null}
 
       {op.type === "encode" ? (
-        <EncodeFields op={op} draft={draft} it={it} onChange={onChange} />
+        <EncodeFields
+          op={op}
+          draft={draft}
+          it={it}
+          onChange={onChange}
+          onDraftChange={onDraftChange}
+        />
       ) : null}
 
       {op.type === "emit" ? (
@@ -2678,21 +2718,58 @@ function EncodeFields({
   draft,
   it,
   onChange,
+  onDraftChange,
 }: {
   readonly op: Extract<DeviceRecipeOp, { type: "encode" }>;
   readonly draft: DeviceRecipeDraft;
   readonly it: boolean;
   readonly onChange: (op: DeviceRecipeOp) => void;
+  readonly onDraftChange: (draft: DeviceRecipeDraft) => void;
 }) {
   const varNames = draft.variables.map((v) => v.name);
+  const writeChannels = writeChannelsOf(draft);
+  const sequences = [...draft.phases.init, ...draft.commands.flatMap((c) => c.steps)];
+  const source = sequences.find(
+    (step) => step.type === "sample_external" && step.into === op.input,
+  );
+  const flowChannel = source?.type === "sample_external" ? source.fromChannelId : "";
   return (
     <>
       <p className="font-body text-[11px] leading-snug text-ink-muted">
         {it
-          ? "Da un ingresso (es. Campiona) a una variabile interna: cambio tipo o regole di conversione."
+          ? "Ingresso Flow → Encoder → variabile interna. La conversione adatta il valore ai byte o al tipo richiesto dal sensore."
           : "From an input (e.g. Campiona) to an internal variable: type change or conversion rules."}
       </p>
-      <Field label={it ? "Ingresso" : "Input"}>
+      <Field label={it ? "Ingresso Flow da codificare" : "Flow input to encode"}>
+        <div className="flex gap-1">
+          <select
+            className={inputClass}
+            value={flowChannel}
+            onChange={(e) => {
+              if (e.target.value)
+                onDraftChange(bindEncoderFlowInput(draft, op.id, e.target.value));
+            }}
+          >
+            <option value="">
+              {it ? "Usa una variabile interna" : "Use an internal variable"}
+            </option>
+            {writeChannels.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            aria-label={it ? "Crea ingresso Flow" : "Create Flow input"}
+            className="rounded-slsm border border-border px-2 text-brand-blue"
+            onClick={() => onDraftChange(bindEncoderFlowInput(draft, op.id))}
+          >
+            +
+          </button>
+        </div>
+      </Field>
+      <Field label={it ? "Variabile sorgente" : "Source variable"}>
         <select
           value={op.input}
           onChange={(e) => {
@@ -3131,32 +3208,15 @@ function RegisterStepFields({
 
 function I2cWriteFields({
   op,
-  draft,
   it,
   onChange,
 }: {
   readonly op: Extract<DeviceRecipeOp, { type: "i2c_write" }>;
-  readonly draft: DeviceRecipeDraft;
   readonly it: boolean;
   readonly onChange: (next: DeviceRecipeOp) => void;
 }) {
   return (
     <div className="space-y-2">
-      <div>
-        <span className="mb-0.5 block font-body text-[10px] text-ink-muted">
-          {it ? "Indirizzo (7 bit HEX)" : "Address (7-bit HEX)"}
-        </span>
-        <input
-          value={op.address ?? draft.binding.i2c?.address ?? ""}
-          onChange={(e) =>
-            onChange({ ...op, address: e.target.value.trim() || undefined })
-          }
-          className={inputClass}
-          placeholder="3C"
-          spellCheck={false}
-          autoComplete="off"
-        />
-      </div>
       <HexByteCellsEditor
         opId={op.id}
         bytes={op.bytes}
@@ -3170,12 +3230,10 @@ function I2cWriteFields({
 
 function I2cTransactionFields({
   op,
-  draft,
   it,
   onChange,
 }: {
   readonly op: Extract<DeviceRecipeOp, { type: "i2c_transaction" }>;
-  readonly draft: DeviceRecipeDraft;
   readonly it: boolean;
   readonly onChange: (next: DeviceRecipeOp) => void;
 }) {
@@ -3200,19 +3258,6 @@ function I2cTransactionFields({
 
   return (
     <>
-      <Field
-        label={it ? "Indirizzo dispositivo (7 bit HEX)" : "Device address (7-bit HEX)"}
-      >
-        <input
-          value={op.address ?? draft.binding.i2c?.address ?? ""}
-          onChange={(e) =>
-            onChange({ ...op, address: e.target.value.trim() || undefined })
-          }
-          className={inputClass}
-          placeholder="0x48"
-          spellCheck={false}
-        />
-      </Field>
       <div className="space-y-1.5">
         <p className="font-body text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
           {it ? "Fasi" : "Phases"}
