@@ -33,6 +33,6 @@ The module-manager busy guard serializes access to each device context.
 Frontend generation of wire-v2 profiles and device-action rules is a separate
 compiler integration; action authoring alone does not activate runtime wiring.
 
-Validation: ESP32-S3 signed build; 18 native tests covering communication,
-profiles (including multiple actions and parameter preflight) and runtime
+Validation: ESP32-S3 signed build; 19 native tests covering communication,
+typed argument decoding and duplicate rejection, profiles (including multiple actions and parameter preflight) and runtime
 (including source/action filters, edge triggers and signed value forwarding).

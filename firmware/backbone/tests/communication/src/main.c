@@ -1,3 +1,4 @@
+#include "communication_internal.h"
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -1246,6 +1247,29 @@ ZTEST(communication, test_validate_device_profile_payload_shape)
 	}
 	zassert_equal(field, (uint32_t)SPAGHETTI_DEVICE_PROFILE_FAILURE_PLAN);
 	zassert_equal(reason, (uint32_t)SPAGHETTI_DEVICE_PROFILE_FAILURE_UNSUPPORTED);
+}
+
+ZTEST(communication, test_command_arguments_decode_and_reject_duplicates)
+{
+	struct spaghetti_protocol_payload request = {0};
+	struct spaghetti_property_set arguments;
+	const uint8_t encoded[] = {0xa3, 0, 1, 1, 2, 2, 0xa3,
+		1, 0x26, 2, 0xf5, 3, 0x42, 0x6b, 0};
+	memcpy(request.bytes, encoded, sizeof(encoded));
+	request.size = sizeof(encoded);
+	zassert_ok(spaghetti_ops_decode_arguments(&request, &arguments));
+	zassert_equal(arguments.field_count, 3);
+	zassert_equal(arguments.fields[0].data.signed_integer, -7);
+	zassert_true(arguments.fields[1].data.boolean);
+	zassert_equal(arguments.fields[2].data.bytes.size, 2);
+	zassert_equal(arguments.fields[2].data.bytes.bytes[0], 0x6b);
+	const uint8_t duplicate[] = {0xa1, 2, 0xa2, 1, 0, 1, 1};
+	memcpy(request.bytes, duplicate, sizeof(duplicate));
+	request.size = sizeof(duplicate);
+	zassert_equal(spaghetti_ops_decode_arguments(&request, &arguments), -EEXIST);
+	request.size = sizeof(encoded) - 1;
+	memcpy(request.bytes, encoded, sizeof(encoded));
+	zassert_true(spaghetti_ops_decode_arguments(&request, &arguments) < 0);
 }
 
 ZTEST_SUITE(communication, NULL, NULL, NULL, NULL, NULL);
