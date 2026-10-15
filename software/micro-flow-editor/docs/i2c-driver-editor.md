@@ -93,3 +93,12 @@ rimossi. Una scrittura non produce byte RX: una risposta vuota è normale.
 L’inizializzazione è una scheda autonoma sotto «Azioni del sensore». È facoltativa
 e contiene i passi eseguiti una volta all’avvio del programma sul microcontrollore.
 Non compare come azione nel canvas; ha una propria libreria di passi e prova.
+
+Accanto all’indirizzo sono visibili velocità condivisa (100 kHz predefinito,
+400 kHz opzionale) e pin SDA/SCL del Module Function. Modificare la velocità
+aggiorna la configurazione fisica del progetto e la marca da applicare;
+il pulsante SDA/SCL apre Module Function per configurare e applicare il bus.
+La prova usa la velocità selezionata nella configurazione temporanea.
+«8 bit» nei datasheet indica l’indirizzo a 7 bit con R/W, non un terzo modo
+I²C: 0xD0/0xD1 corrispondono a 0x68, 0x78/0x79 a 0x3C.
+Pull-up e filtri non sono parametri configurabili nel protocollo fisico attuale.

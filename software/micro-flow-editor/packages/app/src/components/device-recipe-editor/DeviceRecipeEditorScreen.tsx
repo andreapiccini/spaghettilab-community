@@ -112,7 +112,7 @@ export function DeviceRecipeEditorScreen({
 }: Props) {
   const { locale } = useLocale();
   const it = locale === "it";
-  const { navigate, session } = useSession();
+  const { navigate, session, execute } = useSession();
   const { rows, getClient, installProfile, listDeviceProfiles, removeProfile } =
     useCoreSessions();
   const physicalDraft = useMemo(() => {
@@ -122,6 +122,39 @@ export function DeviceRecipeEditorScreen({
     const bindingId = session?.stack.current.coreBindings[0]?.bindingId;
     return draftForBinding(project, bindingId);
   }, [session]);
+  function updateI2cSpeed(speed: number) {
+    if (!session || !physicalDraft) return;
+    const bindingId = session.stack.current.coreBindings[0]?.bindingId;
+    execute?.({
+      kind: "SetSensorI2cBusSpeed",
+      apply: (project) => {
+        const physical = parsePhysicalProject(
+          project.authoringMetadata[PHYSICAL_META_KEY]?.comment,
+        );
+        const drafts = Object.fromEntries(
+          Object.entries(physical.drafts).map(([key, value]) => [
+            key,
+            bindingId &&
+            key.startsWith(`${bindingId}:`) &&
+            value.nodeId === physicalDraft.nodeId
+              ? { ...value, i2cSpeed: speed, applied: false }
+              : value,
+          ]),
+        );
+        return {
+          ok: true,
+          value: {
+            ...project,
+            authoringMetadata: {
+              ...project.authoringMetadata,
+              [PHYSICAL_META_KEY]: { comment: JSON.stringify({ ...physical, drafts }) },
+            },
+          },
+        };
+      },
+    });
+    setTestResult(null);
+  }
   const connectedBindingId = useMemo(() => {
     const fromSession = session?.stack.current.coreBindings[0]?.bindingId;
     if (
@@ -611,7 +644,7 @@ export function DeviceRecipeEditorScreen({
                 className={inputClass}
               />
             </label>
-            <label className="w-20 font-body text-[10px] text-ink-muted">
+            <label className="w-36 font-body text-[10px] text-ink-muted">
               {it ? "Bit indirizzo" : "Address bits"}
               <select
                 aria-label={it ? "Bit indirizzo" : "Address bits"}
@@ -631,10 +664,50 @@ export function DeviceRecipeEditorScreen({
                 }}
                 className={inputClass}
               >
-                <option value={7}>7 bit</option>
+                <option value={7}>7 bit · standard</option>
                 <option value={10}>10 bit</option>
               </select>
             </label>
+            <label className="w-28 font-body text-[10px] text-ink-muted">
+              {it ? "Velocità bus" : "Bus speed"}
+              <select
+                className={inputClass}
+                aria-label={it ? "Velocità bus I²C" : "I²C bus speed"}
+                value={physicalDraft?.i2cSpeed ?? 0}
+                disabled={!physicalDraft || !execute}
+                onChange={(event) => updateI2cSpeed(Number(event.target.value))}
+              >
+                <option value={0}>100 kHz</option>
+                <option value={1}>400 kHz</option>
+              </select>
+            </label>
+            <div className="font-body text-[10px] text-ink-muted">
+              <span className="block">SDA / SCL</span>
+              <button
+                type="button"
+                onClick={() => navigate("physical-composition")}
+                className="rounded-slsm border border-border-strong px-2 py-1.5 text-xs text-brand-blue hover:bg-brand-blue/5"
+              >
+                {physicalDraft
+                  ? `${physicalLabelForSignalMode(physicalDraft.modes, 4, functionVariantOf(physicalDraft)) ?? "SDA —"} / ${physicalLabelForSignalMode(physicalDraft.modes, 5, functionVariantOf(physicalDraft)) ?? "SCL —"}`
+                  : it
+                    ? "Configura pin"
+                    : "Configure pins"}
+              </button>
+              {physicalDraft?.applied === false && (
+                <span className="mt-1 block text-amber-700">
+                  {it ? "Da applicare in Module Function" : "Apply in Module Function"}
+                </span>
+              )}
+            </div>
+            <details className="max-w-64 font-body text-[10px] text-ink-muted">
+              <summary className="cursor-pointer text-brand-blue">
+                {it ? "Indirizzo a 8 bit?" : "8-bit address?"}
+              </summary>
+              {it
+                ? "Non è una modalità I²C distinta: comprende il bit R/W. Usa l’indirizzo a 7 bit: 0xD0/0xD1 → 0x68; 0x78/0x79 → 0x3C. SDA/SCL sono open-drain con pull-up; pin e velocità sono condivisi dal bus."
+                : "Includes the R/W bit. Use the 7-bit address: 0xD0/0xD1 → 0x68; 0x78/0x79 → 0x3C. SDA/SCL use open-drain and pull-ups; pins and speed are shared by the bus."}
+            </details>
           </>
         )}
         <span className="mb-2 ml-auto rounded-slpill bg-warning/20 px-2 py-0.5 font-body text-[10px] text-ink">
@@ -686,7 +759,10 @@ export function DeviceRecipeEditorScreen({
                   setTestResult(null);
                   setTryMessage(null);
                   if (selectedOpId === stepId) {
-                    setSelectedOpId(next.commands.find((action) => action.id === actionId)?.steps[0]?.id ?? null);
+                    setSelectedOpId(
+                      next.commands.find((action) => action.id === actionId)?.steps[0]
+                        ?.id ?? null,
+                    );
                   }
                 }}
                 selectedStepId={selectedOpId}
