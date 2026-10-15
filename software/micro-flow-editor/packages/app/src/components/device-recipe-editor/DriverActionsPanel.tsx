@@ -170,6 +170,8 @@ export function DriverSequence({
   selectedId,
   onSelect,
   initialization = false,
+  controls,
+  result,
 }: {
   draft: DeviceRecipeDraft;
   ops: DeviceRecipeDraft["commands"][number]["steps"];
@@ -177,6 +179,8 @@ export function DriverSequence({
   selectedId: string | null;
   onSelect: (id: string) => void;
   initialization?: boolean;
+  controls?: ReactNode;
+  result?: ReactNode;
 }) {
   return (
     <section className="mb-3 rounded-slmd border border-border-strong bg-surface p-3">
@@ -222,6 +226,8 @@ export function DriverSequence({
           ? "Connessione condivisa da tutte le azioni"
           : "Connection shared by all actions"}
       </p>
+      <div className="mt-3">{controls}</div>
+      {result}
     </section>
   );
 }

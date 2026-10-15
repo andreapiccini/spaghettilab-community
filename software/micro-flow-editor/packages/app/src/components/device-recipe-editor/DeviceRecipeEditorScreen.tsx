@@ -433,6 +433,40 @@ export function DeviceRecipeEditorScreen({
     else navigate("processing-graph");
   }
 
+  const testControls = (
+    <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
+      {editorPane !== "init" && (
+        <label className="inline-flex items-center gap-1.5 font-body text-xs text-ink-muted">
+          <input
+            type="checkbox"
+            checked={testRunInitFirst}
+            onChange={(e) => setTestRunInitFirst(e.target.checked)}
+          />
+          {it ? "con Init" : "with Init"}
+        </label>
+      )}
+      <button
+        type="button"
+        disabled={testRunning}
+        onClick={() => void handleRunHardwareTest()}
+        className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue disabled:opacity-40"
+      >
+        <Play size={14} />
+        {testRunning
+          ? it
+            ? "Test…"
+            : "Testing…"
+          : it
+            ? editorPane === "init"
+              ? "Testa init"
+              : "Testa azione"
+            : editorPane === "init"
+              ? "Test init"
+              : "Test action"}
+      </button>
+    </div>
+  );
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface-sunken">
       <header className="flex flex-wrap items-end gap-3 border-b border-border bg-surface px-4 py-2">
@@ -756,6 +790,8 @@ export function DeviceRecipeEditorScreen({
               {draft.binding.bus === "i2c" && (
                 <>
                   <DriverSequence
+                    controls={testControls}
+                    result={visibleTestResult ? <RecipeTestResultPanel result={visibleTestResult} it={it} /> : null}
                     initialization={editorPane === "init"}
                     draft={draft}
                     ops={ops}
@@ -824,9 +860,13 @@ export function DeviceRecipeEditorScreen({
               ))}
             </ul>
           ) : null}
-          {visibleTestResult ? (
-            <RecipeTestResultPanel result={visibleTestResult} it={it} />
-          ) : !testResult && tryMessage ? (
+          {draft.binding.bus !== "i2c" && (
+            <section className="mt-3 rounded-slmd border border-border-strong bg-surface p-3">
+              {testControls}
+              {visibleTestResult && <RecipeTestResultPanel result={visibleTestResult} it={it} />}
+            </section>
+          )}
+          {!testResult && tryMessage ? (
             <p className="mt-3 rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-xs text-ink-muted">
               {tryMessage}
             </p>
@@ -1026,33 +1066,6 @@ export function DeviceRecipeEditorScreen({
             className="rounded-slpill px-3 py-1.5 font-body text-sm text-ink-muted hover:bg-surface-raised"
           >
             {it ? "Annulla" : "Cancel"}
-          </button>
-          <label className="inline-flex items-center gap-1.5 font-body text-xs text-ink-muted">
-            <input
-              type="checkbox"
-              checked={testRunInitFirst}
-              onChange={(e) => setTestRunInitFirst(e.target.checked)}
-            />
-            {it ? "con Init" : "with Init"}
-          </label>
-          <button
-            type="button"
-            disabled={testRunning}
-            onClick={() => void handleRunHardwareTest()}
-            className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue disabled:opacity-40"
-          >
-            <Play size={14} />
-            {testRunning
-              ? it
-                ? "Test…"
-                : "Testing…"
-              : it
-                ? editorPane === "init"
-                  ? "Testa init"
-                  : "Testa azione"
-                : editorPane === "init"
-                  ? "Test init"
-                  : "Test action"}
           </button>
           <button
             type="button"
