@@ -1,5 +1,4 @@
 import { EditorSection } from "./EditorSection.js";
-import { readableI2cStep } from "../../lib/i2c-step-label.js";
 import { parseI2cMessage } from "../../lib/i2c-message-input.js";
 import { FlowBlockPanel } from "./FlowBlockPanel.js";
 import { addFlowInterface, bindFlowEncoderInput, type FlowInterfaceKind } from "../../lib/flow-interfaces.js";
@@ -82,7 +81,6 @@ import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
 import { useSession } from "../../state/session-context.js";
 import { formatHexByte, parseHexByteToken } from "../../lib/i2c-hex.js";
-import { buildProtocolTimingFromOps } from "../../lib/protocol-timing.js";
 import { DerivedSignalView } from "./DerivedSignalView.js";
 import {
   DisplayCenter,
@@ -95,7 +93,6 @@ import {
   DriverCanvasPreview,
 } from "./DriverActionsPanel.js";
 import { bindEncoderFlowInput, registerStep } from "../../lib/i2c-driver-actions.js";
-import { TimingScopeChart } from "./TimingScopeChart.js";
 
 type Props = {
   readonly initialDraft?: DeviceRecipeDraft;
@@ -158,6 +155,7 @@ export function DeviceRecipeEditorScreen({
   const [showBlockPreview, setShowBlockPreview] = useState(false);
   const [testRunInitFirst, setTestRunInitFirst] = useState(false);
   const [testRunning, setTestRunning] = useState(false);
+  const [testSelectionKey, setTestSelectionKey] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<RecipeHardwareTestResult | null>(null);
 
   const isDisplay = draft.category === "display";
@@ -165,6 +163,7 @@ export function DeviceRecipeEditorScreen({
     draft.commands.find((c) => c.id === selectedCommandId)?.id ??
     draft.commands[0]?.id ??
     null;
+  const visibleTestResult = testSelectionKey === (editorPane === "init" ? "init" : activeActionId) ? testResult : null;
   const ops = opsForEditorPane(draft, editorPane, activeActionId);
   const selectedInterfaceId = draft.flowInterfaces?.some(op => op.id === interfaceSelection && (op.type === "sample_external" || op.type === "emit")) ? interfaceSelection : null;
   const selected = (selectedInterfaceId ? draft.flowInterfaces?.find(op => op.id === selectedInterfaceId) : undefined) ?? ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null;
@@ -337,6 +336,7 @@ export function DeviceRecipeEditorScreen({
     setTryMessage(null);
     setTestResult(null);
     const selection = currentTestSelection();
+    setTestSelectionKey(editorPane === "init" ? "init" : activeActionId);
     try {
       const client = connectedBindingId ? getClient(connectedBindingId) : undefined;
       const addrRaw = draft.binding.i2c?.address;
@@ -715,7 +715,7 @@ export function DeviceRecipeEditorScreen({
                 draft={draft}
                 ops={ops}
                 it={it}
-                rxByOpId={testResult?.ok ? testResult.capture.rxByOpId : undefined}
+                rxByOpId={visibleTestResult?.ok ? visibleTestResult.capture.rxByOpId : undefined}
                 selectedOpId={selectedOpId}
                 onSelectOp={id => { setSelectedInterfaceId(null); setSelectedOpId(id); }}
               />
@@ -824,7 +824,9 @@ export function DeviceRecipeEditorScreen({
               ))}
             </ul>
           ) : null}
-          {tryMessage ? (
+          {visibleTestResult ? (
+            <RecipeTestResultPanel result={visibleTestResult} it={it} />
+          ) : !testResult && tryMessage ? (
             <p className="mt-3 rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-xs text-ink-muted">
               {tryMessage}
             </p>
@@ -1125,14 +1127,7 @@ export function DeviceRecipeEditorScreen({
         </div>
       ) : null}
 
-      {testResult ? (
-        <RecipeTestResultModal
-          draft={draft}
-          result={testResult}
-          it={it}
-          onClose={() => setTestResult(null)}
-        />
-      ) : null}
+
     </div>
   );
 }
@@ -1188,130 +1183,91 @@ function recipeTestNote(result: RecipeHardwareTestResult, it: boolean): string {
   }
 }
 
-function RecipeTestResultModal({
-  draft,
+function RecipeTestResultPanel({
   result,
   it,
-  onClose,
 }: {
-  readonly draft: DeviceRecipeDraft;
   readonly result: RecipeHardwareTestResult;
   readonly it: boolean;
-  readonly onClose: () => void;
 }) {
-  const ops = result.plan.steps.map((s) => s.op);
-  const timing = buildProtocolTimingFromOps(draft, ops, {
-    rxByOpId: result.capture.rxByOpId,
-    emphasizeRx: true,
-  });
   const rx = rxBlocksOf(result.capture);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
-      role="dialog"
-      aria-modal="true"
+    <section
+      className="mt-3 shrink-0 rounded-slmd border border-border-strong bg-surface p-3"
+      role="status"
+      aria-live="polite"
     >
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-slmd border border-border-strong bg-surface p-4 shadow-e2">
-        <h2 className="font-body-strong text-base text-ink">
-          {it ? "Risultato prova" : "Test result"}
-          <span
-            className={`ml-2 rounded-slpill px-2 py-0.5 font-body text-[10px] font-semibold ${
-              result.ok
-                ? "bg-emerald-500/15 text-emerald-700"
-                : "bg-amber-500/15 text-amber-800"
-            }`}
-          >
-            {result.ok ? (it ? "OK" : "OK") : it ? "Attenzione" : "Notice"}
-          </span>
-        </h2>
-        <p className="mt-1 font-body text-[11px] leading-snug text-ink-muted">
-          {recipeTestNote(result, it)}
-        </p>
+      <h2 className="font-body-strong text-base text-ink">
+        {it ? "Risultato prova" : "Test result"}
+        <span
+          className={`ml-2 rounded-slpill px-2 py-0.5 font-body text-[10px] font-semibold ${
+            result.ok
+              ? "bg-emerald-500/15 text-emerald-700"
+              : "bg-amber-500/15 text-amber-800"
+          }`}
+        >
+          {result.ok ? (it ? "OK" : "OK") : it ? "Attenzione" : "Notice"}
+        </span>
+      </h2>
+      <p className="mt-1 font-body text-[11px] leading-snug text-ink-muted">
+        {recipeTestNote(result, it)}
+      </p>
 
-        {rx.length > 0 ? (
-          <div className="mt-3">
-            <p className="mb-1.5 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-              {it ? "Blocchi ricevuti dal sensore" : "Blocks received from sensor"}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {rx.map((b) => (
-                <span
-                  key={`${b.opId}-${b.index}`}
-                  className="rounded-slsm border border-emerald-600/30 bg-emerald-500/10 px-2 py-1 font-mono text-[11px] text-ink"
-                >
-                  RX{b.index}
-                  <span className="ml-1.5 font-semibold text-emerald-700">
-                    {b.value === null ? "—" : b.label}
-                  </span>
-                </span>
-              ))}
-            </div>
-            {result.rxTruncated && (
-              <p className="mt-1 font-body text-xs text-amber-700">
-                {it
-                  ? "Cattura parziale: sono mostrate le prime 8 letture."
-                  : "Partial capture: only the first 8 reads are shown."}
-              </p>
-            )}
-            <p className="mt-1 font-body text-[10px] text-ink-faint">
-              {it
-                ? "I byte ricevuti realmente dal sensore sono mostrati in HEX. «—» indica un valore non disponibile."
-                : "Actual bytes received from the sensor are shown in HEX. “—” means unavailable."}
-            </p>
-          </div>
-        ) : (
-          <p className="mt-3 font-body text-xs text-ink-faint">
-            {it
-              ? "Solo scritture in questa selezione — nessuna lettura RX da mostrare (normale per Scrivi)."
-              : "Write-only selection — no RX bytes to show (expected for Write)."}
+      {rx.length > 0 ? (
+        <div className="mt-3">
+          <p className="mb-1.5 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+            {it ? "Blocchi ricevuti dal sensore" : "Blocks received from sensor"}
           </p>
-        )}
-
-        {!!result.readResults?.length && (
-          <section className="mt-3 rounded-slmd border border-border-strong p-3">
-            <h3 className="mb-2 font-body text-xs font-semibold text-ink">
-              {it ? "Risultati decodificati" : "Decoded results"}
-            </h3>
-            {result.readResults.map((value, index) => (
-              <p key={`${value.id}-${index}`} className="font-body text-sm text-ink">
-                {value.label}: <span className="font-mono">{value.value ?? "—"}</span>{" "}
-                {value.unit}
-              </p>
+          <div className="flex flex-wrap gap-1.5">
+            {rx.map((b) => (
+              <span
+                key={`${b.opId}-${b.index}`}
+                className="rounded-slsm border border-emerald-600/30 bg-emerald-500/10 px-2 py-1 font-mono text-[11px] text-ink"
+              >
+                RX{b.index}
+                <span className="ml-1.5 font-semibold text-emerald-700">
+                  {b.value === null ? "—" : b.label}
+                </span>
+              </span>
             ))}
-          </section>
-        )}
-
-        {timing.lanes.length > 0 ? (
-          <div className="mt-4 rounded-slmd border border-border-strong bg-surface p-3">
-            <TimingScopeChart
-              title={
-                it ? "Segnali nel tempo (risposta)" : "Signals over time (response)"
-              }
-              caption={
-                it
-                  ? "STEP allineati · fasce verdi = RX dal sensore."
-                  : "Aligned STEP · green bands = sensor RX."
-              }
-              lanes={timing.lanes}
-              durationMs={timing.durationMs}
-              phaseBands={timing.phaseBands}
-              stepSpans={timing.stepSpans.map(step => ({ ...step, label: readableI2cStep(draft, ops.find(op => op.id === step.opId)!, result.capture.rxByOpId[step.opId], it) }))}
-            />
           </div>
-        ) : null}
-
-        <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
-          >
-            {it ? "Chiudi" : "Close"}
-          </button>
+          {result.rxTruncated && (
+            <p className="mt-1 font-body text-xs text-amber-700">
+              {it
+                ? "Cattura parziale: sono mostrate le prime 8 letture."
+                : "Partial capture: only the first 8 reads are shown."}
+            </p>
+          )}
+          <p className="mt-1 font-body text-[10px] text-ink-faint">
+            {it
+              ? "I byte ricevuti realmente dal sensore sono mostrati in HEX. «—» indica un valore non disponibile."
+              : "Actual bytes received from the sensor are shown in HEX. “—” means unavailable."}
+          </p>
         </div>
-      </div>
-    </div>
+      ) : (
+        <p className="mt-3 font-body text-xs text-ink-faint">
+          {it
+            ? "Solo scritture in questa selezione — nessuna lettura RX da mostrare (normale per Scrivi)."
+            : "Write-only selection — no RX bytes to show (expected for Write)."}
+        </p>
+      )}
+
+      {!!result.readResults?.length && (
+        <section className="mt-3 rounded-slmd border border-border-strong p-3">
+          <h3 className="mb-2 font-body text-xs font-semibold text-ink">
+            {it ? "Risultati decodificati" : "Decoded results"}
+          </h3>
+          {result.readResults.map((value, index) => (
+            <p key={`${value.id}-${index}`} className="font-body text-sm text-ink">
+              {value.label}: <span className="font-mono">{value.value ?? "—"}</span>{" "}
+              {value.unit}
+            </p>
+          ))}
+        </section>
+      )}
+
+    </section>
   );
 }
 

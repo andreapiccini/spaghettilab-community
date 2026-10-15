@@ -44,7 +44,8 @@ sequenza parziale.
 ## Prova e deploy
 
 **Testa azione** esegue la selezione; **con Init** antepone l’inizializzazione.
-Le risposte RX reali e la decodifica appaiono nell’editor. La prova applica una
+L’esito, le risposte RX reali e la decodifica appaiono direttamente sotto i passi
+dell’azione selezionata, senza popup. Il grafico in alto mostra le risposte ricevute. La prova applica una
 configurazione temporanea e ripristina quella precedente. La prova di scrittura
 richiede messaggi costanti, senza riferimenti a variabili non risolti.
 
