@@ -89,3 +89,7 @@ inviato la sequenza completa di 28 byte con due parametri del canvas. Validazion
 lettura di conferma della configurazione e nuova esecuzione dopo riavvio sono
 riuscite. La configurazione originale è stata ripristinata e i profili di prova
 rimossi. Una scrittura non produce byte RX: una risposta vuota è normale.
+
+L’inizializzazione è una scheda autonoma sotto «Azioni del sensore». È facoltativa
+e contiene i passi eseguiti una volta all’avvio del programma sul microcontrollore.
+Non compare come azione nel canvas; ha una propria libreria di passi e prova.

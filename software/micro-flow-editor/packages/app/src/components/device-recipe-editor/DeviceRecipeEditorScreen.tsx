@@ -173,33 +173,6 @@ export function DeviceRecipeEditorScreen({
   const canvasActionCount = draft.commands.filter(
     (c) => c.exposeOnCanvas !== false,
   ).length;
-  const paneTabs: {
-    id: DeviceRecipeEditorPane;
-    label: string;
-    hint: string;
-    blurb: string;
-  }[] = [
-    {
-      id: "init",
-      label: it ? "Inizializzazione" : "Initialization",
-      hint: it
-        ? "Eseguita una volta all’avvio, quando il blocco è sul canvas."
-        : "Runs once at startup when the block is on the canvas.",
-      blurb: it
-        ? "Setup all’accensione: registri, indirizzi, preparazione dispositivo. Non è un ciclo."
-        : "Power-on setup: registers, addresses, device prep. Not a loop.",
-    },
-    {
-      id: "actions",
-      label: it ? "Azioni" : "Actions",
-      hint: it
-        ? "Sequenza eseguita quando il blocco viene attivato sul canvas."
-        : "Sequence run when the block is triggered on the canvas.",
-      blurb: it
-        ? "Sequenza del driver (scrivi / scrivi e leggi → variabili → uscita). L’intervallo lo decidi sul canvas."
-        : "Driver sequence (write / write-read → variables → output). Interval is set on the canvas.",
-    },
-  ];
 
   function switchMode(mode: DeviceRecipeMode) {
     const next = createBlankDraft(mode, draft.name);
@@ -433,6 +406,122 @@ export function DeviceRecipeEditorScreen({
     else navigate("processing-graph");
   }
 
+  const stepLibrary = (
+    <>
+      <section className="mt-3 border-t border-brand-blue/25 pt-3">
+        <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+          {editorPane === "init"
+            ? it
+              ? "Aggiungi un passo di avvio"
+              : "Add a startup step"
+            : it
+              ? `Aggiungi un passo a «${draft.commands.find((c) => c.id === activeActionId)?.label ?? ""}»`
+              : `Add a step to “${draft.commands.find((c) => c.id === activeActionId)?.label ?? ""}”`}
+        </h2>
+        {draft.binding.bus === "i2c" && (
+          <div className="mb-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => addRegisterStep("read")}
+              className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
+            >
+              {it ? "+ Leggi registro" : "+ Read register"}
+            </button>
+            <button
+              type="button"
+              onClick={() => addRegisterStep("write")}
+              className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
+            >
+              {it ? "+ Scrivi registro" : "+ Write register"}
+            </button>
+          </div>
+        )}
+        <p className="mb-2 font-body text-[10px] text-ink-muted">
+          {it
+            ? editorPane === "init"
+              ? "Questi passi vengono eseguiti all’avvio del dispositivo."
+              : "I passi qui aggiunti appartengono solo a questa azione."
+            : editorPane === "init"
+              ? "These steps run at device startup."
+              : "Steps added here belong only to this action."}
+        </p>
+        <details open={draft.binding.bus !== "i2c"}>
+          <summary className="mb-2 cursor-pointer font-body text-xs text-ink-muted">
+            {it ? "Tutte le operazioni · avanzate" : "All operations · advanced"}
+          </summary>
+          <LibraryList
+            library={library.filter(
+              (item) => !isFlowInterface({ id: "", type: item.type } as DeviceRecipeOp),
+            )}
+            bus={draft.binding.bus}
+            it={it}
+            onAdd={addLibraryOp}
+          />
+        </details>
+        {draft.binding.bus === "gpio" ? (
+          <div className="mt-3">
+            <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+              {it ? "Modelli" : "Templates"}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                const next = createGpioDigitalExample(draft.name);
+                setDraft(next);
+                setEditorPane("actions");
+                setSelectedCommandId(next.commands[0]?.id ?? null);
+                setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+              }}
+              className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+            >
+              {it ? "Ingresso digitale" : "Digital input"}
+            </button>
+          </div>
+        ) : null}
+        {draft.binding.bus === "adc" ? (
+          <div className="mt-3">
+            <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+              {it ? "Modelli" : "Templates"}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                const next = createAnalogLevelExample(draft.name);
+                setDraft(next);
+                setEditorPane("actions");
+                setSelectedCommandId(next.commands[0]?.id ?? null);
+                setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+              }}
+              className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+            >
+              {it ? "Livello analogico" : "Analog level"}
+            </button>
+          </div>
+        ) : null}
+        {draft.binding.bus === "w1" ? (
+          <div className="mt-3">
+            <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
+              {it ? "Modelli" : "Templates"}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                const next = createDs18b20Example(draft.name);
+                setDraft(next);
+                setEditorPane("actions");
+                setSelectedCommandId(next.commands[0]?.id ?? null);
+                setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+              }}
+              className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+            >
+              DS18B20
+            </button>
+          </div>
+        ) : null}
+      </section>{" "}
+    </>
+  );
+
   const testControls = (
     <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3">
       {editorPane !== "init" && (
@@ -578,7 +667,13 @@ export function DeviceRecipeEditorScreen({
             />
           ) : (
             <>
-              <FlowBlockPanel draft={draft} it={it} selectedId={selectedInterfaceId} onSelect={setSelectedInterfaceId} onAdd={addInterface} />
+              <FlowBlockPanel
+                draft={draft}
+                it={it}
+                selectedId={selectedInterfaceId}
+                onSelect={setSelectedInterfaceId}
+                onAdd={addInterface}
+              />
               <DriverActionsList
                 draft={draft}
                 it={it}
@@ -591,122 +686,57 @@ export function DeviceRecipeEditorScreen({
                   setSelectedOpId(id);
                 }}
               >
-                {(editorPane === "init" || activeActionId) && (
+                {editorPane === "actions" && activeActionId && stepLibrary}
+              </DriverActionsList>
+              <EditorSection
+                title={it ? "Inizializzazione" : "Initialization"}
+                icon={Play}
+                collapsible
+                defaultOpen
+              >
+                <p className="mb-2 font-body text-[11px] text-ink-muted">
+                  {it
+                    ? "Facoltativa: questi passi preparano il sensore una volta all’avvio del programma sul microcontrollore."
+                    : "Optional: these steps prepare the sensor once when the microcontroller program starts."}
+                </p>
+                <button
+                  type="button"
+                  aria-pressed={editorPane === "init"}
+                  onClick={() => {
+                    setEditorPane("init");
+                    setSelectedInterfaceId(null);
+                    setSelectedOpId(draft.phases.init[0]?.id ?? null);
+                    setTestResult(null);
+                    setTryMessage(null);
+                  }}
+                  className={`w-full rounded-slsm border px-2 py-2 text-left font-body text-xs ${editorPane === "init" ? "border-brand-blue bg-brand-blue/5 text-brand-blue" : "border-border-strong text-ink"}`}
+                >
+                  {it ? "Configura inizializzazione" : "Configure initialization"} ·{" "}
+                  {draft.phases.init.length} {it ? "passi" : "steps"}
+                </button>
+                {editorPane === "init" && (
                   <>
-                    <section className="mt-3 border-t border-brand-blue/25 pt-3">
-                      <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                        {editorPane === "init"
-                          ? it
-                            ? "Aggiungi un passo di avvio"
-                            : "Add a startup step"
-                          : it
-                            ? `Aggiungi un passo a «${draft.commands.find((c) => c.id === activeActionId)?.label ?? ""}»`
-                            : `Add a step to “${draft.commands.find((c) => c.id === activeActionId)?.label ?? ""}”`}
-                      </h2>
-                      {draft.binding.bus === "i2c" && (
-                        <div className="mb-2 flex flex-wrap gap-2">
+                    <ol className="mt-2 space-y-1">
+                      {draft.phases.init.map((step, index) => (
+                        <li key={step.id}>
                           <button
                             type="button"
-                            onClick={() => addRegisterStep("read")}
-                            className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
-                          >
-                            {it ? "+ Leggi registro" : "+ Read register"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => addRegisterStep("write")}
-                            className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
-                          >
-                            {it ? "+ Scrivi registro" : "+ Write register"}
-                          </button>
-                        </div>
-                      )}
-                      <p className="mb-2 font-body text-[10px] text-ink-muted">
-                        {it
-                          ? editorPane === "init"
-                            ? "Questi passi vengono eseguiti all’avvio del dispositivo."
-                            : "I passi qui aggiunti appartengono solo a questa azione."
-                          : editorPane === "init"
-                            ? "These steps run at device startup."
-                            : "Steps added here belong only to this action."}
-                      </p>
-                      <details open={draft.binding.bus !== "i2c"}>
-                        <summary className="mb-2 cursor-pointer font-body text-xs text-ink-muted">
-                          {it
-                            ? "Tutte le operazioni · avanzate"
-                            : "All operations · advanced"}
-                        </summary>
-                        <LibraryList
-                          library={library.filter(item => !isFlowInterface({ id: "", type: item.type } as DeviceRecipeOp))}
-                          bus={draft.binding.bus}
-                          it={it}
-                          onAdd={addLibraryOp}
-                        />
-                      </details>
-                      {draft.binding.bus === "gpio" ? (
-                        <div className="mt-3">
-                          <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
-                            {it ? "Modelli" : "Templates"}
-                          </p>
-                          <button
-                            type="button"
+                            aria-pressed={selectedOpId === step.id}
                             onClick={() => {
-                              const next = createGpioDigitalExample(draft.name);
-                              setDraft(next);
-                              setEditorPane("actions");
-                              setSelectedCommandId(next.commands[0]?.id ?? null);
-                              setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                              setSelectedInterfaceId(null);
+                              setSelectedOpId(step.id);
                             }}
-                            className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+                            className={`w-full rounded-slsm px-2 py-1.5 text-left font-body text-[11px] ${selectedOpId === step.id ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-brand-blue/5"}`}
                           >
-                            {it ? "Ingresso digitale" : "Digital input"}
+                            {index + 1}. {describeDeviceOp(step)}
                           </button>
-                        </div>
-                      ) : null}
-                      {draft.binding.bus === "adc" ? (
-                        <div className="mt-3">
-                          <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
-                            {it ? "Modelli" : "Templates"}
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const next = createAnalogLevelExample(draft.name);
-                              setDraft(next);
-                              setEditorPane("actions");
-                              setSelectedCommandId(next.commands[0]?.id ?? null);
-                              setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-                            }}
-                            className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-                          >
-                            {it ? "Livello analogico" : "Analog level"}
-                          </button>
-                        </div>
-                      ) : null}
-                      {draft.binding.bus === "w1" ? (
-                        <div className="mt-3">
-                          <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
-                            {it ? "Modelli" : "Templates"}
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const next = createDs18b20Example(draft.name);
-                              setDraft(next);
-                              setEditorPane("actions");
-                              setSelectedCommandId(next.commands[0]?.id ?? null);
-                              setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-                            }}
-                            className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-                          >
-                            DS18B20
-                          </button>
-                        </div>
-                      ) : null}
-                    </section>{" "}
+                        </li>
+                      ))}
+                    </ol>
+                    {stepLibrary}
                   </>
                 )}
-              </DriverActionsList>
+              </EditorSection>
               {draft.binding.bus !== "i2c" && (
                 <>
                   <section className="rounded-slmd border border-border-strong p-3">
@@ -749,55 +779,34 @@ export function DeviceRecipeEditorScreen({
                 draft={draft}
                 ops={ops}
                 it={it}
-                rxByOpId={visibleTestResult?.ok ? visibleTestResult.capture.rxByOpId : undefined}
+                rxByOpId={
+                  visibleTestResult?.ok ? visibleTestResult.capture.rxByOpId : undefined
+                }
                 selectedOpId={selectedOpId}
-                onSelectOp={id => { setSelectedInterfaceId(null); setSelectedOpId(id); }}
+                onSelectOp={(id) => {
+                  setSelectedInterfaceId(null);
+                  setSelectedOpId(id);
+                }}
               />
-              <div className="mb-3 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex rounded-slpill border border-border-strong bg-surface p-0.5">
-                    {paneTabs.map((tab) => (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        title={tab.hint}
-                        onClick={() => {
-                          setEditorPane(tab.id);
-                          if (tab.id === "init") {
-                            setSelectedOpId(draft.phases.init[0]?.id ?? null);
-                          } else {
-                            setSelectedOpId(
-                              draft.commands.find((c) => c.id === activeActionId)
-                                ?.steps[0]?.id ??
-                                draft.commands[0]?.steps[0]?.id ??
-                                null,
-                            );
-                          }
-                        }}
-                        className={`rounded-slpill px-3 py-1 font-body text-xs font-semibold ${
-                          editorPane === tab.id
-                            ? "bg-brand-blue text-white"
-                            : "text-ink-muted"
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
               {draft.binding.bus === "i2c" && (
                 <>
                   <DriverSequence
                     controls={testControls}
-                    result={visibleTestResult ? <RecipeTestResultPanel result={visibleTestResult} it={it} /> : null}
+                    result={
+                      visibleTestResult ? (
+                        <RecipeTestResultPanel result={visibleTestResult} it={it} />
+                      ) : null
+                    }
                     initialization={editorPane === "init"}
                     draft={draft}
                     ops={ops}
                     it={it}
                     selectedId={selected?.id ?? null}
-                    onSelect={id => { setSelectedInterfaceId(null); setSelectedOpId(id); }}
+                    onSelect={(id) => {
+                      setSelectedInterfaceId(null);
+                      setSelectedOpId(id);
+                    }}
                   />
                 </>
               )}
@@ -863,7 +872,9 @@ export function DeviceRecipeEditorScreen({
           {draft.binding.bus !== "i2c" && (
             <section className="mt-3 rounded-slmd border border-border-strong bg-surface p-3">
               {testControls}
-              {visibleTestResult && <RecipeTestResultPanel result={visibleTestResult} it={it} />}
+              {visibleTestResult && (
+                <RecipeTestResultPanel result={visibleTestResult} it={it} />
+              )}
             </section>
           )}
           {!testResult && tryMessage ? (
@@ -888,7 +899,22 @@ export function DeviceRecipeEditorScreen({
             />
           ) : (
             <>
-              <EditorSection title={selected?.type === "sample_external" ? (it ? "Configura ingresso" : "Configure input") : selected?.type === "emit" ? (it ? "Configura uscita" : "Configure output") : (it ? "Configura il passo" : "Configure step")} icon={SlidersHorizontal}>
+              <EditorSection
+                title={
+                  selected?.type === "sample_external"
+                    ? it
+                      ? "Configura ingresso"
+                      : "Configure input"
+                    : selected?.type === "emit"
+                      ? it
+                        ? "Configura uscita"
+                        : "Configure output"
+                      : it
+                        ? "Configura il passo"
+                        : "Configure step"
+                }
+                icon={SlidersHorizontal}
+              >
                 {selected ? (
                   <StepInspector
                     op={selected}
@@ -897,7 +923,16 @@ export function DeviceRecipeEditorScreen({
                     onChange={patchSelected}
                     onDraftChange={setDraft}
                     onRemove={() => {
-                      if (selectedInterfaceId) { setDraft({ ...draft, flowInterfaces: draft.flowInterfaces?.filter(op => op.id !== selectedInterfaceId) }); setSelectedInterfaceId(null); return; }
+                      if (selectedInterfaceId) {
+                        setDraft({
+                          ...draft,
+                          flowInterfaces: draft.flowInterfaces?.filter(
+                            (op) => op.id !== selectedInterfaceId,
+                          ),
+                        });
+                        setSelectedInterfaceId(null);
+                        return;
+                      }
                       if (editorPane === "init") {
                         setDraft(removeOp(draft, "init", selected.id));
                       } else if (activeActionId) {
@@ -906,7 +941,18 @@ export function DeviceRecipeEditorScreen({
                       setSelectedOpId(null);
                     }}
                     onMove={(dir) => {
-                      if (selectedInterfaceId) { const list = [...(draft.flowInterfaces ?? [])]; const index = list.findIndex(op => op.id === selectedInterfaceId); const target = index + dir; if (index >= 0 && target >= 0 && target < list.length) { [list[index], list[target]] = [list[target]!, list[index]!]; setDraft({ ...draft, flowInterfaces: list }); } return; }
+                      if (selectedInterfaceId) {
+                        const list = [...(draft.flowInterfaces ?? [])];
+                        const index = list.findIndex(
+                          (op) => op.id === selectedInterfaceId,
+                        );
+                        const target = index + dir;
+                        if (index >= 0 && target >= 0 && target < list.length) {
+                          [list[index], list[target]] = [list[target]!, list[index]!];
+                          setDraft({ ...draft, flowInterfaces: list });
+                        }
+                        return;
+                      }
                       if (editorPane === "init") {
                         setDraft(moveOp(draft, "init", selected.id, dir));
                       } else if (activeActionId) {
@@ -925,7 +971,11 @@ export function DeviceRecipeEditorScreen({
                 )}
               </EditorSection>
 
-              <EditorSection title={it ? "Variabili interne" : "Internal variables"} icon={Braces} collapsible>
+              <EditorSection
+                title={it ? "Variabili interne" : "Internal variables"}
+                icon={Braces}
+                collapsible
+              >
                 <VariablesPanel draft={draft} it={it} onChange={setDraft} />
               </EditorSection>
 
@@ -994,7 +1044,10 @@ export function DeviceRecipeEditorScreen({
                 </section>
               ) : null}
 
-              <EditorSection title={it ? "Anteprima nel Flow" : "Flow preview"} icon={Workflow}>
+              <EditorSection
+                title={it ? "Anteprima nel Flow" : "Flow preview"}
+                icon={Workflow}
+              >
                 {draft.binding.bus === "i2c" ? (
                   <DriverCanvasPreview
                     draft={draft}
@@ -1139,8 +1192,6 @@ export function DeviceRecipeEditorScreen({
           </div>
         </div>
       ) : null}
-
-
     </div>
   );
 }
