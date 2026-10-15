@@ -452,7 +452,7 @@ async function runRecipeHardwareTestUnlocked(
     if (op.type === "i2c_write" || op.type === "i2c_write_read") {
       const bytes = op.type === "i2c_write" ? op.bytes : op.writeBytes;
       return (
-        bytes.length > 8 ||
+        bytes.length > 32 ||
         bytes.some((b) => !/^(?:0x)?[0-9a-f]{1,2}$/i.test(b.trim())) ||
         (op.type === "i2c_write_read" && (op.readLen < 1 || op.readLen > 8))
       );
@@ -467,7 +467,7 @@ async function runRecipeHardwareTestUnlocked(
       capture,
       parked: null,
       restored: false,
-      note: "Operazione I²C non valida: usa valori HEX costanti e al massimo 8 byte per transazione.",
+      note: "Operazione I²C non valida: usa valori HEX costanti, al massimo 32 byte per scrittura e da 1 a 8 byte per lettura.",
     };
 
   const initOps =
@@ -488,11 +488,27 @@ async function runRecipeHardwareTestUnlocked(
 
   // Run the whole plan once in profile init during APPLY — no schedule/runtime.
   // (A schedule + start_runtime has produced INTERNAL_ERROR after VALIDATE ok.)
-  const { profile, skipped } = recipePlanToTestProfile(
-    input.draft,
-    [...initOps, ...bodyOps],
-    [],
-  );
+  let compiled: ReturnType<typeof recipePlanToTestProfile>;
+  try {
+    compiled = recipePlanToTestProfile(input.draft, [...initOps, ...bodyOps], []);
+    if (compiled.profile.initOps.length > 16) {
+      throw new Error(
+        `La sequenza richiede ${compiled.profile.initOps.length} istruzioni; il firmware ne supporta al massimo 16 per la prova. Riduci i passi o i byte dei messaggi.`,
+      );
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      kind: "profile_failed",
+      plan,
+      capture,
+      parked: null,
+      restored: false,
+      note: "Impossibile compilare la sequenza di prova.",
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+  const { profile, skipped } = compiled;
 
   let parked: ParkedLiveConfig;
   try {

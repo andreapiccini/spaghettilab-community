@@ -1226,8 +1226,8 @@ function recipeTestNote(result: RecipeHardwareTestResult, it: boolean): string {
     case "profile_failed":
       return (
         (it
-          ? "Profilo/config di prova non installabile."
-          : "Test profile/config could not be installed.") + err
+          ? `Profilo/config di prova non installabile. ${result.note}`
+          : `Test profile/config could not be installed. ${result.note}`) + err
       );
     case "restore_failed":
       return (
