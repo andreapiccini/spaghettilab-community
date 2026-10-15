@@ -1,3 +1,4 @@
+import { readableI2cStep } from "./i2c-step-label.js";
 /**
  * Shared protocol frame model: datasheet strip ↔ timing chart use the same segments.
  */
@@ -211,7 +212,7 @@ function expandI2cOp(
   const pushWriteBytes = (bytes: readonly string[]) => {
     for (const b of bytes) {
       const n = parseHexByteToken(b) ?? 0;
-      pushCell("data", formatHexByte(n), 8, byteBits(n));
+      pushCell("data", b.startsWith("$") ? b : formatHexByte(n), 8, b.startsWith("$") ? undefined : byteBits(n));
       pushCell("ack", "ACK", 1);
     }
   };
@@ -458,7 +459,8 @@ export function buildProtocolTimingFromOps(
       return band;
     });
 
-    return withStepSpans({ cells, phaseBands: bands, lanes, durationMs, busOps, postOps }, ops);
+    const model = withStepSpans({ cells, phaseBands: bands, lanes, durationMs, busOps, postOps }, ops);
+    return { ...model, stepSpans: model.stepSpans.map(step => ({ ...step, label: readableI2cStep(draft, ops.find(op => op.id === step.opId)!, rxByOpId?.[step.opId]) })) };
   }
 
   if (bus === "spi" && draft.binding.spi) {

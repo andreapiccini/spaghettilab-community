@@ -689,8 +689,7 @@ int spaghetti_module_manager_read(
 	struct spaghetti_record *out)
 {
 	struct spaghetti_module_slot *slot;
-	struct spaghetti_record_payload payload;
-	struct spaghetti_record record;
+	struct spaghetti_record *record;
 	int err;
 
 	if (out == NULL) {
@@ -719,30 +718,31 @@ int spaghetti_module_manager_read(
 		goto unlock;
 	}
 
+	record = k_calloc(1, sizeof(*record));
+	if (record == NULL) { err = -ENOMEM; goto unlock; }
 	slot->busy = true;
 	k_mutex_unlock(&slots_lock);
 
-	err = slot->module.driver->ops->read(&slot->module, &payload);
+	err = slot->module.driver->ops->read(&slot->module, &record->payload);
 
 	(void)k_mutex_lock(&slots_lock, K_FOREVER);
 	if (err == 0) {
-		err = payload_matches_driver_schema(slot->module.driver, &payload);
+		err = payload_matches_driver_schema(slot->module.driver, &record->payload);
 		if (err == 0) {
 			if (slot->read_sequence == UINT32_MAX) {
 				slot->read_sequence = 0U;
 			}
 			++slot->read_sequence;
 
-			memset(&record, 0, sizeof(record));
-			record.source_id = slot->module.id;
-			record.source_key = slot->module.key;
-			record.boot_id = 0U;
-			record.timestamp_ms = k_uptime_get();
-			record.sequence = slot->read_sequence;
-			record.payload = payload;
-			*out = record;
+			record->source_id = slot->module.id;
+			record->source_key = slot->module.key;
+			record->boot_id = 0U;
+			record->timestamp_ms = k_uptime_get();
+			record->sequence = slot->read_sequence;
+			*out = *record;
 		}
 	}
+	k_free(record);
 	slot->busy = false;
 	k_mutex_unlock(&slots_lock);
 	return err;

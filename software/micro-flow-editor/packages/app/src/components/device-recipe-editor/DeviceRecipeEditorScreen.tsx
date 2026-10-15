@@ -1,4 +1,12 @@
+import { EditorSection } from "./EditorSection.js";
+import { readableI2cStep } from "../../lib/i2c-step-label.js";
+import { parseI2cMessage } from "../../lib/i2c-message-input.js";
+import { FlowBlockPanel } from "./FlowBlockPanel.js";
+import { addFlowInterface, bindFlowEncoderInput, type FlowInterfaceKind } from "../../lib/flow-interfaces.js";
 import {
+  SlidersHorizontal,
+  Braces,
+  Workflow,
   ArrowDown,
   ArrowUp,
   Check,
@@ -10,7 +18,7 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   addCommand,
   createAnalogLevelExample,
@@ -29,6 +37,8 @@ import {
   multiSampleSpanMs,
   normalizeRecipeVarName,
   opsForEditorPane,
+  organizeDriverInterfaces,
+  isFlowInterface,
   recipeBlockPorts,
   removeCommandStep,
   removeOp,
@@ -81,7 +91,6 @@ import {
 } from "./DisplayRecipePanels.js";
 import {
   DriverActionsList,
-  DriverActionSettings,
   DriverSequence,
   DriverCanvasPreview,
 } from "./DriverActionsPanel.js";
@@ -129,12 +138,13 @@ export function DeviceRecipeEditorScreen({
     return rows.find((r) => r.sessionState === "READY")?.binding.bindingId;
   }, [session, rows]);
   const [draft, setDraft] = useState<DeviceRecipeDraft>(
-    () => initialDraft ?? createBlankDraft("i2c"),
+    () => organizeDriverInterfaces(initialDraft ?? createBlankDraft("i2c")),
   );
   const [editorPane, setEditorPane] = useState<DeviceRecipeEditorPane>("actions");
   const [selectedCommandId, setSelectedCommandId] = useState<string | null>(
     draft.commands[0]?.id ?? null,
   );
+  const [interfaceSelection, setSelectedInterfaceId] = useState<string | null>(null);
   const [selectedOpId, setSelectedOpId] = useState<string | null>(
     () => draft.commands[0]?.steps[0]?.id ?? draft.phases.init[0]?.id ?? null,
   );
@@ -156,7 +166,8 @@ export function DeviceRecipeEditorScreen({
     draft.commands[0]?.id ??
     null;
   const ops = opsForEditorPane(draft, editorPane, activeActionId);
-  const selected = ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null;
+  const selectedInterfaceId = draft.flowInterfaces?.some(op => op.id === interfaceSelection && (op.type === "sample_external" || op.type === "emit")) ? interfaceSelection : null;
+  const selected = (selectedInterfaceId ? draft.flowInterfaces?.find(op => op.id === selectedInterfaceId) : undefined) ?? ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null;
   const library = libraryOpsForBus(draft.binding.bus);
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
@@ -203,6 +214,7 @@ export function DeviceRecipeEditorScreen({
   }
 
   function selectDriverAction(id: string) {
+    setSelectedInterfaceId(null);
     setSelectedCommandId(id);
     setEditorPane("actions");
     const first = draft.commands.find((c) => c.id === id)?.steps[0]?.id ?? null;
@@ -213,6 +225,7 @@ export function DeviceRecipeEditorScreen({
   }
 
   function addRegisterStep(kind: "read" | "write") {
+    setSelectedInterfaceId(null);
     const op = registerStep(kind);
     if (editorPane === "init") {
       setDraft({
@@ -240,6 +253,8 @@ export function DeviceRecipeEditorScreen({
 
   function patchSelected(next: DeviceRecipeOp) {
     if (!selected) return;
+    setTestResult(null);
+    if (selectedInterfaceId) { setDraft(updateOpAnywhere(draft, selected.id, next)); return; }
     if (editorPane === "init") {
       setDraft(updateOp(draft, "init", selected.id, next));
       return;
@@ -248,7 +263,15 @@ export function DeviceRecipeEditorScreen({
     setDraft(updateCommandStep(draft, activeActionId, selected.id, next));
   }
 
+  function addInterface(type: FlowInterfaceKind) {
+    const added = addFlowInterface(draft, type, activeActionId);
+    let next = added.draft;
+    if (type === "encode" && added.op.type === "encode" && !next.flowInterfaces?.some(op => op.type === "sample_external" && op.into === (added.op as Extract<DeviceRecipeOp, { type: "encode" }>).input)) next = bindFlowEncoderInput(next, added.op.id);
+    setDraft(next); setSelectedInterfaceId(added.op.id);
+  }
   function addLibraryOp(type: DeviceRecipeOp["type"]) {
+    if (!isDisplay && isFlowInterface({ id: "", type } as DeviceRecipeOp)) { addInterface(type as FlowInterfaceKind); return; }
+    setSelectedInterfaceId(null);
     if (editorPane === "init") {
       const next = insertOp(draft, "init", type);
       setDraft(next);
@@ -452,15 +475,16 @@ export function DeviceRecipeEditorScreen({
                 aria-label={it ? "Indirizzo I²C" : "I²C address"}
                 spellCheck={false}
                 value={draft.binding.i2c.address}
-                onChange={(e) =>
+                onChange={(e) => {
+                  setTestResult(null);
                   setDraft({
                     ...draft,
                     binding: {
                       ...draft.binding,
                       i2c: { ...draft.binding.i2c!, address: e.target.value },
                     },
-                  })
-                }
+                  });
+                }}
                 className={inputClass}
               />
             </label>
@@ -469,7 +493,8 @@ export function DeviceRecipeEditorScreen({
               <select
                 aria-label={it ? "Bit indirizzo" : "Address bits"}
                 value={draft.binding.i2c.addressBits ?? 7}
-                onChange={(e) =>
+                onChange={(e) => {
+                  setTestResult(null);
                   setDraft({
                     ...draft,
                     binding: {
@@ -479,8 +504,8 @@ export function DeviceRecipeEditorScreen({
                         addressBits: Number(e.target.value) as 7 | 10,
                       },
                     },
-                  })
-                }
+                  });
+                }}
                 className={inputClass}
               >
                 <option value={7}>7 bit</option>
@@ -519,6 +544,7 @@ export function DeviceRecipeEditorScreen({
             />
           ) : (
             <>
+              <FlowBlockPanel draft={draft} it={it} selectedId={selectedInterfaceId} onSelect={setSelectedInterfaceId} onAdd={addInterface} />
               <DriverActionsList
                 draft={draft}
                 it={it}
@@ -565,27 +591,6 @@ export function DeviceRecipeEditorScreen({
                             ? "These steps run at device startup."
                             : "Steps added here belong only to this action."}
                       </p>
-                      <div className="mb-2 flex flex-wrap gap-1">
-                        {(["sample_external", "encode", "decode", "emit"] as const).map(
-                          (type) => (
-                            <button
-                              key={type}
-                              type="button"
-                              onClick={() => addLibraryOp(type)}
-                              className="rounded-slsm border border-border-strong px-2 py-1.5 font-body text-xs text-ink"
-                            >
-                              {
-                                {
-                                  sample_external: it ? "+ Ingresso" : "+ Input",
-                                  encode: "+ Encoder",
-                                  decode: "+ Decoder",
-                                  emit: it ? "+ Uscita" : "+ Output",
-                                }[type]
-                              }
-                            </button>
-                          ),
-                        )}
-                      </div>
                       <details open={draft.binding.bus !== "i2c"}>
                         <summary className="mb-2 cursor-pointer font-body text-xs text-ink-muted">
                           {it
@@ -593,7 +598,7 @@ export function DeviceRecipeEditorScreen({
                             : "All operations · advanced"}
                         </summary>
                         <LibraryList
-                          library={library}
+                          library={library.filter(item => !isFlowInterface({ id: "", type: item.type } as DeviceRecipeOp))}
                           bus={draft.binding.bus}
                           it={it}
                           onAdd={addLibraryOp}
@@ -705,8 +710,9 @@ export function DeviceRecipeEditorScreen({
                 draft={draft}
                 ops={ops}
                 it={it}
+                rxByOpId={testResult?.ok ? testResult.capture.rxByOpId : undefined}
                 selectedOpId={selectedOpId}
-                onSelectOp={setSelectedOpId}
+                onSelectOp={id => { setSelectedInterfaceId(null); setSelectedOpId(id); }}
               />
               <div className="mb-3 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -744,22 +750,13 @@ export function DeviceRecipeEditorScreen({
 
               {draft.binding.bus === "i2c" && (
                 <>
-                  {editorPane === "actions" && (
-                    <DriverActionSettings
-                      draft={draft}
-                      it={it}
-                      activeId={activeActionId}
-                      onChange={setDraft}
-                      onSelect={selectDriverAction}
-                    />
-                  )}
                   <DriverSequence
                     initialization={editorPane === "init"}
                     draft={draft}
                     ops={ops}
                     it={it}
                     selectedId={selected?.id ?? null}
-                    onSelect={setSelectedOpId}
+                    onSelect={id => { setSelectedInterfaceId(null); setSelectedOpId(id); }}
                   />
                 </>
               )}
@@ -844,10 +841,7 @@ export function DeviceRecipeEditorScreen({
             />
           ) : (
             <>
-              <section className="rounded-slmd border border-border-strong p-3">
-                <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                  {it ? "Configura il passo" : "Configure step"}
-                </h2>
+              <EditorSection title={selected?.type === "sample_external" ? (it ? "Configura ingresso" : "Configure input") : selected?.type === "emit" ? (it ? "Configura uscita" : "Configure output") : (it ? "Configura il passo" : "Configure step")} icon={SlidersHorizontal}>
                 {selected ? (
                   <StepInspector
                     op={selected}
@@ -856,6 +850,7 @@ export function DeviceRecipeEditorScreen({
                     onChange={patchSelected}
                     onDraftChange={setDraft}
                     onRemove={() => {
+                      if (selectedInterfaceId) { setDraft({ ...draft, flowInterfaces: draft.flowInterfaces?.filter(op => op.id !== selectedInterfaceId) }); setSelectedInterfaceId(null); return; }
                       if (editorPane === "init") {
                         setDraft(removeOp(draft, "init", selected.id));
                       } else if (activeActionId) {
@@ -864,6 +859,7 @@ export function DeviceRecipeEditorScreen({
                       setSelectedOpId(null);
                     }}
                     onMove={(dir) => {
+                      if (selectedInterfaceId) { const list = [...(draft.flowInterfaces ?? [])]; const index = list.findIndex(op => op.id === selectedInterfaceId); const target = index + dir; if (index >= 0 && target >= 0 && target < list.length) { [list[index], list[target]] = [list[target]!, list[index]!]; setDraft({ ...draft, flowInterfaces: list }); } return; }
                       if (editorPane === "init") {
                         setDraft(moveOp(draft, "init", selected.id, dir));
                       } else if (activeActionId) {
@@ -880,16 +876,11 @@ export function DeviceRecipeEditorScreen({
                       : "Select a step in the sequence."}
                   </p>
                 )}
-              </section>
+              </EditorSection>
 
-              <details className="rounded-slmd border border-border p-2">
-                <summary className="cursor-pointer font-body text-xs font-semibold text-ink">
-                  {it
-                    ? "Variabili e ingressi del canvas"
-                    : "Variables and canvas inputs"}
-                </summary>
+              <EditorSection title={it ? "Variabili interne" : "Internal variables"} icon={Braces} collapsible>
                 <VariablesPanel draft={draft} it={it} onChange={setDraft} />
-              </details>
+              </EditorSection>
 
               {draft.binding.bus === "adc" && draft.binding.adc ? (
                 <section className="rounded-slmd border border-border-strong p-3">
@@ -956,10 +947,7 @@ export function DeviceRecipeEditorScreen({
                 </section>
               ) : null}
 
-              <section className="rounded-slmd border border-border-strong p-3">
-                <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                  {it ? "Anteprima nel Flow" : "Flow preview"}
-                </h2>
+              <EditorSection title={it ? "Anteprima nel Flow" : "Flow preview"} icon={Workflow}>
                 {draft.binding.bus === "i2c" ? (
                   <DriverCanvasPreview
                     draft={draft}
@@ -1013,7 +1001,7 @@ export function DeviceRecipeEditorScreen({
                     {draft.runtimeUnavailable.join(", ")}
                   </p>
                 ) : null}
-              </section>
+              </EditorSection>
             </>
           )}
         </aside>
@@ -1303,7 +1291,7 @@ function RecipeTestResultModal({
               lanes={timing.lanes}
               durationMs={timing.durationMs}
               phaseBands={timing.phaseBands}
-              stepSpans={timing.stepSpans}
+              stepSpans={timing.stepSpans.map(step => ({ ...step, label: readableI2cStep(draft, ops.find(op => op.id === step.opId)!, result.capture.rxByOpId[step.opId], it) }))}
             />
           </div>
         ) : null}
@@ -1605,8 +1593,8 @@ function StepInspector({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-1">
-        <span className="font-body text-xs font-semibold text-ink">
-          {describeDeviceOp(op)}
+        <span className="min-w-0 flex-1 font-body text-xs font-semibold text-ink">
+          {op.type === "i2c_write" ? (it ? "Scrivi messaggio I²C" : "Write I²C message") : (op.type === "i2c_read" || op.type === "i2c_write_read") ? (it ? "Leggi risposta I²C" : "Read I²C response") : describeDeviceOp(op)}
         </span>
         <button
           type="button"
@@ -1634,8 +1622,7 @@ function StepInspector({
         </button>
       </div>
 
-      {(op.type === "i2c_write" || op.type === "i2c_write_read") &&
-        op.registerWidth && <RegisterStepFields op={op} it={it} onChange={onChange} />}
+
       {op.type === "sample_external" ? (
         <SampleExternalFields
           op={op}
@@ -1646,7 +1633,7 @@ function StepInspector({
         />
       ) : null}
 
-      {op.type === "i2c_write" && !op.registerWidth ? (
+      {op.type === "i2c_write" ? (
         <I2cWriteFields op={op} it={it} onChange={onChange} />
       ) : null}
 
@@ -1673,13 +1660,14 @@ function StepInspector({
         </>
       ) : null}
 
-      {op.type === "i2c_write_read" && !op.registerWidth ? (
+      {op.type === "i2c_write_read" ? (
         <>
           <HexByteCellsEditor
+            key={op.id}
             opId={op.id}
             bytes={op.writeBytes}
             it={it}
-            label={it ? "Byte da scrivere" : "Bytes to write"}
+            label={it ? "Messaggio prima della lettura" : "Message before reading"}
             onChange={(writeBytes) => onChange({ ...op, writeBytes })}
           />
           <Field label={it ? "Byte da leggere" : "Bytes to read"}>
@@ -2578,13 +2566,15 @@ function EmitOutputFields({
           </Field>
         </>
       ) : null}
-      <Field label="from">
+      <Field label={it ? "Variabile da esporre" : "Variable to expose"}>
         <input
+          list="flow-output-variables"
           value={op.from}
           onChange={(e) => onChange({ ...op, from: e.target.value })}
           className={inputClass}
         />
       </Field>
+      <datalist id="flow-output-variables">{[...new Set([...draft.variables.map(variable => variable.name), ...draft.commands.flatMap(command => command.steps.flatMap(step => "into" in step ? [step.into] : []))])].map(name => <option key={name} value={name} />)}</datalist>
     </>
   );
 }
@@ -2747,7 +2737,7 @@ function EncodeFields({
             value={flowChannel}
             onChange={(e) => {
               if (e.target.value)
-                onDraftChange(bindEncoderFlowInput(draft, op.id, e.target.value));
+                onDraftChange(bindFlowEncoderInput(draft, op.id, e.target.value));
             }}
           >
             <option value="">
@@ -2763,7 +2753,7 @@ function EncodeFields({
             type="button"
             aria-label={it ? "Crea ingresso Flow" : "Create Flow input"}
             className="rounded-slsm border border-border px-2 text-brand-blue"
-            onClick={() => onDraftChange(bindEncoderFlowInput(draft, op.id))}
+            onClick={() => onDraftChange(bindFlowEncoderInput(draft, op.id))}
           >
             +
           </button>
@@ -2884,7 +2874,7 @@ function EncodeFields({
 }
 
 function stripHexPrefix(raw: string): string {
-  return raw.trim().replace(/^0x/i, "").toUpperCase();
+  return raw.startsWith("$") ? raw : raw.trim().replace(/^0x/i, "").toUpperCase();
 }
 
 /**
@@ -2908,12 +2898,12 @@ function HexByteCellsEditor({
     (bytes.length > 0 ? bytes : ["0x00"]).map(stripHexPrefix),
   );
 
-  useEffect(() => {
-    setCells((bytes.length > 0 ? bytes : ["0x00"]).map(stripHexPrefix));
-  }, [opId]);
+  const [sequenceText, setSequenceText] = useState("");
+  const [sequenceError, setSequenceError] = useState<string | null>(null);
 
   function persist(nextCells: readonly string[]) {
     const stored = nextCells.map((c) => {
+      if (/^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(c)) return c;
       const n = parseHexByteToken(c);
       return n === null ? "0x00" : formatHexByte(n);
     });
@@ -2921,12 +2911,14 @@ function HexByteCellsEditor({
   }
 
   function updateCell(index: number, value: string) {
-    let v = value.replace(/^0x/i, "").toUpperCase();
-    v = v.replace(/[^0-9A-F]/g, "").slice(0, 2);
-    const next = [...cells];
-    next[index] = v;
-    setCells(next);
-    persist(next);
+    const v = value.startsWith("$") ? value.replace(/[^a-zA-Z0-9_$]/g, "").slice(0, 33) : value.replace(/^0x/i, "").toUpperCase().replace(/[^0-9A-F]/g, "").slice(0, 2);
+    const next = [...cells]; next[index] = v; setCells(next);
+    if (v !== "$" && next.every(cell => cell === "" || parseHexByteToken(cell) !== null || /^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(cell))) persist(next);
+  }
+  function applySequence(text: string) {
+    const parsed = parseI2cMessage(text);
+    if (parsed.error) { setSequenceError(parsed.error); return; }
+    setSequenceError(null); setCells(parsed.tokens.map(stripHexPrefix)); onChange(parsed.tokens);
   }
 
   function addByte() {
@@ -2957,18 +2949,28 @@ function HexByteCellsEditor({
           ({cells.length} {it ? "nella stessa transazione" : "in one transaction"})
         </span>
       </span>
-      <ul className="flex flex-col gap-1">
+      <details className="rounded-slsm border border-border p-2">
+        <summary className="cursor-pointer font-body text-xs text-brand-blue">{it ? "Incolla sequenza" : "Paste sequence"}</summary>
+        <textarea aria-label={it ? "Sequenza HEX da incollare" : "Paste HEX sequence"} value={sequenceText} onChange={e => setSequenceText(e.target.value)} placeholder="00 AE D5 80 … oppure 6B $valore" className="mt-2 w-full rounded border border-border px-2 py-1 font-mono text-xs" rows={3} />
+        <button type="button" onClick={() => applySequence(sequenceText)} className="mt-1 rounded border border-border px-2 py-1 font-body text-xs text-brand-blue">{it ? "Usa messaggio" : "Use message"}</button>
+        <p className="mt-1 font-body text-[10px] text-ink-muted">{it ? "Puoi anche incollare l’intera sequenza in una casella: i byte si distribuiscono automaticamente." : "Paste a whole sequence into any cell to distribute the bytes automatically."}</p>
+        {sequenceError && <p role="alert" className="font-body text-xs text-error">{sequenceError}</p>}
+      </details>
+      <ul className="grid grid-cols-2 gap-1">
         {cells.map((cell, index) => {
-          const valid = cell === "" || parseHexByteToken(cell) !== null;
+          const valid = cell === "" || parseHexByteToken(cell) !== null || /^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(cell);
           return (
             <li key={`${opId}-b${index}`} className="flex items-center gap-1.5">
               <span className="w-4 shrink-0 text-right font-mono text-[10px] text-ink-faint">
                 {index}
               </span>
-              <span className="font-mono text-[11px] text-ink-faint">0x</span>
+              <span className="font-mono text-[11px] text-ink-faint">{cell.startsWith("$") ? "" : "0x"}</span>
               <input
                 data-i2c-byte={`${opId}-${index}`}
                 value={cell}
+                onPaste={e => { const text = e.clipboardData.getData("text/plain"); e.preventDefault(); const parsed = parseI2cMessage(text); if (parsed.error) setSequenceError(parsed.error); else if (parsed.tokens.length === 1) updateCell(index, stripHexPrefix(parsed.tokens[0]!)); else applySequence(text); }}
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => { e.preventDefault(); const ref = e.dataTransfer.getData("text/plain"); const parsed = parseI2cMessage(ref); if (!parsed.error && parsed.tokens.length === 1) { const next = [...cells]; next[index] = parsed.tokens[0]!; setCells(next); onChange(next.map(value => value.startsWith("$") ? value : `0x${value.replace(/^0x/i, "")}`)); } }}
                 onChange={(e) => updateCell(index, e.target.value)}
                 onBlur={() => {
                   if (cell === "") {
@@ -3008,7 +3010,7 @@ function HexByteCellsEditor({
                     });
                   }
                 }}
-                className={`${inputClass} w-14 text-center font-mono text-sm ${
+                className={`${inputClass} min-w-0 text-center font-mono text-sm ${
                   valid ? "" : "border-error"
                 }`}
                 placeholder="00"
@@ -3016,7 +3018,7 @@ function HexByteCellsEditor({
                 autoComplete="off"
                 autoCorrect="off"
                 inputMode="text"
-                maxLength={2}
+                maxLength={33}
                 aria-label={it ? `Byte ${index}` : `Byte ${index}`}
               />
               <button
@@ -3049,162 +3051,6 @@ function HexByteCellsEditor({
   );
 }
 
-function RegisterAddressField({
-  value,
-  width,
-  it,
-  onCommit,
-}: {
-  value: string;
-  width: number;
-  it: boolean;
-  onCommit: (value: string) => void;
-}) {
-  const [text, setText] = useState(value);
-  const [error, setError] = useState(false);
-  return (
-    <>
-      <input
-        aria-label={it ? "Registro HEX" : "Register HEX"}
-        aria-invalid={error}
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          setError(false);
-        }}
-        onBlur={() => {
-          const raw = text.trim().replace(/^0x/i, "");
-          if (!new RegExp(`^[0-9a-fA-F]{1,${width * 2}}$`).test(raw)) {
-            setError(true);
-            return;
-          }
-          const normalized = raw.toUpperCase().padStart(width * 2, "0");
-          setText(normalized);
-          onCommit(normalized);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") e.currentTarget.blur();
-        }}
-        className={inputClass}
-        spellCheck={false}
-      />
-      {error && (
-        <p role="alert" className="font-body text-xs text-error">
-          {it ? "Inserisci un indirizzo HEX valido." : "Enter a valid HEX address."}
-        </p>
-      )}
-    </>
-  );
-}
-
-function RegisterStepFields({
-  op,
-  it,
-  onChange,
-}: {
-  op: Extract<DeviceRecipeOp, { type: "i2c_write" | "i2c_write_read" }>;
-  it: boolean;
-  onChange: (op: DeviceRecipeOp) => void;
-}) {
-  const width = op.registerWidth ?? 1;
-  const bytes = op.type === "i2c_write" ? op.bytes : op.writeBytes;
-  const register = bytes.slice(0, width);
-  const payload = bytes.slice(width);
-  function changeBytes(next: readonly string[]) {
-    onChange(
-      op.type === "i2c_write" ? { ...op, bytes: next } : { ...op, writeBytes: next },
-    );
-  }
-  return (
-    <>
-      <Field label={it ? "Indirizzo del registro" : "Register address"}>
-        <RegisterAddressField
-          key={`${op.id}-${width}`}
-          value={register.join("")}
-          width={width}
-          it={it}
-          onCommit={(raw) =>
-            changeBytes([
-              ...Array.from({ length: width }, (_, i) => raw.slice(i * 2, i * 2 + 2)),
-              ...payload,
-            ])
-          }
-        />
-      </Field>
-      {op.type === "i2c_write" ? (
-        <HexByteCellsEditor
-          opId={op.id}
-          bytes={payload}
-          it={it}
-          label={it ? "Valore da scrivere" : "Value to write"}
-          onChange={(next) => changeBytes([...register, ...next])}
-        />
-      ) : (
-        <>
-          <Field label={it ? "Byte da leggere" : "Bytes to read"}>
-            <input
-              type="number"
-              min={1}
-              max={8}
-              value={op.readLen}
-              onChange={(e) =>
-                onChange({
-                  ...op,
-                  readLen: Math.max(1, Math.min(8, Number(e.target.value) || 1)),
-                })
-              }
-              className={inputClass}
-            />
-          </Field>
-          <Field label={it ? "Salva byte in" : "Save bytes to"}>
-            <input
-              className={inputClass}
-              value={op.into}
-              onChange={(e) => onChange({ ...op, into: e.target.value })}
-            />
-          </Field>
-          <p className="font-body text-xs text-ink-muted">
-            {it
-              ? "Scrittura del registro + RESTART + lettura. Usa Decodifica e Pubblica risultato per l’uscita."
-              : "Write register + RESTART + read. Use Decode and Publish result for the output."}
-          </p>
-        </>
-      )}
-      <details className="rounded-slsm border border-border p-2">
-        <summary className="cursor-pointer font-body text-xs text-ink-muted">
-          {it ? "Dettagli tecnici del registro" : "Register technical details"}
-        </summary>{" "}
-        <Field label={it ? "Dimensione indirizzo registro" : "Register address width"}>
-          <select
-            className={inputClass}
-            value={width}
-            onChange={(e) => {
-              const nextWidth = Number(e.target.value) as 1 | 2;
-              const nextRegister = register
-                .join("")
-                .padStart(nextWidth * 2, "0")
-                .slice(-nextWidth * 2);
-              const nextBytes = [
-                ...Array.from({ length: nextWidth }, (_, i) =>
-                  nextRegister.slice(i * 2, i * 2 + 2),
-                ),
-                ...payload,
-              ];
-              onChange(
-                op.type === "i2c_write"
-                  ? { ...op, registerWidth: nextWidth, bytes: nextBytes }
-                  : { ...op, registerWidth: nextWidth, writeBytes: nextBytes },
-              );
-            }}
-          >
-            <option value={1}>8 bit</option>
-            <option value={2}>16 bit · MSB first</option>
-          </select>
-        </Field>
-      </details>
-    </>
-  );
-}
 
 function I2cWriteFields({
   op,
@@ -3218,10 +3064,11 @@ function I2cWriteFields({
   return (
     <div className="space-y-2">
       <HexByteCellsEditor
+            key={op.id}
         opId={op.id}
         bytes={op.bytes}
         it={it}
-        label={it ? "Byte da inviare" : "Bytes to send"}
+        label={it ? "Messaggio da inviare" : "Message to send"}
         onChange={(bytes) => onChange({ ...op, bytes })}
       />
     </div>
@@ -3375,8 +3222,8 @@ function SampleExternalFields({
     <>
       <p className="font-body text-[11px] leading-snug text-ink-muted">
         {it
-          ? "Legge un ingresso Flow e lo mette in una variabile (usabile in Init e Azioni)."
-          : "Reads a Flow input into a variable (usable in Init and Actions)."}
+          ? "Il valore ricevuto dal canvas aggiorna questa variabile. Usa $nome nei messaggi I²C."
+          : "The canvas input updates this variable. Use $name in I²C messages."}
       </p>
       <Field label={it ? "Ingresso Flow" : "Flow input"}>
         <div className="flex gap-1">
@@ -3459,6 +3306,7 @@ function SampleExternalFields({
           <option value="string">string</option>
         </select>
       </Field>
+      <details className="rounded-lg border border-border bg-surface-sunken/40 p-2"><summary className="cursor-pointer font-body text-[11px] text-ink-muted">{it ? "Formato nei messaggi I²C" : "I²C message format"}</summary><div className="mt-2 space-y-2"><Field label={it ? "Numero di byte" : "Byte count"}><input type="number" min={1} max={8} value={op.widthBytes ?? 8} onChange={event => onChange({ ...op, widthBytes: Math.max(1, Math.min(8, Number(event.target.value) || 1)) })} className={inputClass} /></Field><Field label={it ? "Ordine dei byte" : "Byte order"}><select value={op.byteOrder ?? "be"} onChange={event => onChange({ ...op, byteOrder: event.target.value as "be" | "le" })} className={inputClass}><option value="be">Big endian</option><option value="le">Little endian</option></select></Field></div></details>
       <Field label={it ? "Etichetta ingresso" : "Input label"}>
         <input
           value={
@@ -3491,7 +3339,7 @@ function VariablesPanel({
 }) {
   const writeChannels = writeChannelsOf(draft);
   return (
-    <section className="rounded-slmd border border-border-strong p-3">
+    <section className="space-y-2">
       <h2 className="mb-1 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
         {it ? "Variabili" : "Variables"}
       </h2>

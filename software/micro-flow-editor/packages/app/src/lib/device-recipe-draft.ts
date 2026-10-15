@@ -396,6 +396,8 @@ export type DeviceRecipeOp =
       readonly fromChannelId: string;
       readonly into: string;
       readonly valueType: RecipeVarType;
+      readonly widthBytes?: number;
+      readonly byteOrder?: "be" | "le";
     };
 
 /**
@@ -510,6 +512,8 @@ export type DeviceRecipeDraft = {
   readonly variables: readonly RecipeVariable[];
   /** Named actions (sensor + display). Source of truth for sequences + Flow blocks. */
   readonly commands: readonly DeviceRecipeCommand[];
+  readonly flowInterfaces?: readonly DeviceRecipeOp[];
+  readonly flowInterfaceActions?: Readonly<Record<string, readonly string[]>>;
   readonly display?: DisplayProfile;
   readonly phases: {
     readonly init: readonly DeviceRecipeOp[];
@@ -551,11 +555,43 @@ export function opsForEditorPane(
   return actionById(draft, actionId)?.steps ?? [];
 }
 
+/** Interface operations belong to the Flow contract, rather than the bus sequence. */
+export function isFlowInterface(op: DeviceRecipeOp): boolean {
+  return ["sample_external", "encode", "decode", "emit"].includes(op.type);
+}
+export function organizeDriverInterfaces(draft: DeviceRecipeDraft): DeviceRecipeDraft {
+  if (draft.category === "display") return draft;
+  const interfaces = [...(draft.flowInterfaces ?? [])];
+  const scopes = { ...draft.flowInterfaceActions };
+  const commands = draft.commands.map(command => {
+    const steps = command.steps.filter(op => {
+      if (!isFlowInterface(op)) return true;
+      if (!interfaces.some(item => item.id === op.id)) interfaces.push(op);
+      scopes[op.id] = [...new Set([...(scopes[op.id] ?? []), command.id])];
+      return false;
+    });
+    return { ...command, steps };
+  });
+  return { ...draft, commands, flowInterfaces: interfaces, flowInterfaceActions: scopes };
+}
+export function effectiveActionSteps(draft: DeviceRecipeDraft, command: DeviceRecipeCommand): readonly DeviceRecipeOp[] {
+  const interfaces = (draft.flowInterfaces ?? []).filter(op => !draft.flowInterfaceActions?.[op.id] || draft.flowInterfaceActions[op.id]!.includes(command.id));
+  const before = (draft.flowInterfaces ?? []).filter(op => op.type === "sample_external" || op.type === "encode");
+  const available = new Set([...draft.variables.map(variable => variable.name), ...[...before, ...command.steps].flatMap(op => "into" in op ? [op.into] : [])]);
+  const after: DeviceRecipeOp[] = [];
+  for (const op of interfaces) {
+    if (op.type === "decode" && available.has(parseVarRef(op.input) ?? op.input)) { after.push(op); available.add(op.into); }
+    if (op.type === "emit" && available.has(parseVarRef(op.from) ?? op.from)) after.push(op);
+  }
+  return [...before, ...command.steps, ...after];
+}
+
 /** Walk init + every named action (and legacy phases if still present). */
 export function forEachSequenceOp(
   draft: DeviceRecipeDraft,
   visit: (op: DeviceRecipeOp) => void,
 ): void {
+  for (const op of draft.flowInterfaces ?? []) visit(op);
   for (const op of draft.phases.init) visit(op);
   for (const cmd of draft.commands) {
     for (const op of cmd.steps) visit(op);
@@ -1886,6 +1922,11 @@ export function updateOpAnywhere(
   opId: string,
   next: DeviceRecipeOp,
 ): DeviceRecipeDraft {
+  if (draft.flowInterfaces?.some(op => op.id === opId)) {
+    let base = draft;
+    if (next.type === "decode" || next.type === "encode" || next.type === "sample_external") base = upsertIntoVariable(base, next.into, next.type === "decode" ? next.outType ?? "number" : next.type === "encode" ? next.toType : next.valueType);
+    return touch({ ...base, flowInterfaces: base.flowInterfaces!.map(op => op.id === opId ? next : op) });
+  }
   if (draft.phases.init.some((o) => o.id === opId)) return updateOp(draft, "init", opId, next);
   for (const cmd of draft.commands) {
     if (cmd.steps.some((s) => s.id === opId)) return updateCommandStep(draft, cmd.id, opId, next);
@@ -1986,8 +2027,8 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
       errors.push({ field: `cmd.${cmd.id}.steps`, message: `Sequenza vuota: ${cmd.label}` });
     }
     for (const op of cmd.steps) {
-      if ((op.type === "i2c_read" && (op.len < 1 || op.len > 8)) || (op.type === "i2c_write_read" && (op.readLen < 1 || op.readLen > 8 || op.writeBytes.length > 8)) || (op.type === "i2c_write" && op.bytes.length > 8)) {
-        errors.push({ field: `cmd.${cmd.id}.${op.id}`, message: "Ogni transazione supporta da 1 a 8 byte" });
+      if ((op.type === "i2c_read" && (op.len < 1 || op.len > 8)) || (op.type === "i2c_write_read" && (op.readLen < 1 || op.readLen > 8 || op.writeBytes.length > 32)) || (op.type === "i2c_write" && op.bytes.length > 32)) {
+        errors.push({ field: `cmd.${cmd.id}.${op.id}`, message: "Ogni messaggio supporta fino a 32 byte; le letture fino a 8 byte" });
       }
       if (op.type === "i2c_transaction") {
         for (const msg of validateI2cTransactionPhases(op.phases)) {
@@ -2086,7 +2127,7 @@ export function draftToCanvasSensorRecipes(draft: DeviceRecipeDraft): readonly S
         ];
   return actions.filter(c => c.exposeOnCanvas !== false).map((cmd) => {
     const used = new Set<string>();
-    for (const op of cmd.steps) {
+    for (const op of effectiveActionSteps(draft, cmd)) {
       if (op.type === "emit") used.add(op.channelId);
       if (op.type === "sample_external") used.add(op.fromChannelId);
     }
@@ -2095,7 +2136,9 @@ export function draftToCanvasSensorRecipes(draft: DeviceRecipeDraft): readonly S
       ...draft,
       id: `${draft.id}:${cmd.id}`,
       name: `${draft.name} · ${cmd.label}`,
-      commands: [{ ...cmd, trigger: normalizeActionTrigger(cmd.trigger) }],
+      commands: [{ ...cmd, steps: effectiveActionSteps(draft, cmd), trigger: normalizeActionTrigger(cmd.trigger) }],
+      flowInterfaces: [],
+      flowInterfaceActions: {},
       channels,
       phases: { init: draft.phases.init, sample: [], command: [] },
     };
@@ -2445,6 +2488,7 @@ export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?:
     channels: raw.channels ?? [],
     variables: uniqueVars,
     commands,
+    ...(raw.flowInterfaces ? { flowInterfaces: migrateList(raw.flowInterfaces), flowInterfaceActions: raw.flowInterfaceActions } : {}),
     display: raw.display,
     phases: {
       init: initMigrated,

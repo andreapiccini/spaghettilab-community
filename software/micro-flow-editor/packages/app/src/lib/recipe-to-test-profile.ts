@@ -16,9 +16,7 @@ import { hexStringsToBytes } from "./i2c-hex.js";
 
 /**
  * Pack bytes into LOAD_CONST low/high (little-endian).
- * Firmware temp slots hold at most 8 bytes — longer payloads are chunked into
- * consecutive slots and emitted as back-to-back I2C_WRITE only when each chunk
- * is its own transaction; for a single transaction we keep length ≤ 8.
+ * LOAD_CONST packs eight bytes; CONCAT assembles larger messages before a single transfer.
  */
 function loadConst(dst: number, bytes: readonly number[]): Instruction {
   const slice = bytes.slice(0, 8);
@@ -32,17 +30,24 @@ function loadConst(dst: number, bytes: readonly number[]): Instruction {
   return { op: "LOAD_CONST", dst, length: Math.max(1, slice.length), low: low >>> 0, high: high >>> 0 };
 }
 
-/** One I2C_WRITE transaction for up to 8 payload bytes (same START…STOP). */
+/** One I2C_WRITE transaction for up to 32 payload bytes (same START…STOP). */
 function mapI2cWritePayload(
   payload: readonly number[],
   timeoutMs: number,
   take: () => number,
 ): Instruction[] {
   const bytes = payload.length > 0 ? [...payload] : [0];
-  // Temp slot = 8 bytes max; transmit as many as fit in one transaction.
-  const chunk = bytes.slice(0, 8);
-  const src = take();
-  return [loadConst(src, chunk), { op: "I2C_WRITE", src, length: chunk.length, timeoutMs }];
+  if (bytes.length > 32) throw new Error("Una transazione I²C può contenere al massimo 32 byte.");
+  const result: Instruction[] = [];
+  let src: number | undefined;
+  for (let offset = 0; offset < bytes.length; offset += 8) {
+    const slot = take();
+    result.push(loadConst(slot, bytes.slice(offset, offset + 8)));
+    if (src === undefined) src = slot;
+    else { const dst = take(); result.push({ op: "CONCAT", srcA: src, srcB: slot, dst }); src = dst; }
+  }
+  result.push({ op: "I2C_WRITE", src: src!, length: bytes.length, timeoutMs });
+  return result;
 }
 
 function mapOp(op: DeviceRecipeOp, temp: { next: number }): Instruction[] {
@@ -66,21 +71,13 @@ function mapOp(op: DeviceRecipeOp, temp: { next: number }): Instruction[] {
       return [{ op: "I2C_READ", dst, length: Math.max(1, op.len), timeoutMs: op.timeoutMs ?? 20 }];
     }
     case "i2c_write_read": {
-      // Single WRITE_READ opcode → firmware RESTART (no intermediate STOP).
-      const payload = hexStringsToBytes(op.writeBytes).slice(0, 8);
-      const src = take();
-      const dst = take();
+      const payload = hexStringsToBytes(op.writeBytes);
       const timeoutMs = op.timeoutMs ?? 20;
-      const ops: Instruction[] = [];
-      if (payload.length > 0) ops.push(loadConst(src, payload));
-      ops.push({
-        op: "I2C_WRITE_READ",
-        src,
-        dst,
-        readLength: Math.max(1, op.readLen),
-        writeLength: payload.length,
-        timeoutMs,
-      });
+      const ops = mapI2cWritePayload(payload, timeoutMs, take);
+      const write = ops.pop()!;
+      if (write.op !== "I2C_WRITE") throw new Error("Messaggio I²C non valido.");
+      const dst = take();
+      ops.push({ op: "I2C_WRITE_READ", src: write.src, dst, readLength: Math.max(1, op.readLen), writeLength: write.length, timeoutMs });
       return ops;
     }
     case "i2c_transaction": {
@@ -97,24 +94,25 @@ function mapOp(op: DeviceRecipeOp, temp: { next: number }): Instruction[] {
         if (phase.kind === "write") {
           pendingWrite.push(...hexStringsToBytes(phase.bytes));
         } else if (phase.kind === "read") {
-          const src = take();
           const dst = take();
           if (pendingWrite.length > 0) {
-            const chunk = pendingWrite.slice(0, 8);
-            out.push(loadConst(src, chunk));
+            const packed = mapI2cWritePayload(pendingWrite, timeoutMs, take);
+            const write = packed.pop()!;
+            if (write.op !== "I2C_WRITE") throw new Error("Messaggio I²C non valido.");
+            out.push(...packed);
             out.push({
               op: "I2C_WRITE_READ",
-              src,
+              src: write.src,
               dst,
               readLength: Math.max(1, phase.len),
-              writeLength: chunk.length,
+              writeLength: write.length,
               timeoutMs,
             });
             pendingWrite = [];
           } else {
             out.push({ op: "I2C_READ", dst, length: Math.max(1, phase.len), timeoutMs });
           }
-        } else if (phase.kind === "restart" || phase.kind === "stop" || phase.kind === "start") {
+        } else if (phase.kind === "stop" || phase.kind === "start") {
           flushWrite();
         }
       }
@@ -165,24 +163,19 @@ export function recipePlanToTestProfile(
       skipped.push(op.type);
       continue;
     }
-    const before = temp.next;
     const part = mapOp(op, temp);
     if (part.length === 0 && isExecutableCandidate(op)) skipped.push(op.type);
     mappedSample.push(...part);
-    if (op.type === "i2c_read") {
-      lastReadSlot = before % 8;
-    } else if (op.type === "i2c_write_read" || op.type === "i2c_transaction") {
-      lastReadSlot = (before + 1) % 8;
-    }
+    for (const instruction of part) if (instruction.op === "I2C_READ" || instruction.op === "I2C_WRITE_READ") lastReadSlot = instruction.dst;
   }
 
   const fieldId = 1;
   if (lastReadSlot !== null) {
-    mappedSample.push({ op: "EMIT_FIELD", src: lastReadSlot, fieldId });
+    mappedSample.push({ op: "EMIT_FIELD", src: lastReadSlot, fieldId, width: 1, byteOrder: "le", signExtend: false, multiplier: 0 });
   } else {
     // Ensure validate-profile has something to emit if sampleFields declared
     const dst = temp.next % 8;
-    mappedSample.push(loadConst(dst, [0]), { op: "EMIT_FIELD", src: dst, fieldId });
+    mappedSample.push(loadConst(dst, [0]), { op: "EMIT_FIELD", src: dst, fieldId, width: 1, byteOrder: "le", signExtend: false, multiplier: 0 });
   }
   mappedSample.push({ op: "EMIT_RECORD" });
 

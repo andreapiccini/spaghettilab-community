@@ -113,7 +113,7 @@ export function compileConfig(input: CompileConfigInput, options: CompileConfigO
   const processingNodesById = new Map(processingNodes.map((n) => [n.id, n]));
   const blockNodes = processingNodes.filter((n) => isBlockNodeData(n.data));
   const ruleNodes = processingNodes.filter((n) => isRuleNodeData(n.data));
-  const triggerNodes = processingNodes.filter((n) => n.data.kind === "schedule" || n.data.kind === "event-source");
+  const triggerNodes = processingNodes.filter((n) => n.data.kind === "schedule");
   const blockKeyOf = assignKeys(blockNodes.map((n) => n.id));
   const ruleKeyOf = assignKeys(ruleNodes.map((n) => n.id));
 
@@ -130,7 +130,7 @@ export function compileConfig(input: CompileConfigInput, options: CompileConfigO
     errors.push(failure(ConfigCompilerErrorCode.CAPACITY_EXCEEDED, ["rules"], overflow?.[0] ?? "rules", `${ruleNodes.length} rules exceed the declared cap ${options.maxRules}`));
   }
   if (options.maxSchedules !== undefined && triggerNodes.length > options.maxSchedules) {
-    errors.push(failure(ConfigCompilerErrorCode.CAPACITY_EXCEEDED, ["schedules"], "schedules", `${triggerNodes.length} triggers exceed the declared cap ${options.maxSchedules}`));
+    errors.push(failure(ConfigCompilerErrorCode.CAPACITY_EXCEEDED, ["schedules"], "schedules", `${triggerNodes.length} schedules exceed the declared cap ${options.maxSchedules}`));
   }
   const edges = input.processingGraph.edges as readonly ProcessingEdge[];
   if (options.maxEdges !== undefined && edges.length > options.maxEdges) {
@@ -146,8 +146,8 @@ export function compileConfig(input: CompileConfigInput, options: CompileConfigO
       portId: data.portId,
       typeId: data.driverTypeId,
       properties: propsResult.ok ? propsResult.value : {},
-      bayId: data.bayId,
-      powerRailId: data.railId,
+      bayId: data.bayId === 255 ? undefined : data.bayId,
+      powerRailId: data.railId === 255 ? undefined : data.railId,
     };
   });
 

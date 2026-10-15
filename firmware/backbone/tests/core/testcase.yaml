@@ -38,3 +38,11 @@ tests:
     tags:
       - spaghetti
       - core
+  spaghetti.core.missing_profile:
+    platform_allow:
+      - native_sim/native/64
+    extra_configs:
+      - CONFIG_SPAGHETTI_TEST_PROFILE_MISSING=y
+    tags:
+      - spaghetti
+      - core

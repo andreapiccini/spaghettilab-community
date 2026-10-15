@@ -136,7 +136,7 @@ static int retain_startup_config(void)
 	err = spaghetti_storage_read_config(startup_config);
 	if (err < 0) {
 		k_free(startup_config);
-		if ((err == -EBADMSG) || (err == -EPROTONOSUPPORT)) {
+		if ((err == -EBADMSG) || (err == -EPROTONOSUPPORT) || (err == -ENOENT)) {
 			LOG_WRN("stored Config is corrupt or incompatible; using empty state");
 			return 0;
 		}

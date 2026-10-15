@@ -103,7 +103,7 @@ export function decodeModuleCommandResponse(bytes: Uint8Array): ModuleCommandRes
   )
     throw new ProtocolCodecError("Invalid command capture");
   const rxReads = rx.value.map((value) => {
-    if (value.kind !== "bytes" || value.value.length > 8)
+    if (value.kind !== "bytes" || value.value.length > 32)
       throw new ProtocolCodecError("Invalid command RX");
     return value.value;
   });

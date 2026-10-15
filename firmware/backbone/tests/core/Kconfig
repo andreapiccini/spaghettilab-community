@@ -22,6 +22,10 @@ config SPAGHETTI_TEST_CONFIG_ABSENT
 	bool "Simulate absent Config"
 	default n
 
+config SPAGHETTI_TEST_PROFILE_MISSING
+	bool "Simulate a stored Config with a missing driver profile"
+	default n
+
 config SPAGHETTI_TEST_MAINTENANCE_MARKER
 	bool "Simulate one-shot maintenance marker"
 	default n

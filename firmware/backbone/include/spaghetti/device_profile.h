@@ -27,7 +27,7 @@
 #define SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS 8U
 
 /** Opcode vocabulary revision understood by this firmware image. */
-#define SPAGHETTI_DEVICE_PROFILE_OPCODE_VERSION 3U
+#define SPAGHETTI_DEVICE_PROFILE_OPCODE_VERSION 4U
 
 /** Compact CBOR map wire revision decoded by install. */
 #define SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION 2U
@@ -78,6 +78,10 @@ enum spaghetti_device_profile_opcode {
 	SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD = 22U, /**< Finalize sample record. */
 	SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ = 23U, /**< 1-Wire write then read. */
 	SPAGHETTI_DEVICE_PROFILE_OP_UART_READ = 24U, /**< Read imm0 UART bytes. */
+	SPAGHETTI_DEVICE_PROFILE_OP_LOAD_VALUE =
+		28U, /**< Read a previously published device variable. */
+	SPAGHETTI_DEVICE_PROFILE_OP_SCALE_PACK =
+		27U, /**< Checked integer scaling and byte packing. */
 	SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT = 26U, /**< Pack a command argument into temp. */
 	SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO = 25U, /**< Bounded digital-input poll. */
 };
@@ -126,9 +130,11 @@ struct spaghetti_device_profile_action {
 };
 
 struct spaghetti_device_profile {
-	char profile_id[SPAGHETTI_DEVICE_PROFILE_ID_SIZE]; /**< Owned stable model ID. */
+	char profile_id[SPAGHETTI_DEVICE_PROFILE_ID_SIZE]; /**< Owned stable model ID.
+							    */
 	uint16_t version; /**< Incompatible profile revision. */
-	uint8_t hash[SPAGHETTI_DEVICE_PROFILE_HASH_SIZE]; /**< SHA-256 of installed bytes. */
+	uint8_t hash[SPAGHETTI_DEVICE_PROFILE_HASH_SIZE];  /**< SHA-256 of installed
+							      bytes. */
 	enum spaghetti_port_transport transport; /**< Required Port electrical family. */
 	uint32_t required_capabilities; /**< Port capability bits the profile needs. */
 	uint32_t max_total_time_ms; /**< Worst-case plan time accepted by validate. */
@@ -138,12 +144,15 @@ struct spaghetti_device_profile {
 		init_ops[CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS]; /**< Init plan. */
 	size_t init_count; /**< Valid entries in @ref init_ops. */
 	struct spaghetti_device_profile_op
-		sample_ops[CONFIG_SPAGHETTI_MAX_ACQUISITION_OPERATIONS]; /**< Sample plan. */
+		sample_ops[CONFIG_SPAGHETTI_MAX_ACQUISITION_OPERATIONS]; /**< Sample plan.
+									  */
 	size_t sample_count; /**< Valid entries in @ref sample_ops. */
 	struct spaghetti_device_profile_op
-		safe_stop_ops[CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS]; /**< Safe-stop plan. */
+		safe_stop_ops[CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS]; /**< Safe-stop
+									   plan. */
 	size_t safe_stop_count; /**< Valid entries in @ref safe_stop_ops. */
-	char sample_schema_id[SPAGHETTI_SCHEMA_ID_SIZE]; /**< Owned sample schema_id. */
+	char sample_schema_id[SPAGHETTI_SCHEMA_ID_SIZE]; /**< Owned sample schema_id.
+							  */
 	uint16_t sample_schema_version; /**< Sample schema version. */
 	struct spaghetti_device_profile_field
 		sample_fields[SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS]; /**< Owned fields. */
@@ -165,7 +174,9 @@ struct spaghetti_profile_rx_capture {
 };
 void spaghetti_device_profile_capture_begin(void);
 void spaghetti_device_profile_capture_command_begin(void);
-int spaghetti_device_profile_pack_argument(const struct spaghetti_device_profile_op *op, const struct spaghetti_property_set *arguments, uint8_t out[8]);
+int spaghetti_device_profile_pack_argument(const struct spaghetti_device_profile_op *op,
+					   const struct spaghetti_property_set *arguments,
+					   uint8_t out[8]);
 void spaghetti_device_profile_capture_finish(struct spaghetti_profile_rx_capture *out);
 
 struct spaghetti_device_profile_budget {
@@ -206,13 +217,15 @@ struct spaghetti_device_profile_failure {
  * Values come from Module config property fields, not from the shared profile.
  */
 struct spaghetti_device_profile_binding {
-	const struct spaghetti_property_set *arguments; /**< Borrowed for one command only. */
+	const struct spaghetti_property_set *arguments;
+	const struct spaghetti_property_set *values; /**< Borrowed for one command only. */
 	uint16_t i2c_address; /**< 7-bit I2C address when transport is I2C. */
 	uint8_t spi_cs; /**< Logical SPI chip-select index. */
 	uint8_t adc_channel; /**< Logical ADC channel index 0..4. */
 	uint32_t spi_frequency_hz; /**< SPI clock used by SPI_TRANSCEIVE. */
 	uint32_t default_timeout_ms; /**< Fallback Port lock timeout. */
-	uint8_t w1_rom[SPAGHETTI_ENDPOINT_VALUE_MAX]; /**< 1-Wire ROM when transport is W1. */
+	uint8_t w1_rom[SPAGHETTI_ENDPOINT_VALUE_MAX]; /**< 1-Wire ROM when transport
+							 is W1. */
 };
 
 /**
@@ -225,10 +238,8 @@ struct spaghetti_device_profile_binding {
  * @retval true At least one active or persisted Config references the profile.
  * @retval false The profile is unreferenced and may be removed.
  */
-typedef bool (*spaghetti_device_profile_reference_checker_t)(
-	const char *profile_id,
-	uint16_t version,
-	void *user_data);
+typedef bool (*spaghetti_device_profile_reference_checker_t)(const char *profile_id,
+							     uint16_t version, void *user_data);
 
 /**
  * @brief Initialize the catalog from built-ins and persisted CBOR slots.
@@ -268,10 +279,8 @@ const struct spaghetti_device_profile *spaghetti_device_profile_get(size_t idx);
  *
  * @return Firmware-lifetime pointer, or NULL when no entry matches.
  */
-const struct spaghetti_device_profile *spaghetti_device_profile_find(
-	const char *id,
-	uint16_t version,
-	const uint8_t *hash_or_null);
+const struct spaghetti_device_profile *
+spaghetti_device_profile_find(const char *id, uint16_t version, const uint8_t *hash_or_null);
 
 /**
  * @brief Validate one decoded profile and compute its worst-case budget.
@@ -289,8 +298,7 @@ const struct spaghetti_device_profile *spaghetti_device_profile_find(
  * @retval -EFBIG Computed time, transactions, or bytes exceed profile maxima.
  * @retval -EPROTONOSUPPORT Sample schema fields are incoherent with EMIT ops.
  */
-int spaghetti_device_profile_validate(
-	const struct spaghetti_device_profile *profile,
+int spaghetti_device_profile_validate(const struct spaghetti_device_profile *profile,
 	struct spaghetti_device_profile_budget *out_budget);
 
 /**
@@ -313,9 +321,7 @@ int spaghetti_device_profile_validate(
  * @retval -EFBIG Budget validation failed.
  * @retval -EPROTONOSUPPORT Sample schema fields are incoherent with EMIT ops.
  */
-int spaghetti_device_profile_validate_cbor(
-	const uint8_t *cbor,
-	size_t size,
+int spaghetti_device_profile_validate_cbor(const uint8_t *cbor, size_t size,
 	struct spaghetti_device_profile_failure *failure);
 
 /**
@@ -325,7 +331,8 @@ int spaghetti_device_profile_validate_cbor(
  * opcodes, hash conflicts, or validation failure.
  *
  * @param[in] cbor Borrowed complete CBOR image.
- * @param[in] size Exact byte count of @p cbor; must be <= MAX_DEVICE_PROFILE_BYTES.
+ * @param[in] size Exact byte count of @p cbor; must be <=
+ * MAX_DEVICE_PROFILE_BYTES.
  *
  * @retval 0 Profile committed to a RAM slot and persisted store.
  * @retval -EINVAL Null pointer or zero size.
@@ -352,8 +359,7 @@ int spaghetti_device_profile_install(const uint8_t *cbor, size_t size);
  * @retval -EEXIST Same id/version exists with a different hash.
  * @retval -ENOSPC No free profile slot remains.
  */
-int spaghetti_device_profile_install_decoded(
-	const struct spaghetti_device_profile *profile);
+int spaghetti_device_profile_install_decoded(const struct spaghetti_device_profile *profile);
 
 /**
  * @brief Remove one installed profile when it is unreferenced.
@@ -379,8 +385,7 @@ int spaghetti_device_profile_remove(const char *id, uint16_t version);
  * @param[in,out] user_data Passed to @p checker on each remove attempt.
  */
 void spaghetti_device_profile_set_reference_checker(
-	spaghetti_device_profile_reference_checker_t checker,
-	void *user_data);
+	spaghetti_device_profile_reference_checker_t checker, void *user_data);
 
 /**
  * @brief Execute one plan from a validated profile through Port APIs only.
@@ -398,10 +403,8 @@ void spaghetti_device_profile_set_reference_checker(
  * @retval -ETIMEDOUT WAIT_FIELD_MASK exhausted its attempts.
  * @retval -EIO Or other original Port errno.
  */
-int spaghetti_device_profile_exec(
-	const struct spaghetti_device_profile *profile,
-	const struct spaghetti_device_profile_op *ops,
-	size_t op_count,
+int spaghetti_device_profile_exec(const struct spaghetti_device_profile *profile,
+				  const struct spaghetti_device_profile_op *ops, size_t op_count,
 	const struct spaghetti_port *port,
 	const struct spaghetti_device_profile_binding *binding,
 	struct spaghetti_record_payload *out_record);
@@ -417,8 +420,7 @@ int spaghetti_device_profile_exec(
  * @retval -EINVAL Null pointer or unsupported field type.
  * @retval -E2BIG Field count exceeds the caller table contract.
  */
-int spaghetti_device_profile_make_schema(
-	const struct spaghetti_device_profile *profile,
+int spaghetti_device_profile_make_schema(const struct spaghetti_device_profile *profile,
 	struct spaghetti_field_descriptor *fields,
 	struct spaghetti_schema_descriptor *out_schema);
 

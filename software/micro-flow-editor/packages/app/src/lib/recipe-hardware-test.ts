@@ -19,6 +19,7 @@ import {
 } from "./backbone-physical.js";
 import {
   describeDeviceOp,
+  effectiveActionSteps,
   type DeviceRecipeDraft,
   type DeviceRecipeOp,
   type DeviceRecipePhase,
@@ -221,7 +222,7 @@ function actionOps(
     const cmd =
       (commandId ? draft.commands.find((c) => c.id === commandId) : undefined) ??
       draft.commands[0];
-    return cmd?.steps ?? [];
+    return cmd ? effectiveActionSteps(draft, cmd) : [];
   }
   // Legacy fallback before migrate
   return phaseOps(draft, "command").length

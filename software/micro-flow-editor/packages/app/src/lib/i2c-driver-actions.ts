@@ -2,6 +2,7 @@ import {
   addCommand,
   createNamedAction,
   normalizeRecipeVarName,
+  effectiveActionSteps,
   ensureWriteChannel,
   upsertRecipeVariable,
   type DeviceRecipeCommand,
@@ -101,15 +102,16 @@ export function duplicateDriverAction(
     steps: action.steps.map((op) => ({ ...op, id: id("step") })),
     params: action.params.map((p) => ({ ...p, id: id("param") })),
   });
-  return { ...draft, commands: [...draft.commands, copy], updatedAt: Date.now() };
+  return { ...draft, commands: [...draft.commands, copy], ...(draft.flowInterfaceActions ? { flowInterfaceActions: Object.fromEntries(Object.entries(draft.flowInterfaceActions).map(([id, actions]) => [id, actions.includes(action.id) ? [...actions, copy.id] : actions])) } : {}), updatedAt: Date.now() };
 }
 
 export function actionPorts(draft: DeviceRecipeDraft, action: DeviceRecipeCommand) {
+  const steps = effectiveActionSteps(draft, action);
   const outputs = new Set(
-    action.steps.flatMap((op) => (op.type === "emit" ? [op.channelId] : [])),
+    steps.flatMap((op) => (op.type === "emit" ? [op.channelId] : [])),
   );
   const inputs = new Set(
-    action.steps.flatMap((op) =>
+    steps.flatMap((op) =>
       op.type === "sample_external" ? [op.fromChannelId] : [],
     ),
   );

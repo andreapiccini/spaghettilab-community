@@ -2,6 +2,11 @@
 
 #include <errno.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#if defined(CONFIG_SETTINGS)
+#include <zephyr/settings/settings.h>
+#endif
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -9,8 +14,7 @@
 
 #include <zcbor_decode.h>
 
-LOG_MODULE_REGISTER(spaghetti_device_profile,
-		    CONFIG_SPAGHETTI_DEVICE_PROFILE_LOG_LEVEL);
+LOG_MODULE_REGISTER(spaghetti_device_profile, CONFIG_SPAGHETTI_DEVICE_PROFILE_LOG_LEVEL);
 
 #define SPAGHETTI_DEVICE_PROFILE_CBOR_KEY_WIRE 0U
 #define SPAGHETTI_DEVICE_PROFILE_CBOR_KEY_ID 1U
@@ -36,12 +40,39 @@ struct spaghetti_device_profile_slot {
 	size_t cbor_size;
 };
 
-static struct spaghetti_device_profile_slot slots
-	[CONFIG_SPAGHETTI_MAX_DEVICE_PROFILES];
-static const struct spaghetti_device_profile
-	*catalog[CONFIG_SPAGHETTI_MAX_DEVICE_PROFILES];
+static struct spaghetti_device_profile_slot slots[CONFIG_SPAGHETTI_MAX_DEVICE_PROFILES];
+static const struct spaghetti_device_profile *catalog[CONFIG_SPAGHETTI_MAX_DEVICE_PROFILES];
 static size_t catalog_count;
 static bool catalog_ready;
+#if defined(CONFIG_SETTINGS)
+static int profiles_settings_set(const char *name, size_t len, settings_read_cb read_cb, void *arg)
+{
+	char *end;
+	unsigned long index = strtoul(name, &end, 10);
+	if (end == name || *end || index >= ARRAY_SIZE(slots)) return -ENOENT;
+	if (!len || len > sizeof(slots[index].cbor)) return 0;
+	int count = read_cb(arg, slots[index].cbor, len);
+	if (count < 0) return count;
+	if ((size_t)count != len) return -EIO;
+	slots[index].cbor_size = len;
+	slots[index].persisted = true;
+	return 0;
+}
+SETTINGS_STATIC_HANDLER_DEFINE(spaghetti_device_profiles, "device_profiles", NULL,
+	profiles_settings_set, NULL, NULL);
+static int persist_profile_slot(struct spaghetti_device_profile_slot *slot, bool remove)
+{
+	char key[32];
+	snprintf(key, sizeof(key), "device_profiles/%u", (unsigned)(slot - slots));
+	return remove ? settings_delete(key) : settings_save_one(key, slot->cbor, slot->cbor_size);
+}
+#else
+static int persist_profile_slot(struct spaghetti_device_profile_slot *slot, bool remove)
+{
+	ARG_UNUSED(slot); ARG_UNUSED(remove); return 0;
+}
+#endif
+
 static spaghetti_device_profile_reference_checker_t reference_checker;
 static void *reference_checker_user_data;
 
@@ -63,7 +94,7 @@ static bool profile_id_is_valid(const char *id)
 static bool opcode_is_known(uint8_t opcode)
 {
 	return (opcode >= SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE) &&
-	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT);
+	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_LOAD_VALUE);
 }
 
 static bool temp_ok(uint8_t slot)
@@ -76,10 +107,7 @@ static int expect_key(zcbor_state_t *state, uint32_t expected)
 	return zcbor_uint32_expect(state, expected) ? 0 : -EBADMSG;
 }
 
-static int decode_text(
-	zcbor_state_t *state,
-	char *out,
-	size_t out_size)
+static int decode_text(zcbor_state_t *state, char *out, size_t out_size)
 {
 	struct zcbor_string text;
 
@@ -95,8 +123,7 @@ static int decode_text(
 	return 0;
 }
 
-static int accumulate_op_budget(
-	const struct spaghetti_device_profile_op *op,
+static int accumulate_op_budget(const struct spaghetti_device_profile_op *op,
 	struct spaghetti_device_profile_budget *budget)
 {
 	uint32_t time_ms = 0U;
@@ -122,22 +149,17 @@ static int accumulate_op_budget(
 		time_ms = op->imm1;
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ:
-		if (!temp_ok(op->src_a) || !temp_ok(op->dst) ||
-		    (op->imm0 == 0U) ||
+		if (!temp_ok(op->src_a) || !temp_ok(op->dst) || (op->imm0 == 0U) ||
 		    (op->imm0 > SPAGHETTI_VALUE_BYTES_MAX)) {
 			return -EINVAL;
 		}
 		transactions = 1U;
-		bytes = (uint32_t)op->imm0 +
-			((op->imm1 != 0U) ? (uint32_t)op->imm1 : 1U);
-		time_ms = (op->imm2 > UINT16_MAX) ? UINT16_MAX :
-						   (uint16_t)op->imm2;
+		bytes = (uint32_t)op->imm0 + ((op->imm1 != 0U) ? (uint32_t)op->imm1 : 1U);
+		time_ms = (op->imm2 > UINT16_MAX) ? UINT16_MAX : (uint16_t)op->imm2;
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_SPI_TRANSCEIVE:
-		if (!temp_ok(op->src_a) || !temp_ok(op->dst) ||
-		    (op->imm0 == 0U) ||
-		    (op->imm0 > SPAGHETTI_VALUE_BYTES_MAX) ||
-		    (op->imm3 > 3U)) {
+		if (!temp_ok(op->src_a) || !temp_ok(op->dst) || (op->imm0 == 0U) ||
+		    (op->imm0 > SPAGHETTI_VALUE_BYTES_MAX) || (op->imm3 > 3U)) {
 			return -EINVAL;
 		}
 		transactions = 1U;
@@ -168,10 +190,8 @@ static int accumulate_op_budget(
 			return -EINVAL;
 		}
 		transactions = 1U;
-		bytes = (uint32_t)op->imm0 +
-			((op->imm1 != 0U) ? (uint32_t)op->imm1 : 1U);
-		time_ms = (op->imm2 > UINT16_MAX) ? UINT16_MAX :
-						   (uint16_t)op->imm2;
+		bytes = (uint32_t)op->imm0 + ((op->imm1 != 0U) ? (uint32_t)op->imm1 : 1U);
+		time_ms = (op->imm2 > UINT16_MAX) ? UINT16_MAX : (uint16_t)op->imm2;
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET:
 		if (!temp_ok(op->dst)) {
@@ -207,8 +227,19 @@ static int accumulate_op_budget(
 		transactions = op->imm0;
 		time_ms = (uint32_t)op->imm0 * (uint32_t)op->imm1;
 		break;
+	case SPAGHETTI_DEVICE_PROFILE_OP_SCALE_PACK:
+		if (!temp_ok(op->dst) || !temp_ok(op->src_a) || op->src_b > 7 || op->imm0 < 1 ||
+		    op->imm0 > 8 || op->imm1 == 0) {
+			return -EINVAL;
+		}
+		break;
+	case SPAGHETTI_DEVICE_PROFILE_OP_LOAD_VALUE:
 	case SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT:
-		if (!temp_ok(op->dst) || op->src_a == 0U || op->src_a > SPAGHETTI_PROPERTY_MAX_FIELDS || op->src_b > 1U || op->imm0 == 0U || op->imm0 > 8U || op->imm1 > 1U) return -EINVAL;
+		if (!temp_ok(op->dst) || op->src_a == 0U ||
+		    op->src_a > SPAGHETTI_PROPERTY_MAX_FIELDS || op->src_b > 1U || op->imm0 == 0U ||
+		    op->imm0 > 8U || op->imm1 > 1U) {
+			return -EINVAL;
+		}
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST:
 		if (!temp_ok(op->dst) || (op->imm0 == 0U) || (op->imm0 > 8U)) {
@@ -216,13 +247,12 @@ static int accumulate_op_budget(
 		}
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_COPY_BYTES:
-		if (!temp_ok(op->dst) || !temp_ok(op->src_a)) {
+		if (!temp_ok(op->dst) || !temp_ok(op->src_a) || op->imm1 > 8) {
 			return -EINVAL;
 		}
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_CONCAT:
-		if (!temp_ok(op->dst) || !temp_ok(op->src_a) ||
-		    !temp_ok(op->src_b)) {
+		if (!temp_ok(op->dst) || !temp_ok(op->src_a) || !temp_ok(op->src_b)) {
 			return -EINVAL;
 		}
 		break;
@@ -265,8 +295,7 @@ static int accumulate_op_budget(
 	return 0;
 }
 
-static int opcode_matches_profile(
-	const struct spaghetti_device_profile_op *op,
+static int opcode_matches_profile(const struct spaghetti_device_profile_op *op,
 	const struct spaghetti_device_profile *profile)
 {
 	switch (op->opcode) {
@@ -274,21 +303,18 @@ static int opcode_matches_profile(
 		if (profile->transport != SPAGHETTI_PORT_TRANSPORT_W1) {
 			return -EINVAL;
 		}
-		if ((profile->required_capabilities & SPAGHETTI_PORT_CAP_W1) ==
-		    0U) {
+		if ((profile->required_capabilities & SPAGHETTI_PORT_CAP_W1) == 0U) {
 			return -EINVAL;
 		}
 		return 0;
 	case SPAGHETTI_DEVICE_PROFILE_OP_UART_READ:
 		if ((profile->transport != SPAGHETTI_PORT_TRANSPORT_UART) &&
-		    ((profile->required_capabilities & SPAGHETTI_PORT_CAP_UART) ==
-		     0U)) {
+		    ((profile->required_capabilities & SPAGHETTI_PORT_CAP_UART) == 0U)) {
 			return -EINVAL;
 		}
 		return 0;
 	case SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO:
-		if ((profile->required_capabilities &
-		     SPAGHETTI_PORT_CAP_DIGITAL_INPUT) == 0U) {
+		if ((profile->required_capabilities & SPAGHETTI_PORT_CAP_DIGITAL_INPUT) == 0U) {
 			return -EINVAL;
 		}
 		return 0;
@@ -297,13 +323,9 @@ static int opcode_matches_profile(
 	}
 }
 
-static int validate_plan(
-	const struct spaghetti_device_profile_op *ops,
-	size_t count,
-	size_t max_count,
-	const struct spaghetti_device_profile *profile,
-	struct spaghetti_device_profile_budget *budget,
-	bool *saw_emit_field)
+static int validate_plan(const struct spaghetti_device_profile_op *ops, size_t count,
+			 size_t max_count, const struct spaghetti_device_profile *profile,
+			 struct spaghetti_device_profile_budget *budget, bool *saw_emit_field)
 {
 	if (count > max_count) {
 		return -E2BIG;
@@ -331,11 +353,9 @@ static int validate_plan(
 			bool found = false;
 
 			*saw_emit_field = true;
-			for (size_t field_idx = 0U;
-			     field_idx < profile->sample_field_count;
+			for (size_t field_idx = 0U; field_idx < profile->sample_field_count;
 			     ++field_idx) {
-				if (profile->sample_fields[field_idx].field_id ==
-				    op->dst) {
+				if (profile->sample_fields[field_idx].field_id == op->dst) {
 					found = true;
 					break;
 				}
@@ -349,8 +369,7 @@ static int validate_plan(
 	return 0;
 }
 
-int spaghetti_device_profile_make_schema(
-	const struct spaghetti_device_profile *profile,
+int spaghetti_device_profile_make_schema(const struct spaghetti_device_profile *profile,
 	struct spaghetti_field_descriptor *fields,
 	struct spaghetti_schema_descriptor *out_schema)
 {
@@ -362,8 +381,7 @@ int spaghetti_device_profile_make_schema(
 	}
 
 	for (size_t idx = 0U; idx < profile->sample_field_count; ++idx) {
-		const struct spaghetti_device_profile_field *src =
-			&profile->sample_fields[idx];
+		const struct spaghetti_device_profile_field *src = &profile->sample_fields[idx];
 
 		if ((src->field_id == 0U) ||
 		    ((src->type != SPAGHETTI_VALUE_INT64) &&
@@ -394,13 +412,11 @@ int spaghetti_device_profile_make_schema(
 	return 0;
 }
 
-int spaghetti_device_profile_validate(
-	const struct spaghetti_device_profile *profile,
+int spaghetti_device_profile_validate(const struct spaghetti_device_profile *profile,
 	struct spaghetti_device_profile_budget *out_budget)
 {
 	struct spaghetti_device_profile_budget budget = { 0 };
-	struct spaghetti_field_descriptor fields
-		[SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS];
+	struct spaghetti_field_descriptor fields[SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS];
 	struct spaghetti_schema_descriptor schema;
 	bool saw_emit_field = false;
 	int err;
@@ -408,12 +424,9 @@ int spaghetti_device_profile_validate(
 	if (profile == NULL) {
 		return -EINVAL;
 	}
-	if (!profile_id_is_valid(profile->profile_id) ||
-	    (profile->version == 0U) ||
-	    (profile->required_capabilities == 0U) ||
-	    (profile->max_total_time_ms == 0U) ||
-	    (profile->sample_schema_id[0] == '\0') ||
-	    (profile->sample_schema_version == 0U) ||
+	if (!profile_id_is_valid(profile->profile_id) || (profile->version == 0U) ||
+	    (profile->required_capabilities == 0U) || (profile->max_total_time_ms == 0U) ||
+	    (profile->sample_schema_id[0] == '\0') || (profile->sample_schema_version == 0U) ||
 	    ((profile->sample_field_count == 0U) && (profile->action_count == 0U))) {
 		return -EINVAL;
 	}
@@ -428,40 +441,59 @@ int spaghetti_device_profile_validate(
 	}
 
 	err = validate_plan(profile->init_ops, profile->init_count,
-			    CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS, profile,
-			    &budget, &saw_emit_field);
+			    CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS, profile, &budget,
+			    &saw_emit_field);
 	if (err < 0) {
 		return err;
 	}
 	err = validate_plan(profile->sample_ops, profile->sample_count,
-			    CONFIG_SPAGHETTI_MAX_ACQUISITION_OPERATIONS, profile,
-			    &budget, &saw_emit_field);
+			    CONFIG_SPAGHETTI_MAX_ACQUISITION_OPERATIONS, profile, &budget,
+			    &saw_emit_field);
 	if (err < 0) {
 		return err;
 	}
 	err = validate_plan(profile->safe_stop_ops, profile->safe_stop_count,
-			    CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS, profile,
-			    &budget, &saw_emit_field);
+			    CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS, profile, &budget,
+			    &saw_emit_field);
 	if (err < 0) {
 		return err;
 	}
 
-	if (profile->action_count > SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS) return -E2BIG;
+	if (profile->action_count > SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS) {
+		return -E2BIG;
+	}
 	if (profile->action_count > 0U) {
 		size_t next = 0U;
 		uint16_t ids = 0U;
 		for (size_t i = 0; i < profile->action_count; ++i) {
 			const struct spaghetti_device_profile_action *action = &profile->actions[i];
-			if (action->id == 0U || action->id > 8U || (ids & BIT(action->id)) || action->first != next || action->count == 0U || action->count > profile->sample_count - next) return -EINVAL;
+			if (action->id == 0U || action->id > 8U || (ids & BIT(action->id)) ||
+			    action->first != next || action->count == 0U ||
+			    action->count > profile->sample_count - next) {
+				return -EINVAL;
+			}
 			ids |= BIT(action->id);
 			next += action->count;
-			if (profile->sample_ops[next - 1].opcode != SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD) return -EINVAL;
+			if (profile->sample_ops[next - 1].opcode !=
+			    SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD) {
+				return -EINVAL;
 		}
-		if (next != profile->sample_count) return -EINVAL;
+		}
+		if (next != profile->sample_count) {
+			return -EINVAL;
+		}
 	}
 	/* Arguments cannot influence startup or safe-stop plans. */
-	for (size_t i = 0; i < profile->init_count; ++i) if (profile->init_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) return -EINVAL;
-	for (size_t i = 0; i < profile->safe_stop_count; ++i) if (profile->safe_stop_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) return -EINVAL;
+	for (size_t i = 0; i < profile->init_count; ++i) {
+		if (profile->init_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) {
+			return -EINVAL;
+		}
+	}
+	for (size_t i = 0; i < profile->safe_stop_count; ++i) {
+		if (profile->safe_stop_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) {
+			return -EINVAL;
+		}
+	}
 	if (!saw_emit_field && profile->action_count == 0U) {
 		return -EPROTONOSUPPORT;
 	}
@@ -491,21 +523,16 @@ static uint32_t sha256_rotr(uint32_t value, uint32_t bits)
 static void sha256_transform(uint32_t state[8], const uint8_t block[64])
 {
 	static const uint32_t k[64] = {
-		0x428a2f98U, 0x71374491U, 0xb5c0fbcfU, 0xe9b5dba5U,
-		0x3956c25bU, 0x59f111f1U, 0x923f82a4U, 0xab1c5ed5U,
-		0xd807aa98U, 0x12835b01U, 0x243185beU, 0x550c7dc3U,
-		0x72be5d74U, 0x80deb1feU, 0x9bdc06a7U, 0xc19bf174U,
-		0xe49b69c1U, 0xefbe4786U, 0x0fc19dc6U, 0x240ca1ccU,
-		0x2de92c6fU, 0x4a7484aaU, 0x5cb0a9dcU, 0x76f988daU,
-		0x983e5152U, 0xa831c66dU, 0xb00327c8U, 0xbf597fc7U,
-		0xc6e00bf3U, 0xd5a79147U, 0x06ca6351U, 0x14292967U,
-		0x27b70a85U, 0x2e1b2138U, 0x4d2c6dfcU, 0x53380d13U,
-		0x650a7354U, 0x766a0abbU, 0x81c2c92eU, 0x92722c85U,
-		0xa2bfe8a1U, 0xa81a664bU, 0xc24b8b70U, 0xc76c51a3U,
-		0xd192e819U, 0xd6990624U, 0xf40e3585U, 0x106aa070U,
-		0x19a4c116U, 0x1e376c08U, 0x2748774cU, 0x34b0bcb5U,
-		0x391c0cb3U, 0x4ed8aa4aU, 0x5b9cca4fU, 0x682e6ff3U,
-		0x748f82eeU, 0x78a5636fU, 0x84c87814U, 0x8cc70208U,
+		0x428a2f98U, 0x71374491U, 0xb5c0fbcfU, 0xe9b5dba5U, 0x3956c25bU, 0x59f111f1U,
+		0x923f82a4U, 0xab1c5ed5U, 0xd807aa98U, 0x12835b01U, 0x243185beU, 0x550c7dc3U,
+		0x72be5d74U, 0x80deb1feU, 0x9bdc06a7U, 0xc19bf174U, 0xe49b69c1U, 0xefbe4786U,
+		0x0fc19dc6U, 0x240ca1ccU, 0x2de92c6fU, 0x4a7484aaU, 0x5cb0a9dcU, 0x76f988daU,
+		0x983e5152U, 0xa831c66dU, 0xb00327c8U, 0xbf597fc7U, 0xc6e00bf3U, 0xd5a79147U,
+		0x06ca6351U, 0x14292967U, 0x27b70a85U, 0x2e1b2138U, 0x4d2c6dfcU, 0x53380d13U,
+		0x650a7354U, 0x766a0abbU, 0x81c2c92eU, 0x92722c85U, 0xa2bfe8a1U, 0xa81a664bU,
+		0xc24b8b70U, 0xc76c51a3U, 0xd192e819U, 0xd6990624U, 0xf40e3585U, 0x106aa070U,
+		0x19a4c116U, 0x1e376c08U, 0x2748774cU, 0x34b0bcb5U, 0x391c0cb3U, 0x4ed8aa4aU,
+		0x5b9cca4fU, 0x682e6ff3U, 0x748f82eeU, 0x78a5636fU, 0x84c87814U, 0x8cc70208U,
 		0x90befffaU, 0xa4506cebU, 0xbef9a3f7U, 0xc67178f2U,
 	};
 	uint32_t w[64];
@@ -521,27 +548,22 @@ static void sha256_transform(uint32_t state[8], const uint8_t block[64])
 	for (size_t idx = 0U; idx < 16U; ++idx) {
 		w[idx] = ((uint32_t)block[idx * 4U] << 24) |
 			 ((uint32_t)block[(idx * 4U) + 1U] << 16) |
-			 ((uint32_t)block[(idx * 4U) + 2U] << 8) |
-			 (uint32_t)block[(idx * 4U) + 3U];
+			 ((uint32_t)block[(idx * 4U) + 2U] << 8) | (uint32_t)block[(idx * 4U) + 3U];
 	}
 	for (size_t idx = 16U; idx < 64U; ++idx) {
-		const uint32_t s0 = sha256_rotr(w[idx - 15U], 7U) ^
-				    sha256_rotr(w[idx - 15U], 18U) ^
+		const uint32_t s0 = sha256_rotr(w[idx - 15U], 7U) ^ sha256_rotr(w[idx - 15U], 18U) ^
 				    (w[idx - 15U] >> 3);
-		const uint32_t s1 = sha256_rotr(w[idx - 2U], 17U) ^
-				    sha256_rotr(w[idx - 2U], 19U) ^
+		const uint32_t s1 = sha256_rotr(w[idx - 2U], 17U) ^ sha256_rotr(w[idx - 2U], 19U) ^
 				    (w[idx - 2U] >> 10);
 
 		w[idx] = w[idx - 16U] + s0 + w[idx - 7U] + s1;
 	}
 
 	for (size_t idx = 0U; idx < 64U; ++idx) {
-		const uint32_t s1 = sha256_rotr(e, 6U) ^ sha256_rotr(e, 11U) ^
-				    sha256_rotr(e, 25U);
+		const uint32_t s1 = sha256_rotr(e, 6U) ^ sha256_rotr(e, 11U) ^ sha256_rotr(e, 25U);
 		const uint32_t ch = (e & f) ^ ((~e) & g);
 		const uint32_t temp1 = h + s1 + ch + k[idx] + w[idx];
-		const uint32_t s0 = sha256_rotr(a, 2U) ^ sha256_rotr(a, 13U) ^
-				    sha256_rotr(a, 22U);
+		const uint32_t s0 = sha256_rotr(a, 2U) ^ sha256_rotr(a, 13U) ^ sha256_rotr(a, 22U);
 		const uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
 		const uint32_t temp2 = s0 + maj;
 
@@ -565,9 +587,7 @@ static void sha256_transform(uint32_t state[8], const uint8_t block[64])
 	state[7] += h;
 }
 
-static int compute_sha256(
-	const uint8_t *data,
-	size_t size,
+static int compute_sha256(const uint8_t *data, size_t size,
 	uint8_t out[SPAGHETTI_DEVICE_PROFILE_HASH_SIZE])
 {
 	uint32_t state[8] = {
@@ -635,9 +655,8 @@ static int decode_op(zcbor_state_t *state, struct spaghetti_device_profile_op *o
 		return -EBADMSG;
 	}
 
-	if ((values[0] > UINT8_MAX) || (values[1] > UINT8_MAX) ||
-	    (values[2] > UINT8_MAX) || (values[3] > UINT8_MAX) ||
-	    (values[4] > UINT16_MAX) || (values[5] > UINT16_MAX)) {
+	if ((values[0] > UINT8_MAX) || (values[1] > UINT8_MAX) || (values[2] > UINT8_MAX) ||
+	    (values[3] > UINT8_MAX) || (values[4] > UINT16_MAX) || (values[5] > UINT16_MAX)) {
 		return -EINVAL;
 	}
 
@@ -652,11 +671,8 @@ static int decode_op(zcbor_state_t *state, struct spaghetti_device_profile_op *o
 	return 0;
 }
 
-static int decode_ops(
-	zcbor_state_t *state,
-	struct spaghetti_device_profile_op *ops,
-	size_t max_count,
-	size_t *out_count)
+static int decode_ops(zcbor_state_t *state, struct spaghetti_device_profile_op *ops,
+		      size_t max_count, size_t *out_count)
 {
 	size_t count = 0U;
 
@@ -701,20 +717,17 @@ static int decode_fields(zcbor_state_t *state, struct spaghetti_device_profile *
 		if (count >= SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS) {
 			return -E2BIG;
 		}
-		if (!zcbor_list_start_decode(state) ||
-		    !zcbor_uint32_decode(state, &field_id) ||
+		if (!zcbor_list_start_decode(state) || !zcbor_uint32_decode(state, &field_id) ||
 		    !zcbor_uint32_decode(state, &type)) {
 			return -EBADMSG;
 		}
 		if ((field_id == 0U) || (field_id > UINT16_MAX) ||
-		    ((type != SPAGHETTI_VALUE_INT64) &&
-		     (type != SPAGHETTI_VALUE_UINT64))) {
+		    ((type != SPAGHETTI_VALUE_INT64) && (type != SPAGHETTI_VALUE_UINT64))) {
 			return -EINVAL;
 		}
 
 		profile->sample_fields[count].field_id = (uint16_t)field_id;
-		profile->sample_fields[count].type =
-			(enum spaghetti_value_type)type;
+		profile->sample_fields[count].type = (enum spaghetti_value_type)type;
 		err = decode_text(state, profile->sample_fields[count].name,
 				  sizeof(profile->sample_fields[count].name));
 		if (err < 0) {
@@ -739,9 +752,7 @@ static int decode_fields(zcbor_state_t *state, struct spaghetti_device_profile *
 	return 0;
 }
 
-static int decode_profile_cbor(
-	const uint8_t *cbor,
-	size_t size,
+static int decode_profile_cbor(const uint8_t *cbor, size_t size,
 	struct spaghetti_device_profile *out)
 {
 	zcbor_state_t states[8];
@@ -780,8 +791,8 @@ static int decode_profile_cbor(
 	}
 
 	err = expect_key(states, SPAGHETTI_DEVICE_PROFILE_CBOR_KEY_VERSION);
-	if ((err < 0) || !zcbor_uint32_decode(states, &version) ||
-	    (version == 0U) || (version > UINT16_MAX)) {
+	if ((err < 0) || !zcbor_uint32_decode(states, &version) || (version == 0U) ||
+	    (version > UINT16_MAX)) {
 		return -EBADMSG;
 	}
 	out->version = (uint16_t)version;
@@ -799,22 +810,19 @@ static int decode_profile_cbor(
 	out->required_capabilities = caps;
 
 	err = expect_key(states, SPAGHETTI_DEVICE_PROFILE_CBOR_KEY_TIME);
-	if ((err < 0) || !zcbor_uint32_decode(states, &time_ms) ||
-	    (time_ms == 0U)) {
+	if ((err < 0) || !zcbor_uint32_decode(states, &time_ms) || (time_ms == 0U)) {
 		return -EBADMSG;
 	}
 	out->max_total_time_ms = time_ms;
 
 	err = expect_key(states, SPAGHETTI_DEVICE_PROFILE_CBOR_KEY_TX);
-	if ((err < 0) || !zcbor_uint32_decode(states, &max_tx) ||
-	    (max_tx > UINT16_MAX)) {
+	if ((err < 0) || !zcbor_uint32_decode(states, &max_tx) || (max_tx > UINT16_MAX)) {
 		return -EBADMSG;
 	}
 	out->max_transactions = (uint16_t)max_tx;
 
 	err = expect_key(states, SPAGHETTI_DEVICE_PROFILE_CBOR_KEY_BYTES);
-	if ((err < 0) || !zcbor_uint32_decode(states, &max_bytes) ||
-	    (max_bytes > UINT16_MAX)) {
+	if ((err < 0) || !zcbor_uint32_decode(states, &max_bytes) || (max_bytes > UINT16_MAX)) {
 		return -EBADMSG;
 	}
 	out->max_bytes = (uint16_t)max_bytes;
@@ -823,8 +831,7 @@ static int decode_profile_cbor(
 	if (err < 0) {
 		return err;
 	}
-	err = decode_ops(states, out->init_ops,
-			 CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS,
+	err = decode_ops(states, out->init_ops, CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS,
 			 &out->init_count);
 	if (err < 0) {
 		return err;
@@ -834,8 +841,7 @@ static int decode_profile_cbor(
 	if (err < 0) {
 		return err;
 	}
-	err = decode_ops(states, out->sample_ops,
-			 CONFIG_SPAGHETTI_MAX_ACQUISITION_OPERATIONS,
+	err = decode_ops(states, out->sample_ops, CONFIG_SPAGHETTI_MAX_ACQUISITION_OPERATIONS,
 			 &out->sample_count);
 	if (err < 0) {
 		return err;
@@ -845,8 +851,7 @@ static int decode_profile_cbor(
 	if (err < 0) {
 		return err;
 	}
-	err = decode_ops(states, out->safe_stop_ops,
-			 CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS,
+	err = decode_ops(states, out->safe_stop_ops, CONFIG_SPAGHETTI_MAX_PROFILE_OPERATIONS,
 			 &out->safe_stop_count);
 	if (err < 0) {
 		return err;
@@ -856,15 +861,14 @@ static int decode_profile_cbor(
 	if (err < 0) {
 		return err;
 	}
-	err = decode_text(states, out->sample_schema_id,
-			  sizeof(out->sample_schema_id));
+	err = decode_text(states, out->sample_schema_id, sizeof(out->sample_schema_id));
 	if (err < 0) {
 		return err;
 	}
 
 	err = expect_key(states, SPAGHETTI_DEVICE_PROFILE_CBOR_KEY_SCHEMA_VER);
-	if ((err < 0) || !zcbor_uint32_decode(states, &schema_version) ||
-	    (schema_version == 0U) || (schema_version > UINT16_MAX)) {
+	if ((err < 0) || !zcbor_uint32_decode(states, &schema_version) || (schema_version == 0U) ||
+	    (schema_version > UINT16_MAX)) {
 		return -EBADMSG;
 	}
 	out->sample_schema_version = (uint16_t)schema_version;
@@ -879,20 +883,34 @@ static int decode_profile_cbor(
 	}
 
 	if (wire_version == 2U) {
-		if (expect_key(states, 14U) < 0 || !zcbor_list_start_decode(states)) return -EBADMSG;
+		if (expect_key(states, 14U) < 0 || !zcbor_list_start_decode(states)) {
+			return -EBADMSG;
+		}
 		while (!zcbor_array_at_end(states)) {
 			uint32_t id, first, count;
-			if (out->action_count >= SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS || !zcbor_list_start_decode(states) || !zcbor_uint32_decode(states, &id) || !zcbor_uint32_decode(states, &first) || !zcbor_uint32_decode(states, &count) || !zcbor_list_end_decode(states) || id > 8U || first > UINT8_MAX || count > UINT8_MAX) return -EBADMSG;
-			out->actions[out->action_count++] = (struct spaghetti_device_profile_action){ .id = id, .first = first, .count = count };
+			if (out->action_count >= SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS ||
+			    !zcbor_list_start_decode(states) || !zcbor_uint32_decode(states, &id) ||
+			    !zcbor_uint32_decode(states, &first) ||
+			    !zcbor_uint32_decode(states, &count) ||
+			    !zcbor_list_end_decode(states) || id > 8U || first > UINT8_MAX ||
+			    count > UINT8_MAX) {
+				return -EBADMSG;
 		}
-		if (!zcbor_list_end_decode(states)) return -EBADMSG;
+			out->actions[out->action_count++] =
+				(struct spaghetti_device_profile_action){
+					.id = id, .first = first, .count = count};
 	}
-	if (!zcbor_map_end_decode(states) || states->payload != states->payload_end) return -EBADMSG;
+		if (!zcbor_list_end_decode(states)) {
+			return -EBADMSG;
+		}
+	}
+	if (!zcbor_map_end_decode(states) || states->payload != states->payload_end) {
+		return -EBADMSG;
+	}
 	return 0;
 }
 
-static void fill_profile_failure(
-	struct spaghetti_device_profile_failure *failure,
+static void fill_profile_failure(struct spaghetti_device_profile_failure *failure,
 	enum spaghetti_device_profile_failure_field field,
 	enum spaghetti_device_profile_failure_reason reason)
 {
@@ -904,9 +922,7 @@ static void fill_profile_failure(
 	failure->reason = reason;
 }
 
-static void fill_decode_failure(
-	int err,
-	struct spaghetti_device_profile_failure *failure)
+static void fill_decode_failure(int err, struct spaghetti_device_profile_failure *failure)
 {
 	switch (err) {
 	case -ENOTSUP:
@@ -929,9 +945,7 @@ static void fill_decode_failure(
 	}
 }
 
-static void fill_validate_failure(
-	int err,
-	struct spaghetti_device_profile_failure *failure)
+static void fill_validate_failure(int err, struct spaghetti_device_profile_failure *failure)
 {
 	switch (err) {
 	case -ENOTSUP:
@@ -961,9 +975,7 @@ static void fill_validate_failure(
 	}
 }
 
-int spaghetti_device_profile_validate_cbor(
-	const uint8_t *cbor,
-	size_t size,
+int spaghetti_device_profile_validate_cbor(const uint8_t *cbor, size_t size,
 	struct spaghetti_device_profile_failure *failure)
 {
 	struct spaghetti_device_profile *staging;
@@ -1003,16 +1015,13 @@ int spaghetti_device_profile_validate_cbor(
 	return 0;
 }
 
-static const struct spaghetti_device_profile *find_locked(
-	const char *id,
-	uint16_t version,
+static const struct spaghetti_device_profile *find_locked(const char *id, uint16_t version,
 	const uint8_t *hash_or_null)
 {
 	for (size_t idx = 0U; idx < catalog_count; ++idx) {
 		const struct spaghetti_device_profile *profile = catalog[idx];
 
-		if ((strcmp(profile->profile_id, id) == 0) &&
-		    (profile->version == version)) {
+		if ((strcmp(profile->profile_id, id) == 0) && (profile->version == version)) {
 			if ((hash_or_null != NULL) &&
 			    (memcmp(profile->hash, hash_or_null,
 				    SPAGHETTI_DEVICE_PROFILE_HASH_SIZE) != 0)) {
@@ -1048,11 +1057,8 @@ static struct spaghetti_device_profile_slot *alloc_slot(void)
 	return NULL;
 }
 
-static int commit_decoded(
-	const struct spaghetti_device_profile *profile,
-	const uint8_t *cbor,
-	size_t cbor_size,
-	bool persist)
+static int commit_decoded(const struct spaghetti_device_profile *profile, const uint8_t *cbor,
+			  size_t cbor_size, bool persist)
 {
 	const struct spaghetti_device_profile *existing;
 	struct spaghetti_device_profile_slot *slot;
@@ -1066,13 +1072,14 @@ static int commit_decoded(
 
 	existing = find_locked(profile->profile_id, profile->version, NULL);
 	if (existing != NULL) {
-		if (memcmp(existing->hash, profile->hash,
-			   SPAGHETTI_DEVICE_PROFILE_HASH_SIZE) != 0) {
+		if (memcmp(existing->hash, profile->hash, SPAGHETTI_DEVICE_PROFILE_HASH_SIZE) !=
+		    0) {
 			return -EEXIST;
 		}
 		return 0;
 	}
 
+	if (catalog_count >= ARRAY_SIZE(catalog)) return -ENOSPC;
 	slot = alloc_slot();
 	if (slot == NULL) {
 		return -ENOSPC;
@@ -1088,6 +1095,8 @@ static int commit_decoded(
 		memcpy(slot->cbor, cbor, cbor_size);
 		slot->cbor_size = cbor_size;
 		slot->persisted = true;
+		err = persist_profile_slot(slot, false);
+		if (err < 0) { memset(slot, 0, sizeof(*slot)); return err; }
 	}
 
 	err = catalog_add(&slot->decoded);
@@ -1144,11 +1153,14 @@ int spaghetti_device_profile_init(void)
 		} else {
 			slots[idx].used = false;
 			slots[idx].from_builtin = false;
-			memset(&slots[idx].decoded, 0,
-			       sizeof(slots[idx].decoded));
+			memset(&slots[idx].decoded, 0, sizeof(slots[idx].decoded));
 		}
 	}
 
+#if defined(CONFIG_SETTINGS)
+	err = settings_load_subtree("device_profiles");
+	if (err < 0) return err;
+#endif
 	STRUCT_SECTION_FOREACH(spaghetti_device_profile, profile) {
 		err = spaghetti_device_profile_validate(profile, NULL);
 		if (err < 0) {
@@ -1184,10 +1196,8 @@ const struct spaghetti_device_profile *spaghetti_device_profile_get(size_t idx)
 	return catalog[idx];
 }
 
-const struct spaghetti_device_profile *spaghetti_device_profile_find(
-	const char *id,
-	uint16_t version,
-	const uint8_t *hash_or_null)
+const struct spaghetti_device_profile *
+spaghetti_device_profile_find(const char *id, uint16_t version, const uint8_t *hash_or_null)
 {
 	if (!profile_id_is_valid(id) || (version == 0U)) {
 		return NULL;
@@ -1223,8 +1233,7 @@ int spaghetti_device_profile_install(const uint8_t *cbor, size_t size)
 	return commit_decoded(&staging, cbor, size, true);
 }
 
-int spaghetti_device_profile_install_decoded(
-	const struct spaghetti_device_profile *profile)
+int spaghetti_device_profile_install_decoded(const struct spaghetti_device_profile *profile)
 {
 	if (profile == NULL) {
 		return -EINVAL;
@@ -1267,6 +1276,10 @@ int spaghetti_device_profile_remove(const char *id, uint16_t version)
 		return -EBUSY;
 	}
 
+	if (slot->persisted) {
+		int err = persist_profile_slot(slot, true);
+		if (err < 0 && err != -ENOENT) return err;
+	}
 	for (size_t idx = catalog_idx + 1U; idx < catalog_count; ++idx) {
 		catalog[idx - 1U] = catalog[idx];
 	}
@@ -1276,8 +1289,7 @@ int spaghetti_device_profile_remove(const char *id, uint16_t version)
 }
 
 void spaghetti_device_profile_set_reference_checker(
-	spaghetti_device_profile_reference_checker_t checker,
-	void *user_data)
+	spaghetti_device_profile_reference_checker_t checker, void *user_data)
 {
 	reference_checker = checker;
 	reference_checker_user_data = user_data;
@@ -1295,8 +1307,7 @@ void spaghetti_device_profile_reset_for_test(void)
 		if (slots[idx].persisted) {
 			slots[idx].used = false;
 			slots[idx].from_builtin = false;
-			memset(&slots[idx].decoded, 0,
-			       sizeof(slots[idx].decoded));
+			memset(&slots[idx].decoded, 0, sizeof(slots[idx].decoded));
 		} else {
 			memset(&slots[idx], 0, sizeof(slots[idx]));
 		}

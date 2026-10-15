@@ -8,8 +8,7 @@
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/util.h>
 
-LOG_MODULE_DECLARE(spaghetti_device_profile,
-		   CONFIG_SPAGHETTI_DEVICE_PROFILE_LOG_LEVEL);
+LOG_MODULE_DECLARE(spaghetti_device_profile, CONFIG_SPAGHETTI_DEVICE_PROFILE_LOG_LEVEL);
 
 static struct spaghetti_profile_rx_capture init_rx;
 static k_tid_t capture_owner;
@@ -39,8 +38,7 @@ struct spaghetti_device_profile_temp {
 	uint8_t bytes[SPAGHETTI_VALUE_BYTES_MAX];
 };
 
-static uint32_t binding_timeout_ms(
-	const struct spaghetti_device_profile_binding *binding,
+static uint32_t binding_timeout_ms(const struct spaghetti_device_profile_binding *binding,
 	uint16_t imm_timeout)
 {
 	if (imm_timeout != 0U) {
@@ -53,9 +51,7 @@ static uint32_t binding_timeout_ms(
 	return 100U;
 }
 
-static int temp_get(
-	struct spaghetti_device_profile_temp *temps,
-	uint8_t idx,
+static int temp_get(struct spaghetti_device_profile_temp *temps, uint8_t idx,
 	struct spaghetti_device_profile_temp **out)
 {
 	if (idx >= SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS) {
@@ -132,11 +128,9 @@ static uint16_t crc16_ccitt(const uint8_t *data, size_t size)
 	return crc;
 }
 
-static int exec_i2c_write(
-	const struct spaghetti_port *port,
+static int exec_i2c_write(const struct spaghetti_port *port,
 	const struct spaghetti_device_profile_binding *binding,
-	struct spaghetti_device_profile_temp *src,
-	uint16_t len,
+			  struct spaghetti_device_profile_temp *src, uint16_t len,
 	uint16_t timeout_ms)
 {
 	struct i2c_msg msg;
@@ -153,15 +147,12 @@ static int exec_i2c_write(
 	request.messages = &msg;
 	request.message_count = 1U;
 	return spaghetti_port_i2c_transfer(port, &request,
-					   K_MSEC(binding_timeout_ms(binding,
-								     timeout_ms)));
+					   K_MSEC(binding_timeout_ms(binding, timeout_ms)));
 }
 
-static int exec_i2c_read(
-	const struct spaghetti_port *port,
+static int exec_i2c_read(const struct spaghetti_port *port,
 	const struct spaghetti_device_profile_binding *binding,
-	struct spaghetti_device_profile_temp *dst,
-	uint16_t len,
+			 struct spaghetti_device_profile_temp *dst, uint16_t len,
 	uint16_t timeout_ms)
 {
 	struct i2c_msg msg;
@@ -179,8 +170,7 @@ static int exec_i2c_read(
 	request.messages = &msg;
 	request.message_count = 1U;
 	err = spaghetti_port_i2c_transfer(port, &request,
-					  K_MSEC(binding_timeout_ms(binding,
-								    timeout_ms)));
+					  K_MSEC(binding_timeout_ms(binding, timeout_ms)));
 	if (err < 0) {
 		return err;
 	}
@@ -189,14 +179,11 @@ static int exec_i2c_read(
 	return 0;
 }
 
-static int exec_i2c_write_read(
-	const struct spaghetti_port *port,
+static int exec_i2c_write_read(const struct spaghetti_port *port,
 	const struct spaghetti_device_profile_binding *binding,
 	struct spaghetti_device_profile_temp *src,
-	struct spaghetti_device_profile_temp *dst,
-	uint16_t read_len,
-	uint16_t write_len,
-	uint16_t timeout_ms)
+			       struct spaghetti_device_profile_temp *dst, uint16_t read_len,
+			       uint16_t write_len, uint16_t timeout_ms)
 {
 	struct i2c_msg messages[2];
 	struct spaghetti_port_i2c_request request;
@@ -217,8 +204,7 @@ static int exec_i2c_write_read(
 	request.messages = messages;
 	request.message_count = 2U;
 	err = spaghetti_port_i2c_transfer(port, &request,
-					  K_MSEC(binding_timeout_ms(binding,
-								    timeout_ms)));
+					  K_MSEC(binding_timeout_ms(binding, timeout_ms)));
 	if (err < 0) {
 		return err;
 	}
@@ -227,15 +213,11 @@ static int exec_i2c_write_read(
 	return 0;
 }
 
-static int exec_spi(
-	const struct spaghetti_port *port,
+static int exec_spi(const struct spaghetti_port *port,
 	const struct spaghetti_device_profile_binding *binding,
 	struct spaghetti_device_profile_temp *src,
-	struct spaghetti_device_profile_temp *dst,
-	uint16_t len,
-	uint16_t timeout_ms,
-	uint32_t frequency_hz,
-	uint32_t mode)
+		    struct spaghetti_device_profile_temp *dst, uint16_t len, uint16_t timeout_ms,
+		    uint32_t frequency_hz, uint32_t mode)
 {
 	struct spi_buf tx_buf;
 	struct spi_buf rx_buf;
@@ -245,8 +227,7 @@ static int exec_spi(
 	spi_operation_t operation;
 	int err;
 
-	if ((len == 0U) || (len > src->size) ||
-	    (len > SPAGHETTI_VALUE_BYTES_MAX) || (mode > 3U)) {
+	if ((len == 0U) || (len > src->size) || (len > SPAGHETTI_VALUE_BYTES_MAX) || (mode > 3U)) {
 		return -EINVAL;
 	}
 
@@ -267,13 +248,11 @@ static int exec_spi(
 	rx_set.buffers = &rx_buf;
 	rx_set.count = 1U;
 	request.chip_select = binding->spi_cs;
-	request.frequency_hz = (frequency_hz != 0U) ? frequency_hz :
-						      binding->spi_frequency_hz;
+	request.frequency_hz = (frequency_hz != 0U) ? frequency_hz : binding->spi_frequency_hz;
 	request.operation = operation;
 	request.tx = &tx_set;
 	request.rx = &rx_set;
-	err = spaghetti_port_spi_transceive(
-		port, &request,
+	err = spaghetti_port_spi_transceive(port, &request,
 		K_MSEC(binding_timeout_ms(binding, timeout_ms)));
 	if (err < 0) {
 		return err;
@@ -283,8 +262,7 @@ static int exec_spi(
 	return 0;
 }
 
-static int exec_wait_field_mask(
-	const struct spaghetti_port *port,
+static int exec_wait_field_mask(const struct spaghetti_port *port,
 	const struct spaghetti_device_profile_binding *binding,
 	struct spaghetti_device_profile_temp *temps,
 	const struct spaghetti_device_profile_op *op)
@@ -306,8 +284,8 @@ static int exec_wait_field_mask(
 		uint32_t value;
 
 		if (tx->size > 0U) {
-			err = exec_i2c_write_read(port, binding, tx, dst, 2U,
-						  (uint16_t)tx->size, op->imm1);
+			err = exec_i2c_write_read(port, binding, tx, dst, 2U, (uint16_t)tx->size,
+						  op->imm1);
 		} else {
 			err = exec_i2c_read(port, binding, dst, 2U, op->imm1);
 		}
@@ -315,8 +293,7 @@ static int exec_wait_field_mask(
 			return err;
 		}
 
-		value = (uint32_t)load_unsigned_be(dst->bytes,
-						   MIN(dst->size, 4U));
+		value = (uint32_t)load_unsigned_be(dst->bytes, MIN(dst->size, 4U));
 		if ((value & op->imm2) == (op->imm3 & op->imm2)) {
 			return 0;
 		}
@@ -340,16 +317,14 @@ static bool w1_rom_is_present(const uint8_t rom[SPAGHETTI_ENDPOINT_VALUE_MAX])
 	return false;
 }
 
-static int exec_wait_gpio(
-	const struct spaghetti_port *port,
+static int exec_wait_gpio(const struct spaghetti_port *port,
 	struct spaghetti_device_profile_temp *temps,
 	const struct spaghetti_device_profile_op *op)
 {
 	struct spaghetti_device_profile_temp *dst;
 	int err;
 
-	if (!spaghetti_port_has_capability(port,
-					   SPAGHETTI_PORT_CAP_DIGITAL_INPUT)) {
+	if (!spaghetti_port_has_capability(port, SPAGHETTI_PORT_CAP_DIGITAL_INPUT)) {
 		return -ENOTSUP;
 	}
 	if (op->imm2 > 1U) {
@@ -383,8 +358,7 @@ static int exec_wait_gpio(
 	return -ETIMEDOUT;
 }
 
-static int exec_emit_field(
-	const struct spaghetti_device_profile *profile,
+static int exec_emit_field(const struct spaghetti_device_profile *profile,
 	struct spaghetti_device_profile_temp *src,
 	const struct spaghetti_device_profile_op *op,
 	struct spaghetti_record_payload *out_record)
@@ -395,8 +369,7 @@ static int exec_emit_field(
 	bool big_endian = op->imm1 != 0U;
 	uint64_t raw;
 
-	if ((out_record == NULL) || (width == 0U) || (width > src->size) ||
-	    (width > 8U) ||
+	if ((out_record == NULL) || (width == 0U) || (width > src->size) || (width > 8U) ||
 	    (out_record->values.field_count >= SPAGHETTI_PROPERTY_MAX_FIELDS)) {
 		return -EINVAL;
 	}
@@ -411,8 +384,8 @@ static int exec_emit_field(
 		return -ENOENT;
 	}
 
-	raw = big_endian ? load_unsigned_be(src->bytes, width) :
-			   load_unsigned_le(src->bytes, width);
+	raw = big_endian ? load_unsigned_be(src->bytes, width)
+			 : load_unsigned_le(src->bytes, width);
 	value = &out_record->values.fields[out_record->values.field_count];
 	memset(value, 0, sizeof(*value));
 	value->field_id = field->field_id;
@@ -444,18 +417,16 @@ static int exec_emit_field(
 	return 0;
 }
 
-int spaghetti_device_profile_exec(
-	const struct spaghetti_device_profile *profile,
-	const struct spaghetti_device_profile_op *ops,
-	size_t op_count,
+int spaghetti_device_profile_exec(const struct spaghetti_device_profile *profile,
+				  const struct spaghetti_device_profile_op *ops, size_t op_count,
 	const struct spaghetti_port *port,
 	const struct spaghetti_device_profile_binding *binding,
 	struct spaghetti_record_payload *out_record)
 {
 	struct spaghetti_device_profile_temp temps[SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS];
 
-	if ((profile == NULL) || ((op_count > 0U) && (ops == NULL)) ||
-	    (port == NULL) || (binding == NULL)) {
+	if ((profile == NULL) || ((op_count > 0U) && (ops == NULL)) || (port == NULL) ||
+	    (binding == NULL)) {
 		return -EINVAL;
 	}
 
@@ -475,15 +446,13 @@ int spaghetti_device_profile_exec(
 		case SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE:
 			err = temp_get(temps, op->src_a, &src_a);
 			if (err == 0) {
-				err = exec_i2c_write(port, binding, src_a,
-						     op->imm0, op->imm1);
+				err = exec_i2c_write(port, binding, src_a, op->imm0, op->imm1);
 			}
 			break;
 		case SPAGHETTI_DEVICE_PROFILE_OP_I2C_READ:
 			err = temp_get(temps, op->dst, &dst);
 			if (err == 0) {
-				err = exec_i2c_read(port, binding, dst, op->imm0,
-						    op->imm1);
+				err = exec_i2c_read(port, binding, dst, op->imm0, op->imm1);
 			}
 			break;
 		case SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ:
@@ -492,10 +461,9 @@ int spaghetti_device_profile_exec(
 				err = temp_get(temps, op->dst, &dst);
 			}
 			if (err == 0) {
-				err = exec_i2c_write_read(
-					port, binding, src_a, dst, op->imm0,
-					(op->imm1 != 0U) ? op->imm1 :
-							   (uint16_t)src_a->size,
+				err = exec_i2c_write_read(port, binding, src_a, dst, op->imm0,
+							  (op->imm1 != 0U) ? op->imm1
+									   : (uint16_t)src_a->size,
 					(uint16_t)op->imm2);
 			}
 			break;
@@ -505,9 +473,8 @@ int spaghetti_device_profile_exec(
 				err = temp_get(temps, op->dst, &dst);
 			}
 			if (err == 0) {
-				err = exec_spi(port, binding, src_a, dst,
-					       op->imm0, op->imm1, op->imm2,
-					       op->imm3);
+				err = exec_spi(port, binding, src_a, dst, op->imm0, op->imm1,
+					       op->imm2, op->imm3);
 			}
 			break;
 		case SPAGHETTI_DEVICE_PROFILE_OP_UART_WRITE:
@@ -516,8 +483,7 @@ int spaghetti_device_profile_exec(
 				err = spaghetti_port_uart_write(
 					port, src_a->bytes,
 					(op->imm0 != 0U) ? op->imm0 : src_a->size,
-					K_MSEC(binding_timeout_ms(binding,
-								  op->imm1)));
+					K_MSEC(binding_timeout_ms(binding, op->imm1)));
 			}
 			break;
 		case SPAGHETTI_DEVICE_PROFILE_OP_UART_READ_UNTIL: {
@@ -526,10 +492,8 @@ int spaghetti_device_profile_exec(
 			err = temp_get(temps, op->dst, &dst);
 			if (err == 0) {
 				err = spaghetti_port_uart_read_until(
-					port, dst->bytes, op->imm0,
-					(uint8_t)op->imm2, &out_len,
-					K_MSEC(binding_timeout_ms(binding,
-								  op->imm1)));
+					port, dst->bytes, op->imm0, (uint8_t)op->imm2, &out_len,
+					K_MSEC(binding_timeout_ms(binding, op->imm1)));
 				if (err == 0) {
 					dst->size = out_len;
 				}
@@ -541,8 +505,7 @@ int spaghetti_device_profile_exec(
 			if (err == 0) {
 				err = spaghetti_port_uart_read(
 					port, dst->bytes, op->imm0,
-					K_MSEC(binding_timeout_ms(binding,
-								  op->imm1)));
+					K_MSEC(binding_timeout_ms(binding, op->imm1)));
 				if (err == 0) {
 					dst->size = op->imm0;
 				}
@@ -551,8 +514,7 @@ int spaghetti_device_profile_exec(
 		case SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ: {
 			uint16_t write_size;
 
-			if (!spaghetti_port_has_capability(
-				    port, SPAGHETTI_PORT_CAP_W1)) {
+			if (!spaghetti_port_has_capability(port, SPAGHETTI_PORT_CAP_W1)) {
 				err = -ENOTSUP;
 				break;
 			}
@@ -567,18 +529,14 @@ int spaghetti_device_profile_exec(
 			if (err < 0) {
 				break;
 			}
-			write_size = (op->imm1 != 0U) ? op->imm1 :
-						       (uint16_t)src_a->size;
-			if ((write_size > src_a->size) ||
-			    (op->imm0 > SPAGHETTI_VALUE_BYTES_MAX)) {
+			write_size = (op->imm1 != 0U) ? op->imm1 : (uint16_t)src_a->size;
+			if ((write_size > src_a->size) || (op->imm0 > SPAGHETTI_VALUE_BYTES_MAX)) {
 				err = -EINVAL;
 				break;
 			}
 			err = spaghetti_port_w1_write_read(
-				port, binding->w1_rom, src_a->bytes, write_size,
-				dst->bytes, op->imm0,
-				K_MSEC(binding_timeout_ms(binding,
-							  (uint16_t)op->imm2)));
+				port, binding->w1_rom, src_a->bytes, write_size, dst->bytes,
+				op->imm0, K_MSEC(binding_timeout_ms(binding, (uint16_t)op->imm2)));
 			if (err == 0) {
 				dst->size = op->imm0;
 			}
@@ -606,13 +564,10 @@ int spaghetti_device_profile_exec(
 			err = temp_get(temps, op->dst, &dst);
 			if (err == 0) {
 				err = spaghetti_port_adc_read(
-					port, binding->adc_channel, NULL,
-					&microvolts,
-					K_MSEC(binding_timeout_ms(binding,
-								  op->imm0)));
+					port, binding->adc_channel, NULL, &microvolts,
+					K_MSEC(binding_timeout_ms(binding, op->imm0)));
 				if (err == 0) {
-					sys_put_be32((uint32_t)microvolts,
-						     dst->bytes);
+					sys_put_be32((uint32_t)microvolts, dst->bytes);
 					dst->size = 4U;
 				}
 			}
@@ -646,14 +601,13 @@ int spaghetti_device_profile_exec(
 				err = temp_get(temps, op->src_a, &src_a);
 			}
 			if (err == 0) {
-				size_t len = (op->imm0 != 0U) ? op->imm0 :
-								src_a->size;
+				size_t len = (op->imm0 != 0U) ? op->imm0 : src_a->size;
 
-				if ((len > src_a->size) ||
+				if (((len + op->imm1) > src_a->size) ||
 				    (len > SPAGHETTI_VALUE_BYTES_MAX)) {
 					err = -EINVAL;
 				} else {
-					memcpy(dst->bytes, src_a->bytes, len);
+					memmove(dst->bytes, src_a->bytes + op->imm1, len);
 					dst->size = len;
 				}
 			}
@@ -667,14 +621,11 @@ int spaghetti_device_profile_exec(
 				err = temp_get(temps, op->src_b, &src_b);
 			}
 			if (err == 0) {
-				if ((src_a->size + src_b->size) >
-				    SPAGHETTI_VALUE_BYTES_MAX) {
+				if ((src_a->size + src_b->size) > SPAGHETTI_VALUE_BYTES_MAX) {
 					err = -EMSGSIZE;
 				} else {
-					memcpy(dst->bytes, src_a->bytes,
-					       src_a->size);
-					memcpy(&dst->bytes[src_a->size],
-					       src_b->bytes, src_b->size);
+					memcpy(dst->bytes, src_a->bytes, src_a->size);
+					memcpy(&dst->bytes[src_a->size], src_b->bytes, src_b->size);
 					dst->size = src_a->size + src_b->size;
 				}
 			}
@@ -706,8 +657,8 @@ int spaghetti_device_profile_exec(
 				err = temp_get(temps, op->src_a, &src_a);
 			}
 			if (err == 0) {
-				uint32_t value = (uint32_t)load_unsigned_be(
-					src_a->bytes, MIN(src_a->size, 4U));
+				uint32_t value = (uint32_t)load_unsigned_be(src_a->bytes,
+									    MIN(src_a->size, 4U));
 
 				value &= op->imm2;
 				store_unsigned_be(dst->bytes, 4U, value);
@@ -720,8 +671,8 @@ int spaghetti_device_profile_exec(
 				err = temp_get(temps, op->src_a, &src_a);
 			}
 			if (err == 0) {
-				uint64_t value = load_unsigned_be(
-					src_a->bytes, MIN(src_a->size, 8U));
+				uint64_t value =
+					load_unsigned_be(src_a->bytes, MIN(src_a->size, 8U));
 
 				if (op->imm1 == 0U) {
 					value <<= op->imm0;
@@ -742,13 +693,11 @@ int spaghetti_device_profile_exec(
 				uint64_t value;
 				uint64_t sign_bit;
 
-				if ((bits == 0U) || (bits > 64U) ||
-				    (src_a->size == 0U)) {
+				if ((bits == 0U) || (bits > 64U) || (src_a->size == 0U)) {
 					err = -EINVAL;
 					break;
 				}
-				value = load_unsigned_be(src_a->bytes,
-							 MIN(src_a->size, 8U));
+				value = load_unsigned_be(src_a->bytes, MIN(src_a->size, 8U));
 				sign_bit = 1ULL << (bits - 1U);
 				if ((value & sign_bit) != 0U) {
 					uint64_t mask = (sign_bit << 1) - 1U;
@@ -769,8 +718,7 @@ int spaghetti_device_profile_exec(
 				err = temp_get(temps, op->src_a, &src_a);
 			}
 			if (err == 0) {
-				dst->bytes[0] =
-					crc8_poly07(src_a->bytes, src_a->size);
+				dst->bytes[0] = crc8_poly07(src_a->bytes, src_a->size);
 				dst->size = 1U;
 			}
 			break;
@@ -780,24 +728,79 @@ int spaghetti_device_profile_exec(
 				err = temp_get(temps, op->src_a, &src_a);
 			}
 			if (err == 0) {
-				sys_put_be16(crc16_ccitt(src_a->bytes,
-							 src_a->size),
-					     dst->bytes);
+				sys_put_be16(crc16_ccitt(src_a->bytes, src_a->size), dst->bytes);
 				dst->size = 2U;
 			}
 			break;
+		case SPAGHETTI_DEVICE_PROFILE_OP_SCALE_PACK: {
+			if (op->imm0 < 1 || op->imm0 > 8 || op->imm1 == 0 || op->src_b > 7) {
+				err = -EINVAL;
+				break;
+			}
+			err = temp_get(temps, op->src_a, &src_a);
+			if (err == 0) {
+				err = temp_get(temps, op->dst, &dst);
+			}
+			if (err < 0) {
+				break;
+			}
+			if (!src_a->size || src_a->size > 8) {
+				err = -EINVAL;
+				break;
+			}
+			uint64_t raw = (op->src_b & 1)
+					       ? load_unsigned_be(src_a->bytes, src_a->size)
+					       : load_unsigned_le(src_a->bytes, src_a->size);
+			if ((op->src_b & 2) && src_a->size < 8 &&
+			    (raw & BIT64(src_a->size * 8 - 1))) {
+				raw |= ~((1ULL << (src_a->size * 8)) - 1);
+			}
+			if (!(op->src_b & 2) && raw > INT64_MAX) {
+				err = -ERANGE;
+				break;
+			}
+			int64_t value = (int64_t)raw;
+			if (__builtin_mul_overflow(value, (int64_t)(int32_t)op->imm2, &value)) {
+				err = -ERANGE;
+				break;
+			}
+			value /= op->imm1;
+			if (__builtin_add_overflow(value, (int64_t)(int32_t)op->imm3, &value)) {
+				err = -ERANGE;
+				break;
+			}
+			if (op->imm0 < 8 &&
+			    (value < -(1LL << (op->imm0 * 8 - 1)) ||
+			     (value >= 0 && (uint64_t)value >= (1ULL << (op->imm0 * 8))))) {
+				err = -ERANGE;
+				break;
+			}
+			for (size_t i = 0; i < op->imm0; i++) {
+				dst->bytes[(op->src_b & 4) ? op->imm0 - i - 1 : i] =
+					((uint64_t)value >> (i * 8)) & 0xff;
+			}
+			dst->size = op->imm0;
+			break;
+		}
+		case SPAGHETTI_DEVICE_PROFILE_OP_LOAD_VALUE:
 		case SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT:
 			err = temp_get(temps, op->dst, &dst);
 			if (err == 0) {
-				err = spaghetti_device_profile_pack_argument(op, binding->arguments, dst->bytes);
-				if (err == 0) dst->size = op->imm0;
+				err = spaghetti_device_profile_pack_argument(
+					op,
+					op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_VALUE
+						? binding->values
+						: binding->arguments,
+					dst->bytes);
+				if (err == 0) {
+					dst->size = op->imm0;
+				}
 			}
 			break;
 		case SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD:
 			err = temp_get(temps, op->src_a, &src_a);
 			if (err == 0) {
-				err = exec_emit_field(profile, src_a, op,
-						      out_record);
+				err = exec_emit_field(profile, src_a, op, out_record);
 			}
 			break;
 		case SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD:
@@ -808,10 +811,8 @@ int spaghetti_device_profile_exec(
 			out_record->kind = SPAGHETTI_RECORD_SAMPLE;
 			strncpy(out_record->schema_id, profile->sample_schema_id,
 				sizeof(out_record->schema_id) - 1U);
-			out_record->schema_id[sizeof(out_record->schema_id) - 1U] =
-				'\0';
-			out_record->schema_version =
-				profile->sample_schema_version;
+			out_record->schema_id[sizeof(out_record->schema_id) - 1U] = '\0';
+			out_record->schema_version = profile->sample_schema_version;
 			break;
 		default:
 			err = -ENOTSUP;
@@ -821,13 +822,15 @@ int spaghetti_device_profile_exec(
 		if (err < 0) {
 			return err;
 		}
-		if (capture_owner == k_current_get() && (ops == profile->init_ops || capture_commands) &&
+		if (capture_owner == k_current_get() &&
+		    (ops == profile->init_ops || capture_commands) &&
 		    (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_READ ||
 		     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ)) {
 			if (init_rx.count < SPAGHETTI_PROFILE_RX_MAX) {
 				const uint8_t index = init_rx.count++;
 				init_rx.lengths[index] = temps[op->dst].size;
-				memcpy(init_rx.bytes[index], temps[op->dst].bytes, temps[op->dst].size);
+				memcpy(init_rx.bytes[index], temps[op->dst].bytes,
+				       temps[op->dst].size);
 			} else {
 				init_rx.truncated = true;
 			}
@@ -837,31 +840,50 @@ int spaghetti_device_profile_exec(
 	return 0;
 }
 
-int spaghetti_device_profile_pack_argument(const struct spaghetti_device_profile_op *op, const struct spaghetti_property_set *arguments, uint8_t out[8])
+int spaghetti_device_profile_pack_argument(const struct spaghetti_device_profile_op *op,
+					   const struct spaghetti_property_set *arguments,
+					   uint8_t out[8])
 {
-	if (op == NULL || out == NULL || op->imm0 == 0U || op->imm0 > 8U) return -EINVAL;
-	const struct spaghetti_value *value = arguments ? spaghetti_property_find(arguments, op->src_a) : NULL;
+	if (op == NULL || out == NULL || op->imm0 == 0U || op->imm0 > 8U) {
+		return -EINVAL;
+	}
+	const struct spaghetti_value *value =
+		arguments ? spaghetti_property_find(arguments, op->src_a) : NULL;
 	uint64_t raw = (uint64_t)op->imm2 | ((uint64_t)op->imm3 << 32);
 	if (value == NULL) {
-		if (op->src_b) return -ENOENT;
-		if (op->imm0 < 8U && (raw >> (op->imm0 * 8U)) != 0U) return -ERANGE;
+		if (op->src_b) {
+			return -ENOENT;
+		}
+		if (op->imm0 < 8U && (raw >> (op->imm0 * 8U)) != 0U) {
+			return -ERANGE;
+		}
 	} else if (value->type == SPAGHETTI_VALUE_BYTES) {
-		if (value->data.bytes.size != op->imm0) return -ERANGE;
+		if (value->data.bytes.size != op->imm0) {
+			return -ERANGE;
+		}
 		memcpy(out, value->data.bytes.bytes, op->imm0);
 		return 0;
 	} else if (value->type == SPAGHETTI_VALUE_UINT64) {
 		raw = value->data.unsigned_integer;
-		if (op->imm0 < 8U && (raw >> (op->imm0 * 8U)) != 0U) return -ERANGE;
+		if (op->imm0 < 8U && (raw >> (op->imm0 * 8U)) != 0U) {
+			return -ERANGE;
+		}
 	} else if (value->type == SPAGHETTI_VALUE_INT64) {
 		int64_t signed_value = value->data.signed_integer;
 		if (op->imm0 < 8U) {
 			int64_t limit = 1LL << (op->imm0 * 8U - 1U);
-			if (signed_value < -limit || signed_value >= limit) return -ERANGE;
+			if (signed_value < -limit ||
+			    (signed_value >= 0 &&
+			     (uint64_t)signed_value >= (1ULL << (op->imm0 * 8U)))) {
+				return -ERANGE;
+			}
 		}
 		raw = (uint64_t)signed_value;
 	} else if (value->type == SPAGHETTI_VALUE_BOOL) {
 		raw = value->data.boolean ? 1U : 0U;
-	} else return -ENOTSUP;
+	} else {
+		return -ENOTSUP;
+	}
 	for (size_t i = 0; i < op->imm0; ++i) {
 		size_t shift = op->imm1 ? i : op->imm0 - i - 1;
 		out[i] = (uint8_t)(raw >> (shift * 8U));

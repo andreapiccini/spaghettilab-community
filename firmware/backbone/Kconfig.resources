@@ -167,7 +167,7 @@ config SPAGHETTI_MAX_PROPERTIES_PER_SET
 	default 24
 
 config SPAGHETTI_VALUE_BYTES_MAX
-	int
+	int "Maximum owned byte payload"
 	range 1 128
 	default 16 if SPAGHETTI_RESOURCE_PROFILE_MINIMAL
 	default 32 if SPAGHETTI_RESOURCE_PROFILE_STANDARD

@@ -38,6 +38,7 @@ static uint32_t command_count;
 static uint32_t start_events_count;
 static uint32_t stop_events_count;
 static bool last_command_on;
+static bool return_command_result;
 static spaghetti_module_key_t last_command_key;
 static spaghetti_module_event_cb_t armed_emit;
 static void *armed_user_data;
@@ -53,8 +54,7 @@ int spaghetti_health_heartbeat(spaghetti_health_component_id_t component_id)
 	return 0;
 }
 
-int spaghetti_processing_on_record(
-	const struct spaghetti_record *record,
+int spaghetti_processing_on_record(const struct spaghetti_record *record,
 	spaghetti_processing_publish_cb_t publish,
 	void *publish_user_data)
 {
@@ -64,8 +64,7 @@ int spaghetti_processing_on_record(
 	return 0;
 }
 
-int spaghetti_module_manager_get_by_key(
-	spaghetti_module_key_t key,
+int spaghetti_module_manager_get_by_key(spaghetti_module_key_t key,
 	struct spaghetti_module_snapshot *out)
 {
 	if ((key == 0U) || (out == NULL)) {
@@ -96,8 +95,7 @@ int spaghetti_module_manager_get_by_key(
 	return -ENOENT;
 }
 
-int spaghetti_module_manager_get_by_id(
-	spaghetti_module_id_t id,
+int spaghetti_module_manager_get_by_id(spaghetti_module_id_t id,
 	struct spaghetti_module_snapshot *out)
 {
 	if (out == NULL) {
@@ -120,11 +118,8 @@ int spaghetti_module_manager_get_by_id(
 	return -ENOENT;
 }
 
-static void fill_sample(struct spaghetti_record *out,
-			spaghetti_module_id_t id,
-			spaghetti_module_key_t key,
-			uint32_t sequence,
-			const char *schema_id,
+static void fill_sample(struct spaghetti_record *out, spaghetti_module_id_t id,
+			spaghetti_module_key_t key, uint32_t sequence, const char *schema_id,
 			int64_t value)
 {
 	memset(out, 0, sizeof(*out));
@@ -134,8 +129,7 @@ static void fill_sample(struct spaghetti_record *out,
 	out->sequence = sequence;
 	out->payload.kind = SPAGHETTI_RECORD_SAMPLE;
 	out->payload.schema_version = 1U;
-	strncpy(out->payload.schema_id, schema_id,
-		sizeof(out->payload.schema_id) - 1U);
+	strncpy(out->payload.schema_id, schema_id, sizeof(out->payload.schema_id) - 1U);
 	out->payload.values.field_count = 1U;
 	out->payload.values.fields[0] = (struct spaghetti_value){
 		.field_id = FAKE_SOURCE_FIELD,
@@ -144,9 +138,7 @@ static void fill_sample(struct spaghetti_record *out,
 	};
 }
 
-int spaghetti_module_manager_read(
-	spaghetti_module_id_t id,
-	struct spaghetti_record *out)
+int spaghetti_module_manager_read(spaghetti_module_id_t id, struct spaghetti_record *out)
 {
 	if (out == NULL) {
 		return -EINVAL;
@@ -159,21 +151,18 @@ int spaghetti_module_manager_read(
 		return read_error_for_id_4;
 	}
 	if (id == 3U) {
-		fill_sample(out, 3U, 10U, ++read_count_a,
-			    "spaghetti.test.schema_a", -120000);
+		fill_sample(out, 3U, 10U, ++read_count_a, "spaghetti.test.schema_a", -120000);
 		return 0;
 	}
 	if (id == 4U) {
-		fill_sample(out, 4U, 11U, ++read_count_b,
-			    "spaghetti.test.schema_b", 42);
+		fill_sample(out, 4U, 11U, ++read_count_b, "spaghetti.test.schema_b", 42);
 		return 0;
 	}
 
 	return -ENOENT;
 }
 
-int spaghetti_module_manager_command(
-	spaghetti_module_id_t id,
+int spaghetti_module_manager_command(spaghetti_module_id_t id,
 	const struct spaghetti_module_command *command)
 {
 	const struct spaghetti_value *on_field;
@@ -192,12 +181,24 @@ int spaghetti_module_manager_command(
 		return -EINVAL;
 	}
 
-	on_field = spaghetti_property_find(&command->arguments,
-					   FAKE_COMMAND_FIELD);
+	on_field = spaghetti_property_find(&command->arguments, FAKE_COMMAND_FIELD);
 	if ((on_field == NULL) || (on_field->type != SPAGHETTI_VALUE_BOOL)) {
 		return -EINVAL;
 	}
 
+	if (return_command_result && command->result != NULL) {
+		memset(command->result, 0, sizeof(*command->result));
+		command->result->kind = SPAGHETTI_RECORD_EVENT;
+		command->result->action_id = FAKE_COMMAND_ID;
+		command->result->schema_version = 1U;
+		strcpy(command->result->schema_id, "spaghetti.test.command");
+		command->result->values.field_count = 1U;
+		command->result->values.fields[0] = (struct spaghetti_value){
+			.field_id = 1U,
+			.type = SPAGHETTI_VALUE_INT64,
+			.data.signed_integer = 104,
+		};
+	}
 	++command_count;
 	last_command_on = on_field->data.boolean;
 	last_command_key = snapshot.key;
@@ -205,10 +206,8 @@ int spaghetti_module_manager_command(
 	return command_error;
 }
 
-int spaghetti_module_manager_start_events(
-	spaghetti_module_id_t id,
-	spaghetti_module_event_cb_t emit,
-	void *emit_user_data)
+int spaghetti_module_manager_start_events(spaghetti_module_id_t id,
+					  spaghetti_module_event_cb_t emit, void *emit_user_data)
 {
 	if (emit == NULL) {
 		return -EINVAL;
@@ -242,10 +241,8 @@ int spaghetti_module_manager_stop_events(spaghetti_module_id_t id)
 	return 0;
 }
 
-static struct spaghetti_runtime_schedule_config make_schedule(
-	spaghetti_module_key_t key,
-	uint32_t period_ms,
-	bool enabled)
+static struct spaghetti_runtime_schedule_config make_schedule(spaghetti_module_key_t key,
+							      uint32_t period_ms, bool enabled)
 {
 	return (struct spaghetti_runtime_schedule_config){
 		.enabled = enabled,
@@ -254,17 +251,17 @@ static struct spaghetti_runtime_schedule_config make_schedule(
 	};
 }
 
-static struct spaghetti_rule_config make_threshold_rule(
-	spaghetti_module_key_t source_key,
+static struct spaghetti_rule_config make_threshold_rule(spaghetti_module_key_t source_key,
 	spaghetti_module_key_t target_key,
-	int64_t lower,
-	int64_t upper)
+							int64_t lower, int64_t upper)
 {
 	struct spaghetti_rule_config rule = {
 		.key = 1U,
-		.properties = {
+		.properties =
+			{
 			.field_count = 8U,
-			.fields = {
+				.fields =
+					{
 				{
 					.field_id = SPAGHETTI_THRESHOLD_SOURCE_KEY,
 					.type = SPAGHETTI_VALUE_UINT64,
@@ -319,8 +316,7 @@ static void receive_record(struct spaghetti_record *out)
 {
 	const struct zbus_channel *channel;
 
-	zassert_ok(zbus_sub_wait_msg(&record_test_subscriber, &channel, out,
-				     K_MSEC(200)));
+	zassert_ok(zbus_sub_wait_msg(&record_test_subscriber, &channel, out, K_MSEC(200)));
 	zassert_true(out->boot_id != 0U);
 	zassert_true(out->sequence >= 1U);
 }
@@ -340,17 +336,17 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	const struct spaghetti_runtime_schedule_config missing[] = {
 		make_schedule(99U, 20U, true),
 	};
-	struct spaghetti_rule_config threshold =
-		make_threshold_rule(10U, 20U, 450000, 500000);
-	struct spaghetti_rule_config missing_target =
-		make_threshold_rule(10U, 99U, 450000, 500000);
+	struct spaghetti_rule_config threshold = make_threshold_rule(10U, 20U, 450000, 500000);
+	struct spaghetti_rule_config missing_target = make_threshold_rule(10U, 99U, 450000, 500000);
 	struct spaghetti_record record;
 	struct spaghetti_record_payload event_payload = {
 		.kind = SPAGHETTI_RECORD_EVENT,
 		.schema_version = 1U,
-		.values = {
+		.values =
+			{
 			.field_count = 1U,
-			.fields = {
+				.fields =
+					{
 				{
 					.field_id = 7U,
 					.type = SPAGHETTI_VALUE_BOOL,
@@ -367,8 +363,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	strncpy(event_payload.schema_id, "spaghetti.test.button",
 		sizeof(event_payload.schema_id) - 1U);
 
-	zassert_equal(spaghetti_runtime_configure(sampling, 1U, NULL, 0U),
-		      -EACCES);
+	zassert_equal(spaghetti_runtime_configure(sampling, 1U, NULL, 0U), -EACCES);
 	zassert_equal(spaghetti_runtime_start(), -EACCES);
 	zassert_equal(spaghetti_runtime_stop(K_NO_WAIT), -EACCES);
 	zassert_ok(spaghetti_data_init());
@@ -385,17 +380,14 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	zassert_ok(spaghetti_runtime_configure(two_schedules, 2U, NULL, 0U));
 	zassert_ok(spaghetti_runtime_start());
 	zassert_equal(spaghetti_runtime_start(), -EALREADY);
-	zassert_equal(spaghetti_runtime_configure(two_schedules, 2U, NULL, 0U),
-		      -EBUSY);
+	zassert_equal(spaghetti_runtime_configure(two_schedules, 2U, NULL, 0U), -EBUSY);
 
 	for (size_t idx = 0U; idx < 6U; ++idx) {
 		receive_record(&record);
-		if (strcmp(record.payload.schema_id,
-			   "spaghetti.test.schema_a") == 0) {
+		if (strcmp(record.payload.schema_id, "spaghetti.test.schema_a") == 0) {
 			++schema_a;
 			zassert_equal(record.source_key, 10U);
-		} else if (strcmp(record.payload.schema_id,
-				  "spaghetti.test.schema_b") == 0) {
+		} else if (strcmp(record.payload.schema_id, "spaghetti.test.schema_b") == 0) {
 			++schema_b;
 			zassert_equal(record.source_key, 11U);
 		}
@@ -406,9 +398,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 
 	read_error_for_id_4 = -EIO;
 	receive_record(&record);
-	zassert_equal(strcmp(record.payload.schema_id,
-			     "spaghetti.test.schema_a"),
-		      0);
+	zassert_equal(strcmp(record.payload.schema_id, "spaghetti.test.schema_a"), 0);
 	read_error_for_id_4 = 0;
 
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
@@ -426,9 +416,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	zassert_ok(armed_emit(&event_payload, armed_user_data));
 	receive_record(&record);
 	zassert_equal(record.source_key, 30U);
-	zassert_equal(strcmp(record.payload.schema_id,
-			     "spaghetti.test.button"),
-		      0);
+	zassert_equal(strcmp(record.payload.schema_id, "spaghetti.test.button"), 0);
 	zassert_equal(record.payload.kind, SPAGHETTI_RECORD_EVENT);
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
 	zassert_true(stop_events_count >= 1U);
@@ -445,26 +433,24 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 		zassert_ok(spaghetti_runtime_start());
 		zassert_ok(k_sem_take(&read_entered_sem, K_MSEC(200)));
 		zassert_not_null(armed_emit);
-		for (size_t idx = 0U;
-		     idx < CONFIG_SPAGHETTI_MAX_RECORD_QUEUE; ++idx) {
+		for (size_t idx = 0U; idx < CONFIG_SPAGHETTI_MAX_RECORD_QUEUE; ++idx) {
 			zassert_ok(armed_emit(&event_payload, armed_user_data));
 		}
-		zassert_equal(armed_emit(&event_payload, armed_user_data),
-			      -ENOSPC);
+		zassert_equal(armed_emit(&event_payload, armed_user_data), -ENOSPC);
 		k_sem_give(&read_release_sem);
 		zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
 		block_read = false;
 	}
 
 	command_count = 0U;
+	return_command_result = true;
 	zassert_ok(spaghetti_runtime_configure(sampling, 1U, &threshold, 1U));
 	zassert_ok(spaghetti_runtime_start());
 	/* Force threshold transitions through published samples. */
 	{
 		struct spaghetti_record forced = {0};
 
-		fill_sample(&forced, 3U, 10U, 1U, "spaghetti.test.schema_a",
-			    449999);
+		fill_sample(&forced, 3U, 10U, 1U, "spaghetti.test.schema_a", 449999);
 		forced.boot_id = 1U;
 		/* Drive the rule by publishing through Runtime sampling values. */
 	}
@@ -481,6 +467,17 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	zassert_ok(k_sem_take(&command_sem, K_MSEC(200)));
 	zassert_false(last_command_on);
 	zassert_equal(last_command_key, 20U);
+	bool received_result = false;
+	for (size_t i = 0; i < 8; ++i) {
+		if (record.source_key == 20U && record.payload.action_id == FAKE_COMMAND_ID) {
+			zassert_equal(record.payload.values.fields[0].data.signed_integer, 104);
+			received_result = true;
+			break;
+		}
+		receive_record(&record);
+	}
+	zassert_true(received_result, "Command result must enter the runtime record stream");
+	return_command_result = false;
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
 
 	command_error = -ENODEV;
@@ -491,8 +488,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
 	command_error = 0;
 
-	zassert_ok(spaghetti_runtime_configure(sampling, 1U, &missing_target,
-					       1U));
+	zassert_ok(spaghetti_runtime_configure(sampling, 1U, &missing_target, 1U));
 	zassert_ok(spaghetti_runtime_start());
 	k_sleep(K_MSEC(50));
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));

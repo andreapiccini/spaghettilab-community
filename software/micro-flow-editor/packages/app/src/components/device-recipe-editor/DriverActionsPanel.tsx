@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Plus, Copy, Trash2, Blocks, BookOpen } from "lucide-react";
+import { Plus, Copy, Trash2, Blocks, BookOpen, ChevronDown } from "lucide-react";
 import {
   addCommand,
   removeCommand,
@@ -11,8 +11,6 @@ import { actionPorts, duplicateDriverAction } from "../../lib/i2c-driver-actions
 
 const button =
   "rounded-slsm border border-border-strong px-2 py-1.5 font-body text-xs text-ink hover:border-brand-blue";
-const input =
-  "w-full rounded-slsm border border-border-strong bg-surface px-2 py-1.5 font-body text-xs text-ink";
 type Props = {
   draft: DeviceRecipeDraft;
   it: boolean;
@@ -38,165 +36,139 @@ export function DriverActionsList({
     onSelect(next.commands[next.commands.length - 1]!.id);
   }
   return (
-    <section className="rounded-slmd border border-border-strong p-3">
-      <h2 className="mb-2 font-body text-xs font-semibold text-ink">
-        <Blocks size={14} className="mr-1 inline text-brand-blue" aria-hidden />
-        {it ? "Azioni del sensore" : "Sensor actions"}
-      </h2>
-      <p className="mb-3 font-body text-[11px] leading-snug text-ink-muted">
-        {it
-          ? "Questo è l’elenco delle azioni del driver. Ogni azione può diventare un blocco del canvas: scegli quale modificare."
-          : "These are your driver actions. Each can become a canvas block: select one to edit."}
-      </p>
-      <div className="space-y-1">
-        {draft.commands.map((action) => (
-          <button
-            key={action.id}
-            type="button"
-            aria-pressed={activeId === action.id}
-            onClick={() => onSelect(action.id)}
-            className={`w-full rounded-slsm px-2 py-2 text-left font-body text-xs ${activeId === action.id ? "bg-brand-blue/10 text-brand-blue" : "text-ink hover:bg-surface-sunken"}`}
-          >
-            <span className="block font-semibold">{action.label || action.name}</span>
-            <span className="text-ink-muted">
-              {action.steps.length} {it ? "passi" : "steps"} ·{" "}
-              {action.exposeOnCanvas === false
-                ? it
-                  ? "solo driver"
-                  : "driver only"
-                : it
-                  ? "blocco canvas"
-                  : "canvas block"}
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        <button type="button" className={button} onClick={() => add()}>
-          <Plus size={12} className="mr-1 inline" />
-          {it ? "Azione" : "Action"}
-        </button>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-export function DriverActionSettings({
-  draft,
-  it,
-  activeId,
-  onChange,
-  onSelect,
-}: Props) {
-  const action = draft.commands.find((a) => a.id === activeId);
-  if (!action) return null;
-  const ports = actionPorts(draft, action);
-  return (
-    <section className="mb-3 rounded-slmd border border-border-strong bg-surface p-3">
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-heading text-sm font-semibold text-ink">
-          {it ? "Azione" : "Action"}: {action.label}
-        </h2>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className={button}
-            onClick={() => {
-              const next = duplicateDriverAction(draft, action);
-              onChange(next);
-              onSelect(next.commands[next.commands.length - 1]!.id);
-            }}
-          >
-            <Copy size={12} className="mr-1 inline" />
-            {it ? "Duplica" : "Duplicate"}
-          </button>
-          <button
-            type="button"
-            className={button}
-            onClick={() => {
-              const next = removeCommand(draft, action.id);
-              onChange(next);
-              if (next.commands[0]) onSelect(next.commands[0].id);
-            }}
-          >
-            <Trash2 size={12} className="mr-1 inline" />
-            {it ? "Rimuovi azione" : "Remove action"}
-          </button>
-        </div>
-      </div>
-      <details>
-        <summary className="cursor-pointer font-body text-xs text-ink-muted">
+    <details
+      open
+      className="group/actions overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm"
+    >
+      <summary className="flex cursor-pointer list-none items-center gap-2.5 bg-surface-sunken/60 px-3 py-3 font-body text-xs font-semibold text-ink [&::-webkit-details-marker]:hidden">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-blue">
+          <Blocks size={16} aria-hidden />
+        </span>
+        <span className="flex-1">{it ? "Azioni del sensore" : "Sensor actions"}</span>
+        <span className="rounded-full bg-brand-blue/10 px-1.5 py-0.5 font-mono text-[10px] text-brand-blue">
+          {draft.commands.length}
+        </span>
+        <ChevronDown
+          size={14}
+          className="-rotate-90 text-ink-muted transition-transform group-open/actions:rotate-0"
+          aria-hidden
+        />
+      </summary>
+      <div className="mx-3 mb-3 ml-6 border-l-2 border-brand-blue/15 pl-3 pt-2">
+        <p className="mb-3 font-body text-[11px] leading-snug text-ink-muted">
           {it
-            ? "Nome, blocco canvas e dettagli dell’azione"
-            : "Name, canvas block and action details"}
-        </summary>
-        <div className="mt-2">
-          <label className="mb-3 flex items-center gap-2 font-body text-xs text-ink-muted">
-            <input
-              type="checkbox"
-              checked={action.exposeOnCanvas !== false}
-              onChange={(e) =>
-                onChange(
-                  updateCommand(draft, action.id, {
-                    ...action,
-                    exposeOnCanvas: e.target.checked,
-                  }),
-                )
-              }
-            />
-            {it
-              ? "Esponi questa azione come blocco nel canvas"
-              : "Expose this action as a canvas block"}
-          </label>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <label className="font-body text-xs text-ink-muted">
-              {it ? "Nome del blocco" : "Block label"}
-              <input
-                aria-label={it ? "Nome azione" : "Action label"}
-                className={input}
-                value={action.label}
-                onChange={(e) =>
-                  onChange(
-                    updateCommand(draft, action.id, {
-                      ...action,
-                      label: e.target.value,
-                    }),
-                  )
-                }
-              />
-            </label>
-            <details>
-              <summary className="cursor-pointer font-body text-xs text-ink-muted">
-                {it ? "Identificatore tecnico" : "Technical identifier"}
-              </summary>{" "}
-              <label className="font-body text-xs text-ink-muted">
-                {it ? "Identificatore" : "Identifier"}
-                <input
-                  className={input}
-                  value={action.name}
-                  onChange={(e) =>
-                    onChange(
-                      updateCommand(draft, action.id, {
-                        ...action,
-                        name: e.target.value,
-                      }),
-                    )
+            ? "Questo è l’elenco delle azioni del driver. Ogni azione può diventare un blocco del canvas: scegli quale modificare."
+            : "These are your driver actions. Each can become a canvas block: select one to edit."}
+        </p>
+        <div className="space-y-1">
+          {draft.commands.map((action) => (
+            <div
+              key={action.id}
+              className={`rounded-lg border p-2 ${activeId === action.id ? "border-brand-blue/25 bg-brand-blue/5" : "border-border bg-surface-sunken/40"}`}
+            >
+              <div className="flex items-center gap-1">
+                {activeId === action.id ? (
+                  <input
+                    aria-label={it ? "Nome azione" : "Action name"}
+                    value={action.label}
+                    onChange={(e) =>
+                      onChange(
+                        updateCommand(draft, action.id, {
+                          ...action,
+                          label: e.target.value,
+                        }),
+                      )
+                    }
+                    className="min-w-0 flex-1 rounded border border-brand-blue/25 bg-surface px-1 py-1 font-body text-xs font-semibold text-ink"
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onSelect(action.id)}
+                    className="min-w-0 flex-1 text-left font-body text-xs font-semibold text-ink"
+                  >
+                    {action.label || action.name}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  aria-label={
+                    it ? `Duplica ${action.label}` : `Duplicate ${action.label}`
                   }
-                />
-              </label>
-            </details>
-          </div>
-          <p className="mt-2 font-body text-xs text-ink-muted">
-            {it ? "Ingressi" : "Inputs"}:{" "}
-            {ports.inputs.map((p) => p.label).join(", ") || "—"} ·{" "}
-            {it ? "Risultati" : "Results"}:{" "}
-            {ports.outputs.map((p) => p.label).join(", ") ||
-              (it ? "Nessuna uscita" : "No output")}
-          </p>
+                  onClick={() => {
+                    const next = duplicateDriverAction(draft, action);
+                    onChange(next);
+                    onSelect(next.commands.at(-1)!.id);
+                  }}
+                  className="rounded border border-border bg-surface p-1 text-ink-muted"
+                >
+                  <Copy size={12} />
+                </button>
+                <button
+                  type="button"
+                  aria-label={it ? `Rimuovi ${action.label}` : `Remove ${action.label}`}
+                  onClick={() => {
+                    const next = removeCommand(draft, action.id);
+                    onChange(next);
+                    if (next.commands[0]) onSelect(next.commands[0].id);
+                  }}
+                  className="rounded border border-border bg-surface p-1 text-error"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+              <span className="font-body text-[10px] text-ink-muted">
+                {action.steps.length} {it ? "passi I²C" : "I²C steps"}
+              </span>
+              {activeId === action.id && (
+                <details className="mt-1">
+                  <summary className="cursor-pointer font-body text-[10px] text-ink-muted">
+                    {it ? "Opzioni dell’azione" : "Action options"}
+                  </summary>
+                  <label className="mt-1 flex gap-1 font-body text-[10px] text-ink">
+                    <input
+                      type="checkbox"
+                      checked={action.exposeOnCanvas !== false}
+                      onChange={(e) =>
+                        onChange(
+                          updateCommand(draft, action.id, {
+                            ...action,
+                            exposeOnCanvas: e.target.checked,
+                          }),
+                        )
+                      }
+                    />
+                    {it ? "Esponi nel canvas" : "Expose on canvas"}
+                  </label>
+                  <label className="block font-body text-[10px] text-ink-muted">
+                    {it ? "Identificatore tecnico" : "Technical identifier"}
+                    <input
+                      value={action.name}
+                      onChange={(e) =>
+                        onChange(
+                          updateCommand(draft, action.id, {
+                            ...action,
+                            name: e.target.value,
+                          }),
+                        )
+                      }
+                      className="w-full rounded border border-border bg-surface p-1 font-mono text-[10px]"
+                    />
+                  </label>
+                </details>
+              )}
+            </div>
+          ))}
         </div>
-      </details>
-    </section>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <button type="button" className={button} onClick={() => add()}>
+            <Plus size={12} className="mr-1 inline" />
+            {it ? "Azione" : "Action"}
+          </button>
+        </div>
+        {children}
+      </div>
+    </details>
   );
 }
 
@@ -243,10 +215,11 @@ export function DriverSequence({
             >
               <span className="font-mono text-xs text-ink-muted">{i + 1}</span>
               <span className="font-body text-xs text-ink">
-                {(op.type === "i2c_write" || op.type === "i2c_write_read") &&
-                op.registerWidth
-                  ? `${it ? (op.type === "i2c_write" ? "Scrivi registro" : "Leggi registro") : op.type === "i2c_write" ? "Write register" : "Read register"} 0x${(op.type === "i2c_write" ? op.bytes : op.writeBytes).slice(0, op.registerWidth).join("")}`
-                  : describeDeviceOp(op)}
+                {op.type === "i2c_write"
+                  ? `${it ? "Scrivi messaggio" : "Write message"} · ${op.bytes.length} byte`
+                  : op.type === "i2c_read" || op.type === "i2c_write_read"
+                    ? `${it ? "Leggi" : "Read"} ${op.type === "i2c_read" ? op.len : op.readLen} byte → $${op.into}`
+                    : describeDeviceOp(op)}
               </span>
             </button>
           </li>
@@ -331,8 +304,8 @@ export function DriverCanvasPreview({
               </div>
               <p className="mt-3 font-body text-[10px] text-ink-muted">
                 {it
-                  ? "Ingressi → Encoder → variabili interne · Sensore → Decoder → variabili → Uscite"
-                  : "Inputs → Encoder → internal variables · Sensor → Decoder → variables → Outputs"}
+                  ? "Ingressi → variabili interne → passi I²C · variabili → Uscite"
+                  : "Inputs → internal variables → I²C steps · variables → Outputs"}
               </p>
             </div>
           );

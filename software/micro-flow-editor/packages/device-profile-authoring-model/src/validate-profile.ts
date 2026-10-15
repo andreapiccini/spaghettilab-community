@@ -37,6 +37,7 @@ function tempSlots(instruction: Instruction): number[] {
     case "I2C_WRITE_READ":
     case "SPI_TRANSCEIVE":
     case "W1_WRITE_READ":
+    case "SCALE_PACK":
     case "COPY_BYTES":
     case "BYTE_SWAP":
     case "MASK":
@@ -48,6 +49,7 @@ function tempSlots(instruction: Instruction): number[] {
     case "WAIT_FIELD_MASK":
       return [instruction.dst, instruction.src];
     case "WAIT_GPIO":
+    case "LOAD_VALUE":
     case "LOAD_ARGUMENT":
     case "LOAD_CONST":
       return [instruction.dst];
@@ -167,6 +169,9 @@ function structuralError(instruction: Instruction): { target: string; remediatio
       return instruction.readLength === 0 && instruction.op === "I2C_WRITE_READ"
         ? { target: "readLength", remediation: "readLength must be greater than zero" }
         : undefined;
+    case "SCALE_PACK":
+      return instruction.flags > 7 || instruction.width < 1 || instruction.width > 8 || instruction.divisor < 1 ? { target: "SCALE_PACK", remediation: "Invalid scale or pack operands" } : undefined;
+    case "LOAD_VALUE":
     case "LOAD_ARGUMENT":
       return instruction.argumentId < 1 || instruction.argumentId > 8 || instruction.length < 1 || instruction.length > 8 ? { target: "LOAD_ARGUMENT", remediation: "Argument ID and width must be 1..8" } : undefined;
     case "LOAD_CONST":

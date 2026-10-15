@@ -1,3 +1,4 @@
+import { prepareDriverDeployment } from "../../lib/driver-deployment-plan.js";
 import { planDriverCanvasChanges } from "../../lib/driver-canvas-plan.js";
 import { encodeConfigCbor, sha256 } from "@spaghettilab/config-compiler";
 import { physicalPinsForBinding } from "../../lib/physical-pin-bindings.js";
@@ -1544,7 +1545,9 @@ function ProcessingGraphScreenInner() {
     setRunning(true);
     setHashHex(null);
     try {
-      const result = dryRunConfig({ physicalGraph: physicalGraphState, processingGraph: graphState, mqtt: DISABLED_MQTT, connectivity: 0, energy: DEFAULT_ENERGY }, { availableBlockRuleTypeIds: demoOnly ? new Set([...SHIPPED_TYPE_IDS, "ab.relay", "ab.compare_if", "ab.temperature_sensor"]) : SHIPPED_TYPE_IDS });
+      const input = { physicalGraph: physicalGraphState, processingGraph: graphState, mqtt: DISABLED_MQTT, connectivity: 0, energy: DEFAULT_ENERGY };
+      const plan = !demoOnly && session && selected ? prepareDriverDeployment(session.stack.current, selected.bindingId, input) : { input, profiles: [], options: {} };
+      const result = dryRunConfig(plan.input, { ...plan.options, availableBlockRuleTypeIds: demoOnly ? new Set([...SHIPPED_TYPE_IDS, "ab.relay", "ab.compare_if", "ab.temperature_sensor"]) : new Set([...SHIPPED_TYPE_IDS, "device-action"]) });
       setDryRun(result);
       const hardErrors = result.issues.filter((i) => i.severity !== "warning").length;
       // Start local LED/GPIO preview immediately after validate — before the

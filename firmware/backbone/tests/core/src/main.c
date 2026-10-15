@@ -172,7 +172,7 @@ int spaghetti_update_init(void)
 int spaghetti_storage_read_config(struct spaghetti_config *out)
 {
 	zassert_not_null(out);
-	if (IS_ENABLED(CONFIG_SPAGHETTI_TEST_CONFIG_ABSENT)) {
+	if ((IS_ENABLED(CONFIG_SPAGHETTI_TEST_CONFIG_ABSENT) || IS_ENABLED(CONFIG_SPAGHETTI_TEST_PROFILE_MISSING))) {
 		return -ENOENT;
 	}
 	*out = (struct spaghetti_config) {
@@ -235,7 +235,7 @@ int spaghetti_maintenance_link_probe(uint32_t timeout_ms, bool *requested)
 int spaghetti_maintenance_link_enter(
 	enum spaghetti_maintenance_entry_reason reason)
 {
-	if (IS_ENABLED(CONFIG_SPAGHETTI_TEST_CONFIG_ABSENT)) {
+	if ((IS_ENABLED(CONFIG_SPAGHETTI_TEST_CONFIG_ABSENT) || IS_ENABLED(CONFIG_SPAGHETTI_TEST_PROFILE_MISSING))) {
 		zassert_equal(reason, SPAGHETTI_MAINTENANCE_CONFIG_ABSENT);
 	} else if (IS_ENABLED(CONFIG_SPAGHETTI_TEST_MAINTENANCE_MARKER)) {
 		zassert_equal(reason, SPAGHETTI_MAINTENANCE_REBOOT_REQUEST);
@@ -388,10 +388,11 @@ int spaghetti_module_manager_remove(spaghetti_module_id_t id,
 
 ZTEST(core, test_boot_order_and_nonfatal_stored_config_failure)
 {
+	const bool unprovisioned = IS_ENABLED(CONFIG_SPAGHETTI_TEST_CONFIG_ABSENT) || IS_ENABLED(CONFIG_SPAGHETTI_TEST_PROFILE_MISSING);
 	const bool maintenance =
 		IS_ENABLED(CONFIG_SPAGHETTI_TEST_MAINTENANCE_MARKER) ||
 		IS_ENABLED(CONFIG_SPAGHETTI_TEST_BOOTSTRAP_REQUEST);
-	const bool normal = !IS_ENABLED(CONFIG_SPAGHETTI_TEST_CONFIG_ABSENT) &&
+	const bool normal = !unprovisioned &&
 			    !maintenance;
 	struct spaghetti_core_info info;
 
@@ -404,7 +405,7 @@ ZTEST(core, test_boot_order_and_nonfatal_stored_config_failure)
 	zassert_ok(spaghetti_core_get_info(&info));
 	zassert_equal(info.state, SPAGHETTI_CORE_READY);
 	zassert_equal(info.mode,
-		IS_ENABLED(CONFIG_SPAGHETTI_TEST_CONFIG_ABSENT) ?
+		unprovisioned ?
 			SPAGHETTI_CORE_MODE_UNPROVISIONED :
 			maintenance ? SPAGHETTI_CORE_MODE_MAINTENANCE :
 				      SPAGHETTI_CORE_MODE_NORMAL);

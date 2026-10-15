@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { readableTimingScale } from "../../lib/timing-scale.js";
 /**
  * Logic-analyzer / oscilloscope-style timing diagram (illustrative SVG).
  * Phase bands show protocol framing (START/STOP/Sr/ACK/NACK/ADDR/DATA).
@@ -52,6 +54,7 @@ export function TimingScopeChart({
   onSelectOp,
   className,
 }: Props) {
+  const [zoom, setZoom] = useState(1);
   const dur = Math.max(1, durationMs);
   const labelW = 56;
   const levelW = 22;
@@ -63,207 +66,353 @@ export function TimingScopeChart({
   const titleH = title ? 22 : 4;
   const padTop = titleH + stepH + bandH;
   const padBot = caption ? 18 : 8;
-  const plotW = 520;
+  const scale = readableTimingScale(dur, phaseBands, stepSpans, zoom);
+  const plotW = scale.width;
   const width = left + plotW + padR;
   const height = padTop + lanes.length * laneH + padBot;
   const stepY = titleH;
   const bandY = titleH + stepH;
 
-  const xAt = (t: number) => left + (Math.min(dur, Math.max(0, t)) / dur) * plotW;
+  const xAt = (t: number) => left + scale.xAt(Math.min(dur, Math.max(0, t)));
   const yHigh = (laneIndex: number) => padTop + laneIndex * laneH + 12;
   const yLow = (laneIndex: number) => padTop + laneIndex * laneH + 34;
   const plotBottom = padTop + lanes.length * laneH - 6;
 
   return (
     <div className={className}>
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={title ?? "Timing"}>
-        {title ? (
-          <text x={4} y={16} fill={INK} style={{ fontSize: 13, fontWeight: 700, fontFamily: "Manrope, sans-serif" }}>
-            {title}
-          </text>
-        ) : null}
-
-        {/* Recipe steps — same time axis as SCL/SDA */}
-        {stepSpans.length > 0 ? (
-          <g>
+      {phaseBands.length > 0 && (
+        <div className="mb-2 flex items-center justify-end gap-1 font-body text-xs">
+          <button
+            type="button"
+            aria-label="Riduci diagramma"
+            onClick={() => setZoom((value) => Math.max(0.5, value - 0.25))}
+            className="rounded border border-border px-2 py-1"
+          >
+            −
+          </button>
+          <button
+            type="button"
+            aria-label="Ripristina zoom diagramma"
+            onClick={() => setZoom(1)}
+            className="rounded border border-border px-2 py-1"
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+          <button
+            type="button"
+            aria-label="Ingrandisci diagramma"
+            onClick={() => setZoom((value) => Math.min(4, value + 0.25))}
+            className="rounded border border-border px-2 py-1"
+          >
+            +
+          </button>
+        </div>
+      )}
+      <div
+        className="max-w-full overflow-x-auto"
+        tabIndex={0}
+        aria-label="Diagramma scorrevole"
+      >
+        <svg
+          style={{ width: phaseBands.length ? `${width}px` : "100%", minWidth: "100%" }}
+          viewBox={`0 0 ${width} ${height}`}
+          role="img"
+          aria-label={title ?? "Timing"}
+        >
+          {title ? (
             <text
               x={4}
-              y={stepY + 14}
-              fill={MUTED}
-              style={{ fontSize: 9, fontWeight: 700, fontFamily: "Manrope, sans-serif" }}
+              y={16}
+              fill={INK}
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "Manrope, sans-serif",
+              }}
             >
-              STEP
+              {title}
             </text>
-            {stepSpans.map((step) => {
-              const x0 = xAt(step.t0);
-              const x1 = xAt(step.t1);
-              const w = Math.max(18, x1 - x0);
-              const hi = highlightOpId === step.opId;
-              const fill = hi
-                ? step.kind === "bus"
-                  ? "rgba(15,23,42,0.92)"
-                  : "rgba(37,99,235,0.18)"
-                : step.kind === "bus"
-                  ? "rgba(15,23,42,0.78)"
-                  : "rgba(148,163,184,0.18)";
-              const ink = step.kind === "bus" || hi ? "#fff" : INK;
-              const shortLabel =
-                w < 72
-                  ? `${step.index + 1}`
-                  : w < 120
-                    ? `${step.index + 1}. ${step.label.slice(0, 18)}${step.label.length > 18 ? "…" : ""}`
-                    : `${step.index + 1}. ${step.label}`;
-              return (
-                <g
-                  key={step.opId}
-                  style={{ cursor: onSelectOp ? "pointer" : "default" }}
-                  onClick={() => onSelectOp?.(step.opId)}
-                >
-                  <title>{`${step.index + 1}. ${step.label}`}</title>
-                  <rect
-                    x={x0}
-                    y={stepY + 2}
-                    width={w}
-                    height={stepH - 8}
-                    rx={4}
-                    fill={fill}
-                    stroke={hi ? TRACE : "rgba(15,23,42,0.15)"}
-                    strokeWidth={hi ? 1.5 : 0.75}
-                  />
+          ) : null}
+
+          {/* Recipe steps — same time axis as SCL/SDA */}
+          {stepSpans.length > 0 ? (
+            <g>
+              <text
+                x={4}
+                y={stepY + 14}
+                fill={MUTED}
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  fontFamily: "Manrope, sans-serif",
+                }}
+              >
+                STEP
+              </text>
+              {stepSpans.map((step) => {
+                const x0 = xAt(step.t0);
+                const x1 = xAt(step.t1);
+                const w = Math.max(18, x1 - x0);
+                const hi = highlightOpId === step.opId;
+                const fill = hi
+                  ? step.kind === "bus"
+                    ? "rgba(15,23,42,0.92)"
+                    : "rgba(37,99,235,0.18)"
+                  : step.kind === "bus"
+                    ? "rgba(15,23,42,0.78)"
+                    : "rgba(148,163,184,0.18)";
+                const ink = step.kind === "bus" || hi ? "#fff" : INK;
+                const shortLabel =
+                  w < 72
+                    ? `${step.index + 1}`
+                    : w < 120
+                      ? `${step.index + 1}. ${step.label.slice(0, 18)}${step.label.length > 18 ? "…" : ""}`
+                      : `${step.index + 1}. ${step.label}`;
+                return (
+                  <g
+                    key={step.opId}
+                    style={{ cursor: onSelectOp ? "pointer" : "default" }}
+                    onClick={() => onSelectOp?.(step.opId)}
+                  >
+                    <title>{`${step.index + 1}. ${step.label}`}</title>
+                    <rect
+                      x={x0}
+                      y={stepY + 2}
+                      width={w}
+                      height={stepH - 8}
+                      rx={4}
+                      fill={fill}
+                      stroke={hi ? TRACE : "rgba(15,23,42,0.15)"}
+                      strokeWidth={hi ? 1.5 : 0.75}
+                    />
+                    <text
+                      x={x0 + w / 2}
+                      y={stepY + 20}
+                      textAnchor="middle"
+                      fill={step.kind === "bus" ? "#fff" : ink}
+                      style={{
+                        fontSize: 8,
+                        fontWeight: 700,
+                        fontFamily: "Manrope, sans-serif",
+                      }}
+                    >
+                      {shortLabel}
+                    </text>
+                    <line
+                      x1={x0}
+                      y1={stepY + stepH - 6}
+                      x2={x0}
+                      y2={plotBottom}
+                      stroke={hi ? TRACE : MUTED}
+                      strokeWidth={hi ? 1 : 0.5}
+                      strokeDasharray="2 3"
+                      opacity={0.4}
+                    />
+                  </g>
+                );
+              })}
+            </g>
+          ) : null}
+
+          {/* Phase bands — START / STOP / Sr / ACK / NACK / ADDR / DATA */}
+          {phaseBands.map((band) => {
+            const x0 = xAt(band.t0);
+            const x1 = xAt(band.t1);
+            const w = Math.max(2, x1 - x0);
+            const hi = highlightOpId && band.opId === highlightOpId;
+            const fill =
+              band.color ?? (hi ? "rgba(37,99,235,0.2)" : "rgba(148,163,184,0.12)");
+            const short = band.label.length <= 2;
+            const showLabel = short ? w >= 5 : w > 12;
+            return (
+              <g
+                key={band.id}
+                style={{ cursor: onSelectOp && band.opId ? "pointer" : "default" }}
+                onClick={() => band.opId && onSelectOp?.(band.opId)}
+              >
+                <rect
+                  x={x0}
+                  y={bandY}
+                  width={w}
+                  height={bandH - 4}
+                  fill={fill}
+                  stroke={hi ? TRACE : "rgba(15,23,42,0.12)"}
+                  strokeWidth={hi ? 1 : 0.5}
+                />
+                {showLabel ? (
                   <text
                     x={x0 + w / 2}
-                    y={stepY + 20}
+                    y={bandY + 16}
                     textAnchor="middle"
-                    fill={step.kind === "bus" ? "#fff" : ink}
-                    style={{ fontSize: 8, fontWeight: 700, fontFamily: "Manrope, sans-serif" }}
+                    fill={hi ? TRACE : INK}
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      fontFamily: "ui-monospace, monospace",
+                    }}
                   >
-                    {shortLabel}
+                    {{ S: "START", P: "STOP", A: "ACK", N: "NACK" }[
+                      band.label as "S" | "P" | "A" | "N"
+                    ] ?? band.label}
                   </text>
-                  <line
-                    x1={x0}
-                    y1={stepY + stepH - 6}
-                    x2={x0}
-                    y2={plotBottom}
-                    stroke={hi ? TRACE : MUTED}
-                    strokeWidth={hi ? 1 : 0.5}
-                    strokeDasharray="2 3"
-                    opacity={0.4}
-                  />
-                </g>
-              );
-            })}
-          </g>
-        ) : null}
+                ) : null}
+                <line
+                  x1={x0}
+                  y1={bandY}
+                  x2={x0}
+                  y2={plotBottom}
+                  stroke={hi ? TRACE : MUTED}
+                  strokeWidth={hi ? 1 : 0.5}
+                  strokeDasharray={short ? "2 3" : "3 3"}
+                  opacity={0.55}
+                />
+              </g>
+            );
+          })}
 
-        {/* Phase bands — START / STOP / Sr / ACK / NACK / ADDR / DATA */}
-        {phaseBands.map((band) => {
-          const x0 = xAt(band.t0);
-          const x1 = xAt(band.t1);
-          const w = Math.max(2, x1 - x0);
-          const hi = highlightOpId && band.opId === highlightOpId;
-          const fill = band.color ?? (hi ? "rgba(37,99,235,0.2)" : "rgba(148,163,184,0.12)");
-          const short = band.label.length <= 2;
-          const showLabel = short ? w >= 5 : w > 12;
-          return (
-            <g
-              key={band.id}
-              style={{ cursor: onSelectOp && band.opId ? "pointer" : "default" }}
-              onClick={() => band.opId && onSelectOp?.(band.opId)}
-            >
-              <rect
-                x={x0}
-                y={bandY}
-                width={w}
-                height={bandH - 4}
-                fill={fill}
-                stroke={hi ? TRACE : "rgba(15,23,42,0.12)"}
-                strokeWidth={hi ? 1 : 0.5}
-              />
-              {showLabel ? (
+          {lanes.map((lane, li) => {
+            const yh = yHigh(li);
+            const yl = yLow(li);
+            const midY = (yh + yl) / 2;
+            const path = buildStepPath(lane.edges, dur, xAt, yh, yl);
+            const ann = lane.annotation;
+
+            return (
+              <g key={lane.id}>
                 <text
-                  x={x0 + w / 2}
-                  y={bandY + 16}
-                  textAnchor="middle"
-                  fill={hi ? TRACE : INK}
+                  x={4}
+                  y={midY + 4}
+                  fill={INK}
                   style={{
-                    fontSize: short ? 8 : 7,
+                    fontSize: 12,
                     fontWeight: 700,
                     fontFamily: "ui-monospace, monospace",
                   }}
                 >
-                  {band.label}
+                  {lane.label}
                 </text>
-              ) : null}
-              <line
-                x1={x0}
-                y1={bandY}
-                x2={x0}
-                y2={plotBottom}
-                stroke={hi ? TRACE : MUTED}
-                strokeWidth={hi ? 1 : 0.5}
-                strokeDasharray={short ? "2 3" : "3 3"}
-                opacity={0.55}
-              />
-            </g>
-          );
-        })}
+                <text
+                  x={labelW + 2}
+                  y={yh + 4}
+                  fill={MUTED}
+                  style={{ fontSize: 10, fontFamily: "ui-monospace, monospace" }}
+                >
+                  H
+                </text>
+                <text
+                  x={labelW + 2}
+                  y={yl + 4}
+                  fill={MUTED}
+                  style={{ fontSize: 10, fontFamily: "ui-monospace, monospace" }}
+                >
+                  L
+                </text>
+                <line
+                  x1={left}
+                  y1={yh}
+                  x2={left + plotW}
+                  y2={yh}
+                  stroke={GRID}
+                  strokeWidth={1}
+                />
+                <line
+                  x1={left}
+                  y1={yl}
+                  x2={left + plotW}
+                  y2={yl}
+                  stroke={GRID}
+                  strokeWidth={1}
+                />
 
-        {lanes.map((lane, li) => {
-          const yh = yHigh(li);
-          const yl = yLow(li);
-          const midY = (yh + yl) / 2;
-          const path = buildStepPath(lane.edges, dur, xAt, yh, yl);
-          const ann = lane.annotation;
+                {ann ? (
+                  <g>
+                    <rect
+                      x={xAt(ann.t0)}
+                      y={yh - 8}
+                      width={Math.max(2, xAt(ann.t1) - xAt(ann.t0))}
+                      height={yl - yh + 16}
+                      fill={TRACE_SOFT}
+                    />
+                    <line
+                      x1={xAt(ann.t0)}
+                      y1={yh - 10}
+                      x2={xAt(ann.t0)}
+                      y2={yl + 8}
+                      stroke={DASH}
+                      strokeWidth={1}
+                      strokeDasharray="3 3"
+                    />
+                    <line
+                      x1={xAt(ann.t1)}
+                      y1={yh - 10}
+                      x2={xAt(ann.t1)}
+                      y2={yl + 8}
+                      stroke={DASH}
+                      strokeWidth={1}
+                      strokeDasharray="3 3"
+                    />
+                    <line
+                      x1={xAt(ann.t0)}
+                      y1={yh - 16}
+                      x2={xAt(ann.t1)}
+                      y2={yh - 16}
+                      stroke={TRACE}
+                      strokeWidth={1.25}
+                    />
+                    <text
+                      x={(xAt(ann.t0) + xAt(ann.t1)) / 2}
+                      y={yh - 20}
+                      textAnchor="middle"
+                      fill={TRACE}
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        fontFamily: "Manrope, sans-serif",
+                      }}
+                    >
+                      {ann.label}
+                    </text>
+                  </g>
+                ) : null}
 
-          return (
-            <g key={lane.id}>
-              <text x={4} y={midY + 4} fill={INK} style={{ fontSize: 12, fontWeight: 700, fontFamily: "ui-monospace, monospace" }}>
-                {lane.label}
-              </text>
-              <text x={labelW + 2} y={yh + 4} fill={MUTED} style={{ fontSize: 10, fontFamily: "ui-monospace, monospace" }}>
-                H
-              </text>
-              <text x={labelW + 2} y={yl + 4} fill={MUTED} style={{ fontSize: 10, fontFamily: "ui-monospace, monospace" }}>
-                L
-              </text>
-              <line x1={left} y1={yh} x2={left + plotW} y2={yh} stroke={GRID} strokeWidth={1} />
-              <line x1={left} y1={yl} x2={left + plotW} y2={yl} stroke={GRID} strokeWidth={1} />
+                <path
+                  d={path}
+                  fill="none"
+                  stroke={TRACE}
+                  strokeWidth={1.15}
+                  strokeLinejoin="miter"
+                  strokeLinecap="square"
+                />
 
-              {ann ? (
-                <g>
-                  <rect x={xAt(ann.t0)} y={yh - 8} width={Math.max(2, xAt(ann.t1) - xAt(ann.t0))} height={yl - yh + 16} fill={TRACE_SOFT} />
-                  <line x1={xAt(ann.t0)} y1={yh - 10} x2={xAt(ann.t0)} y2={yl + 8} stroke={DASH} strokeWidth={1} strokeDasharray="3 3" />
-                  <line x1={xAt(ann.t1)} y1={yh - 10} x2={xAt(ann.t1)} y2={yl + 8} stroke={DASH} strokeWidth={1} strokeDasharray="3 3" />
-                  <line x1={xAt(ann.t0)} y1={yh - 16} x2={xAt(ann.t1)} y2={yh - 16} stroke={TRACE} strokeWidth={1.25} />
-                  <text
-                    x={(xAt(ann.t0) + xAt(ann.t1)) / 2}
-                    y={yh - 20}
-                    textAnchor="middle"
-                    fill={TRACE}
-                    style={{ fontSize: 11, fontWeight: 600, fontFamily: "Manrope, sans-serif" }}
-                  >
-                    {ann.label}
-                  </text>
-                </g>
-              ) : null}
+                {(lane.sampleTimes ?? []).map((t, i) => {
+                  const level = levelAt(lane.edges, t);
+                  const y = level === 1 ? yh : yl;
+                  return (
+                    <circle
+                      key={`${lane.id}-s${i}`}
+                      cx={xAt(t)}
+                      cy={y}
+                      r={1.8}
+                      fill={TRACE}
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
 
-              <path d={path} fill="none" stroke={TRACE} strokeWidth={1.15} strokeLinejoin="miter" strokeLinecap="square" />
-
-              {(lane.sampleTimes ?? []).map((t, i) => {
-                const level = levelAt(lane.edges, t);
-                const y = level === 1 ? yh : yl;
-                return <circle key={`${lane.id}-s${i}`} cx={xAt(t)} cy={y} r={1.8} fill={TRACE} />;
-              })}
-            </g>
-          );
-        })}
-
-        {caption ? (
-          <text x={left} y={height - 6} fill={MUTED} style={{ fontSize: 9, fontFamily: "Noto Sans, sans-serif" }}>
-            {caption}
-          </text>
-        ) : null}
-      </svg>
+          {caption ? (
+            <text
+              x={left}
+              y={height - 6}
+              fill={MUTED}
+              style={{ fontSize: 9, fontFamily: "Noto Sans, sans-serif" }}
+            >
+              {caption}
+            </text>
+          ) : null}
+        </svg>
+      </div>
     </div>
   );
 }
@@ -360,7 +509,10 @@ export function gpioDebounceLane(opts: {
   };
 }
 
-export function durationFromLanes(lanes: readonly TimingLane[], fallbackMs: number): number {
+export function durationFromLanes(
+  lanes: readonly TimingLane[],
+  fallbackMs: number,
+): number {
   let max = fallbackMs;
   for (const lane of lanes) {
     for (const e of lane.edges) max = Math.max(max, e.t);

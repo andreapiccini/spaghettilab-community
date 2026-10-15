@@ -110,12 +110,15 @@ export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
         imm1: instruction.intervalMs,
         imm2: instruction.expectedLevel,
       };
+    case "SCALE_PACK":
+      return { ...base, opcode: DeviceProfileOpcode.SCALE_PACK, dst: instruction.dst, srcA: instruction.src, srcB: instruction.flags, imm0: instruction.width, imm1: instruction.divisor, imm2: instruction.multiplier >>> 0, imm3: instruction.offset >>> 0 };
+    case "LOAD_VALUE":
     case "LOAD_ARGUMENT":
-      return { ...base, opcode: DeviceProfileOpcode.LOAD_ARGUMENT, dst: instruction.dst, srcA: instruction.argumentId, srcB: instruction.required ? 1 : 0, imm0: instruction.length, imm1: instruction.littleEndian ? 1 : 0, imm2: instruction.low, imm3: instruction.high };
+      return { ...base, opcode: instruction.op === "LOAD_VALUE" ? DeviceProfileOpcode.LOAD_VALUE : DeviceProfileOpcode.LOAD_ARGUMENT, dst: instruction.dst, srcA: instruction.argumentId, srcB: instruction.required ? 1 : 0, imm0: instruction.length, imm1: instruction.littleEndian ? 1 : 0, imm2: instruction.low, imm3: instruction.high };
     case "LOAD_CONST":
       return { ...base, opcode: DeviceProfileOpcode.LOAD_CONST, dst: instruction.dst, imm0: instruction.length, imm2: instruction.low, imm3: instruction.high };
     case "COPY_BYTES":
-      return { ...base, opcode: DeviceProfileOpcode.COPY_BYTES, srcA: instruction.src, dst: instruction.dst, imm0: instruction.length };
+      return { ...base, opcode: DeviceProfileOpcode.COPY_BYTES, srcA: instruction.src, dst: instruction.dst, imm0: instruction.length, imm1: instruction.offset ?? 0 };
     case "CONCAT":
       return { ...base, opcode: DeviceProfileOpcode.CONCAT, srcA: instruction.srcA, srcB: instruction.srcB, dst: instruction.dst };
     case "BYTE_SWAP":
@@ -192,13 +195,17 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
         return err(invalidOperand(String(raw.imm2), "WAIT_GPIO expectedLevel (imm2) must be 0 or 1"));
       }
       return ok({ op: "WAIT_GPIO", dst: raw.dst, attempts: raw.imm0, intervalMs: raw.imm1, expectedLevel: raw.imm2 });
+    case DeviceProfileOpcode.SCALE_PACK:
+      if (raw.srcB > 7 || raw.imm0 < 1 || raw.imm0 > 8 || raw.imm1 < 1) return err(invalidOperand("SCALE_PACK", "Invalid scale operands"));
+      return ok({ op: "SCALE_PACK", src: raw.srcA, dst: raw.dst, flags: raw.srcB, width: raw.imm0, divisor: raw.imm1, multiplier: raw.imm2 | 0, offset: raw.imm3 | 0 });
+    case DeviceProfileOpcode.LOAD_VALUE:
     case DeviceProfileOpcode.LOAD_ARGUMENT:
       if (raw.srcA < 1 || raw.srcA > 8 || raw.srcB > 1 || raw.imm0 < 1 || raw.imm0 > 8 || raw.imm1 > 1) return err(invalidOperand("LOAD_ARGUMENT", "Invalid argument packing"));
-      return ok({ op: "LOAD_ARGUMENT", dst: raw.dst, argumentId: raw.srcA, required: raw.srcB === 1, length: raw.imm0, littleEndian: raw.imm1 === 1, low: raw.imm2, high: raw.imm3 });
+      return ok({ op: raw.opcode === DeviceProfileOpcode.LOAD_VALUE ? "LOAD_VALUE" : "LOAD_ARGUMENT", dst: raw.dst, argumentId: raw.srcA, required: raw.srcB === 1, length: raw.imm0, littleEndian: raw.imm1 === 1, low: raw.imm2, high: raw.imm3 });
     case DeviceProfileOpcode.LOAD_CONST:
       return ok({ op: "LOAD_CONST", dst: raw.dst, length: raw.imm0, low: raw.imm2, high: raw.imm3 });
     case DeviceProfileOpcode.COPY_BYTES:
-      return ok({ op: "COPY_BYTES", src: raw.srcA, dst: raw.dst, length: raw.imm0 });
+      return ok({ op: "COPY_BYTES", src: raw.srcA, dst: raw.dst, length: raw.imm0, ...(raw.imm1 ? { offset: raw.imm1 } : {}) });
     case DeviceProfileOpcode.CONCAT:
       return ok({ op: "CONCAT", srcA: raw.srcA, srcB: raw.srcB, dst: raw.dst });
     case DeviceProfileOpcode.BYTE_SWAP:

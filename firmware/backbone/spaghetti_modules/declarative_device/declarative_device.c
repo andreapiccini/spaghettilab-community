@@ -13,17 +13,24 @@
 #include <spaghetti/port.h>
 #include <spaghetti/schema.h>
 
-LOG_MODULE_REGISTER(spaghetti_declarative_device,
-		    CONFIG_SPAGHETTI_DECLARATIVE_DEVICE_LOG_LEVEL);
+LOG_MODULE_REGISTER(spaghetti_declarative_device, CONFIG_SPAGHETTI_DECLARATIVE_DEVICE_LOG_LEVEL);
+
+struct parameter_cache {
+	struct parameter_cache *next;
+	uint16_t action_id;
+	struct spaghetti_property_set arguments;
+};
 
 struct spaghetti_declarative_context {
+	struct parameter_cache *parameters;
+	struct spaghetti_property_set *values;
 	const struct spaghetti_device_profile *profile;
 	struct spaghetti_device_profile_binding binding;
 	bool initialized;
+	uint8_t pending_commands;
 };
 
-K_MEM_SLAB_DEFINE(declarative_context_slab,
-		  sizeof(struct spaghetti_declarative_context),
+K_MEM_SLAB_DEFINE(declarative_context_slab, sizeof(struct spaghetti_declarative_context),
 		  CONFIG_SPAGHETTI_DECLARATIVE_DEVICE_MAX_INSTANCES,
 		  __alignof__(struct spaghetti_declarative_context));
 
@@ -152,8 +159,7 @@ static const struct spaghetti_schema_descriptor *const declarative_record_schema
 	&declarative_sample_schema,
 };
 
-static int resolve_profile(
-	const struct spaghetti_property_set *config,
+static int resolve_profile(const struct spaghetti_property_set *config,
 	const struct spaghetti_device_profile **out_profile,
 	struct spaghetti_device_profile_binding *out_binding)
 {
@@ -175,20 +181,16 @@ static int resolve_profile(
 	}
 
 	id = spaghetti_property_find(config, SPAGHETTI_DECLARATIVE_CONFIG_PROFILE_ID);
-	version = spaghetti_property_find(
-		config, SPAGHETTI_DECLARATIVE_CONFIG_PROFILE_VERSION);
-	if ((id == NULL) || (id->type != SPAGHETTI_VALUE_TEXT) ||
-	    (version == NULL) || (version->type != SPAGHETTI_VALUE_UINT64) ||
-	    (version->data.unsigned_integer == 0U) ||
+	version = spaghetti_property_find(config, SPAGHETTI_DECLARATIVE_CONFIG_PROFILE_VERSION);
+	if ((id == NULL) || (id->type != SPAGHETTI_VALUE_TEXT) || (version == NULL) ||
+	    (version->type != SPAGHETTI_VALUE_UINT64) || (version->data.unsigned_integer == 0U) ||
 	    (version->data.unsigned_integer > UINT16_MAX)) {
 		return -EINVAL;
 	}
 
-	hash = spaghetti_property_find(config,
-				       SPAGHETTI_DECLARATIVE_CONFIG_PROFILE_HASH);
+	hash = spaghetti_property_find(config, SPAGHETTI_DECLARATIVE_CONFIG_PROFILE_HASH);
 	if (hash != NULL) {
-		if ((hash->type != SPAGHETTI_VALUE_BYTES) ||
-		    (hash->data.bytes.size == 0U) ||
+		if ((hash->type != SPAGHETTI_VALUE_BYTES) || (hash->data.bytes.size == 0U) ||
 		    (hash->data.bytes.size > SPAGHETTI_DEVICE_PROFILE_HASH_SIZE)) {
 			return -EINVAL;
 		}
@@ -200,8 +202,7 @@ static int resolve_profile(
 	}
 
 	profile = spaghetti_device_profile_find(
-		id->data.text.text, (uint16_t)version->data.unsigned_integer,
-		hash_bytes);
+		id->data.text.text, (uint16_t)version->data.unsigned_integer, hash_bytes);
 	if (profile == NULL) {
 		return -ENOENT;
 	}
@@ -210,14 +211,12 @@ static int resolve_profile(
 	out_binding->default_timeout_ms = 100U;
 	out_binding->spi_frequency_hz = 1000000U;
 
-	i2c_address = spaghetti_property_find(
-		config, SPAGHETTI_DECLARATIVE_CONFIG_I2C_ADDRESS);
+	i2c_address = spaghetti_property_find(config, SPAGHETTI_DECLARATIVE_CONFIG_I2C_ADDRESS);
 	if (i2c_address != NULL) {
 		if (i2c_address->type != SPAGHETTI_VALUE_UINT64) {
 			return -EINVAL;
 		}
-		out_binding->i2c_address =
-			(uint16_t)i2c_address->data.unsigned_integer;
+		out_binding->i2c_address = (uint16_t)i2c_address->data.unsigned_integer;
 	}
 
 	spi_cs = spaghetti_property_find(config, SPAGHETTI_DECLARATIVE_CONFIG_SPI_CS);
@@ -228,24 +227,21 @@ static int resolve_profile(
 		out_binding->spi_cs = (uint8_t)spi_cs->data.unsigned_integer;
 	}
 
-	adc_channel = spaghetti_property_find(
-		config, SPAGHETTI_DECLARATIVE_CONFIG_ADC_CHANNEL);
+	adc_channel = spaghetti_property_find(config, SPAGHETTI_DECLARATIVE_CONFIG_ADC_CHANNEL);
 	if (adc_channel != NULL) {
 		if (adc_channel->type != SPAGHETTI_VALUE_UINT64) {
 			return -EINVAL;
 		}
-		out_binding->adc_channel =
-			(uint8_t)adc_channel->data.unsigned_integer;
+		out_binding->adc_channel = (uint8_t)adc_channel->data.unsigned_integer;
 	}
 
-	spi_frequency = spaghetti_property_find(
-		config, SPAGHETTI_DECLARATIVE_CONFIG_SPI_FREQUENCY_HZ);
+	spi_frequency =
+		spaghetti_property_find(config, SPAGHETTI_DECLARATIVE_CONFIG_SPI_FREQUENCY_HZ);
 	if (spi_frequency != NULL) {
 		if (spi_frequency->type != SPAGHETTI_VALUE_UINT64) {
 			return -EINVAL;
 		}
-		out_binding->spi_frequency_hz =
-			(uint32_t)spi_frequency->data.unsigned_integer;
+		out_binding->spi_frequency_hz = (uint32_t)spi_frequency->data.unsigned_integer;
 	}
 
 	w1_rom = spaghetti_property_find(config, SPAGHETTI_DECLARATIVE_CONFIG_W1_ROM);
@@ -254,8 +250,7 @@ static int resolve_profile(
 		    (w1_rom->data.bytes.size != SPAGHETTI_ENDPOINT_VALUE_MAX)) {
 			return -EINVAL;
 		}
-		memcpy(out_binding->w1_rom, w1_rom->data.bytes.bytes,
-		       SPAGHETTI_ENDPOINT_VALUE_MAX);
+		memcpy(out_binding->w1_rom, w1_rom->data.bytes.bytes, SPAGHETTI_ENDPOINT_VALUE_MAX);
 	}
 
 	*out_profile = profile;
@@ -270,8 +265,7 @@ static int declarative_validate_config(const struct spaghetti_property_set *conf
 	return resolve_profile(config, &profile, &binding);
 }
 
-static int declarative_describe_endpoint(
-	const struct spaghetti_property_set *config,
+static int declarative_describe_endpoint(const struct spaghetti_property_set *config,
 	struct spaghetti_module_endpoint *out)
 {
 	const struct spaghetti_device_profile *profile;
@@ -327,19 +321,16 @@ static int declarative_describe_endpoint(
 static int declarative_run_safe_stop(struct spaghetti_declarative_context *context,
 				     const struct spaghetti_port *port)
 {
-	if ((context->profile == NULL) ||
-	    (context->profile->safe_stop_count == 0U)) {
+	if ((context->profile == NULL) || (context->profile->safe_stop_count == 0U)) {
 		return 0;
 	}
 
-	return spaghetti_device_profile_exec(
-		context->profile, context->profile->safe_stop_ops,
-		context->profile->safe_stop_count, port, &context->binding,
-		NULL);
+	return spaghetti_device_profile_exec(context->profile, context->profile->safe_stop_ops,
+					     context->profile->safe_stop_count, port,
+					     &context->binding, NULL);
 }
 
-static int declarative_init(
-	struct spaghetti_module *module,
+static int declarative_init(struct spaghetti_module *module,
 	const struct spaghetti_property_set *config)
 {
 	struct spaghetti_declarative_context *context;
@@ -347,8 +338,7 @@ static int declarative_init(
 	struct spaghetti_device_profile_binding binding;
 	int err;
 
-	if ((module == NULL) || (module->context != NULL) ||
-	    (module->port == NULL)) {
+	if ((module == NULL) || (module->context != NULL) || (module->port == NULL)) {
 		return -EINVAL;
 	}
 
@@ -357,13 +347,11 @@ static int declarative_init(
 		return err;
 	}
 
-	if (!spaghetti_port_has_capability(module->port,
-					   profile->required_capabilities)) {
+	if (!spaghetti_port_has_capability(module->port, profile->required_capabilities)) {
 		return -ENOTSUP;
 	}
 
-	err = k_mem_slab_alloc(&declarative_context_slab, (void **)&context,
-			       K_NO_WAIT);
+	err = k_mem_slab_alloc(&declarative_context_slab, (void **)&context, K_NO_WAIT);
 	if (err < 0) {
 		return -ENOMEM;
 	}
@@ -371,13 +359,18 @@ static int declarative_init(
 	memset(context, 0, sizeof(*context));
 	context->profile = profile;
 	context->binding = binding;
+	context->values = k_calloc(1, sizeof(*context->values));
+	if (!context->values) {
+		k_mem_slab_free(&declarative_context_slab, context);
+		return -ENOMEM;
+	}
 	module->context = context;
 
-	err = spaghetti_device_profile_exec(profile, profile->init_ops,
-					    profile->init_count, module->port,
-					    &binding, NULL);
+	err = spaghetti_device_profile_exec(profile, profile->init_ops, profile->init_count,
+					    module->port, &binding, NULL);
 	if (err < 0) {
 		(void)declarative_run_safe_stop(context, module->port);
+		k_free(context->values);
 		k_mem_slab_free(&declarative_context_slab, (void *)context);
 		module->context = NULL;
 		return err;
@@ -387,80 +380,232 @@ static int declarative_init(
 	return 0;
 }
 
-
-static const struct spaghetti_device_profile_action *find_profile_action(const struct spaghetti_device_profile *profile, uint16_t id)
+static const struct spaghetti_device_profile_action *
+find_profile_action(const struct spaghetti_device_profile *profile, uint16_t id)
 {
-	for (size_t i = 0; i < profile->action_count; ++i) if (profile->actions[i].id == id) return &profile->actions[i];
+	for (size_t i = 0; i < profile->action_count; ++i) {
+		if (profile->actions[i].id == id) {
+			return &profile->actions[i];
+		}
+	}
 	return NULL;
 }
 
-static int declarative_validate_command(struct spaghetti_module *module, const struct spaghetti_module_command *command)
+static struct parameter_cache *find_parameters(struct spaghetti_declarative_context *context,
+					       uint16_t id)
 {
-	if (module == NULL || module->context == NULL || command == NULL || command->arguments.field_count > SPAGHETTI_PROPERTY_MAX_FIELDS) return -EINVAL;
-	struct spaghetti_declarative_context *context = module->context;
-	const struct spaghetti_device_profile_action *action = find_profile_action(context->profile, command->command_id);
-	if (action == NULL) return -ENOTSUP;
-	uint16_t used = 0U;
-	uint8_t packed[8];
-	for (size_t i = action->first; i < action->first + action->count; ++i) {
-		const struct spaghetti_device_profile_op *op = &context->profile->sample_ops[i];
-		if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) {
-			int err = spaghetti_device_profile_pack_argument(op, &command->arguments, packed);
-			if (err < 0) return err;
-			used |= BIT(op->src_a);
+	ARG_UNUSED(id);
+	if (context->parameters) {
+		return context->parameters;
 		}
+	return NULL;
 	}
-	uint16_t seen = 0U;
+
+static int merge_parameters(struct spaghetti_declarative_context *context,
+			    const struct spaghetti_module_command *command,
+			    struct spaghetti_property_set *out)
+{
+	struct parameter_cache *cached = find_parameters(context, command->command_id);
+	memset(out, 0, sizeof(*out));
+	if (cached) {
+		*out = cached->arguments;
+	}
 	for (size_t i = 0; i < command->arguments.field_count; ++i) {
-		uint16_t id = command->arguments.fields[i].field_id;
-		if (id == 0U || id > SPAGHETTI_PROPERTY_MAX_FIELDS || !(used & BIT(id)) || (seen & BIT(id))) return -EINVAL;
-		seen |= BIT(id);
+		const struct spaghetti_value *value = &command->arguments.fields[i];
+		size_t index = 0;
+		while (index < out->field_count && out->fields[index].field_id != value->field_id) {
+			index++;
+		}
+		if (index == out->field_count) {
+			if (index == SPAGHETTI_PROPERTY_MAX_FIELDS) {
+				return -E2BIG;
+			}
+			out->field_count++;
+		}
+		out->fields[index] = *value;
 	}
 	return 0;
 }
 
-static int declarative_command(struct spaghetti_module *module, const struct spaghetti_module_command *command)
+static int declarative_validate_command(struct spaghetti_module *module,
+					const struct spaghetti_module_command *command)
+{
+	if (!module || !module->context || !command ||
+	    command->arguments.field_count > SPAGHETTI_PROPERTY_MAX_FIELDS) {
+		return -EINVAL;
+	}
+	struct spaghetti_declarative_context *context = module->context;
+	const struct spaghetti_device_profile_action *action =
+		find_profile_action(context->profile, command->command_id);
+	if (!action) {
+		return -ENOTSUP;
+	}
+	struct spaghetti_property_set *merged = k_malloc(sizeof(*merged));
+	if (!merged) {
+		return -ENOMEM;
+	}
+	int err = merge_parameters(context, command, merged);
+	uint16_t used = 0, seen = 0;
+	uint8_t packed[8];
+	for (size_t i = action->first; err == 0 && i < action->first + action->count; i++) {
+		const struct spaghetti_device_profile_op *op = &context->profile->sample_ops[i];
+		if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_LOAD_VALUE && !command->update_only) {
+			err = spaghetti_device_profile_pack_argument(op, context->values, packed);
+			continue;
+		}
+		if (op->opcode != SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) {
+			continue;
+		}
+		used |= BIT(op->src_a);
+		if (command->update_only && !spaghetti_property_find(merged, op->src_a)) {
+			continue;
+		}
+		err = spaghetti_device_profile_pack_argument(op, merged, packed);
+	}
+	for (size_t i = 0; err == 0 && i < command->arguments.field_count; i++) {
+		uint16_t id = command->arguments.fields[i].field_id;
+		if (!id || id > SPAGHETTI_PROPERTY_MAX_FIELDS || !(used & BIT(id)) ||
+		    (seen & BIT(id))) {
+			err = -EINVAL;
+			break;
+		}
+		seen |= BIT(id);
+	}
+	k_free(merged);
+	return err;
+}
+
+/* Keep schema descriptors off the small runtime worker stack. */
+static int validate_result(const struct spaghetti_device_profile *profile, struct spaghetti_record_payload *out)
+{
+	struct spaghetti_field_descriptor *fields = k_calloc(SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS, sizeof(*fields));
+	struct spaghetti_schema_descriptor schema;
+	if (fields == NULL) return -ENOMEM;
+	int err = spaghetti_device_profile_make_schema(profile, fields, &schema);
+	if (err == 0) err = spaghetti_record_payload_validate(out, &schema);
+	k_free(fields);
+	return err;
+}
+
+static int declarative_command(struct spaghetti_module *module,
+			       const struct spaghetti_module_command *command)
 {
 	int err = declarative_validate_command(module, command);
-	if (err < 0) return err;
+	if (err < 0) {
+		return err;
+	}
 	struct spaghetti_declarative_context *context = module->context;
-	const struct spaghetti_device_profile_action *action = find_profile_action(context->profile, command->command_id);
+	struct spaghetti_property_set *merged = k_malloc(sizeof(*merged));
+	if (!merged) {
+		return -ENOMEM;
+	}
+	err = merge_parameters(context, command, merged);
+	if (err < 0) {
+		k_free(merged);
+		return err;
+	}
+	if (command->update_only) {
+		struct parameter_cache *cached = find_parameters(context, command->command_id);
+		if (!cached) {
+			cached = k_calloc(1, sizeof(*cached));
+			if (!cached) {
+				k_free(merged);
+				return -ENOMEM;
+			}
+			cached->action_id = command->command_id;
+			cached->next = context->parameters;
+			context->parameters = cached;
+		}
+		cached->arguments = *merged;
+		if (command->trigger_pending) {
+			context->pending_commands |= BIT(command->command_id - 1);
+		}
+		k_free(merged);
+		if (command->result) {
+			memset(command->result, 0, sizeof(*command->result));
+		}
+		if (context->pending_commands & BIT(command->command_id - 1)) {
+			struct spaghetti_module_command *pending = k_calloc(1, sizeof(*pending));
+			if (!pending) {
+				return -ENOMEM;
+			}
+			pending->command_id = command->command_id;
+			pending->result = command->result;
+			err = declarative_command(module, pending);
+			k_free(pending);
+			if (err == -ENOENT) {
+				return 0;
+			}
+			if (err == 0) {
+				context->pending_commands &= ~BIT(command->command_id - 1);
+			}
+			return err;
+		}
+		return 0;
+	}
+	const struct spaghetti_device_profile_action *action =
+		find_profile_action(context->profile, command->command_id);
 	struct spaghetti_record_payload *out = command->result;
 	bool owned = out == NULL;
-	if (owned) out = k_malloc(sizeof(*out));
-	if (out == NULL) return -ENOMEM;
-	struct spaghetti_device_profile_binding binding = context->binding;
-	binding.arguments = &command->arguments;
-	err = spaghetti_device_profile_exec(context->profile, &context->profile->sample_ops[action->first], action->count, module->port, &binding, out);
-	if (err == 0) {
-		struct spaghetti_field_descriptor fields[SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS];
-		struct spaghetti_schema_descriptor schema;
-		err = spaghetti_device_profile_make_schema(context->profile, fields, &schema);
-		if (err == 0) err = spaghetti_record_payload_validate(out, &schema);
-		if (err == 0) { out->action_id = action->id; out->kind = SPAGHETTI_RECORD_EVENT; }
+	if (owned) {
+		out = k_malloc(sizeof(*out));
 	}
-	if (owned) k_free(out);
+	if (!out) {
+		k_free(merged);
+		return -ENOMEM;
+	}
+	struct spaghetti_device_profile_binding binding = context->binding;
+	binding.arguments = merged;
+	binding.values = context->values;
+	err = spaghetti_device_profile_exec(context->profile,
+					    &context->profile->sample_ops[action->first],
+					    action->count, module->port, &binding, out);
+	if (err == 0) {
+		err = validate_result(context->profile, out);
+		if (err == 0) {
+			out->action_id = action->id;
+			out->kind = SPAGHETTI_RECORD_EVENT;
+			for (size_t i = 0; i < out->values.field_count; i++) {
+				size_t index = 0;
+				while (index < context->values->field_count &&
+				       context->values->fields[index].field_id !=
+					       out->values.fields[i].field_id) {
+					index++;
+				}
+				if (index == context->values->field_count &&
+				    index < SPAGHETTI_PROPERTY_MAX_FIELDS) {
+					context->values->field_count++;
+				}
+				if (index < SPAGHETTI_PROPERTY_MAX_FIELDS) {
+					context->values->fields[index] = out->values.fields[i];
+				}
+			}
+		}
+	}
+	if (owned) {
+		k_free(out);
+	}
+	k_free(merged);
 	return err;
 }
 
 static const struct spaghetti_field_descriptor declarative_command_fields[1];
 static const struct spaghetti_schema_descriptor declarative_command_schema = {
-	.schema_id = "spaghetti.decl.command", .version = 1U, .fields = declarative_command_fields, .field_count = 0U,
+	.schema_id = "spaghetti.decl.command",
+	.version = 1U,
+	.fields = declarative_command_fields,
+	.field_count = 0U,
 };
-#define ACTION_DESCRIPTOR(n) { .command_id = n, .name = "action_" #n, .argument_schema = &declarative_command_schema }
+#define ACTION_DESCRIPTOR(n)                                                                       \
+	{.command_id = n, .name = "action_" #n, .argument_schema = &declarative_command_schema}
 static const struct spaghetti_command_descriptor declarative_commands[] = {
 	ACTION_DESCRIPTOR(1), ACTION_DESCRIPTOR(2), ACTION_DESCRIPTOR(3), ACTION_DESCRIPTOR(4),
 	ACTION_DESCRIPTOR(5), ACTION_DESCRIPTOR(6), ACTION_DESCRIPTOR(7), ACTION_DESCRIPTOR(8),
 };
 
-static int declarative_read(
-	struct spaghetti_module *module,
-	struct spaghetti_record_payload *out)
+static int declarative_read(struct spaghetti_module *module, struct spaghetti_record_payload *out)
 {
 	struct spaghetti_declarative_context *context;
-	struct spaghetti_field_descriptor fields
-		[SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS];
-	struct spaghetti_schema_descriptor schema;
 	int err;
 
 	if ((module == NULL) || (module->context == NULL) || (out == NULL) ||
@@ -475,28 +620,23 @@ static int declarative_read(
 
 	if (context->profile->action_count > 0U) {
 		struct spaghetti_module_command *command = k_calloc(1, sizeof(*command));
-		if (command == NULL) return -ENOMEM;
+		if (command == NULL) {
+			return -ENOMEM;
+		}
 		command->command_id = context->profile->actions[0].id;
 		command->result = out;
 		err = declarative_command(module, command);
 		k_free(command);
 		return err;
 	}
-	err = spaghetti_device_profile_exec(
-		context->profile, context->profile->sample_ops,
-		context->profile->sample_count, module->port, &context->binding,
-		out);
+	err = spaghetti_device_profile_exec(context->profile, context->profile->sample_ops,
+					    context->profile->sample_count, module->port,
+					    &context->binding, out);
 	if (err < 0) {
 		return err;
 	}
 
-	err = spaghetti_device_profile_make_schema(context->profile, fields,
-						  &schema);
-	if (err < 0) {
-		return err;
-	}
-
-	return spaghetti_record_payload_validate(out, &schema);
+	return validate_result(context->profile, out);
 }
 
 static int declarative_deinit(struct spaghetti_module *module)
@@ -511,6 +651,12 @@ static int declarative_deinit(struct spaghetti_module *module)
 	context = module->context;
 	err = declarative_run_safe_stop(context, module->port);
 	context->initialized = false;
+	k_free(context->values);
+	while (context->parameters) {
+		struct parameter_cache *cached = context->parameters;
+		context->parameters = cached->next;
+		k_free(cached);
+	}
 	k_mem_slab_free(&declarative_context_slab, (void *)context);
 	module->context = NULL;
 	module->state = SPAGHETTI_MODULE_UNINITIALIZED;

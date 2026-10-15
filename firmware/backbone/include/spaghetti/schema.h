@@ -15,19 +15,23 @@
 
 #include <spaghetti/module.h>
 
-/** Maximum characters stored in one schema_id, including the terminating NUL. */
+/** Maximum characters stored in one schema_id, including the terminating NUL.
+ */
 #define SPAGHETTI_SCHEMA_ID_SIZE 32U
 
-/** Maximum characters stored in one field name, including the terminating NUL. */
+/** Maximum characters stored in one field name, including the terminating NUL.
+ */
 #define SPAGHETTI_FIELD_NAME_SIZE 24U
 
-/** Maximum characters stored in one unit string, including the terminating NUL. */
+/** Maximum characters stored in one unit string, including the terminating NUL.
+ */
 #define SPAGHETTI_UNIT_NAME_SIZE 16U
 
 /** Maximum owned opaque bytes in one BYTES value. */
 #define SPAGHETTI_VALUE_BYTES_MAX CONFIG_SPAGHETTI_VALUE_BYTES_MAX
 
-/** Maximum UTF-8 payload bytes in one TEXT value, excluding the terminating NUL. */
+/** Maximum UTF-8 payload bytes in one TEXT value, excluding the terminating
+ * NUL. */
 #define SPAGHETTI_VALUE_TEXT_MAX CONFIG_SPAGHETTI_VALUE_TEXT_MAX
 
 /** Maximum fields stored in one property set. */
@@ -65,8 +69,8 @@ enum spaghetti_field_flags {
 
 /** Known descriptor flag bits; other bits are rejected during validation. */
 #define SPAGHETTI_FIELD_FLAGS_KNOWN \
-	(SPAGHETTI_FIELD_REQUIRED | SPAGHETTI_FIELD_WRITABLE | \
-	 SPAGHETTI_FIELD_HAS_DEFAULT | SPAGHETTI_FIELD_ENUM)
+	(SPAGHETTI_FIELD_REQUIRED | SPAGHETTI_FIELD_WRITABLE | SPAGHETTI_FIELD_HAS_DEFAULT |       \
+	 SPAGHETTI_FIELD_ENUM)
 
 /** Kind of one Module-produced record payload. */
 enum spaghetti_record_kind {
@@ -157,7 +161,8 @@ struct spaghetti_record_payload {
 	enum spaghetti_record_kind kind; /**< Sample or event classification. */
 	char schema_id[SPAGHETTI_SCHEMA_ID_SIZE]; /**< Owned matching schema_id. */
 	uint16_t schema_version; /**< Matching schema version. */
-	uint16_t action_id; /**< 0 for legacy samples, otherwise completed profile action. */
+	uint16_t action_id;                   /**< 0 for legacy samples, otherwise completed profile
+						 action. */
 	struct spaghetti_property_set values; /**< Owned typed fields. */
 };
 
@@ -178,9 +183,13 @@ struct spaghetti_record {
 
 /** Synchronous Module command carrying owned argument values. */
 struct spaghetti_module_command {
+	bool update_only;     /**< Runtime parameter latch. */
+	bool trigger_pending; /**< Retain activation until required arguments arrive.
+			       */
 	uint16_t command_id; /**< Stable command identifier. */
 	struct spaghetti_property_set arguments; /**< Owned argument values. */
-	struct spaghetti_record_payload *result; /**< Optional borrowed output, valid only on success. */
+	struct spaghetti_record_payload
+		*result; /**< Optional borrowed output, valid only on success. */
 };
 
 /**
@@ -195,8 +204,7 @@ struct spaghetti_module_command {
  * @retval -ENOENT Reference target is missing.
  * @retval -EINVAL Reference value is malformed for the semantic.
  */
-typedef int (*spaghetti_schema_reference_resolve_fn)(
-	enum spaghetti_field_semantic semantic,
+typedef int (*spaghetti_schema_reference_resolve_fn)(enum spaghetti_field_semantic semantic,
 	uint8_t reference_group,
 	const struct spaghetti_value *value,
 	void *user_data);
@@ -209,9 +217,8 @@ typedef int (*spaghetti_schema_reference_resolve_fn)(
  *
  * @return Immutable pointer with the property-set lifetime, or NULL.
  */
-const struct spaghetti_value *spaghetti_property_find(
-	const struct spaghetti_property_set *properties,
-	uint16_t field_id);
+const struct spaghetti_value *
+spaghetti_property_find(const struct spaghetti_property_set *properties, uint16_t field_id);
 
 /**
  * @brief Validate a property set against a schema without resolving references.
@@ -227,8 +234,7 @@ const struct spaghetti_value *spaghetti_property_find(
  * @retval -ERANGE Numeric value is outside declared limits.
  * @retval -EPROTONOSUPPORT Semantic, enum, or default contract is unsupported.
  */
-int spaghetti_property_validate(
-	const struct spaghetti_property_set *properties,
+int spaghetti_property_validate(const struct spaghetti_property_set *properties,
 	const struct spaghetti_schema_descriptor *schema);
 
 /**
@@ -247,8 +253,7 @@ int spaghetti_property_validate(
  * @retval -ERANGE Numeric value is outside declared limits.
  * @retval -EPROTONOSUPPORT Semantic, enum, or default contract is unsupported.
  */
-int spaghetti_property_validate_with_resolver(
-	const struct spaghetti_property_set *properties,
+int spaghetti_property_validate_with_resolver(const struct spaghetti_property_set *properties,
 	const struct spaghetti_schema_descriptor *schema,
 	spaghetti_schema_reference_resolve_fn resolve,
 	void *user_data);
@@ -267,8 +272,7 @@ int spaghetti_property_validate_with_resolver(
  * @retval -ERANGE Numeric value is outside declared limits.
  * @retval -EPROTONOSUPPORT Schema ID/version or semantic contract mismatch.
  */
-int spaghetti_record_payload_validate(
-	const struct spaghetti_record_payload *payload,
+int spaghetti_record_payload_validate(const struct spaghetti_record_payload *payload,
 	const struct spaghetti_schema_descriptor *schema);
 
 /**
@@ -285,8 +289,7 @@ int spaghetti_record_payload_validate(
  * @retval -ERANGE Numeric value is outside declared limits.
  * @retval -EPROTONOSUPPORT Schema ID/version or semantic contract mismatch.
  */
-int spaghetti_record_validate(
-	const struct spaghetti_record *record,
+int spaghetti_record_validate(const struct spaghetti_record *record,
 	const struct spaghetti_schema_descriptor *schema);
 
 #endif /* SPAGHETTI_SCHEMA_H */

@@ -201,3 +201,13 @@ describe("fromRawOp — the inverse of toRawOp, used by device-profile-install's
     if (!result.ok) expect(result.error.code).toBe("device-profile.invalid_raw_operand");
   });
 });
+
+describe("runtime variable and encoder operations", () => {
+  it.each<Instruction>([
+    { op: "SCALE_PACK", dst: 2, src: 1, flags: 7, width: 2, divisor: 10, multiplier: -3, offset: -12 },
+    { op: "LOAD_VALUE", dst: 1, argumentId: 2, required: false, length: 2, littleEndian: false, low: 0x1234, high: 0 },
+    { op: "COPY_BYTES", src: 0, dst: 1, length: 2, offset: 3 },
+  ])("preserves signed coefficients, cached field IDs and byte offsets: $op", instruction => {
+    expect(fromRawOp(toRawOp(instruction))).toEqual({ ok: true, value: instruction });
+  });
+});

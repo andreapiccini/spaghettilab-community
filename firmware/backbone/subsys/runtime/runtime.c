@@ -9,11 +9,11 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
 
+#include <spaghetti/core.h>
 #include <spaghetti/data.h>
 #include <spaghetti/health.h>
 #include <spaghetti/module_driver.h>
 #include <spaghetti/module_manager.h>
-#include <spaghetti/core.h>
 #include <spaghetti/processing.h>
 #include <spaghetti/record_delivery.h>
 #include <spaghetti/resources.h>
@@ -32,8 +32,7 @@ SPAGHETTI_HEALTH_COMPONENT_DEFINE(runtime_health) = {
 
 static void runtime_health_keepalive_handler(struct k_work *work);
 
-K_WORK_DELAYABLE_DEFINE(runtime_health_keepalive,
-			runtime_health_keepalive_handler);
+K_WORK_DELAYABLE_DEFINE(runtime_health_keepalive, runtime_health_keepalive_handler);
 
 static void runtime_health_keepalive_handler(struct k_work *work)
 {
@@ -74,8 +73,7 @@ struct spaghetti_runtime_event {
 	struct spaghetti_record_payload payload;
 };
 
-static enum spaghetti_runtime_state runtime_state =
-	SPAGHETTI_RUNTIME_UNINITIALIZED;
+static enum spaghetti_runtime_state runtime_state = SPAGHETTI_RUNTIME_UNINITIALIZED;
 static struct spaghetti_runtime_job jobs[SPAGHETTI_CONFIG_MAX_SCHEDULES];
 static size_t job_count;
 static struct spaghetti_runtime_rule_slot rule_slots[SPAGHETTI_CONFIG_MAX_RULES];
@@ -87,15 +85,12 @@ K_MUTEX_DEFINE(runtime_lock);
 K_SEM_DEFINE(runtime_wake_sem, 0, 1);
 K_SEM_DEFINE(runtime_stopped_sem, 0, 1);
 
-K_MSGQ_DEFINE(runtime_event_queue,
-	      sizeof(struct spaghetti_runtime_event),
-	      CONFIG_SPAGHETTI_MAX_RECORD_QUEUE,
-	      __alignof__(struct spaghetti_runtime_event));
+K_MSGQ_DEFINE(runtime_event_queue, sizeof(struct spaghetti_runtime_event),
+	      CONFIG_SPAGHETTI_MAX_RECORD_QUEUE, __alignof__(struct spaghetti_runtime_event));
 
 static void finish_stop_if_quiescent(void)
 {
-	if ((runtime_state == SPAGHETTI_RUNTIME_STOPPING) &&
-	    (active_operations == 0U)) {
+	if ((runtime_state == SPAGHETTI_RUNTIME_STOPPING) && (active_operations == 0U)) {
 		runtime_state = SPAGHETTI_RUNTIME_STOPPED;
 		k_sem_give(&runtime_stopped_sem);
 	}
@@ -116,8 +111,7 @@ static void deinit_rules(struct spaghetti_runtime_rule_slot *slots, size_t count
 	for (size_t idx = count; idx > 0U; --idx) {
 		struct spaghetti_runtime_rule_slot *slot = &slots[idx - 1U];
 
-		if (!slot->active || (slot->driver == NULL) ||
-		    (slot->driver->ops == NULL) ||
+		if (!slot->active || (slot->driver == NULL) || (slot->driver->ops == NULL) ||
 		    (slot->driver->ops->deinit == NULL)) {
 			memset(slot, 0, sizeof(*slot));
 			continue;
@@ -127,8 +121,7 @@ static void deinit_rules(struct spaghetti_runtime_rule_slot *slots, size_t count
 	}
 }
 
-static int emit_rule_action(const struct spaghetti_rule_action *action,
-			    void *user_data)
+static int emit_rule_action(const struct spaghetti_rule_action *action, void *user_data)
 {
 	struct spaghetti_module_snapshot target;
 	int err;
@@ -141,33 +134,56 @@ static int emit_rule_action(const struct spaghetti_rule_action *action,
 
 	err = spaghetti_module_manager_get_by_key(action->target_key, &target);
 	if ((err < 0) || (target.state != SPAGHETTI_MODULE_READY)) {
-		LOG_WRN("rule target missing: key=%u err=%d", action->target_key,
-			err);
+		LOG_WRN("rule target missing: key=%u err=%d", action->target_key, err);
 		++action_errors;
 		return (err < 0) ? err : -ENOENT;
 	}
 
 	uint8_t depth = user_data ? *(uint8_t *)user_data : 0U;
-	if (depth >= 8U) { ++action_errors; return -ELOOP; }
+	if (depth >= 8U) {
+		++action_errors;
+		return -ELOOP;
+	}
 	struct spaghetti_record_payload *result = k_calloc(1, sizeof(*result));
 	struct spaghetti_module_command *command = k_malloc(sizeof(*command));
-	if (result == NULL || command == NULL) { k_free(result); k_free(command); return -ENOMEM; }
+	if (result == NULL || command == NULL) {
+		k_free(result);
+		k_free(command);
+		return -ENOMEM;
+	}
 	*command = action->command;
 	command->result = result;
 	err = spaghetti_module_manager_command(target.id, command);
+	if (err == -ENOENT && !command->update_only && command->trigger_pending) {
+		command->update_only = true;
+		command->trigger_pending = true;
+		err = spaghetti_module_manager_command(target.id, command);
+	}
+	if (err == -ENOENT && !command->trigger_pending) {
+		err = 0; /* Await another input. */
+	}
 	if (err == 0 && result->schema_id[0] != '\0') {
 		struct spaghetti_runtime_event *event = k_calloc(1, sizeof(*event));
-		if (event == NULL) err = -ENOMEM;
-		else {
-			event->source_id = target.id; event->source_key = target.key;
-			event->payload = *result; event->command_depth = depth + 1U;
+		if (event == NULL) {
+			err = -ENOMEM;
+		} else {
+			event->source_id = target.id;
+			event->source_key = target.key;
+			event->payload = *result;
+			event->command_depth = depth + 1U;
 			err = k_msgq_put(&runtime_event_queue, event, K_NO_WAIT);
 			k_free(event);
-			if (err == 0) k_sem_give(&runtime_wake_sem);
+			if (err == 0) {
+				k_sem_give(&runtime_wake_sem);
 		}
 	}
-	k_free(command); k_free(result);
-	if (err < 0) { ++action_errors; LOG_WRN("rule action failed: key=%u err=%d", action->target_key, err); }
+	}
+	k_free(command);
+	k_free(result);
+	if (err < 0) {
+		++action_errors;
+		LOG_WRN("rule action failed: key=%u err=%d", action->target_key, err);
+	}
 
 	return err;
 }
@@ -191,25 +207,21 @@ static void dispatch_rules(const struct spaghetti_record *record, uint8_t depth)
 		const struct spaghetti_runtime_rule_slot *slot = &local_slots[idx];
 		int err;
 
-		if (!slot->active || (slot->driver == NULL) ||
-		    (slot->driver->ops == NULL) ||
+		if (!slot->active || (slot->driver == NULL) || (slot->driver->ops == NULL) ||
 		    (slot->driver->ops->on_record == NULL)) {
 			continue;
 		}
 
-		err = slot->driver->ops->on_record(slot->context, record,
-						   emit_rule_action, &depth);
+		err = slot->driver->ops->on_record(slot->context, record, emit_rule_action, &depth);
 		if (err < 0) {
-			LOG_WRN("rule on_record failed: key=%u err=%d",
-				slot->key, err);
+			LOG_WRN("rule on_record failed: key=%u err=%d", slot->key, err);
 		}
 	}
 
 	complete_operation();
 }
 
-static int publish_derived_record(const struct spaghetti_record *record,
-				  void *user_data)
+static int publish_derived_record(const struct spaghetti_record *record, void *user_data)
 {
 	int err;
 
@@ -229,19 +241,16 @@ static int publish_record(struct spaghetti_record *record, uint8_t depth)
 	record->boot_id = runtime_boot_id;
 	err = spaghetti_data_publish(record, K_NO_WAIT);
 	if (err < 0) {
-		LOG_WRN("record publish failed: key=%u err=%d",
-			record->source_key, err);
+		LOG_WRN("record publish failed: key=%u err=%d", record->source_key, err);
 		return err;
 	}
 
-	(void)spaghetti_processing_on_record(record, publish_derived_record,
-					     &depth);
+	(void)spaghetti_processing_on_record(record, publish_derived_record, &depth);
 	dispatch_rules(record, depth);
 	return 0;
 }
 
-static int runtime_event_emit(const struct spaghetti_record_payload *payload,
-			      void *user_data)
+static int runtime_event_emit(const struct spaghetti_record_payload *payload, void *user_data)
 {
 	struct spaghetti_runtime_event event;
 	const struct spaghetti_runtime_job *job = user_data;
@@ -290,7 +299,9 @@ static void process_event(struct spaghetti_runtime_event *event)
 	record.source_key = event->source_key;
 	record.timestamp_ms = k_uptime_get();
 	if (job_idx != SIZE_MAX) {
-		if (jobs[job_idx].sequence == UINT32_MAX) jobs[job_idx].sequence = 0U;
+		if (jobs[job_idx].sequence == UINT32_MAX) {
+			jobs[job_idx].sequence = 0U;
+		}
 		record.sequence = ++jobs[job_idx].sequence;
 	} else {
 		static uint32_t command_sequence;
@@ -312,9 +323,8 @@ static void process_due_jobs(int64_t now_ms)
 		int err;
 
 		(void)k_mutex_lock(&runtime_lock, K_FOREVER);
-		if ((runtime_state != SPAGHETTI_RUNTIME_RUNNING) ||
-		    (idx >= job_count) || !jobs[idx].enabled ||
-		    (jobs[idx].next_deadline_ms > now_ms)) {
+		if ((runtime_state != SPAGHETTI_RUNTIME_RUNNING) || (idx >= job_count) ||
+		    !jobs[idx].enabled || (jobs[idx].next_deadline_ms > now_ms)) {
 			k_mutex_unlock(&runtime_lock);
 			continue;
 		}
@@ -325,13 +335,11 @@ static void process_due_jobs(int64_t now_ms)
 
 		err = spaghetti_module_manager_read(job.source_id, &record);
 		(void)k_mutex_lock(&runtime_lock, K_FOREVER);
-		if ((runtime_state == SPAGHETTI_RUNTIME_RUNNING) &&
-		    (idx < job_count) &&
+		if ((runtime_state == SPAGHETTI_RUNTIME_RUNNING) && (idx < job_count) &&
 		    (jobs[idx].source_key == job.source_key)) {
 			/* Advance from the previous deadline to avoid drift. */
 			do {
-				jobs[idx].next_deadline_ms +=
-					(int64_t)jobs[idx].period_ms;
+				jobs[idx].next_deadline_ms += (int64_t)jobs[idx].period_ms;
 			} while (jobs[idx].next_deadline_ms <= now_ms);
 
 			if (err == 0) {
@@ -348,8 +356,7 @@ static void process_due_jobs(int64_t now_ms)
 		k_mutex_unlock(&runtime_lock);
 
 		if (err < 0) {
-			LOG_WRN("sample read failed: key=%u err=%d",
-				job.source_key, err);
+			LOG_WRN("sample read failed: key=%u err=%d", job.source_key, err);
 		} else {
 			(void)publish_record(&record, 0U);
 		}
@@ -364,8 +371,7 @@ static int64_t nearest_deadline_ms(void)
 	int64_t nearest = INT64_MAX;
 
 	for (size_t idx = 0U; idx < job_count; ++idx) {
-		if (jobs[idx].enabled &&
-		    (jobs[idx].next_deadline_ms < nearest)) {
+		if (jobs[idx].enabled && (jobs[idx].next_deadline_ms < nearest)) {
 			nearest = jobs[idx].next_deadline_ms;
 		}
 	}
@@ -409,8 +415,8 @@ static void runtime_worker_entry(void *first, void *second, void *third)
 		} else {
 			const int64_t delta_ms = nearest - now_ms;
 
-			wait = K_MSEC((delta_ms > (int64_t)UINT32_MAX) ?
-				      UINT32_MAX : (uint32_t)delta_ms);
+			wait = K_MSEC((delta_ms > (int64_t)UINT32_MAX) ? UINT32_MAX
+								       : (uint32_t)delta_ms);
 		}
 		k_mutex_unlock(&runtime_lock);
 
@@ -421,8 +427,7 @@ static void runtime_worker_entry(void *first, void *second, void *third)
 
 		(void)k_sem_take(&runtime_wake_sem, wait);
 
-		while (k_msgq_get(&runtime_event_queue, &event, K_NO_WAIT) ==
-		       0) {
+		while (k_msgq_get(&runtime_event_queue, &event, K_NO_WAIT) == 0) {
 			process_event(&event);
 		}
 
@@ -431,13 +436,10 @@ static void runtime_worker_entry(void *first, void *second, void *third)
 	}
 }
 
-K_THREAD_DEFINE(runtime_worker_thread_id,
-		CONFIG_SPAGHETTI_RUNTIME_STACK_SIZE,
-		runtime_worker_entry, NULL, NULL, NULL,
-		CONFIG_SPAGHETTI_RUNTIME_PRIORITY, 0, 0);
+K_THREAD_DEFINE(runtime_worker_thread_id, CONFIG_SPAGHETTI_RUNTIME_STACK_SIZE, runtime_worker_entry,
+		NULL, NULL, NULL, CONFIG_SPAGHETTI_RUNTIME_PRIORITY, 0, 0);
 
-static int validate_schedules(
-	const struct spaghetti_runtime_schedule_config *schedules,
+static int validate_schedules(const struct spaghetti_runtime_schedule_config *schedules,
 	size_t schedule_count)
 {
 	if ((schedule_count > SPAGHETTI_CONFIG_MAX_SCHEDULES) ||
@@ -446,8 +448,7 @@ static int validate_schedules(
 	}
 
 	for (size_t idx = 0U; idx < schedule_count; ++idx) {
-		if ((schedules[idx].source_key == 0U) ||
-		    (schedules[idx].period_ms == 0U)) {
+		if ((schedules[idx].source_key == 0U) || (schedules[idx].period_ms == 0U)) {
 			return -EINVAL;
 		}
 	}
@@ -455,13 +456,10 @@ static int validate_schedules(
 	return 0;
 }
 
-static int init_rules_copy(
-	const struct spaghetti_rule_config *rules,
-	size_t count,
+static int init_rules_copy(const struct spaghetti_rule_config *rules, size_t count,
 	struct spaghetti_runtime_rule_slot *out_slots)
 {
-	if ((count > SPAGHETTI_CONFIG_MAX_RULES) ||
-	    ((rules == NULL) && (count > 0U))) {
+	if ((count > SPAGHETTI_CONFIG_MAX_RULES) || ((rules == NULL) && (count > 0U))) {
 		return -EINVAL;
 	}
 
@@ -479,10 +477,8 @@ static int init_rules_copy(
 
 		driver = spaghetti_rule_registry_find(rules[idx].type_id);
 		if ((driver == NULL) || (driver->ops == NULL) ||
-		    (driver->ops->validate_config == NULL) ||
-		    (driver->ops->init == NULL) ||
-		    (driver->ops->on_record == NULL) ||
-		    (driver->ops->deinit == NULL)) {
+		    (driver->ops->validate_config == NULL) || (driver->ops->init == NULL) ||
+		    (driver->ops->on_record == NULL) || (driver->ops->deinit == NULL)) {
 			deinit_rules(out_slots, idx);
 			return -ENOTSUP;
 		}
@@ -547,10 +543,8 @@ int spaghetti_runtime_init(void)
 	return 0;
 }
 
-int spaghetti_runtime_configure(
-	const struct spaghetti_runtime_schedule_config *schedules,
-	size_t schedule_count,
-	const struct spaghetti_rule_config *rules,
+int spaghetti_runtime_configure(const struct spaghetti_runtime_schedule_config *schedules,
+				size_t schedule_count, const struct spaghetti_rule_config *rules,
 	size_t count)
 {
 	struct spaghetti_runtime_rule_slot pending_rules[SPAGHETTI_CONFIG_MAX_RULES];
@@ -651,8 +645,7 @@ int spaghetti_runtime_start(void)
 	for (size_t idx = 0U; idx < job_count; ++idx) {
 		struct spaghetti_module_snapshot source;
 
-		err = spaghetti_module_manager_get_by_key(jobs[idx].source_key,
-							  &source);
+		err = spaghetti_module_manager_get_by_key(jobs[idx].source_key, &source);
 		if ((err < 0) || (source.state != SPAGHETTI_MODULE_READY)) {
 			err = -ENOENT;
 			goto unlock;
@@ -670,8 +663,8 @@ int spaghetti_runtime_start(void)
 	action_errors = 0U;
 
 	for (size_t idx = 0U; idx < job_count; ++idx) {
-		err = spaghetti_module_manager_start_events(
-			jobs[idx].source_id, runtime_event_emit, &jobs[idx]);
+		err = spaghetti_module_manager_start_events(jobs[idx].source_id, runtime_event_emit,
+							    &jobs[idx]);
 		if (err == -ENOTSUP) {
 			err = 0;
 			continue;

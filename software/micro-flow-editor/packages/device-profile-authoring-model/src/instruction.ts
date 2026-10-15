@@ -104,7 +104,7 @@ export type W1WriteReadInstruction = Op<"W1_WRITE_READ"> & {
 /** `imm0` is the byte count actually copied (1-8) from `low`/`high` (`imm2`/`imm3`, little-endian). */
 export type LoadConstInstruction = Op<"LOAD_CONST"> & { readonly dst: TempSlot; readonly length: number; readonly low: number; readonly high: number };
 /** `imm0` byte count to copy (0 = use `src`'s actual size). */
-export type CopyBytesInstruction = Op<"COPY_BYTES"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly length: number };
+export type CopyBytesInstruction = Op<"COPY_BYTES"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly length: number; readonly offset?: number };
 export type ConcatInstruction = Op<"CONCAT"> & { readonly srcA: TempSlot; readonly srcB: TempSlot; readonly dst: TempSlot };
 export type ByteSwapInstruction = Op<"BYTE_SWAP"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly width: 2 | 4 };
 export type MaskInstruction = Op<"MASK"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly mask: number };
@@ -117,9 +117,12 @@ export type Crc16Instruction = Op<"CRC16"> & { readonly src: TempSlot; readonly 
 export type EmitFieldInstruction = Op<"EMIT_FIELD"> & { readonly src: TempSlot; readonly fieldId: number; readonly width?: number; readonly byteOrder?: "be" | "le"; readonly signExtend?: boolean; readonly multiplier?: number };
 export type EmitRecordInstruction = Op<"EMIT_RECORD">;
 
-export type LoadArgumentInstruction = Op<"LOAD_ARGUMENT"> & { readonly dst: TempSlot; readonly argumentId: number; readonly length: number; readonly littleEndian: boolean; readonly required: boolean; readonly low: number; readonly high: number };
+export type LoadArgumentInstruction = Op<"LOAD_ARGUMENT" | "LOAD_VALUE"> & { readonly dst: TempSlot; readonly argumentId: number; readonly length: number; readonly littleEndian: boolean; readonly required: boolean; readonly low: number; readonly high: number };
+
+export type ScalePackInstruction = Op<"SCALE_PACK"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly flags: number; readonly width: number; readonly divisor: number; readonly multiplier: number; readonly offset: number };
 
 export type Instruction =
+  | ScalePackInstruction
   | LoadArgumentInstruction
   | I2cWriteInstruction
   | I2cReadInstruction

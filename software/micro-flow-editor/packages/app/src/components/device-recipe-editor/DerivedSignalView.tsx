@@ -1,3 +1,4 @@
+import { readableI2cStep } from "../../lib/i2c-step-label.js";
 import {
   multiSampleSpanMs,
   type DeviceRecipeDraft,
@@ -18,12 +19,14 @@ export function DerivedSignalView({
   it,
   selectedOpId = null,
   onSelectOp,
+  rxByOpId,
 }: {
   readonly draft: DeviceRecipeDraft;
   readonly ops: readonly DeviceRecipeOp[];
   readonly it: boolean;
   readonly selectedOpId?: string | null;
   readonly onSelectOp?: (opId: string) => void;
+  readonly rxByOpId?: Readonly<Record<string, readonly (number | null)[]>>;
 }) {
   const bus = draft.binding.bus;
 
@@ -78,7 +81,7 @@ export function DerivedSignalView({
   }
 
   if (bus === "i2c" || bus === "spi") {
-    const model = buildProtocolTimingFromOps(draft, ops);
+    const model = buildProtocolTimingFromOps(draft, ops, { rxByOpId });
     if (model.lanes.length === 0) {
       return (
         <section className="rounded-slmd border border-border-strong bg-surface p-3">
@@ -92,32 +95,14 @@ export function DerivedSignalView({
       <section className="rounded-slmd border border-border-strong bg-surface p-3">
         <TimingScopeChart
           title={it ? "Segnali nel tempo" : "Signals over time"}
-          caption={
-            bus === "i2c"
-              ? it
-                ? "Riga STEP = passi ricetta · sotto S/Sr/P/A/N · SCL/SDA. Clicca un passo per selezionarlo."
-                : "STEP row = recipe steps · below S/Sr/P/A/N · SCL/SDA. Click a step to select it."
-              : it
-                ? "Riga STEP allineata a CS / byte. Clicca un passo per selezionarlo."
-                : "STEP row aligned with CS / bytes. Click a step to select it."
-          }
           lanes={model.lanes}
           durationMs={model.durationMs}
           phaseBands={model.phaseBands}
-          stepSpans={model.stepSpans}
+          stepSpans={model.stepSpans.map(step => ({ ...step, label: readableI2cStep(draft, ops.find(op => op.id === step.opId)!, rxByOpId?.[step.opId], it) }))}
           highlightOpId={selectedOpId}
           onSelectOp={onSelectOp}
         />
-        {bus === "i2c" ? (
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-body text-[10px] text-ink-muted">
-            <LegendDot color="#0f172ac6" label="STEP bus" />
-            <LegendDot color="#2563eb44" label="S START" />
-            <LegendDot color="#7c3aed44" label="Sr" />
-            <LegendDot color="#ea580c44" label="P STOP" />
-            <LegendDot color="#16a34a44" label="A ACK" />
-            <LegendDot color="#ca8a0444" label="N NACK" />
-          </div>
-        ) : null}
+
       </section>
     );
   }
@@ -274,14 +259,3 @@ function AnalogSamplePreview({
   );
 }
 
-function LegendDot({ color, label }: { readonly color: string; readonly label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1">
-      <span
-        className="inline-block h-2.5 w-3.5 shrink-0 rounded-sm border border-ink/15"
-        style={{ backgroundColor: color }}
-      />
-      {label}
-    </span>
-  );
-}

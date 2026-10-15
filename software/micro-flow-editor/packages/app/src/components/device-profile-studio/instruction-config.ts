@@ -32,7 +32,7 @@ export const STEP_CATEGORIES: readonly StepCategory[] = [
   { label: "Wait (bounded)", ops: ["DELAY_BOUNDED", "WAIT_FIELD_MASK", "WAIT_GPIO"] },
   {
     label: "Byte operation",
-    ops: ["LOAD_CONST", "LOAD_ARGUMENT", "COPY_BYTES", "CONCAT", "BYTE_SWAP"],
+    ops: ["LOAD_CONST", "LOAD_ARGUMENT", "LOAD_VALUE", "SCALE_PACK", "COPY_BYTES", "CONCAT", "BYTE_SWAP"],
   },
   { label: "Mask/Shift/Sign", ops: ["MASK", "SHIFT", "SIGN_EXTEND"] },
   { label: "CRC", ops: ["CRC8", "CRC16"] },
@@ -55,7 +55,9 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
   WAIT_FIELD_MASK: "Wait field mask",
   WAIT_GPIO: "Wait GPIO",
   LOAD_CONST: "Load const",
+  LOAD_VALUE: "Variabile del sensore",
   LOAD_ARGUMENT: "Parametro azione",
+  SCALE_PACK: "Scala e codifica",
   COPY_BYTES: "Copy bytes",
   CONCAT: "Concat",
   BYTE_SWAP: "Byte swap",
@@ -69,6 +71,7 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
 };
 
 const FIELDS: Record<Instruction["op"], readonly FieldSpec[]> = {
+  SCALE_PACK: [{ key: "src", label: "Sorgente", kind: "tempSlot" }, { key: "dst", label: "Destinazione", kind: "tempSlot" }, { key: "flags", label: "Endian / segno", kind: "number" }, { key: "width", label: "Byte", kind: "number" }, { key: "divisor", label: "Divisore", kind: "number" }, { key: "multiplier", label: "Moltiplicatore", kind: "number" }, { key: "offset", label: "Offset", kind: "number" }],
   I2C_WRITE: [
     { key: "src", label: "src (temp slot)", kind: "tempSlot" },
     { key: "length", label: "length", kind: "number" },
@@ -144,6 +147,7 @@ const FIELDS: Record<Instruction["op"], readonly FieldSpec[]> = {
     { key: "low", label: "low", kind: "number" },
     { key: "high", label: "high", kind: "number" },
   ],
+  LOAD_VALUE: [{ key: "dst", label: "Destinazione", kind: "tempSlot" }, { key: "argumentId", label: "ID variabile", kind: "number" }, { key: "length", label: "Byte", kind: "number" }, { key: "littleEndian", label: "Little endian", kind: "boolean" }, { key: "required", label: "Obbligatorio", kind: "boolean" }, { key: "low", label: "Default low", kind: "number" }, { key: "high", label: "Default high", kind: "number" }],
   LOAD_ARGUMENT: [
     { key: "dst", label: "Destinazione", kind: "tempSlot" },
     { key: "argumentId", label: "Parametro (1–8)", kind: "number" },
@@ -252,6 +256,9 @@ export function defaultInstruction(op: Instruction["op"]): Instruction {
       return { op, dst: 0, attempts: 5, intervalMs: 10, expectedLevel: 1 };
     case "LOAD_CONST":
       return { op, dst: 0, length: 1, low: 0, high: 0 };
+    case "SCALE_PACK":
+      return { op, src: 0, dst: 1, flags: 0, width: 1, divisor: 1, multiplier: 1, offset: 0 };
+    case "LOAD_VALUE":
     case "LOAD_ARGUMENT":
       return {
         op,
