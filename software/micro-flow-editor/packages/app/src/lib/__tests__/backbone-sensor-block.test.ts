@@ -101,3 +101,26 @@ it("keeps only one selected input and output and preserves trigger mode", () => 
     ),
   ).toMatchObject({ inputMode: "trigger" });
 });
+
+it("numbers new variables across inputs and existing read buffers without renaming them", () => {
+  const base = createBlankDraft("i2c");
+  const first = addFlowInterface(base, "sample_external");
+  expect(first.op).toMatchObject({ into: "var1" });
+  const second = addFlowInterface(first.draft, "sample_external");
+  expect(second.op).toMatchObject({ into: "var2" });
+  const withRead = {
+    ...second.draft,
+    phases: {
+      ...second.draft.phases,
+      init: [{ id: "read", type: "i2c_read" as const, len: 1, into: "var3" }],
+    },
+  };
+  const fourth = addFlowInterface(withRead, "sample_external");
+  expect(fourth.op).toMatchObject({ into: "var4" });
+  expect(fourth.draft.variables.map((variable) => variable.name)).toEqual([
+    "var1",
+    "var2",
+    "var4",
+  ]);
+  expect(fourth.draft.phases.init[0]).toMatchObject({ into: "var3" });
+});

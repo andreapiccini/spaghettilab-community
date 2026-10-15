@@ -101,6 +101,15 @@ export function normalizeRecipeVarName(name: string): string {
     .slice(0, 32) || "var";
 }
 
+/** Next free automatic variable name, including implicit read buffers. */
+export function nextRecipeVariableName(draft: DeviceRecipeDraft): string {
+  const names = new Set(draft.variables.map(variable => variable.name));
+  forEachSequenceOp(draft, op => { if ("into" in op && op.into) names.add(op.into); });
+  let index = 1;
+  while (names.has(`var${index}`)) index++;
+  return `var${index}`;
+}
+
 export function normalizeRecipeVariable(raw?: Partial<RecipeVariable> | null): RecipeVariable {
   const name = normalizeRecipeVarName(raw?.name ?? "var");
   const valueType: RecipeVarType =
@@ -1490,7 +1499,7 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
         id,
         type: "i2c_read",
         len: 2,
-        into: "raw",
+        into: nextRecipeVariableName(draft),
         timeoutMs: 20,
       };
     case "i2c_write_read":
@@ -1499,7 +1508,7 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
         type: "i2c_write_read",
         writeBytes: ["0x00"],
         readLen: 2,
-        into: "raw",
+        into: nextRecipeVariableName(draft),
         timeoutMs: 20,
       };
     case "i2c_scan":
@@ -1522,7 +1531,7 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
           { kind: "read", len: 2 },
           { kind: "stop" },
         ],
-        into: "raw",
+        into: nextRecipeVariableName(draft),
         timeoutMs: 20,
       };
     case "spi_cs":
@@ -1745,7 +1754,7 @@ export function insertCommandStep(
     while (base.channels.some(c => c.id === `ingresso_${index}`) || base.variables.some(v => v.name === `ingresso_${index}`)) index++;
     const name = `ingresso_${index}`;
     const ensured = ensureWriteChannel(base, { id: name, label: `Ingresso ${index}` });
-    op = { ...op, fromChannelId: ensured.channelId, into: name, valueType: "number" };
+    op = { ...op, fromChannelId: ensured.channelId, into: nextRecipeVariableName(base), valueType: "number" };
     base = upsertIntoVariable(ensured.draft, op.into, op.valueType);
   }
   const withChannel = ensureReadChannelForI2cOp(base, op);

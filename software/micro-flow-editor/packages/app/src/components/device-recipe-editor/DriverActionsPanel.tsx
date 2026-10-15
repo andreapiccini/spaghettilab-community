@@ -252,7 +252,6 @@ export function DriverSequence({
 export function DriverCanvasPreview({
   draft,
   it,
-  activeId,
 }: {
   draft: DeviceRecipeDraft;
   it: boolean;
@@ -273,7 +272,6 @@ export function DriverCanvasPreview({
     <section className="space-y-2">
       <SensorSchematic
         name={draft.name}
-        action={draft.commands.find((action) => action.id === activeId)?.label}
         inputs={inputs}
         outputs={outputs}
       />

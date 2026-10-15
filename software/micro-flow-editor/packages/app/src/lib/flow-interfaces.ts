@@ -1,5 +1,6 @@
 import {
   defaultOp,
+  nextRecipeVariableName,
   updateOpAnywhere,
   upsertRecipeVariable,
   ensureWriteChannel,
@@ -28,7 +29,7 @@ export function addFlowInterface(
     op = {
       ...op,
       fromChannelId: name,
-      into: name,
+      into: nextRecipeVariableName(base),
       valueType: "number",
       widthBytes: 1,
       byteOrder: "be",

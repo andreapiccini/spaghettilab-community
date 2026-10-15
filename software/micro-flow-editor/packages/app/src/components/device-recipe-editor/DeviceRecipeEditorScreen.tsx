@@ -37,6 +37,7 @@ import {
   moveOp,
   multiSampleSpanMs,
   normalizeRecipeVarName,
+  nextRecipeVariableName,
   opsForEditorPane,
   organizeDriverInterfaces,
   isFlowInterface,
@@ -234,7 +235,7 @@ export function DeviceRecipeEditorScreen({
 
   function addRegisterStep(kind: "read" | "write") {
     setSelectedInterfaceId(null); setFlowEditing(false);
-    const op = registerStep(kind);
+    const op = registerStep(kind, nextRecipeVariableName(draft));
     if (editorPane === "init") {
       setDraft({
         ...draft,
@@ -1839,7 +1840,7 @@ function ReadDestinationField({
         ) : (
           <button
             type="button"
-            onClick={() => setCreating(true)}
+            onClick={() => { setNewName(nextRecipeVariableName(draft)); setCreating(true); }}
             className="inline-flex items-center gap-1 font-body text-xs font-semibold text-brand-blue"
           >
             <Plus size={12} />
@@ -3718,9 +3719,9 @@ function VariablesPanel({
         onClick={() =>
           onChange(
             upsertRecipeVariable(draft, {
-              name: `var_${draft.variables.length + 1}`,
+              name: nextRecipeVariableName(draft),
               valueType: "hex",
-              label: `var_${draft.variables.length + 1}`,
+              label: nextRecipeVariableName(draft),
             }),
           )
         }

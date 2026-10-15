@@ -3,12 +3,10 @@ import type { SensorChannel } from "../../lib/sensor-recipe.js";
 /** Driver symbol: the interfaces are external pins, never I²C action steps. */
 export function SensorSchematic({
   name,
-  action,
   inputs,
   outputs,
 }: {
   name: string;
-  action?: string;
   inputs: readonly SensorChannel[];
   outputs: readonly SensorChannel[];
 }) {
@@ -37,11 +35,6 @@ export function SensorSchematic({
         <strong className="w-full break-words font-body text-xs text-ink">
           {name}
         </strong>
-        {action && (
-          <span className="mt-2 w-full break-words font-body text-[10px] text-ink-muted">
-            {action}
-          </span>
-        )}
       </div>
       <div className="flex flex-col justify-center gap-3 py-3">
         {outputs.map((pin) => (
