@@ -94,7 +94,7 @@ export function DerivedSignalView({
     return (
       <section className="rounded-slmd border border-border-strong bg-surface p-3">
         <TimingScopeChart
-          title={it ? "Segnali nel tempo" : "Signals over time"}
+          title={it ? "Diagramma temporale" : "Timing diagram"}
           lanes={model.lanes}
           durationMs={model.durationMs}
           phaseBands={model.phaseBands}
@@ -117,7 +117,7 @@ export function DerivedSignalView({
         </p>
       ) : (
         <TimingScopeChart
-          title={it ? "Segnali nel tempo" : "Signals over time"}
+          title={it ? "Diagramma temporale" : "Timing diagram"}
           caption={caption}
           lanes={lanes}
           durationMs={durationMs}
