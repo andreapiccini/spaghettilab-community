@@ -33,7 +33,7 @@ export function FlowBlockPanel({
   );
   const variables = [
     ...new Set(
-      [...draft.variables.map((v) => v.name), ...bufferNames].filter(
+      [...draft.variables.map((v) => v.name), ...(draft.flowInterfaces ?? []).flatMap(op => op.type === "sample_external" && op.inputMode !== "trigger" ? [op.into] : []), ...bufferNames].filter(
         (name): name is string => typeof name === "string",
       ),
     ),
@@ -121,7 +121,7 @@ export function FlowBlockPanel({
                 {interfaceLabel(op, labels)}
                 <span className="block truncate text-[10px] text-ink-muted">
                   {op.type === "sample_external"
-                    ? `${draft.channels.find((channel) => channel.id === op.fromChannelId)?.label ?? op.fromChannelId} → $${op.into}`
+                    ? op.inputMode === "trigger" ? "Trigger → azione selezionata nel canvas" : `${draft.channels.find((channel) => channel.id === op.fromChannelId)?.label ?? op.fromChannelId} → $${op.into}`
                     : op.type === "emit"
                       ? `$${op.from} → ${draft.channels.find((channel) => channel.id === op.channelId)?.label ?? op.channelId}`
                       : describeDeviceOp(op)}

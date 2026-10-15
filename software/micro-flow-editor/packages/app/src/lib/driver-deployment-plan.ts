@@ -1,3 +1,9 @@
+import {
+  SENSOR_INSTANCE_PROP,
+  SENSOR_INPUT_PROP,
+  SENSOR_OUTPUT_PROP,
+  sensorInterfaces,
+} from "./sensor-instance.js";
 import type {
   CompileConfigInput,
   CompileConfigOptions,
@@ -86,7 +92,10 @@ export function prepareDriverDeployment(
   const portId = busPorts[0]!;
   const physical = [...input.physicalGraph.nodes];
   const profiles: DeviceProfileDraft[] = [];
-  const runtime = new Map<string, { moduleId: string; action: RuntimeAction }>();
+  const runtime = new Map<
+    string,
+    { moduleId: string; action: RuntimeAction; triggerHandle?: string }
+  >();
   const generated = new Map<string, Node>();
   const originalEdges = [...input.processingGraph.edges];
   const aliases = new Map<string, string>();
@@ -164,31 +173,88 @@ export function prepareDriverDeployment(
       );
       if (!action)
         throw new Error(`L’azione del blocco «${node.id}» non esiste più: rigeneralo.`);
-      const inIds = new Set(
-        effectiveActionSteps(draft, action).flatMap((step) =>
-          step.type === "sample_external" ? [step.fromChannelId] : [],
-        ),
-      );
+      const single = node.data.properties[SENSOR_INSTANCE_PROP] === true;
+      const selectedInput = String(node.data.properties[SENSOR_INPUT_PROP] ?? "");
+      const selectedOutput = String(node.data.properties[SENSOR_OUTPUT_PROP] ?? "");
+      const { inputs: interfaces, outputs: outputInterfaces } = sensorInterfaces(draft);
+      const trigger =
+        selectedInput === "execute" ||
+        interfaces.some(
+          (step) =>
+            step.fromChannelId === selectedInput && step.inputMode === "trigger",
+        );
+      if (
+        single &&
+        selectedInput &&
+        selectedInput !== "execute" &&
+        !interfaces.some((step) => step.fromChannelId === selectedInput)
+      )
+        throw new Error(
+          `L’ingresso selezionato nel blocco «${node.id}» non esiste più.`,
+        );
+      if (
+        single &&
+        selectedOutput &&
+        !outputInterfaces.some((step) => step.channelId === selectedOutput)
+      )
+        throw new Error(`L’uscita selezionata nel blocco «${node.id}» non esiste più.`);
+      const inIds = single
+        ? new Set(selectedInput ? [selectedInput] : [])
+        : new Set(
+            effectiveActionSteps(draft, action).flatMap((step) =>
+              step.type === "sample_external" ? [step.fromChannelId] : [],
+            ),
+          );
       const incoming = edges.filter((edge) => edge.target === node.id);
       for (const edge of incoming)
-        if (edge.targetHandle !== "execute" && !inIds.has(edge.targetHandle ?? ""))
+        if (
+          !(single
+            ? inIds.has(edge.targetHandle ?? "")
+            : edge.targetHandle === "execute" || inIds.has(edge.targetHandle ?? ""))
+        )
           throw new Error(
             `Ingresso «${edge.targetHandle}» non disponibile nel blocco «${node.id}».`,
           );
       for (const id of inIds)
         if (incoming.filter((edge) => edge.targetHandle === id).length > 1)
           throw new Error(`Ingresso «${id}»: collega una sola sorgente.`);
+      const sharedWiredInputs = instances.flatMap((instance) =>
+        edges
+          .filter(
+            (edge) =>
+              edge.target === instance.id &&
+              interfaces.some(
+                (input) =>
+                  input.inputMode !== "trigger" &&
+                  input.fromChannelId === edge.targetHandle,
+              ),
+          )
+          .flatMap((edge) => (edge.targetHandle ? [edge.targetHandle] : [])),
+      );
       connected.set(
         node.id,
-        new Set(
-          incoming.flatMap((edge) =>
-            edge.targetHandle && edge.targetHandle !== "execute"
+        new Set([
+          ...(single ? sharedWiredInputs : []),
+          ...incoming.flatMap((edge) =>
+            edge.targetHandle &&
+            !(trigger && edge.targetHandle === selectedInput) &&
+            edge.targetHandle !== "execute"
               ? [edge.targetHandle]
               : [],
           ),
-        ),
+        ]),
       );
-      const steps = effectiveActionSteps(draft, action).map((step) => {
+      const effective = effectiveActionSteps(draft, action);
+      const selectedEmit = outputInterfaces.find(
+        (step) => step.channelId === selectedOutput,
+      );
+      const body = single
+        ? [
+            ...effective.filter((step) => step.type !== "emit"),
+            ...(selectedEmit ? [selectedEmit] : []),
+          ]
+        : effective;
+      const steps = body.map((step) => {
         if (step.type !== "emit") return step;
         const id = `${node.id}/${step.channelId}`;
         const channel = draft.channels.find((item) => item.id === step.channelId);
@@ -252,7 +318,15 @@ export function prepareDriverDeployment(
           value,
         ]),
       );
-      runtime.set(node.id, { moduleId, action: { ...info, outputIds } });
+      const selectedInput = String(node.data.properties[SENSOR_INPUT_PROP] ?? "");
+      const isTrigger = sensorInterfaces(draft).inputs.some(
+        (step) => step.fromChannelId === selectedInput && step.inputMode === "trigger",
+      );
+      runtime.set(node.id, {
+        moduleId,
+        action: { ...info, outputIds },
+        ...(isTrigger ? { triggerHandle: selectedInput } : {}),
+      });
       generated.set(node.id, {
         ...node,
         data: { kind: "event-source", moduleNodeId: moduleId },
@@ -447,9 +521,14 @@ export function prepareDriverDeployment(
       continue;
     }
     const source = sourceFor(edge);
-    const execute = edge.targetHandle === "execute";
+    const execute =
+      edge.targetHandle === "execute" ||
+      Boolean(target.triggerHandle && edge.targetHandle === target.triggerHandle);
     const explicit = edges.some(
-      (other) => other.target === edge.target && other.targetHandle === "execute",
+      (other) =>
+        other.target === edge.target &&
+        (other.targetHandle === "execute" ||
+          Boolean(target.triggerHandle && other.targetHandle === target.triggerHandle)),
     );
     const argument = execute
       ? undefined
@@ -473,7 +552,18 @@ export function prepareDriverDeployment(
             ? { "6": BigInt(argument), ...(source.field ? {} : { "7": 1n }) }
             : {}),
           "8": BigInt(
-            execute ? (sourceNode.data.kind === "block" ? 1 : 0) : explicit ? 3 : 4,
+            execute
+              ? sourceNode.data.kind === "block"
+                ? 1
+                : 0
+              : explicit ||
+                  sensorNodes.some(
+                    (node) =>
+                      node.id === edge.target &&
+                      node.data.properties[SENSOR_INSTANCE_PROP] === true,
+                  )
+                ? 3
+                : 4,
           ),
         },
       },

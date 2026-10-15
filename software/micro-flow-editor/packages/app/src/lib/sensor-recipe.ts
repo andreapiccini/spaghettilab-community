@@ -22,6 +22,7 @@ export type SensorOutputKind =
 export type SensorChannelDirection = "read" | "write";
 
 export type SensorChannel = {
+  readonly inputMode?: "data" | "trigger";
   readonly id: string;
   readonly label: string;
   readonly unit: string;

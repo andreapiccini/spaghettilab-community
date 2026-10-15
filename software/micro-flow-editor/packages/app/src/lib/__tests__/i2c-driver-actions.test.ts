@@ -157,7 +157,8 @@ describe("driver canvas regeneration", () => {
     const changes = planDriverCanvasChanges(recipes, module.id, nodes);
     expect(changes.updates.map((u) => u.id)).toEqual(["connected-read", "copied-read"]);
     expect(changes.removals).toEqual(["orphan-read"]);
-    expect(changes.additions.map((r) => r.actionId)).toEqual([recipes[1]!.actionId]);
+    expect(changes.additions).toEqual([]);
+    expect(planDriverCanvasChanges(recipes, module.id, []).additions).toEqual([recipes[0]]);
     const hidden = {
       ...draft,
       commands: draft.commands.map((c) => ({

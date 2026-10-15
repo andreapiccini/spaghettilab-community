@@ -1,3 +1,5 @@
+import { SensorSchematic } from "./SensorSchematic.js";
+import { sensorInterfaces } from "../../lib/sensor-instance.js";
 import type { ReactNode } from "react";
 import { Plus, Copy, Trash2, Blocks, BookOpen, ChevronDown } from "lucide-react";
 import {
@@ -8,7 +10,7 @@ import {
   type DeviceRecipeDraft,
 } from "../../lib/device-recipe-draft.js";
 import { readableI2cStep } from "../../lib/i2c-step-label.js";
-import { actionPorts, duplicateDriverAction } from "../../lib/i2c-driver-actions.js";
+import { duplicateDriverAction } from "../../lib/i2c-driver-actions.js";
 
 const button =
   "rounded-slsm border border-border-strong px-2 py-1.5 font-body text-xs text-ink hover:border-brand-blue";
@@ -256,72 +258,30 @@ export function DriverCanvasPreview({
   it: boolean;
   activeId?: string | null;
 }) {
+  const interfaces = sensorInterfaces(draft);
+  const inputs = interfaces.inputs.flatMap((op) => {
+    const channel = draft.channels.find((ch) => ch.id === op.fromChannelId);
+    return channel
+      ? [{ ...channel, inputMode: op.inputMode ?? ("data" as const) }]
+      : [];
+  });
+  const outputs = interfaces.outputs.flatMap((op) => {
+    const channel = draft.channels.find((ch) => ch.id === op.channelId);
+    return channel ? [channel] : [];
+  });
   return (
-    <section className="space-y-3">
-      <h2 className="font-heading text-sm font-semibold text-ink">{draft.name}</h2>
-      <p className="font-body text-xs text-ink-muted">
+    <section className="space-y-2">
+      <SensorSchematic
+        name={draft.name}
+        action={draft.commands.find((action) => action.id === activeId)?.label}
+        inputs={inputs}
+        outputs={outputs}
+      />
+      <p className="font-body text-[10px] text-ink-muted">
         {it
-          ? "Un dispositivo, un blocco per ogni azione."
-          : "One device, one block per action."}
+          ? "Pin disponibili del sensore. Nel canvas ogni istanza sceglie una sola azione, un ingresso e un’uscita. Usa più blocchi per altre connessioni."
+          : "Available sensor pins. Each canvas instance selects one action, input and output. Use more blocks for more connections."}
       </p>
-      {draft.commands
-        .filter((action) =>
-          activeId !== undefined
-            ? action.id === activeId
-            : action.exposeOnCanvas !== false,
-        )
-        .map((action) => {
-          const ports = actionPorts(draft, action);
-          return (
-            <div
-              key={action.id}
-              className="rounded-slmd border border-border-strong bg-surface-sunken p-3"
-            >
-              <h3 className="font-body text-sm font-semibold text-ink">
-                {draft.name} · {action.label}
-              </h3>
-              <div className="mt-3 grid grid-cols-2 gap-3 font-body text-xs">
-                <div>
-                  <p className="mb-2 text-ink-muted">{it ? "Ingressi" : "Inputs"}</p>
-                  <div className="mb-1 rounded-slsm border border-border px-2 py-1">
-                    → {it ? "Esegui" : "Run"}
-                  </div>
-                  {ports.inputs.map((p) => (
-                    <div
-                      key={p.id}
-                      className="mb-1 rounded-slsm border border-brand-blue/30 px-2 py-1 text-brand-blue"
-                    >
-                      → {p.label}
-                      {p.unit ? ` (${p.unit})` : ""}
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <p className="mb-2 text-ink-muted">{it ? "Uscite" : "Outputs"}</p>
-                  {ports.outputs.map((p) => (
-                    <div
-                      key={p.id}
-                      className="mb-1 rounded-slsm border border-success/30 px-2 py-1 text-ink"
-                    >
-                      {p.label}
-                      {p.unit ? ` (${p.unit})` : ""} →
-                    </div>
-                  ))}
-                  {!ports.outputs.length && (
-                    <p className="text-ink-faint">
-                      {it ? "Nessuna uscita pubblicata" : "No published outputs"}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <p className="mt-3 font-body text-[10px] text-ink-muted">
-                {it
-                  ? "Ingressi → variabili interne → passi I²C · variabili → Uscite"
-                  : "Inputs → internal variables → I²C steps · variables → Outputs"}
-              </p>
-            </div>
-          );
-        })}
     </section>
   );
 }

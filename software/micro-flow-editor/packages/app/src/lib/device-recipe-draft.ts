@@ -393,6 +393,7 @@ export type DeviceRecipeOp =
       /** Copy a Flow write-channel value into a recipe variable. */
       readonly id: string;
       readonly type: "sample_external";
+      readonly inputMode?: "data" | "trigger";
       readonly fromChannelId: string;
       readonly into: string;
       readonly valueType: RecipeVarType;
@@ -576,7 +577,7 @@ export function organizeDriverInterfaces(draft: DeviceRecipeDraft): DeviceRecipe
 }
 export function effectiveActionSteps(draft: DeviceRecipeDraft, command: DeviceRecipeCommand): readonly DeviceRecipeOp[] {
   const interfaces = (draft.flowInterfaces ?? []).filter(op => !draft.flowInterfaceActions?.[op.id] || draft.flowInterfaceActions[op.id]!.includes(command.id));
-  const before = (draft.flowInterfaces ?? []).filter(op => op.type === "sample_external" || op.type === "encode");
+  const before = (draft.flowInterfaces ?? []).filter(op => (op.type === "sample_external" && op.inputMode !== "trigger") || op.type === "encode");
   const available = new Set([...draft.variables.map(variable => variable.name), ...[...before, ...command.steps].flatMap(op => "into" in op ? [op.into] : [])]);
   const after: DeviceRecipeOp[] = [];
   for (const op of interfaces) {
@@ -718,7 +719,7 @@ export function describeDeviceOp(op: DeviceRecipeOp): string {
     case "adc_multi_sample":
       return `Acquisisci ${op.count} campioni`;
     case "sample_external":
-      return `Campiona ${op.fromChannelId} → $${op.into}`;
+      return op.inputMode === "trigger" ? `Trigger ${op.fromChannelId} → azione` : `Campiona ${op.fromChannelId} → $${op.into}`;
     case "average":
       return `Media ${op.input}`;
     case "filter":

@@ -1,3 +1,11 @@
+import {
+  createBlankDraft,
+  draftToCanvasSensorRecipes,
+  serializeDeviceRecipeDraft,
+  parseDeviceRecipeDraft,
+} from "../device-recipe-draft.js";
+import { addFlowInterface } from "../flow-interfaces.js";
+import { sensorInstanceSelection, SENSOR_INPUT_PROP } from "../sensor-instance.js";
 import { describe, expect, it } from "vitest";
 import { findCatalogEntryById } from "@spaghettilab/processing-block-catalog";
 import {
@@ -13,8 +21,20 @@ import { blankSensorRecipe, recipeChannels, withChannels } from "../sensor-recip
 describe("backbone-sensor-block", () => {
   it("maps read channels to output ports and write to inputs", () => {
     const { inputs, outputs } = blockPortsFromChannels([
-      { id: "temp_c", label: "Temperatura", unit: "°C", quantity: "temperature", direction: "read" },
-      { id: "relay", label: "Relè", unit: "on/off", quantity: "digital", direction: "write" },
+      {
+        id: "temp_c",
+        label: "Temperatura",
+        unit: "°C",
+        quantity: "temperature",
+        direction: "read",
+      },
+      {
+        id: "relay",
+        label: "Relè",
+        unit: "on/off",
+        quantity: "digital",
+        direction: "write",
+      },
     ]);
     expect(outputs).toHaveLength(1);
     expect(outputs[0]?.id).toBe("temp_c");
@@ -26,7 +46,13 @@ describe("backbone-sensor-block", () => {
     const entry = findCatalogEntryById(BACKBONE_SENSOR_BLOCK_CATALOG_ID);
     expect(entry).toBeDefined();
     const recipe = withChannels(blankSensorRecipe("Demo", "adc"), [
-      { id: "level", label: "Livello", unit: "%", quantity: "analog", direction: "read" },
+      {
+        id: "level",
+        label: "Livello",
+        unit: "%",
+        quantity: "analog",
+        direction: "read",
+      },
     ]);
     const module = createModuleFromRecipe(recipe);
     const props = propertiesForSensorModule(module, recipe);
@@ -35,4 +61,43 @@ describe("backbone-sensor-block", () => {
     expect(overlay.label).toBe("Demo");
     expect(JSON.parse(serializeSensorChannels(recipeChannels(recipe)))).toHaveLength(1);
   });
+});
+
+it("keeps only one selected input and output and preserves trigger mode", () => {
+  let draft = createBlankDraft("i2c");
+  const first = addFlowInterface(draft, "sample_external");
+  const second = addFlowInterface(first.draft, "sample_external");
+  draft = {
+    ...second.draft,
+    flowInterfaces: second.draft.flowInterfaces!.map((op) =>
+      op.id === second.op.id ? { ...op, inputMode: "trigger" as const } : op,
+    ),
+  };
+  const out = addFlowInterface(draft, "emit");
+  draft = out.draft;
+  if (second.op.type !== "sample_external" || out.op.type !== "emit")
+    throw new Error("interfaces");
+  const recipe = draftToCanvasSensorRecipes(draft)[0]!;
+  const selection = sensorInstanceSelection(
+    recipe,
+    second.op.fromChannelId,
+    out.op.channelId,
+  );
+  expect(selection.channels.filter((ch) => ch.direction === "write")).toHaveLength(1);
+  expect(selection.channels.filter((ch) => ch.direction === "read")).toHaveLength(1);
+  const entry = findCatalogEntryById(BACKBONE_SENSOR_BLOCK_CATALOG_ID)!;
+  const props = propertiesForSensorModule(
+    createModuleFromRecipe(recipe),
+    recipe,
+    selection,
+  );
+  expect(props[SENSOR_INPUT_PROP]).toBe(second.op.fromChannelId);
+  const overlay = catalogEntryWithSensorChannels(entry, props);
+  expect(overlay.inputs.map((port) => port.id)).toEqual([second.op.fromChannelId]);
+  expect(overlay.outputs.map((port) => port.id)).toEqual([out.op.channelId]);
+  expect(
+    parseDeviceRecipeDraft(serializeDeviceRecipeDraft(draft))!.flowInterfaces?.find(
+      (op) => op.id === second.op.id,
+    ),
+  ).toMatchObject({ inputMode: "trigger" });
 });

@@ -269,6 +269,7 @@ export function compileRuntimeDriver(
     for (const op of steps) {
       switch (op.type) {
         case "sample_external": {
+          if (op.inputMode === "trigger") break;
           if (isInit)
             throw new Error(
               "Gli ingressi Flow vanno letti nelle azioni, non all’avvio.",

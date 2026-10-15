@@ -140,6 +140,76 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
       ? `2px solid ${ledColor}`
       : undefined;
 
+  if (data.sensorSchematic)
+    return (
+      <div
+        className="group relative"
+        style={{ width: cardWidth, height: cardHeight }}
+        data-tour-target={`flow-node-${id}`}
+      >
+        <HoverDeleteButton
+          id={id}
+          label={copy.deleteBlock}
+          forceVisible={selected}
+          corner="right"
+        />
+        <div
+          className="absolute inset-x-4 inset-y-0 flex flex-col items-center justify-center rounded-sm border-2 bg-surface px-3 text-center shadow-e1"
+          style={{ borderColor: selected ? "var(--color-brand-blue)" : "#64748b" }}
+        >
+          <Cpu size={15} className="mb-1 text-brand-blue" />
+          <strong className="w-full truncate font-body text-xs text-ink">
+            {data.label}
+          </strong>
+          <span className="w-full truncate font-body text-[10px] text-ink-muted">
+            {data.subtitle}
+          </span>
+        </div>
+        {inputHandles.map((port, index) => (
+          <div key={port.id}>
+            <span
+              className="pointer-events-none absolute left-0 h-px w-4 bg-brand-blue"
+              style={{ top: stackedHandleTop(index, inputHandles.length) }}
+            />
+            <span className="pointer-events-none absolute left-5 top-1 font-body text-[9px] text-brand-blue">
+              {port.label}
+            </span>
+            <Handle
+              type="target"
+              position={Position.Left}
+              id={port.id}
+              style={{
+                ...SOURCE_HANDLE_STYLE,
+                top: stackedHandleTop(index, inputHandles.length),
+                background: "var(--color-brand-blue)",
+              }}
+            />
+          </div>
+        ))}
+        {outputHandles.map((port, index) => (
+          <div key={port.id}>
+            <span
+              className="pointer-events-none absolute right-0 h-px w-4 bg-emerald-600"
+              style={{ top: stackedHandleTop(index, outputHandles.length) }}
+            />
+            <span className="pointer-events-none absolute right-5 bottom-1 font-body text-[9px] text-emerald-700">
+              {port.label}
+            </span>
+            <Handle
+              type="source"
+              position={Position.Right}
+              id={port.id}
+              style={{
+                ...SOURCE_HANDLE_STYLE,
+                top: stackedHandleTop(index, outputHandles.length),
+                background: "#059669",
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    );
+
   return (
     <div className="group relative" style={{ width: cardWidth }} data-tour-target={`flow-node-${id}`}>
       <HoverDeleteButton

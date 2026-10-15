@@ -204,9 +204,7 @@ export function DeviceRecipeEditorScreen({
   const library = libraryOpsForBus(draft.binding.bus);
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
-  const canvasActionCount = draft.commands.filter(
-    (c) => c.exposeOnCanvas !== false,
-  ).length;
+
 
   function switchMode(mode: DeviceRecipeMode) {
     const next = createBlankDraft(mode, draft.name);
@@ -1262,13 +1260,7 @@ export function DeviceRecipeEditorScreen({
             className="inline-flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={14} />
-            {canvasActionCount > 1
-              ? it
-                ? `Genera ${canvasActionCount} blocchi Flow`
-                : `Generate ${canvasActionCount} Flow blocks`
-              : it
-                ? "Genera blocco Flow"
-                : "Generate Flow block"}
+            {it ? "Genera blocco sensore" : "Generate sensor block"}
           </button>
         </div>
       </footer>
@@ -1306,7 +1298,7 @@ export function DeviceRecipeEditorScreen({
                 className="inline-flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
               >
                 <Check size={14} />
-                {it ? "Crea blocchi nel canvas" : "Create canvas blocks"}
+                {it ? "Crea blocco nel canvas" : "Create canvas block"}
               </button>
             </div>
           </div>
@@ -2640,6 +2632,7 @@ function BlockPreviewCard({
   readonly it: boolean;
   readonly verified: boolean;
 }) {
+  if (draft.binding.bus === "i2c") return <DriverCanvasPreview draft={draft} it={it} />;
   const { inputs, outputs } = recipeBlockPorts(draft);
   return (
     <section className="rounded-slmd border border-brand-blue/30 bg-brand-blue/5 p-3">
@@ -3487,9 +3480,16 @@ function SampleExternalFields({
     <>
       <p className="font-body text-[11px] leading-snug text-ink-muted">
         {it
-          ? "Il valore ricevuto dal canvas aggiorna questa variabile. Usa $nome nei messaggi I²C."
+          ? op.inputMode === "trigger" ? "Il segnale ricevuto attiva l’azione scelta nel blocco del canvas." : "Il valore ricevuto dal canvas aggiorna questa variabile. Usa $nome nei messaggi I²C."
           : "The canvas input updates this variable. Use $name in I²C messages."}
       </p>
+      <Field label={it ? "Modalità ingresso" : "Input mode"}>
+        <select value={op.inputMode ?? "data"} className={inputClass}
+          onChange={event => onChange({...op, inputMode: event.target.value as "data" | "trigger"})}>
+          <option value="data">{it ? "Dato → variabile" : "Data → variable"}</option>
+          <option value="trigger">{it ? "Trigger → azione" : "Trigger → action"}</option>
+        </select>
+      </Field>
       <Field label={it ? "Ingresso Flow" : "Flow input"}>
         <div className="flex gap-1">
           <select
@@ -3529,6 +3529,7 @@ function SampleExternalFields({
           </button>
         </div>
       </Field>
+      {op.inputMode !== "trigger" && <>
       <Field label={it ? "Variabile" : "Variable"}>
         <input
           value={op.into}
@@ -3572,6 +3573,7 @@ function SampleExternalFields({
         </select>
       </Field>
       <details className="rounded-lg border border-border bg-surface-sunken/40 p-2"><summary className="cursor-pointer font-body text-[11px] text-ink-muted">{it ? "Formato nei messaggi I²C" : "I²C message format"}</summary><div className="mt-2 space-y-2"><Field label={it ? "Numero di byte" : "Byte count"}><input type="number" min={1} max={8} value={op.widthBytes ?? 8} onChange={event => onChange({ ...op, widthBytes: Math.max(1, Math.min(8, Number(event.target.value) || 1)) })} className={inputClass} /></Field><Field label={it ? "Ordine dei byte" : "Byte order"}><select value={op.byteOrder ?? "be"} onChange={event => onChange({ ...op, byteOrder: event.target.value as "be" | "le" })} className={inputClass}><option value="be">Big endian</option><option value="le">Little endian</option></select></Field></div></details>
+      </>}
       <Field label={it ? "Etichetta ingresso" : "Input label"}>
         <input
           value={

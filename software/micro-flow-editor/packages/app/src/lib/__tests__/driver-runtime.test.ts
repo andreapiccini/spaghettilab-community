@@ -1,3 +1,4 @@
+import { SENSOR_INSTANCE_PROP, SENSOR_INPUT_PROP, SENSOR_OUTPUT_PROP } from "../sensor-instance.js";
 import { describe, expect, it } from "vitest";
 import type { ProjectV1 } from "@spaghettilab/domain";
 import { compileConfig, type CompileConfigInput } from "@spaghettilab/config-compiler";
@@ -521,6 +522,135 @@ describe("direct Flow input/output interfaces", () => {
     });
     expect(migrated.commands.every((command) => command.exposeOnCanvas === true)).toBe(
       true,
+    );
+  });
+});
+
+describe("single sensor instances", () => {
+  it("latches data without executing and uses a separate trigger instance with shared input memory", () => {
+    let draft = addCommand(createBlankDraft("i2c", "OLED"), { label: "Scrivi" });
+    const added = addFlowInterface(draft, "sample_external");
+    draft = added.draft;
+    const dataInput = added.op;
+    if (dataInput.type !== "sample_external") throw new Error("input");
+    const trigger = addFlowInterface(draft, "sample_external");
+    draft = {
+      ...trigger.draft,
+      flowInterfaces: trigger.draft.flowInterfaces!.map((op) =>
+        op.id === trigger.op.id ? { ...op, inputMode: "trigger" as const } : op,
+      ),
+      commands: draft.commands.map((command) => ({
+        ...command,
+        steps: [
+          {
+            id: "write",
+            type: "i2c_write" as const,
+            bytes: ["00", `$${dataInput.into}`],
+          },
+        ],
+      })),
+    };
+    if (trigger.op.type !== "sample_external") throw new Error("trigger");
+    const id = draft.commands[0]!.id;
+    const fixture = deployment(draft, [
+      {
+        id: "data",
+        source: "timer",
+        target: id,
+        sourceHandle: "0",
+        targetHandle: dataInput.fromChannelId,
+      },
+      {
+        id: "trigger",
+        source: "timer",
+        target: "trigger-instance",
+        sourceHandle: "0",
+        targetHandle: trigger.op.fromChannelId,
+      },
+    ]);
+    const original = fixture.input.processingGraph.nodes.find(
+      (node) => node.id === id,
+    )!;
+    if (original.data.kind !== "block") throw new Error("block");
+    const dataNode = {
+      ...original,
+      data: {
+        ...original.data,
+        properties: {
+          ...original.data.properties,
+          [SENSOR_INSTANCE_PROP]: true,
+          [SENSOR_INPUT_PROP]: dataInput.fromChannelId,
+          [SENSOR_OUTPUT_PROP]: "",
+        },
+      },
+    };
+    const triggerNode = {
+      ...dataNode,
+      id: "trigger-instance",
+      data: {
+        ...dataNode.data,
+        properties: {
+          ...dataNode.data.properties,
+          [SENSOR_INPUT_PROP]: trigger.op.fromChannelId,
+        },
+      },
+    };
+    const input = {
+      ...fixture.input,
+      processingGraph: {
+        ...fixture.input.processingGraph,
+        nodes: [
+          ...fixture.input.processingGraph.nodes.filter((node) => node.id !== id),
+          dataNode,
+          triggerNode,
+        ],
+      },
+    };
+    const plan = prepareDriverDeployment(fixture.project, "core", input);
+    const dataRule = plan.input.processingGraph.nodes.find(
+      (node) => node.id === "0-parameter:data",
+    )!;
+    const triggerRule = plan.input.processingGraph.nodes.find(
+      (node) => node.id === "1-execute:trigger",
+    )!;
+    expect(dataRule.data).toMatchObject({ kind: "rule", properties: { "8": 3n } });
+    expect(triggerRule.data).toMatchObject({ kind: "rule", properties: { "8": 0n } });
+    expect(plan.profiles[0]!.actions).toHaveLength(2);
+    const args = plan.profiles[0]!.sampleOps.filter((op) => op.op === "LOAD_ARGUMENT");
+    expect(args).toHaveLength(2);
+    expect(args.every((op) => op.required && op.argumentId === 1)).toBe(true);
+    expect(compileConfig(plan.input, plan.options).ok).toBe(true);
+  });
+  it("rejects wires to unselected sensor pins", () => {
+    const draft = readDriver();
+    const id = draft.commands[0]!.id;
+    const fixture = deployment(draft, [
+      { id: "bad", source: "timer", target: id, targetHandle: "execute" },
+    ]);
+    const input = {
+      ...fixture.input,
+      processingGraph: {
+        ...fixture.input.processingGraph,
+        nodes: fixture.input.processingGraph.nodes.map((node) =>
+          node.id === id && node.data.kind === "block"
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  properties: {
+                    ...node.data.properties,
+                    [SENSOR_INSTANCE_PROP]: true,
+                    [SENSOR_INPUT_PROP]: "",
+                    [SENSOR_OUTPUT_PROP]: "",
+                  },
+                },
+              }
+            : node,
+        ),
+      },
+    };
+    expect(() => prepareDriverDeployment(fixture.project, "core", input)).toThrow(
+      "Ingresso",
     );
   });
 });

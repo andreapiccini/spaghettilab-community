@@ -1,3 +1,4 @@
+import { SENSOR_INSTANCE_PROP, SENSOR_INPUT_PROP, SENSOR_OUTPUT_PROP } from "../../lib/sensor-instance.js";
 import { prepareDriverDeployment } from "../../lib/driver-deployment-plan.js";
 import { planDriverCanvasChanges } from "../../lib/driver-canvas-plan.js";
 import { encodeConfigCbor, sha256 } from "@spaghettilab/config-compiler";
@@ -294,7 +295,7 @@ function ProcessingGraphScreenInner() {
         "input",
         undefined,
         {
-          comment: recipe.chip,
+          comment: recipe.deviceDraft?.name ?? recipe.chip,
           properties: propertiesForSensorModule(module, recipe),
         },
       );
@@ -351,11 +352,16 @@ function ProcessingGraphScreenInner() {
             ...node.data,
             properties: {
               ...node.data.properties,
-              ...propertiesForSensorModule(module, update.recipe),
+              ...propertiesForSensorModule(module, update.recipe, node.data.properties[SENSOR_INSTANCE_PROP] === true ? {inputId: String(node.data.properties[SENSOR_INPUT_PROP] ?? ""), outputId: String(node.data.properties[SENSOR_OUTPUT_PROP] ?? "")} : undefined),
             },
           },
         }),
       );
+      const selectedProperties = propertiesForSensorModule(module, update.recipe, node.data.properties[SENSOR_INSTANCE_PROP] === true ? {inputId: String(node.data.properties[SENSOR_INPUT_PROP] ?? ""), outputId: String(node.data.properties[SENSOR_OUTPUT_PROP] ?? "")} : undefined);
+      for (const edge of selectedProperties[SENSOR_INSTANCE_PROP] === true ? graphState.edges : []) {
+        if ((edge.target === node.id && edge.targetHandle !== selectedProperties[SENSOR_INPUT_PROP]) || (edge.source === node.id && edge.sourceHandle !== selectedProperties[SENSOR_OUTPUT_PROP]))
+          execute(removeGraphEdgeCommand(deviceGraphLens(bindingIndex), edge.id));
+      }
       graphNodeIds.push(node.id);
       const oldRecipe = existing?.actions?.find(
         (r) => r.actionId === update.recipe.actionId,
@@ -371,7 +377,7 @@ function ProcessingGraphScreenInner() {
                 ...project.authoringMetadata,
                 [node.id]: {
                   ...project.authoringMetadata[node.id],
-                  comment: update.recipe.chip,
+                  comment: update.recipe.deviceDraft?.name ?? update.recipe.chip,
                 },
               },
             },
@@ -389,7 +395,7 @@ function ProcessingGraphScreenInner() {
         "input",
         undefined,
         {
-          comment: recipe.chip,
+          comment: recipe.deviceDraft?.name ?? recipe.chip,
           properties: propertiesForSensorModule(module, recipe),
         },
       );
@@ -1448,6 +1454,15 @@ function ProcessingGraphScreenInner() {
     if (!execute || bindingIndex < 0) return;
     const lens = deviceGraphLens(bindingIndex);
     execute(updateGraphNodeCommand(lens, { layer: "device-processing", id: nodeId, data }));
+    if (data.kind === "block" && data.properties[SENSOR_INSTANCE_PROP] === true) {
+      const entry = catalogEntryForNode(data);
+      const inputs = new Set(entry?.inputs?.map(port => port.id));
+      const outputs = new Set(entry?.outputs?.map(port => port.id));
+      for (const edge of graphState.edges) {
+        if ((edge.target === nodeId && !inputs.has(edge.targetHandle ?? "")) || (edge.source === nodeId && !outputs.has(edge.sourceHandle ?? "")))
+          execute(removeGraphEdgeCommand(lens, edge.id));
+      }
+    }
     execute({
       kind: "UpdateAuthoringMetadata",
       apply: (project) => ({
@@ -1801,7 +1816,7 @@ function ProcessingGraphScreenInner() {
             )}
           </div>
 
-          {inspector && demoOnly && (
+          {inspector && (demoOnly || (inspector.kind === "edit" && recipeForActionNode(inspector.data))) && (
             <DemoInspectorBubble
               nodeId={inspector.kind === "edit" ? inspector.nodeId : undefined}
               onDismiss={() => setInspector(null)}
@@ -1818,11 +1833,12 @@ function ProcessingGraphScreenInner() {
                 knownModuleNodeIds={knownModuleNodeIds}
                 onSave={handleSave}
                 onApply={handleApply}
+                onDelete={inspector.kind === "edit" && !demoOnly ? handleDelete : undefined}
                 onClose={() => setInspector(null)}
               />
             </DemoInspectorBubble>
           )}
-          {inspector && !demoOnly && (
+          {inspector && !demoOnly && !(inspector.kind === "edit" && recipeForActionNode(inspector.data)) && (
             <NodeInspector
                 driverBindingId={selected?.bindingId}
                 driverRecipe={inspector.kind === "edit" ? recipeForActionNode(inspector.data) : undefined}

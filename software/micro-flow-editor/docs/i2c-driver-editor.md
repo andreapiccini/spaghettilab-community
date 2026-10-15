@@ -6,10 +6,10 @@ per un registro, il primo byte del messaggio è il registro; non è l’indirizz
 I²C del dispositivo. Le vecchie impostazioni di indirizzo nei passi non
 scavalcano la connessione condivisa.
 
-## Due schede a sinistra
+## Schede a sinistra
 
 **Blocco Flow del sensore** contiene le interfacce e l’elenco delle variabili:
-Ingresso acquisisce un parametro e crea una variabile; Uscita espone una variabile
+Ingresso acquisisce un dato in una variabile oppure attiva un’azione come trigger; Uscita espone una variabile
 nel canvas. I blocchi del canvas preparano il tipo richiesto. Il formato in byte
 dell’ingresso resta configurabile nei dettagli. Encoder e Decoder non sono più
 interfacce aggiungibili; i dati dei driver precedenti restano compatibili. Le variabili si
@@ -20,8 +20,8 @@ variabili interne con valori iniziali numerici o HEX e riferimenti `$nome`.
 **Azioni del sensore** contiene l’elenco delle azioni nominate. **+ Azione** crea
 un’azione vuota; la libreria «Aggiungi un passo a…» inserisce letture, scritture e
 attese solo nell’azione selezionata. Nome, duplicazione e rimozione sono disponibili nell’elenco. Le azioni sono
-esposte automaticamente nel canvas, senza un pannello di opzioni separato. Ogni azione esposta genera un blocco
-con più ingressi e uscite, condividendo un’unica istanza fisica del dispositivo.
+esposte automaticamente nel canvas, senza un pannello di opzioni separato. Il sensore genera un solo blocco iniziale: ogni istanza sceglie un’azione,
+un ingresso e un’uscita, condividendo un’unica istanza fisica del dispositivo.
 
 Le schede aperte mantengono l’altezza del contenuto e le colonne laterali scorrono
 indipendentemente: interfacce, passi e librerie restano raggiungibili. I passi
@@ -102,3 +102,27 @@ La prova usa la velocità selezionata nella configurazione temporanea.
 «8 bit» nei datasheet indica l’indirizzo a 7 bit con R/W, non un terzo modo
 I²C: 0xD0/0xD1 corrispondono a 0x68, 0x78/0x79 a 0x3C.
 Pull-up e filtri non sono parametri configurabili nel protocollo fisico attuale.
+
+## Istanze del sensore nel canvas
+
+La libreria espone un unico blocco per sensore. La generazione iniziale crea una
+sola istanza; per altre azioni o altri pin si trascina di nuovo lo stesso sensore.
+Un clic sul blocco apre un popup con tre scelte: azione, ingresso, uscita. Ogni
+istanza espone al massimo un ingresso e un’uscita. Cambiare un pin scollega solo
+i fili del pin che non è più disponibile. Le istanze condividono un solo modulo
+fisico e l’inizializzazione resta unica.
+
+L’anteprima del driver mostra tutti i pin disponibili come terminali esterni di
+un simbolo schematico. Il simbolo del canvas mostra quelli selezionati.
+
+Un ingresso ha due modalità:
+- **Dato → variabile**: conserva il valore ricevuto, senza avviare operazioni I²C.
+- **Trigger → azione**: attiva l’azione selezionata nell’istanza del canvas.
+
+L’uscita espone una variabile come dato. Per acquisire dati e poi attivare una
+transazione si usano più istanze dello stesso sensore. I parametri collegati sono
+condivisi e obbligatori: l’attivazione resta in attesa finché sono disponibili.
+Il trigger generico «Esegui azione» è disponibile anche senza un’interfaccia trigger
+esplicita. Le variabili interne e i riferimenti `$nome` restano utilizzabili.
+I vecchi progetti conservano i blocchi precedenti; rigenerare il driver aggiorna
+le istanze al nuovo modello di selezione.

@@ -17,7 +17,7 @@ export function planDriverCanvasChanges(
   const instanceId = recipes[0]?.driverInstanceId;
   const updates: { id: string; recipe: SensorRecipe }[] = [];
   const removals: string[] = [];
-  const retained = new Set<string>();
+
   for (const node of nodes) {
     const belongs =
       node.properties[SENSOR_MODULE_ID_PROP] === moduleId ||
@@ -31,7 +31,6 @@ export function planDriverCanvasChanges(
       continue;
     }
     updates.push({ id: node.id, recipe });
-    retained.add(recipe.id);
   }
-  return { updates, removals, additions: recipes.filter((r) => !retained.has(r.id)) };
+  return { updates, removals, additions: updates.length ? [] : recipes.slice(0, 1) };
 }

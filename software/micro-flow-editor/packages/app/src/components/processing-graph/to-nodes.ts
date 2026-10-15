@@ -1,3 +1,4 @@
+import { SENSOR_INSTANCE_PROP, SENSOR_ACTION_LABEL_PROP } from "../../lib/sensor-instance.js";
 import { SENSOR_ACTION_ID_PROP, channelsFromNodeProperties } from "../../lib/backbone-sensor-block.js";
 import type { AuthoringMetadata, GraphState } from "@spaghettilab/domain";
 import { isBlockNodeData, isRuleNodeData, moduleReferenceOf, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
@@ -25,6 +26,7 @@ export type ToggleWaveUi = {
 };
 
 export type ProcessingNodeUiData = {
+  readonly sensorSchematic?: boolean;
   readonly domainId: string;
   readonly kind: DeviceProcessingNodeData["kind"];
   readonly label: string;
@@ -157,6 +159,7 @@ export function toProcessingNodes(
       }),
       data: {
         domainId: node.id,
+        sensorSchematic: isBlockNodeData(data) && data.properties[SENSOR_INSTANCE_PROP] === true,
         kind: data.kind,
         label: titles.get(node.id) ?? PROCESSING_NODE_KIND_CONFIG[data.kind].label,
         subtitle: subtitleFor(node.id, data, graphState, titles, moduleLabel, fieldLabel, locale),
@@ -393,6 +396,7 @@ function subtitleFor(
   if (isBlockNodeData(data)) {
     if (typeof data.properties[SENSOR_ACTION_ID_PROP] === "string") {
       const channels = channelsFromNodeProperties(data.properties);
+      if (data.properties[SENSOR_INSTANCE_PROP] === true) return String(data.properties[SENSOR_ACTION_LABEL_PROP] ?? "");
       return channels.length ? channels.map(c => `${c.label}${c.unit ? ` (${c.unit})` : ""}`).join(" · ") : (locale === "it" ? "Azione di scrittura" : "Write action");
     }
     if (isCompareIf(data)) return formatIfCondition(nodeId, data, graphState, locale);

@@ -1,3 +1,7 @@
+import { draftToCanvasSensorRecipes } from "../../lib/device-recipe-draft.js";
+import { propertiesForSensorModule, SENSOR_ACTION_ID_PROP } from "../../lib/backbone-sensor-block.js";
+import { createModuleFromRecipe } from "../../lib/backbone-sensor-modules.js";
+import { SENSOR_INPUT_PROP, SENSOR_OUTPUT_PROP, sensorInterfaces } from "../../lib/sensor-instance.js";
 import type { SensorRecipe } from "../../lib/sensor-recipe.js";
 import { DriverCanvasActionTest } from "./DriverCanvasActionTest.js";
 import type { DomainError, GraphEdge, GraphNode } from "@spaghettilab/domain";
@@ -162,6 +166,31 @@ export function NodeInspector({
   const [data, setData] = useState<DeviceProcessingNodeData>(() =>
     withFieldDefaults(mode.kind === "edit" ? mode.data : defaultDataFor(mode.nodeKind, moduleOptions[0]?.id)),
   );
+  const driverChoices = driverRecipe?.deviceDraft
+    ? draftToCanvasSensorRecipes(driverRecipe.deviceDraft)
+    : [];
+  const currentDriverRecipe =
+    data.kind === "block"
+      ? (driverChoices.find(
+          (recipe) => recipe.actionId === data.properties[SENSOR_ACTION_ID_PROP],
+        ) ?? driverRecipe)
+      : driverRecipe;
+  function selectSensor(actionId: string, inputId?: string, outputId?: string) {
+    if (data.kind !== "block") return;
+    const recipe = driverChoices.find((item) => item.actionId === actionId);
+    if (!recipe) return;
+    const module = createModuleFromRecipe(recipe);
+    patch({
+      properties: {
+        ...data.properties,
+        ...propertiesForSensorModule(
+          { ...module, id: String(data.properties.backboneSensorModuleId) },
+          recipe,
+          { inputId, outputId },
+        ),
+      },
+    } as Partial<DeviceProcessingNodeData>);
+  }
   const nodeId = mode.kind === "edit" ? mode.nodeId : "__draft__";
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
   const catalogEntry = catalogEntryForNode(data);
@@ -252,12 +281,12 @@ export function NodeInspector({
   return (
     <motion.div
       data-tour-target="demo-tour-inspector"
-      initial={demoOnly ? false : { x: 320, opacity: 0 }}
-      animate={demoOnly ? undefined : { x: 0, opacity: 1 }}
-      exit={demoOnly ? undefined : { x: 320, opacity: 0 }}
+      initial={demoOnly || driverRecipe ? false : { x: 320, opacity: 0 }}
+      animate={demoOnly || driverRecipe ? undefined : { x: 0, opacity: 1 }}
+      exit={demoOnly || driverRecipe ? undefined : { x: 320, opacity: 0 }}
       transition={motionTokens.spring.smooth}
       className={
-        demoOnly
+        demoOnly || driverRecipe
           ? "flex w-full flex-col bg-surface"
           : "flex h-full w-80 flex-col border-l border-border bg-surface shadow-e2"
       }
@@ -265,24 +294,133 @@ export function NodeInspector({
       <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
         <div
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-slsm"
-          style={{ backgroundColor: headerSolid ? headerColor : `color-mix(in srgb, ${headerColor} 18%, transparent)` }}
+          style={{
+            backgroundColor: headerSolid
+              ? headerColor
+              : `color-mix(in srgb, ${headerColor} 18%, transparent)`,
+          }}
           aria-hidden
         >
           {!headerSolid && <HeaderIcon size={14} style={{ color: headerColor }} />}
         </div>
-        <h2 className="min-w-0 truncate font-heading text-sm font-semibold text-ink" title={headerTitle}>
+        <h2
+          className="min-w-0 truncate font-heading text-sm font-semibold text-ink"
+          title={headerTitle}
+        >
           {headerTitle}
         </h2>
-        <button type="button" onClick={onClose} className="ml-auto shrink-0 text-ink-faint hover:text-ink">
+        <button
+          type="button"
+          onClick={onClose}
+          className="ml-auto shrink-0 text-ink-faint hover:text-ink"
+        >
           ✕
         </button>
       </div>
 
       <div className="flex-1 overflow-auto p-4">
-        {driverRecipe && <DriverCanvasActionTest key={driverRecipe.id} recipe={driverRecipe} preferredBindingId={driverBindingId} />}
+        {currentDriverRecipe?.deviceDraft && data.kind === "block" && (
+          <section className="mb-3 space-y-3 rounded-slmd border border-brand-blue/25 bg-brand-blue/5 p-3">
+            <p className="font-body text-xs text-ink-muted">
+              {locale === "it"
+                ? "Una sola azione, un ingresso e un’uscita per questo blocco. Trascina un altro blocco del sensore per altre connessioni."
+                : "One action, input and output per instance. Drag another sensor block for more connections."}
+            </p>
+            <label className="block font-body text-xs text-ink">
+              {locale === "it" ? "Azione" : "Action"}
+              <select
+                className="mt-1 w-full rounded border border-border bg-surface p-2"
+                value={currentDriverRecipe.actionId}
+                onChange={(event) => selectSensor(event.target.value)}
+              >
+                {driverChoices.map((recipe) => (
+                  <option key={recipe.actionId} value={recipe.actionId}>
+                    {
+                      recipe.deviceDraft?.commands.find(
+                        (action) => action.id === recipe.actionId,
+                      )?.label
+                    }
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block font-body text-xs text-ink">
+              {locale === "it" ? "Ingresso" : "Input"}
+              <select
+                className="mt-1 w-full rounded border border-border bg-surface p-2"
+                value={String(data.properties[SENSOR_INPUT_PROP] ?? "execute")}
+                onChange={(event) =>
+                  selectSensor(
+                    currentDriverRecipe.actionId!,
+                    event.target.value,
+                    String(data.properties[SENSOR_OUTPUT_PROP] ?? ""),
+                  )
+                }
+              >
+                <option value="">{locale === "it" ? "Nessuno" : "None"}</option>
+                <option value="execute">
+                  {locale === "it" ? "Trigger · Esegui azione" : "Trigger · Run action"}
+                </option>
+                {sensorInterfaces(currentDriverRecipe.deviceDraft).inputs.map(
+                  (input) => (
+                    <option key={input.id} value={input.fromChannelId}>
+                      {
+                        currentDriverRecipe.deviceDraft?.channels.find(
+                          (ch) => ch.id === input.fromChannelId,
+                        )?.label
+                      }{" "}
+                      · {input.inputMode === "trigger" ? "Trigger" : `$${input.into}`}
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+            <label className="block font-body text-xs text-ink">
+              {locale === "it"
+                ? "Uscita · variabile → dato"
+                : "Output · variable → data"}
+              <select
+                className="mt-1 w-full rounded border border-border bg-surface p-2"
+                value={String(data.properties[SENSOR_OUTPUT_PROP] ?? "")}
+                onChange={(event) =>
+                  selectSensor(
+                    currentDriverRecipe.actionId!,
+                    String(data.properties[SENSOR_INPUT_PROP] ?? "execute"),
+                    event.target.value,
+                  )
+                }
+              >
+                <option value="">{locale === "it" ? "Nessuna" : "None"}</option>
+                {sensorInterfaces(currentDriverRecipe.deviceDraft).outputs.map(
+                  (output) => (
+                    <option key={output.id} value={output.channelId}>
+                      {currentDriverRecipe.deviceDraft?.channels.find(
+                        (ch) => ch.id === output.channelId,
+                      )?.label || output.channelId}{" "}
+                      · ${output.from}
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+          </section>
+        )}
+        {currentDriverRecipe && (
+          <DriverCanvasActionTest
+            key={currentDriverRecipe.id}
+            recipe={currentDriverRecipe}
+            preferredBindingId={driverBindingId}
+          />
+        )}
         <AnimatePresence>
           {errors.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={motionTokens.duration.base} className="mb-3 border-l-4 border-error bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] p-2 font-body text-xs text-ink">
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={motionTokens.duration.base}
+              className="mb-3 border-l-4 border-error bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] p-2 font-body text-xs text-ink"
+            >
               {errors[0]!.remediation}
             </motion.div>
           )}
@@ -290,20 +428,36 @@ export function NodeInspector({
 
         {!demoOnly && (
           <>
-            <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-name">
+            <label
+              className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+              htmlFor="ni-name"
+            >
               {copy.nameLabel}
             </label>
-            <input id="ni-name" value={comment} onChange={(e) => setCommentAndMaybeApply(e.target.value)} placeholder={config.label} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none" />
+            <input
+              id="ni-name"
+              value={comment}
+              onChange={(e) => setCommentAndMaybeApply(e.target.value)}
+              placeholder={config.label}
+              className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none"
+            />
           </>
         )}
 
         {!demoOnly && mode.kind === "edit" && (
-          <EdgeList title="Input" edges={incoming.map((e) => ({ id: e.id, label: nodeLabel(e.source) }))} empty={copy.noIncoming} />
+          <EdgeList
+            title="Input"
+            edges={incoming.map((e) => ({ id: e.id, label: nodeLabel(e.source) }))}
+            empty={copy.noIncoming}
+          />
         )}
 
         {data.kind === "event-source" && (
           <>
-            <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-event">
+            <label
+              className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+              htmlFor="ni-event"
+            >
               Trigger
             </label>
             <select
@@ -323,7 +477,10 @@ export function NodeInspector({
               }}
               className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none"
             >
-              {localizeCatalogEntries(catalogEntriesForNodeKind("event-source"), locale).map((entry) => (
+              {localizeCatalogEntries(
+                catalogEntriesForNodeKind("event-source"),
+                locale,
+              ).map((entry) => (
                 <option key={entry.id} value={entry.id}>
                   {entry.label}
                 </option>
@@ -335,10 +492,18 @@ export function NodeInspector({
 
         {showModulePicker && (
           <>
-            <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-module">
+            <label
+              className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+              htmlFor="ni-module"
+            >
               Module
             </label>
-            <select id="ni-module" value={data.kind === "event-source" ? data.moduleNodeId : ""} onChange={(e) => patch({ moduleNodeId: e.target.value })} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none">
+            <select
+              id="ni-module"
+              value={data.kind === "event-source" ? data.moduleNodeId : ""}
+              onChange={(e) => patch({ moduleNodeId: e.target.value })}
+              className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
+            >
               <option value="">—</option>
               {moduleOptions.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -360,10 +525,19 @@ export function NodeInspector({
 
         {data.kind === "schedule" && (
           <>
-            <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-period">
+            <label
+              className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+              htmlFor="ni-period"
+            >
               {copy.periodMs}
             </label>
-            <input id="ni-period" type="number" value={data.periodMs} onChange={(e) => patch({ periodMs: Number(e.target.value) })} className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
+            <input
+              id="ni-period"
+              type="number"
+              value={data.periodMs}
+              onChange={(e) => patch({ periodMs: Number(e.target.value) })}
+              className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
+            />
           </>
         )}
 
@@ -371,7 +545,10 @@ export function NodeInspector({
           <>
             {!demoOnly && !driverRecipe && (
               <>
-                <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-blocktype">
+                <label
+                  className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+                  htmlFor="ni-blocktype"
+                >
                   Block
                 </label>
                 <TypeIdSelect
@@ -395,50 +572,108 @@ export function NodeInspector({
                 {!authoringType && (
                   <div className="mb-4 flex gap-2">
                     <div className="flex-1">
-                      <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-minver">
+                      <label
+                        className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+                        htmlFor="ni-minver"
+                      >
                         {copy.minVersion}
                       </label>
-                      <input id="ni-minver" type="number" value={data.minVersion ?? ""} onChange={(e) => patch({ minVersion: e.target.value === "" ? undefined : Number(e.target.value) })} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
+                      <input
+                        id="ni-minver"
+                        type="number"
+                        value={data.minVersion ?? ""}
+                        onChange={(e) =>
+                          patch({
+                            minVersion:
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
+                          })
+                        }
+                        className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
+                      />
                     </div>
                     <div className="flex-1">
-                      <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-exactver">
+                      <label
+                        className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+                        htmlFor="ni-exactver"
+                      >
                         {copy.exactVersion}
                       </label>
-                      <input id="ni-exactver" type="number" value={data.exactVersion ?? ""} onChange={(e) => patch({ exactVersion: e.target.value === "" ? undefined : Number(e.target.value) })} className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none" />
+                      <input
+                        id="ni-exactver"
+                        type="number"
+                        value={data.exactVersion ?? ""}
+                        onChange={(e) =>
+                          patch({
+                            exactVersion:
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
+                          })
+                        }
+                        className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
+                      />
                     </div>
                   </div>
                 )}
               </>
             )}
-            {driverRecipe ? <p className="mb-3 font-body text-xs text-ink-muted">{driverRecipe.deviceDraft?.name} · I²C {driverRecipe.address}<br />{locale === "it" ? "La sequenza si modifica nell’editor Dispositivi." : "Edit the sequence in the Devices editor."}</p> : demoIfBlock ? (
+            {driverRecipe ? (
+              <p className="mb-3 font-body text-xs text-ink-muted">
+                {driverRecipe.deviceDraft?.name} · I²C {driverRecipe.address}
+                <br />
+                {locale === "it"
+                  ? "La sequenza si modifica nell’editor Dispositivi."
+                  : "Edit the sequence in the Devices editor."}
+              </p>
+            ) : demoIfBlock ? (
               <DemoIfSentence
                 source={demoIfSource ?? "none"}
                 properties={data.properties}
                 onChange={(properties) => patch({ properties })}
                 digitalSinkConnected={outgoing.some((edge) => {
-                  const sink = existingNodes.find((node) => node.id === edge.target)?.data;
+                  const sink = existingNodes.find(
+                    (node) => node.id === edge.target,
+                  )?.data;
                   return !!sink && (isLedBlock(sink) || isRelayBlock(sink));
                 })}
               />
             ) : demoTempBlock ? (
               <p className="font-body text-sm text-ink-muted">{copy.tempProbeHint}</p>
             ) : namedFields.length > 0 ? (
-              <CatalogFieldsEditor fields={namedFields} properties={data.properties} lineOptions={lineOptions} onChange={(properties) => patch({ properties })} />
+              <CatalogFieldsEditor
+                fields={namedFields}
+                properties={data.properties}
+                lineOptions={lineOptions}
+                onChange={(properties) => patch({ properties })}
+              />
             ) : (
               <>
-                <p className="mb-2 font-body text-xs text-ink-faint">{copy.blockSchemaGap}</p>
-                <PropertiesEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
+                <p className="mb-2 font-body text-xs text-ink-faint">
+                  {copy.blockSchemaGap}
+                </p>
+                <PropertiesEditor
+                  properties={data.properties}
+                  onChange={(properties) => patch({ properties })}
+                />
               </>
             )}
             {isRgbLedBlock(data) && (
-              <RgbLedSequenceEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
+              <RgbLedSequenceEditor
+                properties={data.properties}
+                onChange={(properties) => patch({ properties })}
+              />
             )}
           </>
         )}
 
         {data.kind === "rule" && (
           <>
-            <label className="mb-1 block font-body text-xs font-semibold text-ink-muted" htmlFor="ni-ruletype">
+            <label
+              className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+              htmlFor="ni-ruletype"
+            >
               Rule
             </label>
             <TypeIdSelect
@@ -452,7 +687,9 @@ export function NodeInspector({
                     ruleTypeId,
                     properties:
                       ruleTypeId === "threshold"
-                        ? withThresholdFirmwareFields(defaultPropertiesFromFields(entry?.fields ?? []))
+                        ? withThresholdFirmwareFields(
+                            defaultPropertiesFromFields(entry?.fields ?? []),
+                          )
                         : defaultPropertiesFromFields(entry?.fields ?? []),
                   } as DeviceProcessingNodeData,
                   entry,
@@ -469,7 +706,13 @@ export function NodeInspector({
               protocolFor={protocolFor}
               pinMapOf={pinMapOf}
               mode="source"
-              onChange={(moduleNodeId, numericId) => patch({ sourceReference: moduleNodeId ? { moduleNodeId, fieldId: numericId } : undefined })}
+              onChange={(moduleNodeId, numericId) =>
+                patch({
+                  sourceReference: moduleNodeId
+                    ? { moduleNodeId, fieldId: numericId }
+                    : undefined,
+                })
+              }
             />
 
             <NamedOrNumericModuleRef
@@ -480,7 +723,13 @@ export function NodeInspector({
               protocolFor={protocolFor}
               pinMapOf={pinMapOf}
               mode="command"
-              onChange={(moduleNodeId, numericId) => patch({ commandTarget: moduleNodeId ? { moduleNodeId, commandId: numericId } : undefined })}
+              onChange={(moduleNodeId, numericId) =>
+                patch({
+                  commandTarget: moduleNodeId
+                    ? { moduleNodeId, commandId: numericId }
+                    : undefined,
+                })
+              }
             />
 
             {namedFields.length > 0 ? (
@@ -490,35 +739,56 @@ export function NodeInspector({
                 lineOptions={lineOptions}
                 onChange={(properties) =>
                   patch({
-                    properties: data.ruleTypeId === "threshold" ? withThresholdFirmwareFields(properties) : properties,
+                    properties:
+                      data.ruleTypeId === "threshold"
+                        ? withThresholdFirmwareFields(properties)
+                        : properties,
                   })
                 }
               />
             ) : data.ruleTypeId === "threshold" ? null : (
               <>
-                <p className="mb-2 font-body text-xs text-ink-faint">{copy.ruleSchemaGap}</p>
-                <PropertiesEditor properties={data.properties} onChange={(properties) => patch({ properties })} />
+                <p className="mb-2 font-body text-xs text-ink-faint">
+                  {copy.ruleSchemaGap}
+                </p>
+                <PropertiesEditor
+                  properties={data.properties}
+                  onChange={(properties) => patch({ properties })}
+                />
               </>
             )}
           </>
         )}
 
         {!demoOnly && mode.kind === "edit" && (
-          <EdgeList title="Output" edges={outgoing.map((e) => ({ id: e.id, label: nodeLabel(e.target) }))} empty={isRuleNodeData(data) ? copy.ruleNoOutgoing : copy.noOutgoing} />
+          <EdgeList
+            title="Output"
+            edges={outgoing.map((e) => ({ id: e.id, label: nodeLabel(e.target) }))}
+            empty={isRuleNodeData(data) ? copy.ruleNoOutgoing : copy.noOutgoing}
+          />
         )}
       </div>
 
       {!demoOnly && (
-      <div className="flex shrink-0 items-center gap-2 border-t border-border p-3">
-        {onDelete && (
-          <button type="button" onClick={onDelete} className="rounded-slsm border border-border-strong px-3 py-1.5 font-body text-sm text-error hover:bg-surface-raised">
-            {copy.delete}
+        <div className="flex shrink-0 items-center gap-2 border-t border-border p-3">
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="rounded-slsm border border-border-strong px-3 py-1.5 font-body text-sm text-error hover:bg-surface-raised"
+            >
+              {copy.delete}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => onSave(data, comment)}
+            disabled={!canSave}
+            className="ml-auto rounded-slsm bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50"
+          >
+            {copy.save}
           </button>
-        )}
-        <button type="button" onClick={() => onSave(data, comment)} disabled={!canSave} className="ml-auto rounded-slsm bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:opacity-50">
-          {copy.save}
-        </button>
-      </div>
+        </div>
       )}
     </motion.div>
   );
