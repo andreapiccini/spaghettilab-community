@@ -7,6 +7,7 @@ import {
   describeDeviceOp,
   type DeviceRecipeDraft,
 } from "../../lib/device-recipe-draft.js";
+import { readableI2cStep } from "../../lib/i2c-step-label.js";
 import { actionPorts, duplicateDriverAction } from "../../lib/i2c-driver-actions.js";
 
 const button =
@@ -18,6 +19,8 @@ type Props = {
   onChange: (d: DeviceRecipeDraft) => void;
   onSelect: (id: string) => void;
   children?: ReactNode;
+  selectedStepId?: string | null;
+  onSelectStep?: (id: string) => void;
 };
 
 export function DriverActionsList({
@@ -27,10 +30,13 @@ export function DriverActionsList({
   onChange,
   onSelect,
   children,
+  selectedStepId,
+  onSelectStep,
 }: Props) {
   function add() {
     const next = addCommand(draft, {
       label: `${it ? "Azione" : "Action"} ${draft.commands.length + 1}`,
+      exposeOnCanvas: true,
     });
     onChange(next);
     onSelect(next.commands[next.commands.length - 1]!.id);
@@ -38,7 +44,7 @@ export function DriverActionsList({
   return (
     <details
       open
-      className="group/actions overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm"
+      className="group/actions shrink-0 overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm"
     >
       <summary className="flex cursor-pointer list-none items-center gap-2.5 bg-surface-sunken/60 px-3 py-3 font-body text-xs font-semibold text-ink [&::-webkit-details-marker]:hidden">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-blue">
@@ -120,42 +126,27 @@ export function DriverActionsList({
               <span className="font-body text-[10px] text-ink-muted">
                 {action.steps.length} {it ? "passi I²C" : "I²C steps"}
               </span>
-              {activeId === action.id && (
-                <details className="mt-1">
-                  <summary className="cursor-pointer font-body text-[10px] text-ink-muted">
-                    {it ? "Opzioni dell’azione" : "Action options"}
-                  </summary>
-                  <label className="mt-1 flex gap-1 font-body text-[10px] text-ink">
-                    <input
-                      type="checkbox"
-                      checked={action.exposeOnCanvas !== false}
-                      onChange={(e) =>
-                        onChange(
-                          updateCommand(draft, action.id, {
-                            ...action,
-                            exposeOnCanvas: e.target.checked,
-                          }),
-                        )
-                      }
-                    />
-                    {it ? "Esponi nel canvas" : "Expose on canvas"}
-                  </label>
-                  <label className="block font-body text-[10px] text-ink-muted">
-                    {it ? "Identificatore tecnico" : "Technical identifier"}
-                    <input
-                      value={action.name}
-                      onChange={(e) =>
-                        onChange(
-                          updateCommand(draft, action.id, {
-                            ...action,
-                            name: e.target.value,
-                          }),
-                        )
-                      }
-                      className="w-full rounded border border-border bg-surface p-1 font-mono text-[10px]"
-                    />
-                  </label>
-                </details>
+              {activeId === action.id && action.steps.length > 0 && (
+                <div className="mt-2 space-y-1 border-t border-brand-blue/15 pt-2">
+                  {action.steps.map((step, index) => (
+                    <button
+                      key={step.id}
+                      type="button"
+                      aria-pressed={selectedStepId === step.id}
+                      onClick={() => onSelectStep?.(step.id)}
+                      className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left font-body text-[11px] ${selectedStepId === step.id ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-brand-blue/5"}`}
+                    >
+                      <span className="shrink-0 font-mono text-[10px]">
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0 break-words">
+                        {draft.binding.bus === "i2c"
+                          ? readableI2cStep(draft, step, undefined, it)
+                          : describeDeviceOp(step)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           ))}

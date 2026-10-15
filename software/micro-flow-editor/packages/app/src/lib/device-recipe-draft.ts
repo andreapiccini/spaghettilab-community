@@ -570,7 +570,7 @@ export function organizeDriverInterfaces(draft: DeviceRecipeDraft): DeviceRecipe
       scopes[op.id] = [...new Set([...(scopes[op.id] ?? []), command.id])];
       return false;
     });
-    return { ...command, steps };
+    return { ...command, steps, exposeOnCanvas: true };
   });
   return { ...draft, commands, flowInterfaces: interfaces, flowInterfaceActions: scopes };
 }

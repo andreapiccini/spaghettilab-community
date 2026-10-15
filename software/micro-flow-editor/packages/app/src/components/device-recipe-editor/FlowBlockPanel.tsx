@@ -53,7 +53,7 @@ export function FlowBlockPanel({
   return (
     <details
       open
-      className="group/flow overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm"
+      className="group/flow shrink-0 overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm"
     >
       <summary className="flex cursor-pointer list-none items-center gap-2.5 bg-surface-sunken/60 px-3 py-3 font-body text-xs font-semibold text-ink [&::-webkit-details-marker]:hidden">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-blue">

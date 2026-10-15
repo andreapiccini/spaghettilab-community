@@ -527,7 +527,7 @@ export function DeviceRecipeEditorScreen({
 
       <div className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[272px_minmax(0,1fr)_300px]">
         {/* LEFT */}
-        <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto border-r border-border bg-surface p-3">
+        <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-r border-border bg-surface p-3">
           {isDisplay && draft.display ? (
             <DisplayLeftSidebar
               draft={draft}
@@ -551,6 +551,11 @@ export function DeviceRecipeEditorScreen({
                 activeId={editorPane === "actions" ? activeActionId : null}
                 onChange={setDraft}
                 onSelect={selectDriverAction}
+                selectedStepId={selectedOpId}
+                onSelectStep={(id) => {
+                  setSelectedInterfaceId(null);
+                  setSelectedOpId(id);
+                }}
               >
                 {(editorPane === "init" || activeActionId) && (
                   <>
@@ -827,7 +832,7 @@ export function DeviceRecipeEditorScreen({
         </main>
 
         {/* RIGHT */}
-        <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto border-l border-border bg-surface p-3">
+        <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-l border-border bg-surface p-3">
           {isDisplay && draft.display ? (
             <DisplayInspector
               draft={draft}

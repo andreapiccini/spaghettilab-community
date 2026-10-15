@@ -469,3 +469,58 @@ describe("driver installation lifecycle", () => {
     ).rejects.toThrow("offline");
   });
 });
+
+describe("direct Flow input/output interfaces", () => {
+  it("uses an input variable directly in a byte without an encoder", () => {
+    const added = addFlowInterface(createBlankDraft("i2c"), "sample_external");
+    if (added.op.type !== "sample_external") throw new Error("input");
+    const draft = addCommand(added.draft, {
+      label: "Write input",
+      steps: [{ id: "write", type: "i2c_write", bytes: [`$${added.op.into}`] }],
+    });
+    const profile = compileRuntimeDriver(
+      draft,
+      new Map([[draft.commands[0]!.id, new Set([added.op.fromChannelId])]]),
+    ).profile;
+    expect(draft.flowInterfaces?.map((op) => op.type)).toEqual(["sample_external"]);
+    expect(profile.sampleOps).toContainEqual(
+      expect.objectContaining({ op: "LOAD_ARGUMENT", length: 1, required: true }),
+    );
+    expect(
+      parseDeviceRecipeDraft(serializeDeviceRecipeDraft(draft))?.flowInterfaces?.[0],
+    ).toMatchObject({ widthBytes: 1, byteOrder: "be" });
+  });
+  it("publishes an internal variable and supports internal HEX message variables", () => {
+    const base = {
+      ...createBlankDraft("i2c"),
+      variables: [
+        { name: "internal", valueType: "number" as const, defaultValue: "42" },
+        { name: "message", valueType: "hex" as const, defaultValue: "00 AF" },
+      ],
+    };
+    const added = addFlowInterface(base, "emit");
+    expect(added.op).toMatchObject({ type: "emit", from: "internal" });
+    const draft = addCommand(added.draft, {
+      label: "Internal values",
+      steps: [{ id: "write", type: "i2c_write", bytes: ["$message"] }],
+    });
+    const profile = compileRuntimeDriver(draft).profile;
+    expect(profile.sampleOps).toContainEqual(
+      expect.objectContaining({ op: "I2C_WRITE", length: 2 }),
+    );
+    expect(profile.sampleOps.some((op) => op.op === "EMIT_FIELD")).toBe(true);
+  });
+  it("exposes actions automatically without action options", () => {
+    const draft = readDriver();
+    const migrated = organizeDriverInterfaces({
+      ...draft,
+      commands: draft.commands.map((command) => ({
+        ...command,
+        exposeOnCanvas: false,
+      })),
+    });
+    expect(migrated.commands.every((command) => command.exposeOnCanvas === true)).toBe(
+      true,
+    );
+  });
+});

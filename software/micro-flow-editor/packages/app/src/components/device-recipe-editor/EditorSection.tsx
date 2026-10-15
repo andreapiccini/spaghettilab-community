@@ -38,13 +38,13 @@ export function EditorSection({
   return collapsible ? (
     <details
       open={defaultOpen}
-      className="group/panel overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm"
+      className="group/panel shrink-0 overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm"
     >
       <summary className={`${headerClass} cursor-pointer`}>{heading}</summary>
       {body}
     </details>
   ) : (
-    <section className="overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm">
+    <section className="shrink-0 overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm">
       <h2 className={headerClass}>{heading}</h2>
       {body}
     </section>

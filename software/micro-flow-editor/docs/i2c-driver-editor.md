@@ -9,22 +9,30 @@ scavalcano la connessione condivisa.
 ## Due schede a sinistra
 
 **Blocco Flow del sensore** contiene le interfacce e l’elenco delle variabili:
-Ingresso acquisisce un parametro, Encoder lo converte in byte, Decoder converte
-una risposta del sensore, Uscita espone la variabile nel canvas. Le variabili si
+Ingresso acquisisce un parametro e crea una variabile; Uscita espone una variabile
+nel canvas. I blocchi del canvas preparano il tipo richiesto. Il formato in byte
+dell’ingresso resta configurabile nei dettagli. Encoder e Decoder non sono più
+interfacce aggiungibili; i dati dei driver precedenti restano compatibili. Le variabili si
 possono trascinare nei messaggi o richiamare con `$nome`. Le interfacce condivise
-vengono compilate insieme alle azioni che le utilizzano; i vecchi driver vengono
-riorganizzati conservando l’associazione dei decoder e delle uscite.
+vengono compilate insieme alle azioni che le utilizzano; restano possibili
+variabili interne con valori iniziali numerici o HEX e riferimenti `$nome`.
 
 **Azioni del sensore** contiene l’elenco delle azioni nominate. **+ Azione** crea
 un’azione vuota; la libreria «Aggiungi un passo a…» inserisce letture, scritture e
-attese solo nell’azione selezionata. Nome, duplicazione, rimozione ed esposizione
-nel canvas sono disponibili nell’elenco. Ogni azione esposta genera un blocco
+attese solo nell’azione selezionata. Nome, duplicazione e rimozione sono disponibili nell’elenco. Le azioni sono
+esposte automaticamente nel canvas, senza un pannello di opzioni separato. Ogni azione esposta genera un blocco
 con più ingressi e uscite, condividendo un’unica istanza fisica del dispositivo.
+
+Le schede aperte mantengono l’altezza del contenuto e le colonne laterali scorrono
+indipendentemente: interfacce, passi e librerie restano raggiungibili. I passi
+sono selezionabili anche sotto l’azione nella colonna sinistra. I pannelli destri
+usano la stessa gerarchia grafica di quelli sinistri.
 
 Il grafico resta in alto. Ogni byte ha una larghezza minima; scorrimento
 orizzontale e zoom mantengono leggibili i messaggi lunghi. I titoli mostrano
 indirizzo, write/read, numero di byte e risposta effettivamente acquisita.
-START, STOP, ACK e NACK restano nella sequenza del bus. Il grafico è una
+START, STOP, ACK e NACK restano nella sequenza del bus; legenda e didascalia
+inferiori sono rimosse per guadagnare spazio. Il grafico è una
 rappresentazione del protocollo, non una misura con analizzatore logico.
 
 **Incolla sequenza** accetta byte HEX separati da spazi, virgole o punti e virgola,

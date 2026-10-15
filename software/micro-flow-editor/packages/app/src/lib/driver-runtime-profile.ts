@@ -12,6 +12,7 @@ import {
   effectiveActionSteps,
   type DeviceRecipeOp,
 } from "./device-recipe-draft.js";
+import { parseI2cMessage } from "./i2c-message-input.js";
 import { parseHexByteToken } from "./i2c-hex.js";
 
 export type RuntimeAction = {
@@ -139,6 +140,26 @@ export function compileRuntimeDriver(
       if (existing) return existing;
       const variable = draft.variables.find((v) => v.name === key);
       const cached = publishedVariables.get(key);
+      if (!cached && variable?.valueType === "hex") {
+        const parsed = parseI2cMessage(String(variable.defaultValue ?? "00"));
+        if (
+          parsed.error ||
+          parsed.tokens.length > 8 ||
+          parsed.tokens.some((token) => token.startsWith("$"))
+        )
+          throw new Error(`Variabile HEX «${key}»: specifica da 1 a 8 byte costanti.`);
+        const value: Value = {
+          width: parsed.tokens.length,
+          byteOrder: "be",
+          signed: false,
+          defaultValue: BigInt(
+            `0x${parsed.tokens.map((token) => token.replace(/^0x/i, "")).join("")}`,
+          ),
+        };
+        values.set(key, value);
+        return value;
+      }
+
       if (!cached && (!variable || !["number", "bool"].includes(variable.valueType)))
         throw new Error(`Variabile «${key}» non definita prima dell’uso.`);
       const defaultValue =
