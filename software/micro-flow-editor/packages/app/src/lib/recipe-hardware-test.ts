@@ -358,6 +358,13 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
  */
 const activeHardwareTests = new WeakSet<SpaghettiClient>();
 
+/** Shared by tools that stream commands under one temporary configuration. */
+export async function withExclusiveRecipeHardwareTest<T>(client: SpaghettiClient, run: () => Promise<T>): Promise<T> {
+  if (activeHardwareTests.has(client)) throw new Error("Una prova è già in corso su questo Core.");
+  activeHardwareTests.add(client);
+  try {return await run();} finally {activeHardwareTests.delete(client);}
+}
+
 /** One temporary config transaction at a time per connected Core, including restore. */
 export async function runRecipeHardwareTest(
   input: RunRecipeHardwareTestInput,

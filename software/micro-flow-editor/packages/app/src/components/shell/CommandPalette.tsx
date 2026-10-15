@@ -18,6 +18,7 @@ import {
   SlidersHorizontal,
   Store,
   Undo2,
+  Wrench,
   Workflow,
   type LucideIcon,
 } from "lucide-react";
@@ -106,6 +107,7 @@ export function CommandPalette() {
         ["catalog-topology", copy.palette.catalogTopology, Network],
         ["physical-composition", copy.palette.physicalComposition, Boxes],
         ["device-profile-studio", copy.palette.deviceProfileStudio, FileCode],
+        ["tools", "Tool · Display", Wrench],
         ["processing-graph", copy.palette.processingGraph, Workflow],
         ["deploy-diff", copy.screens.deployDiff, GitCompareArrows],
         ["runtime-diagnostics", copy.screens.runtimeDiagnostics, Activity],

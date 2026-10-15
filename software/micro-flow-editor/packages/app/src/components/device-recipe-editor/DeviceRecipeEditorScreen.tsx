@@ -736,7 +736,7 @@ export function DeviceRecipeEditorScreen({
           {it ? "Protocollo" : "Protocol"}
           <select
             aria-label={it ? "Protocollo" : "Protocol"}
-            value={isDisplay ? "display" : draft.binding.bus}
+            value={draft.binding.bus}
             onChange={(e) =>
               switchMode(
                 e.target.value as "i2c" | "spi" | "gpio" | "adc" | "w1" | "display",
@@ -744,7 +744,7 @@ export function DeviceRecipeEditorScreen({
             }
             className={inputClass}
           >
-            {(["i2c", "spi", "gpio", "adc", "w1", "display"] as const).map((mode) => (
+            {(["i2c", "spi", "gpio", "adc", "w1"] as const).map((mode) => (
               <option key={mode} value={mode}>
                 {mode.toUpperCase()}
               </option>

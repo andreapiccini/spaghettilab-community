@@ -1,3 +1,5 @@
+import { ToolsScreen } from "./components/tools/ToolsScreen.js";
+import { saveDriverMetadata } from "./lib/device-driver-library.js";
 import { useEffect, useState } from "react";
 import { AppShell } from "./components/shell/AppShell.js";
 import { ScreenStub } from "./components/shell/ScreenStub.js";
@@ -112,7 +114,7 @@ function DeviceRecipeEditorRoute({ initialDraft }: { readonly initialDraft?: Dev
         value: {
           ...project,
           authoringMetadata: {
-            ...project.authoringMetadata,
+            ...saveDriverMetadata(project.authoringMetadata,draft),
             [DEVICE_RECIPE_DRAFT_META_KEY]: { comment: serializeDeviceRecipeDraft(draft) },
             [DEVICE_RECIPE_PENDING_CREATE_META_KEY]: pendingCreate ? { comment: "1" } : { comment: "" },
           },
@@ -187,6 +189,8 @@ function AppContent() {
       </AppShell>
     );
   }
+
+  if (activeScreen === "tools") return <AppShell><ToolsScreen /></AppShell>;
 
   if (activeScreen === "device-profile-studio") {
     return (
