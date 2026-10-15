@@ -1,3 +1,4 @@
+import { readableI2cStep } from "../../lib/i2c-step-label.js";
 import { EditorSection } from "./EditorSection.js";
 import { parseI2cMessage } from "../../lib/i2c-message-input.js";
 import { FlowBlockPanel } from "./FlowBlockPanel.js";
@@ -784,43 +785,77 @@ export function DeviceRecipeEditorScreen({
                     ? "Facoltativa: questi passi preparano il sensore una volta all’avvio del programma sul microcontrollore."
                     : "Optional: these steps prepare the sensor once when the microcontroller program starts."}
                 </p>
-                <button
-                  type="button"
-                  aria-pressed={editorPane === "init"}
-                  onClick={() => {
-                    setEditorPane("init");
-                    setSelectedInterfaceId(null);
-                    setSelectedOpId(draft.phases.init[0]?.id ?? null);
-                    setTestResult(null);
-                    setTryMessage(null);
-                  }}
-                  className={`w-full rounded-slsm border px-2 py-2 text-left font-body text-xs ${editorPane === "init" ? "border-brand-blue bg-brand-blue/5 text-brand-blue" : "border-border-strong text-ink"}`}
+                <div
+                  className={`rounded-lg border p-2 ${editorPane === "init" ? "border-brand-blue/25 bg-brand-blue/5" : "border-border bg-surface-sunken/40"}`}
                 >
-                  {it ? "Configura inizializzazione" : "Configure initialization"} ·{" "}
-                  {draft.phases.init.length} {it ? "passi" : "steps"}
-                </button>
-                {editorPane === "init" && (
-                  <>
-                    <ol className="mt-2 space-y-1">
-                      {draft.phases.init.map((step, index) => (
-                        <li key={step.id}>
-                          <button
-                            type="button"
-                            aria-pressed={selectedOpId === step.id}
-                            onClick={() => {
-                              setSelectedInterfaceId(null);
-                              setSelectedOpId(step.id);
-                            }}
-                            className={`w-full rounded-slsm px-2 py-1.5 text-left font-body text-[11px] ${selectedOpId === step.id ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-brand-blue/5"}`}
-                          >
-                            {index + 1}. {describeDeviceOp(step)}
-                          </button>
-                        </li>
-                      ))}
-                    </ol>
-                    {stepLibrary}
-                  </>
-                )}
+                  <button
+                    type="button"
+                    aria-pressed={editorPane === "init"}
+                    onClick={() => {
+                      setEditorPane("init");
+                      setSelectedInterfaceId(null);
+                      setSelectedOpId(draft.phases.init[0]?.id ?? null);
+                      setTestResult(null);
+                      setTryMessage(null);
+                    }}
+                    className="w-full text-left font-body text-xs font-semibold text-ink"
+                  >
+                    {it ? "Avvio del sensore" : "Sensor startup"}
+                  </button>
+                  <span className="font-body text-[10px] text-ink-muted">
+                    {draft.phases.init.length} {it ? "passi" : "steps"}
+                  </span>
+                  {editorPane === "init" && (
+                    <>
+                      {draft.phases.init.length > 0 && (
+                        <ol className="mt-2 space-y-1 border-t border-brand-blue/15 pt-2">
+                          {draft.phases.init.map((step, index) => (
+                            <li key={step.id} className="flex items-start gap-1">
+                              <button
+                                type="button"
+                                aria-pressed={selectedOpId === step.id}
+                                onClick={() => {
+                                  setSelectedInterfaceId(null);
+                                  setSelectedOpId(step.id);
+                                }}
+                                className={`flex min-w-0 flex-1 items-start gap-2 rounded-md px-2 py-1.5 text-left font-body text-[11px] ${selectedOpId === step.id ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-brand-blue/5"}`}
+                              >
+                                <span className="shrink-0 font-mono text-[10px]">
+                                  {index + 1}
+                                </span>
+                                <span className="min-w-0 break-words">
+                                  {draft.binding.bus === "i2c"
+                                    ? readableI2cStep(draft, step, undefined, it)
+                                    : describeDeviceOp(step)}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                aria-label={
+                                  it
+                                    ? `Rimuovi passo di avvio ${index + 1}`
+                                    : `Remove startup step ${index + 1}`
+                                }
+                                onClick={() => {
+                                  const next = removeOp(draft, "init", step.id);
+                                  setDraft(next);
+                                  setTestResult(null);
+                                  setTryMessage(null);
+                                  if (selectedOpId === step.id)
+                                    setSelectedOpId(next.phases.init[0]?.id ?? null);
+                                }}
+                                className="shrink-0 rounded-md p-1.5 text-ink-faint hover:bg-error/10 hover:text-error"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                      {stepLibrary}
+                    </>
+                  )}
+                </div>
               </EditorSection>
               {draft.binding.bus !== "i2c" && (
                 <>
