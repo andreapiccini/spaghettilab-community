@@ -39,7 +39,7 @@ struct spaghetti_port {
 
 struct fake_bus {
 	uint32_t transfers;
-	uint8_t last_write[32];
+	uint8_t last_write[2048];
 	size_t last_write_len;
 	uint8_t i2c_mem[0x80][256];
 	uint8_t spi_last_tx[16];
@@ -1216,3 +1216,123 @@ ZTEST(device_profiles, test_oled_message_single_transaction_and_checked_scaling)
 }
 
 ZTEST_SUITE(device_profiles, NULL, device_profiles_setup, NULL, NULL, NULL);
+
+ZTEST(device_profiles, test_long_message_single_transfer_patch_and_bounds)
+{
+	static uint8_t data[SPAGHETTI_PROFILE_MESSAGE_MAX];
+	for (size_t i = 0; i < sizeof(data); i++)
+		data[i] = (uint8_t)i;
+	struct spaghetti_device_profile profile;
+	fill_base(&profile, "long-message", SPAGHETTI_PORT_TRANSPORT_I2C, SPAGHETTI_PORT_CAP_I2C);
+	profile.message_data = data;
+	profile.message_data_size = sizeof(data);
+	profile.max_bytes = 4096;
+	profile.sample_ops[0] =
+	    make_op(SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_LOAD, 0, 0, 0, sizeof(data), 0, 0, 0);
+	profile.sample_ops[1] =
+	    make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 2, 0, 0xBEEF, 0);
+	profile.sample_ops[2] =
+	    make_op(SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_PATCH, 0, 0, 0, 1023, 2, 0, 0);
+	profile.sample_ops[3] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE, 0, 0, 0,
+					sizeof(data), 1000, 0, 0);
+	profile.sample_ops[4] =
+	    make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD, FIELD_VALUE, 0, 0, 2, 1, 0, 1);
+	profile.sample_ops[5] =
+	    make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD, 0, 0, 0, 0, 0, 0, 0);
+	profile.sample_count = 6;
+	struct spaghetti_device_profile_budget budget;
+	zassert_ok(spaghetti_device_profile_validate(&profile, &budget));
+	zassert_equal(budget.transactions, 1);
+	struct spaghetti_device_profile_binding binding = {.i2c_address = 0x3c,
+							   .default_timeout_ms = 1000};
+	struct spaghetti_record_payload result;
+	uint32_t before = bus.transfers;
+	zassert_ok(spaghetti_device_profile_exec(&profile, profile.sample_ops, profile.sample_count,
+						 &fake_port, &binding, &result));
+	zassert_equal(bus.transfers, before + 1);
+	zassert_equal(bus.last_write_len, sizeof(data));
+	zassert_equal(bus.last_write[1023], 0xEF);
+	zassert_equal(bus.last_write[1024], 0xBE);
+	zassert_equal(bus.last_write[2047], 0xFF);
+	zassert_equal(data[1023], 0xFF); /* Immutable template is untouched. */
+	profile.sample_ops[2].imm0 = 2047;
+	zassert_equal(spaghetti_device_profile_validate(&profile, NULL), -EINVAL);
+	profile.sample_ops[2].imm0 = 1023;
+	profile.sample_ops[0].imm2 = 1;
+	zassert_equal(spaghetti_device_profile_validate(&profile, NULL), -EINVAL);
+	profile.sample_ops[0].imm2 = 0;
+	bus.i2c_error = -ETIMEDOUT;
+	zassert_equal(spaghetti_device_profile_exec(&profile, profile.sample_ops,
+						    profile.sample_count, &fake_port, &binding,
+						    &result),
+		      -ETIMEDOUT);
+	bus.i2c_error = 0;
+	zassert_ok(spaghetti_device_profile_exec(&profile, profile.sample_ops, profile.sample_count,
+						 &fake_port, &binding,
+						 &result)); /* Workspace lock released. */
+}
+
+static bool put_raw_op(zcbor_state_t *state, const uint32_t op[8])
+{
+	if (!zcbor_list_start_encode(state, 8))
+		return false;
+	for (size_t i = 0; i < 8; i++)
+		if (!zcbor_uint32_put(state, op[i]))
+			return false;
+	return zcbor_list_end_encode(state, 8);
+}
+ZTEST(device_profiles, test_wire3_owns_long_data_across_reload)
+{
+	static uint8_t wire[3000], data[2048];
+	memset(data, 0x5A, sizeof(data));
+	ZCBOR_STATE_E(state, 8, wire, sizeof(wire), 1);
+	const uint32_t init[][8] = {{29, 0, 0, 0, 2048, 0, 0, 0}, {31, 0, 0, 0, 2048, 1000, 0, 0}};
+	const uint32_t sample[][8] = {
+	    {12, 0, 0, 0, 1, 0, 0, 0}, {21, 1, 0, 0, 1, 1, 0, 1}, {22, 0, 0, 0, 0, 0, 0, 0}};
+	zassert_true(zcbor_map_start_encode(state, 16));
+	const uint32_t values[] = {
+	    3, 0, 1, SPAGHETTI_PORT_TRANSPORT_I2C, SPAGHETTI_PORT_CAP_I2C, 1000, 1, 2048};
+	for (uint32_t i = 0; i < 8; i++) {
+		zassert_true(zcbor_uint32_put(state, i));
+		if (i == 1)
+			zassert_true(zcbor_tstr_put_lit(state, "long-owned"));
+		else
+			zassert_true(zcbor_uint32_put(state, values[i]));
+	}
+	zassert_true(zcbor_uint32_put(state, 8) && zcbor_list_start_encode(state, 2));
+	for (size_t i = 0; i < 2; i++)
+		zassert_true(put_raw_op(state, init[i]));
+	zassert_true(zcbor_list_end_encode(state, 2));
+	zassert_true(zcbor_uint32_put(state, 9) && zcbor_list_start_encode(state, 3));
+	for (size_t i = 0; i < 3; i++)
+		zassert_true(put_raw_op(state, sample[i]));
+	zassert_true(zcbor_list_end_encode(state, 3));
+	zassert_true(zcbor_uint32_put(state, 10) && zcbor_list_start_encode(state, 0) &&
+		     zcbor_list_end_encode(state, 0));
+	zassert_true(zcbor_uint32_put(state, 11) && zcbor_tstr_put_lit(state, "long.schema"));
+	zassert_true(zcbor_uint32_put(state, 12) && zcbor_uint32_put(state, 1));
+	zassert_true(zcbor_uint32_put(state, 13) && zcbor_list_start_encode(state, 1) &&
+		     zcbor_list_start_encode(state, 4));
+	zassert_true(zcbor_uint32_put(state, 1) && zcbor_uint32_put(state, SPAGHETTI_VALUE_INT64) &&
+		     zcbor_tstr_put_lit(state, "value") && zcbor_tstr_put_lit(state, "raw"));
+	zassert_true(zcbor_list_end_encode(state, 4) && zcbor_list_end_encode(state, 1));
+	zassert_true(zcbor_uint32_put(state, 14) && zcbor_list_start_encode(state, 0) &&
+		     zcbor_list_end_encode(state, 0));
+	struct zcbor_string blob = {.value = data, .len = sizeof(data)};
+	zassert_true(zcbor_uint32_put(state, 15) && zcbor_bstr_encode(state, &blob) &&
+		     zcbor_map_end_encode(state, 16));
+	size_t size = state->payload - wire;
+	zassert_ok(spaghetti_device_profile_install(wire, size));
+	memset(wire, 0, sizeof(wire));
+	const struct spaghetti_device_profile *found =
+	    spaghetti_device_profile_find("long-owned", 1, NULL);
+	zassert_not_null(found);
+	zassert_equal(found->message_data_size, 2048);
+	zassert_equal(found->message_data[2047], 0x5A);
+	spaghetti_device_profile_reset_for_test();
+	zassert_ok(spaghetti_device_profile_init());
+	found = spaghetti_device_profile_find("long-owned", 1, NULL);
+	zassert_not_null(found);
+	zassert_equal(found->message_data[2047], 0x5A);
+	zassert_ok(spaghetti_device_profile_remove("long-owned", 1));
+}

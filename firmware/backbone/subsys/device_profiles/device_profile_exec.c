@@ -417,11 +417,11 @@ static int exec_emit_field(const struct spaghetti_device_profile *profile,
 	return 0;
 }
 
-int spaghetti_device_profile_exec(const struct spaghetti_device_profile *profile,
-				  const struct spaghetti_device_profile_op *ops, size_t op_count,
-	const struct spaghetti_port *port,
-	const struct spaghetti_device_profile_binding *binding,
-	struct spaghetti_record_payload *out_record)
+static int exec_with_message(uint8_t *message, const struct spaghetti_device_profile *profile,
+			     const struct spaghetti_device_profile_op *ops, size_t op_count,
+			     const struct spaghetti_port *port,
+			     const struct spaghetti_device_profile_binding *binding,
+			     struct spaghetti_record_payload *out_record)
 {
 	struct spaghetti_device_profile_temp temps[SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS];
 
@@ -430,6 +430,7 @@ int spaghetti_device_profile_exec(const struct spaghetti_device_profile *profile
 		return -EINVAL;
 	}
 
+	size_t message_size = 0U;
 	memset(temps, 0, sizeof(temps));
 	if (out_record != NULL) {
 		memset(out_record, 0, sizeof(*out_record));
@@ -443,6 +444,35 @@ int spaghetti_device_profile_exec(const struct spaghetti_device_profile *profile
 		int err = 0;
 
 		switch (op->opcode) {
+		case SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_LOAD:
+			if (message == NULL || op->imm0 == 0U ||
+			    op->imm0 > SPAGHETTI_PROFILE_MESSAGE_MAX ||
+			    profile->message_data == NULL ||
+			    (uint64_t)op->imm2 + op->imm0 > profile->message_data_size)
+				return -EINVAL;
+			memcpy(message, profile->message_data + op->imm2, op->imm0);
+			message_size = op->imm0;
+			break;
+		case SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_PATCH:
+			err = temp_get(temps, op->src_a, &src_a);
+			if (err != 0 || message == NULL || op->imm1 == 0U ||
+			    op->imm1 > src_a->size || (size_t)op->imm0 + op->imm1 > message_size)
+				return -EINVAL;
+			memcpy(message + op->imm0, src_a->bytes, op->imm1);
+			break;
+		case SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE: {
+			if (message == NULL || message_size == 0U || op->imm0 != message_size)
+				return -EINVAL;
+			struct i2c_msg msg = {.buf = message,
+					      .len = message_size,
+					      .flags = I2C_MSG_WRITE | I2C_MSG_STOP};
+			struct spaghetti_port_i2c_request request = {
+			    .address = binding->i2c_address, .messages = &msg, .message_count = 1U};
+			err = spaghetti_port_i2c_transfer(
+			    port, &request, K_MSEC(binding_timeout_ms(binding, op->imm1)));
+			message_size = 0U;
+			break;
+		}
 		case SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE:
 			err = temp_get(temps, op->src_a, &src_a);
 			if (err == 0) {
@@ -838,6 +868,39 @@ int spaghetti_device_profile_exec(const struct spaghetti_device_profile *profile
 	}
 
 	return 0;
+}
+
+/* One dedicated workspace, shared with a bounded lock; ordinary actions allocate none. */
+K_MUTEX_DEFINE(message_lock);
+
+int spaghetti_device_profile_exec(const struct spaghetti_device_profile *profile,
+				  const struct spaghetti_device_profile_op *ops, size_t op_count,
+				  const struct spaghetti_port *port,
+				  const struct spaghetti_device_profile_binding *binding,
+				  struct spaghetti_record_payload *out_record)
+{
+	bool needs_message = false;
+	if (ops == NULL && op_count != 0U)
+		return -EINVAL;
+	for (size_t i = 0U; i < op_count; ++i)
+		if (ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_LOAD ||
+		    ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_PATCH ||
+		    ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE)
+			needs_message = true;
+	if (!needs_message)
+		return exec_with_message(NULL, profile, ops, op_count, port, binding, out_record);
+	int err = k_mutex_lock(&message_lock, K_MSEC(1000));
+	if (err < 0)
+		return err;
+	uint8_t *workspace = k_malloc(SPAGHETTI_PROFILE_MESSAGE_MAX);
+	if (workspace == NULL) {
+		k_mutex_unlock(&message_lock);
+		return -ENOMEM;
+	}
+	err = exec_with_message(workspace, profile, ops, op_count, port, binding, out_record);
+	k_free(workspace);
+	k_mutex_unlock(&message_lock);
+	return err;
 }
 
 int spaghetti_device_profile_pack_argument(const struct spaghetti_device_profile_op *op,

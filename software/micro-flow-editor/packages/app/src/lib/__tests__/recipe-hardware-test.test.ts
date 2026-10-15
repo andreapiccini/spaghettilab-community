@@ -3,6 +3,8 @@ import { buildRecipeTestConfigBytes } from "../recipe-to-test-profile.js";
 import { describe, expect, it, vi } from "vitest";
 import { createI2cGenericExample } from "../device-recipe-draft.js";
 import {
+  restoreParkedConfig,
+  boundedRecipeRequest,
   buildRecipeTestPlan,
   modesForRecipeTestI2c,
   runRecipeHardwareTest,
@@ -228,7 +230,7 @@ it("does not overlap temporary configs when two canvas actions are tested", asyn
   expect((await next).kind).toBe("profile_failed");
 });
 
-it.each([33, 32])(
+it.each([2049, 32])(
   "rejects unsupported sequences before touching the Core: %s",
   async (length) => {
     const base = createI2cGenericExample();
@@ -254,8 +256,69 @@ it.each([33, 32])(
     });
     expect(result.kind).toBe("profile_failed");
     expect(`${result.note} ${result.error ?? ""}`).toContain(
-      length === 33 ? "32 byte" : "16",
+      length === 2049 ? "2048 byte" : "16",
     );
     expect(getConfig).not.toHaveBeenCalled();
   },
 );
+
+it("bounds a stalled request and aborts its transport signal", async () => {
+  vi.useFakeTimers();
+  try {
+    let signal: AbortSignal | undefined;
+    const result = boundedRecipeRequest((current) => {
+      signal = current;
+      return new Promise(() => {});
+    }, 100).catch((error) => error);
+    await vi.advanceTimersByTimeAsync(100);
+    expect((await result).name).toBe("TimeoutError");
+    expect(signal?.aborted).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it("releases the test lock when GET_CONFIG never responds", async () => {
+  vi.useFakeTimers();
+  try {
+    const client = {
+      getConfig: () => new Promise(() => {}),
+    } as unknown as SpaghettiClient;
+    const input = {
+      client,
+      draft: createI2cGenericExample(),
+      selection: { target: { kind: "action" as const }, runInitFirst: false },
+      labels,
+    };
+    const first = runRecipeHardwareTest(input);
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect((await first).error).toContain("Timeout");
+    const second = runRecipeHardwareTest(input);
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect((await second).error).toContain("Timeout");
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+it("bounds restoration when APPLY_CONFIG never responds", async () => {
+  vi.useFakeTimers();
+  try {
+    const client = {
+      getConfig: async () => ({ generation: 1 }),
+      applyConfig: () => new Promise(() => {}),
+    } as unknown as SpaghettiClient;
+    const result = restoreParkedConfig(client, {
+      generation: 1,
+      configBytes: new Uint8Array(),
+      sha256: new Uint8Array(32),
+    }).catch((error) => error);
+    await vi.advanceTimersByTimeAsync(15_000);
+    expect((await result).name).toBe("TimeoutError");
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    vi.useRealTimers();
+  }
+});

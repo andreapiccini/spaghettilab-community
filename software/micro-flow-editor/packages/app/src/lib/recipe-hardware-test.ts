@@ -277,6 +277,84 @@ export function buildRecipeTestPlan(
   return { selection, steps };
 }
 
+/** Bounds even transports/callbacks that fail to settle their own promise. */
+export function boundedRecipeRequest<T>(
+  run: (signal: AbortSignal) => Promise<T>,
+  timeoutMs: number,
+  parent?: AbortSignal,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const controller = new AbortController();
+    const abort = () =>
+      controller.abort(
+        parent?.reason ?? new DOMException("Prova interrotta", "AbortError"),
+      );
+    const cleanup = () => {
+      clearTimeout(timer);
+      parent?.removeEventListener("abort", abort);
+      controller.signal.removeEventListener("abort", fail);
+    };
+    const fail = () => {
+      cleanup();
+      reject(controller.signal.reason);
+    };
+    const timer = setTimeout(
+      () =>
+        controller.abort(
+          new DOMException(
+            "Timeout della prova I²C: il Core non ha risposto entro il tempo previsto.",
+            "TimeoutError",
+          ),
+        ),
+      Math.max(1, timeoutMs),
+    );
+    controller.signal.addEventListener("abort", fail, { once: true });
+    parent?.addEventListener("abort", abort, { once: true });
+    if (parent?.aborted) abort();
+    try {
+      controller.signal.throwIfAborted();
+      run(controller.signal).then(
+        (value) => {
+          cleanup();
+          resolve(value);
+        },
+        (error) => {
+          cleanup();
+          reject(error);
+        },
+      );
+    } catch (error) {
+      cleanup();
+      reject(error);
+    }
+  });
+}
+
+function timedRecipeClient(
+  client: SpaghettiClient,
+  deadline: number,
+  parent?: AbortSignal,
+): SpaghettiClient {
+  return new Proxy(client, {
+    get(target, key) {
+      const method = Reflect.get(target, key);
+      if (typeof method !== "function") return method;
+      return (...args: unknown[]) =>
+        boundedRecipeRequest(
+          (signal) => {
+            const signalIndex = ["getConfig", "getStatus"].includes(String(key))
+              ? 0
+              : 1;
+            args[signalIndex] = signal;
+            return Promise.resolve(Reflect.apply(method, target, args));
+          },
+          Math.min(10_000, Math.max(1, deadline - Date.now())),
+          parent,
+        );
+    },
+  });
+}
+
 /** Snapshot live Backbone config — canvas / project are never modified. */
 export async function parkLiveConfig(
   client: SpaghettiClient,
@@ -294,11 +372,13 @@ export async function restoreParkedConfig(
   client: SpaghettiClient,
   parked: ParkedLiveConfig,
 ): Promise<void> {
-  const current = await client.getConfig();
-  await client.applyConfig({
-    expectedGeneration: current.generation,
-    configBytes: parked.configBytes,
-  });
+  await boundedRecipeRequest(async (signal) => {
+    const current = await client.getConfig(signal);
+    await client.applyConfig(
+      { expectedGeneration: current.generation, configBytes: parked.configBytes },
+      signal,
+    );
+  }, 15_000);
 }
 
 export type RunRecipeHardwareTestInput = {
@@ -329,6 +409,8 @@ export type RunRecipeHardwareTestInput = {
   readonly signal?: AbortSignal;
   /** How long to leave the test config active so a sample can fire (ms). */
   readonly sampleWaitMs?: number;
+  /** Original client used for independently bounded restoration. */
+  readonly restoreClient?: SpaghettiClient;
 };
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -359,10 +441,18 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 const activeHardwareTests = new WeakSet<SpaghettiClient>();
 
 /** Shared by tools that stream commands under one temporary configuration. */
-export async function withExclusiveRecipeHardwareTest<T>(client: SpaghettiClient, run: () => Promise<T>): Promise<T> {
-  if (activeHardwareTests.has(client)) throw new Error("Una prova è già in corso su questo Core.");
+export async function withExclusiveRecipeHardwareTest<T>(
+  client: SpaghettiClient,
+  run: () => Promise<T>,
+): Promise<T> {
+  if (activeHardwareTests.has(client))
+    throw new Error("Una prova è già in corso su questo Core.");
   activeHardwareTests.add(client);
-  try {return await run();} finally {activeHardwareTests.delete(client);}
+  try {
+    return await run();
+  } finally {
+    activeHardwareTests.delete(client);
+  }
 }
 
 /** One temporary config transaction at a time per connected Core, including restore. */
@@ -384,7 +474,38 @@ export async function runRecipeHardwareTest(
   }
   activeHardwareTests.add(input.client);
   try {
-    return await runRecipeHardwareTestUnlocked(input);
+    const deadline = Date.now() + 45_000;
+    const bounded = <T>(run: () => Promise<T>) =>
+      boundedRecipeRequest(
+        run,
+        Math.min(10_000, Math.max(1, deadline - Date.now())),
+        input.signal,
+      );
+    try {
+      return await runRecipeHardwareTestUnlocked({
+        ...input,
+        restoreClient: input.client,
+        client: timedRecipeClient(input.client, deadline, input.signal),
+        installProfile: input.installProfile
+          ? (profile) => bounded(() => input.installProfile!(profile))
+          : undefined,
+        cleanupTryProfiles: input.cleanupTryProfiles
+          ? () => bounded(input.cleanupTryProfiles!)
+          : undefined,
+      });
+    } catch (error) {
+      const plan = buildRecipeTestPlan(input.draft, input.selection, input.labels);
+      return {
+        ok: false,
+        kind: "apply_failed",
+        plan,
+        capture: buildRecipeBusCapture(plan.steps.map((step) => step.op)),
+        parked: null,
+        restored: false,
+        note: "Prova terminata senza completamento.",
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
   } finally {
     activeHardwareTests.delete(input.client);
   }
@@ -459,7 +580,7 @@ async function runRecipeHardwareTestUnlocked(
     if (op.type === "i2c_write" || op.type === "i2c_write_read") {
       const bytes = op.type === "i2c_write" ? op.bytes : op.writeBytes;
       return (
-        bytes.length > 32 ||
+        bytes.length > (op.type === "i2c_write" ? 2048 : 32) ||
         bytes.some((b) => !/^(?:0x)?[0-9a-f]{1,2}$/i.test(b.trim())) ||
         (op.type === "i2c_write_read" && (op.readLen < 1 || op.readLen > 8))
       );
@@ -474,7 +595,7 @@ async function runRecipeHardwareTestUnlocked(
       capture,
       parked: null,
       restored: false,
-      note: "Operazione I²C non valida: usa valori HEX costanti, al massimo 32 byte per scrittura e da 1 a 8 byte per lettura.",
+      note: "Operazione I²C non valida: usa valori HEX costanti, al massimo 2048 byte per scrittura (32 per scrittura-lettura) e da 1 a 8 byte per lettura.",
     };
 
   const initOps =
@@ -712,7 +833,7 @@ async function runRecipeHardwareTestUnlocked(
     // Ops ran during APPLY. Restore is another persistent Config write,
     // so it must respect the firmware write interval even for write-only tests.
     await sleep(Math.max(CONFIG_WRITE_GAP_MS, input.sampleWaitMs ?? 0), input.signal);
-    await restoreParkedConfig(input.client, parkedForRestore);
+    await restoreParkedConfig(input.restoreClient ?? input.client, parkedForRestore);
     return {
       ok: true,
       kind: "applied",
@@ -733,8 +854,8 @@ async function runRecipeHardwareTestUnlocked(
     let restored = false;
     try {
       // Respect write-interval before restore if APPLY partially persisted.
-      await sleep(CONFIG_WRITE_GAP_MS, input.signal);
-      await restoreParkedConfig(input.client, parkedForRestore);
+      await sleep(CONFIG_WRITE_GAP_MS);
+      await restoreParkedConfig(input.restoreClient ?? input.client, parkedForRestore);
       restored = true;
     } catch (restoreErr) {
       if (applied) {

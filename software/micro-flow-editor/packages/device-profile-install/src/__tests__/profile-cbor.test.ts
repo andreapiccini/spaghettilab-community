@@ -105,9 +105,9 @@ describe("encodeDeviceProfileCbor / decodeDeviceProfileCbor — S063 wire encode
 
   it("rejects an unsupported wire version", () => {
     const bytes = encodeDeviceProfileCbor(minimalDraft());
-    // Byte 2 is the WIRE field's value (uint 1, single byte 0x01) — corrupt it to 3.
+    // Byte 2 is the WIRE field's value (uint 1, single byte 0x01) — corrupt it to 4.
     const tampered = new Uint8Array(bytes);
-    tampered[2] = 3;
+    tampered[2] = 4;
     const result = decodeDeviceProfileCbor(tampered);
     expect(result.ok).toBe(false);
     if (!result.ok)

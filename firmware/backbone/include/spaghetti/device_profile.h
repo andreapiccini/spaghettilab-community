@@ -27,10 +27,12 @@
 #define SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS 8U
 
 /** Opcode vocabulary revision understood by this firmware image. */
-#define SPAGHETTI_DEVICE_PROFILE_OPCODE_VERSION 4U
+#define SPAGHETTI_DEVICE_PROFILE_OPCODE_VERSION 5U
 
 /** Compact CBOR map wire revision decoded by install. */
-#define SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION 2U
+#define SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION 3U
+#define SPAGHETTI_PROFILE_MESSAGE_MAX 2048U
+#define SPAGHETTI_PROFILE_DATA_MAX 3072U
 #define SPAGHETTI_DEVICE_PROFILE_MAX_ACTIONS 8U
 
 /** Maximum sample-record fields owned by one profile. */
@@ -54,36 +56,41 @@
  * firmware Capability Pack; install never extends this set.
  */
 enum spaghetti_device_profile_opcode {
-	SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE = 1U, /**< Write temp bytes on I2C. */
-	SPAGHETTI_DEVICE_PROFILE_OP_I2C_READ = 2U, /**< Read imm0 bytes into temp. */
-	SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ = 3U, /**< Write then read. */
-	SPAGHETTI_DEVICE_PROFILE_OP_SPI_TRANSCEIVE = 4U, /**< Full-duplex SPI. */
-	SPAGHETTI_DEVICE_PROFILE_OP_UART_WRITE = 5U, /**< Write temp bytes on UART. */
-	SPAGHETTI_DEVICE_PROFILE_OP_UART_READ_UNTIL = 6U, /**< Read until stop byte. */
-	SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET = 7U, /**< Sample digital input. */
-	SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET = 8U, /**< Drive digital output. */
-	SPAGHETTI_DEVICE_PROFILE_OP_ADC_READ = 9U, /**< Read one ADC channel. */
-	SPAGHETTI_DEVICE_PROFILE_OP_DELAY_BOUNDED = 10U, /**< Sleep imm0 milliseconds. */
+	SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_LOAD =
+	    29U, /**< Copy immutable data slice to dedicated workspace. */
+	SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_PATCH = 30U, /**< Patch workspace from a small temp. */
+	SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE =
+	    31U, /**< Single START/STOP for the assembled message. */
+	SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE = 1U,	   /**< Write temp bytes on I2C. */
+	SPAGHETTI_DEVICE_PROFILE_OP_I2C_READ = 2U,	   /**< Read imm0 bytes into temp. */
+	SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ = 3U,   /**< Write then read. */
+	SPAGHETTI_DEVICE_PROFILE_OP_SPI_TRANSCEIVE = 4U,   /**< Full-duplex SPI. */
+	SPAGHETTI_DEVICE_PROFILE_OP_UART_WRITE = 5U,	   /**< Write temp bytes on UART. */
+	SPAGHETTI_DEVICE_PROFILE_OP_UART_READ_UNTIL = 6U,  /**< Read until stop byte. */
+	SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET = 7U,	   /**< Sample digital input. */
+	SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET = 8U,	   /**< Drive digital output. */
+	SPAGHETTI_DEVICE_PROFILE_OP_ADC_READ = 9U,	   /**< Read one ADC channel. */
+	SPAGHETTI_DEVICE_PROFILE_OP_DELAY_BOUNDED = 10U,   /**< Sleep imm0 milliseconds. */
 	SPAGHETTI_DEVICE_PROFILE_OP_WAIT_FIELD_MASK = 11U, /**< Bounded ready poll. */
-	SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST = 12U, /**< Load imm2/imm3 bytes. */
-	SPAGHETTI_DEVICE_PROFILE_OP_COPY_BYTES = 13U, /**< Copy temp to temp. */
-	SPAGHETTI_DEVICE_PROFILE_OP_CONCAT = 14U, /**< Concatenate two temps. */
-	SPAGHETTI_DEVICE_PROFILE_OP_BYTE_SWAP = 15U, /**< Swap 2 or 4 byte temp. */
-	SPAGHETTI_DEVICE_PROFILE_OP_MASK = 16U, /**< AND first bytes with imm2. */
-	SPAGHETTI_DEVICE_PROFILE_OP_SHIFT = 17U, /**< Shift integer temp. */
-	SPAGHETTI_DEVICE_PROFILE_OP_SIGN_EXTEND = 18U, /**< Sign-extend imm0 bits. */
-	SPAGHETTI_DEVICE_PROFILE_OP_CRC8 = 19U, /**< CRC-8 poly 0x07 over temp. */
-	SPAGHETTI_DEVICE_PROFILE_OP_CRC16 = 20U, /**< CRC-16-CCITT over temp. */
-	SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD = 21U, /**< Append one record field. */
-	SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD = 22U, /**< Finalize sample record. */
-	SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ = 23U, /**< 1-Wire write then read. */
-	SPAGHETTI_DEVICE_PROFILE_OP_UART_READ = 24U, /**< Read imm0 UART bytes. */
+	SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST = 12U,	   /**< Load imm2/imm3 bytes. */
+	SPAGHETTI_DEVICE_PROFILE_OP_COPY_BYTES = 13U,	   /**< Copy temp to temp. */
+	SPAGHETTI_DEVICE_PROFILE_OP_CONCAT = 14U,	   /**< Concatenate two temps. */
+	SPAGHETTI_DEVICE_PROFILE_OP_BYTE_SWAP = 15U,	   /**< Swap 2 or 4 byte temp. */
+	SPAGHETTI_DEVICE_PROFILE_OP_MASK = 16U,		   /**< AND first bytes with imm2. */
+	SPAGHETTI_DEVICE_PROFILE_OP_SHIFT = 17U,	   /**< Shift integer temp. */
+	SPAGHETTI_DEVICE_PROFILE_OP_SIGN_EXTEND = 18U,	   /**< Sign-extend imm0 bits. */
+	SPAGHETTI_DEVICE_PROFILE_OP_CRC8 = 19U,		   /**< CRC-8 poly 0x07 over temp. */
+	SPAGHETTI_DEVICE_PROFILE_OP_CRC16 = 20U,	   /**< CRC-16-CCITT over temp. */
+	SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD = 21U,	   /**< Append one record field. */
+	SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD = 22U,	   /**< Finalize sample record. */
+	SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ = 23U,   /**< 1-Wire write then read. */
+	SPAGHETTI_DEVICE_PROFILE_OP_UART_READ = 24U,	   /**< Read imm0 UART bytes. */
 	SPAGHETTI_DEVICE_PROFILE_OP_LOAD_VALUE =
-		28U, /**< Read a previously published device variable. */
+	    28U, /**< Read a previously published device variable. */
 	SPAGHETTI_DEVICE_PROFILE_OP_SCALE_PACK =
-		27U, /**< Checked integer scaling and byte packing. */
+	    27U, /**< Checked integer scaling and byte packing. */
 	SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT = 26U, /**< Pack a command argument into temp. */
-	SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO = 25U, /**< Bounded digital-input poll. */
+	SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO = 25U,	 /**< Bounded digital-input poll. */
 };
 
 /**
@@ -130,6 +137,9 @@ struct spaghetti_device_profile_action {
 };
 
 struct spaghetti_device_profile {
+	const uint8_t *message_data; /**< Immutable bytes, owned by installed CBOR or static
+					built-in storage. */
+	size_t message_data_size;
 	char profile_id[SPAGHETTI_DEVICE_PROFILE_ID_SIZE]; /**< Owned stable model ID.
 							    */
 	uint16_t version; /**< Incompatible profile revision. */

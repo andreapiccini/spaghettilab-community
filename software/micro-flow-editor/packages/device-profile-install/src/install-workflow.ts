@@ -1,5 +1,11 @@
 import type { DeviceProfileDraft } from "@spaghettilab/device-profile-authoring-model";
-import { domainError, err, ok, type DomainError, type Result } from "@spaghettilab/domain";
+import {
+  domainError,
+  err,
+  ok,
+  type DomainError,
+  type Result,
+} from "@spaghettilab/domain";
 import type { DeviceProfileSummary } from "@spaghettilab/protocol-sdk";
 import { DeviceProfileInstallErrorCode } from "./errors.js";
 import { bytesEqual, sha256 } from "./hash.js";
@@ -13,17 +19,29 @@ import { encodeDeviceProfileCbor } from "./profile-cbor.js";
  * is this small.
  */
 export type DeviceProfileWireClient = {
-  validateDeviceProfile(req: { readonly profileCbor: Uint8Array }): Promise<{ readonly valid: number }>;
+  validateDeviceProfile(req: {
+    readonly profileCbor: Uint8Array;
+  }): Promise<{ readonly valid: number }>;
   installDeviceProfile(req: { readonly profileCbor: Uint8Array }): Promise<void>;
-  removeDeviceProfile(req: { readonly idBytes: Uint8Array; readonly version: number }): Promise<void>;
+  removeDeviceProfile(req: {
+    readonly idBytes: Uint8Array;
+    readonly version: number;
+  }): Promise<void>;
   getFullDeviceProfileList(): Promise<DeviceProfileSummary[]>;
 };
 
 /** A structural stand-in for `@spaghettilab/protocol-sdk`'s `SpaghettiClientError` — checked by shape, not `instanceof`, so this package doesn't need a hard dependency on that class for a single field read. */
 type WireError = { readonly code?: string; readonly status?: number };
 
-function isProtocolError(e: unknown): e is WireError & { code: "PROTOCOL_ERROR"; status: number } {
-  return typeof e === "object" && e !== null && (e as WireError).code === "PROTOCOL_ERROR" && typeof (e as WireError).status === "number";
+function isProtocolError(
+  e: unknown,
+): e is WireError & { code: "PROTOCOL_ERROR"; status: number } {
+  return (
+    typeof e === "object" &&
+    e !== null &&
+    (e as WireError).code === "PROTOCOL_ERROR" &&
+    typeof (e as WireError).status === "number"
+  );
 }
 
 /**
@@ -58,7 +76,8 @@ function wireFailure(operation: string, cause: unknown): DomainError {
         code: DeviceProfileInstallErrorCode.PROFILE_IN_USE,
         path: ["device-profile-install", operation],
         target: "status=BUSY",
-        remediation: "the Core reports this profile is still referenced by a live or persisted Config — it cannot be removed or replaced",
+        remediation:
+          "the Core reports this profile is still referenced by a live or persisted Config — it cannot be removed or replaced",
         cause,
       });
     }
@@ -67,7 +86,8 @@ function wireFailure(operation: string, cause: unknown): DomainError {
         code: DeviceProfileInstallErrorCode.REMOTE_VALIDATION_FAILED,
         path: ["device-profile-install", operation],
         target: "status=CONFLICT",
-        remediation: "same profileId+version is already installed with a different hash — retry with a new version",
+        remediation:
+          "same profileId+version is already installed with a different hash — retry with a new version",
         cause,
       });
     }
@@ -76,7 +96,8 @@ function wireFailure(operation: string, cause: unknown): DomainError {
         code: DeviceProfileInstallErrorCode.REMOTE_VALIDATION_FAILED,
         path: ["device-profile-install", operation],
         target: "status=RESOURCE_EXHAUSTED",
-        remediation: "the Core has no free profile slot — remove an unused Device Profile and retry",
+        remediation:
+          "the Core has no free profile slot — remove an unused Device Profile and retry",
         cause,
       });
     }
@@ -85,16 +106,21 @@ function wireFailure(operation: string, cause: unknown): DomainError {
         code: DeviceProfileInstallErrorCode.REMOTE_VALIDATION_FAILED,
         path: ["device-profile-install", operation],
         target: "status=UNSUPPORTED",
-        remediation: "the Core rejected the wire version or an opcode this profile uses",
+        remediation:
+          "the Core rejected the wire version or an opcode this profile uses",
         cause,
       });
     }
-    if (cause.status === STATUS_INVALID_ARGUMENT || cause.status === STATUS_MALFORMED_REQUEST) {
+    if (
+      cause.status === STATUS_INVALID_ARGUMENT ||
+      cause.status === STATUS_MALFORMED_REQUEST
+    ) {
       return domainError({
         code: DeviceProfileInstallErrorCode.REMOTE_VALIDATION_FAILED,
         path: ["device-profile-install", operation],
         target: `status=${cause.status === STATUS_INVALID_ARGUMENT ? "INVALID_ARGUMENT" : "MALFORMED_REQUEST"}`,
-        remediation: "the Core rejected the test profile bytes (invalid or malformed Device Profile)",
+        remediation:
+          "the Core rejected the test profile bytes (invalid or malformed Device Profile)",
         cause,
       });
     }
@@ -103,7 +129,8 @@ function wireFailure(operation: string, cause: unknown): DomainError {
         code: DeviceProfileInstallErrorCode.REMOTE_VALIDATION_FAILED,
         path: ["device-profile-install", operation],
         target: `status=${cause.status === STATUS_TIMEOUT ? "TIMEOUT" : "UNAVAILABLE"}`,
-        remediation: "Core busy or link unstable — wait a moment and retry while Connected",
+        remediation:
+          "Core busy or link unstable — wait a moment and retry while Connected",
         cause,
       });
     }
@@ -124,7 +151,8 @@ function wireFailure(operation: string, cause: unknown): DomainError {
       code: DeviceProfileInstallErrorCode.REMOTE_VALIDATION_FAILED,
       path: ["device-profile-install", operation],
       target: "client=TIMEOUT",
-      remediation: "timeout waiting for the Core — check the link (BLE/USB) and retry while Connected",
+      remediation:
+        "timeout waiting for the Core — check the link (BLE/USB) and retry while Connected",
       cause,
     });
   }
@@ -190,11 +218,25 @@ export type InstallProfileResult = {
  * but its result is not treated as a real correctness signal; only the
  * post-install hash check is.
  */
-export async function installProfile(client: DeviceProfileWireClient, draft: DeviceProfileDraft): Promise<Result<InstallProfileResult, DomainError>> {
+export async function installProfile(
+  client: DeviceProfileWireClient,
+  draft: DeviceProfileDraft,
+): Promise<Result<InstallProfileResult, DomainError>> {
   const profileCbor = encodeDeviceProfileCbor(draft);
 
   try {
-    await client.validateDeviceProfile({ profileCbor });
+    const validation = await client.validateDeviceProfile({ profileCbor });
+    if (!validation.valid)
+      return err(
+        domainError({
+          code: DeviceProfileInstallErrorCode.REMOTE_VALIDATION_FAILED,
+          path: ["device-profile-install", "validateDeviceProfile"],
+          target: draft.profileId,
+          remediation: draft.messageData
+            ? "Il Core non accetta il profilo con messaggi lunghi. Serve firmware 0.3.7 o successivo con supporto ai messaggi I²C lunghi."
+            : "Il Core ha rifiutato il profilo; controlla istruzioni e risorse prima dell’installazione.",
+        }),
+      );
   } catch (cause) {
     // Stub / wire-shape drift on VALIDATE must not block install — post-install
     // hash is the real correctness check (see package README).
@@ -226,14 +268,17 @@ export async function installProfile(client: DeviceProfileWireClient, draft: Dev
     return err(wireFailure("getFullDeviceProfileList", cause));
   }
 
-  const match = installed.find((p) => p.profileId === draft.profileId && p.version === draft.version);
+  const match = installed.find(
+    (p) => p.profileId === draft.profileId && p.version === draft.version,
+  );
   if (!match) {
     return err(
       domainError({
         code: DeviceProfileInstallErrorCode.NOT_FOUND_AFTER_INSTALL,
         path: ["device-profile-install", "installProfile"],
         target: `${draft.profileId}@${draft.version}`,
-        remediation: "INSTALL_DEVICE_PROFILE returned success but the profile does not appear in a subsequent catalog listing",
+        remediation:
+          "INSTALL_DEVICE_PROFILE returned success but the profile does not appear in a subsequent catalog listing",
       }),
     );
   }
@@ -243,7 +288,8 @@ export async function installProfile(client: DeviceProfileWireClient, draft: Dev
         code: DeviceProfileInstallErrorCode.HASH_VERIFICATION_FAILED,
         path: ["device-profile-install", "installProfile"],
         target: `${draft.profileId}@${draft.version}`,
-        remediation: "the Core's reported SHA-256 does not match the SHA-256 of the bytes this package sent",
+        remediation:
+          "the Core's reported SHA-256 does not match the SHA-256 of the bytes this package sent",
       }),
     );
   }
@@ -272,12 +318,16 @@ export async function removeProfile(
         code: DeviceProfileInstallErrorCode.PROFILE_IN_USE,
         path: ["device-profile-install", "removeProfile"],
         target: `${profileId}@${version}`,
-        remediation: "at least one Module in the current project references this profile — remove or reassign it first",
+        remediation:
+          "at least one Module in the current project references this profile — remove or reassign it first",
       }),
     );
   }
   try {
-    await client.removeDeviceProfile({ idBytes: new TextEncoder().encode(profileId), version });
+    await client.removeDeviceProfile({
+      idBytes: new TextEncoder().encode(profileId),
+      version,
+    });
     return ok(undefined);
   } catch (cause) {
     return err(wireFailure("removeProfile", cause));

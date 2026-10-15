@@ -33,6 +33,8 @@ type Props = {
   readonly stepSpans?: readonly TimingStepSpan[];
   readonly highlightOpId?: string | null;
   readonly onSelectOp?: (opId: string) => void;
+  readonly onChangeByte?: (opId: string, index: number, value: string) => void;
+  readonly onAddByte?: (opId: string) => void;
   readonly className?: string;
 };
 
@@ -53,8 +55,15 @@ export function TimingScopeChart({
   highlightOpId = null,
   onSelectOp,
   className,
+  onChangeByte,
+  onAddByte,
 }: Props) {
   const [zoom, setZoom] = useState(1);
+  const [byteFormat, setByteFormat] = useState<"hex" | "binary">("hex");
+  const displayByte = (value: string) =>
+    byteFormat === "binary" && /^(?:0x)?[0-9a-f]{1,2}$/i.test(value)
+      ? `0b${Number.parseInt(value.replace(/^0x/i, ""), 16).toString(2).padStart(8, "0")}`
+      : value;
   const dur = Math.max(1, durationMs);
   const labelW = 56;
   const levelW = 22;
@@ -63,10 +72,15 @@ export function TimingScopeChart({
   const laneH = 48;
   const stepH = stepSpans.length ? 36 : 0;
   const bandH = phaseBands.length ? 28 : 0;
-  const titleH = title ? 22 : 4;
+  const titleH = 4;
   const padTop = titleH + stepH + bandH;
   const padBot = caption ? 18 : 8;
-  const scale = readableTimingScale(dur, phaseBands, stepSpans, zoom);
+  const scale = readableTimingScale(
+    dur,
+    phaseBands,
+    stepSpans,
+    byteFormat === "binary" ? Math.max(1.4, zoom * 1.4) : zoom,
+  );
   const plotW = scale.width;
   const width = left + plotW + padR;
   const height = padTop + lanes.length * laneH + padBot;
@@ -80,32 +94,52 @@ export function TimingScopeChart({
 
   return (
     <div className={className}>
-      {phaseBands.length > 0 && (
-        <div className="mb-2 flex items-center justify-end gap-1 font-body text-xs">
-          <button
-            type="button"
-            aria-label="Riduci diagramma"
-            onClick={() => setZoom((value) => Math.max(0.5, value - 0.25))}
-            className="rounded border border-border px-2 py-1"
-          >
-            −
-          </button>
-          <button
-            type="button"
-            aria-label="Ripristina zoom diagramma"
-            onClick={() => setZoom(1)}
-            className="rounded border border-border px-2 py-1"
-          >
-            {Math.round(zoom * 100)}%
-          </button>
-          <button
-            type="button"
-            aria-label="Ingrandisci diagramma"
-            onClick={() => setZoom((value) => Math.min(4, value + 0.25))}
-            className="rounded border border-border px-2 py-1"
-          >
-            +
-          </button>
+      {(title || phaseBands.length > 0) && (
+        <div className="mb-2 flex items-center justify-between gap-3">
+          {title ? (
+            <h3 className="font-display text-sm font-bold text-ink">{title}</h3>
+          ) : (
+            <span />
+          )}
+          {phaseBands.length > 0 && (
+            <div className="flex shrink-0 items-center gap-1 font-body text-xs">
+              <select
+                aria-label="Formato byte"
+                value={byteFormat}
+                onChange={(event) =>
+                  setByteFormat(event.target.value as "hex" | "binary")
+                }
+                className="mr-2 rounded border border-border bg-surface px-2 py-1 text-ink"
+              >
+                <option value="hex">HEX</option>
+                <option value="binary">Binario</option>
+              </select>
+              <button
+                type="button"
+                aria-label="Riduci diagramma"
+                onClick={() => setZoom((value) => Math.max(0.5, value - 0.25))}
+                className="rounded border border-border px-2 py-1"
+              >
+                −
+              </button>
+              <button
+                type="button"
+                aria-label="Ripristina zoom diagramma"
+                onClick={() => setZoom(1)}
+                className="rounded border border-border px-2 py-1"
+              >
+                {Math.round(zoom * 100)}%
+              </button>
+              <button
+                type="button"
+                aria-label="Ingrandisci diagramma"
+                onClick={() => setZoom((value) => Math.min(4, value + 0.25))}
+                className="rounded border border-border px-2 py-1"
+              >
+                +
+              </button>
+            </div>
+          )}
         </div>
       )}
       <div
@@ -116,24 +150,9 @@ export function TimingScopeChart({
         <svg
           style={{ width: phaseBands.length ? `${width}px` : "100%", minWidth: "100%" }}
           viewBox={`0 0 ${width} ${height}`}
-          role="img"
+          role={onChangeByte ? "group" : "img"}
           aria-label={title ?? "Timing"}
         >
-          {title ? (
-            <text
-              x={4}
-              y={16}
-              fill={INK}
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                fontFamily: "Manrope, sans-serif",
-              }}
-            >
-              {title}
-            </text>
-          ) : null}
-
           {/* Recipe steps — same time axis as SCL/SDA */}
           {stepSpans.length > 0 ? (
             <g>
@@ -147,7 +166,7 @@ export function TimingScopeChart({
                   fontFamily: "Manrope, sans-serif",
                 }}
               >
-                STEP
+                AZIONE
               </text>
               {stepSpans.map((step) => {
                 const x0 = xAt(step.t0);
@@ -214,6 +233,21 @@ export function TimingScopeChart({
             </g>
           ) : null}
 
+          {phaseBands.length > 0 && (
+            <text
+              x={4}
+              y={bandY + 16}
+              fill={MUTED}
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                fontFamily: "Manrope, sans-serif",
+              }}
+            >
+              BYTE
+            </text>
+          )}
+
           {/* Phase bands — START / STOP / Sr / ACK / NACK / ADDR / DATA */}
           {phaseBands.map((band) => {
             const x0 = xAt(band.t0);
@@ -239,7 +273,78 @@ export function TimingScopeChart({
                   stroke={hi ? TRACE : "rgba(15,23,42,0.12)"}
                   strokeWidth={hi ? 1 : 0.5}
                 />
-                {showLabel ? (
+                {band.editableByte && band.opId && onChangeByte ? (
+                  <foreignObject
+                    x={x0 + 1}
+                    y={bandY + 1}
+                    width={Math.max(20, w - 2)}
+                    height={bandH - 6}
+                  >
+                    <div
+                      className="flex h-full items-center"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <input
+                        key={`${byteFormat}:${band.editableByte.value}`}
+                        aria-label={`Byte ${band.editableByte.index + 1} · ${band.opId}`}
+                        defaultValue={displayByte(band.editableByte.value)}
+                        spellCheck={false}
+                        className="h-full w-full min-w-0 rounded border border-transparent bg-transparent px-1 text-center font-mono text-[10px] font-bold text-ink hover:border-brand-blue focus:border-brand-blue focus:bg-surface focus:outline-none"
+                        onFocus={(event) => {
+                          onSelectOp?.(band.opId!);
+                          event.currentTarget.select();
+                        }}
+                        onBlur={(event) => {
+                          const value = event.currentTarget.value.trim();
+                          if (
+                            /^(?:0x)?[0-9a-f]{1,2}$/i.test(value) ||
+                            /^0b[01]{1,8}$/i.test(value) ||
+                            /^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(value)
+                          ) {
+                            onChangeByte(
+                              band.opId!,
+                              band.editableByte!.index,
+                              value.startsWith("$")
+                                ? value
+                                : /^0b/i.test(value)
+                                  ? Number.parseInt(value.slice(2), 2)
+                                      .toString(16)
+                                      .toUpperCase()
+                                      .padStart(2, "0")
+                                  : value
+                                      .replace(/^0x/i, "")
+                                      .toUpperCase()
+                                      .padStart(2, "0"),
+                            );
+                          } else
+                            event.currentTarget.value = displayByte(
+                              band.editableByte!.value,
+                            );
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") event.currentTarget.blur();
+                          if (event.key === "Escape") {
+                            event.currentTarget.value = displayByte(
+                              band.editableByte!.value,
+                            );
+                            event.currentTarget.blur();
+                          }
+                        }}
+                      />
+                      {band.editableByte.last && onAddByte && (
+                        <button
+                          type="button"
+                          aria-label={`Aggiungi byte · ${band.opId}`}
+                          title="Aggiungi byte"
+                          className="h-full shrink-0 border-l border-brand-blue/30 px-1 font-bold text-brand-blue hover:bg-brand-blue/10"
+                          onClick={() => onAddByte(band.opId!)}
+                        >
+                          +
+                        </button>
+                      )}
+                    </div>
+                  </foreignObject>
+                ) : showLabel ? (
                   <text
                     x={x0 + w / 2}
                     y={bandY + 16}
@@ -253,7 +358,7 @@ export function TimingScopeChart({
                   >
                     {{ S: "START", P: "STOP", A: "ACK", N: "NACK" }[
                       band.label as "S" | "P" | "A" | "N"
-                    ] ?? band.label}
+                    ] ?? displayByte(band.label)}
                   </text>
                 ) : null}
                 <line

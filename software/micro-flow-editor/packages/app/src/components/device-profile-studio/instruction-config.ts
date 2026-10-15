@@ -40,6 +40,7 @@ export const STEP_CATEGORIES: readonly StepCategory[] = [
 ];
 
 export const OP_LABEL: Record<Instruction["op"], string> = {
+  MESSAGE_LOAD: "Load message", MESSAGE_PATCH: "Patch message", I2C_MESSAGE_WRITE: "I2C message write",
   I2C_WRITE: "I2C write",
   I2C_READ: "I2C read",
   I2C_WRITE_READ: "I2C write-read",
@@ -71,6 +72,9 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
 };
 
 const FIELDS: Record<Instruction["op"], readonly FieldSpec[]> = {
+  MESSAGE_LOAD: [{ key: "offset", label: "Offset", kind: "number" }, { key: "length", label: "Byte", kind: "number" }],
+  MESSAGE_PATCH: [{ key: "src", label: "Sorgente", kind: "tempSlot" }, { key: "offset", label: "Offset", kind: "number" }, { key: "length", label: "Byte", kind: "number" }],
+  I2C_MESSAGE_WRITE: [{ key: "length", label: "Byte", kind: "number" }, { key: "timeoutMs", label: "Timeout (ms)", kind: "number" }],
   SCALE_PACK: [{ key: "src", label: "Sorgente", kind: "tempSlot" }, { key: "dst", label: "Destinazione", kind: "tempSlot" }, { key: "flags", label: "Endian / segno", kind: "number" }, { key: "width", label: "Byte", kind: "number" }, { key: "divisor", label: "Divisore", kind: "number" }, { key: "multiplier", label: "Moltiplicatore", kind: "number" }, { key: "offset", label: "Offset", kind: "number" }],
   I2C_WRITE: [
     { key: "src", label: "src (temp slot)", kind: "tempSlot" },
@@ -210,6 +214,9 @@ export function fieldsFor(op: Instruction["op"]): readonly FieldSpec[] {
 /** A minimal, valid default instance for each opcode — every numeric field starts at a small, real, executable value (never `NaN`/negative where the firmware would reject it). */
 export function defaultInstruction(op: Instruction["op"]): Instruction {
   switch (op) {
+    case "MESSAGE_LOAD": return { op, offset: 0, length: 1 };
+    case "MESSAGE_PATCH": return { op, src: 0, offset: 0, length: 1 };
+    case "I2C_MESSAGE_WRITE": return { op, length: 1, timeoutMs: 100 };
     case "I2C_WRITE":
       return { op, src: 0, length: 1, timeoutMs: 20 };
     case "I2C_READ":

@@ -8,6 +8,9 @@
  * delle istruzioni catalogate").
  */
 export const DeviceProfileOpcode = {
+  MESSAGE_LOAD: 29,
+  MESSAGE_PATCH: 30,
+  I2C_MESSAGE_WRITE: 31,
   I2C_WRITE: 1,
   I2C_READ: 2,
   I2C_WRITE_READ: 3,

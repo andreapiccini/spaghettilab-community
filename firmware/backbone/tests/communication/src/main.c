@@ -580,8 +580,12 @@ const struct spaghetti_device_profile *spaghetti_device_profile_get(size_t idx)
 	return NULL;
 }
 
+static size_t installed_profile_size;
+static uint8_t installed_profile_last;
 int spaghetti_device_profile_install(const uint8_t *cbor, size_t size)
 {
+	installed_profile_size = size;
+	installed_profile_last = size ? cbor[size - 1] : 0;
 	return ((cbor != NULL) && (size > 0U)) ? 0 : -EINVAL;
 }
 
@@ -1273,3 +1277,35 @@ ZTEST(communication, test_command_arguments_decode_and_reject_duplicates)
 }
 
 ZTEST_SUITE(communication, NULL, NULL, NULL, NULL, NULL);
+
+ZTEST(communication, test_large_profile_chunk_upload)
+{
+	struct spaghetti_request_context context = make_context(all_permissions);
+	struct spaghetti_protocol_request request = {.version = SPAGHETTI_PROTOCOL_VERSION,
+						     .operation =
+							 SPAGHETTI_PROTOCOL_INSTALL_DEVICE_PROFILE};
+	struct spaghetti_protocol_response response;
+	uint8_t chunk[400];
+	installed_profile_size = 0;
+	int err = spaghetti_communication_init();
+	zassert_true(err == 0 || err == -EALREADY);
+	for (uint32_t offset = 0; offset < 2048; offset += sizeof(chunk)) {
+		size_t length = MIN(sizeof(chunk), 2048 - offset);
+		memset(chunk, offset == 2000 ? 0xA5 : 0x5A, length);
+		ZCBOR_STATE_E(state, 4, request.payload.bytes, sizeof(request.payload.bytes), 1);
+		zassert_true(zcbor_map_start_encode(state, 4) && zcbor_uint32_put(state, 0) &&
+			     zcbor_bstr_encode_ptr(state, chunk, length));
+		zassert_true(zcbor_uint32_put(state, 1) && zcbor_uint32_put(state, offset));
+		zassert_true(zcbor_uint32_put(state, 2) && zcbor_uint32_put(state, 2048));
+		zassert_true(zcbor_uint32_put(state, 3) && zcbor_uint32_put(state, 777));
+		zassert_true(zcbor_map_end_encode(state, 4));
+		request.payload.size = state->payload - request.payload.bytes;
+		request.correlation_id = 50000 + offset;
+		zassert_ok(spaghetti_communication_handle_request(&context, &request, &response));
+		zassert_equal(response.status, SPAGHETTI_PROTOCOL_STATUS_OK);
+		if (offset < 2000)
+			zassert_equal(installed_profile_size, 0);
+	}
+	zassert_equal(installed_profile_size, 2048);
+	zassert_equal(installed_profile_last, 0xA5);
+}

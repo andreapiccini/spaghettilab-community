@@ -36,3 +36,21 @@ WAIT without attempts, and budgets above the profile maxima before any I/O.
 sentinel. Module Manager skips the blanket Port capability check and derives the
 acquire transport from the endpoint described after profile resolution. The driver
 still checks the profile's capability mask against the Port during init.
+
+### Long I²C writes (opcode set 5, wire 3)
+
+Wire 3 appends key 14 (action slices, possibly empty) and key 15 (immutable byte string,
+maximum 3072 bytes) after the legacy keys 0–13. Wire 1 and 2 remain readable.
+
+- `MESSAGE_LOAD` (29): `imm0` = message length (1–2048), `imm2` = template offset.
+- `MESSAGE_PATCH` (30): `src_a` = ordinary temp, `imm0` = message offset,
+  `imm1` = bytes copied. The source and destination ranges are checked.
+- `I2C_MESSAGE_WRITE` (31): `imm0` = loaded message length, `imm1` = bounded timeout.
+  One message is passed to Port I²C with STOP only at its end.
+
+A dedicated workspace is allocated only for plans containing these instructions,
+serialized by a bounded mutex and freed on every return path. Small temp/value
+buffers remain unchanged. Installed profiles own their exact CBOR allocation;
+message pointers are rebased to that owned storage. Aggregate profile storage is
+limited to 16 KiB and allocation failures are returned before use. The fixed
+profile slots no longer reserve a maximum CBOR buffer each.

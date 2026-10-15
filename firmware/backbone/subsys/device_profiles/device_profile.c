@@ -36,11 +36,35 @@ struct spaghetti_device_profile_slot {
 	bool persisted;
 	bool from_builtin;
 	struct spaghetti_device_profile decoded;
-	uint8_t cbor[CONFIG_SPAGHETTI_MAX_DEVICE_PROFILE_BYTES];
+	uint8_t *cbor;
 	size_t cbor_size;
 };
 
 static struct spaghetti_device_profile_slot slots[CONFIG_SPAGHETTI_MAX_DEVICE_PROFILES];
+#define PROFILE_STORAGE_BUDGET 16384U
+static size_t profile_storage_bytes;
+static void clear_slot(struct spaghetti_device_profile_slot *slot)
+{
+	if (slot->cbor != NULL) {
+		profile_storage_bytes -= slot->cbor_size;
+		k_free(slot->cbor);
+	}
+	memset(slot, 0, sizeof(*slot));
+}
+static int own_cbor(struct spaghetti_device_profile_slot *slot, const uint8_t *bytes, size_t size)
+{
+	if (!size || size > CONFIG_SPAGHETTI_MAX_DEVICE_PROFILE_BYTES ||
+	    size > PROFILE_STORAGE_BUDGET - profile_storage_bytes)
+		return -ENOSPC;
+	uint8_t *owned = k_malloc(size);
+	if (owned == NULL)
+		return -ENOMEM;
+	memcpy(owned, bytes, size);
+	slot->cbor = owned;
+	slot->cbor_size = size;
+	profile_storage_bytes += size;
+	return 0;
+}
 static const struct spaghetti_device_profile *catalog[CONFIG_SPAGHETTI_MAX_DEVICE_PROFILES];
 static size_t catalog_count;
 static bool catalog_ready;
@@ -50,11 +74,21 @@ static int profiles_settings_set(const char *name, size_t len, settings_read_cb 
 	char *end;
 	unsigned long index = strtoul(name, &end, 10);
 	if (end == name || *end || index >= ARRAY_SIZE(slots)) return -ENOENT;
-	if (!len || len > sizeof(slots[index].cbor)) return 0;
-	int count = read_cb(arg, slots[index].cbor, len);
-	if (count < 0) return count;
-	if ((size_t)count != len) return -EIO;
+	if (!len || len > CONFIG_SPAGHETTI_MAX_DEVICE_PROFILE_BYTES)
+		return 0;
+	clear_slot(&slots[index]);
+	if (len > PROFILE_STORAGE_BUDGET - profile_storage_bytes)
+		return -ENOSPC;
+	slots[index].cbor = k_malloc(len);
+	if (slots[index].cbor == NULL)
+		return -ENOMEM;
 	slots[index].cbor_size = len;
+	profile_storage_bytes += len;
+	int count = read_cb(arg, slots[index].cbor, len);
+	if (count < 0 || (size_t)count != len) {
+		clear_slot(&slots[index]);
+		return count < 0 ? count : -EIO;
+	}
 	slots[index].persisted = true;
 	return 0;
 }
@@ -94,7 +128,7 @@ static bool profile_id_is_valid(const char *id)
 static bool opcode_is_known(uint8_t opcode)
 {
 	return (opcode >= SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE) &&
-	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_LOAD_VALUE);
+	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE);
 }
 
 static bool temp_ok(uint8_t slot)
@@ -131,6 +165,22 @@ static int accumulate_op_budget(const struct spaghetti_device_profile_op *op,
 	uint32_t bytes = 0U;
 
 	switch (op->opcode) {
+	case SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_LOAD:
+		if (op->imm0 == 0U || op->imm0 > SPAGHETTI_PROFILE_MESSAGE_MAX)
+			return -EINVAL;
+		break;
+	case SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_PATCH:
+		if (!temp_ok(op->src_a) || op->imm1 == 0U || op->imm1 > SPAGHETTI_VALUE_BYTES_MAX ||
+		    (uint32_t)op->imm0 + op->imm1 > SPAGHETTI_PROFILE_MESSAGE_MAX)
+			return -EINVAL;
+		break;
+	case SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE:
+		if (op->imm0 == 0U || op->imm0 > SPAGHETTI_PROFILE_MESSAGE_MAX || op->imm1 == 0U)
+			return -EINVAL;
+		transactions = 1U;
+		bytes = op->imm0;
+		time_ms = op->imm1;
+		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE:
 		if (!temp_ok(op->src_a)) {
 			return -EINVAL;
@@ -331,6 +381,7 @@ static int validate_plan(const struct spaghetti_device_profile_op *ops, size_t c
 		return -E2BIG;
 	}
 
+	size_t message_size = 0U;
 	for (size_t idx = 0U; idx < count; ++idx) {
 		const struct spaghetti_device_profile_op *op = &ops[idx];
 		int err;
@@ -339,6 +390,21 @@ static int validate_plan(const struct spaghetti_device_profile_op *ops, size_t c
 			return -ENOTSUP;
 		}
 
+		if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_LOAD) {
+			if (profile->message_data == NULL ||
+			    (uint64_t)op->imm2 + op->imm0 > profile->message_data_size)
+				return -EINVAL;
+			message_size = op->imm0;
+		} else if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_PATCH) {
+			if ((size_t)op->imm0 + op->imm1 > message_size)
+				return -EINVAL;
+		} else if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE) {
+			if (profile->transport != SPAGHETTI_PORT_TRANSPORT_I2C ||
+			    !(profile->required_capabilities & SPAGHETTI_PORT_CAP_I2C) ||
+			    op->imm0 != message_size)
+				return -EINVAL;
+			message_size = 0U;
+		}
 		err = opcode_matches_profile(op, profile);
 		if (err < 0) {
 			return err;
@@ -777,7 +843,8 @@ static int decode_profile_cbor(const uint8_t *cbor, size_t size,
 	if ((err < 0) || !zcbor_uint32_decode(states, &wire_version)) {
 		return -EBADMSG;
 	}
-	if (wire_version != 1U && wire_version != SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION) {
+	if (wire_version != 1U && wire_version != 2U &&
+	    wire_version != SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION) {
 		return -ENOTSUP;
 	}
 
@@ -882,7 +949,7 @@ static int decode_profile_cbor(const uint8_t *cbor, size_t size,
 		return err;
 	}
 
-	if (wire_version == 2U) {
+	if (wire_version >= 2U) {
 		if (expect_key(states, 14U) < 0 || !zcbor_list_start_decode(states)) {
 			return -EBADMSG;
 		}
@@ -903,6 +970,15 @@ static int decode_profile_cbor(const uint8_t *cbor, size_t size,
 		if (!zcbor_list_end_decode(states)) {
 			return -EBADMSG;
 		}
+	}
+	if (wire_version >= 3U) {
+		struct zcbor_string data;
+		if (expect_key(states, 15U) < 0 || !zcbor_bstr_decode(states, &data))
+			return -EBADMSG;
+		if (data.len > SPAGHETTI_PROFILE_DATA_MAX)
+			return -EMSGSIZE;
+		out->message_data = data.value;
+		out->message_data_size = data.len;
 	}
 	if (!zcbor_map_end_decode(states) || states->payload != states->payload_end) {
 		return -EBADMSG;
@@ -1048,7 +1124,7 @@ static struct spaghetti_device_profile_slot *alloc_slot(void)
 {
 	for (size_t idx = 0U; idx < ARRAY_SIZE(slots); ++idx) {
 		if (!slots[idx].used) {
-			memset(&slots[idx], 0, sizeof(slots[idx]));
+			clear_slot(&slots[idx]);
 			slots[idx].used = true;
 			return &slots[idx];
 		}
@@ -1088,20 +1164,41 @@ static int commit_decoded(const struct spaghetti_device_profile *profile, const 
 	slot->decoded = *profile;
 	slot->from_builtin = false;
 	if (persist && (cbor != NULL) && (cbor_size > 0U)) {
-		if (cbor_size > sizeof(slot->cbor)) {
-			slot->used = false;
-			return -EMSGSIZE;
+		err = own_cbor(slot, cbor, cbor_size);
+		if (err < 0) {
+			clear_slot(slot);
+			return err;
 		}
-		memcpy(slot->cbor, cbor, cbor_size);
-		slot->cbor_size = cbor_size;
+		if (profile->message_data_size) {
+			if (profile->message_data < cbor ||
+			    profile->message_data_size > cbor_size ||
+			    (size_t)(profile->message_data - cbor) >
+				cbor_size - profile->message_data_size) {
+				clear_slot(slot);
+				return -EINVAL;
+			}
+			slot->decoded.message_data = slot->cbor + (profile->message_data - cbor);
+		}
 		slot->persisted = true;
 		err = persist_profile_slot(slot, false);
-		if (err < 0) { memset(slot, 0, sizeof(*slot)); return err; }
+		if (err < 0) {
+			clear_slot(slot);
+			return err;
+		}
+	}
+
+	if (!persist && profile->message_data_size) {
+		err = own_cbor(slot, profile->message_data, profile->message_data_size);
+		if (err < 0) {
+			clear_slot(slot);
+			return err;
+		}
+		slot->decoded.message_data = slot->cbor;
 	}
 
 	err = catalog_add(&slot->decoded);
 	if (err < 0) {
-		slot->used = false;
+		clear_slot(slot);
 		return err;
 	}
 
@@ -1149,7 +1246,7 @@ int spaghetti_device_profile_init(void)
 	catalog_count = 0U;
 	for (size_t idx = 0U; idx < ARRAY_SIZE(slots); ++idx) {
 		if (!slots[idx].persisted) {
-			memset(&slots[idx], 0, sizeof(slots[idx]));
+			clear_slot(&slots[idx]);
 		} else {
 			slots[idx].used = false;
 			slots[idx].from_builtin = false;
@@ -1284,7 +1381,7 @@ int spaghetti_device_profile_remove(const char *id, uint16_t version)
 		catalog[idx - 1U] = catalog[idx];
 	}
 	catalog_count -= 1U;
-	memset(slot, 0, sizeof(*slot));
+	clear_slot(slot);
 	return 0;
 }
 
@@ -1309,7 +1406,7 @@ void spaghetti_device_profile_reset_for_test(void)
 			slots[idx].from_builtin = false;
 			memset(&slots[idx].decoded, 0, sizeof(slots[idx].decoded));
 		} else {
-			memset(&slots[idx], 0, sizeof(slots[idx]));
+			clear_slot(&slots[idx]);
 		}
 	}
 }
@@ -1317,7 +1414,7 @@ void spaghetti_device_profile_reset_for_test(void)
 void spaghetti_device_profile_clear_persisted_for_test(void)
 {
 	for (size_t idx = 0U; idx < ARRAY_SIZE(slots); ++idx) {
-		memset(&slots[idx], 0, sizeof(slots[idx]));
+		clear_slot(&slots[idx]);
 	}
 	catalog_count = 0U;
 	catalog_ready = false;

@@ -92,8 +92,8 @@ config SPAGHETTI_MAX_DEVICE_PROFILES
 	default 32
 
 config SPAGHETTI_MAX_DEVICE_PROFILE_BYTES
-	int
-	range 128 4096
+	int "Maximum installed profile CBOR bytes"
+	range 128 8192
 	default 512 if SPAGHETTI_RESOURCE_PROFILE_MINIMAL
 	default 1024 if SPAGHETTI_RESOURCE_PROFILE_STANDARD
 	default 2048

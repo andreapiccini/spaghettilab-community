@@ -12,6 +12,11 @@ export type TimingSpanAnnotation = {
 };
 
 export type TimingPhaseBand = {
+  readonly editableByte?: {
+    readonly index: number;
+    readonly value: string;
+    readonly last: boolean;
+  };
   readonly id: string;
   readonly t0: number;
   readonly t1: number;

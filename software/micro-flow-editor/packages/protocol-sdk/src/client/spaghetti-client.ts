@@ -526,7 +526,10 @@ export class SpaghettiClient {
 
   // --- command / connectivity / maintenance ----------------------------------
 
-  async moduleCommand(req: ModuleCommandRequest, signal?: AbortSignal): Promise<ReturnType<typeof decodeModuleCommandResponse>> {
+  async moduleCommand(
+    req: ModuleCommandRequest,
+    signal?: AbortSignal,
+  ): Promise<ReturnType<typeof decodeModuleCommandResponse>> {
     const bytes = await this.request(
       Operation.MODULE_COMMAND,
       encodeModuleCommandRequest(req),
@@ -666,6 +669,21 @@ export class SpaghettiClient {
     req: ValidateDeviceProfileRequest,
     signal?: AbortSignal,
   ): Promise<ValidateDeviceProfileResponse> {
+    if (req.profileCbor.length > 480 && !req.upload) {
+      const token = Math.floor(Math.random() * 0xfffffffe) + 1;
+      let response: ValidateDeviceProfileResponse | undefined;
+      for (let offset = 0; offset < req.profileCbor.length; offset += 400) {
+        response = await this.validateDeviceProfile(
+          {
+            profileCbor: req.profileCbor.slice(offset, offset + 400),
+            upload: { offset, total: req.profileCbor.length, token },
+          },
+          signal,
+        );
+        if (!response.valid) return response;
+      }
+      return response!;
+    }
     const bytes = await this.request(
       Operation.VALIDATE_DEVICE_PROFILE,
       encodeValidateDeviceProfileRequest(req),
@@ -678,6 +696,19 @@ export class SpaghettiClient {
     req: InstallDeviceProfileRequest,
     signal?: AbortSignal,
   ): Promise<void> {
+    if (req.profileCbor.length > 480 && !req.upload) {
+      const token = Math.floor(Math.random() * 0xfffffffe) + 1;
+      for (let offset = 0; offset < req.profileCbor.length; offset += 400) {
+        await this.installDeviceProfile(
+          {
+            profileCbor: req.profileCbor.slice(offset, offset + 400),
+            upload: { offset, total: req.profileCbor.length, token },
+          },
+          signal,
+        );
+      }
+      return;
+    }
     const bytes = await this.request(
       Operation.INSTALL_DEVICE_PROFILE,
       encodeInstallDeviceProfileRequest(req),

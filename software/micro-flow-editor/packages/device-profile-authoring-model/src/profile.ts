@@ -21,8 +21,14 @@ export const SCHEMA_ID_MAX_LENGTH = 31;
  * an invented field (see this package's README).
  */
 export type DeviceProfileDraft = {
+  /** Immutable long-message templates; wire v3, at most 3072 bytes total. */
+  readonly messageData?: readonly number[];
   /** Wire-v2 action slices in the shared sample op pool. IDs are stable command IDs 1..8. */
-  readonly actions?: readonly { readonly id: number; readonly first: number; readonly count: number }[];
+  readonly actions?: readonly {
+    readonly id: number;
+    readonly first: number;
+    readonly count: number;
+  }[];
   readonly profileId: string;
   readonly version: number;
   readonly transport: number;

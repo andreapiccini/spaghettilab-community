@@ -261,12 +261,12 @@ export function DriverCanvasPreview({
   const inputs = interfaces.inputs.flatMap((op) => {
     const channel = draft.channels.find((ch) => ch.id === op.fromChannelId);
     return channel
-      ? [{ ...channel, inputMode: op.inputMode ?? ("data" as const) }]
+      ? [{ ...channel, inputMode: op.inputMode ?? ("data" as const), variable: op.into }]
       : [];
   });
   const outputs = interfaces.outputs.flatMap((op) => {
     const channel = draft.channels.find((ch) => ch.id === op.channelId);
-    return channel ? [channel] : [];
+    return channel ? [{ ...channel, variable: op.from }] : [];
   });
   return (
     <section className="space-y-2">
@@ -274,6 +274,7 @@ export function DriverCanvasPreview({
         name={draft.name}
         inputs={inputs}
         outputs={outputs}
+        it={it}
       />
       <p className="font-body text-[10px] text-ink-muted">
         {it

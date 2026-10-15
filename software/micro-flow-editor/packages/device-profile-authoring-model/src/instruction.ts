@@ -25,9 +25,17 @@ export type TempSlot = number;
 type Op<Kind extends string> = { readonly op: Kind };
 
 /** `exec_i2c_write`: `imm0` is the byte count to send (must be >0 and <= the temp's actual size), `imm1` the transfer timeout in ms. */
-export type I2cWriteInstruction = Op<"I2C_WRITE"> & { readonly src: TempSlot; readonly length: number; readonly timeoutMs: number };
+export type I2cWriteInstruction = Op<"I2C_WRITE"> & {
+  readonly src: TempSlot;
+  readonly length: number;
+  readonly timeoutMs: number;
+};
 /** `exec_i2c_read`: `imm0` bytes read into `dst`, `imm1` timeout in ms. */
-export type I2cReadInstruction = Op<"I2C_READ"> & { readonly dst: TempSlot; readonly length: number; readonly timeoutMs: number };
+export type I2cReadInstruction = Op<"I2C_READ"> & {
+  readonly dst: TempSlot;
+  readonly length: number;
+  readonly timeoutMs: number;
+};
 /** `exec_i2c_write_read`: `imm0` is the **read** length, `imm1` the **write** length (0 = use `src`'s actual size), `imm2` the timeout in ms — this order is easy to get backwards, and an earlier revision of this file did. */
 export type I2cWriteReadInstruction = Op<"I2C_WRITE_READ"> & {
   readonly src: TempSlot;
@@ -46,7 +54,11 @@ export type SpiTransceiveInstruction = Op<"SPI_TRANSCEIVE"> & {
   readonly mode: 0 | 1 | 2 | 3;
 };
 /** `spaghetti_port_uart_write`: `imm0` byte count (0 = use `src`'s actual size), `imm1` timeout ms. */
-export type UartWriteInstruction = Op<"UART_WRITE"> & { readonly src: TempSlot; readonly length: number; readonly timeoutMs: number };
+export type UartWriteInstruction = Op<"UART_WRITE"> & {
+  readonly src: TempSlot;
+  readonly length: number;
+  readonly timeoutMs: number;
+};
 /** `spaghetti_port_uart_read_until`: `imm0` max byte count, `imm1` timeout ms, `imm2` the stop byte — **not** `imm0`, despite what the opcode's one-line comment alone would suggest. */
 export type UartReadUntilInstruction = Op<"UART_READ_UNTIL"> & {
   readonly dst: TempSlot;
@@ -64,8 +76,13 @@ export type GpioGetInstruction = Op<"GPIO_GET"> & { readonly dst: TempSlot };
 /** `spaghetti_port_set_output(port, imm0 != 0)` — an immediate boolean, never a temp slot read (the firmware doesn't even validate `src_a` for this opcode). */
 export type GpioSetInstruction = Op<"GPIO_SET"> & { readonly value: boolean };
 /** `imm0` is the ADC read timeout in ms; the channel itself comes from the instance `binding`, not this op. */
-export type AdcReadInstruction = Op<"ADC_READ"> & { readonly dst: TempSlot; readonly timeoutMs: number };
-export type DelayBoundedInstruction = Op<"DELAY_BOUNDED"> & { readonly milliseconds: number };
+export type AdcReadInstruction = Op<"ADC_READ"> & {
+  readonly dst: TempSlot;
+  readonly timeoutMs: number;
+};
+export type DelayBoundedInstruction = Op<"DELAY_BOUNDED"> & {
+  readonly milliseconds: number;
+};
 /**
  * "Bounded ready poll" — `attempts` (`imm0`) must be > 0 (the firmware
  * itself rejects zero attempts as an unbounded wait, `-EINVAL`); this is the
@@ -102,26 +119,103 @@ export type W1WriteReadInstruction = Op<"W1_WRITE_READ"> & {
   readonly timeoutMs: number;
 };
 /** `imm0` is the byte count actually copied (1-8) from `low`/`high` (`imm2`/`imm3`, little-endian). */
-export type LoadConstInstruction = Op<"LOAD_CONST"> & { readonly dst: TempSlot; readonly length: number; readonly low: number; readonly high: number };
+export type LoadConstInstruction = Op<"LOAD_CONST"> & {
+  readonly dst: TempSlot;
+  readonly length: number;
+  readonly low: number;
+  readonly high: number;
+};
 /** `imm0` byte count to copy (0 = use `src`'s actual size). */
-export type CopyBytesInstruction = Op<"COPY_BYTES"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly length: number; readonly offset?: number };
-export type ConcatInstruction = Op<"CONCAT"> & { readonly srcA: TempSlot; readonly srcB: TempSlot; readonly dst: TempSlot };
-export type ByteSwapInstruction = Op<"BYTE_SWAP"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly width: 2 | 4 };
-export type MaskInstruction = Op<"MASK"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly mask: number };
+export type CopyBytesInstruction = Op<"COPY_BYTES"> & {
+  readonly src: TempSlot;
+  readonly dst: TempSlot;
+  readonly length: number;
+  readonly offset?: number;
+};
+export type ConcatInstruction = Op<"CONCAT"> & {
+  readonly srcA: TempSlot;
+  readonly srcB: TempSlot;
+  readonly dst: TempSlot;
+};
+export type ByteSwapInstruction = Op<"BYTE_SWAP"> & {
+  readonly src: TempSlot;
+  readonly dst: TempSlot;
+  readonly width: 2 | 4;
+};
+export type MaskInstruction = Op<"MASK"> & {
+  readonly src: TempSlot;
+  readonly dst: TempSlot;
+  readonly mask: number;
+};
 /** `imm1 === 0` shifts left, any other value shifts right — matches `device_profile_exec.c` exactly (`if (op->imm1 == 0U) value <<= op->imm0; else value >>= op->imm0;`). */
-export type ShiftInstruction = Op<"SHIFT"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly amount: number; readonly direction: "left" | "right" };
-export type SignExtendInstruction = Op<"SIGN_EXTEND"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly bits: number };
-export type Crc8Instruction = Op<"CRC8"> & { readonly src: TempSlot; readonly dst: TempSlot };
-export type Crc16Instruction = Op<"CRC16"> & { readonly src: TempSlot; readonly dst: TempSlot };
+export type ShiftInstruction = Op<"SHIFT"> & {
+  readonly src: TempSlot;
+  readonly dst: TempSlot;
+  readonly amount: number;
+  readonly direction: "left" | "right";
+};
+export type SignExtendInstruction = Op<"SIGN_EXTEND"> & {
+  readonly src: TempSlot;
+  readonly dst: TempSlot;
+  readonly bits: number;
+};
+export type Crc8Instruction = Op<"CRC8"> & {
+  readonly src: TempSlot;
+  readonly dst: TempSlot;
+};
+export type Crc16Instruction = Op<"CRC16"> & {
+  readonly src: TempSlot;
+  readonly dst: TempSlot;
+};
 /** `fieldId` must match a `SampleField.fieldId` declared on the owning `DeviceProfileDraft` — checked by `validate-profile.ts`, never assumed. */
-export type EmitFieldInstruction = Op<"EMIT_FIELD"> & { readonly src: TempSlot; readonly fieldId: number; readonly width?: number; readonly byteOrder?: "be" | "le"; readonly signExtend?: boolean; readonly multiplier?: number };
+export type EmitFieldInstruction = Op<"EMIT_FIELD"> & {
+  readonly src: TempSlot;
+  readonly fieldId: number;
+  readonly width?: number;
+  readonly byteOrder?: "be" | "le";
+  readonly signExtend?: boolean;
+  readonly multiplier?: number;
+};
 export type EmitRecordInstruction = Op<"EMIT_RECORD">;
 
-export type LoadArgumentInstruction = Op<"LOAD_ARGUMENT" | "LOAD_VALUE"> & { readonly dst: TempSlot; readonly argumentId: number; readonly length: number; readonly littleEndian: boolean; readonly required: boolean; readonly low: number; readonly high: number };
+export type LoadArgumentInstruction = Op<"LOAD_ARGUMENT" | "LOAD_VALUE"> & {
+  readonly dst: TempSlot;
+  readonly argumentId: number;
+  readonly length: number;
+  readonly littleEndian: boolean;
+  readonly required: boolean;
+  readonly low: number;
+  readonly high: number;
+};
 
-export type ScalePackInstruction = Op<"SCALE_PACK"> & { readonly src: TempSlot; readonly dst: TempSlot; readonly flags: number; readonly width: number; readonly divisor: number; readonly multiplier: number; readonly offset: number };
+export type ScalePackInstruction = Op<"SCALE_PACK"> & {
+  readonly src: TempSlot;
+  readonly dst: TempSlot;
+  readonly flags: number;
+  readonly width: number;
+  readonly divisor: number;
+  readonly multiplier: number;
+  readonly offset: number;
+};
+
+export type MessageLoadInstruction = Op<"MESSAGE_LOAD"> & {
+  readonly offset: number;
+  readonly length: number;
+};
+export type MessagePatchInstruction = Op<"MESSAGE_PATCH"> & {
+  readonly src: TempSlot;
+  readonly offset: number;
+  readonly length: number;
+};
+export type I2cMessageWriteInstruction = Op<"I2C_MESSAGE_WRITE"> & {
+  readonly length: number;
+  readonly timeoutMs: number;
+};
 
 export type Instruction =
+  | MessageLoadInstruction
+  | MessagePatchInstruction
+  | I2cMessageWriteInstruction
   | ScalePackInstruction
   | LoadArgumentInstruction
   | I2cWriteInstruction

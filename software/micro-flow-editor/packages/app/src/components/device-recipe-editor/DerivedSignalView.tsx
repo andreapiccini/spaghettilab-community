@@ -20,12 +20,16 @@ export function DerivedSignalView({
   selectedOpId = null,
   onSelectOp,
   rxByOpId,
+  onChangeByte,
+  onAddByte,
 }: {
   readonly draft: DeviceRecipeDraft;
   readonly ops: readonly DeviceRecipeOp[];
   readonly it: boolean;
   readonly selectedOpId?: string | null;
   readonly onSelectOp?: (opId: string) => void;
+  readonly onChangeByte?: (opId: string, index: number, value: string) => void;
+  readonly onAddByte?: (opId: string) => void;
   readonly rxByOpId?: Readonly<Record<string, readonly (number | null)[]>>;
 }) {
   const bus = draft.binding.bus;
@@ -97,7 +101,16 @@ export function DerivedSignalView({
           title={it ? "Diagramma temporale" : "Timing diagram"}
           lanes={model.lanes}
           durationMs={model.durationMs}
-          phaseBands={model.phaseBands}
+          phaseBands={model.phaseBands.map((band) => {
+            const op = ops.find(item => item.id === band.opId);
+            const bytes = op?.type === "i2c_write" ? op.bytes : op?.type === "i2c_write_read" ? op.writeBytes : op?.type === "spi_transfer" ? op.txBytes : null;
+            if (!bytes || !onChangeByte) return band;
+            const payload = model.cells.filter(cell => cell.opId === op!.id && (cell.kind === "data" || cell.kind === "byte"));
+            const index = payload.findIndex(cell => cell.id === band.id);
+            return index >= 0 && index < bytes.length ? { ...band, editableByte: { index, value: bytes[index]!, last: index === bytes.length - 1 } } : band;
+          })}
+          onChangeByte={onChangeByte}
+          onAddByte={onAddByte}
           stepSpans={model.stepSpans.map(step => ({ ...step, label: readableI2cStep(draft, ops.find(op => op.id === step.opId)!, rxByOpId?.[step.opId], it) }))}
           highlightOpId={selectedOpId}
           onSelectOp={onSelectOp}

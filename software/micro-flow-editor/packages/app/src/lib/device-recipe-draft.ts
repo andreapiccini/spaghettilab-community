@@ -2095,8 +2095,8 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
       errors.push({ field: `cmd.${cmd.id}.steps`, message: `Sequenza vuota: ${cmd.label}` });
     }
     for (const op of cmd.steps) {
-      if ((op.type === "i2c_read" && (op.len < 1 || op.len > 8)) || (op.type === "i2c_write_read" && (op.readLen < 1 || op.readLen > 8 || op.writeBytes.length > 32)) || (op.type === "i2c_write" && op.bytes.length > 32)) {
-        errors.push({ field: `cmd.${cmd.id}.${op.id}`, message: "Ogni messaggio supporta fino a 32 byte; le letture fino a 8 byte" });
+      if ((op.type === "i2c_read" && (op.len < 1 || op.len > 8)) || (op.type === "i2c_write_read" && (op.readLen < 1 || op.readLen > 8 || op.writeBytes.length > 32)) || (op.type === "i2c_write" && op.bytes.length > 2048)) {
+        errors.push({ field: `cmd.${cmd.id}.${op.id}`, message: "Scrittura: fino a 2048 byte; scrittura-lettura: 32 byte in uscita; letture: 8 byte" });
       }
       if (op.type === "i2c_transaction") {
         for (const msg of validateI2cTransactionPhases(op.phases)) {

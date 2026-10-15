@@ -1,3 +1,4 @@
+import { appendLongI2cMessage } from "./i2c-long-message.js";
 import {
   PortCapability,
   PortTransport,
@@ -112,6 +113,7 @@ export function compileRuntimeDriver(
   const actions = new Map<string, RuntimeAction>();
   const initOps: Instruction[] = [],
     sampleOps: Instruction[] = [];
+  const messageData: number[] = [];
   const slices: { id: number; first: number; count: number }[] = [];
 
   function sequence(
@@ -367,6 +369,7 @@ export function compileRuntimeDriver(
           break;
         }
         case "i2c_write": {
+          if (appendLongI2cMessage(op.bytes, messageData, target, name => { const value = get(name); return { width: value.width, materialize: () => materialize(value) }; }, op.timeoutMs)) break;
           const bytes = payload(op.bytes);
           target.push({
             op: "I2C_WRITE",
@@ -568,16 +571,17 @@ export function compileRuntimeDriver(
     name: `value_${fields.get(id)!}`,
     unit: draft.channels.find((c) => c.id === id)?.unit || undefined,
   }));
-  const semantic = { initOps, sampleOps, slices, sampleFields };
+  const semantic = { initOps, sampleOps, slices, sampleFields, ...(messageData.length ? { messageData } : {}) };
   const profileId = `drv.${stableDriverHash(JSON.stringify(semantic))}`;
   const profile: DeviceProfileDraft = {
+    ...(messageData.length ? { messageData } : {}),
     profileId,
     version: 1,
     transport: PortTransport.I2C,
     requiredCapabilities: PortCapability.I2C,
     maxTotalTimeMs: 60000,
     maxTransactions: 64,
-    maxBytes: 256,
+    maxBytes: messageData.length ? 65535 : 256,
     initOps,
     sampleOps,
     safeStopOps: [],

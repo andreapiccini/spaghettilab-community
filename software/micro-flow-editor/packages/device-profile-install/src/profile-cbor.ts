@@ -1,6 +1,7 @@
 import {
   decodeOne,
   encodeArray,
+  encodeBytes,
   encodeMap,
   encodeText,
   encodeUint,
@@ -103,7 +104,10 @@ function encodeField(field: SampleField): Uint8Array {
  */
 export function encodeDeviceProfileCbor(draft: DeviceProfileDraft): Uint8Array {
   return encodeMap([
-    [KEY.WIRE, u32(draft.actions ? 2 : DEVICE_PROFILE_WIRE_VERSION)],
+    [
+      KEY.WIRE,
+      u32(draft.messageData ? 3 : draft.actions ? 2 : DEVICE_PROFILE_WIRE_VERSION),
+    ],
     [KEY.ID, encodeText(draft.profileId)],
     [KEY.VERSION, u32(draft.version)],
     [KEY.TRANSPORT, u32(draft.transport)],
@@ -117,17 +121,20 @@ export function encodeDeviceProfileCbor(draft: DeviceProfileDraft): Uint8Array {
     [KEY.SCHEMA_ID, encodeText(draft.sampleSchemaId)],
     [KEY.SCHEMA_VER, u32(draft.sampleSchemaVersion)],
     [KEY.FIELDS, encodeArray(draft.sampleFields.map(encodeField))],
-    ...(draft.actions
+    ...(draft.actions || draft.messageData
       ? [
           [
             14,
             encodeArray(
-              draft.actions.map((action) =>
+              (draft.actions ?? []).map((action) =>
                 encodeArray([u32(action.id), u32(action.first), u32(action.count)]),
               ),
             ),
           ] as const,
         ]
+      : []),
+    ...(draft.messageData
+      ? [[15, encodeBytes(new Uint8Array(draft.messageData))] as const]
       : []),
   ]);
 }
@@ -255,7 +262,11 @@ export function decodeDeviceProfileCbor(
 
   try {
     const wireVersion = requireU32(map, KEY.WIRE, "DeviceProfileCbor");
-    if (wireVersion !== DEVICE_PROFILE_WIRE_VERSION && wireVersion !== 2) {
+    if (
+      wireVersion !== DEVICE_PROFILE_WIRE_VERSION &&
+      wireVersion !== 2 &&
+      wireVersion !== 3
+    ) {
       return err(
         domainError({
           code: DeviceProfileInstallErrorCode.UNSUPPORTED_WIRE_VERSION,
@@ -286,6 +297,15 @@ export function decodeDeviceProfileCbor(
     }
 
     const draft: DeviceProfileDraft = {
+      ...(wireVersion === 3
+        ? {
+            messageData: (() => {
+              const data = map.get(15);
+              if (data?.kind !== "bytes") throw new Error("Invalid message data");
+              return [...data.value];
+            })(),
+          }
+        : {}),
       profileId: requireText(map, KEY.ID, "DeviceProfileCbor"),
       version: requireU32(map, KEY.VERSION, "DeviceProfileCbor"),
       transport: requireU32(map, KEY.TRANSPORT, "DeviceProfileCbor"),
@@ -299,7 +319,7 @@ export function decodeDeviceProfileCbor(
       sampleSchemaId: requireText(map, KEY.SCHEMA_ID, "DeviceProfileCbor"),
       sampleSchemaVersion: requireU32(map, KEY.SCHEMA_VER, "DeviceProfileCbor"),
       sampleFields,
-      ...(wireVersion === 2
+      ...(wireVersion >= 2
         ? {
             actions: requireArray(map, 14, "DeviceProfileCbor").map((value) => {
               if (

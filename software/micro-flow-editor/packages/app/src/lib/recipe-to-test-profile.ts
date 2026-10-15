@@ -1,3 +1,4 @@
+import { appendLongI2cMessage } from "./i2c-long-message.js";
 import {
   PortCapability,
   PortTransport,
@@ -50,7 +51,7 @@ function mapI2cWritePayload(
   return result;
 }
 
-function mapOp(op: DeviceRecipeOp, temp: { next: number }): Instruction[] {
+function mapOp(op: DeviceRecipeOp, temp: { next: number; data: number[] }): Instruction[] {
   const take = () => {
     const s = temp.next % 8;
     temp.next += 1;
@@ -63,6 +64,8 @@ function mapOp(op: DeviceRecipeOp, temp: { next: number }): Instruction[] {
       return [{ op: "DELAY_BOUNDED", milliseconds: ms }];
     }
     case "i2c_write": {
+      const message: Instruction[] = [];
+      if (appendLongI2cMessage(op.bytes, temp.data, message, () => { throw new Error("Per la prova usa byte costanti."); }, op.timeoutMs)) return message;
       const payload = hexStringsToBytes(op.bytes);
       return mapI2cWritePayload(payload, op.timeoutMs ?? 20, take);
     }
@@ -149,7 +152,7 @@ export function recipePlanToTestProfile(
   bodyOps: readonly DeviceRecipeOp[],
 ): { readonly profile: DeviceProfileDraft; readonly skipped: readonly string[] } {
   const skipped: string[] = [];
-  const temp = { next: 0 };
+  const temp = { next: 0, data: [] as number[] };
   const mappedInit: Instruction[] = [];
   for (const op of initOps) {
     const part = mapOp(op, temp);
@@ -186,13 +189,14 @@ export function recipePlanToTestProfile(
   // Unique-ish each Testa run avoids CONFLICT when the same id was installed earlier.
   const version = ((Date.now() + Math.floor(Math.random() * 997)) % 65535) + 1;
   const profile: DeviceProfileDraft = {
+    ...(temp.data.length ? { messageData: temp.data } : {}),
     profileId,
     version,
     transport,
     requiredCapabilities: caps,
     maxTotalTimeMs: 5000,
     maxTransactions: 64,
-    maxBytes: 256,
+    maxBytes: temp.data.length ? 65535 : 256,
     initOps: mappedInit,
     sampleOps: mappedSample,
     safeStopOps: [],

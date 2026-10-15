@@ -717,6 +717,14 @@ export function DeviceRecipeEditorScreen({
     </EditorSection>
   );
 
+  const helpAddressRaw = (draft.binding.i2c?.address ?? "").replace(/^0x/i, "");
+  const helpAddress = /^[0-9a-f]{1,2}$/i.test(helpAddressRaw) ? Number.parseInt(helpAddressRaw, 16) : NaN;
+  const helpIsEightBit = helpAddress > 0x7f;
+  const helpWire = helpIsEightBit ? helpAddress >> 1 : helpAddress;
+  const helpWrite = helpWire * 2;
+  const helpHex = (value: number) => `0x${value.toString(16).toUpperCase().padStart(2, "0")}`;
+  const helpValid = Number.isFinite(helpAddress) && draft.binding.i2c?.addressBits !== 10;
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface-sunken">
       <header className="flex flex-wrap items-end gap-3 border-b border-border bg-surface px-4 py-2">
@@ -842,11 +850,17 @@ export function DeviceRecipeEditorScreen({
                     ? "Se viene indicato un indirizzo a 8 bit, in genere 7 bit identificano il dispositivo e l’ultimo bit indica scrittura (0) o lettura (1)."
                     : "An 8-bit address generally contains 7 device address bits; the last bit indicates write (0) or read (1)."}
                 </p>
-                <dl className="mt-2 grid grid-cols-[1fr_auto] gap-x-3 gap-y-1">
-                  <dt>{it ? "Indirizzo write" : "Write address"}</dt><dd className="font-mono text-ink">0xA0</dd>
-                  <dt>{it ? "Indirizzo read" : "Read address"}</dt><dd className="font-mono text-ink">0xA1</dd>
-                  <dt>{it ? "Indirizzo Wire (7 bit)" : "Wire address (7-bit)"}</dt><dd className="font-mono text-ink">0x50</dd>
-                </dl>
+                {helpValid ? (
+                  <div className="mt-2 space-y-2">
+                    <p>{it ? "Esempio con il valore inserito" : "Example using the entered value"}: <span className="font-mono text-ink">{helpHex(helpAddress)}</span> ({helpIsEightBit ? "8 bit" : "7 bit"}).</p>
+                    <p>{it ? "Base indirizzo a 8 bit" : "8-bit address base"}: <span className="font-mono text-ink">{helpHex(helpWrite)}</span></p>
+                    <p className="font-mono text-ink">write: {helpHex(helpWrite)} + 0x00 = {helpHex(helpWrite)}</p>
+                    <p className="font-mono text-ink">read: {helpHex(helpWrite)} + 0x01 = {helpHex(helpWrite + 1)}</p>
+                    <p>{it ? "0x00 indica scrittura; 0x01 indica lettura." : "0x00 means write; 0x01 means read."}</p>
+                    <p>{it ? "Indirizzo Wire (7 bit)" : "Wire address (7-bit)"}: <span className="font-mono text-ink">{helpHex(helpWire)}</span></p>
+                  </div>
+                ) : <p className="mt-2">{it ? "L’esempio si aggiorna con un indirizzo a 7 o 8 bit valido. Gli indirizzi a 10 bit usano un formato diverso." : "The example updates with a valid 7- or 8-bit address. 10-bit addresses use a different format."}</p>}
+
               </div>
             </details>
           </>
@@ -1071,6 +1085,27 @@ export function DeviceRecipeEditorScreen({
                       ? visibleTestResult.capture.rxByOpId
                       : undefined
                   }
+                  onChangeByte={(id, index, value) => {
+                    const op = ops.find(item => item.id === id);
+                    if (!op) return;
+                    if (op.type === "i2c_write") {
+                      setDraft(updateOpAnywhere(draft, id, { ...op, bytes: op.bytes.map((byte, i) => i === index ? value : byte) }));
+                    } else if (op.type === "i2c_write_read") {
+                      setDraft(updateOpAnywhere(draft, id, { ...op, writeBytes: op.writeBytes.map((byte, i) => i === index ? value : byte) }));
+                    } else if (op.type === "spi_transfer") {
+                      setDraft(updateOpAnywhere(draft, id, { ...op, txBytes: op.txBytes.map((byte, i) => i === index ? value : byte) }));
+                    }
+                    setTestResult(null);
+                  }}
+                  onAddByte={(id) => {
+                    const op = ops.find(item => item.id === id);
+                    if (!op) return;
+                    if (op.type === "i2c_write") setDraft(updateOpAnywhere(draft, id, { ...op, bytes: [...op.bytes, "00"] }));
+                    else if (op.type === "i2c_write_read") setDraft(updateOpAnywhere(draft, id, { ...op, writeBytes: [...op.writeBytes, "00"] }));
+                    else if (op.type === "spi_transfer") setDraft(updateOpAnywhere(draft, id, { ...op, txBytes: [...op.txBytes, "00"] }));
+                    setTestResult(null);
+                    setSelectedOpId(id);
+                  }}
                   selectedOpId={selectedOpId}
                   onSelectOp={(id) => {
                     setSelectedInterfaceId(null);
@@ -3190,6 +3225,14 @@ function HexByteCellsEditor({
   const [cells, setCells] = useState<string[]>(() =>
     (bytes.length > 0 ? bytes : ["0x00"]).map(stripHexPrefix),
   );
+
+  const [sourceBytes, setSourceBytes] = useState(bytes);
+  if (sourceBytes !== bytes) {
+    setSourceBytes(bytes);
+    const normalizedCells = cells.map(cell => cell.startsWith("$") ? cell : cell.toUpperCase().padStart(2, "0"));
+    const incoming = bytes.map(stripHexPrefix);
+    if (JSON.stringify(normalizedCells) !== JSON.stringify(incoming)) setCells(incoming);
+  }
 
   const [sequenceText, setSequenceText] = useState("");
   const [sequenceError, setSequenceError] = useState<string | null>(null);

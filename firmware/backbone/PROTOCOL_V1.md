@@ -285,3 +285,19 @@ Failed configuration transactions may carry a map with `0` (signed errno),
 `1` (transaction phase) and `2` (rollback errno, zero on success), alongside the
 non-OK envelope status. Clients must not interpret INTERNAL_ERROR alone as an
 I²C NACK.
+
+### Large Device Profile upload (firmware 0.3.7)
+
+VALIDATE_DEVICE_PROFILE and INSTALL_DEVICE_PROFILE retain key 0 (profile CBOR bstr).
+For profiles that do not fit one packet the SDK sends ordered chunks, with optional
+keys 1 = byte offset, 2 = total CBOR size, 3 = nonzero upload token. The current
+SDK uses 400-byte chunks. This does not change the envelope payload limit.
+
+The Core binds an upload to the principal, operation, token and total size. The
+first chunk has offset 0; subsequent chunks must be contiguous. The total is
+bounded by CONFIG_SPAGHETTI_MAX_DEVICE_PROFILE_BYTES (4096 in the Core image).
+Only the final chunk triggers complete-profile validation or installation.
+Intermediate responses acknowledge the chunk using the operation's existing
+response shape; the SDK exposes only the final result to its caller. An unfinished
+upload expires after 60 seconds; its owned allocation is freed. No partially
+received profile enters the catalog or executes bus operations.

@@ -1,5 +1,7 @@
 # Tool Display
 
+Stato: sviluppo sospeso su richiesta dell’utente. La sezione Tool è nascosta dalla navigazione e dalla ricerca comandi; codice e dati sono conservati come base da completare in futuro.
+
 Display è un tool laterale, separato dal protocollo del driver. La prima versione offre un editor monocromatico con punti, linee, rettangoli e testo bitmap 5×7.
 
 ## Driver e adapter
