@@ -37,6 +37,9 @@ import {
   moveOp,
   multiSampleSpanMs,
   normalizeRecipeVarName,
+  recipeVariables,
+  renameRecipeVariable,
+  type RecipeVariable,
   nextRecipeVariableName,
   opsForEditorPane,
   organizeDriverInterfaces,
@@ -3627,6 +3630,126 @@ function SampleExternalFields({
   );
 }
 
+function VariableRow({
+  variable,
+  draft,
+  it,
+  onChange,
+}: {
+  variable: RecipeVariable;
+  draft: DeviceRecipeDraft;
+  it: boolean;
+  onChange: (draft: DeviceRecipeDraft) => void;
+}) {
+  const [name, setName] = useState(variable.name);
+  const [error, setError] = useState<string | null>(null);
+  function commitName() {
+    try {
+      onChange(renameRecipeVariable(draft, variable.id, name));
+      setName(normalizeRecipeVarName(name.trim().replace(/^\$+/, "")));
+      setError(null);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    }
+  }
+  const used = isVariableUsed(draft, variable.name);
+  return (
+    <li className="space-y-2 rounded-lg border border-border p-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
+        <label className="min-w-0 font-body text-[10px] text-ink-muted">
+          {it ? "Nome variabile" : "Variable name"}
+          <input
+            aria-label={
+              it ? `Nome variabile ${variable.name}` : `Variable name ${variable.name}`
+            }
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+              setError(null);
+            }}
+            onBlur={commitName}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                event.currentTarget.blur();
+              }
+              if (event.key === "Escape") {
+                setName(variable.name);
+                setError(null);
+              }
+            }}
+            spellCheck={false}
+            className={`${inputClass} mt-1 min-w-0`}
+          />
+        </label>
+        <button
+          type="button"
+          disabled={used}
+          title={
+            used
+              ? it
+                ? "In uso nel driver"
+                : "Used by the driver"
+              : it
+                ? "Elimina variabile"
+                : "Delete variable"
+          }
+          aria-label={
+            it
+              ? `Elimina variabile ${variable.name}`
+              : `Delete variable ${variable.name}`
+          }
+          onClick={() => onChange(removeRecipeVariable(draft, variable.id))}
+          className="rounded-slsm border border-border p-1.5 text-error disabled:opacity-30"
+        >
+          <Trash2 size={12} />
+        </button>
+      </div>
+      {error && (
+        <p role="alert" className="font-body text-[11px] text-error">
+          {error}
+        </p>
+      )}
+      <label className="block font-body text-[10px] text-ink-muted">
+        {it ? "Tipo" : "Type"}
+        <select
+          value={variable.valueType}
+          onChange={(event) =>
+            onChange(
+              upsertRecipeVariable(draft, {
+                ...variable,
+                valueType: event.target.value as RecipeVarType,
+              }),
+            )
+          }
+          className={`${inputClass} mt-1`}
+        >
+          <option value="hex">hex</option>
+          <option value="number">number</option>
+          <option value="bool">bool</option>
+          <option value="string">string</option>
+        </select>
+      </label>
+      <input
+        aria-label={
+          it ? `Valore iniziale ${variable.name}` : `Initial value ${variable.name}`
+        }
+        value={variable.defaultValue ?? ""}
+        placeholder={it ? "Default (opzionale)" : "Default (optional)"}
+        onChange={(event) =>
+          onChange(
+            upsertRecipeVariable(draft, {
+              ...variable,
+              defaultValue: event.target.value || undefined,
+            }),
+          )
+        }
+        className={inputClass}
+      />
+    </li>
+  );
+}
+
 function VariablesPanel({
   draft,
   it,
@@ -3636,81 +3759,25 @@ function VariablesPanel({
   readonly it: boolean;
   readonly onChange: (draft: DeviceRecipeDraft) => void;
 }) {
+  const variables = recipeVariables(draft);
   return (
     <section className="space-y-2">
-      <ul className="mb-2 space-y-1.5">
-        {draft.variables.length === 0 ? (
+      <ul className="space-y-2">
+        {variables.length === 0 ? (
           <li className="font-body text-[11px] text-ink-faint">
             {it
-              ? "Nessuna — aggiungi Ingresso o crea qui."
-              : "None — add Ingresso or create here."}
+              ? "Nessuna variabile. Creane una qui o aggiungi un ingresso o una lettura."
+              : "No variables. Create one here or add an input or read."}
           </li>
         ) : (
-          draft.variables.map((v) => (
-            <li key={v.id} className="rounded-slsm border border-border p-1.5">
-              <div className="grid grid-cols-[minmax(0,1fr)_75px_auto] items-center gap-1">
-                <input
-                  aria-label={it ? "Nome variabile" : "Variable name"}
-                  value={v.name}
-                  onChange={(e) =>
-                    onChange(
-                      upsertRecipeVariable(draft, {
-                        ...v,
-                        name: normalizeRecipeVarName(e.target.value),
-                      }),
-                    )
-                  }
-                  className={`${inputClass} min-w-0`}
-                />
-                <select
-                  value={v.valueType}
-                  onChange={(e) =>
-                    onChange(
-                      upsertRecipeVariable(draft, {
-                        ...v,
-                        valueType: e.target.value as RecipeVarType,
-                      }),
-                    )
-                  }
-                  className={`${inputClass} min-w-0`}
-                >
-                  <option value="hex">hex</option>
-                  <option value="number">number</option>
-                  <option value="bool">bool</option>
-                  <option value="string">string</option>
-                </select>
-                <button
-                  type="button"
-                  disabled={isVariableUsed(draft, v.name)}
-                  title={
-                    isVariableUsed(draft, v.name)
-                      ? it
-                        ? "In uso nella sequenza"
-                        : "Used in sequence"
-                      : it
-                        ? "Elimina"
-                        : "Delete"
-                  }
-                  onClick={() => onChange(removeRecipeVariable(draft, v.id))}
-                  className="rounded-slsm border border-border p-0.5 text-error disabled:opacity-30"
-                >
-                  <Trash2 size={12} />
-                </button>
-              </div>
-              <input
-                value={v.defaultValue ?? ""}
-                placeholder={it ? "Default (opzionale)" : "Default (optional)"}
-                onChange={(e) =>
-                  onChange(
-                    upsertRecipeVariable(draft, {
-                      ...v,
-                      defaultValue: e.target.value || undefined,
-                    }),
-                  )
-                }
-                className={`${inputClass} mt-1`}
-              />
-            </li>
+          variables.map((variable) => (
+            <VariableRow
+              key={`${variable.id}:${variable.name}`}
+              variable={variable}
+              draft={draft}
+              it={it}
+              onChange={onChange}
+            />
           ))
         )}
       </ul>
@@ -3721,15 +3788,14 @@ function VariablesPanel({
             upsertRecipeVariable(draft, {
               name: nextRecipeVariableName(draft),
               valueType: "hex",
-              label: nextRecipeVariableName(draft),
             }),
           )
         }
-        className="mb-3 flex w-full items-center justify-center gap-1 rounded-slsm border border-dashed border-border-strong py-1 font-body text-[11px] text-brand-blue hover:bg-brand-blue/5"
+        className="flex w-full items-center justify-center gap-1 rounded-slsm border border-dashed border-border-strong py-1.5 font-body text-[11px] text-brand-blue hover:bg-brand-blue/5"
       >
-        <Plus size={12} /> {it ? "Aggiungi variabile" : "Add variable"}
+        <Plus size={12} />
+        {it ? "Aggiungi variabile" : "Add variable"}
       </button>
-
     </section>
   );
 }

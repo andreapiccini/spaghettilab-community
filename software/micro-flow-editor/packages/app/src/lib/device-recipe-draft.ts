@@ -103,8 +103,7 @@ export function normalizeRecipeVarName(name: string): string {
 
 /** Next free automatic variable name, including implicit read buffers. */
 export function nextRecipeVariableName(draft: DeviceRecipeDraft): string {
-  const names = new Set(draft.variables.map(variable => variable.name));
-  forEachSequenceOp(draft, op => { if ("into" in op && op.into) names.add(op.into); });
+  const names = new Set(recipeVariables(draft).map(variable => variable.name));
   let index = 1;
   while (names.has(`var${index}`)) index++;
   return `var${index}`;
@@ -1788,17 +1787,76 @@ export function moveCommandStep(
   return touch({ ...draft, commands });
 }
 
+/** Stable IDs also cover legacy buffers that were not listed in variables[]. */
+export function recipeVariables(draft: DeviceRecipeDraft): readonly RecipeVariable[] {
+  const variables = [...draft.variables];
+  const names = new Set(variables.map(variable => variable.name));
+  forEachSequenceOp(draft, op => {
+    for (const key of ["into", "intoPresence", "intoOk"] as const) {
+      const name = key in op ? (op as unknown as Record<string, unknown>)[key] : undefined;
+      if (typeof name !== "string" || !name || names.has(name)) continue;
+      names.add(name);
+      const valueType: RecipeVarType = key !== "into" ? "bool" :
+        op.type === "sample_external" ? op.valueType :
+        op.type === "decode" ? op.outType ?? "number" :
+        op.type === "encode" ? op.toType :
+        ["i2c_read", "i2c_write_read", "i2c_transaction", "spi_transfer", "w1_read", "i2c_scan"].includes(op.type) ? "hex" : "number";
+      variables.push({id: `implicit:${op.id}:${key}`, name, label: name, valueType});
+    }
+  });
+  return variables;
+}
+
+/** Names are presentation aliases. Renaming preserves identity and all uses atomically. */
+export function renameRecipeVariable(draft: DeviceRecipeDraft, variableId: string, newName: string): DeviceRecipeDraft {
+  const available = recipeVariables(draft);
+  const variable = available.find(item => item.id === variableId);
+  if (!variable) throw new Error("Variabile non trovata.");
+  const trimmed = newName.trim().replace(/^\$+/, "");
+  if (!trimmed) throw new Error("Inserisci un nome per la variabile.");
+  const name = normalizeRecipeVarName(trimmed);
+  if (available.some(item => item.id !== variable.id && item.name === name))
+    throw new Error(`La variabile «${name}» esiste già.`);
+  if (name === variable.name) return draft;
+  const referenceKeys = new Set(["into", "intoPresence", "intoOk", "input", "from"]);
+  const rewrite = (value: unknown, key = ""): unknown => {
+    if (typeof value === "string") {
+      if (parseVarRef(value) === variable.name && !["id", "channelId", "fromChannelId", "label", "name"].includes(key)) return `$${name}`;
+      return referenceKeys.has(key) && value === variable.name ? name : value;
+    }
+    if (Array.isArray(value)) return value.map(item => rewrite(item, key));
+    if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([field, item]) => [field, rewrite(item, field)]));
+    return value;
+  };
+  const mapOps = (ops: readonly DeviceRecipeOp[]) => ops.map(op => rewrite(op) as DeviceRecipeOp);
+  const renamed = {...variable, name, label: variable.label === variable.name ? name : variable.label};
+  return touch({...draft,
+    variables: draft.variables.some(item => item.id === variable.id)
+      ? draft.variables.map(item => item.id === variable.id ? renamed : item)
+      : [...draft.variables, renamed],
+    phases: {init: mapOps(draft.phases.init), sample: mapOps(draft.phases.sample), command: mapOps(draft.phases.command)},
+    commands: draft.commands.map(command => ({...command, steps: mapOps(command.steps)})),
+    flowInterfaces: mapOps(draft.flowInterfaces ?? []),
+    channels: draft.channels.map(channel => channel.label === variable.name ? {...channel, label: name} : channel),
+  });
+}
+
 export function upsertRecipeVariable(
   draft: DeviceRecipeDraft,
   patch: Partial<RecipeVariable> & { readonly name: string },
 ): DeviceRecipeDraft {
-  const next = normalizeRecipeVariable(patch);
-  const existingIdx = draft.variables.findIndex((v) => v.name === next.name || v.id === patch.id);
-  const variables =
-    existingIdx >= 0
-      ? draft.variables.map((v, i) => (i === existingIdx ? { ...next, id: draft.variables[i]!.id } : v))
-      : [...draft.variables, next];
-  return touch({ ...draft, variables });
+  // Identity wins over a name match, so a rename never merges two variables.
+  const existing = patch.id ? recipeVariables(draft).find(variable => variable.id === patch.id)
+    : recipeVariables(draft).find(variable => variable.name === normalizeRecipeVarName(patch.name));
+  const base = existing && existing.name !== normalizeRecipeVarName(patch.name)
+    ? renameRecipeVariable(draft, existing.id, patch.name) : draft;
+  const current = existing ? base.variables.find(variable => variable.id === existing.id) ?? existing : undefined;
+  const next = normalizeRecipeVariable({...current, ...patch, ...(existing ? {id: existing.id} : {}),
+    ...(existing && patch.name !== existing.name && patch.label === existing.name ? {label: normalizeRecipeVarName(patch.name)} : {}),
+  });
+  const existingIdx = base.variables.findIndex(variable => variable.id === next.id);
+  const variables = existingIdx >= 0 ? base.variables.map((variable, index) => index === existingIdx ? next : variable) : [...base.variables, next];
+  return touch({...base, variables});
 }
 
 export function removeRecipeVariable(draft: DeviceRecipeDraft, varId: string): DeviceRecipeDraft {
@@ -1877,15 +1935,15 @@ export function collectAllVarRefs(draft: DeviceRecipeDraft): readonly string[] {
 }
 
 export function isVariableUsed(draft: DeviceRecipeDraft, name: string): boolean {
-  const n = normalizeRecipeVarName(name);
-  if (collectAllVarRefs(draft).includes(n)) return true;
+  if (collectAllVarRefs(draft).includes(name)) return true;
   let used = false;
-  forEachSequenceOp(draft, (op) => {
-    if (
-      (op.type === "sample_external" || op.type === "decode" || op.type === "encode") &&
-      op.into === n
-    ) {
-      used = true;
+  const hasReference = (value: unknown): boolean => typeof value === "string" ? parseVarRef(value) === name :
+    Array.isArray(value) ? value.some(hasReference) : Boolean(value && typeof value === "object" && Object.values(value).some(hasReference));
+  forEachSequenceOp(draft, op => {
+    if (hasReference(op)) used = true;
+    for (const key of ["into", "intoPresence", "intoOk", "input", "from"]) {
+      const value = (op as unknown as Record<string, unknown>)[key];
+      if (value === name || value === `$${name}`) used = true;
     }
   });
   return used;
@@ -2090,7 +2148,7 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
     }
   }
 
-  const knownVars = new Set(draft.variables.map((v) => v.name));
+  const knownVars = new Set(recipeVariables(draft).map((v) => v.name));
   for (const ref of collectAllVarRefs(draft)) {
     if (!knownVars.has(ref)) {
       errors.push({ field: "variables", message: `Variabile sconosciuta: $${ref}` });

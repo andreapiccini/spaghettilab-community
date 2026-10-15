@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import {
   describeDeviceOp,
+  recipeVariables,
   toVarRef,
   type DeviceRecipeDraft,
   type DeviceRecipeOp,
@@ -30,16 +31,7 @@ export function FlowBlockPanel({
   onAdd: (kind: FlowInterfaceKind) => void;
   onEdit?: () => void;
 }) {
-  const bufferNames = draft.commands.flatMap((command) =>
-    command.steps.flatMap((op) => ("into" in op ? [op.into] : [])),
-  );
-  const variables = [
-    ...new Set(
-      [...draft.variables.map((v) => v.name), ...(draft.flowInterfaces ?? []).flatMap(op => op.type === "sample_external" && op.inputMode !== "trigger" ? [op.into] : []), ...bufferNames].filter(
-        (name): name is string => typeof name === "string",
-      ),
-    ),
-  ];
+  const variables = recipeVariables(draft).map(variable => variable.name);
   const labels: Record<FlowInterfaceKind, string> = {
     sample_external: it ? "Ingresso" : "Input",
     encode: "Encoder",

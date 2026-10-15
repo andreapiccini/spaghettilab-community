@@ -132,3 +132,13 @@ Il trigger generico «Esegui azione» è disponibile anche senza un’interfacci
 esplicita. Le variabili interne e i riferimenti `$nome` restano utilizzabili.
 I vecchi progetti conservano i blocchi precedenti; rigenerare il driver aggiorna
 le istanze al nuovo modello di selezione.
+
+## Nomi e identità delle variabili
+
+La colonna «Variabili interne» elenca anche i buffer delle letture presenti nei
+vecchi driver. Il nome occupa una riga intera. Si modifica liberamente e si
+conferma con Invio o uscendo dal campo; nomi vuoti e duplicati sono segnalati.
+La rinomina conserva l’ID della variabile e aggiorna in un’unica modifica tutti
+i riferimenti nelle fasi di inizializzazione, nelle azioni, nei messaggi I²C/SPI,
+nelle transazioni avanzate e nelle interfacce. Gli ID delle azioni e dei pin
+restano invariati, quindi i fili del canvas mantengono la loro identità.
