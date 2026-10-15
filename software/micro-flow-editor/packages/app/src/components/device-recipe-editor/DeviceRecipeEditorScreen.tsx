@@ -415,24 +415,24 @@ export function DeviceRecipeEditorScreen({
               ? "Aggiungi un passo di avvio"
               : "Add a startup step"
             : it
-              ? `Aggiungi un passo a «${draft.commands.find((c) => c.id === activeActionId)?.label ?? ""}»`
-              : `Add a step to “${draft.commands.find((c) => c.id === activeActionId)?.label ?? ""}”`}
+              ? "Aggiungi un passo"
+              : "Add a step"}
         </h2>
         {draft.binding.bus === "i2c" && (
           <div className="mb-2 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => addRegisterStep("read")}
-              className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
-            >
-              {it ? "+ Leggi registro" : "+ Read register"}
-            </button>
-            <button
-              type="button"
               onClick={() => addRegisterStep("write")}
               className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
             >
-              {it ? "+ Scrivi registro" : "+ Write register"}
+              {it ? "+ Scrivi" : "+ Write"}
+            </button>
+            <button
+              type="button"
+              onClick={() => addRegisterStep("read")}
+              className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink"
+            >
+              {it ? "+ Leggi" : "+ Read"}
             </button>
           </div>
         )}
@@ -447,7 +447,7 @@ export function DeviceRecipeEditorScreen({
         </p>
         <details open={draft.binding.bus !== "i2c"}>
           <summary className="mb-2 cursor-pointer font-body text-xs text-ink-muted">
-            {it ? "Tutte le operazioni · avanzate" : "All operations · advanced"}
+            {it ? "Avanzati" : "Advanced"}
           </summary>
           <LibraryList
             library={library.filter(
@@ -680,6 +680,15 @@ export function DeviceRecipeEditorScreen({
                 activeId={editorPane === "actions" ? activeActionId : null}
                 onChange={setDraft}
                 onSelect={selectDriverAction}
+                onRemoveStep={(actionId, stepId) => {
+                  const next = removeCommandStep(draft, actionId, stepId);
+                  setDraft(next);
+                  setTestResult(null);
+                  setTryMessage(null);
+                  if (selectedOpId === stepId) {
+                    setSelectedOpId(next.commands.find((action) => action.id === actionId)?.steps[0]?.id ?? null);
+                  }
+                }}
                 selectedStepId={selectedOpId}
                 onSelectStep={(id) => {
                   setSelectedInterfaceId(null);

@@ -21,6 +21,7 @@ type Props = {
   children?: ReactNode;
   selectedStepId?: string | null;
   onSelectStep?: (id: string) => void;
+  onRemoveStep: (actionId: string, stepId: string) => void;
 };
 
 export function DriverActionsList({
@@ -32,6 +33,7 @@ export function DriverActionsList({
   children,
   selectedStepId,
   onSelectStep,
+  onRemoveStep,
 }: Props) {
   function add() {
     const next = addCommand(draft, {
@@ -129,25 +131,39 @@ export function DriverActionsList({
               {activeId === action.id && action.steps.length > 0 && (
                 <div className="mt-2 space-y-1 border-t border-brand-blue/15 pt-2">
                   {action.steps.map((step, index) => (
-                    <button
-                      key={step.id}
-                      type="button"
-                      aria-pressed={selectedStepId === step.id}
-                      onClick={() => onSelectStep?.(step.id)}
-                      className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left font-body text-[11px] ${selectedStepId === step.id ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-brand-blue/5"}`}
-                    >
-                      <span className="shrink-0 font-mono text-[10px]">
-                        {index + 1}
-                      </span>
-                      <span className="min-w-0 break-words">
-                        {draft.binding.bus === "i2c"
-                          ? readableI2cStep(draft, step, undefined, it)
-                          : describeDeviceOp(step)}
-                      </span>
-                    </button>
+                    <div key={step.id} className="flex items-start gap-1">
+                      <button
+                        type="button"
+                        aria-pressed={selectedStepId === step.id}
+                        onClick={() => onSelectStep?.(step.id)}
+                        className={`flex min-w-0 flex-1 items-start gap-2 rounded-md px-2 py-1.5 text-left font-body text-[11px] ${selectedStepId === step.id ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-brand-blue/5"}`}
+                      >
+                        <span className="shrink-0 font-mono text-[10px]">
+                          {index + 1}
+                        </span>
+                        <span className="min-w-0 break-words">
+                          {draft.binding.bus === "i2c"
+                            ? readableI2cStep(draft, step, undefined, it)
+                            : describeDeviceOp(step)}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={
+                          it
+                            ? `Rimuovi passo ${index + 1} da ${action.label}`
+                            : `Remove step ${index + 1} from ${action.label}`
+                        }
+                        onClick={() => onRemoveStep(action.id, step.id)}
+                        className="shrink-0 rounded-md p-1.5 text-ink-faint hover:bg-error/10 hover:text-error"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
+              {activeId === action.id && children}
             </div>
           ))}
         </div>
@@ -157,7 +173,6 @@ export function DriverActionsList({
             {it ? "Azione" : "Action"}
           </button>
         </div>
-        {children}
       </div>
     </details>
   );
