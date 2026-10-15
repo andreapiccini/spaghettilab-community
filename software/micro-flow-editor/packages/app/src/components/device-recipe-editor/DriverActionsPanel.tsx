@@ -54,7 +54,7 @@ export function DriverActionsList({
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-blue">
           <Blocks size={16} aria-hidden />
         </span>
-        <span className="flex-1">{it ? "Azioni del sensore" : "Sensor actions"}</span>
+        <span className="flex-1">{it ? "Azioni" : "Actions"}</span>
         <span className="rounded-full bg-brand-blue/10 px-1.5 py-0.5 font-mono text-[10px] text-brand-blue">
           {draft.commands.length}
         </span>

@@ -54,7 +54,7 @@ export function FlowBlockPanel({
           <Cable size={16} aria-hidden />
         </span>
         <span className="flex-1">
-          {it ? "Blocco Flow del sensore" : "Sensor Flow block"}
+          Input/Output
         </span>
         <ChevronDown
           size={14}
