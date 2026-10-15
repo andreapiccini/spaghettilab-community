@@ -4,6 +4,7 @@ import { parseI2cMessage } from "../../lib/i2c-message-input.js";
 import { FlowBlockPanel } from "./FlowBlockPanel.js";
 import { addFlowInterface, bindFlowEncoderInput, type FlowInterfaceKind } from "../../lib/flow-interfaces.js";
 import {
+  CircleHelp,
   SlidersHorizontal,
   Braces,
   Workflow,
@@ -823,13 +824,26 @@ export function DeviceRecipeEditorScreen({
                 </span>
               )}
             </div>
-            <details className="max-w-64 font-body text-[10px] text-ink-muted">
-              <summary className="cursor-pointer text-brand-blue">
-                {it ? "Indirizzo a 8 bit?" : "8-bit address?"}
+            <details className="relative mb-1 font-body text-xs text-ink-muted">
+              <summary
+                aria-label={it ? "Aiuto indirizzi I²C" : "I²C address help"}
+                title={it ? "Aiuto indirizzi I²C" : "I²C address help"}
+                className="flex h-7 w-7 cursor-pointer list-none items-center justify-center rounded-full text-brand-blue hover:bg-brand-blue/10 [&::-webkit-details-marker]:hidden"
+              >
+                <CircleHelp size={18} aria-hidden />
               </summary>
-              {it
-                ? "Non è una modalità I²C distinta: comprende il bit R/W. Usa l’indirizzo a 7 bit: 0xD0/0xD1 → 0x68; 0x78/0x79 → 0x3C. SDA/SCL sono open-drain con pull-up; pin e velocità sono condivisi dal bus."
-                : "Includes the R/W bit. Use the 7-bit address: 0xD0/0xD1 → 0x68; 0x78/0x79 → 0x3C. SDA/SCL use open-drain and pull-ups; pins and speed are shared by the bus."}
+              <div className="absolute right-0 top-full z-30 mt-2 w-80 max-w-[80vw] rounded-slmd border border-border-strong bg-surface p-3 shadow-e2">
+                <p className="leading-relaxed">
+                  {it
+                    ? "Se viene indicato un indirizzo a 8 bit, in genere 7 bit identificano il dispositivo e l’ultimo bit indica scrittura (0) o lettura (1)."
+                    : "An 8-bit address generally contains 7 device address bits; the last bit indicates write (0) or read (1)."}
+                </p>
+                <dl className="mt-2 grid grid-cols-[1fr_auto] gap-x-3 gap-y-1">
+                  <dt>{it ? "Indirizzo write" : "Write address"}</dt><dd className="font-mono text-ink">0xA0</dd>
+                  <dt>{it ? "Indirizzo read" : "Read address"}</dt><dd className="font-mono text-ink">0xA1</dd>
+                  <dt>{it ? "Indirizzo Wire (7 bit)" : "Wire address (7-bit)"}</dt><dd className="font-mono text-ink">0x50</dd>
+                </dl>
+              </div>
             </details>
           </>
         )}
