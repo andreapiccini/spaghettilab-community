@@ -21,12 +21,14 @@ export function FlowBlockPanel({
   selectedId,
   onSelect,
   onAdd,
+  onEdit,
 }: {
   draft: DeviceRecipeDraft;
   it: boolean;
   selectedId: string | null;
   onSelect: (id: string) => void;
   onAdd: (kind: FlowInterfaceKind) => void;
+  onEdit?: () => void;
 }) {
   const bufferNames = draft.commands.flatMap((command) =>
     command.steps.flatMap((op) => ("into" in op ? [op.into] : [])),
@@ -55,7 +57,7 @@ export function FlowBlockPanel({
       open
       className="group/flow shrink-0 overflow-hidden rounded-slmd border border-border-strong bg-surface shadow-sm"
     >
-      <summary className="flex cursor-pointer list-none items-center gap-2.5 bg-surface-sunken/60 px-3 py-3 font-body text-xs font-semibold text-ink [&::-webkit-details-marker]:hidden">
+      <summary onClick={onEdit} className="flex cursor-pointer list-none items-center gap-2.5 bg-surface-sunken/60 px-3 py-3 font-body text-xs font-semibold text-ink [&::-webkit-details-marker]:hidden">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-blue">
           <Cable size={16} aria-hidden />
         </span>

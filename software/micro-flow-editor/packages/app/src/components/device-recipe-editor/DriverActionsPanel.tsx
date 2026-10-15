@@ -67,8 +67,8 @@ export function DriverActionsList({
       <div className="mx-3 mb-3 ml-6 border-l-2 border-brand-blue/15 pl-3 pt-2">
         <p className="mb-3 font-body text-[11px] leading-snug text-ink-muted">
           {it
-            ? "Questo è l’elenco delle azioni del driver. Ogni azione può diventare un blocco del canvas: scegli quale modificare."
-            : "These are your driver actions. Each can become a canvas block: select one to edit."}
+            ? "Questo è l’elenco delle azioni del driver. Scegli quale modificare; ogni blocco del sensore nel canvas può selezionarne una."
+            : "These are your driver actions. Choose one to edit; each sensor block on the canvas selects one action."}
         </p>
         <div className="space-y-1">
           {draft.commands.map((action) => (

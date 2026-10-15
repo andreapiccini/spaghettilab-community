@@ -175,6 +175,7 @@ export function DeviceRecipeEditorScreen({
   const [selectedCommandId, setSelectedCommandId] = useState<string | null>(
     draft.commands[0]?.id ?? null,
   );
+  const [flowEditing, setFlowEditing] = useState(false);
   const [interfaceSelection, setSelectedInterfaceId] = useState<string | null>(null);
   const [selectedOpId, setSelectedOpId] = useState<string | null>(
     () => draft.commands[0]?.steps[0]?.id ?? draft.phases.init[0]?.id ?? null,
@@ -200,7 +201,7 @@ export function DeviceRecipeEditorScreen({
   const visibleTestResult = testSelectionKey === (editorPane === "init" ? "init" : activeActionId) ? testResult : null;
   const ops = opsForEditorPane(draft, editorPane, activeActionId);
   const selectedInterfaceId = draft.flowInterfaces?.some(op => op.id === interfaceSelection && (op.type === "sample_external" || op.type === "emit")) ? interfaceSelection : null;
-  const selected = (selectedInterfaceId ? draft.flowInterfaces?.find(op => op.id === selectedInterfaceId) : undefined) ?? ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null;
+  const selected = flowEditing ? draft.flowInterfaces?.find(op => op.id === selectedInterfaceId) ?? null : ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null;
   const library = libraryOpsForBus(draft.binding.bus);
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
@@ -210,6 +211,8 @@ export function DeviceRecipeEditorScreen({
     const next = createBlankDraft(mode, draft.name);
     setDraft({ ...next, name: draft.name || next.name });
     setEditorPane("actions");
+    setFlowEditing(false);
+    setSelectedInterfaceId(null);
     setSelectedCommandId(next.commands[0]?.id ?? null);
     setSelectedCommandStepId(next.commands[0]?.steps[0]?.id ?? null);
     setSelectedOpId(next.commands[0]?.steps[0]?.id ?? next.phases.init[0]?.id ?? null);
@@ -218,7 +221,7 @@ export function DeviceRecipeEditorScreen({
   }
 
   function selectDriverAction(id: string) {
-    setSelectedInterfaceId(null);
+    setSelectedInterfaceId(null); setFlowEditing(false);
     setSelectedCommandId(id);
     setEditorPane("actions");
     const first = draft.commands.find((c) => c.id === id)?.steps[0]?.id ?? null;
@@ -229,7 +232,7 @@ export function DeviceRecipeEditorScreen({
   }
 
   function addRegisterStep(kind: "read" | "write") {
-    setSelectedInterfaceId(null);
+    setSelectedInterfaceId(null); setFlowEditing(false);
     const op = registerStep(kind);
     if (editorPane === "init") {
       setDraft({
@@ -271,11 +274,11 @@ export function DeviceRecipeEditorScreen({
     const added = addFlowInterface(draft, type, activeActionId);
     let next = added.draft;
     if (type === "encode" && added.op.type === "encode" && !next.flowInterfaces?.some(op => op.type === "sample_external" && op.into === (added.op as Extract<DeviceRecipeOp, { type: "encode" }>).input)) next = bindFlowEncoderInput(next, added.op.id);
-    setDraft(next); setSelectedInterfaceId(added.op.id);
+    setDraft(next); setSelectedInterfaceId(added.op.id); setFlowEditing(true);
   }
   function addLibraryOp(type: DeviceRecipeOp["type"]) {
     if (!isDisplay && isFlowInterface({ id: "", type } as DeviceRecipeOp)) { addInterface(type as FlowInterfaceKind); return; }
-    setSelectedInterfaceId(null);
+    setSelectedInterfaceId(null); setFlowEditing(false);
     if (editorPane === "init") {
       const next = insertOp(draft, "init", type);
       setDraft(next);
@@ -588,6 +591,127 @@ export function DeviceRecipeEditorScreen({
     </div>
   );
 
+  const selectedInspector = (
+    <EditorSection
+      title={
+        selected?.type === "sample_external"
+          ? it
+            ? "Configura ingresso"
+            : "Configure input"
+          : selected?.type === "emit"
+            ? it
+              ? "Configura uscita"
+              : "Configure output"
+            : it
+              ? "Configura il passo"
+              : "Configure step"
+      }
+      icon={SlidersHorizontal}
+    >
+      {selected ? (
+        <StepInspector
+          op={selected}
+          draft={draft}
+          it={it}
+          onChange={patchSelected}
+          onDraftChange={setDraft}
+          onRemove={() => {
+            if (selectedInterfaceId) {
+              setDraft({
+                ...draft,
+                flowInterfaces: draft.flowInterfaces?.filter(
+                  (op) => op.id !== selectedInterfaceId,
+                ),
+              });
+              setSelectedInterfaceId(null);
+              setFlowEditing(true);
+              return;
+            }
+            if (editorPane === "init") {
+              setDraft(removeOp(draft, "init", selected.id));
+            } else if (activeActionId) {
+              setDraft(removeCommandStep(draft, activeActionId, selected.id));
+            }
+            setSelectedOpId(null);
+          }}
+          onMove={(dir) => {
+            if (selectedInterfaceId) {
+              const list = [...(draft.flowInterfaces ?? [])];
+              const index = list.findIndex((op) => op.id === selectedInterfaceId);
+              const target = index + dir;
+              if (index >= 0 && target >= 0 && target < list.length) {
+                [list[index], list[target]] = [list[target]!, list[index]!];
+                setDraft({ ...draft, flowInterfaces: list });
+              }
+              return;
+            }
+            if (editorPane === "init") {
+              setDraft(moveOp(draft, "init", selected.id, dir));
+            } else if (activeActionId) {
+              setDraft(moveCommandStep(draft, activeActionId, selected.id, dir));
+            }
+          }}
+        />
+      ) : (
+        <p className="font-body text-xs text-ink-faint">
+          {it ? "Seleziona un passo nella sequenza." : "Select a step in the sequence."}
+        </p>
+      )}
+    </EditorSection>
+  );
+  const flowPreview = (
+    <EditorSection title={it ? "Anteprima nel Flow" : "Flow preview"} icon={Workflow}>
+      {draft.binding.bus === "i2c" ? (
+        <div className="mx-auto w-full max-w-xl">
+          <DriverCanvasPreview draft={draft} it={it} />
+        </div>
+      ) : (
+        <>
+          <div className="rounded-slmd border border-border-strong bg-surface-sunken p-3">
+            <div className="flex items-center gap-2">
+              <Cpu size={16} className="text-brand-blue" />
+              <span className="font-body text-sm font-semibold text-ink">
+                {draft.name}
+              </span>
+            </div>
+            <ul className="mt-2 space-y-1">
+              {draft.channels
+                .filter((ch) => ch.direction === "read")
+                .map((ch) => {
+                  const calibratedBlocked = draft.binding.bus === "adc" && !calibOk;
+                  return (
+                    <li
+                      key={ch.id}
+                      className={`flex items-center justify-end gap-2 font-body text-xs ${
+                        calibratedBlocked ? "text-ink-faint line-through" : "text-ink"
+                      }`}
+                    >
+                      {ch.label} · {ch.unit}
+                      {calibratedBlocked ? (
+                        <span className="font-body text-[9px] no-underline">
+                          {it ? "non disponibile" : "unavailable"}
+                        </span>
+                      ) : null}
+                      <span className="h-2.5 w-2.5 rounded-full border-2 border-brand-blue bg-surface" />
+                    </li>
+                  );
+                })}
+            </ul>
+            <p className="mt-3 rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[11px] text-ink-muted">
+              {it ? "Stato:" : "Status:"} {draft.verification.note}
+            </p>
+          </div>
+        </>
+      )}
+      {draft.runtimeUnavailable.length > 0 ? (
+        <p className="mt-2 font-body text-[10px] text-ink-faint">
+          {it ? "Runtime non disponibile:" : "Runtime unavailable:"}{" "}
+          {draft.runtimeUnavailable.join(", ")}
+        </p>
+      ) : null}
+    </EditorSection>
+  );
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface-sunken">
       <header className="flex flex-wrap items-end gap-3 border-b border-border bg-surface px-4 py-2">
@@ -743,13 +867,19 @@ export function DeviceRecipeEditorScreen({
                 draft={draft}
                 it={it}
                 selectedId={selectedInterfaceId}
-                onSelect={setSelectedInterfaceId}
+                onEdit={() => setFlowEditing(true)}
+                onSelect={(id) => {
+                  setSelectedInterfaceId(id);
+                  setFlowEditing(true);
+                }}
                 onAdd={addInterface}
               />
               <DriverActionsList
                 draft={draft}
                 it={it}
-                activeId={editorPane === "actions" ? activeActionId : null}
+                activeId={
+                  !flowEditing && editorPane === "actions" ? activeActionId : null
+                }
                 onChange={setDraft}
                 onSelect={selectDriverAction}
                 onRemoveStep={(actionId, stepId) => {
@@ -767,10 +897,14 @@ export function DeviceRecipeEditorScreen({
                 selectedStepId={selectedOpId}
                 onSelectStep={(id) => {
                   setSelectedInterfaceId(null);
+                  setFlowEditing(false);
                   setSelectedOpId(id);
                 }}
               >
-                {editorPane === "actions" && activeActionId && stepLibrary}
+                {!flowEditing &&
+                  editorPane === "actions" &&
+                  activeActionId &&
+                  stepLibrary}
               </DriverActionsList>
               <EditorSection
                 title={it ? "Inizializzazione" : "Initialization"}
@@ -784,14 +918,15 @@ export function DeviceRecipeEditorScreen({
                     : "Optional: these steps prepare the sensor once when the microcontroller program starts."}
                 </p>
                 <div
-                  className={`rounded-lg border p-2 ${editorPane === "init" ? "border-brand-blue/25 bg-brand-blue/5" : "border-border bg-surface-sunken/40"}`}
+                  className={`rounded-lg border p-2 ${!flowEditing && editorPane === "init" ? "border-brand-blue/25 bg-brand-blue/5" : "border-border bg-surface-sunken/40"}`}
                 >
                   <button
                     type="button"
-                    aria-pressed={editorPane === "init"}
+                    aria-pressed={!flowEditing && editorPane === "init"}
                     onClick={() => {
                       setEditorPane("init");
                       setSelectedInterfaceId(null);
+                      setFlowEditing(false);
                       setSelectedOpId(draft.phases.init[0]?.id ?? null);
                       setTestResult(null);
                       setTryMessage(null);
@@ -803,7 +938,7 @@ export function DeviceRecipeEditorScreen({
                   <span className="font-body text-[10px] text-ink-muted">
                     {draft.phases.init.length} {it ? "passi" : "steps"}
                   </span>
-                  {editorPane === "init" && (
+                  {!flowEditing && editorPane === "init" && (
                     <>
                       {draft.phases.init.length > 0 && (
                         <ol className="mt-2 space-y-1 border-t border-brand-blue/15 pt-2">
@@ -814,6 +949,7 @@ export function DeviceRecipeEditorScreen({
                                 aria-pressed={selectedOpId === step.id}
                                 onClick={() => {
                                   setSelectedInterfaceId(null);
+                                  setFlowEditing(false);
                                   setSelectedOpId(step.id);
                                 }}
                                 className={`flex min-w-0 flex-1 items-start gap-2 rounded-md px-2 py-1.5 text-left font-body text-[11px] ${selectedOpId === step.id ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-brand-blue/5"}`}
@@ -878,36 +1014,55 @@ export function DeviceRecipeEditorScreen({
         {/* CENTER */}
         <main className="flex min-h-0 flex-col overflow-y-auto p-4">
           {isDisplay && draft.display ? (
-            <DisplayCenter
-              draft={draft}
-              it={it}
-              onChange={setDraft}
-              selectedCommandId={selectedCommandId}
-              onSelectCommand={(id) => {
-                setSelectedCommandId(id);
-                const c = draft.commands.find((x) => x.id === id);
-                setSelectedCommandStepId(c?.steps[0]?.id ?? null);
-              }}
-              selectedStepId={selectedCommandStepId}
-              onSelectStep={setSelectedCommandStepId}
-            />
+            <>
+              <DisplayCenter
+                draft={draft}
+                it={it}
+                onChange={setDraft}
+                selectedCommandId={selectedCommandId}
+                onSelectCommand={(id) => {
+                  setSelectedCommandId(id);
+                  const c = draft.commands.find((x) => x.id === id);
+                  setSelectedCommandStepId(c?.steps[0]?.id ?? null);
+                }}
+                selectedStepId={selectedCommandStepId}
+                onSelectStep={setSelectedCommandStepId}
+              />
+              <DisplayInspector
+                draft={draft}
+                it={it}
+                onChange={setDraft}
+                selectedCommandId={selectedCommandId}
+                onSelectCommand={setSelectedCommandId}
+                selectedStepId={selectedCommandStepId}
+                onSelectStep={setSelectedCommandStepId}
+                createBlocked={createBlocked}
+              />
+            </>
           ) : (
             <>
-              <DerivedSignalView
-                draft={draft}
-                ops={ops}
-                it={it}
-                rxByOpId={
-                  visibleTestResult?.ok ? visibleTestResult.capture.rxByOpId : undefined
-                }
-                selectedOpId={selectedOpId}
-                onSelectOp={(id) => {
-                  setSelectedInterfaceId(null);
-                  setSelectedOpId(id);
-                }}
-              />
+              {flowEditing ? (
+                flowPreview
+              ) : (
+                <DerivedSignalView
+                  draft={draft}
+                  ops={ops}
+                  it={it}
+                  rxByOpId={
+                    visibleTestResult?.ok
+                      ? visibleTestResult.capture.rxByOpId
+                      : undefined
+                  }
+                  selectedOpId={selectedOpId}
+                  onSelectOp={(id) => {
+                    setSelectedInterfaceId(null);
+                    setFlowEditing(false);
+                    setSelectedOpId(id);
+                  }}
+                />
+              )}
 
-              {draft.binding.bus === "i2c" && (
+              {!flowEditing && draft.binding.bus === "i2c" && (
                 <>
                   <DriverSequence
                     controls={testControls}
@@ -923,17 +1078,22 @@ export function DeviceRecipeEditorScreen({
                     selectedId={selected?.id ?? null}
                     onSelect={(id) => {
                       setSelectedInterfaceId(null);
+                      setFlowEditing(false);
                       setSelectedOpId(id);
                     }}
                   />
                 </>
               )}
 
-              {draft.binding.bus === "adc" && editorPane === "actions" ? (
+              {!flowEditing &&
+              draft.binding.bus === "adc" &&
+              editorPane === "actions" ? (
                 <AnalogSamplingSummary ops={ops} it={it} />
               ) : null}
 
-              {draft.binding.bus === "i2c" || draft.binding.bus === "spi" ? null : (
+              {flowEditing ||
+              draft.binding.bus === "i2c" ||
+              draft.binding.bus === "spi" ? null : (
                 <section className="mb-4 mt-4 rounded-slmd border border-border-strong bg-surface p-3">
                   <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
                     {it
@@ -978,125 +1138,9 @@ export function DeviceRecipeEditorScreen({
             </>
           )}
 
-          {fieldErrors.length > 0 ? (
-            <ul className="mt-3 rounded-slmd border border-error/40 bg-error/5 px-3 py-2 font-body text-xs text-error">
-              {fieldErrors.map((err) => (
-                <li key={err.field}>
-                  {err.field}: {err.message}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {draft.binding.bus !== "i2c" && (
-            <section className="mt-3 rounded-slmd border border-border-strong bg-surface p-3">
-              {testControls}
-              {visibleTestResult && (
-                <RecipeTestResultPanel result={visibleTestResult} it={it} />
-              )}
-            </section>
-          )}
-          {!testResult && tryMessage ? (
-            <p className="mt-3 rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-xs text-ink-muted">
-              {tryMessage}
-            </p>
-          ) : null}
-        </main>
-
-        {/* RIGHT */}
-        <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-l border-border bg-surface p-3">
-          {isDisplay && draft.display ? (
-            <DisplayInspector
-              draft={draft}
-              it={it}
-              onChange={setDraft}
-              selectedCommandId={selectedCommandId}
-              onSelectCommand={setSelectedCommandId}
-              selectedStepId={selectedCommandStepId}
-              onSelectStep={setSelectedCommandStepId}
-              createBlocked={createBlocked}
-            />
-          ) : (
-            <>
-              <EditorSection
-                title={
-                  selected?.type === "sample_external"
-                    ? it
-                      ? "Configura ingresso"
-                      : "Configure input"
-                    : selected?.type === "emit"
-                      ? it
-                        ? "Configura uscita"
-                        : "Configure output"
-                      : it
-                        ? "Configura il passo"
-                        : "Configure step"
-                }
-                icon={SlidersHorizontal}
-              >
-                {selected ? (
-                  <StepInspector
-                    op={selected}
-                    draft={draft}
-                    it={it}
-                    onChange={patchSelected}
-                    onDraftChange={setDraft}
-                    onRemove={() => {
-                      if (selectedInterfaceId) {
-                        setDraft({
-                          ...draft,
-                          flowInterfaces: draft.flowInterfaces?.filter(
-                            (op) => op.id !== selectedInterfaceId,
-                          ),
-                        });
-                        setSelectedInterfaceId(null);
-                        return;
-                      }
-                      if (editorPane === "init") {
-                        setDraft(removeOp(draft, "init", selected.id));
-                      } else if (activeActionId) {
-                        setDraft(removeCommandStep(draft, activeActionId, selected.id));
-                      }
-                      setSelectedOpId(null);
-                    }}
-                    onMove={(dir) => {
-                      if (selectedInterfaceId) {
-                        const list = [...(draft.flowInterfaces ?? [])];
-                        const index = list.findIndex(
-                          (op) => op.id === selectedInterfaceId,
-                        );
-                        const target = index + dir;
-                        if (index >= 0 && target >= 0 && target < list.length) {
-                          [list[index], list[target]] = [list[target]!, list[index]!];
-                          setDraft({ ...draft, flowInterfaces: list });
-                        }
-                        return;
-                      }
-                      if (editorPane === "init") {
-                        setDraft(moveOp(draft, "init", selected.id, dir));
-                      } else if (activeActionId) {
-                        setDraft(
-                          moveCommandStep(draft, activeActionId, selected.id, dir),
-                        );
-                      }
-                    }}
-                  />
-                ) : (
-                  <p className="font-body text-xs text-ink-faint">
-                    {it
-                      ? "Seleziona un passo nella sequenza."
-                      : "Select a step in the sequence."}
-                  </p>
-                )}
-              </EditorSection>
-
-              <EditorSection
-                title={it ? "Variabili interne" : "Internal variables"}
-                icon={Braces}
-                collapsible
-              >
-                <VariablesPanel draft={draft} it={it} onChange={setDraft} />
-              </EditorSection>
-
+          {!isDisplay && (
+            <div className="mt-3 space-y-3">
+              {selectedInspector}
               {draft.binding.bus === "adc" && draft.binding.adc ? (
                 <section className="rounded-slmd border border-border-strong p-3">
                   <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
@@ -1160,68 +1204,41 @@ export function DeviceRecipeEditorScreen({
                     ) : null}
                   </div>
                 </section>
-              ) : null}
-
-              <EditorSection
-                title={it ? "Anteprima nel Flow" : "Flow preview"}
-                icon={Workflow}
-              >
-                {draft.binding.bus === "i2c" ? (
-                  <DriverCanvasPreview
-                    draft={draft}
-                    it={it}
-                    activeId={activeActionId}
-                  />
-                ) : (
-                  <>
-                    <div className="rounded-slmd border border-border-strong bg-surface-sunken p-3">
-                      <div className="flex items-center gap-2">
-                        <Cpu size={16} className="text-brand-blue" />
-                        <span className="font-body text-sm font-semibold text-ink">
-                          {draft.name}
-                        </span>
-                      </div>
-                      <ul className="mt-2 space-y-1">
-                        {draft.channels
-                          .filter((ch) => ch.direction === "read")
-                          .map((ch) => {
-                            const calibratedBlocked =
-                              draft.binding.bus === "adc" && !calibOk;
-                            return (
-                              <li
-                                key={ch.id}
-                                className={`flex items-center justify-end gap-2 font-body text-xs ${
-                                  calibratedBlocked
-                                    ? "text-ink-faint line-through"
-                                    : "text-ink"
-                                }`}
-                              >
-                                {ch.label} · {ch.unit}
-                                {calibratedBlocked ? (
-                                  <span className="font-body text-[9px] no-underline">
-                                    {it ? "non disponibile" : "unavailable"}
-                                  </span>
-                                ) : null}
-                                <span className="h-2.5 w-2.5 rounded-full border-2 border-brand-blue bg-surface" />
-                              </li>
-                            );
-                          })}
-                      </ul>
-                      <p className="mt-3 rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[11px] text-ink-muted">
-                        {it ? "Stato:" : "Status:"} {draft.verification.note}
-                      </p>
-                    </div>
-                  </>
-                )}
-                {draft.runtimeUnavailable.length > 0 ? (
-                  <p className="mt-2 font-body text-[10px] text-ink-faint">
-                    {it ? "Runtime non disponibile:" : "Runtime unavailable:"}{" "}
-                    {draft.runtimeUnavailable.join(", ")}
-                  </p>
-                ) : null}
-              </EditorSection>
-            </>
+              ) : null}{" "}
+            </div>
           )}
+          {fieldErrors.length > 0 ? (
+            <ul className="mt-3 rounded-slmd border border-error/40 bg-error/5 px-3 py-2 font-body text-xs text-error">
+              {fieldErrors.map((err) => (
+                <li key={err.field}>
+                  {err.field}: {err.message}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {!flowEditing && draft.binding.bus !== "i2c" && (
+            <section className="mt-3 rounded-slmd border border-border-strong bg-surface p-3">
+              {testControls}
+              {visibleTestResult && (
+                <RecipeTestResultPanel result={visibleTestResult} it={it} />
+              )}
+            </section>
+          )}
+          {!flowEditing && !testResult && tryMessage ? (
+            <p className="mt-3 rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-xs text-ink-muted">
+              {tryMessage}
+            </p>
+          ) : null}
+        </main>
+
+        {/* RIGHT: only the shared internal variable list. */}
+        <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-l border-border bg-surface p-3">
+          <EditorSection
+            title={it ? "Variabili interne" : "Internal variables"}
+            icon={Braces}
+          >
+            <VariablesPanel draft={draft} it={it} onChange={setDraft} />
+          </EditorSection>
         </aside>
       </div>
 
@@ -3214,7 +3231,7 @@ function HexByteCellsEditor({
         <p className="mt-1 font-body text-[10px] text-ink-muted">{it ? "Puoi anche incollare l’intera sequenza in una casella: i byte si distribuiscono automaticamente." : "Paste a whole sequence into any cell to distribute the bytes automatically."}</p>
         {sequenceError && <p role="alert" className="font-body text-xs text-error">{sequenceError}</p>}
       </details>
-      <ul className="grid grid-cols-2 gap-1">
+      <ul className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-2">
         {cells.map((cell, index) => {
           const valid = cell === "" || parseHexByteToken(cell) !== null || /^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(cell);
           return (
@@ -3604,17 +3621,8 @@ function VariablesPanel({
   readonly it: boolean;
   readonly onChange: (draft: DeviceRecipeDraft) => void;
 }) {
-  const writeChannels = writeChannelsOf(draft);
   return (
     <section className="space-y-2">
-      <h2 className="mb-1 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-        {it ? "Variabili" : "Variables"}
-      </h2>
-      <p className="mb-2 font-body text-[10px] leading-snug text-ink-muted">
-        {it
-          ? "Globali tra Inizializzazione e Azioni. Ingresso le aggiorna da un ingresso Flow."
-          : "Shared across Initialization and Actions. Ingresso fills them from a Flow input."}
-      </p>
       <ul className="mb-2 space-y-1.5">
         {draft.variables.length === 0 ? (
           <li className="font-body text-[11px] text-ink-faint">
@@ -3625,8 +3633,9 @@ function VariablesPanel({
         ) : (
           draft.variables.map((v) => (
             <li key={v.id} className="rounded-slsm border border-border p-1.5">
-              <div className="flex items-center gap-1">
+              <div className="grid grid-cols-[minmax(0,1fr)_75px_auto] items-center gap-1">
                 <input
+                  aria-label={it ? "Nome variabile" : "Variable name"}
                   value={v.name}
                   onChange={(e) =>
                     onChange(
@@ -3636,7 +3645,7 @@ function VariablesPanel({
                       }),
                     )
                   }
-                  className={`${inputClass} flex-1`}
+                  className={`${inputClass} min-w-0`}
                 />
                 <select
                   value={v.valueType}
@@ -3648,7 +3657,7 @@ function VariablesPanel({
                       }),
                     )
                   }
-                  className={`${inputClass} w-20`}
+                  className={`${inputClass} min-w-0`}
                 >
                   <option value="hex">hex</option>
                   <option value="number">number</option>
@@ -3706,45 +3715,6 @@ function VariablesPanel({
         <Plus size={12} /> {it ? "Aggiungi variabile" : "Add variable"}
       </button>
 
-      <h3 className="mb-1 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-        {it ? "Ingressi Flow" : "Flow inputs"}
-      </h3>
-      <p className="mb-1 font-body text-[10px] text-ink-muted">
-        {it
-          ? "Canali in scrittura esposti al canvas."
-          : "Write channels exposed to the canvas."}
-      </p>
-      <ul className="mb-1 space-y-1">
-        {writeChannels.length === 0 ? (
-          <li className="font-body text-[11px] text-ink-faint">
-            {it ? "Nessun ingresso." : "No inputs."}
-          </li>
-        ) : (
-          writeChannels.map((ch) => (
-            <li
-              key={ch.id}
-              className="rounded-slpill bg-brand-blue/10 px-2 py-0.5 font-body text-[11px] text-brand-blue"
-            >
-              {ch.label} · {ch.id}
-            </li>
-          ))
-        )}
-      </ul>
-      <button
-        type="button"
-        onClick={() => {
-          const ensured = ensureWriteChannel(draft, {
-            id: `ingresso_${writeChannels.length + 1}`,
-            label: it
-              ? `Ingresso ${writeChannels.length + 1}`
-              : `Input ${writeChannels.length + 1}`,
-          });
-          onChange(ensured.draft);
-        }}
-        className="flex w-full items-center justify-center gap-1 rounded-slsm border border-dashed border-border-strong py-1 font-body text-[11px] text-brand-blue hover:bg-brand-blue/5"
-      >
-        <Plus size={12} /> {it ? "Aggiungi ingresso" : "Add input"}
-      </button>
     </section>
   );
 }

@@ -28,7 +28,13 @@ indipendentemente: interfacce, passi e librerie restano raggiungibili. I passi
 sono selezionabili anche sotto l’azione nella colonna sinistra. I pannelli destri
 usano la stessa gerarchia grafica di quelli sinistri.
 
-Il grafico resta in alto. Ogni byte ha una larghezza minima; scorrimento
+Al centro, in alto, l’editor mostra il diagramma dell’azione o dell’inizializzazione
+selezionata. Se si modifica «Blocco Flow del sensore», lo sostituisce con
+l’anteprima schematica dei pin. La configurazione dell’interfaccia o del passo
+selezionato compare sotto, nella stessa colonna centrale. A destra resta solo
+la lista delle variabili interne, con creazione e modifica.
+
+Il grafico temporale resta in alto durante la modifica delle sequenze. Ogni byte ha una larghezza minima; scorrimento
 orizzontale e zoom mantengono leggibili i messaggi lunghi. I titoli mostrano
 indirizzo, write/read, numero di byte e risposta effettivamente acquisita.
 START, STOP, ACK e NACK restano nella sequenza del bus; legenda e didascalia
