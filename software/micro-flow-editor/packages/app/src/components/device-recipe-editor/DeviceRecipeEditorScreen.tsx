@@ -1534,6 +1534,116 @@ function BindingPanel({
   );
 }
 
+function ReadDestinationField({
+  value,
+  draft,
+  it,
+  onSelect,
+  onCreate,
+}: {
+  value: string;
+  draft: DeviceRecipeDraft;
+  it: boolean;
+  onSelect: (name: string) => void;
+  onCreate: (name: string) => void;
+}) {
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const operations = [
+    ...Object.values(draft.phases).flat(),
+    ...draft.commands.flatMap((command) => command.steps),
+    ...(draft.flowInterfaces ?? []),
+  ];
+  const names = [
+    ...new Set(
+      [
+        ...draft.variables.map((variable) => variable.name),
+        ...operations.flatMap((step) =>
+          "into" in step && step.into ? [step.into] : [],
+        ),
+        value,
+      ].filter((name): name is string => Boolean(name)),
+    ),
+  ];
+  const normalized = normalizeRecipeVarName(newName.replace(/^\$+/, ""));
+  const duplicate = names.includes(normalized);
+  return (
+    <Field label={it ? "Salva in" : "Save to"}>
+      <div className="space-y-2">
+        <select
+          aria-label={it ? "Variabile di destinazione" : "Destination variable"}
+          value={value}
+          onChange={(event) => {
+            onSelect(event.target.value);
+            setCreating(false);
+          }}
+          className={inputClass}
+        >
+          {!value && (
+            <option value="">
+              {it ? "Scegli una variabile" : "Choose a variable"}
+            </option>
+          )}
+          {names.map((name) => (
+            <option key={name} value={name}>
+              ${name}
+            </option>
+          ))}
+        </select>
+        {creating ? (
+          <div className="space-y-1.5 rounded-slsm border border-border bg-surface-sunken p-2">
+            <input
+              autoFocus
+              aria-label={it ? "Nome nuova variabile" : "New variable name"}
+              placeholder={it ? "Nome variabile" : "Variable name"}
+              value={newName}
+              onChange={(event) => setNewName(event.target.value)}
+              className={inputClass}
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={!newName.trim()}
+                className="font-body text-xs font-semibold text-brand-blue disabled:opacity-40"
+                onClick={() => {
+                  if (duplicate) onSelect(normalized);
+                  else onCreate(normalized);
+                  setCreating(false);
+                  setNewName("");
+                }}
+              >
+                {duplicate
+                  ? it
+                    ? "Usa variabile"
+                    : "Use variable"
+                  : it
+                    ? "Crea e seleziona"
+                    : "Create and select"}
+              </button>
+              <button
+                type="button"
+                className="font-body text-xs text-ink-muted"
+                onClick={() => setCreating(false)}
+              >
+                {it ? "Annulla" : "Cancel"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setCreating(true)}
+            className="inline-flex items-center gap-1 font-body text-xs font-semibold text-brand-blue"
+          >
+            <Plus size={12} />
+            {it ? "Nuova variabile" : "New variable"}
+          </button>
+        )}
+      </div>
+    </Field>
+  );
+}
+
 function StepInspector({
   op,
   draft,
@@ -1611,13 +1721,18 @@ function StepInspector({
               className={inputClass}
             />
           </Field>
-          <Field label={it ? "Salva in" : "Save to"}>
-            <input
-              value={op.into}
-              onChange={(e) => onChange({ ...op, into: e.target.value })}
-              className={inputClass}
-            />
-          </Field>
+          <ReadDestinationField
+            key={op.id}
+            value={op.into}
+            draft={draft}
+            it={it}
+            onSelect={(into) => onChange({ ...op, into })}
+            onCreate={(name) => onDraftChange(updateOpAnywhere(
+              upsertRecipeVariable(draft, { name, valueType: "hex" }),
+              op.id,
+              { ...op, into: name },
+            ))}
+          />
         </>
       ) : null}
 
@@ -1642,13 +1757,18 @@ function StepInspector({
               className={inputClass}
             />
           </Field>
-          <Field label={it ? "Salva in" : "Save to"}>
-            <input
-              value={op.into}
-              onChange={(e) => onChange({ ...op, into: e.target.value })}
-              className={inputClass}
-            />
-          </Field>
+          <ReadDestinationField
+            key={op.id}
+            value={op.into}
+            draft={draft}
+            it={it}
+            onSelect={(into) => onChange({ ...op, into })}
+            onCreate={(name) => onDraftChange(updateOpAnywhere(
+              upsertRecipeVariable(draft, { name, valueType: "hex" }),
+              op.id,
+              { ...op, into: name },
+            ))}
+          />
           <p className="font-body text-[10px] text-ink-faint">
             {it
               ? "RESTART generato automaticamente (nessuno STOP intermedio)."
