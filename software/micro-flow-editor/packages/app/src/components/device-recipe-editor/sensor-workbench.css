@@ -821,9 +821,8 @@
 .sensor-workbench-main > .sensor-workbench-inspector {
   margin-top: 0;
 }
-/* In sensor editing the workspace provides its own chrome, as in the approved design. */
-[data-app-shell]:has(.sensor-workbench) > header,
-[data-app-shell]:has(.sensor-workbench) > div > nav {
+/* The workspace supplies its header; keep the app navigation available. */
+[data-app-shell]:has(.sensor-workbench) > header {
   display: none;
 }
 .sensor-workbench-breadcrumb {
