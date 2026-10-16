@@ -1625,13 +1625,6 @@ export function DeviceRecipeEditorScreen({
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={handleCancel}
-            className="rounded-slpill px-3 py-1.5 font-body text-sm text-ink-muted hover:bg-surface-raised"
-          >
-            {it ? "Annulla" : "Cancel"}
-          </button>
-          <button
-            type="button"
             onClick={handleSaveDraft}
             className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue"
           >

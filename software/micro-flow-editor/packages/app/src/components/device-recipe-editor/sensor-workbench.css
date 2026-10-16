@@ -508,10 +508,7 @@
 }
 .sensor-workbench footer > div {
   width: 100%;
-}
-.sensor-workbench footer > div > button:first-child {
-  margin-right: auto;
-  border: 1px solid var(--color-border-strong);
+  justify-content: flex-end;
 }
 .sensor-workbench footer button {
   border-radius: var(--radius-slsm);
