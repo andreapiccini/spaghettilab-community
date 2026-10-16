@@ -7,7 +7,7 @@ import { TopBar } from "./TopBar.js";
 export function AppShell({ children }: { readonly children: ReactNode }) {
   const demoOnly = isDemoOnlyEnabled();
   return (
-    <div className="flex h-dvh flex-col bg-surface-sunken">
+    <div data-app-shell className="flex h-dvh flex-col bg-surface-sunken">
       <TopBar />
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {!demoOnly && <LeftRail />}

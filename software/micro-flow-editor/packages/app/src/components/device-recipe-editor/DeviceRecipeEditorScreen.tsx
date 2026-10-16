@@ -1,9 +1,17 @@
+import { publicAsset } from "../../lib/public-asset.js";
+import "./sensor-workbench.css";
+import { SensorWorkbenchNav, SensorWorkbenchHeading } from "./SensorWorkbenchNav.js";
 import { readableI2cStep } from "../../lib/i2c-step-label.js";
 import { EditorSection } from "./EditorSection.js";
 import { parseI2cMessage } from "../../lib/i2c-message-input.js";
 import { FlowBlockPanel } from "./FlowBlockPanel.js";
-import { addFlowInterface, bindFlowEncoderInput, type FlowInterfaceKind } from "../../lib/flow-interfaces.js";
 import {
+  addFlowInterface,
+  bindFlowEncoderInput,
+  type FlowInterfaceKind,
+} from "../../lib/flow-interfaces.js";
+import {
+  X,
   CircleHelp,
   SlidersHorizontal,
   Braces,
@@ -121,13 +129,13 @@ export function DeviceRecipeEditorScreen({
   const { navigate, session, execute } = useSession();
   const { rows, getClient, installProfile, listDeviceProfiles, removeProfile } =
     useCoreSessions();
+  const physicalMetadata =
+    session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment;
+  const physicalBindingId = session?.stack.current.coreBindings[0]?.bindingId;
   const physicalDraft = useMemo(() => {
-    const project = parsePhysicalProject(
-      session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment,
-    );
-    const bindingId = session?.stack.current.coreBindings[0]?.bindingId;
-    return draftForBinding(project, bindingId);
-  }, [session]);
+    const project = parsePhysicalProject(physicalMetadata);
+    return draftForBinding(project, physicalBindingId);
+  }, [physicalMetadata, physicalBindingId]);
   function updateI2cSpeed(speed: number) {
     if (!session || !physicalDraft) return;
     const bindingId = session.stack.current.coreBindings[0]?.bindingId;
@@ -173,8 +181,8 @@ export function DeviceRecipeEditorScreen({
     }
     return rows.find((r) => r.sessionState === "READY")?.binding.bindingId;
   }, [session, rows]);
-  const [draft, setDraft] = useState<DeviceRecipeDraft>(
-    () => organizeDriverInterfaces(initialDraft ?? createBlankDraft("i2c")),
+  const [draft, setDraft] = useState<DeviceRecipeDraft>(() =>
+    organizeDriverInterfaces(initialDraft ?? createBlankDraft("i2c")),
   );
   const [editorPane, setEditorPane] = useState<DeviceRecipeEditorPane>("actions");
   const [selectedCommandId, setSelectedCommandId] = useState<string | null>(
@@ -198,19 +206,30 @@ export function DeviceRecipeEditorScreen({
   const [testSelectionKey, setTestSelectionKey] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<RecipeHardwareTestResult | null>(null);
 
+  const isWorkbench = draft.binding.bus === "i2c" && draft.category !== "display";
   const isDisplay = draft.category === "display";
   const activeActionId =
     draft.commands.find((c) => c.id === selectedCommandId)?.id ??
     draft.commands[0]?.id ??
     null;
-  const visibleTestResult = testSelectionKey === (editorPane === "init" ? "init" : activeActionId) ? testResult : null;
+  const visibleTestResult =
+    testSelectionKey === (editorPane === "init" ? "init" : activeActionId)
+      ? testResult
+      : null;
   const ops = opsForEditorPane(draft, editorPane, activeActionId);
-  const selectedInterfaceId = draft.flowInterfaces?.some(op => op.id === interfaceSelection && (op.type === "sample_external" || op.type === "emit")) ? interfaceSelection : null;
-  const selected = flowEditing ? draft.flowInterfaces?.find(op => op.id === selectedInterfaceId) ?? null : ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null;
+  const selectedInterfaceId = draft.flowInterfaces?.some(
+    (op) =>
+      op.id === interfaceSelection &&
+      (op.type === "sample_external" || op.type === "emit"),
+  )
+    ? interfaceSelection
+    : null;
+  const selected = flowEditing
+    ? (draft.flowInterfaces?.find((op) => op.id === selectedInterfaceId) ?? null)
+    : (ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null);
   const library = libraryOpsForBus(draft.binding.bus);
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
-
 
   function switchMode(mode: DeviceRecipeMode) {
     const next = createBlankDraft(mode, draft.name);
@@ -226,7 +245,8 @@ export function DeviceRecipeEditorScreen({
   }
 
   function selectDriverAction(id: string) {
-    setSelectedInterfaceId(null); setFlowEditing(false);
+    setSelectedInterfaceId(null);
+    setFlowEditing(false);
     setSelectedCommandId(id);
     setEditorPane("actions");
     const first = draft.commands.find((c) => c.id === id)?.steps[0]?.id ?? null;
@@ -237,7 +257,8 @@ export function DeviceRecipeEditorScreen({
   }
 
   function addRegisterStep(kind: "read" | "write") {
-    setSelectedInterfaceId(null); setFlowEditing(false);
+    setSelectedInterfaceId(null);
+    setFlowEditing(false);
     const op = registerStep(kind, nextRecipeVariableName(draft));
     if (editorPane === "init") {
       setDraft({
@@ -266,7 +287,10 @@ export function DeviceRecipeEditorScreen({
   function patchSelected(next: DeviceRecipeOp) {
     if (!selected) return;
     setTestResult(null);
-    if (selectedInterfaceId) { setDraft(updateOpAnywhere(draft, selected.id, next)); return; }
+    if (selectedInterfaceId) {
+      setDraft(updateOpAnywhere(draft, selected.id, next));
+      return;
+    }
     if (editorPane === "init") {
       setDraft(updateOp(draft, "init", selected.id, next));
       return;
@@ -278,12 +302,27 @@ export function DeviceRecipeEditorScreen({
   function addInterface(type: FlowInterfaceKind) {
     const added = addFlowInterface(draft, type, activeActionId);
     let next = added.draft;
-    if (type === "encode" && added.op.type === "encode" && !next.flowInterfaces?.some(op => op.type === "sample_external" && op.into === (added.op as Extract<DeviceRecipeOp, { type: "encode" }>).input)) next = bindFlowEncoderInput(next, added.op.id);
-    setDraft(next); setSelectedInterfaceId(added.op.id); setFlowEditing(true);
+    if (
+      type === "encode" &&
+      added.op.type === "encode" &&
+      !next.flowInterfaces?.some(
+        (op) =>
+          op.type === "sample_external" &&
+          op.into === (added.op as Extract<DeviceRecipeOp, { type: "encode" }>).input,
+      )
+    )
+      next = bindFlowEncoderInput(next, added.op.id);
+    setDraft(next);
+    setSelectedInterfaceId(added.op.id);
+    setFlowEditing(true);
   }
   function addLibraryOp(type: DeviceRecipeOp["type"]) {
-    if (!isDisplay && isFlowInterface({ id: "", type } as DeviceRecipeOp)) { addInterface(type as FlowInterfaceKind); return; }
-    setSelectedInterfaceId(null); setFlowEditing(false);
+    if (!isDisplay && isFlowInterface({ id: "", type } as DeviceRecipeOp)) {
+      addInterface(type as FlowInterfaceKind);
+      return;
+    }
+    setSelectedInterfaceId(null);
+    setFlowEditing(false);
     if (editorPane === "init") {
       const next = insertOp(draft, "init", type);
       setDraft(next);
@@ -571,12 +610,12 @@ export function DeviceRecipeEditorScreen({
             checked={testRunInitFirst}
             onChange={(e) => setTestRunInitFirst(e.target.checked)}
           />
-          {it ? "con Init" : "with Init"}
+          {it ? "Con inizializzazione" : "With initialization"}
         </label>
       )}
       <button
         type="button"
-        disabled={testRunning}
+        disabled={testRunning || ops.length === 0}
         onClick={() => void handleRunHardwareTest()}
         className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue disabled:opacity-40"
       >
@@ -718,16 +757,57 @@ export function DeviceRecipeEditorScreen({
   );
 
   const helpAddressRaw = (draft.binding.i2c?.address ?? "").replace(/^0x/i, "");
-  const helpAddress = /^[0-9a-f]{1,2}$/i.test(helpAddressRaw) ? Number.parseInt(helpAddressRaw, 16) : NaN;
+  const helpAddress = /^[0-9a-f]{1,2}$/i.test(helpAddressRaw)
+    ? Number.parseInt(helpAddressRaw, 16)
+    : NaN;
   const helpIsEightBit = helpAddress > 0x7f;
   const helpWire = helpIsEightBit ? helpAddress >> 1 : helpAddress;
   const helpWrite = helpWire * 2;
-  const helpHex = (value: number) => `0x${value.toString(16).toUpperCase().padStart(2, "0")}`;
-  const helpValid = Number.isFinite(helpAddress) && draft.binding.i2c?.addressBits !== 10;
+  const helpHex = (value: number) =>
+    `0x${value.toString(16).toUpperCase().padStart(2, "0")}`;
+  const helpValid =
+    Number.isFinite(helpAddress) && draft.binding.i2c?.addressBits !== 10;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-surface-sunken">
-      <header className="flex flex-wrap items-end gap-3 border-b border-border bg-surface px-4 py-2">
+    <div
+      className={`flex h-full min-h-0 flex-col bg-surface-sunken ${isWorkbench ? "sensor-workbench" : ""}`}
+    >
+      {isWorkbench && (
+        <div className="sensor-workbench-breadcrumb">
+          <div className="sensor-workbench-identity">
+            <img src={publicAsset("ux-assets/icon-transparent-28@2x.png")} alt="" />
+            <strong>
+              Spaghetti<span>LAB</span>
+            </strong>
+            <span className="sensor-workbench-path">
+              {it ? "Dispositivi" : "Devices"}
+              <span aria-hidden>/</span>
+              {draft.name}
+            </span>
+          </div>
+          <div>
+            <span className="sensor-workbench-status">
+              {draft.status === "draft"
+                ? it
+                  ? "Bozza"
+                  : "Draft"
+                : it
+                  ? "Pronta"
+                  : "Ready"}
+            </span>
+            <button
+              type="button"
+              onClick={handleCancel}
+              aria-label={it ? "Chiudi editor" : "Close editor"}
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+      <header
+        className={`${isWorkbench ? "sensor-workbench-connection" : ""} flex flex-wrap items-end gap-3 border-b border-border bg-surface px-4 py-2`}
+      >
         <CircuitBoard size={22} className="mb-2 shrink-0 text-brand-blue" aria-hidden />
         <label className="min-w-40 flex-1 max-w-xs">
           <span className="font-body text-[10px] text-ink-muted">
@@ -800,7 +880,7 @@ export function DeviceRecipeEditorScreen({
                 }}
                 className={inputClass}
               >
-                <option value={7}>7 bit · standard</option>
+                <option value={7}>{isWorkbench ? "7 bit" : "7 bit · standard"}</option>
                 <option value={10}>10 bit</option>
               </select>
             </label>
@@ -817,24 +897,43 @@ export function DeviceRecipeEditorScreen({
                 <option value={1}>400 kHz</option>
               </select>
             </label>
-            <div className="font-body text-[10px] text-ink-muted">
-              <span className="block">SDA / SCL</span>
+            <div className="sensor-workbench-pins font-body text-[10px] text-ink-muted">
+              {([4, 5] as const).map((mode) => (
+                <div key={mode}>
+                  <span>{mode === 4 ? "SDA" : "SCL"}</span>
+                  <button
+                    type="button"
+                    onClick={() => navigate("physical-composition")}
+                    aria-label={
+                      it
+                        ? `Configura ${mode === 4 ? "SDA" : "SCL"}`
+                        : `Configure ${mode === 4 ? "SDA" : "SCL"}`
+                    }
+                    title={
+                      physicalDraft?.applied === false
+                        ? it
+                          ? "Da applicare in Module Function"
+                          : "Apply in Module Function"
+                        : undefined
+                    }
+                  >
+                    {physicalDraft
+                      ? (physicalLabelForSignalMode(
+                          physicalDraft.modes,
+                          mode,
+                          functionVariantOf(physicalDraft),
+                        ) ?? "—")
+                      : "—"}
+                  </button>
+                </div>
+              ))}
               <button
                 type="button"
                 onClick={() => navigate("physical-composition")}
-                className="rounded-slsm border border-border-strong px-2 py-1.5 text-xs text-brand-blue hover:bg-brand-blue/5"
+                aria-label={it ? "Configura pin I²C" : "Configure I²C pins"}
               >
-                {physicalDraft
-                  ? `${physicalLabelForSignalMode(physicalDraft.modes, 4, functionVariantOf(physicalDraft)) ?? "SDA —"} / ${physicalLabelForSignalMode(physicalDraft.modes, 5, functionVariantOf(physicalDraft)) ?? "SCL —"}`
-                  : it
-                    ? "Configura pin"
-                    : "Configure pins"}
+                <SlidersHorizontal size={16} />
               </button>
-              {physicalDraft?.applied === false && (
-                <span className="mt-1 block text-amber-700">
-                  {it ? "Da applicare in Module Function" : "Apply in Module Function"}
-                </span>
-              )}
             </div>
             <details className="relative mb-1 font-body text-xs text-ink-muted">
               <summary
@@ -852,15 +951,41 @@ export function DeviceRecipeEditorScreen({
                 </p>
                 {helpValid ? (
                   <div className="mt-2 space-y-2">
-                    <p>{it ? "Esempio con il valore inserito" : "Example using the entered value"}: <span className="font-mono text-ink">{helpHex(helpAddress)}</span> ({helpIsEightBit ? "8 bit" : "7 bit"}).</p>
-                    <p>{it ? "Base indirizzo a 8 bit" : "8-bit address base"}: <span className="font-mono text-ink">{helpHex(helpWrite)}</span></p>
-                    <p className="font-mono text-ink">write: {helpHex(helpWrite)} + 0x00 = {helpHex(helpWrite)}</p>
-                    <p className="font-mono text-ink">read: {helpHex(helpWrite)} + 0x01 = {helpHex(helpWrite + 1)}</p>
-                    <p>{it ? "0x00 indica scrittura; 0x01 indica lettura." : "0x00 means write; 0x01 means read."}</p>
-                    <p>{it ? "Indirizzo Wire (7 bit)" : "Wire address (7-bit)"}: <span className="font-mono text-ink">{helpHex(helpWire)}</span></p>
+                    <p>
+                      {it
+                        ? "Esempio con il valore inserito"
+                        : "Example using the entered value"}
+                      :{" "}
+                      <span className="font-mono text-ink">{helpHex(helpAddress)}</span>{" "}
+                      ({helpIsEightBit ? "8 bit" : "7 bit"}).
+                    </p>
+                    <p>
+                      {it ? "Base indirizzo a 8 bit" : "8-bit address base"}:{" "}
+                      <span className="font-mono text-ink">{helpHex(helpWrite)}</span>
+                    </p>
+                    <p className="font-mono text-ink">
+                      write: {helpHex(helpWrite)} + 0x00 = {helpHex(helpWrite)}
+                    </p>
+                    <p className="font-mono text-ink">
+                      read: {helpHex(helpWrite)} + 0x01 = {helpHex(helpWrite + 1)}
+                    </p>
+                    <p>
+                      {it
+                        ? "0x00 indica scrittura; 0x01 indica lettura."
+                        : "0x00 means write; 0x01 means read."}
+                    </p>
+                    <p>
+                      {it ? "Indirizzo Wire (7 bit)" : "Wire address (7-bit)"}:{" "}
+                      <span className="font-mono text-ink">{helpHex(helpWire)}</span>
+                    </p>
                   </div>
-                ) : <p className="mt-2">{it ? "L’esempio si aggiorna con un indirizzo a 7 o 8 bit valido. Gli indirizzi a 10 bit usano un formato diverso." : "The example updates with a valid 7- or 8-bit address. 10-bit addresses use a different format."}</p>}
-
+                ) : (
+                  <p className="mt-2">
+                    {it
+                      ? "L’esempio si aggiorna con un indirizzo a 7 o 8 bit valido. Gli indirizzi a 10 bit usano un formato diverso."
+                      : "The example updates with a valid 7- or 8-bit address. 10-bit addresses use a different format."}
+                  </p>
+                )}
               </div>
             </details>
           </>
@@ -876,10 +1001,53 @@ export function DeviceRecipeEditorScreen({
         </span>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[272px_minmax(0,1fr)_300px]">
+      <div
+        className={`${isWorkbench ? "sensor-workbench-layout" : ""} grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[272px_minmax(0,1fr)_300px]`}
+      >
         {/* LEFT */}
-        <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-r border-border bg-surface p-3">
-          {isDisplay && draft.display ? (
+        <aside
+          className={`${isWorkbench ? "sensor-workbench-navigation" : ""} flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-r border-border bg-surface p-3`}
+        >
+          {isWorkbench ? (
+            <SensorWorkbenchNav
+              draft={draft}
+              it={it}
+              pane={flowEditing ? "flow" : editorPane === "init" ? "init" : "actions"}
+              activeId={activeActionId}
+              selectedStepId={selected?.id ?? null}
+              selectedInterfaceId={selectedInterfaceId}
+              onChange={setDraft}
+              onSelectAction={selectDriverAction}
+              onSelectFlow={() => {
+                setFlowEditing(true);
+                setSelectedInterfaceId(null);
+              }}
+              onSelectInterface={(id) => {
+                setFlowEditing(true);
+                setSelectedInterfaceId(id);
+              }}
+              onSelectInit={() => {
+                setEditorPane("init");
+                setFlowEditing(false);
+                setSelectedInterfaceId(null);
+                setSelectedOpId(draft.phases.init[0]?.id ?? null);
+                setTestResult(null);
+                setTryMessage(null);
+              }}
+              onSelectStep={setSelectedOpId}
+              onRemoveStep={(id) => {
+                const next =
+                  editorPane === "init"
+                    ? removeOp(draft, "init", id)
+                    : activeActionId
+                      ? removeCommandStep(draft, activeActionId, id)
+                      : draft;
+                setDraft(next);
+                setTestResult(null);
+                setSelectedOpId(null);
+              }}
+            />
+          ) : isDisplay && draft.display ? (
             <DisplayLeftSidebar
               draft={draft}
               it={it}
@@ -1044,7 +1212,72 @@ export function DeviceRecipeEditorScreen({
         </aside>
 
         {/* CENTER */}
-        <main className="flex min-h-0 flex-col overflow-y-auto p-4">
+        <main
+          className={`${isWorkbench ? "sensor-workbench-main" : ""} flex min-h-0 flex-col overflow-y-auto p-4`}
+        >
+          {isWorkbench && (
+            <>
+              <SensorWorkbenchHeading
+                draft={draft}
+                it={it}
+                initialization={editorPane === "init"}
+                flow={flowEditing}
+                activeId={activeActionId}
+                onChange={setDraft}
+                onSelectAction={selectDriverAction}
+              />
+              {flowEditing && (
+                <div className="sensor-workbench-interface-tools">
+                  <button type="button" onClick={() => addInterface("sample_external")}>
+                    <Plus size={14} />
+                    {it ? "Ingresso" : "Input"}
+                  </button>
+                  <button type="button" onClick={() => addInterface("emit")}>
+                    <Plus size={14} />
+                    {it ? "Uscita" : "Output"}
+                  </button>
+                </div>
+              )}
+              {!flowEditing && (
+                <div className="sensor-workbench-sequence">
+                  <DriverSequence
+                    draft={draft}
+                    ops={ops}
+                    it={it}
+                    selectedId={selected?.id ?? null}
+                    onSelect={setSelectedOpId}
+                    initialization={editorPane === "init"}
+                  />
+                  <details
+                    className="sensor-workbench-add-step"
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") {
+                        event.currentTarget.open = false;
+                        event.currentTarget.querySelector("summary")?.focus();
+                      }
+                    }}
+                    onBlur={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget))
+                        event.currentTarget.open = false;
+                    }}
+                    onClick={(event) => {
+                      if ((event.target as HTMLElement).closest("button"))
+                        event.currentTarget.open = false;
+                    }}
+                  >
+                    <summary>
+                      <Plus size={14} />
+                      {it ? "Passo" : "Step"}
+                    </summary>
+                    {stepLibrary}
+                  </details>
+                </div>
+              )}
+              {!flowEditing && (
+                <div className="sensor-workbench-inspector">{selectedInspector}</div>
+              )}
+            </>
+          )}
           {isDisplay && draft.display ? (
             <>
               <DisplayCenter
@@ -1074,7 +1307,15 @@ export function DeviceRecipeEditorScreen({
           ) : (
             <>
               {flowEditing ? (
-                flowPreview
+                <>
+                  <div
+                    className={
+                      isWorkbench ? "sensor-workbench-flow-preview" : undefined
+                    }
+                  >
+                    {flowPreview}
+                  </div>
+                </>
               ) : (
                 <DerivedSignalView
                   draft={draft}
@@ -1086,23 +1327,62 @@ export function DeviceRecipeEditorScreen({
                       : undefined
                   }
                   onChangeByte={(id, index, value) => {
-                    const op = ops.find(item => item.id === id);
+                    const op = ops.find((item) => item.id === id);
                     if (!op) return;
                     if (op.type === "i2c_write") {
-                      setDraft(updateOpAnywhere(draft, id, { ...op, bytes: op.bytes.map((byte, i) => i === index ? value : byte) }));
+                      setDraft(
+                        updateOpAnywhere(draft, id, {
+                          ...op,
+                          bytes: op.bytes.map((byte, i) =>
+                            i === index ? value : byte,
+                          ),
+                        }),
+                      );
                     } else if (op.type === "i2c_write_read") {
-                      setDraft(updateOpAnywhere(draft, id, { ...op, writeBytes: op.writeBytes.map((byte, i) => i === index ? value : byte) }));
+                      setDraft(
+                        updateOpAnywhere(draft, id, {
+                          ...op,
+                          writeBytes: op.writeBytes.map((byte, i) =>
+                            i === index ? value : byte,
+                          ),
+                        }),
+                      );
                     } else if (op.type === "spi_transfer") {
-                      setDraft(updateOpAnywhere(draft, id, { ...op, txBytes: op.txBytes.map((byte, i) => i === index ? value : byte) }));
+                      setDraft(
+                        updateOpAnywhere(draft, id, {
+                          ...op,
+                          txBytes: op.txBytes.map((byte, i) =>
+                            i === index ? value : byte,
+                          ),
+                        }),
+                      );
                     }
                     setTestResult(null);
                   }}
                   onAddByte={(id) => {
-                    const op = ops.find(item => item.id === id);
+                    const op = ops.find((item) => item.id === id);
                     if (!op) return;
-                    if (op.type === "i2c_write") setDraft(updateOpAnywhere(draft, id, { ...op, bytes: [...op.bytes, "00"] }));
-                    else if (op.type === "i2c_write_read") setDraft(updateOpAnywhere(draft, id, { ...op, writeBytes: [...op.writeBytes, "00"] }));
-                    else if (op.type === "spi_transfer") setDraft(updateOpAnywhere(draft, id, { ...op, txBytes: [...op.txBytes, "00"] }));
+                    if (op.type === "i2c_write")
+                      setDraft(
+                        updateOpAnywhere(draft, id, {
+                          ...op,
+                          bytes: [...op.bytes, "00"],
+                        }),
+                      );
+                    else if (op.type === "i2c_write_read")
+                      setDraft(
+                        updateOpAnywhere(draft, id, {
+                          ...op,
+                          writeBytes: [...op.writeBytes, "00"],
+                        }),
+                      );
+                    else if (op.type === "spi_transfer")
+                      setDraft(
+                        updateOpAnywhere(draft, id, {
+                          ...op,
+                          txBytes: [...op.txBytes, "00"],
+                        }),
+                      );
                     setTestResult(null);
                     setSelectedOpId(id);
                   }}
@@ -1115,7 +1395,15 @@ export function DeviceRecipeEditorScreen({
                 />
               )}
 
-              {!flowEditing && draft.binding.bus === "i2c" && (
+              {isWorkbench && !flowEditing && (
+                <div className="sensor-workbench-test">
+                  {testControls}
+                  {visibleTestResult && (
+                    <RecipeTestResultPanel result={visibleTestResult} it={it} compact />
+                  )}
+                </div>
+              )}
+              {!isWorkbench && !flowEditing && draft.binding.bus === "i2c" && (
                 <>
                   <DriverSequence
                     controls={testControls}
@@ -1192,8 +1480,10 @@ export function DeviceRecipeEditorScreen({
           )}
 
           {!isDisplay && (
-            <div className="mt-3 space-y-3">
-              {selectedInspector}
+            <div
+              className={`mt-3 space-y-3 ${isWorkbench && flowEditing ? "sensor-workbench-inspector" : ""}`}
+            >
+              {(!isWorkbench || flowEditing) && selectedInspector}
               {draft.binding.bus === "adc" && draft.binding.adc ? (
                 <section className="rounded-slmd border border-border-strong p-3">
                   <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
@@ -1285,18 +1575,50 @@ export function DeviceRecipeEditorScreen({
         </main>
 
         {/* RIGHT: only the shared internal variable list. */}
-        <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-l border-border bg-surface p-3">
+        <aside
+          className={`${isWorkbench ? "sensor-workbench-variables" : ""} flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-l border-border bg-surface p-3`}
+        >
           <EditorSection
             title={it ? "Variabili interne" : "Internal variables"}
             icon={Braces}
           >
+            {isWorkbench && (
+              <p className="sensor-workbench-variable-help">
+                {it
+                  ? "Condivise tra azioni e inizializzazione"
+                  : "Shared across actions and initialization"}
+              </p>
+            )}
             <VariablesPanel draft={draft} it={it} onChange={setDraft} />
+            {isWorkbench && recipeVariables(draft).length > 0 && (
+              <div className="sensor-workbench-variable-references">
+                <div>
+                  {recipeVariables(draft).map((variable) => (
+                    <span
+                      key={variable.id}
+                      draggable
+                      onDragStart={(event) => {
+                        event.dataTransfer.setData("text/plain", `$${variable.name}`);
+                        event.dataTransfer.effectAllowed = "copy";
+                      }}
+                    >
+                      ${variable.name}
+                    </span>
+                  ))}
+                </div>
+                <p>
+                  {it
+                    ? "Trascina una variabile in un byte, oppure usala nei messaggi e nelle letture."
+                    : "Drag a variable into a byte, or use it in messages and reads."}
+                </p>
+              </div>
+            )}
           </EditorSection>
         </aside>
       </div>
 
       <footer className="flex shrink-0 items-center justify-between gap-2 border-t border-border bg-surface px-4 py-2.5">
-        <span className="font-body text-[11px] text-ink-faint">
+        <span className="sensor-workbench-last-edit font-body text-[11px] text-ink-faint">
           {it ? "Ultima modifica:" : "Last edited:"}{" "}
           {new Date(draft.updatedAt).toLocaleString()}
         </span>
@@ -1432,20 +1754,36 @@ function recipeTestNote(result: RecipeHardwareTestResult, it: boolean): string {
 function RecipeTestResultPanel({
   result,
   it,
+  compact = false,
 }: {
   readonly result: RecipeHardwareTestResult;
   readonly it: boolean;
+  readonly compact?: boolean;
 }) {
   const rx = rxBlocksOf(result.capture);
 
   return (
     <section
-      className="mt-3 shrink-0 rounded-slmd border border-border-strong bg-surface p-3"
+      data-test-ok={result.ok}
+      className={`sensor-workbench-result ${compact ? "is-compact" : ""} mt-3 shrink-0 rounded-slmd border border-border-strong bg-surface p-3`}
       role="status"
       aria-live="polite"
     >
       <h2 className="font-body-strong text-base text-ink">
-        {it ? "Risultato prova" : "Test result"}
+        {compact && (
+          <Check
+            size={16}
+            aria-hidden
+            className={result.ok ? "text-success" : "hidden"}
+          />
+        )}
+        {compact && result.ok
+          ? it
+            ? "Prova completata"
+            : "Test completed"
+          : it
+            ? "Risultato prova"
+            : "Test result"}
         <span
           className={`ml-2 rounded-slpill px-2 py-0.5 font-body text-[10px] font-semibold ${
             result.ok
@@ -1491,7 +1829,7 @@ function RecipeTestResultPanel({
               : "Actual bytes received from the sensor are shown in HEX. “—” means unavailable."}
           </p>
         </div>
-      ) : (
+      ) : compact ? null : (
         <p className="mt-3 font-body text-xs text-ink-faint">
           {it
             ? "Solo scritture in questa selezione — nessuna lettura RX da mostrare (normale per Scrivi)."
@@ -1512,7 +1850,6 @@ function RecipeTestResultPanel({
           ))}
         </section>
       )}
-
     </section>
   );
 }
@@ -1878,7 +2215,10 @@ function ReadDestinationField({
         ) : (
           <button
             type="button"
-            onClick={() => { setNewName(nextRecipeVariableName(draft)); setCreating(true); }}
+            onClick={() => {
+              setNewName(nextRecipeVariableName(draft));
+              setCreating(true);
+            }}
             className="inline-flex items-center gap-1 font-body text-xs font-semibold text-brand-blue"
           >
             <Plus size={12} />
@@ -1908,10 +2248,18 @@ function StepInspector({
   onMove: (dir: -1 | 1) => void;
 }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1">
+    <div className="sensor-step-fields space-y-2">
+      <div className="sensor-step-heading flex items-center gap-1">
         <span className="min-w-0 flex-1 font-body text-xs font-semibold text-ink">
-          {op.type === "i2c_write" ? (it ? "Scrivi messaggio I²C" : "Write I²C message") : (op.type === "i2c_read" || op.type === "i2c_write_read") ? (it ? "Leggi risposta I²C" : "Read I²C response") : describeDeviceOp(op)}
+          {op.type === "i2c_write"
+            ? it
+              ? "Scrivi messaggio"
+              : "Write message"
+            : op.type === "i2c_read" || op.type === "i2c_write_read"
+              ? it
+                ? "Leggi risposta"
+                : "Read response"
+              : describeDeviceOp(op)}
         </span>
         <button
           type="button"
@@ -1939,7 +2287,6 @@ function StepInspector({
         </button>
       </div>
 
-
       {op.type === "sample_external" ? (
         <SampleExternalFields
           op={op}
@@ -1951,7 +2298,7 @@ function StepInspector({
       ) : null}
 
       {op.type === "i2c_write" ? (
-        <I2cWriteFields op={op} it={it} onChange={onChange} />
+        <I2cWriteFields op={op} draft={draft} it={it} onChange={onChange} />
       ) : null}
 
       {op.type === "i2c_read" ? (
@@ -1973,11 +2320,15 @@ function StepInspector({
             draft={draft}
             it={it}
             onSelect={(into) => onChange({ ...op, into })}
-            onCreate={(name) => onDraftChange(updateOpAnywhere(
-              upsertRecipeVariable(draft, { name, valueType: "hex" }),
-              op.id,
-              { ...op, into: name },
-            ))}
+            onCreate={(name) =>
+              onDraftChange(
+                updateOpAnywhere(
+                  upsertRecipeVariable(draft, { name, valueType: "hex" }),
+                  op.id,
+                  { ...op, into: name },
+                ),
+              )
+            }
           />
         </>
       ) : null}
@@ -2009,11 +2360,15 @@ function StepInspector({
             draft={draft}
             it={it}
             onSelect={(into) => onChange({ ...op, into })}
-            onCreate={(name) => onDraftChange(updateOpAnywhere(
-              upsertRecipeVariable(draft, { name, valueType: "hex" }),
-              op.id,
-              { ...op, into: name },
-            ))}
+            onCreate={(name) =>
+              onDraftChange(
+                updateOpAnywhere(
+                  upsertRecipeVariable(draft, { name, valueType: "hex" }),
+                  op.id,
+                  { ...op, into: name },
+                ),
+              )
+            }
           />
           <p className="font-body text-[10px] text-ink-faint">
             {it
@@ -2902,7 +3257,18 @@ function EmitOutputFields({
           className={inputClass}
         />
       </Field>
-      <datalist id="flow-output-variables">{[...new Set([...draft.variables.map(variable => variable.name), ...draft.commands.flatMap(command => command.steps.flatMap(step => "into" in step ? [step.into] : []))])].map(name => <option key={name} value={name} />)}</datalist>
+      <datalist id="flow-output-variables">
+        {[
+          ...new Set([
+            ...draft.variables.map((variable) => variable.name),
+            ...draft.commands.flatMap((command) =>
+              command.steps.flatMap((step) => ("into" in step ? [step.into] : [])),
+            ),
+          ]),
+        ].map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
     </>
   );
 }
@@ -3215,184 +3581,313 @@ function HexByteCellsEditor({
   it,
   label,
   onChange,
+  variables = [],
 }: {
   readonly opId: string;
   readonly bytes: readonly string[];
   readonly it: boolean;
   readonly label: string;
   readonly onChange: (tokens: readonly string[]) => void;
+  readonly variables?: readonly string[];
 }) {
+  const [format, setFormat] = useState<"hex" | "binary">("hex");
+  function display(token: string, mode = format) {
+    if (token.startsWith("$")) return token;
+    const value = parseHexByteToken(token) ?? 0;
+    return mode === "binary"
+      ? `0b${value.toString(2).padStart(8, "0")}`
+      : stripHexPrefix(formatHexByte(value));
+  }
+  function numeric(cell: string) {
+    return /^0b[01]{1,8}$/i.test(cell)
+      ? Number.parseInt(cell.slice(2), 2)
+      : parseHexByteToken(cell);
+  }
+  function tokens(next: readonly string[]) {
+    return next.map((cell) =>
+      cell.startsWith("$") ? cell : formatHexByte(numeric(cell) ?? 0),
+    );
+  }
   const [cells, setCells] = useState<string[]>(() =>
-    (bytes.length > 0 ? bytes : ["0x00"]).map(stripHexPrefix),
+    (bytes.length ? bytes : ["00"]).map((token) => display(token)),
   );
-
   const [sourceBytes, setSourceBytes] = useState(bytes);
   if (sourceBytes !== bytes) {
     setSourceBytes(bytes);
-    const normalizedCells = cells.map(cell => cell.startsWith("$") ? cell : cell.toUpperCase().padStart(2, "0"));
-    const incoming = bytes.map(stripHexPrefix);
-    if (JSON.stringify(normalizedCells) !== JSON.stringify(incoming)) setCells(incoming);
+    if (
+      JSON.stringify(tokens(cells)) !==
+      JSON.stringify(
+        bytes.map((token) =>
+          token.startsWith("$") ? token : formatHexByte(parseHexByteToken(token) ?? 0),
+        ),
+      )
+    )
+      setCells(bytes.map((token) => display(token)));
   }
-
   const [sequenceText, setSequenceText] = useState("");
   const [sequenceError, setSequenceError] = useState<string | null>(null);
-
-  function persist(nextCells: readonly string[]) {
-    const stored = nextCells.map((c) => {
-      if (/^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(c)) return c;
-      const n = parseHexByteToken(c);
-      return n === null ? "0x00" : formatHexByte(n);
-    });
-    onChange(stored);
+  function persist(next: string[]) {
+    setCells(next);
+    onChange(tokens(next));
   }
-
-  function updateCell(index: number, value: string) {
-    const v = value.startsWith("$") ? value.replace(/[^a-zA-Z0-9_$]/g, "").slice(0, 33) : value.replace(/^0x/i, "").toUpperCase().replace(/[^0-9A-F]/g, "").slice(0, 2);
-    const next = [...cells]; next[index] = v; setCells(next);
-    if (v !== "$" && next.every(cell => cell === "" || parseHexByteToken(cell) !== null || /^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(cell))) persist(next);
+  function updateCell(index: number, raw: string) {
+    const value = raw.startsWith("$")
+      ? raw.replace(/[^a-zA-Z0-9_$]/g, "").slice(0, 33)
+      : format === "binary"
+        ? `0b${raw.replace(/^0b/i, "").replace(/[^01]/g, "").slice(0, 8)}`
+        : raw
+            .replace(/^0x/i, "")
+            .toUpperCase()
+            .replace(/[^0-9A-F]/g, "")
+            .slice(0, 2);
+    const next = [...cells];
+    next[index] = value;
+    setCells(next);
+    if (
+      next.every(
+        (cell) =>
+          cell === "" ||
+          cell === "0b" ||
+          numeric(cell) !== null ||
+          /^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(cell),
+      )
+    )
+      onChange(tokens(next));
   }
   function applySequence(text: string) {
     const parsed = parseI2cMessage(text);
-    if (parsed.error) { setSequenceError(parsed.error); return; }
-    setSequenceError(null); setCells(parsed.tokens.map(stripHexPrefix)); onChange(parsed.tokens);
+    if (parsed.error) {
+      setSequenceError(parsed.error);
+      return;
+    }
+    setSequenceError(null);
+    setCells(parsed.tokens.map((token) => display(token)));
+    onChange(parsed.tokens);
   }
-
-  function addByte() {
-    const next = [...cells, ""];
-    setCells(next);
-    persist(next.map((c) => (c === "" ? "00" : c)));
+  function focusByte(index: number) {
     requestAnimationFrame(() => {
-      const el = document.querySelector<HTMLInputElement>(
-        `[data-i2c-byte="${opId}-${cells.length}"]`,
+      const input = document.querySelector<HTMLInputElement>(
+        `[data-i2c-byte="${opId}-${index}"]`,
       );
-      el?.focus();
-      el?.select();
+      input?.focus();
+      input?.select();
     });
   }
-
-  function removeByte(index: number) {
-    if (cells.length <= 1) return;
-    const next = cells.filter((_, i) => i !== index);
-    setCells(next);
-    persist(next);
+  function addByte() {
+    persist([...cells, display("00")]);
+    focusByte(cells.length);
   }
-
+  function removeByte(index: number) {
+    if (cells.length > 1) persist(cells.filter((_, i) => i !== index));
+  }
   return (
-    <div className="space-y-1">
-      <span className="block font-body text-[10px] text-ink-muted">
-        {label}{" "}
-        <span className="text-ink-faint">
-          ({cells.length} {it ? "nella stessa transazione" : "in one transaction"})
-        </span>
-      </span>
-      <details className="rounded-slsm border border-border p-2">
-        <summary className="cursor-pointer font-body text-xs text-brand-blue">{it ? "Incolla sequenza" : "Paste sequence"}</summary>
-        <textarea aria-label={it ? "Sequenza HEX da incollare" : "Paste HEX sequence"} value={sequenceText} onChange={e => setSequenceText(e.target.value)} placeholder="00 AE D5 80 … oppure 6B $valore" className="mt-2 w-full rounded border border-border px-2 py-1 font-mono text-xs" rows={3} />
-        <button type="button" onClick={() => applySequence(sequenceText)} className="mt-1 rounded border border-border px-2 py-1 font-body text-xs text-brand-blue">{it ? "Usa messaggio" : "Use message"}</button>
-        <p className="mt-1 font-body text-[10px] text-ink-muted">{it ? "Puoi anche incollare l’intera sequenza in una casella: i byte si distribuiscono automaticamente." : "Paste a whole sequence into any cell to distribute the bytes automatically."}</p>
-        {sequenceError && <p role="alert" className="font-body text-xs text-error">{sequenceError}</p>}
-      </details>
-      <ul className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-2">
-        {cells.map((cell, index) => {
-          const valid = cell === "" || parseHexByteToken(cell) !== null || /^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(cell);
-          return (
-            <li key={`${opId}-b${index}`} className="flex items-center gap-1.5">
-              <span className="w-4 shrink-0 text-right font-mono text-[10px] text-ink-faint">
-                {index}
-              </span>
-              <span className="font-mono text-[11px] text-ink-faint">{cell.startsWith("$") ? "" : "0x"}</span>
-              <input
-                data-i2c-byte={`${opId}-${index}`}
-                value={cell}
-                onPaste={e => { const text = e.clipboardData.getData("text/plain"); e.preventDefault(); const parsed = parseI2cMessage(text); if (parsed.error) setSequenceError(parsed.error); else if (parsed.tokens.length === 1) updateCell(index, stripHexPrefix(parsed.tokens[0]!)); else applySequence(text); }}
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => { e.preventDefault(); const ref = e.dataTransfer.getData("text/plain"); const parsed = parseI2cMessage(ref); if (!parsed.error && parsed.tokens.length === 1) { const next = [...cells]; next[index] = parsed.tokens[0]!; setCells(next); onChange(next.map(value => value.startsWith("$") ? value : `0x${value.replace(/^0x/i, "")}`)); } }}
-                onChange={(e) => updateCell(index, e.target.value)}
-                onBlur={() => {
-                  if (cell === "") {
-                    updateCell(index, "00");
-                    return;
-                  }
-                  if (cell.length === 1 && parseHexByteToken(cell) !== null) {
-                    updateCell(index, cell.padStart(2, "0"));
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || (e.key === " " && cell.length >= 2)) {
-                    e.preventDefault();
-                    if (index === cells.length - 1) addByte();
-                    else {
-                      document
-                        .querySelector<HTMLInputElement>(
-                          `[data-i2c-byte="${opId}-${index + 1}"]`,
-                        )
-                        ?.focus();
-                      document
-                        .querySelector<HTMLInputElement>(
-                          `[data-i2c-byte="${opId}-${index + 1}"]`,
-                        )
-                        ?.select();
-                    }
-                  }
-                  if (e.key === "Backspace" && cell === "" && cells.length > 1) {
-                    e.preventDefault();
-                    removeByte(index);
-                    requestAnimationFrame(() => {
-                      document
-                        .querySelector<HTMLInputElement>(
-                          `[data-i2c-byte="${opId}-${Math.max(0, index - 1)}"]`,
-                        )
-                        ?.focus();
-                    });
-                  }
-                }}
-                className={`${inputClass} min-w-0 text-center font-mono text-sm ${
-                  valid ? "" : "border-error"
-                }`}
-                placeholder="00"
-                spellCheck={false}
-                autoComplete="off"
-                autoCorrect="off"
-                inputMode="text"
-                maxLength={33}
-                aria-label={it ? `Byte ${index}` : `Byte ${index}`}
+    <div className="sensor-byte-editor space-y-2">
+      <div className="sensor-byte-toolbar">
+        <p>
+          {it
+            ? "I byte vengono inviati nella stessa transazione."
+            : "Bytes are sent in the same transaction."}{" "}
+          <span className="sr-only">
+            {label}: {cells.length} byte
+          </span>
+        </p>
+        <div className="sensor-byte-toolbar-actions">
+          <details
+            className="sensor-byte-paste"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector("summary")?.focus();
+              }
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget))
+                event.currentTarget.open = false;
+            }}
+          >
+            <summary>{it ? "Incolla sequenza" : "Paste sequence"}</summary>
+            <div>
+              <textarea
+                aria-label={it ? "Sequenza HEX da incollare" : "Paste HEX sequence"}
+                value={sequenceText}
+                onChange={(event) => setSequenceText(event.target.value)}
+                placeholder="00 AE D5 80 … oppure 6B $var1"
+                rows={3}
               />
               <button
                 type="button"
-                disabled={cells.length <= 1}
-                onClick={() => removeByte(index)}
-                className="rounded p-1 text-ink-faint hover:bg-surface-raised hover:text-error disabled:opacity-30"
-                aria-label={it ? "Rimuovi byte" : "Remove byte"}
+                onClick={(event) => {
+                  if (!parseI2cMessage(sequenceText).error) {
+                    applySequence(sequenceText);
+                    event.currentTarget.closest("details")?.removeAttribute("open");
+                  } else applySequence(sequenceText);
+                }}
               >
-                <Trash2 size={12} />
+                {it ? "Usa messaggio" : "Use message"}
               </button>
-            </li>
-          );
-        })}
-      </ul>
-      <button
-        type="button"
-        onClick={addByte}
-        className="flex w-full items-center justify-center gap-1 rounded-slsm border border-dashed border-border-strong py-1.5 font-body text-[11px] text-brand-blue hover:bg-brand-blue/5"
+              {sequenceError && <p role="alert">{sequenceError}</p>}
+            </div>
+          </details>
+          <div
+            className="sensor-byte-format"
+            role="group"
+            aria-label={it ? "Formato del messaggio" : "Message format"}
+          >
+            {(["hex", "binary"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                aria-pressed={format === mode}
+                onClick={() => {
+                  setCells(tokens(cells).map((token) => display(token, mode)));
+                  setFormat(mode);
+                }}
+              >
+                {mode === "hex" ? "HEX" : it ? "Binario" : "Binary"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <ul
+        className={`sensor-byte-grid ${format === "binary" ? "is-binary" : ""}`}
+        aria-label={label}
       >
-        <Plus size={12} />
-        {it ? "Aggiungi byte" : "Add byte"}
-      </button>
-      <p className="font-body text-[10px] text-ink-faint">
-        {it
-          ? "Due cifre HEX per campo (00–FF). Invio o spazio: campo successivo."
-          : "Two HEX digits per field (00–FF). Enter or space: next field."}
-      </p>
+        {cells.map((cell, index) => (
+          <li key={`${opId}-${index}`}>
+            <label>
+              <span>{index}</span>
+              <input
+                data-i2c-byte={`${opId}-${index}`}
+                title={cell.startsWith("$") ? cell : undefined}
+                aria-invalid={
+                  cell !== "" &&
+                  cell !== "0b" &&
+                  numeric(cell) === null &&
+                  !/^\$[a-zA-Z_][a-zA-Z0-9_]*$/.test(cell)
+                }
+                value={cell}
+                aria-label={`Byte ${index}`}
+                spellCheck={false}
+                autoComplete="off"
+                maxLength={33}
+                onChange={(event) => updateCell(index, event.target.value)}
+                onBlur={() => {
+                  if (!cell || cell === "0b")
+                    updateCell(index, format === "binary" ? "0b00000000" : "00");
+                  else if (numeric(cell) !== null) {
+                    const next = [...cells];
+                    next[index] = display(formatHexByte(numeric(cell)!));
+                    setCells(next);
+                  }
+                }}
+                onPaste={(event) => {
+                  event.preventDefault();
+                  const text = event.clipboardData.getData("text/plain");
+                  const parsed = parseI2cMessage(text);
+                  if (parsed.error) setSequenceError(parsed.error);
+                  else if (parsed.tokens.length === 1) {
+                    const next = [...cells];
+                    next[index] = display(parsed.tokens[0]!);
+                    persist(next);
+                  } else applySequence(text);
+                }}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  const parsed = parseI2cMessage(
+                    event.dataTransfer.getData("text/plain"),
+                  );
+                  if (!parsed.error && parsed.tokens.length === 1) {
+                    const next = [...cells];
+                    next[index] = display(parsed.tokens[0]!);
+                    persist(next);
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    if (index === cells.length - 1) addByte();
+                    else focusByte(index + 1);
+                  }
+                  if (
+                    event.key === "Backspace" &&
+                    (!cell || cell === "0b") &&
+                    cells.length > 1
+                  ) {
+                    event.preventDefault();
+                    removeByte(index);
+                    focusByte(Math.max(0, index - 1));
+                  }
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              className="sensor-byte-remove"
+              disabled={cells.length <= 1}
+              onClick={() => removeByte(index)}
+              aria-label={it ? `Rimuovi byte ${index}` : `Remove byte ${index}`}
+            >
+              <Trash2 size={11} />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className="sensor-byte-actions">
+        <button type="button" onClick={addByte}>
+          <Plus size={14} />
+          {it ? "Aggiungi byte" : "Add byte"}
+        </button>
+        {variables.length > 0 && (
+          <details
+            className="sensor-byte-variables"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector("summary")?.focus();
+              }
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget))
+                event.currentTarget.open = false;
+            }}
+          >
+            <summary>$ {it ? "Inserisci variabile" : "Insert variable"}</summary>
+            <div>
+              {variables.map((name) => (
+                <button
+                  type="button"
+                  key={name}
+                  onClick={(event) => {
+                    event.currentTarget.closest("details")?.removeAttribute("open");
+                    persist([...cells, `$${name}`]);
+                    focusByte(cells.length);
+                  }}
+                >
+                  ${name}
+                </button>
+              ))}
+            </div>
+          </details>
+        )}
+      </div>
+      {sequenceError && (
+        <p className="text-xs text-error" role="alert">
+          {sequenceError}
+        </p>
+      )}
     </div>
   );
 }
 
-
 function I2cWriteFields({
+  draft,
   op,
   it,
   onChange,
 }: {
+  readonly draft: DeviceRecipeDraft;
   readonly op: Extract<DeviceRecipeOp, { type: "i2c_write" }>;
   readonly it: boolean;
   readonly onChange: (next: DeviceRecipeOp) => void;
@@ -3400,7 +3895,8 @@ function I2cWriteFields({
   return (
     <div className="space-y-2">
       <HexByteCellsEditor
-            key={op.id}
+        key={op.id}
+        variables={recipeVariables(draft).map((variable) => variable.name)}
         opId={op.id}
         bytes={op.bytes}
         it={it}
@@ -3558,14 +4054,23 @@ function SampleExternalFields({
     <>
       <p className="font-body text-[11px] leading-snug text-ink-muted">
         {it
-          ? op.inputMode === "trigger" ? "Il segnale ricevuto attiva l’azione scelta nel blocco del canvas." : "Il valore ricevuto dal canvas aggiorna questa variabile. Usa $nome nei messaggi I²C."
+          ? op.inputMode === "trigger"
+            ? "Il segnale ricevuto attiva l’azione scelta nel blocco del canvas."
+            : "Il valore ricevuto dal canvas aggiorna questa variabile. Usa $nome nei messaggi I²C."
           : "The canvas input updates this variable. Use $name in I²C messages."}
       </p>
       <Field label={it ? "Modalità ingresso" : "Input mode"}>
-        <select value={op.inputMode ?? "data"} className={inputClass}
-          onChange={event => onChange({...op, inputMode: event.target.value as "data" | "trigger"})}>
+        <select
+          value={op.inputMode ?? "data"}
+          className={inputClass}
+          onChange={(event) =>
+            onChange({ ...op, inputMode: event.target.value as "data" | "trigger" })
+          }
+        >
           <option value="data">{it ? "Dato → variabile" : "Data → variable"}</option>
-          <option value="trigger">{it ? "Trigger → azione" : "Trigger → action"}</option>
+          <option value="trigger">
+            {it ? "Trigger → azione" : "Trigger → action"}
+          </option>
         </select>
       </Field>
       <Field label={it ? "Ingresso Flow" : "Flow input"}>
@@ -3607,51 +4112,89 @@ function SampleExternalFields({
           </button>
         </div>
       </Field>
-      {op.inputMode !== "trigger" && <>
-      <Field label={it ? "Variabile" : "Variable"}>
-        <input
-          value={op.into}
-          onChange={(e) =>
-            onChange({
-              ...op,
-              into: normalizeRecipeVarName(e.target.value),
-            })
-          }
-          className={inputClass}
-        />
-      </Field>
-      <Field label={it ? "Tipo input" : "Input type"}>
-        <select
-          value={op.valueType}
-          onChange={(e) => {
-            const valueType = e.target.value as RecipeVarType;
-            const channels = draft.channels.map((c) =>
-              c.id === op.fromChannelId
-                ? {
-                    ...c,
-                    quantity:
-                      valueType === "bool"
-                        ? ("digital" as const)
-                        : valueType === "number" || valueType === "hex"
-                          ? ("analog" as const)
-                          : ("other" as const),
+      {op.inputMode !== "trigger" && (
+        <>
+          <Field label={it ? "Variabile" : "Variable"}>
+            <input
+              value={op.into}
+              onChange={(e) =>
+                onChange({
+                  ...op,
+                  into: normalizeRecipeVarName(e.target.value),
+                })
+              }
+              className={inputClass}
+            />
+          </Field>
+          <Field label={it ? "Tipo input" : "Input type"}>
+            <select
+              value={op.valueType}
+              onChange={(e) => {
+                const valueType = e.target.value as RecipeVarType;
+                const channels = draft.channels.map((c) =>
+                  c.id === op.fromChannelId
+                    ? {
+                        ...c,
+                        quantity:
+                          valueType === "bool"
+                            ? ("digital" as const)
+                            : valueType === "number" || valueType === "hex"
+                              ? ("analog" as const)
+                              : ("other" as const),
+                      }
+                    : c,
+                );
+                onDraftChange(
+                  updateOpAnywhere({ ...draft, channels }, op.id, { ...op, valueType }),
+                );
+              }}
+              className={inputClass}
+            >
+              <option value="hex">hex</option>
+              <option value="number">number</option>
+              <option value="bool">bool</option>
+              <option value="string">string</option>
+            </select>
+          </Field>
+          <details className="rounded-lg border border-border bg-surface-sunken/40 p-2">
+            <summary className="cursor-pointer font-body text-[11px] text-ink-muted">
+              {it ? "Formato nei messaggi I²C" : "I²C message format"}
+            </summary>
+            <div className="mt-2 space-y-2">
+              <Field label={it ? "Numero di byte" : "Byte count"}>
+                <input
+                  type="number"
+                  min={1}
+                  max={8}
+                  value={op.widthBytes ?? 8}
+                  onChange={(event) =>
+                    onChange({
+                      ...op,
+                      widthBytes: Math.max(
+                        1,
+                        Math.min(8, Number(event.target.value) || 1),
+                      ),
+                    })
                   }
-                : c,
-            );
-            onDraftChange(
-              updateOpAnywhere({ ...draft, channels }, op.id, { ...op, valueType }),
-            );
-          }}
-          className={inputClass}
-        >
-          <option value="hex">hex</option>
-          <option value="number">number</option>
-          <option value="bool">bool</option>
-          <option value="string">string</option>
-        </select>
-      </Field>
-      <details className="rounded-lg border border-border bg-surface-sunken/40 p-2"><summary className="cursor-pointer font-body text-[11px] text-ink-muted">{it ? "Formato nei messaggi I²C" : "I²C message format"}</summary><div className="mt-2 space-y-2"><Field label={it ? "Numero di byte" : "Byte count"}><input type="number" min={1} max={8} value={op.widthBytes ?? 8} onChange={event => onChange({ ...op, widthBytes: Math.max(1, Math.min(8, Number(event.target.value) || 1)) })} className={inputClass} /></Field><Field label={it ? "Ordine dei byte" : "Byte order"}><select value={op.byteOrder ?? "be"} onChange={event => onChange({ ...op, byteOrder: event.target.value as "be" | "le" })} className={inputClass}><option value="be">Big endian</option><option value="le">Little endian</option></select></Field></div></details>
-      </>}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label={it ? "Ordine dei byte" : "Byte order"}>
+                <select
+                  value={op.byteOrder ?? "be"}
+                  onChange={(event) =>
+                    onChange({ ...op, byteOrder: event.target.value as "be" | "le" })
+                  }
+                  className={inputClass}
+                >
+                  <option value="be">Big endian</option>
+                  <option value="le">Little endian</option>
+                </select>
+              </Field>
+            </div>
+          </details>
+        </>
+      )}
       <Field label={it ? "Etichetta ingresso" : "Input label"}>
         <input
           value={
@@ -3697,7 +4240,7 @@ function VariableRow({
   }
   const used = isVariableUsed(draft, variable.name);
   return (
-    <li className="space-y-2 rounded-lg border border-border p-2">
+    <li className="sensor-variable-row space-y-2 rounded-lg border border-border p-2">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
         <label className="min-w-0 font-body text-[10px] text-ink-muted">
           {it ? "Nome variabile" : "Variable name"}

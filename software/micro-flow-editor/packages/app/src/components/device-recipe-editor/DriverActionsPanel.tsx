@@ -1,7 +1,8 @@
+import { workbenchStepLabel, workbenchStepDetail } from "./sensor-workbench-labels.js";
 import { SensorSchematic } from "./SensorSchematic.js";
 import { sensorInterfaces } from "../../lib/sensor-instance.js";
 import type { ReactNode } from "react";
-import { Plus, Copy, Trash2, Blocks, BookOpen, ChevronDown } from "lucide-react";
+import { Plus, Copy, Trash2, Blocks, ChevronDown } from "lucide-react";
 import {
   addCommand,
   removeCommand,
@@ -181,7 +182,6 @@ export function DriverActionsList({
 }
 
 export function DriverSequence({
-  draft,
   ops,
   it,
   selectedId,
@@ -200,50 +200,42 @@ export function DriverSequence({
   result?: ReactNode;
 }) {
   return (
-    <section className="mb-3 rounded-slmd border border-border-strong bg-surface p-3">
-      <h2 className="mb-2 font-body text-xs font-semibold text-ink">
-        <BookOpen size={14} className="mr-1 inline text-brand-blue" aria-hidden />
-        {initialization
+    <section
+      className="sensor-sequence"
+      aria-label={
+        initialization
           ? it
-            ? "Passi di avvio · eseguiti una volta"
-            : "Startup steps · run once"
+            ? "Passi di inizializzazione"
+            : "Initialization steps"
           : it
-            ? "Passi dell’azione selezionata"
-            : "Selected action steps"}
-      </h2>
+            ? "Passi dell’azione"
+            : "Action steps"
+      }
+    >
       {!ops.length && (
-        <p className="font-body text-xs text-ink-muted">
-          {it ? "Aggiungi un passo dalla libreria." : "Add a step from the library."}
+        <p className="sensor-sequence-empty">
+          {it ? "Aggiungi il primo passo" : "Add the first step"}
         </p>
       )}
-      <ol className="space-y-1">
+      <ol>
         {ops.map((op, i) => (
           <li key={op.id}>
             <button
               type="button"
               onClick={() => onSelect(op.id)}
               aria-pressed={selectedId === op.id}
-              className={`flex w-full items-center gap-3 rounded-slsm border px-2 py-1.5 text-left ${selectedId === op.id ? "border-brand-blue bg-brand-blue/5" : "border-border bg-surface-sunken"}`}
+              className={selectedId === op.id ? "is-selected" : ""}
             >
-              <span className="font-mono text-xs text-ink-muted">{i + 1}</span>
-              <span className="font-body text-xs text-ink">
-                {op.type === "i2c_write"
-                  ? `${it ? "Scrivi messaggio" : "Write message"} · ${op.bytes.length} byte`
-                  : op.type === "i2c_read" || op.type === "i2c_write_read"
-                    ? `${it ? "Leggi" : "Read"} ${op.type === "i2c_read" ? op.len : op.readLen} byte → $${op.into}`
-                    : describeDeviceOp(op)}
+              <span className="sensor-step-number">{i + 1}</span>
+              <span>
+                <strong>{workbenchStepLabel(op, it)}</strong>
+                <small>{workbenchStepDetail(op, it)}</small>
               </span>
             </button>
           </li>
         ))}
       </ol>
-      <p className="mt-2 font-body text-xs text-ink-muted">
-        {draft.binding.i2c?.address} ·{" "}
-        {it
-          ? "Connessione condivisa da tutte le azioni"
-          : "Connection shared by all actions"}
-      </p>
-      <div className="mt-3">{controls}</div>
+      {controls}
       {result}
     </section>
   );
@@ -261,7 +253,13 @@ export function DriverCanvasPreview({
   const inputs = interfaces.inputs.flatMap((op) => {
     const channel = draft.channels.find((ch) => ch.id === op.fromChannelId);
     return channel
-      ? [{ ...channel, inputMode: op.inputMode ?? ("data" as const), variable: op.into }]
+      ? [
+          {
+            ...channel,
+            inputMode: op.inputMode ?? ("data" as const),
+            variable: op.into,
+          },
+        ]
       : [];
   });
   const outputs = interfaces.outputs.flatMap((op) => {
@@ -270,12 +268,7 @@ export function DriverCanvasPreview({
   });
   return (
     <section className="space-y-2">
-      <SensorSchematic
-        name={draft.name}
-        inputs={inputs}
-        outputs={outputs}
-        it={it}
-      />
+      <SensorSchematic name={draft.name} inputs={inputs} outputs={outputs} it={it} />
       <p className="font-body text-[10px] text-ink-muted">
         {it
           ? "Pin disponibili del sensore. Nel canvas ogni istanza sceglie una sola azione, un ingresso e un’uscita. Usa più blocchi per altre connessioni."

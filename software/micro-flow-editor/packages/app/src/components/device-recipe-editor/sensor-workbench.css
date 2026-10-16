@@ -1,0 +1,1052 @@
+/* One continuous workspace; the existing inspectors retain their behavior. */
+.sensor-workbench {
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+.sensor-workbench button,
+.sensor-workbench summary,
+.sensor-workbench select {
+  cursor: pointer;
+}
+.sensor-workbench button:disabled {
+  cursor: not-allowed;
+}
+.sensor-workbench :is(button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 2px;
+}
+.sensor-workbench-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--color-border);
+  font: 12px var(--font-body);
+  color: var(--color-ink-muted);
+}
+.sensor-workbench-breadcrumb > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sensor-workbench-breadcrumb > span > span {
+  margin: 0 16px;
+  color: var(--color-ink-faint);
+}
+.sensor-workbench-breadcrumb > div {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.sensor-workbench-status {
+  background: var(--color-surface-raised);
+  padding: 4px 10px;
+  border-radius: var(--radius-slsm);
+  font-size: 11px;
+}
+.sensor-workbench-connection {
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+}
+.sensor-workbench-connection > svg,
+.sensor-workbench-connection > span:last-child {
+  display: none;
+}
+.sensor-workbench-connection > label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  min-width: 0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.sensor-workbench-connection > label:first-of-type {
+  flex: 1;
+  min-width: 140px;
+  max-width: 300px;
+}
+.sensor-workbench-connection > label:first-of-type > span {
+  display: none;
+}
+.sensor-workbench-connection > label:first-of-type input {
+  border-color: transparent;
+  padding: 2px 0;
+  font-size: 24px;
+  background: transparent;
+}
+.sensor-workbench-connection > label:first-of-type input:hover {
+  border-color: var(--color-border);
+}
+.sensor-workbench-connection > label :is(input, select) {
+  width: auto;
+  min-width: 0;
+  padding: 7px 10px;
+  font-size: 12px;
+  border-radius: var(--radius-slsm);
+  background: var(--color-surface);
+}
+.sensor-workbench-connection > label input {
+  width: 76px;
+}
+.sensor-workbench-connection > label:nth-of-type(4) {
+  font-size: 0;
+}
+.sensor-workbench-connection > label:nth-of-type(4) select {
+  max-width: 110px;
+}
+.sensor-workbench-connection > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sensor-workbench-connection > div > span:first-child {
+  display: inline;
+}
+.sensor-workbench-layout {
+  grid-template-columns: 240px minmax(0, 1fr) 264px;
+}
+.sensor-workbench-navigation {
+  padding: 12px;
+  background: var(--color-surface-raised);
+}
+.sensor-workbench-main {
+  padding: 16px 24px 24px;
+  background: var(--color-surface);
+}
+.sensor-nav {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  gap: 4px;
+  font: 12px var(--font-body);
+}
+.sensor-nav button {
+  text-align: left;
+}
+.sensor-nav-primary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 10px;
+  border-radius: var(--radius-slsm);
+  font-size: 14px;
+  font-weight: 600;
+}
+.sensor-nav small {
+  display: block;
+  color: var(--color-ink-muted);
+  font-weight: 400;
+  font-size: 11px;
+  margin-top: 3px;
+}
+.sensor-nav .is-selected {
+  background: color-mix(in srgb, var(--color-brand-blue) 10%, transparent);
+}
+.sensor-nav-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 4px 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.sensor-nav-section-heading button {
+  padding: 4px;
+  color: var(--color-brand-blue);
+}
+.sensor-nav-action {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 10px;
+  border-radius: var(--radius-slsm);
+}
+.sensor-nav-action strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.sensor-nav-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sensor-nav-steps {
+  margin: 4px 0 8px;
+  padding: 0 0 0 8px;
+}
+.sensor-nav-steps li {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin: 2px 0;
+  border-radius: 4px;
+}
+.sensor-nav-steps li.is-selected::before {
+  content: "";
+  position: absolute;
+  inset: 3px auto 3px -8px;
+  width: 3px;
+  background: var(--color-brand-blue);
+  border-radius: 4px;
+}
+.sensor-nav-steps li > button:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+  font-size: 11px;
+}
+.sensor-nav-steps li > button:first-child > span:last-child {
+  overflow-wrap: anywhere;
+}
+.sensor-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 24px;
+  height: 26px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--color-brand-blue) 8%, transparent);
+  font: 12px var(--font-mono);
+}
+.sensor-nav-remove {
+  color: var(--color-ink-faint);
+  padding: 6px;
+  opacity: 0;
+}
+.sensor-nav-steps li:hover .sensor-nav-remove,
+.sensor-nav-remove:focus-visible {
+  opacity: 1;
+}
+.sensor-nav-remove:hover {
+  color: var(--color-error);
+}
+.sensor-nav-init {
+  border-top: 1px solid var(--color-border);
+  margin-top: 14px;
+  padding-top: 10px;
+}
+.sensor-nav-help {
+  margin-top: auto;
+  padding: 40px 10px 12px;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.sensor-nav-interfaces {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 32px;
+}
+.sensor-nav-interfaces button {
+  padding: 8px;
+  border-radius: 4px;
+}
+.sensor-workbench-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.sensor-workbench-heading h1 {
+  font: 700 21px var(--font-heading);
+}
+.sensor-workbench-heading p {
+  font: 11px var(--font-body);
+  color: var(--color-ink-muted);
+  margin-top: 3px;
+}
+.sensor-workbench-action-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sensor-workbench-action-name input {
+  field-sizing: content;
+  width: 180px;
+  min-width: 80px;
+  max-width: min(360px, 40vw);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font: 700 21px var(--font-heading);
+  background: transparent;
+}
+.sensor-workbench-action-name input:hover {
+  border-color: var(--color-border);
+}
+.sensor-workbench-action-name button {
+  color: var(--color-ink-muted);
+  padding: 4px;
+}
+.sensor-workbench-action-tools {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: 11px var(--font-body);
+  color: var(--color-ink-muted);
+}
+.sensor-workbench-action-tools button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+}
+.sensor-workbench-action-tools button:last-child {
+  border-left: 1px solid var(--color-border);
+  padding-left: 14px;
+}
+.sensor-workbench-sequence {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 8px 16px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 16px;
+}
+.sensor-sequence {
+  min-width: 0;
+}
+.sensor-sequence > ol {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  overflow-x: auto;
+  padding: 2px;
+}
+.sensor-sequence li {
+  position: relative;
+  flex: 0 0 auto;
+}
+.sensor-sequence li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: 30px;
+  border-top: 1px solid var(--color-border-strong);
+}
+.sensor-sequence li button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 190px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-slsm);
+  background: var(--color-surface);
+  padding: 12px 14px;
+  text-align: left;
+}
+.sensor-sequence li button.is-selected {
+  border-color: var(--color-brand-blue);
+  background: color-mix(in srgb, var(--color-brand-blue) 7%, var(--color-surface));
+}
+.sensor-sequence strong {
+  display: block;
+  font: 600 11px var(--font-body);
+}
+.sensor-sequence small {
+  display: block;
+  font: 11px var(--font-body);
+  color: var(--color-ink-muted);
+  margin-top: 4px;
+}
+.sensor-sequence-empty {
+  font: 12px var(--font-body);
+  color: var(--color-ink-faint);
+  padding: 12px 0;
+}
+.sensor-workbench-add-step {
+  position: relative;
+  flex-shrink: 0;
+  font: 12px var(--font-body);
+}
+.sensor-workbench-add-step > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-slsm);
+  color: var(--color-brand-blue);
+}
+.sensor-workbench-add-step > summary::after {
+  content: "⌄";
+}
+.sensor-workbench-add-step > section {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 300px;
+  max-height: 50vh;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-slsm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-e2);
+  z-index: 20;
+}
+.sensor-workbench-inspector {
+  margin-bottom: 16px;
+}
+/* Remove the redundant frame/header around the existing step inspector. */
+.sensor-workbench-inspector > section {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+.sensor-workbench-inspector > section > h2 {
+  display: none;
+}
+.sensor-workbench-inspector > section > div {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+.sensor-workbench .sensor-step-heading {
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.sensor-workbench .sensor-step-heading > span {
+  font: 700 18px var(--font-heading);
+}
+.sensor-workbench .sensor-step-heading button {
+  padding: 5px;
+}
+.sensor-workbench-main > section {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.sensor-workbench-inspector + section {
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+}
+.sensor-workbench-test {
+  margin-top: 8px;
+}
+.sensor-workbench-test > div {
+  border: 0;
+  padding-top: 4px;
+}
+.sensor-workbench-test button {
+  border-radius: var(--radius-slsm);
+  font-size: 12px;
+  color: var(--color-brand-blue);
+  border-color: var(--color-brand-blue);
+}
+.sensor-workbench-result {
+  border-radius: var(--radius-slsm);
+  padding: 12px;
+}
+.sensor-workbench-result[data-test-ok="true"] {
+  background: color-mix(in srgb, var(--color-success) 7%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-success) 35%, var(--color-border));
+}
+.sensor-workbench-result h2 {
+  font-size: 13px;
+}
+.sensor-workbench-variables {
+  padding: 18px;
+}
+.sensor-workbench-variables > section {
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.sensor-workbench-variables > section > h2 {
+  padding: 0;
+  background: transparent;
+  gap: 8px;
+  font-size: 14px;
+}
+.sensor-workbench-variables > section > h2 > span:first-child {
+  width: 22px;
+  height: 24px;
+  background: transparent;
+  color: var(--color-ink);
+}
+.sensor-workbench-variables > section > div {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.sensor-workbench-variable-help {
+  margin: 10px 0 16px;
+  font: 10px/1.7 var(--font-body);
+  color: var(--color-ink-muted);
+}
+.sensor-workbench .sensor-variable-row {
+  padding: 12px;
+  border-radius: var(--radius-slsm);
+}
+.sensor-workbench .sensor-variable-row input[aria-label^="Nome variabile"],
+.sensor-workbench .sensor-variable-row input[aria-label^="Variable name"] {
+  font-weight: 600;
+  font-size: 14px;
+}
+.sensor-workbench footer {
+  padding: 12px 24px;
+  position: relative;
+}
+.sensor-workbench footer > div {
+  width: 100%;
+}
+.sensor-workbench footer > div > button:first-child {
+  margin-right: auto;
+  border: 1px solid var(--color-border-strong);
+}
+.sensor-workbench footer button {
+  border-radius: var(--radius-slsm);
+  font-size: 12px;
+  padding: 9px 16px;
+}
+.sensor-workbench-last-edit {
+  display: none;
+}
+.sensor-workbench-interfaces > details {
+  border: 0;
+  box-shadow: none;
+}
+.sensor-workbench-interfaces > details > summary {
+  display: none;
+}
+.sensor-workbench-interfaces > details > div {
+  margin: 16px 0;
+  border: 0;
+  padding: 0;
+}
+.sensor-workbench-interfaces .group\/variables {
+  display: none;
+}
+/* Byte editing is shared by the step inspector and retains keyboard/paste/drag support. */
+.sensor-byte-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.sensor-byte-toolbar > p {
+  font: 11px/1.6 var(--font-body);
+  color: var(--color-ink-muted);
+}
+.sensor-byte-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.sensor-byte-paste,
+.sensor-byte-variables {
+  position: relative;
+  font: 11px var(--font-body);
+}
+.sensor-byte-paste > summary,
+.sensor-byte-variables > summary {
+  list-style: none;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-slsm);
+  cursor: pointer;
+}
+.sensor-byte-paste > div,
+.sensor-byte-variables > div {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  width: 320px;
+  max-width: 70vw;
+  z-index: 20;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-slsm);
+  box-shadow: var(--shadow-e2);
+  padding: 12px;
+}
+.sensor-byte-paste textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 8px;
+  font: 12px var(--font-mono);
+}
+.sensor-byte-paste button {
+  margin-top: 8px;
+  color: var(--color-brand-blue);
+}
+.sensor-byte-format {
+  display: flex;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-slsm);
+  padding: 2px;
+  font: 10px var(--font-body);
+}
+.sensor-byte-format button {
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.sensor-byte-format button[aria-pressed="true"] {
+  background: var(--color-brand-blue);
+  color: white;
+}
+.sensor-byte-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 16px 8px;
+  max-height: 280px;
+  overflow: auto;
+  padding: 4px;
+  scrollbar-gutter: stable;
+}
+.sensor-workbench .sensor-byte-grid {
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+}
+.sensor-byte-grid.is-binary,
+.sensor-workbench .sensor-byte-grid.is-binary {
+  grid-template-columns: repeat(auto-fill, minmax(126px, 1fr));
+}
+.sensor-byte-grid li {
+  position: relative;
+  min-width: 0;
+}
+.sensor-byte-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sensor-byte-grid label > span {
+  text-align: center;
+  font: 9px var(--font-mono);
+  color: var(--color-ink-faint);
+}
+.sensor-byte-grid input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  text-align: center;
+  font: 12px var(--font-mono);
+  padding: 4px;
+}
+.sensor-byte-grid input:focus {
+  outline: none;
+  border-color: var(--color-brand-blue);
+  box-shadow: 0 0 0 1px var(--color-brand-blue);
+  background: color-mix(in srgb, var(--color-brand-blue) 5%, var(--color-surface));
+}
+.sensor-byte-remove {
+  position: absolute;
+  right: 1px;
+  top: 0;
+  opacity: 0;
+  padding: 2px;
+  color: var(--color-error);
+  background: var(--color-surface);
+  border-radius: 3px;
+}
+.sensor-byte-grid li:hover .sensor-byte-remove,
+.sensor-byte-remove:focus-visible {
+  opacity: 1;
+}
+.sensor-byte-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  font: 11px var(--font-body);
+  color: var(--color-brand-blue);
+}
+.sensor-byte-actions > button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-border-strong);
+  padding: 7px 12px;
+  border-radius: var(--radius-slsm);
+}
+.sensor-byte-variables > div {
+  left: 0;
+  right: auto;
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  overflow: auto;
+  width: 180px;
+  gap: 4px;
+}
+.sensor-byte-variables button {
+  padding: 6px;
+  text-align: left;
+}
+@media (max-width: 1250px) {
+  .sensor-workbench-layout {
+    grid-template-columns: 200px minmax(0, 1fr) 220px;
+  }
+  .sensor-workbench-main {
+    padding: 16px;
+  }
+  .sensor-workbench-connection {
+    gap: 12px;
+  }
+  .sensor-workbench-connection > label:first-of-type {
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .sensor-byte-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .sensor-workbench .sensor-byte-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .sensor-workbench-layout {
+    grid-template-columns: 170px minmax(0, 1fr);
+    overflow: auto;
+  }
+  .sensor-workbench-variables {
+    grid-column: 2;
+    border-top: 1px solid var(--color-border);
+    overflow: visible;
+  }
+  .sensor-workbench-navigation {
+    grid-row: 1 / 3;
+    overflow: visible;
+  }
+  .sensor-workbench-main {
+    overflow: visible;
+  }
+  .sensor-nav-primary {
+    font-size: 12px;
+    gap: 8px;
+  }
+  .sensor-nav-remove,
+  .sensor-byte-remove {
+    opacity: 1;
+  }
+  .sensor-workbench-breadcrumb {
+    padding: 0 16px;
+  }
+}
+@media (max-width: 600px) {
+  .sensor-workbench-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sensor-workbench-navigation {
+    grid-row: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .sensor-nav-help {
+    display: none;
+  }
+  .sensor-workbench-variables {
+    grid-column: 1;
+  }
+  .sensor-workbench .sensor-byte-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .sensor-workbench-sequence {
+    gap: 10px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .sensor-workbench footer {
+    padding: 8px;
+  }
+  .sensor-workbench footer button {
+    padding: 8px;
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sensor-workbench :is(button, input) {
+    transition:
+      background-color 0.12s,
+      border-color 0.12s;
+  }
+}
+.sensor-workbench-connection > label:first-of-type input {
+  width: 100%;
+}
+.sensor-workbench-sequence > .sensor-sequence {
+  flex: 1;
+}
+.sensor-workbench-action-name input {
+  width: auto;
+}
+.sensor-workbench-main > * {
+  flex-shrink: 0;
+}
+.sensor-workbench-variable-references {
+  margin-top: 24px;
+  font: 10px/1.7 var(--font-body);
+  color: var(--color-ink-muted);
+}
+.sensor-workbench-variable-references > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.sensor-workbench-variable-references span {
+  cursor: grab;
+  background: color-mix(in srgb, var(--color-brand-blue) 10%, var(--color-surface));
+  color: var(--color-brand-blue);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font: 11px var(--font-mono);
+}
+.sensor-workbench-main > .sensor-workbench-inspector {
+  margin-top: 0;
+}
+/* In sensor editing the workspace provides its own chrome, as in the approved design. */
+[data-app-shell]:has(.sensor-workbench) > header,
+[data-app-shell]:has(.sensor-workbench) > div > nav {
+  display: none;
+}
+.sensor-workbench-breadcrumb {
+  min-height: 50px;
+}
+.sensor-workbench-breadcrumb .sensor-workbench-identity {
+  display: flex;
+  min-width: 0;
+  gap: 8px;
+}
+.sensor-workbench-identity img {
+  width: 24px;
+  height: 24px;
+}
+.sensor-workbench-identity strong {
+  white-space: nowrap;
+  font: 700 18px var(--font-heading);
+}
+.sensor-workbench-identity strong > span {
+  color: var(--color-brand-blue);
+}
+.sensor-workbench-path {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: 24px;
+  padding-left: 24px;
+  border-left: 1px solid var(--color-border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sensor-workbench-path > span {
+  color: var(--color-ink-faint);
+}
+.sensor-workbench-connection .sensor-workbench-pins {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.sensor-workbench-pins > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sensor-workbench-pins button {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-slsm);
+  min-height: 32px;
+  padding: 6px 12px;
+  background: var(--color-surface);
+  font: 12px var(--font-mono);
+  color: var(--color-ink);
+}
+.sensor-workbench-pins > div > button {
+  min-width: 64px;
+}
+.sensor-workbench-pins > button {
+  padding: 8px;
+}
+.sensor-workbench-flow-preview > section {
+  border: 0;
+  box-shadow: none;
+}
+.sensor-workbench-flow-preview > section > h2 {
+  display: none;
+}
+.sensor-workbench-flow-preview > section > div {
+  margin: 0;
+  border: 0;
+  padding: 16px 0;
+}
+.sensor-workbench-result.is-compact > h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sensor-workbench-result.is-compact[data-test-ok="true"] > h2 {
+  color: var(--color-success);
+}
+.sensor-workbench-result.is-compact[data-test-ok="true"] > h2 > span {
+  display: none;
+}
+@media (max-width: 900px) {
+  .sensor-workbench-path {
+    margin-left: 8px;
+    padding-left: 12px;
+    gap: 8px;
+  }
+}
+@media (max-width: 600px) {
+  .sensor-workbench-path {
+    display: none;
+  }
+}
+.sensor-workbench-interface-tools {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+.sensor-workbench-interface-tools button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-slsm);
+  color: var(--color-brand-blue);
+  font: 12px var(--font-body);
+}
+.sensor-workbench-flow-preview ~ .sensor-workbench-inspector .sensor-step-fields {
+  max-width: 720px;
+}
+.sensor-workbench-main h3 {
+  font: 700 18px var(--font-heading);
+}
+.sensor-workbench .sensor-step-heading > span {
+  font-size: 20px;
+}
+.sensor-workbench .sensor-byte-grid input {
+  font-size: 14px;
+}
+.sensor-workbench .sensor-byte-toolbar > p {
+  font-size: 12px;
+}
+.sensor-workbench .sensor-byte-grid label > span {
+  font-size: 10px;
+}
+.sensor-workbench .sensor-nav-action strong {
+  font-size: 14px;
+}
+.sensor-workbench .sensor-nav-steps li > button:first-child {
+  font-size: 12px;
+}
+.sensor-workbench .sensor-sequence strong,
+.sensor-workbench .sensor-sequence small {
+  font-size: 12px;
+}
+.sensor-workbench-variables > section > h2 {
+  font-size: 16px;
+}
+.sensor-workbench .sensor-byte-grid input[value^="$"] {
+  font-size: 11px;
+}
+@media (min-width: 1440px) {
+  .sensor-workbench-layout {
+    grid-template-columns: 288px minmax(0, 1fr) 312px;
+  }
+}
+@media (max-width: 900px) {
+  .sensor-workbench-layout {
+    align-items: start;
+    grid-template-rows: max-content max-content;
+  }
+  .sensor-workbench-main {
+    min-height: min-content;
+  }
+  .sensor-workbench-variables {
+    min-height: min-content;
+  }
+  .sensor-workbench-navigation {
+    align-self: stretch;
+  }
+}
+.sensor-byte-grid input[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+.sensor-nav-actions-group {
+  border-top: 1px solid var(--color-border);
+  margin-top: 14px;
+  padding-top: 10px;
+}
+.sensor-nav-actions-heading {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.sensor-nav-actions-heading > .sensor-nav-primary {
+  flex: 1;
+  min-width: 0;
+}
+.sensor-nav-actions-heading > .sensor-nav-primary > span {
+  flex: 1;
+}
+.sensor-nav-actions-heading > button:last-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: var(--radius-slsm);
+  color: var(--color-brand-blue);
+}
+.sensor-nav-actions-heading > button:last-child:hover {
+  background: color-mix(in srgb, var(--color-brand-blue) 8%, transparent);
+}
+.sensor-nav-actions[hidden] {
+  display: none;
+}
+.sensor-nav-action-row {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-slsm);
+}
+.sensor-nav-action-row > .sensor-nav-action {
+  flex: 1;
+  min-width: 0;
+}
+.sensor-nav-action-row .sensor-nav-action strong {
+  overflow-wrap: anywhere;
+}
+.sensor-nav-delete-action {
+  display: flex;
+  flex-shrink: 0;
+  padding: 8px;
+  margin-right: 4px;
+  color: var(--color-ink-faint);
+  border-radius: 4px;
+}
+.sensor-nav-delete-action:hover {
+  color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 8%, transparent);
+}

@@ -205,9 +205,9 @@ export function TimingScopeChart({
                       strokeWidth={hi ? 1.5 : 0.75}
                     />
                     <text
-                      x={x0 + w / 2}
+                      x={w > 500 ? x0 + 12 : x0 + w / 2}
                       y={stepY + 20}
-                      textAnchor="middle"
+                      textAnchor={w > 500 ? "start" : "middle"}
                       fill={step.kind === "bus" ? "#fff" : ink}
                       style={{
                         fontSize: 8,
