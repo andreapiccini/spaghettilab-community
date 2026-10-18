@@ -1,3 +1,4 @@
+import type { RgbModuleConfig } from "./rgb-module.js";
 /**
  * Device recipe authoring draft (editor UI).
  * Separates: reusable protocol, project pin/bus binding, verification.
@@ -267,6 +268,12 @@ export type I2cTransactionPhase =
 export type WaitTimeUnit = "ms" | "us";
 
 export type DeviceRecipeOp = { readonly label?: string } & (
+  | { readonly id: string; readonly type: "dht22_convert"; readonly input: string; readonly into: string; readonly format: "float" | "string" }
+  | { readonly id: string; readonly type: "dht22_power"; readonly on: boolean }
+  | { readonly id: string; readonly type: "dht22_read"; readonly temperatureInto: string; readonly humidityInto: string }
+
+  | { readonly id: string; readonly type: "rgb_led"; readonly command: "on" | "off" | "color"; readonly color?: string; readonly variableId?: string }
+
   | {
       readonly id: string;
       readonly type: "wait";
@@ -362,6 +369,15 @@ export type DeviceRecipeOp = { readonly label?: string } & (
       readonly type: "gpio_toggle";
       readonly signalId: string;
       readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "stepper";
+      readonly signalIds: readonly string[];
+      readonly command: "start" | "stop" | "position";
+      readonly positionVariable?: string;
+      readonly intervalMs: number;
+      readonly stepsPerRevolution: number;
     }
   | {
       readonly id: string;
@@ -688,6 +704,9 @@ export type DeviceRecipeDraft = {
   /** GPIO-originated events exposed to Design Flow when a backend supports them. */
   readonly gpioEvents?: readonly GpioEventDefinition[];
   readonly gpioHardware?: GpioHardwareAppearance;
+  readonly rgbModule?: RgbModuleConfig;
+  readonly dht22Module?: boolean;
+  readonly dht22Version?: number;
   readonly flowInterfaces?: readonly DeviceRecipeOp[];
   readonly flowInterfaceActions?: Readonly<Record<string, readonly string[]>>;
   readonly display?: DisplayProfile;
@@ -753,7 +772,7 @@ export function organizeDriverInterfaces(draft: DeviceRecipeDraft): DeviceRecipe
 export function effectiveActionSteps(draft: DeviceRecipeDraft, command: DeviceRecipeCommand): readonly DeviceRecipeOp[] {
   const interfaces = (draft.flowInterfaces ?? []).filter(op => !draft.flowInterfaceActions?.[op.id] || draft.flowInterfaceActions[op.id]!.includes(command.id));
   const before = (draft.flowInterfaces ?? []).filter(op => (op.type === "sample_external" && op.inputMode !== "trigger") || op.type === "encode");
-  const available = new Set([...draft.variables.map(variable => variable.name), ...[...before, ...command.steps].flatMap(op => "into" in op ? [op.into] : [])]);
+  const available = new Set([...draft.variables.map(variable => variable.name), ...[...before, ...command.steps].flatMap(op => op.type === "dht22_read" ? [op.temperatureInto, op.humidityInto] : "into" in op ? [op.into] : [])]);
   const after: DeviceRecipeOp[] = [];
   for (const op of interfaces) {
     if (op.type === "decode" && available.has(parseVarRef(op.input) ?? op.input)) { after.push(op); available.add(op.into); }
@@ -867,6 +886,9 @@ export function validateI2cTransactionPhases(
 
 export function describeDeviceOp(op: DeviceRecipeOp): string {
   switch (op.type) {
+    case "dht22_convert": return "Converti temperatura in gradi";
+    case "dht22_power": return op.on ? "Alimenta DHT22" : "Spegni DHT22";
+    case "dht22_read": return "Leggi temperatura e umidità";
     case "wait":
       return `Attendi ${op.ms} ${op.unit === "us" ? "µs" : "ms"}`;
     case "i2c_write":
@@ -897,6 +919,7 @@ export function describeDeviceOp(op: DeviceRecipeOp): string {
       return `Antirimbalzo ${op.stableMs} ms`;
     case "gpio_toggle":
       return `Inverti ${op.signalId}`;
+    case "stepper": return op.command === "position" ? "Vai alla posizione" : op.command === "start" ? "Avvia motore" : "Ferma motore";
     case "gpio_pulse":
       return `Impulso ${op.signalId}`;
     case "gpio_read_analog":
@@ -1660,6 +1683,9 @@ export function libraryOpsForBus(bus: DeviceRecipeBus): readonly { readonly type
     case "gpio":
       return [
         inputOp,
+        { type: "dht22_power", label: "Alimenta / spegni DHT22" },
+        { type: "dht22_read", label: "Leggi DHT22" },
+        { type: "dht22_convert", label: "Converti temperatura in gradi" },
         ...GPIO_OPERATION_DEFINITIONS.map((definition) => ({
           type: definition.type,
           label: definition.label.it,
@@ -1719,6 +1745,10 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
   const id = newId("op");
   const channelId = draft.channels[0]?.id ?? "value";
   switch (type) {
+    case "dht22_convert": return { id, type, input: "temperatura_raw", into: "temperatura", format: "float" };
+    case "dht22_power": return { id, type, on: true };
+    case "dht22_read": return { id, type, temperatureInto: "temperatura", humidityInto: "umidita" };
+    case "rgb_led": return { id, type, command: "color", color: "#FF3366" };
     case "wait":
       return { id, type: "wait", ms: 10, unit: "ms" };
     case "i2c_write":
@@ -1772,6 +1802,7 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
       return { id, type: "spi_cs", assert: true };
     case "spi_transfer":
       return { id, type: "spi_transfer", txBytes: ["0x00"], rxLen: 1, into: "rx", keepCs: true, timeoutMs: 20 };
+    case "stepper": return { id, type: "stepper", signalIds: ["IN1", "IN2", "IN3", "IN4"], command: "stop", intervalMs: 3, stepsPerRevolution: 4096 };
     case "gpio_read":
     case "gpio_write":
     case "gpio_debounce":
@@ -2031,11 +2062,12 @@ export function recipeVariables(draft: DeviceRecipeDraft): readonly RecipeVariab
   const variables = [...draft.variables];
   const names = new Set(variables.map(variable => variable.name));
   forEachSequenceOp(draft, op => {
-    for (const key of ["into", "intoPresence", "intoOk"] as const) {
+    for (const key of ["into", "intoPresence", "intoOk", "temperatureInto", "humidityInto"] as const) {
       const name = key in op ? (op as unknown as Record<string, unknown>)[key] : undefined;
       if (typeof name !== "string" || !name || names.has(name)) continue;
       names.add(name);
-      const valueType: RecipeVarType = key !== "into" ? "bool" :
+      const valueType: RecipeVarType = (key === "intoPresence" || key === "intoOk") ? "bool" :
+        op.type === "dht22_convert" ? (op.format === "string" ? "string" : "number") :
         op.type === "sample_external" ? op.valueType :
         op.type === "decode" ? op.outType ?? "number" :
         op.type === "encode" ? op.toType :
@@ -2057,7 +2089,7 @@ export function renameRecipeVariable(draft: DeviceRecipeDraft, variableId: strin
   if (available.some(item => item.id !== variable.id && item.name === name))
     throw new Error(`La variabile «${name}» esiste già.`);
   if (name === variable.name) return draft;
-  const referenceKeys = new Set(["into", "intoPresence", "intoOk", "input", "from"]);
+  const referenceKeys = new Set(["into", "intoPresence", "intoOk", "temperatureInto", "humidityInto", "input", "from", "positionVariable"]);
   const rewrite = (value: unknown, key = ""): unknown => {
     if (typeof value === "string") {
       if (parseVarRef(value) === variable.name && !["id", "channelId", "fromChannelId", "label", "name"].includes(key)) return `$${name}`;
@@ -2181,7 +2213,7 @@ export function isVariableUsed(draft: DeviceRecipeDraft, name: string): boolean 
     Array.isArray(value) ? value.some(hasReference) : Boolean(value && typeof value === "object" && Object.values(value).some(hasReference));
   forEachSequenceOp(draft, op => {
     if (hasReference(op)) used = true;
-    for (const key of ["into", "intoPresence", "intoOk", "input", "from"]) {
+    for (const key of ["into", "intoPresence", "intoOk", "input", "from", "positionVariable"]) {
       const value = (op as unknown as Record<string, unknown>)[key];
       if (value === name || value === `$${name}`) used = true;
     }
@@ -2503,7 +2535,7 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
   }
   for (const cmd of draft.commands.filter(c => c.exposeOnCanvas !== false)) {
     const steps = effectiveActionSteps(draft, cmd);
-    const reads = steps.some(op => ["i2c_read", "i2c_write_read", "spi_transfer", "adc_sample", "gpio_read", "gpio_read_analog", "gpio_debounce", "w1_read"].includes(op.type));
+    const reads = steps.some(op => ["dht22_read", "i2c_read", "i2c_write_read", "spi_transfer", "adc_sample", "gpio_read", "gpio_read_analog", "gpio_debounce", "w1_read"].includes(op.type));
     if (reads && !steps.some(op => op.type === "emit")) {
       errors.push({ field: `cmd.${cmd.id}.emit`, message: `Aggiungi Pubblica risultato a ${cmd.label}` });
     }
@@ -2553,6 +2585,7 @@ export function hasValidAnalogAcquisition(draft: DeviceRecipeDraft): boolean {
  * Init is attached to every action recipe so a single block stays self-contained.
  */
 export function draftToCanvasSensorRecipes(draft: DeviceRecipeDraft): readonly SensorRecipe[] {
+  if (draft.rgbModule) return [{ ...draftToSensorRecipe(draft), channels: draft.channels, driverInstanceId: draft.id, actionId: draft.commands[0]?.id, deviceDraft: draft }];
   if (draft.category === "display") {
     return [draftToSensorRecipe(draft)];
   }
@@ -2633,7 +2666,7 @@ export function draftToSensorRecipe(draft: DeviceRecipeDraft): SensorRecipe {
   forEachSequenceOp(draft, (op) => {
     if (op.type === "sample_external") hasSampleExternal = true;
   });
-  if (hasSampleExternal) {
+  if (hasSampleExternal && !draft.rgbModule) {
     unknown.push("Ingresso / variabili ricetta: authoring only finché il runtime non le supporta");
   }
   const unavailableGpioOps = new Set<string>();
@@ -2712,6 +2745,10 @@ export function draftToSensorRecipe(draft: DeviceRecipeDraft): SensorRecipe {
 function mapOpToV1(op: DeviceRecipeOp, address?: string): SensorRecipeStep[] {
   const addr = address ?? "0x00";
   switch (op.type) {
+    case "dht22_convert":
+    case "dht22_power":
+    case "dht22_read":
+    case "rgb_led": return [];
     case "wait":
       return [{ type: "wait", ms: Math.max(1, Math.ceil(waitDurationMs(op))) }];
     case "i2c_write":
@@ -2731,6 +2768,7 @@ function mapOpToV1(op: DeviceRecipeOp, address?: string): SensorRecipeStep[] {
     case "spi_transfer":
     case "gpio_debounce":
     case "gpio_toggle":
+    case "stepper":
     case "gpio_pulse":
     case "gpio_read_analog":
     case "gpio_set_pwm":
@@ -2985,6 +3023,9 @@ export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?:
     commands,
     gpioEvents: raw.gpioEvents ?? [],
     gpioHardware: raw.gpioHardware,
+    rgbModule: raw.rgbModule,
+    dht22Module: raw.dht22Module,
+    dht22Version: raw.dht22Version,
     ...(raw.flowInterfaces ? { flowInterfaces: migrateList(raw.flowInterfaces), flowInterfaceActions: raw.flowInterfaceActions } : {}),
     display: raw.display,
     phases: {

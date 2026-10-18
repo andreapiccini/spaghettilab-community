@@ -29,6 +29,16 @@ export function sensorInstanceSelection(
   if (!draft)
     return { inputId: "execute", outputId: "", channels: [] as SensorChannel[] };
   const { inputs, outputs } = sensorInterfaces(draft);
+  if (inputId === undefined) {
+    const motor = draft.commands
+      .find((action) => action.id === recipe.actionId)
+      ?.steps.find((op) => op.type === "stepper");
+    if (motor?.type === "stepper")
+      inputId =
+        motor.command === "position"
+          ? inputs.find((input) => input.into === motor.positionVariable)?.fromChannelId
+          : "execute";
+  }
   const input =
     inputId === ""
       ? undefined

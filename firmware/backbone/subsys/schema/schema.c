@@ -1,6 +1,7 @@
 #include <spaghetti/schema.h>
 
 #include <errno.h>
+#include <math.h>
 #include <string.h>
 
 #include <zephyr/logging/log.h>
@@ -143,6 +144,8 @@ static bool values_equal(const struct spaghetti_value *left,
 	}
 
 	switch (left->type) {
+	case SPAGHETTI_VALUE_FLOAT:
+		return left->data.decimal == right->data.decimal;
 	case SPAGHETTI_VALUE_BOOL:
 		return left->data.boolean == right->data.boolean;
 	case SPAGHETTI_VALUE_INT64:
@@ -294,6 +297,9 @@ static int validate_value_against_field(
 	}
 
 	switch (value->type) {
+	case SPAGHETTI_VALUE_FLOAT:
+		if (!isfinite(value->data.decimal)) return -ERANGE;
+		break;
 	case SPAGHETTI_VALUE_BOOL:
 		break;
 	case SPAGHETTI_VALUE_INT64:

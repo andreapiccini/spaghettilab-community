@@ -644,6 +644,10 @@ async def _pipe_core(websocket: Any, core: BoundCore) -> None:
                 await asyncio.wait_for(idle.wait(), timeout=RESPONSE_WAIT_S)
             except TimeoutError:
                 logger.warning("usb in-flight wait timed out port=%s", core.port)
+                # A missing reply leaves the outcome ambiguous. Do not push later
+                # mutations into the same stalled serial session.
+                await websocket.close(1011, "Backbone response timed out")
+                break
             idle.clear()
             try:
                 await asyncio.to_thread(write)

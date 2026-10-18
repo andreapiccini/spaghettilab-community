@@ -56,6 +56,7 @@ static uint16_t count_used_modules_locked(void)
 static bool endpoint_is_valid(const struct spaghetti_module_endpoint *endpoint)
 {
 	switch (endpoint->kind) {
+	case SPAGHETTI_ENDPOINT_LOGICAL:
 	case SPAGHETTI_ENDPOINT_PORT_EXCLUSIVE:
 	case SPAGHETTI_ENDPOINT_UART_EXCLUSIVE:
 		return endpoint->value_size == 0U;
@@ -65,7 +66,16 @@ static bool endpoint_is_valid(const struct spaghetti_module_endpoint *endpoint)
 	case SPAGHETTI_ENDPOINT_SPI_CHIP_SELECT:
 		return (endpoint->value_size == 1U) &&
 		       (endpoint->value[0] <= 4U);
-	case SPAGHETTI_ENDPOINT_GPIO_LINE:
+ case SPAGHETTI_ENDPOINT_GPIO_LINE: {
+   if (!endpoint->value_size || endpoint->value_size > 4U) return false;
+   uint8_t mask = 0;
+   for (unsigned i = 0; i < endpoint->value_size; i++) {
+     uint8_t line = endpoint->value[i];
+     if (line > 4U || (mask & BIT(line))) return false;
+     mask |= BIT(line);
+   }
+   return true;
+ }
 	case SPAGHETTI_ENDPOINT_ADC_CHANNEL:
 		return (endpoint->value_size == 1U) &&
 		       (endpoint->value[0] <= 4U);
@@ -80,6 +90,7 @@ static bool endpoints_conflict(
 	const struct spaghetti_module_endpoint *first,
 	const struct spaghetti_module_endpoint *second)
 {
+	if (first->kind == SPAGHETTI_ENDPOINT_LOGICAL || second->kind == SPAGHETTI_ENDPOINT_LOGICAL) return false;
 	if ((first->kind == SPAGHETTI_ENDPOINT_PORT_EXCLUSIVE) ||
 	    (second->kind == SPAGHETTI_ENDPOINT_PORT_EXCLUSIVE) ||
 	    (first->kind == SPAGHETTI_ENDPOINT_UART_EXCLUSIVE) ||
@@ -87,6 +98,12 @@ static bool endpoints_conflict(
 		return true;
 	}
 
+ if (first->kind == SPAGHETTI_ENDPOINT_GPIO_LINE && second->kind == SPAGHETTI_ENDPOINT_GPIO_LINE) {
+   for (unsigned i = 0; i < first->value_size; i++)
+     for (unsigned j = 0; j < second->value_size; j++)
+       if (first->value[i] == second->value[j]) return true;
+   return false;
+ }
 	return (first->kind == second->kind) &&
 	       (first->value_size == second->value_size) &&
 	       (memcmp(first->value, second->value, first->value_size) == 0);
@@ -432,7 +449,7 @@ int spaghetti_module_manager_configure(
 	slot->module.endpoint = endpoint;
 	k_mutex_unlock(&slots_lock);
 
-	err = spaghetti_port_acquire(
+	err = endpoint.kind == SPAGHETTI_ENDPOINT_LOGICAL ? 0 : spaghetti_port_acquire(
 		port, request->key,
 		(driver->required_capabilities == 0U) ?
 			transport_for_endpoint(endpoint.kind, driver->transport) :
@@ -446,7 +463,7 @@ int spaghetti_module_manager_configure(
 
 	err = attach_power_if_needed(slot, driver, &admission, &power_attached);
 	if (err < 0) {
-		(void)spaghetti_port_release(port, request->key);
+		if (endpoint.kind != SPAGHETTI_ENDPOINT_LOGICAL) (void)spaghetti_port_release(port, request->key);
 		(void)k_mutex_lock(&slots_lock, K_FOREVER);
 		memset(slot, 0, sizeof(*slot));
 		k_mutex_unlock(&slots_lock);
@@ -468,7 +485,7 @@ int spaghetti_module_manager_configure(
 #else
 		ARG_UNUSED(power_attached);
 #endif
-		(void)spaghetti_port_release(port, request->key);
+		if (endpoint.kind != SPAGHETTI_ENDPOINT_LOGICAL) (void)spaghetti_port_release(port, request->key);
 		(void)k_mutex_lock(&slots_lock, K_FOREVER);
 		memset(slot, 0, sizeof(*slot));
 		k_mutex_unlock(&slots_lock);
@@ -560,7 +577,7 @@ int spaghetti_module_manager_remove(spaghetti_module_id_t id,
 
 	err = slot->module.driver->ops->deinit(&slot->module);
 	detach_power_if_needed(slot);
-	(void)spaghetti_port_release(port, key);
+	if (slot->module.endpoint.kind != SPAGHETTI_ENDPOINT_LOGICAL) (void)spaghetti_port_release(port, key);
 
 	(void)k_mutex_lock(&slots_lock, K_FOREVER);
 	memset(slot, 0, sizeof(*slot));

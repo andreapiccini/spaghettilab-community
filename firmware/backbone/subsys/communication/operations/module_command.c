@@ -7,6 +7,7 @@
 
 #include <spaghetti/access_control.h>
 #include <spaghetti/module_manager.h>
+#include <spaghetti/runtime.h>
 #include <spaghetti/schema.h>
 #include <spaghetti/device_profile.h>
 #include <zephyr/kernel.h>
@@ -61,6 +62,8 @@ static int execute_module_command(
 	k_free(command);
 	if (err < 0) { k_free(record); return err; }
 	if (record->schema_id[0] == '\0') { k_free(record); return spaghetti_ops_encode_empty_map(response); }
+    err = spaghetti_runtime_post_command_result(key, record);
+    if (err < 0) { k_free(record); return err; }
 	ZCBOR_STATE_E(state, 6, response->bytes, sizeof(response->bytes), 1U);
 	bool ok = zcbor_map_start_encode(state, 3U) && zcbor_uint32_put(state, 0U) && zcbor_map_start_encode(state, record->values.field_count);
 	for (size_t i = 0; ok && i < record->values.field_count; ++i) {
@@ -68,6 +71,8 @@ static int execute_module_command(
 		ok = zcbor_uint32_put(state, value->field_id);
 		if (value->type == SPAGHETTI_VALUE_INT64) ok = ok && zcbor_int64_put(state, value->data.signed_integer);
 		else if (value->type == SPAGHETTI_VALUE_UINT64) ok = ok && zcbor_uint64_put(state, value->data.unsigned_integer);
+		else if (value->type == SPAGHETTI_VALUE_FLOAT) ok = ok && zcbor_float64_put(state, value->data.decimal);
+		else if (value->type == SPAGHETTI_VALUE_TEXT) ok = ok && zcbor_tstr_encode_ptr(state, value->data.text.text, value->data.text.size);
 		else ok = false;
 	}
 	ok = ok && zcbor_map_end_encode(state, record->values.field_count) && zcbor_uint32_put(state, 1U) && zcbor_list_start_encode(state, rx.count);

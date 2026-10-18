@@ -2,6 +2,7 @@ import type { ConfigDiff } from "@spaghettilab/config-deployment";
 import { ChevronDown, Minus, PenLine, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { changedConfigFields, formatConfigDiffValue } from "../../lib/config-diff-values.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
 
 const SECTIONS: readonly { readonly key: keyof Pick<ConfigDiff, "modules" | "schedules" | "rules" | "blocks" | "edges">; readonly label: string; readonly nameOf: (item: unknown) => string }[] = [
@@ -83,7 +84,7 @@ function ChangedRow({ before, after, nameOf }: { readonly before: unknown; reado
   const [expanded, setExpanded] = useState(false);
   const beforeObj = before as Record<string, unknown>;
   const afterObj = after as Record<string, unknown>;
-  const changedFields = Object.keys(afterObj).filter((k) => JSON.stringify(beforeObj[k]) !== JSON.stringify(afterObj[k]));
+  const changedFields = changedConfigFields(beforeObj, afterObj);
 
   return (
     <div>
@@ -101,8 +102,8 @@ function ChangedRow({ before, after, nameOf }: { readonly before: unknown; reado
               {changedFields.map((field) => (
                 <div key={field} className="flex gap-2">
                   <span className="text-ink-faint">{field}:</span>
-                  <span className="text-ink-faint line-through">{JSON.stringify(beforeObj[field])}</span>
-                  <span className="text-ink">→ {JSON.stringify(afterObj[field])}</span>
+                  <span className="text-ink-faint line-through">{formatConfigDiffValue(beforeObj[field])}</span>
+                  <span className="text-ink">→ {formatConfigDiffValue(afterObj[field])}</span>
                 </div>
               ))}
             </div>

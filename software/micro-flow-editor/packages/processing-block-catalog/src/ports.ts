@@ -7,6 +7,7 @@
  */
 
 export const SIGNAL_DOMAINS = [
+  "any",
   "digital",
   "analog",
   "power",
@@ -69,7 +70,7 @@ export function rolesCompatible(outRole: SignalRole, inRole: SignalRole): boolea
 
 /** True when a single out PortType can feed a single in PortType. */
 export function portTypesCompatible(outType: PortType, inType: PortType): boolean {
-  if (outType.domain === "activation") return true;
+  if (inType.domain === "any" || outType.domain === "activation") return true;
   if (outType.domain !== inType.domain) return false;
   return rolesCompatible(outType.role, inType.role);
 }

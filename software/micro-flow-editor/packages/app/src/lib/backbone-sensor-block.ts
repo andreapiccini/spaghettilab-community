@@ -1,3 +1,5 @@
+import { rgbInputLabel } from "./rgb-module.js";
+import { MOVEMENT_COMPLETED } from "./flow-sequence.js";
 import {
   SENSOR_INSTANCE_PROP,
   SENSOR_INPUT_PROP,
@@ -130,20 +132,24 @@ export function propertiesForSensorModule(
   recipe: SensorRecipe = module.recipe,
   selection?: { inputId?: string; outputId?: string },
 ): Record<string, string | number | boolean> {
-  const single = Boolean(recipe.actionId && recipe.deviceDraft);
+  const rgb = Boolean(recipe.deviceDraft?.rgbModule);
+  const single = Boolean(recipe.actionId && recipe.deviceDraft) && !recipe.deviceDraft?.dht22Module;
   const selected = sensorInstanceSelection(
     recipe,
     selection?.inputId,
     selection?.outputId,
   );
-  const channels = single ? selected.channels : recipeChannels(recipe);
+  const channels = recipe.deviceDraft?.dht22Module ? recipe.deviceDraft.channels : rgb ? recipe.deviceDraft!.channels.map(channel => ({ ...channel, label: channel.direction === "write" ? rgbInputLabel(recipe.deviceDraft!.rgbModule!.inputs.find(input => input.id === channel.id) ?? { id: channel.id, name: channel.label, mode: "trigger", actionId: "", edge: "rising" }) : channel.id === "state" ? "È acceso" : channel.id === "color" ? "Colore emesso" : channel.label })) : single ? selected.channels : recipeChannels(recipe);
   return {
     [SENSOR_MODULE_ID_PROP]: module.id,
+    ...(recipe.deviceDraft?.dht22Module ? { sensorDht22: true } : {}),
+    ...(recipe.deviceDraft?.commands.some((command) => command.steps.some((op) => op.type === "stepper"))
+      ? { sensorMotion: true } : {}),
     ...(single
       ? {
           [SENSOR_INSTANCE_PROP]: true,
-          [SENSOR_INPUT_PROP]: selected.inputId,
-          [SENSOR_OUTPUT_PROP]: selected.outputId,
+          [SENSOR_INPUT_PROP]: rgb ? "" : selected.inputId,
+          [SENSOR_OUTPUT_PROP]: rgb ? "" : selected.outputId,
           [SENSOR_ACTION_LABEL_PROP]:
             recipe.deviceDraft?.commands.find((action) => action.id === recipe.actionId)
               ?.label ?? "",
@@ -175,7 +181,11 @@ export function catalogEntryWithSensorChannels(
   const channels = channelsFromNodeProperties(properties);
   const isAction = typeof properties[SENSOR_ACTION_ID_PROP] === "string";
   if (channels.length === 0 && !isAction) return entry;
-  const { inputs, outputs } = blockPortsFromChannels(channels);
+  const { inputs, outputs: channelOutputs } = blockPortsFromChannels(channels);
+  const outputs = [...channelOutputs];
+  // This native event is independent of the selected synchronous action output.
+  if (properties.sensorMotion === true)
+    outputs.push(outPort(MOVEMENT_COMPLETED, [T.eventTrigger], "Movimento terminato"));
   return {
     ...entry,
     label:
@@ -184,6 +194,7 @@ export function catalogEntryWithSensorChannels(
         : entry.label,
     inputs:
       isAction &&
+      properties.sensorDht22 !== true &&
       (properties[SENSOR_INSTANCE_PROP] !== true ||
         properties[SENSOR_INPUT_PROP] === "execute")
         ? [

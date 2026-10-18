@@ -1,9 +1,16 @@
+import { rgbModuleDraft } from "./rgb-module.js";
 import {
   migrateDraft,
   validateDraftForCreate,
   type DeviceRecipeDraft,
 } from "./device-recipe-draft.js";
-import { catalogGpioRelayDriver } from "./gpio-driver-presets.js";
+import {
+  catalogDht22Driver,
+  upgradeDht22Driver,
+  catalogUln2003Driver,
+  catalogGpioBuzzerDriver,
+  catalogGpioRelayDriver,
+} from "./gpio-driver-presets.js";
 
 /** App/firmware contract. A bridge must abort on cancellation, serialize each antenna,
  * check expectedUid before EVERY page write and expose user memory only (pages 4–43).
@@ -23,34 +30,16 @@ export type NfcTarget = {
   exclusive?: boolean;
 };
 
+/** Keep the observed route; no broadcast, antenna probing or short-ID guesses. */
 export function nfcPageNodeCandidates(target: NfcTarget): number[] {
-  const seen = new Set<number>();
-  const small: number[] = [];
-  const large: number[] = [];
-  const sources = target.exclusive
-    ? [...(target.alternateNodeIds ?? []), target.nodeId]
-    : [target.nodeId, 0, ...(target.alternateNodeIds ?? [])];
-  for (const nodeId of sources) {
-    if (!Number.isInteger(nodeId) || nodeId < 0 || nodeId > 0xffffff || seen.has(nodeId)) {
-      continue;
-    }
-    seen.add(nodeId);
-    if (nodeId <= 255) small.push(nodeId);
-    else large.push(nodeId);
-  }
-  const ordered = [...small, ...large];
-  return target.exclusive ? ordered.slice(0, 2) : ordered;
+  return Number.isInteger(target.nodeId) &&
+    target.nodeId >= 0 &&
+    target.nodeId <= 0xffffff
+    ? [target.nodeId]
+    : [];
 }
-
 export function nfcPageAntennaCandidates(antenna: number): number[] {
-  const seen = new Set<number>();
-  const ids: number[] = [];
-  for (const value of [antenna, antenna === 0 ? 1 : 0]) {
-    if (!Number.isInteger(value) || value < 0 || value > 2 || seen.has(value)) continue;
-    seen.add(value);
-    ids.push(value);
-  }
-  return ids.length > 0 ? ids : [1];
+  return antenna === 1 || antenna === 2 ? [antenna] : [];
 }
 export type NfcMemory = {
   uid: string;
@@ -83,6 +72,8 @@ export type TagScan = {
   writable: boolean;
   read: boolean;
   source?: "scan" | "read" | "write";
+  recognition?: "library" | "memory";
+  memoryDecoded?: DecodedTag;
   imageRef?: string;
 };
 export const scanPresenceKey = (scan: Pick<TagScan, "target" | "uid" | "simulated">) =>
@@ -97,7 +88,8 @@ export function tagIsPresent(
   if (scan.simulated) return false;
   const suffix = `:${scan.uid}`;
   for (const key of presentKeys) {
-    if (key.startsWith("real:") && key.endsWith(suffix)) return true;
+    if (key.startsWith(`real:${scan.target.bindingId}:`) && key.endsWith(suffix))
+      return true;
   }
   return false;
 }
@@ -167,7 +159,13 @@ export function normalizeTagUid(uid: string): string {
 }
 
 export function builtinNfcDrivers(): LibraryDriver[] {
-  return [driverRevision(catalogGpioRelayDriver())];
+  return [
+    driverRevision(catalogGpioRelayDriver()),
+    driverRevision(catalogGpioBuzzerDriver()),
+    driverRevision(catalogUln2003Driver()),
+    driverRevision(rgbModuleDraft()),
+    driverRevision(catalogDht22Driver()),
+  ];
 }
 
 export function builtinRelayModule(existing?: ModuleDefinition): ModuleDefinition {
@@ -212,10 +210,9 @@ export function libraryNameForUid(
   return library.models.find((item) => item.id === unit.modelId)?.name;
 }
 
-export function applyLibraryNamesToNfcNodes<T extends { readonly uid?: string; readonly label: string }>(
-  nodes: readonly T[],
-  library: NfcLibrary,
-): T[] {
+export function applyLibraryNamesToNfcNodes<
+  T extends { readonly uid?: string; readonly label: string },
+>(nodes: readonly T[], library: NfcLibrary): T[] {
   return nodes.map((node) => {
     const name = libraryNameForUid(library, node.uid);
     return name && name !== node.label ? { ...node, label: name } : node;
@@ -248,8 +245,11 @@ export function recognizedLibraryModule(
 
 export function applyLibraryToScan(scan: TagScan, library: NfcLibrary): TagScan {
   if (scan.decoded.kind === "module") {
-    const model = library.models.find((item) => item.id === scan.decoded.value.modelId);
-    return model?.imageRef && !scan.imageRef ? { ...scan, imageRef: model.imageRef } : scan;
+    const modelId = scan.decoded.value.modelId;
+    const model = library.models.find((item) => item.id === modelId);
+    return model?.imageRef && !scan.imageRef
+      ? { ...scan, imageRef: model.imageRef }
+      : scan;
   }
   const unit = library.units.find(
     (item) => normalizeTagUid(item.uid) === normalizeTagUid(scan.uid),
@@ -260,6 +260,8 @@ export function applyLibraryToScan(scan: TagScan, library: NfcLibrary): TagScan 
   return {
     ...scan,
     name: model.name,
+    recognition: "library",
+    memoryDecoded: scan.memoryDecoded ?? scan.decoded,
     imageRef: model.imageRef ?? scan.imageRef,
     decoded: {
       kind: "module",
@@ -276,19 +278,20 @@ export function applyLibraryToScan(scan: TagScan, library: NfcLibrary): TagScan 
 }
 
 export function mergeBuiltinNfcDrivers(library: NfcLibrary): NfcLibrary {
+  if (library.drivers.some(driver => driver.draft.dht22Module && !driver.draft.dht22Version))
+    library = { ...library, drivers: library.drivers.map(driver => driver.draft.dht22Module && !driver.draft.dht22Version ? driverRevision(upgradeDht22Driver(driver.draft)) : driver) };
   const extras = builtinNfcDrivers().filter(
     (driver) => !library.drivers.some((item) => item.id === driver.id),
   );
   const withDrivers = extras.length
     ? { ...library, drivers: [...library.drivers, ...extras] }
     : library;
-  return associateTagInLibrary(
-    withDrivers,
-    RELAY_MODULE_TAG_UID,
-    builtinRelayModule(
-      withDrivers.models.find((item) => item.id === GPIO_RELAY_MODEL_ID),
-    ),
-  );
+  return withDrivers.models.some((model) => model.id === GPIO_RELAY_MODEL_ID)
+    ? withDrivers
+    : {
+        ...withDrivers,
+        models: [...withDrivers.models, builtinRelayModule()],
+      };
 }
 
 export function checksum(bytes: Uint8Array): number {
@@ -507,48 +510,40 @@ export async function writeAndVerifyTag(
   target: NfcTarget,
   value: ModuleTag,
   previous?: NfcMemory,
-  options?: { readonly deadlineMs?: number; readonly skipPreRead?: boolean; readonly signal?: AbortSignal },
+  options?: { readonly deadlineMs?: number; readonly signal?: AbortSignal },
 ): Promise<NfcMemory> {
   return nfcDeadline(
     async (signal) => {
+      const before =
+        previous?.uid === target.expectedUid &&
+        previous.family === "ST25TN01K" &&
+        previous.bytes.length === 160
+          ? previous
+          : await bridge.read(target, signal);
+      if (before.uid !== target.expectedUid)
+        throw new Error("Il tag è cambiato. Riavvicina il tag originale.");
+      if (before.family !== "ST25TN01K" || before.bytes.length !== 160)
+        throw new Error("Questo tipo di tag non è ancora supportato per la scrittura.");
+      if (
+        !before.writable ||
+        !["empty", "module"].includes(decodeModuleTag(before.bytes).kind)
+      )
+        throw new Error("Tag protetto o formato esistente: scrittura disabilitata.");
       const bytes = encodeModuleTag(value, 160);
-      if (!options?.skipPreRead) {
-        const before =
-          previous &&
-          previous.uid === target.expectedUid &&
-          previous.family === "ST25TN01K" &&
-          previous.bytes.length === 160
-            ? previous
-            : await bridge.read(target, signal);
-        if (before.uid !== target.expectedUid)
-          throw new Error("Il tag è cambiato. Riavvicina il tag originale.");
-        if (before.family !== "ST25TN01K" || before.bytes.length !== 160)
-          throw new Error("Questo tipo di tag non è ancora supportato per la scrittura.");
-        const decoded = decodeModuleTag(before.bytes);
-        if (!before.writable || !["empty", "module"].includes(decoded.kind))
-          throw new Error("Tag protetto o formato esistente: scrittura disabilitata.");
-      }
       signal.throwIfAborted();
       await bridge.write(target, bytes, signal);
-      if (options?.skipPreRead) {
-        return {
-          uid: target.expectedUid,
-          family: "ST25TN01K" as const,
-          writable: true,
-          bytes,
-        };
-      }
       signal.throwIfAborted();
       const after = await bridge.read(target, signal);
       if (
         after.uid !== target.expectedUid ||
+        after.family !== "ST25TN01K" ||
         after.bytes.length !== bytes.length ||
         !after.bytes.every((byte, index) => byte === bytes[index])
       )
         throw new Error("Verifica non riuscita. Il tag non è stato confermato.");
       return after;
     },
-    options?.deadlineMs ?? 90000,
+    options?.deadlineMs ?? 30000,
     options?.signal,
   );
 }

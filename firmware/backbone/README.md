@@ -467,3 +467,60 @@ Neither severity blocks a normal build. To scan without displaying the
 convention report, use `make build VALIDATOR_QUIET=1`. See
 [`VALIDATOR.md`](VALIDATOR.md) for colors, strict mode, scope, and selected-file
 commands.
+
+
+## Canvas sequences and stepper completion (0.5.8)
+
+The editor's **Sequenza** block compiles into a logical `sequence` module and a
+20 ms runtime schedule. It runs on the Core independently of the browser, without
+adding threads or sleeping in the runtime worker. Up to eight rows execute an
+existing driver action or wait 1–60000 ms. Target module/action references are
+resolved at deployment; missing targets, duplicate controllers and conflicting
+command wires are rejected before deployment.
+
+Inputs and live commands are **Avvia / Riprendi** (1), **Pausa** (2), **Stop** (3).
+Pause freezes remaining delay and motor steps; start resumes. Stop resets to the
+first row and releases motor coils. Existing driver Stop continues to hold coils.
+Relays and other non-motion outputs retain their last state; include an explicit
+OFF action when needed. Start while already running is idempotent. Autostart and
+repeat are optional; each completed cycle emits field 1 (`Terminata`). Failures
+stop the sequence/motor and emit field 2 (`Errore`), never completion.
+
+The packed program uses config text fields 1–4 (up to 32 lowercase hex characters
+each), repeat=5, autostart=6 and editor identity=7. Each eight-byte row is
+`kind, target_key, command_id, argument_id, uint32_value_le`; kind 0 waits,
+kind 1 calls an action, kind 2 calls a finite stepper move and waits for completion.
+Finite moves have a 60 s deadline excluding paused time. Commands must not contain
+blocking DELAY operations: use separate sequence wait rows.
+
+Stepper profiles declare the reserved optional uint64 sample field 65534,
+`movement_completed`. Monitoring reads emit it only after the timer has completed
+a finite move, including zero-distance moves. Stop, cancellation and GPIO errors
+never increment completion. This is completion of commanded half-steps, not
+feedback from a position sensor. The motor's zero remains its power-on position.
+The runtime polls completion without replaying a driver's first action. A sequence
+can call stepper, relay and buzzer actions; it needs no extra command wires to its
+targets, which are selected inside its rows.
+
+Tests: `tests/device_profiles` includes sequence pause/resume/repeat/stop and
+stepper completion integration on native_sim. A real motor still requires the
+new firmware and a hardware qualification run after deployment.
+
+## Manual canvas triggers (0.5.15)
+
+**Genera trigger** creates a software-only declarative source with LOW/HIGH
+commands and an armed, disabled schedule. It does not claim pins or poll a bus.
+Each **Invia trigger** click sends LOW → HIGH → LOW; connected action rules use
+rising-edge mode, so one click starts one action. The browser must remain connected
+and the generator must be deployed. General Stop removes the deployed runtime.
+
+Successful host module commands with record results enter the existing bounded
+runtime event queue, only when their source is armed and the runtime is running.
+They follow the same rules and typed USB record delivery as onboard events.
+Queue saturation returns an error instead of executing rules on the USB worker.
+The CBOR decoder accepts zero required capabilities only for LOGICAL profiles.
+
+For DHT22, connect **Avvia azione → Leggi temperatura**, then **Temperatura →
+Mostra valore** on **Visualizza dati**. A successful triggered read publishes the
+measured field and action ID to the PC. The viewer displays the last received
+value; it does not synthesize readings or start additional sensor reads.

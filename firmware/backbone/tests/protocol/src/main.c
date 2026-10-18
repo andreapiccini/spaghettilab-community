@@ -10,6 +10,7 @@
 
 #include <zcbor_common.h>
 #include <zcbor_encode.h>
+#include <zcbor_decode.h>
 
 #include <spaghetti/access_control.h>
 #include <spaghetti/ble.h>
@@ -34,6 +35,7 @@
 #include <spaghetti/port.h>
 #include <spaghetti/power.h>
 #include <spaghetti/protocol.h>
+#include <spaghetti/runtime.h>
 #include <spaghetti/remote_console.h>
 #include <spaghetti/resources.h>
 #include <spaghetti/rule_registry.h>
@@ -552,6 +554,11 @@ const struct spaghetti_image_manifest *spaghetti_image_manifest_get(void)
 	return NULL;
 }
 
+void spaghetti_device_profile_capture_begin(void) {}
+void spaghetti_device_profile_capture_command_begin(void) {}
+void spaghetti_device_profile_capture_finish(struct spaghetti_profile_rx_capture *out)
+{ if (out) memset(out, 0, sizeof(*out)); }
+
 size_t spaghetti_device_profile_count(void)
 {
 	return 0U;
@@ -1043,5 +1050,53 @@ ZTEST(protocol, test_events_and_max_payload_helper)
 	zassert_true(written > 0U);
 	zassert_ok(spaghetti_ops_encode_empty_map(&payload));
 }
+
+ZTEST(protocol, test_typed_record_values)
+{
+    struct spaghetti_record *record = k_calloc(1, sizeof(*record));
+    struct spaghetti_protocol_payload *payload = k_malloc(sizeof(*payload));
+    zassert_not_null(record); zassert_not_null(payload);
+    record->source_key = 3U; record->sequence = 7U;
+    strcpy(record->payload.schema_id, "test.values");
+    record->payload.schema_version = 1U; record->payload.action_id = 2U;
+    record->payload.values.field_count = 3U;
+    record->payload.values.fields[0] = (struct spaghetti_value){ .field_id = 1U, .type = SPAGHETTI_VALUE_FLOAT, .data.decimal = 23.4 };
+    record->payload.values.fields[1] = (struct spaghetti_value){ .field_id = 2U, .type = SPAGHETTI_VALUE_BOOL, .data.boolean = true };
+    record->payload.values.fields[2] = (struct spaghetti_value){ .field_id = 3U, .type = SPAGHETTI_VALUE_TEXT };
+    strcpy(record->payload.values.fields[2].data.text.text, "23.4 C");
+    record->payload.values.fields[2].data.text.size = 6U;
+    zassert_ok(spaghetti_protocol_encode_record_values_event(record, payload));
+    ZCBOR_STATE_D(state, 6U, payload->bytes, payload->size, 1U, 0U);
+    uint32_t key, integer; struct zcbor_string text; double decimal; bool boolean;
+    zassert_true(zcbor_map_start_decode(state));
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 0U);
+    zassert_true(zcbor_uint32_decode(state, &integer)); zassert_equal(integer, 3U);
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 1U);
+    zassert_true(zcbor_uint32_decode(state, &integer)); zassert_equal(integer, 7U);
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 2U);
+    zassert_true(zcbor_tstr_decode(state, &text)); zassert_equal(text.len, 11U);
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 3U);
+    zassert_true(zcbor_uint32_decode(state, &integer)); zassert_equal(integer, 1U);
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 4U);
+    zassert_true(zcbor_map_start_decode(state));
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 1U);
+    zassert_true(zcbor_float64_decode(state, &decimal)); zassert_true(decimal == 23.4);
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 2U);
+    zassert_true(zcbor_bool_decode(state, &boolean)); zassert_true(boolean);
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 3U);
+    zassert_true(zcbor_tstr_decode(state, &text)); zassert_equal(text.len, 6U);
+    zassert_mem_equal(text.value, "23.4 C", 6U);
+    zassert_true(zcbor_map_end_decode(state));
+    zassert_true(zcbor_uint32_decode(state, &key)); zassert_equal(key, 5U);
+    zassert_true(zcbor_uint32_decode(state, &integer)); zassert_equal(integer, 2U);
+    zassert_true(zcbor_map_end_decode(state));
+    record->payload.values.fields[0].type = 99;
+    zassert_equal(spaghetti_protocol_encode_record_values_event(record, payload), -EINVAL);
+    k_free(payload); k_free(record);
+}
+
+int spaghetti_runtime_post_command_result(spaghetti_module_key_t key,
+    const struct spaghetti_record_payload *payload)
+{ ARG_UNUSED(key); ARG_UNUSED(payload); return 0; }
 
 ZTEST_SUITE(protocol, NULL, NULL, NULL, NULL, NULL);

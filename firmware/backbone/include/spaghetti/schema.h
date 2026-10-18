@@ -44,6 +44,7 @@ enum spaghetti_value_type {
 	SPAGHETTI_VALUE_UINT64, /**< Unsigned 64-bit integer or counter. */
 	SPAGHETTI_VALUE_TEXT, /**< Owned UTF-8 text with terminating NUL. */
 	SPAGHETTI_VALUE_BYTES, /**< Owned opaque byte blob. */
+	SPAGHETTI_VALUE_FLOAT, /**< Finite IEEE-754 double numeric sample. */
 };
 
 /** Descriptor hints that do not change the wire type. */
@@ -102,6 +103,7 @@ struct spaghetti_value {
 		bool boolean; /**< Active when type is BOOL. */
 		int64_t signed_integer; /**< Active when type is INT64. */
 		uint64_t unsigned_integer; /**< Active when type is UINT64. */
+		double decimal; /**< Active when type is FLOAT. */
 		struct spaghetti_text_value text; /**< Active when type is TEXT. */
 		struct spaghetti_bytes_value bytes; /**< Active when type is BYTES. */
 	} data;

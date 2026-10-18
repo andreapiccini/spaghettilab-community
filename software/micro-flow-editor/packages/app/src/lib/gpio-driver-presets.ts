@@ -623,37 +623,71 @@ export function createGpioPirPreset(name = "PIR Sensor"): DeviceRecipeDraft {
   return createGpioDigitalSensorPreset(name);
 }
 
-export function createGpioBuzzerPreset(name = "Buzzer"): DeviceRecipeDraft {
-  return gpioDraft({
-    hardwareKind: "buzzer",
-    name,
+export const GPIO_BUZZER_CATALOG_ID = "gpio-buzzer-active";
+
+/** Active buzzer with its own oscillator. Passive audio PWM is not generated. */
+export function createGpioBuzzerPreset(
+  name = "Buzzer attivo",
+  options?: { readonly stable?: boolean },
+): DeviceRecipeDraft {
+  const base = createGpioRelayPreset(name, options);
+  const signalId = "BUZZER";
+  const remap = (op: DeviceRecipeOp): DeviceRecipeOp =>
+    "signalId" in op ? { ...op, signalId } : op;
+  return {
+    ...base,
+    id: options?.stable ? GPIO_BUZZER_CATALOG_ID : base.id,
     description:
-      "Uscita digitale per un cicalino. Il comportamento è definito dalle azioni.",
-    deviceCategory: "output",
-    signals: [digitalOut("BUZZER", "BUZZER")],
-    init: [write("BUZZER", 0)],
+      "Buzzer attivo con oscillatore interno: accendi, spegni o emetti un beep di 100 ms. Non genera toni per buzzer passivi.",
+    gpioHardware: { kind: "buzzer", power: "none", ground: true, extraTerminals: [] },
+    binding: {
+      ...base.binding,
+      gpioSignals: base.binding.gpioSignals.map((signal) => ({
+        ...signal,
+        id: signalId,
+        identifier: signalId,
+        name: "BUZZER",
+      })),
+    },
+    phases: { ...base.phases, init: base.phases.init.map(remap) },
     commands: [
-      action("activate", "Activate", [write("BUZZER", 1)]),
-      action("deactivate", "Deactivate", [write("BUZZER", 0)]),
+      ...base.commands.map((command) => ({
+        ...command,
+        id: command.id.replace("relay-", "buzzer-"),
+        label: command.name === "on" ? "Accendi" : "Spegni",
+        steps: command.steps.map(remap),
+      })),
       action(
         "beep",
-        "Beep",
-        [write("BUZZER", 1), waitMs(100, "duration"), write("BUZZER", 0)],
-        {
-          params: [
-            {
-              id: "duration",
-              name: "duration",
-              type: "float",
-              defaultValue: 100,
-              min: 1,
-              unit: "ms",
-            },
-          ],
-        },
+        "Beep breve",
+        [
+          {
+            id: options?.stable ? "buzzer-beep-pulse" : uid("op"),
+            type: "gpio_pulse",
+            signalId,
+            activeState: 1,
+            durationMs: { kind: "fixed", value: 100 },
+            restoreState: 0,
+          },
+          {
+            id: options?.stable ? "buzzer-beep-read" : uid("op"),
+            type: "gpio_read",
+            signalId,
+            into: "stato",
+          },
+        ],
+        options?.stable ? { id: "buzzer-cmd-beep" } : undefined,
       ),
     ],
-  });
+    variables: base.variables.map((variable) => ({
+      ...variable,
+      id: variable.id.replace("relay-", "buzzer-"),
+    })),
+  };
+}
+
+export function catalogGpioBuzzerDriver(): DeviceRecipeDraft {
+  return createGpioBuzzerPreset("Buzzer attivo", { stable: true });
 }
 
 export function createGpioAnalogSensorPreset(
@@ -864,4 +898,103 @@ export function createGpioDigitalDriver(
         : []),
     ],
   };
+}
+
+/** ULN2003 / 28BYJ-48, nominal 4096 half-steps/revolution. */
+export function catalogUln2003Driver(): DeviceRecipeDraft {
+  const signalIds = ["IN1", "IN2", "IN3", "IN4"];
+  const motor = (command: "start" | "stop" | "position"): DeviceRecipeOp => ({
+    id: `uln-${command}-op`,
+    type: "stepper",
+    signalIds,
+    command,
+    positionVariable: "posizione",
+    intervalMs: 3,
+    stepsPerRevolution: 4096,
+  });
+  const base = gpioDraft({
+    name: "Stepper ULN2003",
+    hardwareKind: "motor",
+    deviceCategory: "actuator",
+    description:
+      "Motore 28BYJ-48 con ULN2003. Start continuo, Stop e posizione 0–360° rispetto allo zero all’avvio. Posizione stimata, senza sensore di riferimento.",
+    signals: signalIds.map((id) => digitalOut(id, id)),
+    init: [motor("stop")],
+    commands: [
+      action("stop", "Stop", [motor("stop")], { id: "uln-01-stop" }),
+      action("start", "Start", [motor("start")], { id: "uln-02-start" }),
+      action("position", "Vai a posizione", [motor("position")], {
+        id: "uln-03-position",
+      }),
+    ],
+    channels: [
+      {
+        ...output("angolo", "Posizione · 0–360°", "number"),
+        direction: "write",
+        unit: "°",
+      },
+    ],
+    runtimeUnavailable: [],
+  });
+  return {
+    ...base,
+    id: "uln2003-28byj48",
+    status: "ready",
+    updatedAt: Date.UTC(2026, 9, 18),
+    gpioHardware: { kind: "motor", power: "5", ground: true, extraTerminals: [] },
+    variables: [
+      {
+        id: "uln-position",
+        name: "posizione",
+        label: "Posizione",
+        valueType: "number",
+        defaultValue: "0",
+      },
+    ],
+    flowInterfaces: [
+      {
+        id: "uln-position-input",
+        type: "sample_external",
+        fromChannelId: "angolo",
+        into: "posizione",
+        valueType: "number",
+        widthBytes: 8,
+        byteOrder: "le",
+        inputMode: "data",
+        label: "Posizione · 0–360°",
+      },
+    ],
+  };
+}
+
+/** DHT22 powered from a dedicated GPIO; DATA and power are separate resources. */
+export function catalogDht22Driver(): DeviceRecipeDraft {
+  const readStep: DeviceRecipeOp = { id: "dht-read", type: "dht22_read", temperatureInto: "temperatura_raw", humidityInto: "umidita_raw" };
+  const draft = gpioDraft({
+    name: "DHT22", hardwareKind: "sensor", deviceCategory: "sensor",
+    description: "Temperatura su richiesta: DATA A0, alimentazione A1 HIGH, GND comune. Il fronte di salita o false→true avvia la lettura.",
+    signals: [digitalIn("DATA", "DATA", { activeLow: false, pull: "none" }), digitalOut("POWER", "Alimentazione 3,3 V")],
+    init: [{ id: "dht-init", type: "dht22_power", on: true }],
+    commands: [
+      action("leggi", "Leggi temperatura", [
+        { id: "dht-trigger", type: "sample_external", inputMode: "trigger", fromChannelId: "read-trigger", into: "richiesta_lettura", valueType: "bool" },
+        readStep,
+        { id: "dht-convert", type: "dht22_convert", input: "temperatura_raw", into: "temperatura", format: "float" },
+        emit("temperature", "temperatura"),
+      ], { id: "00-read" }),
+    ],
+    channels: [
+      { id: "read-trigger", label: "Leggi temperatura", unit: "", quantity: "digital", direction: "write", dataType: "bool", inputMode: "trigger" },
+      { id: "temperature", label: "Temperatura", unit: "°C", quantity: "temperature", direction: "read", dataType: "number" },
+    ], runtimeUnavailable: [],
+  });
+  return { ...draft, id: "gpio-dht22", dht22Module: true, dht22Version: 2, status: "ready", sampleIntervalMs: 0,
+    gpioHardware: { ...draft.gpioHardware!, ground: true }, updatedAt: 1792353600000 };
+}
+
+/** Upgrade the original unformatted DHT22 template while keeping unit identity. */
+export function upgradeDht22Driver(draft: DeviceRecipeDraft): DeviceRecipeDraft {
+  return draft.dht22Module && !draft.dht22Version
+    ? { ...catalogDht22Driver(), id: draft.id, name: draft.name }
+    : draft;
 }

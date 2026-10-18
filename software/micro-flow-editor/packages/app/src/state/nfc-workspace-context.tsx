@@ -90,8 +90,8 @@ function storedHistory(): TagScan[] {
               typeof s.id === "string" &&
               typeof s.uid === "string" &&
               !!s.target &&
-            !!s.decoded &&
-            !s.simulated,
+              !!s.decoded &&
+              !s.simulated,
           )
           .slice(0, 100)
       : [];
@@ -101,7 +101,9 @@ function storedHistory(): TagScan[] {
 }
 function getLibrary() {
   try {
-    return mergeBuiltinNfcDrivers(readNfcLibrary(localStorage.getItem(NFC_LIBRARY_KEY)));
+    return mergeBuiltinNfcDrivers(
+      readNfcLibrary(localStorage.getItem(NFC_LIBRARY_KEY)),
+    );
   } catch {
     return mergeBuiltinNfcDrivers(emptyNfcLibrary());
   }
@@ -140,22 +142,6 @@ function nfcProtocolErrorMessage(error: unknown): string {
   return text;
 }
 
-function readerNodeIds(
-  rows: readonly {
-    readonly viaCan: unknown;
-    readonly attachedBackbones: readonly {
-      readonly productKind?: string;
-      readonly nodeId: number;
-    }[];
-  }[],
-): number[] {
-  return rows.flatMap((row) => {
-    if (row.viaCan) return [];
-    return row.attachedBackbones.flatMap((board, index) =>
-      board.productKind === "nfc-reader" ? [index, board.nodeId] : [],
-    );
-  });
-}
 export function NfcWorkspaceProvider({
   children,
   bridge: suppliedBridge,
@@ -165,15 +151,22 @@ export function NfcWorkspaceProvider({
 }) {
   const { session, execute, navigate, revision, activeScreen } = useSession();
   const { observations, pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
-  const { getClient, rows, lockTransport, unlockTransport } = useCoreSessions();
-  const bridge = useMemo(() => suppliedBridge ?? createNfcMemoryBridge(binding => getClient(binding as CoreBindingId)), [suppliedBridge, getClient]);
+  const { getClient, lockTransport, unlockTransport } = useCoreSessions();
+  const bridge = useMemo(
+    () =>
+      suppliedBridge ??
+      createNfcMemoryBridge((binding) => getClient(binding as CoreBindingId)),
+    [suppliedBridge, getClient],
+  );
   const [library, setLibrary] = useState(getLibrary);
   const [history, setHistory] = useState(storedHistory);
   const [selectedId, setSelectedId] = useState<string>();
   const [popup, setPopup] = useState<TagScan>();
   const [toast, setToast] = useState<TagScan>();
   const [busy, setBusy] = useState(false);
-  const [writeSession, setWriteSession] = useState<{ readonly uid: string } | null>(null);
+  const [writeSession, setWriteSession] = useState<{ readonly uid: string } | null>(
+    null,
+  );
   const writeLockRef = useRef(false);
   const writeAbortRef = useRef<AbortController | null>(null);
   const lock = useRef(false);
@@ -287,8 +280,7 @@ export function NfcWorkspaceProvider({
           name: isSlm1Tag(tag) ? moduleTypeLabel(tag) : "Tag rilevato",
           decoded: {
             kind: isSlm1Tag(tag) ? "legacy" : "unknown",
-            reason:
-              "Avvicina il tag e scegli Leggi per visualizzarne il contenuto.",
+            reason: "Avvicina il tag e scegli Leggi per visualizzarne il contenuto.",
           },
           writable: false,
           read: false,
@@ -519,11 +511,10 @@ export function NfcWorkspaceProvider({
       if (value) setOperationNote("Invio della prima pagina NFC…");
       const memory = value
         ? await writeAndVerifyTag(port, target, value, previous, {
-            deadlineMs: 20000,
-            skipPreRead: true,
+            deadlineMs: 30000,
             signal: writeAbortRef.current?.signal,
           })
-        : await nfcDeadline((signal) => port.read(target, signal), 60000);
+        : await nfcDeadline((signal) => port.read(target, signal), 12000);
       if (memory.uid !== scan.uid) throw new Error("Il tag è cambiato.");
       updateMemory(scan, memory, !!value);
       if (scan.simulated) {
@@ -561,25 +552,22 @@ export function NfcWorkspaceProvider({
 
   function liveMemoryTarget(scan: TagScan, exclusive = false): NfcTarget {
     if (scan.simulated) return scan.target;
-    const alternateNodeIds = readerNodeIds(rows);
-    for (const [bindingId, tags] of observations) {
-      for (const tag of tags) {
-        if (tagUid(tag.uid) !== scan.uid) continue;
-        return {
-          bindingId,
-          nodeId: tag.nodeId ?? 0,
-          antenna: nfcMemoryAntenna(tag.portId),
-          expectedUid: scan.uid,
-          ...(alternateNodeIds.length > 0 ? { alternateNodeIds } : {}),
-          ...(exclusive ? { exclusive: true } : {}),
-        };
-      }
-    }
+    const matches = (
+      observations.get(scan.target.bindingId as CoreBindingId) ?? []
+    ).filter((tag) => tagUid(tag.uid) === scan.uid);
+    const exact = matches.find(
+      (tag) => tag.nodeId === scan.target.nodeId && tag.portId === scan.target.antenna,
+    );
+    const tag = exact ?? (matches.length === 1 ? matches[0] : undefined);
     return {
       ...scan.target,
-      antenna: nfcMemoryAntenna(scan.target.antenna),
-      ...(alternateNodeIds.length > 0 ? { alternateNodeIds } : {}),
-      ...(exclusive ? { exclusive: true } : {}),
+      ...(tag
+        ? {
+            nodeId: tag.nodeId ?? scan.target.nodeId,
+            antenna: nfcMemoryAntenna(tag.portId),
+          }
+        : {}),
+      exclusive,
     };
   }
   function createDriver(scan: TagScan, name: string) {

@@ -16,17 +16,7 @@
 
 LOG_MODULE_REGISTER(spaghetti_on_boot, CONFIG_SPAGHETTI_ON_BOOT_LOG_LEVEL);
 
-/*
- * On Boot has no hardware of its own to own: required_capabilities = 0 means
- * describe_endpoint alone decides the Port transport actually acquired (see
- * module_manager.c's transport_for_endpoint()). 0x00 is the I2C General Call
- * address, reserved by the I2C specification and never assigned to a real
- * peripheral, so binding here can never collide with a genuine I2C device —
- * and because I2C is a shareable transport, other Modules keep using the same
- * Port. On Boot never actually issues an I2C transfer.
- */
-#define SPAGHETTI_ON_BOOT_RESERVED_I2C_ADDRESS 0x00U
-
+/* Software event sources never acquire a physical bus or alter its pinmux. */
 struct spaghetti_on_boot_context {
 	bool running;
 };
@@ -69,9 +59,8 @@ static int on_boot_describe_endpoint(const struct spaghetti_property_set *config
 	}
 
 	const struct spaghetti_module_endpoint endpoint = {
-		.kind = SPAGHETTI_ENDPOINT_I2C_ADDRESS,
-		.value_size = 1U,
-		.value = {SPAGHETTI_ON_BOOT_RESERVED_I2C_ADDRESS},
+		.kind = SPAGHETTI_ENDPOINT_LOGICAL,
+		.value_size = 0U,
 	};
 
 	*out = endpoint;

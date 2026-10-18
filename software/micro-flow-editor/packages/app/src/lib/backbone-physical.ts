@@ -609,7 +609,7 @@ function pushBusInstance(
 }
 
 /** On-board STATUS indicator — fixed MCU pad, not a Module Function pin (IO11). */
-export const STATUS_LED_GPIO = 11;
+export const STATUS_LED_GPIO = 10;
 export const STATUS_LED_LABEL = "STATUS LED";
 
 /** True when Module Function modes already expose this bus/peripheral. */

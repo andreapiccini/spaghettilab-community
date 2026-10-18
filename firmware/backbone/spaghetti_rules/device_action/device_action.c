@@ -11,6 +11,8 @@ struct action_context {
   uint8_t mode;
   bool previous, has_constant;
   uint64_t constant;
+  uint64_t previous_value;
+  bool has_previous_value;
 };
 #define UINT_FIELD(id, label, max, required)                                   \
   {.field_id = id,                                                             \
@@ -55,7 +57,7 @@ static const struct spaghetti_field_descriptor fields[] = {
     UINT_FIELD(5, "source_field", UINT16_MAX, 0),
     UINT_FIELD(6, "argument_id", 8, 0),
     UINT_FIELD(7, "constant", UINT64_MAX, 0),
-	UINT_FIELD(8, "trigger", 4, 0),
+	UINT_FIELD(8, "trigger", 5, 0),
 };
 static const struct spaghetti_schema_descriptor schema = {
     .schema_id = "spaghetti.action.config",
@@ -141,6 +143,11 @@ static int on_record(void *opaque, const struct spaghetti_record *record,
       return -ENOTSUP;
   }
 	}
+  uint64_t numeric_value = value && value->type == SPAGHETTI_VALUE_UINT64 ? value->data.unsigned_integer :
+    value && value->type == SPAGHETTI_VALUE_INT64 ? (uint64_t)value->data.signed_integer : level;
+  if (context->mode == 5 && (!value || (value->type != SPAGHETTI_VALUE_BOOL &&
+      value->type != SPAGHETTI_VALUE_INT64 && value->type != SPAGHETTI_VALUE_UINT64))) return -EINVAL;
+  if (context->mode == 5 && context->has_previous_value && context->previous_value == numeric_value) return 0;
   bool fires =
 		context->mode == 0 || context->mode >= 3 ||
 		(context->mode == 1 ? level && !context->previous : !level && context->previous);
@@ -165,8 +172,8 @@ static int on_record(void *opaque, const struct spaghetti_record *record,
 		}
     argument->field_id = context->argument;
   }
-	action->command.update_only = context->mode >= 3;
-	action->command.trigger_pending = context->mode <= 2;
+	action->command.update_only = context->mode == 3 || context->mode == 4;
+	action->command.trigger_pending = context->mode <= 2 || context->mode == 5;
   int err = emit(action, user);
 	if (err == 0 && context->mode == 4) {
 		action->command.update_only = false;
@@ -179,6 +186,7 @@ static int on_record(void *opaque, const struct spaghetti_record *record,
   k_free(action);
 	if (err == 0) {
     context->previous = level;
+    if (context->mode == 5) { context->previous_value = numeric_value; context->has_previous_value = true; }
 	}
   return err;
 }

@@ -1,13 +1,10 @@
 /**
  * Mirrors `struct spaghetti_device_profile_field` (`device_profile.h`).
- * "MVP supports INT64 and UINT64 only" — this package does not offer a
- * `bool`/`text`/`bytes` sample field type, because the firmware struct
- * itself doesn't yet. There is no separate fixed-point scale/exponent field
- * on the wire struct either: a fixed-point reading is produced by the
- * instruction sequence itself (e.g. `SHIFT`/`MASK` before `EMIT_FIELD`), not
- * declared as field metadata — this package does not invent one.
+ * Samples support INT64, UINT64, finite FLOAT and TEXT. EMIT_DECIMAL converts
+ * signed 16-bit tenths into degrees at the publishing boundary; integer fields
+ * retain their original wire representation.
  */
-export type SampleFieldType = "int64" | "uint64";
+export type SampleFieldType = "int64" | "uint64" | "float" | "text";
 
 /** `SPAGHETTI_FIELD_NAME_SIZE` (24) includes the terminating NUL — 23 usable bytes. */
 export const FIELD_NAME_MAX_LENGTH = 23;

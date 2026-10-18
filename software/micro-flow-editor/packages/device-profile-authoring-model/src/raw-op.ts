@@ -120,6 +120,28 @@ export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
         imm0: instruction.value ? 1 : 0,
         imm1: instruction.channel ?? 0,
       };
+    case "EMIT_DECIMAL": return { ...base, opcode: DeviceProfileOpcode.EMIT_DECIMAL, srcA: instruction.src, dst: instruction.fieldId, imm0: instruction.text ? 1 : 0 };
+    case "DHT22_POWER": return { ...base, opcode: DeviceProfileOpcode.DHT22_POWER, imm0: instruction.dataChannel, imm1: instruction.powerChannel, imm2: instruction.on ? 1 : 0 };
+    case "DHT22_READ": return { ...base, opcode: DeviceProfileOpcode.DHT22_READ, dst: instruction.dst, srcA: instruction.humidityDst, imm0: instruction.dataChannel, imm1: instruction.powerChannel, imm2: instruction.queued ? 1 : 0 };
+    case "RGB_PROGRAM": return { ...base, opcode: DeviceProfileOpcode.RGB_PROGRAM, imm0: instruction.offset, imm1: instruction.length, imm2: instruction.channels, imm3: instruction.inverted ? 1 : 0 };
+    case "STEPPER":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.STEPPER,
+        srcA: instruction.src,
+        imm0: instruction.command,
+        imm1: instruction.channels,
+        imm2: instruction.intervalMs,
+        imm3: instruction.stepsPerRevolution,
+      };
+    case "GPIO_PULSE":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.GPIO_PULSE,
+        imm0: instruction.channel,
+        imm1: instruction.milliseconds,
+        imm2: (instruction.activeHigh ? 1 : 0) | (instruction.restoreHigh ? 2 : 0),
+      };
     case "GPIO_SET_VALUE":
       return {
         ...base,
@@ -399,6 +421,27 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
         op: "GPIO_SET",
         value: raw.imm0 !== 0,
         ...(raw.imm1 ? { channel: raw.imm1 } : {}),
+      });
+    case DeviceProfileOpcode.EMIT_DECIMAL: return ok({ op: "EMIT_DECIMAL", src: raw.srcA, fieldId: raw.dst, text: raw.imm0 !== 0 });
+    case DeviceProfileOpcode.DHT22_POWER: return ok({ op: "DHT22_POWER", dataChannel: raw.imm0, powerChannel: raw.imm1, on: raw.imm2 !== 0 });
+    case DeviceProfileOpcode.DHT22_READ: return ok({ op: "DHT22_READ", dst: raw.dst, humidityDst: raw.srcA, dataChannel: raw.imm0, powerChannel: raw.imm1, ...(raw.imm2 ? { queued: true } : {}) });
+    case DeviceProfileOpcode.RGB_PROGRAM: return ok({ op: "RGB_PROGRAM", offset: raw.imm0, length: raw.imm1, channels: raw.imm2, inverted: raw.imm3 !== 0 });
+    case DeviceProfileOpcode.STEPPER:
+      return ok({
+        op: "STEPPER",
+        command: raw.imm0,
+        channels: raw.imm1,
+        intervalMs: raw.imm2,
+        stepsPerRevolution: raw.imm3,
+        src: raw.srcA,
+      });
+    case DeviceProfileOpcode.GPIO_PULSE:
+      return ok({
+        op: "GPIO_PULSE",
+        channel: raw.imm0,
+        milliseconds: raw.imm1,
+        activeHigh: (raw.imm2 & 1) !== 0,
+        restoreHigh: (raw.imm2 & 2) !== 0,
       });
     case DeviceProfileOpcode.GPIO_SET_VALUE:
       return ok({

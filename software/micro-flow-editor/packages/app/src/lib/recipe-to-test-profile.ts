@@ -270,8 +270,20 @@ export function recipePlanToTestProfile(
         initOps: compiled.sampleOps.filter(
           (op) => op.op !== "EMIT_RECORD" && op.op !== "EMIT_FIELD",
         ),
-        sampleOps: [],
-        sampleFields: [],
+        sampleOps: [
+          { op: "LOAD_CONST", dst: 0, length: 1, low: 0, high: 0 },
+          {
+            op: "EMIT_FIELD",
+            src: 0,
+            fieldId: 1,
+            width: 1,
+            byteOrder: "le",
+            signExtend: false,
+            multiplier: 0,
+          },
+          { op: "EMIT_RECORD" },
+        ],
+        sampleFields: [{ fieldId: 1, type: "uint64", name: "raw", unit: "" }],
       },
       skipped: [],
     };

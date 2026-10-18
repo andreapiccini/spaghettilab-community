@@ -287,6 +287,11 @@ int spaghetti_protocol_encode_record_event_payload(
 	uint16_t schema_version,
 	struct spaghetti_protocol_payload *out);
 
+/** Encode an event with the owned typed values and completed action identifier. */
+int spaghetti_protocol_encode_record_values_event(
+    const struct spaghetti_record *record,
+    struct spaghetti_protocol_payload *out);
+
 /**
  * @brief Encode a bounded status event payload.
  *

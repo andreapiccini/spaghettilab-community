@@ -48,6 +48,10 @@ export const STEP_CATEGORIES: readonly StepCategory[] = [
 ];
 
 export const OP_LABEL: Record<Instruction["op"], string> = {
+  EMIT_DECIMAL: "Pubblica temperatura in gradi",
+  DHT22_POWER: "Alimentazione DHT22",
+  DHT22_READ: "Leggi DHT22",
+  RGB_PROGRAM: "Programma LED RGB",
   MESSAGE_LOAD: "Load message",
   MESSAGE_PATCH: "Patch message",
   I2C_MESSAGE_WRITE: "I2C message write",
@@ -62,6 +66,8 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
   GPIO_GET: "GPIO get",
   GPIO_SET: "GPIO set",
   GPIO_SET_VALUE: "GPIO da variabile",
+  GPIO_PULSE: "Impulso GPIO",
+  STEPPER: "Motore ULN2003",
   ADC_READ: "ADC read",
   DELAY_BOUNDED: "Delay (bounded)",
   WAIT_FIELD_MASK: "Wait field mask",
@@ -83,6 +89,23 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
 };
 
 const FIELDS: Record<Instruction["op"], readonly FieldSpec[]> = {
+  EMIT_DECIMAL: [{ key: "src", label: "Sorgente", kind: "tempSlot" }, { key: "fieldId", label: "Uscita", kind: "number" }, { key: "text", label: "Testo con unità", kind: "boolean" }],
+  DHT22_POWER: [{ key: "dataChannel", label: "Canale DATA", kind: "number" }, { key: "powerChannel", label: "Canale alimentazione", kind: "number" }, { key: "on", label: "Acceso", kind: "boolean" }],
+  DHT22_READ: [{ key: "dataChannel", label: "Canale DATA", kind: "number" }, { key: "powerChannel", label: "Canale alimentazione", kind: "number" }, { key: "dst", label: "Temperatura", kind: "tempSlot" }, { key: "humidityDst", label: "Umidità", kind: "tempSlot" }],
+  RGB_PROGRAM: [{ key: "offset", label: "Offset", kind: "number" }, { key: "length", label: "Byte", kind: "number" }, { key: "channels", label: "Canali RGB", kind: "number" }, { key: "inverted", label: "Anodo comune", kind: "boolean" }],
+  STEPPER: [
+    { key: "command", label: "Comando (0 Stop, 1 Start, 2 Posizione)", kind: "number" },
+    { key: "channels", label: "Mappa IN1–IN4", kind: "number" },
+    { key: "intervalMs", label: "Intervallo passo (ms)", kind: "number" },
+    { key: "stepsPerRevolution", label: "Mezzi passi per giro", kind: "number" },
+    { key: "src", label: "Posizione (temp)", kind: "tempSlot" },
+  ],
+  GPIO_PULSE: [
+    { key: "channel", label: "Canale", kind: "number" },
+    { key: "milliseconds", label: "Durata (ms)", kind: "number" },
+    { key: "activeHigh", label: "Livello attivo HIGH", kind: "boolean" },
+    { key: "restoreHigh", label: "Ripristino HIGH", kind: "boolean" },
+  ],
   GPIO_SET_VALUE: [
     { key: "src", label: "Sorgente", kind: "tempSlot" },
     { key: "channel", label: "Canale", kind: "number" },
@@ -256,6 +279,27 @@ export function fieldsFor(op: Instruction["op"]): readonly FieldSpec[] {
 /** A minimal, valid default instance for each opcode — every numeric field starts at a small, real, executable value (never `NaN`/negative where the firmware would reject it). */
 export function defaultInstruction(op: Instruction["op"]): Instruction {
   switch (op) {
+    case "EMIT_DECIMAL": return { op, src: 0, fieldId: 1, text: false };
+    case "DHT22_POWER": return { op, dataChannel: 0, powerChannel: 1, on: true };
+    case "DHT22_READ": return { op, dataChannel: 0, powerChannel: 1, dst: 0, humidityDst: 1 };
+    case "RGB_PROGRAM": return { op, offset: 0, length: 6, channels: 36, inverted: false };
+    case "STEPPER":
+      return {
+        op: "STEPPER",
+        command: 0,
+        channels: 228,
+        intervalMs: 3,
+        stepsPerRevolution: 4096,
+        src: 0,
+      };
+    case "GPIO_PULSE":
+      return {
+        op,
+        channel: 0,
+        milliseconds: 100,
+        activeHigh: true,
+        restoreHigh: false,
+      };
     case "MESSAGE_LOAD":
       return { op, offset: 0, length: 1 };
     case "MESSAGE_PATCH":

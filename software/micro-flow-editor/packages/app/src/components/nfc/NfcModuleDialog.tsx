@@ -1,3 +1,4 @@
+import { ModulesScreen } from "../modules/ModulesScreen.js";
 import {
   runtimeDigitalOutputPins,
   functionPinGrid,
@@ -78,6 +79,7 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
       (recognized?.driver.draft.binding.bus === "gpio" ? "5V" : ""),
   );
   const [gpioValue, setGpioValue] = useState("");
+  const [importPins, setImportPins] = useState(false);
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -169,6 +171,7 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
   }
   function confirm() {
     if (!execute || !driver || !target) return;
+    if (driver.draft.rgbModule || driver.draft.dht22Module) { setImportPins(true); return; }
     setError("");
     const volts = voltage || "5V";
     try {
@@ -197,6 +200,7 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
       setStep(1);
     }
   }
+  if (importPins && driver && target) return <ModulesScreen nfcImport={{ driver: driver.draft, uid: scan.uid, bindingId: target.bindingId, onClose: nfc.dismissModule }} />;
   return (
     <div className="nfc-overlay">
       <div
@@ -269,9 +273,10 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
                   Aggiungi una Backbone in Discover prima di caricare il modulo.
                 </p>
               )}
-              {driver?.draft.binding.bus === "gpio" && (
+              {driver?.draft.binding.bus === "gpio" && !driver.draft.rgbModule && !driver.draft.dht22Module && (
                 <GpioPinField pins={gpioPins} value={gpioValue} onChange={setGpioValue} />
               )}
+              {driver?.draft.rgbModule && <p className="nfc-info mt-4">Il modulo richiede tre uscite PWM: rosso (R), verde (G) e blu (B). Nel prossimo passaggio verifichi i pin e gli eventuali conflitti.</p>}
               {error && (
                 <p role="alert" className="nfc-info nfc-error mt-4">
                   {error}
@@ -361,7 +366,7 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
                   <option value="5V">5 V · segnali compatibili con 3.3 V</option>
                 </select>
               </label>
-              {driver?.draft.binding.bus === "gpio" && (
+              {driver?.draft.binding.bus === "gpio" && !driver.draft.rgbModule && !driver.draft.dht22Module && (
                 <GpioPinField pins={gpioPins} value={gpioValue} onChange={setGpioValue} />
               )}
               <div className="nfc-actions">
@@ -381,7 +386,8 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
                   disabled={!driver || !target || !voltage}
                   onClick={() => {
                     associate();
-                    setStep(1);
+                    if (driver?.draft.rgbModule || driver?.draft.dht22Module) setImportPins(true);
+                    else setStep(1);
                   }}
                 >
                   Carica nel canvas
@@ -394,7 +400,7 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
             <p className="text-sm text-ink-muted">
               Collega {name} alla Backbone selezionata, poi conferma.
             </p>
-            {driver?.draft.binding.bus === "gpio" && (
+            {driver?.draft.binding.bus === "gpio" && !driver.draft.rgbModule && !driver.draft.dht22Module && (
               <GpioPinField pins={gpioPins} value={gpioValue} onChange={setGpioValue} />
             )}
             {wiring ? (

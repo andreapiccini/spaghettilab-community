@@ -67,9 +67,13 @@ export function nfcWiring(
     const chosen =
       gpioPins.find(
         (pin) =>
-          pin.boardKey === preferredGpio?.boardKey && pin.channel === preferredGpio.channel,
+          pin.boardKey === preferredGpio?.boardKey &&
+          pin.channel === preferredGpio.channel,
       ) ?? gpioPins[0]!;
-    const pin = formatPinLabel(modeIndexToPinId(chosen.channel, chosen.variant), chosen.variant);
+    const pin = formatPinLabel(
+      modeIndexToPinId(chosen.channel, chosen.variant),
+      chosen.variant,
+    );
     const signal = draft.binding.gpioSignals[0]?.name ?? "RELAY";
     return {
       variant: chosen.variant,
@@ -134,11 +138,13 @@ export function installNfcDriver(
   version: string,
   voltage: string,
   preferredGpio?: { readonly boardKey: string; readonly channel: number },
+  preparedWiring?: NfcWiring,
 ): ProjectV1 {
   const volts = ["3.3V", "5V"].includes(voltage) ? voltage : "5V";
   let wiring: NfcWiring | undefined;
   try {
-    wiring = nfcWiring(project, bindingId, driver, volts, preferredGpio);
+    wiring =
+      preparedWiring ?? nfcWiring(project, bindingId, driver, volts, preferredGpio);
   } catch (error) {
     if (driver.binding.bus !== "gpio") throw error;
   }
@@ -206,6 +212,7 @@ export function installNfcDriver(
   const nodeId = `nfc-block-${uid}`;
   const module = {
     ...createModuleFromRecipe(recipe),
+    label: driver.name,
     id: `nfc-module-${uid}`,
     actions: recipes,
     graphNodeId: nodeId,
@@ -250,6 +257,7 @@ export function installNfcDriver(
             bindingId,
             moduleId: module.id,
             driverId: driver.id,
+            voltage: volts,
             version,
             boardKey: wiring?.boardKey ?? `${bindingId}`,
           },

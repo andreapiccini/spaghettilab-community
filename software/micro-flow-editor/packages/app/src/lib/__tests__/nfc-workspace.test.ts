@@ -136,22 +136,24 @@ describe("NFC memory and protected writing", () => {
   it("rejects immediately when the caller aborts", async () => {
     const controller = new AbortController();
     let signal: AbortSignal | undefined;
-    const work = nfcDeadline((s) => {
-      signal = s;
-      return new Promise(() => {});
-    }, 8000, controller.signal);
+    const work = nfcDeadline(
+      (s) => {
+        signal = s;
+        return new Promise(() => {});
+      },
+      8000,
+      controller.signal,
+    );
     controller.abort();
     await expect(work).rejects.toThrow("interrotta");
     expect(signal?.aborted).toBe(true);
   });
-  it("writes without a pre-read when skipPreRead is set", async () => {
+  it("always verifies the complete image after writing", async () => {
     const reader = new SimulatedNfcReader();
     reader.presentTag();
     const spy = vi.spyOn(reader, "read");
-    const result = await writeAndVerifyTag(reader, target, tag, undefined, {
-      skipPreRead: true,
-    });
-    expect(spy).not.toHaveBeenCalled();
+    const result = await writeAndVerifyTag(reader, target, tag);
+    expect(spy).toHaveBeenCalledTimes(2);
     expect(decodeModuleTag(result.bytes)).toEqual({ kind: "module", value: tag });
   });
   it("retains simulated memory across physical presentations", async () => {
@@ -181,10 +183,10 @@ describe("NFC memory target", () => {
     expect(nfcMemoryAntenna(0)).toBe(0);
     expect(nfcMemoryAntenna(1)).toBe(1);
     expect(nfcMemoryAntenna(2)).toBe(2);
-    expect(nfcPageAntennaCandidates(0)).toEqual([0, 1]);
+    expect(nfcPageAntennaCandidates(0)).toEqual([]);
   });
 
-  it("tries uint8 node ids before 24-bit CAN addresses", () => {
+  it("keeps the full observed CAN address", () => {
     expect(
       nfcPageNodeCandidates({
         bindingId: "master",
@@ -193,7 +195,7 @@ describe("NFC memory target", () => {
         expectedUid: target.expectedUid,
         alternateNodeIds: [1, 0xe18030],
       }),
-    ).toEqual([0, 1, 0xe18030]);
+    ).toEqual([0xe18030]);
   });
 
   it("skips the automatic node 0 search in exclusive write", () => {
@@ -206,7 +208,7 @@ describe("NFC memory target", () => {
         alternateNodeIds: [1, 0xe18030],
         exclusive: true,
       }),
-    ).toEqual([1, 0xe18030]);
+    ).toEqual([0xe18030]);
   });
 
   it("treats the same UID as present after the antenna/node is corrected", () => {
@@ -231,8 +233,12 @@ describe("NFC memory target", () => {
   });
 });
 describe("library association without chip write", () => {
-  it("binds the known relay tag in the builtin library", () => {
-    const library = mergeBuiltinNfcDrivers(emptyNfcLibrary());
+  it("recognizes an explicitly associated relay UID without inventing chip contents", () => {
+    const library = associateTagInLibrary(
+      mergeBuiltinNfcDrivers(emptyNfcLibrary()),
+      RELAY_MODULE_TAG_UID,
+      builtinRelayModule(),
+    );
     expect(library.units).toContainEqual({
       uid: RELAY_MODULE_TAG_UID,
       modelId: GPIO_RELAY_MODEL_ID,
@@ -267,7 +273,9 @@ describe("library association without chip write", () => {
       ),
     ).toEqual([{ portId: 1, label: "Relè", uid: RELAY_MODULE_TAG_UID }]);
     expect(recognizedLibraryModule(scan, library)?.driver.id).toBe("gpio-relay");
-    expect(recognizedLibraryModule({ ...scan, uid: "04DEADBEEF0000" }, library)).toBeUndefined();
+    expect(
+      recognizedLibraryModule({ ...scan, uid: "04DEADBEEF0000" }, library),
+    ).toBeUndefined();
   });
 
   it("associates another UID without changing chip memory", () => {
@@ -276,10 +284,7 @@ describe("library association without chip write", () => {
       "04AABBCCDDEEFF",
       builtinRelayModule(),
     );
-    expect(library.units.map((unit) => unit.uid)).toEqual([
-      RELAY_MODULE_TAG_UID,
-      "04AABBCCDDEEFF",
-    ]);
+    expect(library.units.map((unit) => unit.uid)).toEqual(["04AABBCCDDEEFF"]);
   });
 });
 describe("global versioned driver library", () => {
@@ -407,4 +412,16 @@ describe("NFC presentation events", () => {
       diffTagPresentations(new Set(), [scan, scan, antenna, master]).added,
     ).toHaveLength(3);
   });
+});
+
+it("does not treat the same UID on a different Master as this reader's tag", () => {
+  const scan = { target, uid: target.expectedUid, simulated: false };
+  expect(
+    tagIsPresent(
+      scan,
+      new Set([
+        `real:another-master:${target.nodeId}:${target.antenna}:${target.expectedUid}`,
+      ]),
+    ),
+  ).toBe(false);
 });

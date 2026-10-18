@@ -12,7 +12,11 @@ function wrap(node: ReactNode): ReactNode {
   return createElement(
     LocaleProvider,
     null,
-    createElement(SessionProvider, null, createElement(PortProtocolProvider, null, node)),
+    createElement(
+      SessionProvider,
+      null,
+      createElement(PortProtocolProvider, null, node),
+    ),
   );
 }
 
@@ -31,7 +35,7 @@ describe("NodeInspector square wave", () => {
           existingNodes: [{ layer: "device-processing", id: "sq", data }],
           existingEdges: [],
           nodeLabel: (id) => id,
-          knownModuleNodeIds: new Set(),
+          knownModuleNodeIds: new Set<string>(),
           onSave: () => undefined,
           onClose: () => undefined,
         }),

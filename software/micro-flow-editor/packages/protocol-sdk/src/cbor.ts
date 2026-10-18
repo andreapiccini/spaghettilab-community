@@ -3,8 +3,8 @@
  * firmware's zcbor-based Protocol V1 actually uses: unsigned/negative
  * integers (major type 0/1, up to 64 bits), byte strings, UTF-8 text
  * strings, definite-length arrays/maps, and the two boolean simple values.
- * No floats, no tags, no indefinite-length items, no bignums — the firmware
- * never emits them (see software/reference or the S021 implementation note
+ * Finite float32/64 samples are supported; no tags or bignums. The firmware
+ * uses a deliberately bounded subset (see the S021 implementation note
  * for the research this is based on), so a general-purpose CBOR library
  * would accept/produce a strictly larger surface than this protocol allows.
  * Encoding is always canonical (RFC 8949 §4.2.1: shortest-possible integer
@@ -145,6 +145,7 @@ export function encodeArray(items: readonly Uint8Array[]): Uint8Array {
 }
 
 export type CborValue =
+  | { readonly kind: "float"; readonly value: number }
   | { readonly kind: "uint"; readonly value: bigint }
   | { readonly kind: "int"; readonly value: bigint }
   | { readonly kind: "bytes"; readonly value: Uint8Array }
@@ -254,6 +255,13 @@ export class CborReader {
         return { kind: "map", value: map };
       }
       case MAJOR_SIMPLE:
+        if (additionalInfo === 27 || additionalInfo === 26) {
+          const bytes = this.readBytes(additionalInfo === 27 ? 8 : 4);
+          const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+          const value = additionalInfo === 27 ? view.getFloat64(0, false) : view.getFloat32(0, false);
+          if (!Number.isFinite(value)) throw new ProtocolCodecError("Non-finite CBOR float");
+          return { kind: "float", value };
+        }
         if (additionalInfo === 20) return { kind: "bool", value: false };
         if (additionalInfo === 21) return { kind: "bool", value: true };
         if (additionalInfo === 22) return { kind: "null" };
@@ -262,6 +270,15 @@ export class CborReader {
         throw new ProtocolCodecError(`unsupported CBOR major type ${majorType}`);
     }
   }
+}
+
+/** Explicit numeric samples; integer protocol fields continue using encodeInt. */
+export function encodeFloat(value: number): Uint8Array {
+  if (!Number.isFinite(value)) throw new ProtocolCodecError("Non-finite CBOR float");
+  const bytes = new Uint8Array(9);
+  bytes[0] = 0xfb;
+  new DataView(bytes.buffer).setFloat64(1, value, false);
+  return bytes;
 }
 
 export function decodeOne(bytes: Uint8Array): CborValue {

@@ -392,3 +392,26 @@ describe("APPLY_CONFIG failure diagnostics", () => {
     },
   );
 });
+
+
+describe("stalled transport writes", () => {
+  it("times out without retrying a write that never settles", async () => {
+    const transport = new FakeTransport();
+    const send = vi.spyOn(transport, "send").mockImplementation(() => new Promise(() => {}));
+    const client = new SpaghettiClient(transport, { defaultTimeoutMs: 100 });
+    const result = expect(client.getStatus()).rejects.toMatchObject({ code: "TIMEOUT" });
+    await vi.advanceTimersByTimeAsync(101);
+    await result;
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+  it("allows cancelling while the transport is still writing", async () => {
+    const transport = new FakeTransport();
+    vi.spyOn(transport, "send").mockImplementation(() => new Promise(() => {}));
+    const client = new SpaghettiClient(transport);
+    const abort = new AbortController();
+    const result = expect(client.getStatus(abort.signal)).rejects.toMatchObject({ code: "CANCELLED" });
+    abort.abort();
+    await result;
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});

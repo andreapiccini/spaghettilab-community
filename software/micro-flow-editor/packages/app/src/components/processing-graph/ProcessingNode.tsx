@@ -1,14 +1,41 @@
+import { ManualTriggerControl } from "./ManualTriggerControl.js";
+import { DataViewerValue } from "./DataViewerValue.js";
+import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { CSSProperties } from "react";
-import { Cable, Cpu, GitBranch, Palette, Power, Thermometer, ToggleLeft } from "lucide-react";
+import {
+  ListOrdered,
+  Cable,
+  Cpu,
+  GitBranch,
+  Palette,
+  Power,
+  Thermometer,
+  ToggleLeft,
+} from "lucide-react";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
 import { FLOW_START_COLOR } from "./block-visuals.js";
-import { lineHighAtElapsed, lineHighAtTick, waveformPlateaus, type ToggleMode } from "./dry-run-preview.js";
+import {
+  lineHighAtElapsed,
+  lineHighAtTick,
+  waveformPlateaus,
+  type ToggleMode,
+} from "./dry-run-preview.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
-import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT, NODE_WIDTH } from "./layout-constants.js";
+import {
+  FLOW_START_SIZE,
+  IF_FOOTER_HEIGHT,
+  NODE_HEIGHT,
+  NODE_WIDTH,
+} from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
-import { nodeShellRadius, SOURCE_HANDLE_STYLE, stackedHandleTop, type PortKind } from "./node-ports.js";
+import {
+  nodeShellRadius,
+  SOURCE_HANDLE_STYLE,
+  stackedHandleTop,
+  type PortKind,
+} from "./node-ports.js";
 import type { ProcessingNodeUiData } from "./to-nodes.js";
 
 /** Slate chrome for hardware bay endpoints — distinct from solid functionality cards. */
@@ -22,27 +49,36 @@ const CHANNEL_ROW_H = 22;
  * Bay hardware: dashed slate shell + CPU badge (vs solid functionality blocks).
  * Multi-channel (Terminal block): named rows with a handle beside each label.
  */
-export function ProcessingNode({ id, data, selected }: NodeProps & { readonly data: ProcessingNodeUiData }) {
+export function ProcessingNode({
+  id,
+  data,
+  selected,
+}: NodeProps & { readonly data: ProcessingNodeUiData }) {
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
   const Icon =
-    data.tileGlyph === "toggle"
-      ? ToggleLeft
-      : data.tileGlyph === "palette"
-        ? Palette
-        : data.tileGlyph === "power"
-          ? Power
-          : data.tileGlyph === "cable"
-            ? Cable
-            : data.tileGlyph === "if"
-              ? GitBranch
-              : data.tileGlyph === "thermometer"
-                ? Thermometer
-                : config.icon;
+    data.tileGlyph === "sequence"
+      ? ListOrdered
+      : data.tileGlyph === "toggle"
+        ? ToggleLeft
+        : data.tileGlyph === "palette"
+          ? Palette
+          : data.tileGlyph === "power"
+            ? Power
+            : data.tileGlyph === "cable"
+              ? Cable
+              : data.tileGlyph === "if"
+                ? GitBranch
+                : data.tileGlyph === "thermometer"
+                  ? Thermometer
+                  : config.icon;
   const inputHandles = data.inputHandles ?? (data.hasInput ? [{ id: "0" }] : []);
   const outputHandles = data.outputHandles ?? (data.hasOutput ? [{ id: "0" }] : []);
-  const ports = { hasInput: inputHandles.length > 0, hasOutput: outputHandles.length > 0 };
+  const ports = {
+    hasInput: inputHandles.length > 0,
+    hasOutput: outputHandles.length > 0,
+  };
   const multiChannel = outputHandles.length > 1 || inputHandles.length > 1;
   const previewOn = data.previewActive === true;
   const isRgb = data.rgbSwatch !== undefined;
@@ -54,15 +90,13 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
   // Never idle-animate color_cycle / breathe / blink — that looked "on" with no input.
   const ledColor = data.ledColor ?? data.rgbSwatch?.color ?? "#F5C518";
   const accent = data.accentColor ?? config.colorVar;
-  const intensity = isLed && data.previewing ? (data.ledIntensity ?? (previewOn && !isRgb ? 1 : 0)) : isRgb ? 0 : undefined;
+  const intensity =
+    isLed && data.previewing
+      ? (data.ledIntensity ?? (previewOn && !isRgb ? 1 : 0))
+      : isRgb
+        ? 0
+        : undefined;
   const ledLit = intensity !== undefined && intensity > 0.08;
-  const tileColor = data.hasError
-    ? "var(--color-error)"
-    : isLed
-      ? intensity !== undefined
-        ? mixLedTowardBlack(ledColor, intensity)
-        : ledColor
-      : accent;
   const cardHeight = data.cardHeight;
   const cardWidth = data.cardWidth ?? NODE_WIDTH;
 
@@ -91,10 +125,25 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             ? `${Math.round(data.tempProbe.celsius)}°C`
             : data.subtitle;
 
+  if (data.manualTrigger) return <div className="group relative rounded-xl border border-border-strong bg-surface shadow-e1" style={{width:cardWidth,height:cardHeight,outline:selected ? "2px solid var(--color-brand-blue)" : undefined}}>
+    <HoverDeleteButton id={id} label="Elimina generatore" />
+    <ManualTriggerControl nodeId={data.domainId} bindingId={data.manualTrigger.bindingId}/>
+    <Handle type="source" position={Position.Right} id="trigger" style={{...SOURCE_HANDLE_STYLE,top:"50%",background:"var(--color-brand-blue)"}} aria-label="Avvia azione"/>
+  </div>;
+  if (data.dataViewer) return <div className="group relative rounded-xl border border-border-strong bg-surface shadow-e1" style={{ width: cardWidth, height: cardHeight, outline: selected ? "2px solid var(--color-brand-blue)" : undefined }}>
+    <HoverDeleteButton id={id} label="Elimina visualizzatore"/>
+    <Handle type="target" position={Position.Left} id="value" style={{ ...SOURCE_HANDLE_STYLE, top: "50%", background: "var(--color-brand-blue)" }} aria-label="Mostra valore" />
+    <DataViewerValue config={data.dataViewer}/>
+  </div>;
   if (isTick) {
-    const fill = data.hasError ? "var(--color-error)" : (data.accentColor ?? FLOW_START_COLOR);
+    const fill = data.hasError
+      ? "var(--color-error)"
+      : (data.accentColor ?? FLOW_START_COLOR);
     return (
-      <div className="group relative" style={{ width: FLOW_START_SIZE, height: FLOW_START_SIZE }}>
+      <div
+        className="group relative"
+        style={{ width: FLOW_START_SIZE, height: FLOW_START_SIZE }}
+      >
         <div
           className="relative h-full w-full rounded-full shadow-e1 transition-[box-shadow,outline]"
           style={{
@@ -130,7 +179,7 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
     );
   }
 
-  const shellRadius = isBay ? "2px" : nodeShellRadius(ports);
+  const shellRadius = isBay ? "2px" : nodeShellRadius();
   const idleOutline = isBay
     ? `1.5px dashed color-mix(in srgb, ${BAY_EDGE} 75%, transparent)`
     : "1px solid var(--color-border)";
@@ -154,64 +203,171 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           corner="right"
         />
         <div
-          className="absolute inset-x-4 inset-y-0 flex flex-col items-center justify-center rounded-sm border-2 bg-surface px-3 text-center shadow-e1"
-          style={{ borderColor: selected ? "var(--color-brand-blue)" : "#64748b" }}
+          className="absolute inset-x-4 inset-y-0 flex items-start gap-3 rounded-lg border bg-surface px-3 py-3 shadow-e1 transition-colors"
+          style={{
+            borderColor: selected ? "var(--color-brand-blue)" : "#cbd2dc",
+            outline: selected ? "1px solid var(--color-brand-blue)" : undefined,
+          }}
         >
-          <Cpu size={15} className="mb-1 text-brand-blue" />
-          <strong className="w-full truncate font-body text-xs text-ink">
-            {data.label}
-          </strong>
-          <span className="w-full truncate font-body text-[10px] text-ink-muted">
-            {data.subtitle}
-          </span>
+          <div className="h-9 w-9 shrink-0" aria-hidden="true">
+            <ModuleArtwork kind={data.hardwareKind ?? "generic"} name={data.label} />
+          </div>
+          <div className="min-w-0 flex-1 pt-1">
+            <strong
+              className="block truncate font-heading text-xs text-ink"
+              title={data.label}
+            >
+              {data.label}
+            </strong>
+            <span className="mt-1 block text-[10px] text-ink-muted">
+              {data.hardwareSummary ??
+                `${inputHandles.length} ${locale === "it" ? "ingressi" : "inputs"}${outputHandles.length ? ` · ${outputHandles.length} ${locale === "it" ? "uscite" : "outputs"}` : ""}`}
+            </span>
+          </div>
         </div>
-        {inputHandles.map((port, index) => (
-          <div key={port.id}>
-            <span
-              className="pointer-events-none absolute left-0 h-px w-4 bg-brand-blue"
-              style={{ top: stackedHandleTop(index, inputHandles.length) }}
-            />
-            <span className="pointer-events-none absolute left-5 top-1 font-body text-[9px] text-brand-blue">
-              {port.label}
-            </span>
-            <Handle
-              type="target"
-              position={Position.Left}
-              id={port.id}
+        <div className="pointer-events-none absolute inset-x-4 top-[54px] border-t border-border" />
+        {[
+          {
+            type: "target" as const,
+            position: Position.Left,
+            handles: inputHandles,
+            color: "#4e75df",
+            side: "left" as const,
+          },
+          {
+            type: "source" as const,
+            position: Position.Right,
+            handles: outputHandles,
+            color: "#36976b",
+            side: "right" as const,
+          },
+        ].map(({ type, position, handles, color, side }) =>
+          handles.map((port, index) => (
+            <div key={`${type}-${port.id}`}>
+              {port.label &&
+                !["esegui", "execute", "start"].includes(port.label.toLowerCase()) && (
+                  <span
+                    className="pointer-events-none absolute max-w-[124px] truncate font-body text-[9px] text-ink-muted"
+                    style={{
+                      [side]: 30,
+                      textAlign: side === "right" ? "right" : "left",
+                      top: 71 + index * 22,
+                      transform: "translateY(-50%)",
+                    }}
+                  >
+                    {port.label}
+                  </span>
+                )}
+              <Handle
+                type={type}
+                position={position}
+                id={port.id}
+                aria-label={port.label ?? (type === "target" ? "Ingresso" : "Uscita")}
+                title={port.label}
+                style={{
+                  ...SOURCE_HANDLE_STYLE,
+                  [side]: 18,
+                  top: 71 + index * 22,
+                  width: 8,
+                  height: 12,
+                  borderRadius: 2,
+                  border: "1.5px solid #454e5d",
+                  background: "#f1f3f7",
+                  boxShadow: `inset ${type === "target" ? "2px" : "-2px"} 0 0 ${color}`,
+                }}
+              />
+            </div>
+          )),
+        )}
+      </div>
+    );
+
+  if (data.tileGlyph === "sequence")
+    return (
+      <div
+        className="group relative"
+        style={{ width: cardWidth }}
+        data-tour-target={`flow-node-${id}`}
+      >
+        <HoverDeleteButton
+          id={id}
+          label={copy.deleteBlock}
+          forceVisible={selected}
+          corner="right"
+        />
+        <div
+          className="relative rounded-lg bg-surface shadow-e1"
+          style={{
+            width: cardWidth,
+            height: cardHeight,
+            outline: data.hasError
+              ? "2px solid var(--color-error)"
+              : selected
+                ? "2px solid var(--color-brand-blue)"
+                : "1px solid var(--color-border-strong)",
+          }}
+        >
+          <div className="flex h-[54px] items-center gap-2 border-b border-border px-3">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg"
               style={{
-                ...SOURCE_HANDLE_STYLE,
-                top: stackedHandleTop(index, inputHandles.length),
-                background: "var(--color-brand-blue)",
+                color: accent,
+                background: `color-mix(in srgb, ${accent} 10%, white)`,
               }}
-            />
+            >
+              <ListOrdered size={23} strokeWidth={1.8} />
+            </div>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-ink">
+                {data.label}
+              </div>
+              <div className="text-xs text-ink-muted">{subtitle}</div>
+            </div>
           </div>
-        ))}
-        {outputHandles.map((port, index) => (
-          <div key={port.id}>
-            <span
-              className="pointer-events-none absolute right-0 h-px w-4 bg-emerald-600"
-              style={{ top: stackedHandleTop(index, outputHandles.length) }}
-            />
-            <span className="pointer-events-none absolute right-5 bottom-1 font-body text-[9px] text-emerald-700">
-              {port.label}
-            </span>
-            <Handle
-              type="source"
-              position={Position.Right}
-              id={port.id}
-              style={{
-                ...SOURCE_HANDLE_STYLE,
-                top: stackedHandleTop(index, outputHandles.length),
-                background: "#059669",
-              }}
-            />
-          </div>
-        ))}
+          {inputHandles.map((port, index) => (
+            <div key={port.id}>
+              <span
+                className="pointer-events-none absolute left-3 text-[10px] text-ink-muted"
+                style={{ top: 65 + index * 22, transform: "translateY(-50%)" }}
+              >
+                {port.label}
+              </span>
+              <PortKindHandle
+                type="target"
+                id={port.id}
+                title={port.label}
+                kind={port.kind}
+                top={65 + index * 22}
+              />
+            </div>
+          ))}
+          {outputHandles.map((port, index) => (
+            <div key={port.id}>
+              <span
+                className="pointer-events-none absolute right-5 text-[10px] text-ink-muted"
+                style={{ top: 65 + index * 22, transform: "translateY(-50%)" }}
+              >
+                {port.label}
+              </span>
+              <PortKindHandle
+                type="source"
+                id={port.id}
+                title={port.label}
+                kind={port.kind}
+                top={65 + index * 22}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     );
 
   return (
-    <div className="group relative" style={{ width: cardWidth }} data-tour-target={`flow-node-${id}`}>
+    <div
+      className="group relative"
+      style={{ width: cardWidth }}
+      data-tour-target={`flow-node-${id}`}
+    >
       <HoverDeleteButton
         id={id}
         label={copy.deleteBlock}
@@ -252,7 +408,9 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
         {isBay && (
           <span
             className="absolute inset-y-1.5 left-0 w-0.5 rounded-full"
-            style={{ backgroundColor: `color-mix(in srgb, ${BAY_EDGE} 70%, transparent)` }}
+            style={{
+              backgroundColor: `color-mix(in srgb, ${BAY_EDGE} 70%, transparent)`,
+            }}
             aria-hidden
           />
         )}
@@ -265,42 +423,78 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
               id={handle.id}
               title={handle.label}
               kind={handle.kind}
-              top={isIf || isRelay ? NODE_HEIGHT / 2 : stackedHandleTop(index, inputHandles.length)}
+              top={
+                isIf || isRelay
+                  ? NODE_HEIGHT / 2
+                  : stackedHandleTop(index, inputHandles.length)
+              }
             />
           ))}
 
         {/* No overflow-hidden on LED: tile box-shadow (glow) would get clipped on the left. */}
         <div
           className={`flex min-w-0 items-center gap-2 ${
-            multiChannel ? "w-full flex-1 pr-1" : isLed ? "" : isIf || isRelay ? "w-full" : "flex-1 overflow-hidden"
+            multiChannel
+              ? "w-full flex-1 pr-1"
+              : isLed
+                ? ""
+                : isIf || isRelay
+                  ? "w-full"
+                  : "flex-1 overflow-hidden"
           }`}
-          style={isIf || isRelay ? { minHeight: NODE_HEIGHT, paddingLeft: isRelay ? 16 : 10, paddingRight: 10 } : undefined}
+          style={
+            isIf || isRelay
+              ? {
+                  minHeight: NODE_HEIGHT,
+                  paddingLeft: isRelay ? 16 : 10,
+                  paddingRight: 10,
+                }
+              : undefined
+          }
         >
           <div
-            key={`led-${ledColor}-${Math.round((intensity ?? 1) * 100)}`}
-            className={`h-7 w-7 shrink-0 ${isBay ? "rounded-[3px]" : "rounded-slsm"}`}
-            style={{
-              backgroundColor: isRelay ? (previewOn ? "#0F766E" : "#64748B") : tileColor,
-              transition: isRelay ? "background-color 180ms ease, box-shadow 180ms ease" : undefined,
-              boxShadow: ledLit
-                ? `0 0 ${Math.round(4 + (intensity ?? 1) * 10)}px ${Math.round(1 + (intensity ?? 1) * 2)}px ${ledGlowRgba(ledColor, 0.35 + (intensity ?? 1) * 0.45)}`
-                : isRelay && previewOn
-                  ? "0 0 0 3px color-mix(in srgb, #0F766E 35%, transparent)"
-                  : undefined,
-            }}
+            className="h-10 w-10 shrink-0"
             aria-hidden
+            style={{ filter: ledLit ? `drop-shadow(0 0 4px ${ledColor})` : undefined }}
           >
-            {isRelay ? (
-              <RelayContact closed={previewOn} />
-            ) : !isLed ? (
-              <div className="flex h-full w-full items-center justify-center">
-                <Icon size={14} color="#fff" />
+            {isLed || isRelay || data.tempProbe ? (
+              <ModuleArtwork
+                name={data.label}
+                kind={isLed ? (isRgb ? "rgb" : "led") : isRelay ? "relay" : "sensor"}
+                active={ledLit || (isRelay && previewOn)}
+                lightColor={ledColor}
+                intensity={intensity ?? 1}
+              />
+            ) : (
+              <div
+                className="flex h-full w-full items-center justify-center rounded-lg"
+                style={{
+                  color: accent,
+                  background: `color-mix(in srgb, ${accent} 10%, white)`,
+                }}
+              >
+                {isToggle ? (
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <path
+                      d="M3 20h5V8h8v12h5V8h4"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : (
+                  <Icon size={25} strokeWidth={1.8} />
+                )}
               </div>
-            ) : null}
+            )}
           </div>
           <div className={`min-w-0 flex-1 ${isIf || isRelay ? "" : "overflow-hidden"}`}>
             <div className="flex min-w-0 items-center gap-1.5">
-              <div className={`${isIf ? "shrink-0" : "min-w-0 truncate"} font-body text-sm font-semibold text-ink`} title={data.label}>
+              <div
+                className={`${isIf ? "shrink-0" : "min-w-0 truncate"} font-body text-sm font-semibold text-ink`}
+                title={data.label}
+              >
                 {data.label}
               </div>
               {isBay && multiChannel && (
@@ -324,7 +518,11 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                     ? "whitespace-nowrap font-mono text-[10px] leading-tight text-ink"
                     : "truncate font-body text-xs text-ink-faint"
                 }
-                title={isIf ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ") : subtitle}
+                title={
+                  isIf
+                    ? [subtitle, data.ifOutput?.thenElse].filter(Boolean).join(" · ")
+                    : subtitle
+                }
               >
                 {subtitle}
               </div>
@@ -342,13 +540,29 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
           >
             <IfOutChip
               label={copy.ifThenTiny}
-              value={ifBoolean ? (data.ifOutput.thenHigh ? "true" : "false") : data.ifOutput.thenHigh ? "HIGH" : "LOW"}
+              value={
+                ifBoolean
+                  ? data.ifOutput.thenHigh
+                    ? "true"
+                    : "false"
+                  : data.ifOutput.thenHigh
+                    ? "HIGH"
+                    : "LOW"
+              }
               color={ifOutColor}
               active={data.ifOutput.thenHigh}
             />
             <IfOutChip
               label={copy.ifElseTiny}
-              value={ifBoolean ? (data.ifOutput.elseHigh ? "true" : "false") : data.ifOutput.elseHigh ? "HIGH" : "LOW"}
+              value={
+                ifBoolean
+                  ? data.ifOutput.elseHigh
+                    ? "true"
+                    : "false"
+                  : data.ifOutput.elseHigh
+                    ? "HIGH"
+                    : "LOW"
+              }
               color={ifOutColor}
               active={data.ifOutput.elseHigh}
               divided
@@ -360,7 +574,8 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
             className="flex items-center justify-center"
             style={{
               height: IF_FOOTER_HEIGHT,
-              borderTop: "1px solid color-mix(in srgb, #0F766E 40%, var(--color-border))",
+              borderTop:
+                "1px solid color-mix(in srgb, #0F766E 40%, var(--color-border))",
               background: "color-mix(in srgb, #0F766E 8%, var(--color-surface))",
             }}
           >
@@ -381,7 +596,10 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 className="relative flex items-center justify-end gap-1.5 pr-3"
                 style={{ height: CHANNEL_ROW_H }}
               >
-                <span className="min-w-0 truncate text-right font-mono text-[10px] font-medium text-ink-muted" title={handle.label}>
+                <span
+                  className="min-w-0 truncate text-right font-mono text-[10px] font-medium text-ink-muted"
+                  title={handle.label}
+                >
                   {handle.label ?? handle.id}
                 </span>
                 <PortKindHandle
@@ -401,7 +619,10 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 id={handle.id}
                 title={handle.label}
                 kind={handle.kind}
-                top={stackedHandleTop(index, Math.max(inputHandles.length, outputHandles.length))}
+                top={stackedHandleTop(
+                  index,
+                  Math.max(inputHandles.length, outputHandles.length),
+                )}
               />
             ))}
           </div>
@@ -414,7 +635,11 @@ export function ProcessingNode({ id, data, selected }: NodeProps & { readonly da
                 id={handle.id}
                 title={handle.label}
                 kind={handle.kind}
-                top={isIf || isRelay ? NODE_HEIGHT / 2 : stackedHandleTop(index, outputHandles.length)}
+                top={
+                  isIf || isRelay
+                    ? NODE_HEIGHT / 2
+                    : stackedHandleTop(index, outputHandles.length)
+                }
                 live={isIf ? ifLiveHigh : previewOn}
               />
             ))}
@@ -531,11 +756,25 @@ function PortKindGlyph({ kind }: { readonly kind: PortKind }) {
   return (
     <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden>
       {kind === "digital" ? (
-        <path d="M1 6.5V2.5H3.2V6.5H5.4V2.5H8" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="miter" />
+        <path
+          d="M1 6.5V2.5H3.2V6.5H5.4V2.5H8"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinejoin="miter"
+        />
       ) : kind === "analog" ? (
-        <path d="M1 5Q2.2 1.5 4.5 4.5T8 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path
+          d="M1 5Q2.2 1.5 4.5 4.5T8 4"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+        />
       ) : kind === "boolean" ? (
-        <path d="M4.5 1.4 7.4 4.5 4.5 7.6 1.6 4.5Z" stroke="currentColor" strokeWidth="1.15" />
+        <path
+          d="M4.5 1.4 7.4 4.5 4.5 7.6 1.6 4.5Z"
+          stroke="currentColor"
+          strokeWidth="1.15"
+        />
       ) : kind === "activation" ? (
         <path d="M2.2 1.6v5.8L7.4 4.5Z" fill="currentColor" />
       ) : kind === "power" ? (
@@ -564,33 +803,21 @@ function IfOutChip({
     <div
       className="flex min-w-0 items-center justify-center gap-1 whitespace-nowrap px-1"
       style={{
-        borderLeft: divided ? `1px solid color-mix(in srgb, ${color} 35%, var(--color-border))` : undefined,
+        borderLeft: divided
+          ? `1px solid color-mix(in srgb, ${color} 35%, var(--color-border))`
+          : undefined,
       }}
     >
-      <span className="font-mono text-[8px] font-bold uppercase tracking-wide text-ink-muted">{label}</span>
-      <span className="font-mono text-[11px] font-semibold" style={{ color: active ? color : "var(--color-ink)" }}>
+      <span className="font-mono text-[8px] font-bold uppercase tracking-wide text-ink-muted">
+        {label}
+      </span>
+      <span
+        className="font-mono text-[11px] font-semibold"
+        style={{ color: active ? color : "var(--color-ink)" }}
+      >
         {value}
       </span>
     </div>
-  );
-}
-
-function RelayContact({ closed }: { readonly closed: boolean }) {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" className="block">
-      <circle cx="7" cy="19" r="2.2" fill="#fff" />
-      <circle cx="21" cy="19" r="2.2" fill="#fff" />
-      <path d="M7 19H21" stroke="rgba(255,255,255,0.28)" strokeWidth="1.25" />
-      <g
-        style={{
-          transformOrigin: "7px 19px",
-          transform: closed ? "rotate(0deg)" : "rotate(-34deg)",
-          transition: "transform 180ms ease",
-        }}
-      >
-        <path d="M7 19H21.5" stroke="#fff" strokeWidth="2.1" strokeLinecap="round" />
-      </g>
-    </svg>
   );
 }
 
@@ -618,9 +845,24 @@ function ToggleOutputWaveform({
   const highY = 3;
   const lowY = 13;
   const path = live
-    ? scrollingWavePath(live.elapsedMs, live.periodMs, mode, highTicks, lowTicks, initialHigh, pulseMs, w, highY, lowY)
+    ? scrollingWavePath(
+        live.elapsedMs,
+        live.periodMs,
+        mode,
+        highTicks,
+        lowTicks,
+        initialHigh,
+        pulseMs,
+        w,
+        highY,
+        lowY,
+      )
     : staticWavePath(mode, highTicks, lowTicks, initialHigh, pulseMs, w, highY, lowY);
-  const stroke = live ? (lineHigh ? color : "color-mix(in srgb, var(--color-ink-faint) 65%, transparent)") : color;
+  const stroke = live
+    ? lineHigh
+      ? color
+      : "color-mix(in srgb, var(--color-ink-faint) 65%, transparent)"
+    : color;
   const opacity = live ? 1 : 0.72;
 
   return (
@@ -630,14 +872,30 @@ function ToggleOutputWaveform({
         bottom: "calc(50% + 10px)",
         backgroundColor: "color-mix(in srgb, var(--color-surface) 88%, transparent)",
         outline: `1px solid color-mix(in srgb, ${color} 28%, var(--color-border))`,
-        boxShadow: live && lineHigh ? `0 0 0 2px color-mix(in srgb, ${color} 22%, transparent)` : undefined,
+        boxShadow:
+          live && lineHigh
+            ? `0 0 0 2px color-mix(in srgb, ${color} 22%, transparent)`
+            : undefined,
       }}
       aria-hidden
     >
       <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="block">
-        <path d={path} fill="none" stroke={stroke} strokeWidth={1.6} strokeLinejoin="miter" strokeLinecap="square" opacity={opacity} />
+        <path
+          d={path}
+          fill="none"
+          stroke={stroke}
+          strokeWidth={1.6}
+          strokeLinejoin="miter"
+          strokeLinecap="square"
+          opacity={opacity}
+        />
         {live && (
-          <circle cx={w - 2.5} cy={lineHigh ? highY : lowY} r={1.7} fill={lineHigh ? color : "var(--color-ink-faint)"} />
+          <circle
+            cx={w - 2.5}
+            cy={lineHigh ? highY : lowY}
+            r={1.7}
+            fill={lineHigh ? color : "var(--color-ink-faint)"}
+          />
         )}
       </svg>
     </span>
@@ -697,7 +955,8 @@ function scrollingWavePath(
   lowY: number,
 ): string {
   const safePeriod = Math.max(1, periodMs);
-  const cycleMs = mode === "astable" ? safePeriod * Math.max(1, highTicks + lowTicks) : safePeriod;
+  const cycleMs =
+    mode === "astable" ? safePeriod * Math.max(1, highTicks + lowTicks) : safePeriod;
   const windowMs = Math.max(cycleMs * 2, safePeriod * 2);
   const samples = 48;
   const padX = 1;
@@ -724,7 +983,12 @@ function scrollingWavePath(
     if (t < 0) {
       high = mode === "pulse_low" ? true : mode === "pulse_high" ? false : initialHigh;
     } else if (mode === "astable") {
-      high = lineHighAtTick(Math.floor(t / safePeriod), highTicks, lowTicks, initialHigh);
+      high = lineHighAtTick(
+        Math.floor(t / safePeriod),
+        highTicks,
+        lowTicks,
+        initialHigh,
+      );
     } else {
       high = lineHighAtElapsed(t, channel);
     }
@@ -742,16 +1006,6 @@ function scrollingWavePath(
 }
 
 /** Dim an LED hex toward black by intensity (0–1), keeping the same hue. */
-function mixLedTowardBlack(hex: string, intensity: number): string {
-  const rgb = parseCssHex(hex);
-  if (!rgb) return hex;
-  const t = Math.min(1, Math.max(0, intensity));
-  // Keep a visible floor so the swatch never collapses to pure black while "on".
-  const gain = 0.18 + t * 0.82;
-  const to = (v: number) => Math.round(v * gain).toString(16).padStart(2, "0");
-  return `#${to(rgb.r)}${to(rgb.g)}${to(rgb.b)}`;
-}
-
 function ledGlowRgba(hex: string, alpha: number): string {
   const rgb = parseCssHex(hex);
   if (!rgb) return `rgba(245, 197, 24, ${alpha})`;

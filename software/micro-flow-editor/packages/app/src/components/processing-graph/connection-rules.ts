@@ -35,6 +35,7 @@ export function isValidProcessingConnection(
 
   const sourceEntry = resolveEntry(connection.source);
   const targetEntry = resolveEntry(connection.target);
+  if (targetEntry?.id === "appblocks.data_viewer") return true;
   if (!sourceEntry && !targetEntry) return true;
 
   return catalogPortsCompatible(
@@ -66,6 +67,7 @@ export function isValidDemoProcessingConnection(
   const target = ctx.nodes.find((node) => node.id === connection.target)?.data;
   if (!source || !target) return true;
 
+  if (target.kind === "block" && target.blockTypeId === "ui.data_viewer") return true;
   if (isTemperatureSensor(source)) {
     return isCompareIf(target);
   }

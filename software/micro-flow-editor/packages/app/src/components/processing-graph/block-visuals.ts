@@ -1,4 +1,4 @@
-import { Activity, Cable, GitBranch, Palette, Power, Thermometer, ToggleLeft, type LucideIcon } from "lucide-react";
+import { MousePointerClick, Monitor, ListOrdered, Activity, Cable, GitBranch, Palette, Power, Thermometer, ToggleLeft, type LucideIcon } from "lucide-react";
 import {
   COMPARE_IF_IDS,
   DIGITAL_OUT_TOGGLE_IDS,
@@ -16,7 +16,7 @@ import {
  * (teal + SlidersHorizontal). LED keeps a solid swatch; Digital Out Toggle
  * gets a toggle glyph; Flow Start is a bare dark-violet disc (Schedule tick).
  */
-export type CatalogTileGlyph = "toggle" | "palette" | "power" | "cable" | "if" | "thermometer";
+export type CatalogTileGlyph = "toggle" | "palette" | "power" | "cable" | "if" | "thermometer" | "sequence";
 
 export type CatalogBlockVisual = {
   readonly colorVar: string;
@@ -82,6 +82,9 @@ const TERMINAL_BLOCK_VISUAL: CatalogBlockVisual = {
 
 export function visualForCatalogEntryId(entryId: string | undefined): CatalogBlockVisual | undefined {
   if (!entryId) return undefined;
+  if (["appblocks.manual_trigger", "ui.manual_trigger"].includes(entryId)) return {colorVar:"#5975C9",icon:MousePointerClick};
+  if (["appblocks.data_viewer", "ui.data_viewer"].includes(entryId)) return { colorVar: "#5975C9", icon: Monitor };
+  if (["appblocks.sequence", "ab.sequence"].includes(entryId)) return { colorVar: "#5975C9", icon: ListOrdered, tileGlyph: "sequence" };
   if (FLOW_START_IDS.has(entryId)) return FLOW_START_VISUAL;
   if (DIGITAL_OUT_TOGGLE_IDS.has(entryId)) return DIGITAL_OUT_TOGGLE_VISUAL;
   if (SQUARE_WAVE_IDS.has(entryId)) return SQUARE_WAVE_VISUAL;

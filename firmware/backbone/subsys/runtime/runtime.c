@@ -272,6 +272,31 @@ static int runtime_event_emit(const struct spaghetti_record_payload *payload, vo
 	return 0;
 }
 
+int spaghetti_runtime_post_command_result(spaghetti_module_key_t source_key,
+    const struct spaghetti_record_payload *payload)
+{
+    if (!source_key || !payload || !payload->schema_id[0] ||
+        payload->values.field_count > SPAGHETTI_PROPERTY_MAX_FIELDS) return -EINVAL;
+    struct spaghetti_runtime_event *event = k_calloc(1, sizeof(*event));
+    if (!event) return -ENOMEM;
+    int err = 0;
+    (void)k_mutex_lock(&runtime_lock, K_FOREVER);
+    if (runtime_state == SPAGHETTI_RUNTIME_RUNNING) {
+        for (size_t index = 0U; index < job_count; index++) {
+            if (jobs[index].source_key != source_key) continue;
+            event->source_id = jobs[index].source_id;
+            event->source_key = source_key;
+            event->payload = *payload;
+            if (k_msgq_put(&runtime_event_queue, event, K_NO_WAIT) < 0) err = -ENOSPC;
+            else k_sem_give(&runtime_wake_sem);
+            break;
+        }
+    }
+    k_mutex_unlock(&runtime_lock);
+    k_free(event);
+    return err;
+}
+
 static void process_event(struct spaghetti_runtime_event *event)
 {
 	struct spaghetti_record record;
@@ -355,7 +380,9 @@ static void process_due_jobs(int64_t now_ms)
 		}
 		k_mutex_unlock(&runtime_lock);
 
-		if (err < 0) {
+		if (err == -EAGAIN) {
+			/* Event-only polling source has no new event. */
+		} else if (err < 0) {
 			LOG_WRN("sample read failed: key=%u err=%d", job.source_key, err);
 		} else {
 			(void)publish_record(&record, 0U);
@@ -719,4 +746,13 @@ int spaghetti_runtime_stop(k_timeout_t timeout)
 unlock:
 	k_mutex_unlock(&runtime_lock);
 	return err;
+}
+
+/* Execution runs outside runtime_lock. Stop can interrupt long user delays. */
+bool spaghetti_device_profile_execution_cancelled(void)
+{
+	(void)k_mutex_lock(&runtime_lock, K_FOREVER);
+	bool cancelled = runtime_state == SPAGHETTI_RUNTIME_STOPPING;
+	k_mutex_unlock(&runtime_lock);
+	return cancelled;
 }

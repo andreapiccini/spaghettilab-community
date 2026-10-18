@@ -55,6 +55,8 @@ export function canChainIntoEventContainer(data: DeviceProcessingNodeData | unde
   if (!data || data.kind !== "block") return false;
   const entry = catalogEntryForNode(data);
   if (!entry) return true;
+  // Autonomous controllers have named control/event ports, not chain port "0".
+  if (entry.id === "appblocks.sequence") return false;
   if (isBayEntry(entry)) return false;
   if (entry.inputs !== undefined && entry.inputs.length === 0) return false;
   return true;

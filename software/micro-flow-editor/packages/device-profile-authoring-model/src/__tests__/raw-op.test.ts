@@ -221,3 +221,11 @@ describe("indexed digital GPIO", () => {
     ] as const) expect(fromRawOp(toRawOp(op))).toEqual({ ok: true, value: op });
   });
 });
+
+it("round trips an asynchronous active-low pulse without a blocking delay", () => {
+  const pulse: Instruction = { op: "GPIO_PULSE", channel: 2, milliseconds: 125, activeHigh: false, restoreHigh: true };
+  const raw = toRawOp(pulse);
+  expect(raw.opcode).toBe(33);
+  expect(raw.imm2).toBe(2);
+  expect(fromRawOp(raw)).toEqual({ ok: true, value: pulse });
+});

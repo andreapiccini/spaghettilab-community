@@ -17,7 +17,9 @@ export function configHasLiveRuntime(config: CanonicalConfig): boolean {
   return (
     config.modules.length > 0 ||
     config.schedules.some((schedule) => schedule.enabled) ||
-    config.rules.length > 0
+    config.rules.length > 0 ||
+    config.blocks.length > 0 ||
+    config.edges.length > 0
   );
 }
 
@@ -71,12 +73,20 @@ export function formatApplyConfigError(error: unknown, it = true): string {
 export async function applyStoppedRuntime(
   client: RuntimeStopClient,
   signal?: AbortSignal,
-): Promise<{ readonly generation: number; readonly config: GetConfigResponse; readonly changed: boolean }> {
+): Promise<{
+  readonly generation: number;
+  readonly config: GetConfigResponse;
+  readonly changed: boolean;
+}> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt++) {
     const live = await client.getConfig(signal);
     const decoded = decodeConfigCbor(live.configBytes);
-    if (!decoded.ok || !configHasLiveRuntime(decoded.value)) {
+    if (!decoded.ok)
+      throw new Error(
+        "Configurazione del Core non leggibile: Stop non è stato eseguito.",
+      );
+    if (!configHasLiveRuntime(decoded.value)) {
       return { generation: live.generation, config: live, changed: false };
     }
     try {
@@ -92,7 +102,7 @@ export async function applyStoppedRuntime(
     } catch (error) {
       lastError = error;
       if (!isRetryableConfigApply(error) || attempt === 2) break;
-      await new Promise((resolve) => setTimeout(resolve, CONFIG_WRITE_GAP_MS));
+      await waitConfigWriteGap(signal);
     }
   }
   throw lastError instanceof Error
@@ -100,8 +110,19 @@ export async function applyStoppedRuntime(
     : new Error(formatApplyConfigError(lastError));
 }
 
-export async function waitConfigWriteGap(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, CONFIG_WRITE_GAP_MS));
+export async function waitConfigWriteGap(signal?: AbortSignal): Promise<void> {
+  signal?.throwIfAborted();
+  await new Promise<void>((resolve, reject) => {
+    const abort = () => {
+      clearTimeout(timer);
+      reject(signal?.reason ?? new DOMException("Annullato", "AbortError"));
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", abort);
+      resolve();
+    }, CONFIG_WRITE_GAP_MS);
+    signal?.addEventListener("abort", abort, { once: true });
+  });
 }
 
 export function ownedDriverProfileKey(deviceId: string): string {

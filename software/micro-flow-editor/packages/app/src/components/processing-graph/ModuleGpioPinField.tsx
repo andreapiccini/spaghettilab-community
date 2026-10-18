@@ -1,4 +1,7 @@
 import {
+  functionVariantOf,
+  formatPinLabel,
+  modeIndexToPinId,
   runtimeDigitalOutputPins,
   parsePhysicalProject,
   PHYSICAL_META_KEY,
@@ -26,15 +29,65 @@ export function ModuleGpioPinField({
   const { session, execute, navigate } = useSession();
   if (!isGpioModule(module)) return null;
 
+  const savedPhysical = parsePhysicalProject(
+    session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment,
+  );
+  const multiPhysical = module.gpioAssignments
+    ? savedPhysical.drafts[module.gpioAssignments.boardKey]
+    : undefined;
+  const draft = module.recipe.deviceDraft;
+  const stepper = draft?.commands.some(action => action.steps.some(step => step.type === "stepper"));
+  const title = draft?.dht22Module ? "DHT22 · DATA / Alimentazione"
+    : draft?.rgbModule ? "LED RGB · R / G / B"
+    : stepper ? "ULN2003 · IN1–IN4"
+    : `${module.label} · GPIO`;
+  const description = draft?.dht22Module
+    ? "DATA è il segnale del sensore; POWER alimenta il modulo con un GPIO HIGH fisso. Collega anche GND alla massa comune. Il fronte di salita avvia una lettura; il driver rispetta automaticamente i 2 secondi di avvio e tra acquisizioni."
+    : draft?.rgbModule ? "Tre uscite PWM per rosso, verde e blu. Il pin comune deve corrispondere alla polarità scelta nell’inizializzazione."
+    : stepper ? "Posizione 0–360° rispetto allo zero all’avvio. Invia un intero all’ingresso Posizione quando è selezionata «Vai a posizione»."
+    : "Collegamenti GPIO del dispositivo. Puoi modificarli in Module Function.";
+  if (module.gpioAssignments)
+    return (
+      <section className="rounded-xl border border-border p-3 font-body text-sm">
+        <h3 className="mb-2 font-semibold">{title}</h3>
+        <dl>
+          {Object.entries(module.gpioAssignments.channels).map(([signal, channel]) => (
+            <div key={signal} className="flex justify-between py-1">
+              <dt>{draft?.binding.gpioSignals.find(item => item.id === signal)?.name ?? signal}</dt>
+              <dd className="font-mono text-brand-blue">
+                {multiPhysical
+                  ? formatPinLabel(
+                      modeIndexToPinId(channel, functionVariantOf(multiPhysical)),
+                      functionVariantOf(multiPhysical),
+                    )
+                  : `A${channel}`}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-2 text-xs text-ink-muted">
+          {description}
+        </p>
+        <button
+          className="mt-2 text-xs text-brand-blue"
+          onClick={() => navigate("physical-composition")}
+        >
+          Apri Module Function
+        </button>
+      </section>
+    );
+
   const pins = runtimeDigitalOutputPins(
-    parsePhysicalProject(session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment)
-      .drafts,
+    parsePhysicalProject(
+      session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment,
+    ).drafts,
     bindingId,
   );
   const signal =
     module.recipe.deviceDraft?.binding.gpioSignals[0]?.name ??
-    module.recipe.pins.find((pin) => pin.role.toUpperCase() !== "VCC" && pin.role.toUpperCase() !== "GND")
-      ?.role ??
+    module.recipe.pins.find(
+      (pin) => pin.role.toUpperCase() !== "VCC" && pin.role.toUpperCase() !== "GND",
+    )?.role ??
     "RELAY";
 
   return (
@@ -48,7 +101,7 @@ export function ModuleGpioPinField({
           {it ? "a" : "to"}
         </span>
         <select
-          aria-label={it ? "Pin GPIO del relè" : "Relay GPIO pin"}
+          aria-label={it ? "Pin GPIO del dispositivo" : "Device GPIO pin"}
           className="rounded-slsm border border-border-strong bg-surface px-2 py-2"
           value={gpioAssignmentValue(module.gpioAssignment)}
           disabled={!execute}
@@ -66,7 +119,8 @@ export function ModuleGpioPinField({
                       comment: JSON.stringify(
                         assignModuleGpioPin(
                           parseBackboneSensorModules(
-                            current.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
+                            current.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]
+                              ?.comment,
                           ),
                           bindingId,
                           module.id,
@@ -80,9 +134,14 @@ export function ModuleGpioPinField({
             });
           }}
         >
-          <option value="">{pins.length ? (it ? "Scegli pin" : "Choose pin") : "—"}</option>
+          <option value="">
+            {pins.length ? (it ? "Scegli pin" : "Choose pin") : "—"}
+          </option>
           {pins.map((pin) => (
-            <option key={`${pin.boardKey}:${pin.channel}`} value={`${pin.boardKey}:${pin.channel}`}>
+            <option
+              key={`${pin.boardKey}:${pin.channel}`}
+              value={`${pin.boardKey}:${pin.channel}`}
+            >
               {pin.label}
             </option>
           ))}

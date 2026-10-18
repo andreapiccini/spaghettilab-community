@@ -13,6 +13,7 @@
 #include <zephyr/kernel.h>
 
 #include <spaghetti/config.h>
+#include <spaghetti/schema.h>
 
 /**
  * @brief Initialize the stopped Runtime worker.
@@ -82,5 +83,11 @@ int spaghetti_runtime_start(void);
  * @note Call from thread context, never from the Runtime worker itself.
  */
 int spaghetti_runtime_stop(k_timeout_t timeout);
+
+/** Queue the validated result of a host command for the same rules/data path
+ * used by scheduled reads. A stopped runtime or an unarmed source is a no-op.
+ * Returns -ENOSPC on bounded queue pressure; never executes rules on USB's stack. */
+int spaghetti_runtime_post_command_result(spaghetti_module_key_t source_key,
+    const struct spaghetti_record_payload *payload);
 
 #endif /* SPAGHETTI_RUNTIME_H */

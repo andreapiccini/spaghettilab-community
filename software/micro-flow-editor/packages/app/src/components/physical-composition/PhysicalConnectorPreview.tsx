@@ -175,6 +175,7 @@ export function PhysicalConnectorPreview({
       pendingSignal={pendingSignal}
       pendingAccent={pendingAccent}
       onPinActivate={onPinActivate}
+      onAssignSignal={onAssignSignal}
       onClearPin={onClearPin}
     />
   );
@@ -294,10 +295,7 @@ function PcbConnectorInteractive({
   }, [openIndex]);
 
   const openSpot = V2_PCB_HOTSPOTS.find((s) => s.modeIndex === openIndex);
-  const fumetti = useMemo(
-    () => buildPinFumetti(modes, busUnits),
-    [modes, busUnits],
-  );
+  const fumetti = useMemo(() => buildPinFumetti(modes, busUnits), [modes, busUnits]);
   const topFumetti = fumetti.filter((f) => f.side === "top");
   const bottomFumetti = fumetti.filter((f) => f.side === "bottom");
 
@@ -320,259 +318,259 @@ function PcbConnectorInteractive({
       </div>
 
       <div className="relative w-fit max-w-full shrink">
-      <img
-        src={publicAsset("ux-assets/module-function-pcb.png")}
-        alt="Module Function · connettore 2×6"
-        className="pointer-events-none relative z-[1] block h-auto max-h-[min(34vh,280px)] w-auto max-w-full bg-transparent"
-        draggable={false}
-      />
+        <img
+          src={publicAsset("ux-assets/module-function-pcb.png")}
+          alt="Module Function · connettore 2×6"
+          className="pointer-events-none relative z-[1] block h-auto max-h-[min(34vh,280px)] w-auto max-w-full bg-transparent"
+          draggable={false}
+        />
 
-      {fumetti.length > 0 && (
-        <svg
-          className="pointer-events-none absolute inset-0 z-[2] h-full w-full overflow-visible"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden
-        >
-          {topFumetti.map((f) => (
-            <path
-              key={`w-${f.id}`}
-              d={`M ${f.pinX} ${f.pinY} V 0`}
-              fill="none"
-              stroke={f.accent}
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              opacity={0.5}
-              vectorEffect="non-scaling-stroke"
-            />
-          ))}
-          {bottomFumetti.map((f) => (
-            <path
-              key={`w-${f.id}`}
-              d={`M ${f.pinX} ${f.pinY} V 100`}
-              fill="none"
-              stroke={f.accent}
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              opacity={0.5}
-              vectorEffect="non-scaling-stroke"
-            />
-          ))}
-        </svg>
-      )}
-
-      <div className="absolute inset-0 z-[3]">
-        {V2_PCB_HOTSPOTS.map((spot) => {
-          const configurable = spot.modeIndex !== undefined;
-          const mode = configurable ? (modes[spot.modeIndex!] ?? 0) : 0;
-          const role = configurable
-            ? labelForMode(mode)
-            : spot.id.startsWith("GND")
-              ? "GND"
-              : spot.id === "3V3"
-                ? "3.3V"
-                : "5V";
-          const accentKind = configurable ? kindForMode(mode) : null;
-          const accent = accentKind
-            ? PERIPHERAL_ACCENT[accentKind]
-            : spot.id === "3V3" || spot.id === "5V"
-              ? "#DC2626"
-              : spot.id.startsWith("GND")
-                ? "#3F3F46"
-                : null;
-          const occupied = configurable && (mode & 15) !== 0;
-          const powerLit = !configurable && (spot.id === "3V3" || spot.id === "5V");
-          const lit = occupied || powerLit;
-          const isHover = hoverIndex === spot.modeIndex;
-          const isOpen = openIndex === spot.modeIndex;
-          const pendingHere = Boolean(pendingSignal && configurable);
-          const pinId =
-            spot.modeIndex !== undefined
-              ? modeIndexToPinId(spot.modeIndex, "v2")
-              : undefined;
-
-          return (
-            <button
-              key={spot.id}
-              type="button"
-              disabled={!interactive || !configurable}
-              className={`absolute rounded-[4px] transition-all duration-150 disabled:cursor-default ${
-                configurable && interactive ? "cursor-pointer" : ""
-              } ${isHover || isOpen ? "z-20" : "z-10"}`}
-              style={{
-                left: `${spot.x}%`,
-                top: `${spot.y}%`,
-                width: `${spot.w}%`,
-                height: `${spot.h}%`,
-                transform: "translate(-50%, -50%)",
-              }}
-              onMouseEnter={() => configurable && setHoverIndex(spot.modeIndex!)}
-              onMouseLeave={() =>
-                setHoverIndex((prev) => (prev === spot.modeIndex ? null : prev))
-              }
-              onClick={() => {
-                if (!configurable || !interactive) return;
-                if (pendingSignal && onAssignSignal) {
-                  onAssignSignal(spot.modeIndex!, pendingSignal.mode);
-                  setOpenIndex(null);
-                  onPinActivate?.(spot.modeIndex!);
-                  return;
-                }
-                setOpenIndex(spot.modeIndex!);
-                onPinActivate?.(spot.modeIndex!);
-              }}
-              title={
-                configurable && pinId !== undefined
-                  ? `${formatPinLabel(pinId, "v2")} · ${role}${
-                      interactive
-                        ? pendingSignal
-                          ? localeIt
-                            ? ` — assegna ${pendingSignal.label}`
-                            : ` — assign ${pendingSignal.label}`
-                          : localeIt
-                            ? " — click per configurare"
-                            : " — click to configure"
-                        : ""
-                    }`
-                  : role
-              }
-            >
-              <span
-                className={`pointer-events-none absolute inset-[12%] rounded-[2px] border transition-all duration-150 ${
-                  isHover || isOpen ? "scale-110 border-white" : "border-white/80"
-                }`}
-                style={
-                  isHover || isOpen
-                    ? {
-                        backgroundColor: "rgba(103, 232, 249, 0.4)",
-                        boxShadow: "0 0 14px rgba(34,211,238,0.75)",
-                      }
-                    : lit && accent
-                      ? {
-                          backgroundColor: `${accent}55`,
-                          borderColor: "rgba(255,255,255,0.75)",
-                          boxShadow: `0 0 10px ${accent}88, 0 0 16px ${accent}55`,
-                        }
-                      : pendingHere && pendingAccent
-                        ? {
-                            backgroundColor: `${pendingAccent}33`,
-                            borderColor: `${pendingAccent}aa`,
-                            boxShadow: `0 0 10px ${pendingAccent}66`,
-                          }
-                        : {
-                            backgroundColor: "rgba(255,255,255,0.55)",
-                            boxShadow:
-                              "0 0 8px rgba(255,255,255,0.55), inset 0 0 2px rgba(0,0,0,0.12)",
-                          }
-                }
-              />
-            </button>
-          );
-        })}
-      </div>
-
-      <AnimatePresence>
-        {openIndex !== null && openSpot && interactive && (
-          <motion.div
-            key={`pop-${openIndex}`}
-            initial={reducedMotion ? false : { opacity: 0, y: 6, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reducedMotion ? undefined : { opacity: 0, y: 4, scale: 0.96 }}
-            transition={motionTokens.duration.fast}
-            className="absolute z-50 w-52 -translate-x-1/2 rounded-slmd border border-border bg-surface p-2.5 shadow-e2"
-            style={{
-              left: `${openSpot.x}%`,
-              top: openSpot.y < 50 ? `${openSpot.y + 10}%` : undefined,
-              bottom: openSpot.y >= 50 ? `${100 - openSpot.y + 10}%` : undefined,
-            }}
-            role="dialog"
-            aria-label={localeIt ? "Configura pin" : "Configure pin"}
+        {fumetti.length > 0 && (
+          <svg
+            className="pointer-events-none absolute inset-0 z-[2] h-full w-full overflow-visible"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden
           >
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="font-mono text-[11px] font-bold text-ink">
-                {formatPinLabel(modeIndexToPinId(openIndex, "v2"), "v2")}
-              </span>
-              <span className="truncate text-[10px] text-ink-muted">
-                {labelForMode(modes[openIndex] ?? 0)}
-              </span>
-            </div>
-            {(() => {
-              const gpioSignals = placeableSignalsForKind("gpio", modes, "v2");
-              const seen = new Set<string>();
-              const offered = [...gpioSignals, ...popoverSignals].filter((signal) => {
-                if (seen.has(signal.id)) return false;
-                seen.add(signal.id);
-                return true;
-              });
-              return offered.length > 0 ? (
-              <div className="flex flex-col gap-1">
-                <p className="text-[9px] font-semibold uppercase tracking-wide text-ink-faint">
-                  {localeIt ? "Assegna segnale" : "Assign signal"}
-                </p>
-                {offered.map((signal) => {
-                  const accent =
-                    PERIPHERAL_ACCENT[kindForMode(signal.mode) ?? "gpio"];
-                  const placedElsewhere =
-                    !isRepeatableSignalBase(signal.mode & 15) &&
-                    modes.some(
-                      (mode, index) =>
-                        index !== openIndex &&
-                        (mode & 15) === (signal.mode & 15) &&
-                        (signal.mode & 15) !== 0,
-                    );
-                  return (
-                    <button
-                      key={signal.id}
-                      type="button"
-                      disabled={placedElsewhere}
-                      title={
-                        placedElsewhere
-                          ? localeIt
-                            ? "Segnale già assegnato su un altro pin"
-                            : "Signal already assigned on another pin"
-                          : undefined
-                      }
-                      className="rounded-slsm border-2 bg-surface px-2 py-1.5 text-left text-[11px] font-bold transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
-                      style={{ borderColor: `${accent}66`, color: accent }}
-                      onClick={() => {
-                        if (placedElsewhere) return;
-                        onAssignSignal?.(openIndex, signal.mode);
-                        setOpenIndex(null);
-                      }}
-                    >
-                      {signal.label}
-                      {placedElsewhere
-                        ? localeIt
-                          ? " · già usato"
-                          : " · in use"
-                        : ""}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-[10px] leading-relaxed text-ink-muted">
-                {localeIt
-                  ? "Seleziona una periferica a sinistra, oppure libera questo pin."
-                  : "Select a peripheral on the left, or clear this pin."}
-              </p>
-            );
-            })()}
-            {(modes[openIndex]! & 15) !== 0 && (
-              <button
-                type="button"
-                className="mt-2 w-full rounded-slsm border border-border px-2 py-1.5 text-[10px] font-semibold text-error hover:bg-error/5"
-                onClick={() => {
-                  onClearPin?.(openIndex);
-                  setOpenIndex(null);
-                }}
-              >
-                {localeIt ? "Rimuovi assegnazione" : "Clear assignment"}
-              </button>
-            )}
-          </motion.div>
+            {topFumetti.map((f) => (
+              <path
+                key={`w-${f.id}`}
+                d={`M ${f.pinX} ${f.pinY} V 0`}
+                fill="none"
+                stroke={f.accent}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                opacity={0.5}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+            {bottomFumetti.map((f) => (
+              <path
+                key={`w-${f.id}`}
+                d={`M ${f.pinX} ${f.pinY} V 100`}
+                fill="none"
+                stroke={f.accent}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                opacity={0.5}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          </svg>
         )}
-      </AnimatePresence>
+
+        <div className="absolute inset-0 z-[3]">
+          {V2_PCB_HOTSPOTS.map((spot) => {
+            const configurable = spot.modeIndex !== undefined;
+            const mode = configurable ? (modes[spot.modeIndex!] ?? 0) : 0;
+            const role = configurable
+              ? labelForMode(mode)
+              : spot.id.startsWith("GND")
+                ? "GND"
+                : spot.id === "3V3"
+                  ? "3.3V"
+                  : "5V";
+            const accentKind = configurable ? kindForMode(mode) : null;
+            const accent = accentKind
+              ? PERIPHERAL_ACCENT[accentKind]
+              : spot.id === "3V3" || spot.id === "5V"
+                ? "#DC2626"
+                : spot.id.startsWith("GND")
+                  ? "#3F3F46"
+                  : null;
+            const occupied = configurable && (mode & 15) !== 0;
+            const powerLit = !configurable && (spot.id === "3V3" || spot.id === "5V");
+            const lit = occupied || powerLit;
+            const isHover = hoverIndex === spot.modeIndex;
+            const isOpen = openIndex === spot.modeIndex;
+            const pendingHere = Boolean(pendingSignal && configurable);
+            const pinId =
+              spot.modeIndex !== undefined
+                ? modeIndexToPinId(spot.modeIndex, "v2")
+                : undefined;
+
+            return (
+              <button
+                key={spot.id}
+                type="button"
+                disabled={!interactive || !configurable}
+                className={`absolute rounded-[4px] transition-all duration-150 disabled:cursor-default ${
+                  configurable && interactive ? "cursor-pointer" : ""
+                } ${isHover || isOpen ? "z-20" : "z-10"}`}
+                style={{
+                  left: `${spot.x}%`,
+                  top: `${spot.y}%`,
+                  width: `${spot.w}%`,
+                  height: `${spot.h}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+                onMouseEnter={() => configurable && setHoverIndex(spot.modeIndex!)}
+                onMouseLeave={() =>
+                  setHoverIndex((prev) => (prev === spot.modeIndex ? null : prev))
+                }
+                onClick={() => {
+                  if (!configurable || !interactive) return;
+                  if (pendingSignal && onAssignSignal) {
+                    onAssignSignal(spot.modeIndex!, pendingSignal.mode);
+                    setOpenIndex(null);
+                    onPinActivate?.(spot.modeIndex!);
+                    return;
+                  }
+                  setOpenIndex(spot.modeIndex!);
+                  onPinActivate?.(spot.modeIndex!);
+                }}
+                title={
+                  configurable && pinId !== undefined
+                    ? `${formatPinLabel(pinId, "v2")} · ${role}${
+                        interactive
+                          ? pendingSignal
+                            ? localeIt
+                              ? ` — assegna ${pendingSignal.label}`
+                              : ` — assign ${pendingSignal.label}`
+                            : localeIt
+                              ? " — click per configurare"
+                              : " — click to configure"
+                          : ""
+                      }`
+                    : role
+                }
+              >
+                <span
+                  className={`pointer-events-none absolute inset-[12%] rounded-[2px] border transition-all duration-150 ${
+                    isHover || isOpen ? "scale-110 border-white" : "border-white/80"
+                  }`}
+                  style={
+                    isHover || isOpen
+                      ? {
+                          backgroundColor: "rgba(103, 232, 249, 0.4)",
+                          boxShadow: "0 0 14px rgba(34,211,238,0.75)",
+                        }
+                      : lit && accent
+                        ? {
+                            backgroundColor: `${accent}55`,
+                            borderColor: "rgba(255,255,255,0.75)",
+                            boxShadow: `0 0 10px ${accent}88, 0 0 16px ${accent}55`,
+                          }
+                        : pendingHere && pendingAccent
+                          ? {
+                              backgroundColor: `${pendingAccent}33`,
+                              borderColor: `${pendingAccent}aa`,
+                              boxShadow: `0 0 10px ${pendingAccent}66`,
+                            }
+                          : {
+                              backgroundColor: "rgba(255,255,255,0.55)",
+                              boxShadow:
+                                "0 0 8px rgba(255,255,255,0.55), inset 0 0 2px rgba(0,0,0,0.12)",
+                            }
+                  }
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        <AnimatePresence>
+          {openIndex !== null && openSpot && interactive && (
+            <motion.div
+              key={`pop-${openIndex}`}
+              initial={reducedMotion ? false : { opacity: 0, y: 6, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reducedMotion ? undefined : { opacity: 0, y: 4, scale: 0.96 }}
+              transition={motionTokens.duration.fast}
+              className="absolute z-50 w-52 -translate-x-1/2 rounded-slmd border border-border bg-surface p-2.5 shadow-e2"
+              style={{
+                left: `${openSpot.x}%`,
+                top: openSpot.y < 50 ? `${openSpot.y + 10}%` : undefined,
+                bottom: openSpot.y >= 50 ? `${100 - openSpot.y + 10}%` : undefined,
+              }}
+              role="dialog"
+              aria-label={localeIt ? "Configura pin" : "Configure pin"}
+            >
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="font-mono text-[11px] font-bold text-ink">
+                  {formatPinLabel(modeIndexToPinId(openIndex, "v2"), "v2")}
+                </span>
+                <span className="truncate text-[10px] text-ink-muted">
+                  {labelForMode(modes[openIndex] ?? 0)}
+                </span>
+              </div>
+              {(() => {
+                const gpioSignals = placeableSignalsForKind("gpio", modes, "v2");
+                const seen = new Set<string>();
+                const offered = [...gpioSignals, ...popoverSignals].filter((signal) => {
+                  if (seen.has(signal.id)) return false;
+                  seen.add(signal.id);
+                  return true;
+                });
+                return offered.length > 0 ? (
+                  <div className="flex flex-col gap-1">
+                    <p className="text-[9px] font-semibold uppercase tracking-wide text-ink-faint">
+                      {localeIt ? "Assegna segnale" : "Assign signal"}
+                    </p>
+                    {offered.map((signal) => {
+                      const accent =
+                        PERIPHERAL_ACCENT[kindForMode(signal.mode) ?? "gpio"];
+                      const placedElsewhere =
+                        !isRepeatableSignalBase(signal.mode & 15) &&
+                        modes.some(
+                          (mode, index) =>
+                            index !== openIndex &&
+                            (mode & 15) === (signal.mode & 15) &&
+                            (signal.mode & 15) !== 0,
+                        );
+                      return (
+                        <button
+                          key={signal.id}
+                          type="button"
+                          disabled={placedElsewhere}
+                          title={
+                            placedElsewhere
+                              ? localeIt
+                                ? "Segnale già assegnato su un altro pin"
+                                : "Signal already assigned on another pin"
+                              : undefined
+                          }
+                          className="rounded-slsm border-2 bg-surface px-2 py-1.5 text-left text-[11px] font-bold transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+                          style={{ borderColor: `${accent}66`, color: accent }}
+                          onClick={() => {
+                            if (placedElsewhere) return;
+                            onAssignSignal?.(openIndex, signal.mode);
+                            setOpenIndex(null);
+                          }}
+                        >
+                          {signal.label}
+                          {placedElsewhere
+                            ? localeIt
+                              ? " · già usato"
+                              : " · in use"
+                            : ""}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[10px] leading-relaxed text-ink-muted">
+                    {localeIt
+                      ? "Seleziona una periferica a sinistra, oppure libera questo pin."
+                      : "Select a peripheral on the left, or clear this pin."}
+                  </p>
+                );
+              })()}
+              {(modes[openIndex]! & 15) !== 0 && (
+                <button
+                  type="button"
+                  className="mt-2 w-full rounded-slsm border border-border px-2 py-1.5 text-[10px] font-semibold text-error hover:bg-error/5"
+                  onClick={() => {
+                    onClearPin?.(openIndex);
+                    setOpenIndex(null);
+                  }}
+                >
+                  {localeIt ? "Rimuovi assegnazione" : "Clear assignment"}
+                </button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="relative h-[3.35rem] w-full shrink-0">
@@ -599,6 +597,7 @@ function CssGridFallback({
   pendingSignal,
   pendingAccent,
   onPinActivate,
+  onAssignSignal,
   onClearPin,
 }: {
   readonly grid: readonly (readonly FunctionPinCell[])[];
@@ -609,6 +608,7 @@ function CssGridFallback({
   readonly pendingSignal: PhysicalSignalDef | null;
   readonly pendingAccent?: string;
   readonly onPinActivate?: (modeIndex: number) => void;
+  readonly onAssignSignal?: (modeIndex: number, signalMode: number) => void;
   readonly onClearPin?: (modeIndex: number) => void;
 }) {
   const cols = grid[0]?.length ?? 6;
@@ -671,13 +671,20 @@ function CssGridFallback({
                         configurable && setHoverIndex(cell.modeIndex!)
                       }
                       onMouseLeave={() =>
-                        setHoverIndex((prev) =>
-                          prev === cell.modeIndex ? null : prev,
-                        )
+                        setHoverIndex((prev) => (prev === cell.modeIndex ? null : prev))
                       }
                       onClick={() => {
                         if (!configurable || !interactive) return;
-                        if (occupied && !pendingSignal && onClearPin) {
+                        if (pendingSignal && onAssignSignal) {
+                          onAssignSignal(cell.modeIndex!, pendingSignal.mode);
+                          return;
+                        }
+                        if (
+                          occupied &&
+                          !pendingSignal &&
+                          !onPinActivate &&
+                          onClearPin
+                        ) {
                           onClearPin(cell.modeIndex!);
                           return;
                         }

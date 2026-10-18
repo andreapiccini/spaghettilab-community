@@ -77,14 +77,24 @@ static int collect_module_snapshots(
 	return 0;
 }
 
-static int execute_get_status(
+/* Keep bounded peer/tag/module snapshots off transport worker stacks. */
+struct status_workspace {
+	struct spaghetti_module_snapshot snapshots[SPAGHETTI_CONFIG_MAX_MODULES];
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+	struct spaghetti_slup_peer peers[SPAGHETTI_SLUP_PEERS_MAX];
+#endif
+	struct spaghetti_nfc_tag nfc_tags[SPAGHETTI_NFC_TAGS_MAX];
+};
+
+static int encode_get_status(
 	const struct spaghetti_request_context *context,
 	const struct spaghetti_protocol_payload *request,
-	struct spaghetti_protocol_payload *response)
+	struct spaghetti_protocol_payload *response,
+	struct status_workspace *workspace)
 {
 	struct spaghetti_core_info core_info;
 	struct spaghetti_health_status health = {0};
-	struct spaghetti_module_snapshot snapshots[SPAGHETTI_CONFIG_MAX_MODULES];
+	struct spaghetti_module_snapshot *snapshots = workspace->snapshots;
 	size_t module_count = 0U;
 	int err;
 
@@ -105,24 +115,24 @@ static int execute_get_status(
 		struct spaghetti_identity identity;
 		const bool have_identity = (spaghetti_identity_get(&identity) == 0);
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
-		struct spaghetti_slup_peer peers[SPAGHETTI_SLUP_PEERS_MAX];
+		struct spaghetti_slup_peer *peers = workspace->peers;
 		size_t peer_count = 0U;
 		const bool have_peers =
 			(spaghetti_field_update_copy_peers(
-				 peers, ARRAY_SIZE(peers), &peer_count) == 0);
-		struct spaghetti_nfc_tag nfc_tags[SPAGHETTI_NFC_TAGS_MAX];
+				 peers, SPAGHETTI_SLUP_PEERS_MAX, &peer_count) == 0);
+		struct spaghetti_nfc_tag *nfc_tags = workspace->nfc_tags;
 		size_t nfc_count = 0U;
 		const bool have_nfc =
 			(spaghetti_field_update_copy_nfc_tags(
-				 nfc_tags, ARRAY_SIZE(nfc_tags), &nfc_count) ==
+				 nfc_tags, SPAGHETTI_NFC_TAGS_MAX, &nfc_count) ==
 			 0);
 #else
 		const bool have_peers = false;
 		const size_t peer_count = 0U;
-		struct spaghetti_nfc_tag nfc_tags[SPAGHETTI_NFC_TAGS_MAX];
+		struct spaghetti_nfc_tag *nfc_tags = workspace->nfc_tags;
 		size_t nfc_count = 0U;
 		const bool have_nfc =
-			(spaghetti_nfc_copy_tags(nfc_tags, ARRAY_SIZE(nfc_tags),
+			(spaghetti_nfc_copy_tags(nfc_tags, SPAGHETTI_NFC_TAGS_MAX,
 						 &nfc_count) == 0);
 #endif
 		uint8_t physical[SPAGHETTI_PHYSICAL_SIZE];
@@ -307,6 +317,20 @@ static int execute_get_status(
 		response->size = (size_t)(state->payload - response->bytes);
 	}
 	return 0;
+}
+
+static int execute_get_status(
+	const struct spaghetti_request_context *context,
+	const struct spaghetti_protocol_payload *request,
+	struct spaghetti_protocol_payload *response)
+{
+	struct status_workspace *workspace = k_malloc(sizeof(*workspace));
+	if (workspace == NULL) {
+		return -ENOMEM;
+	}
+	int err = encode_get_status(context, request, response, workspace);
+	k_free(workspace);
+	return err;
 }
 
 SPAGHETTI_OPERATION_HANDLER_DEFINE(op_get_status) = {

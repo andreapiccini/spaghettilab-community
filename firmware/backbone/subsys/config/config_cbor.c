@@ -199,6 +199,10 @@ static int decode_property_value(zcbor_state_t *state,
 		value->data.text.text[text.len] = '\0';
 		return 0;
 	case ZCBOR_MAJOR_TYPE_SIMPLE:
+		if (state->payload < state->payload_end && *state->payload == 0xfb) {
+			value->type = SPAGHETTI_VALUE_FLOAT;
+			return zcbor_float64_decode(state, &value->data.decimal) ? 0 : -EBADMSG;
+		}
 		if (zcbor_bool_decode(state, &boolean)) {
 			value->type = SPAGHETTI_VALUE_BOOL;
 			value->data.boolean = boolean;
@@ -256,6 +260,8 @@ static int encode_property_value(zcbor_state_t *state,
 				 const struct spaghetti_value *value)
 {
 	switch (value->type) {
+	case SPAGHETTI_VALUE_FLOAT:
+		return zcbor_float64_put(state, value->data.decimal) ? 0 : -EMSGSIZE;
 	case SPAGHETTI_VALUE_BOOL:
 		return zcbor_bool_put(state, value->data.boolean) ? 0 : -EMSGSIZE;
 	case SPAGHETTI_VALUE_INT64:

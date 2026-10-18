@@ -1183,3 +1183,67 @@ int spaghetti_port_pwm_set(const struct spaghetti_port *port, uint8_t channel, u
 	ARG_UNUSED(port); ARG_UNUSED(channel); ARG_UNUSED(duty); return -ENOTSUP;
 #endif
 }
+
+static int dht22_pins(const struct spaghetti_port *port, uint8_t data, uint8_t power)
+{
+ if (!port || data >= 4 || power >= 4 || data == power ||
+     data >= port->digital_input_count || power >= port->digital_output_count ||
+     !port->digital_inputs || !port->digital_outputs) return -EINVAL;
+ if (port->user_config[0] != 1U || (port->user_modes[data] & 15U) != 1U ||
+     !((port->user_modes[power] & 15U) == 2U || (port->user_modes[power] & 15U) == 3U)) return -ESTALE;
+ if (!gpio_is_ready_dt(&port->digital_inputs[data]) || !gpio_is_ready_dt(&port->digital_outputs[power])) return -ENODEV;
+ return 0;
+}
+int spaghetti_port_dht22_power(const struct spaghetti_port *port, uint8_t data, uint8_t power, bool on)
+{
+ int err = dht22_pins(port, data, power);
+ if (err) return err;
+ /* No pull-up while unpowered: avoid back-powering through DATA. */
+ const struct gpio_dt_spec *pin = &port->digital_inputs[data];
+ err = gpio_pin_configure(pin->port, pin->pin, GPIO_INPUT);
+ if (err) return err;
+ return spaghetti_port_digital_output_set(port, power, on);
+}
+static int dht22_wait_level(const struct gpio_dt_spec *pin, int level, unsigned limit_us)
+{
+ uint32_t start = k_cycle_get_32();
+ for (;;) {
+   int value = gpio_pin_get_raw(pin->port, pin->pin);
+   if (value < 0) return value;
+   uint32_t elapsed = k_cyc_to_us_floor32(k_cycle_get_32() - start);
+   if (value == level) return (int)elapsed;
+   if (elapsed >= limit_us) return -ETIMEDOUT;
+   k_busy_wait(1);
+ }
+}
+
+int spaghetti_port_dht22_read(const struct spaghetti_port *port, uint8_t data, uint8_t power,
+                             int16_t *temperature, uint16_t *humidity)
+{
+ int err = dht22_pins(port, data, power);
+ if (err || !temperature || !humidity) return err ? err : -EINVAL;
+ const struct gpio_dt_spec *pin = &port->digital_inputs[data];
+ uint8_t bytes[5] = {0};
+ err = gpio_pin_configure(pin->port, pin->pin, GPIO_OUTPUT_LOW);
+ if (err) return err;
+ k_busy_wait(1100);
+ /* Only the bounded response capture masks interrupts (about 4 ms normally). */
+ unsigned key = irq_lock();
+ err = gpio_pin_configure(pin->port, pin->pin, GPIO_INPUT);
+ /* Observe release HIGH before the sensor's LOW/HIGH acknowledgement.
+  * Otherwise the final host LOW can shift the response by one bit. */
+ if (!err) err = dht22_wait_level(pin, 1, 120);
+ if (err >= 0) err = dht22_wait_level(pin, 0, 120);
+ if (err >= 0) err = dht22_wait_level(pin, 1, 120);
+ if (err >= 0) err = dht22_wait_level(pin, 0, 120);
+ for (unsigned bit = 0; bit < 40 && err >= 0; bit++) {
+   err = dht22_wait_level(pin, 1, 120);
+   if (err < 0) break;
+   int high = dht22_wait_level(pin, 0, 120);
+   if (high < 0) { err = high; break; }
+   bytes[bit / 8] = (bytes[bit / 8] << 1) | (high >= 40 ? 1 : 0);
+ }
+ irq_unlock(key);
+ if (err < 0) return err;
+ return spaghetti_dht22_decode_frame(bytes, temperature, humidity);
+}

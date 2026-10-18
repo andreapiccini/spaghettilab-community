@@ -50,6 +50,8 @@ struct fake_bus {
 	int32_t adc_microvolts;
 	bool gpio_input;
 	bool gpio_output;
+	uint8_t coil_pattern;
+	unsigned coil_writes;
 	uint8_t uart_rx[32];
 	size_t uart_rx_len;
 	size_t uart_rx_pos;
@@ -62,6 +64,10 @@ struct fake_bus {
 };
 
 static struct fake_bus bus;
+static unsigned int port_acquires;
+static unsigned int port_releases;
+static bool cancel_execution;
+bool spaghetti_device_profile_execution_cancelled(void) { return cancel_execution; }
 static struct spaghetti_port fake_port = {
 	.id = 0U,
 	.capabilities = SPAGHETTI_PORT_CAP_I2C | SPAGHETTI_PORT_CAP_SPI | SPAGHETTI_PORT_CAP_UART |
@@ -69,6 +75,13 @@ static struct spaghetti_port fake_port = {
 			SPAGHETTI_PORT_CAP_ADC | SPAGHETTI_PORT_CAP_W1,
 };
 
+static uint16_t rgb_duties[4];
+int spaghetti_port_pwm_set(const struct spaghetti_port *port, uint8_t channel, uint16_t duty)
+{
+ if (port != &fake_port || channel > 3 || duty > 10000) return -EINVAL;
+ rgb_duties[channel] = duty;
+ return 0;
+}
 static bool profile_referenced;
 static const char *referenced_id;
 static uint16_t referenced_version;
@@ -292,11 +305,13 @@ int spaghetti_port_acquire(const struct spaghetti_port *port, spaghetti_port_own
 	enum spaghetti_port_transport transport)
 {
 	ARG_UNUSED(transport);
+	port_acquires++;
 	return ((port != NULL) && (owner != 0U)) ? 0 : -EINVAL;
 }
 
 int spaghetti_port_release(const struct spaghetti_port *port, spaghetti_port_owner_t owner)
 {
+	port_releases++;
 	return ((port != NULL) && (owner != 0U)) ? 0 : -EINVAL;
 }
 
@@ -381,6 +396,8 @@ int spaghetti_port_get_input(const struct spaghetti_port *port, bool *out_high)
 int spaghetti_port_digital_output_set(const struct spaghetti_port *port, uint8_t channel, bool high)
 {
 	if (channel > 3U) return -EINVAL;
+	if (high) bus.coil_pattern |= BIT(channel); else bus.coil_pattern &= ~BIT(channel);
+	bus.coil_writes++;
 	return spaghetti_port_set_output(port, high);
 }
 int spaghetti_port_digital_state_get(const struct spaghetti_port *port, uint8_t channel, bool *high)
@@ -1372,4 +1389,562 @@ ZTEST(device_profiles, test_gpio_variable_write_readback_and_invalid_value)
 	ops[0].imm2 = 256; /* A nonzero high byte must never be truncated to LOW. */
 	zassert_equal(spaghetti_device_profile_exec(&profile, ops, ARRAY_SIZE(ops), &fake_port, &binding, &record), -ERANGE);
 	zassert_false(bus.gpio_output);
+}
+
+ZTEST(device_profiles, test_pulse_is_nonblocking_and_cancel_restores_level)
+{
+	struct spaghetti_device_profile profile = profile_i2c_be;
+	struct spaghetti_device_profile_binding binding = {0};
+	binding.pulse_owner = &binding;
+	struct spaghetti_device_profile_op pulse = make_op(SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE, 0, 0, 0, 2, 40, 1, 0);
+	bus_reset();
+	int64_t started = k_uptime_get();
+	zassert_ok(spaghetti_device_profile_exec(&profile, &pulse, 1, &fake_port, &binding, NULL));
+	zassert_true(k_uptime_get() - started < 20, "Pulse must not sleep on the execution worker");
+	zassert_true(bus.gpio_output);
+	k_sleep(K_MSEC(60));
+	zassert_false(bus.gpio_output);
+	pulse.imm1 = 50000;
+	zassert_ok(spaghetti_device_profile_exec(&profile, &pulse, 1, &fake_port, &binding, NULL));
+	zassert_true(bus.gpio_output);
+	started = k_uptime_get();
+	spaghetti_device_profile_cancel_pulses(&binding);
+	zassert_true(k_uptime_get() - started < 20);
+	zassert_false(bus.gpio_output);
+	k_sleep(K_MSEC(20));
+	zassert_false(bus.gpio_output, "Cancelled timer must not write after ownership is released");
+}
+
+ZTEST(device_profiles, test_logical_clock_does_not_claim_a_physical_port)
+{
+	struct spaghetti_device_profile profile;
+	struct spaghetti_device_profile_budget budget;
+	struct spaghetti_record record;
+	spaghetti_module_id_t id;
+	fill_base(&profile, "pure-clock", SPAGHETTI_PORT_TRANSPORT_LOGICAL, 0);
+	profile.sample_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 1, 0, 1, 0);
+	profile.sample_ops[1] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD, FIELD_VALUE, 0, 0, 1, 1, 0, 1);
+	profile.sample_ops[2] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD, 0, 0, 0, 0, 0, 0, 0);
+	profile.sample_count = 3;
+	unsigned int acquired = port_acquires, released = port_releases;
+	zassert_ok(spaghetti_device_profile_install_decoded(&profile));
+	zassert_ok(configure_module(77U, "pure-clock", 0, 0xFF, 0xFF, &id));
+	zassert_ok(spaghetti_module_manager_read(id, &record));
+	zassert_ok(spaghetti_module_manager_remove(id, 1U));
+	zassert_equal(port_acquires, acquired);
+	zassert_equal(port_releases, released);
+	profile.sample_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET, 0, 0, 0, 1, 0, 0, 0);
+	zassert_equal(spaghetti_device_profile_validate(&profile, &budget), -EINVAL);
+}
+ZTEST(device_profiles, test_stop_interrupts_a_long_user_delay)
+{
+	struct spaghetti_device_profile_binding binding = {0};
+	struct spaghetti_device_profile_op delay = make_op(SPAGHETTI_DEVICE_PROFILE_OP_DELAY_BOUNDED, 0, 0, 0, 60000, 0, 0, 0);
+	cancel_execution = true;
+	int64_t started = k_uptime_get();
+	int err = spaghetti_device_profile_exec(&profile_i2c_be, &delay, 1, &fake_port, &binding, NULL);
+	cancel_execution = false;
+	zassert_equal(err, -ECANCELED);
+	zassert_true(k_uptime_get() - started < 20);
+}
+
+ZTEST(device_profiles, test_stepper_nonblocking_position_stop_and_release)
+{
+	bus_reset();
+	struct spaghetti_device_profile profile = profile_i2c_be;
+	struct spaghetti_device_profile_binding binding = {0};
+	binding.pulse_owner = &binding;
+	struct spaghetti_device_profile_op ops[] = {
+		make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 2, 0, 90, 0),
+		make_op(SPAGHETTI_DEVICE_PROFILE_OP_STEPPER, 0, 0, 0, 2, 228, 3, 8),
+	};
+	int64_t before = k_uptime_get();
+	zassert_ok(spaghetti_device_profile_exec(&profile, ops, 2, &fake_port, &binding, NULL));
+	zassert_true(k_uptime_get() - before < 20, "Motor movement must not block runtime");
+	k_sleep(K_MSEC(100));
+	/* 90 degrees at eight half-steps/rev is two phase transitions. */
+	zassert_equal(bus.coil_pattern, 2U);
+	unsigned writes = bus.coil_writes;
+	k_sleep(K_MSEC(15));
+	zassert_equal(bus.coil_writes, writes, "Target reached: motor must stop scheduling");
+	ops[1].imm0 = 1;
+	zassert_ok(spaghetti_device_profile_exec(&profile, &ops[1], 1, &fake_port, &binding, NULL));
+	k_sleep(K_MSEC(15));
+	ops[1].imm0 = 0;
+	zassert_ok(spaghetti_device_profile_exec(&profile, &ops[1], 1, &fake_port, &binding, NULL));
+	zassert_not_equal(bus.coil_pattern, 0U, "Motor Stop holds the coils");
+	writes = bus.coil_writes;
+	k_sleep(K_MSEC(15));
+	zassert_equal(bus.coil_writes, writes);
+	ops[0].imm2 = 361;
+	ops[1].imm0 = 2;
+	zassert_equal(spaghetti_device_profile_exec(&profile, ops, 2, &fake_port, &binding, NULL), -EINVAL);
+	zassert_equal(bus.coil_writes, writes, "Invalid angles must not energize outputs");
+	spaghetti_device_profile_cancel_stepper(&binding);
+	zassert_equal(bus.coil_pattern, 0U, "Global safe stop releases every coil");
+	writes = bus.coil_writes;
+	k_sleep(K_MSEC(15));
+	zassert_equal(bus.coil_writes, writes, "Cancelled motor cannot write after release");
+}
+
+ZTEST(device_profiles, test_stepper_module_owns_four_pins_and_releases_on_remove)
+{
+	struct spaghetti_device_profile profile;
+	fill_base(&profile, "stepper-native", SPAGHETTI_PORT_TRANSPORT_GPIO,
+		SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT | SPAGHETTI_PORT_CAP_DIGITAL_INPUT);
+	profile.sample_field_count = 0;
+	profile.init_count = 1;
+	profile.init_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_STEPPER, 0, 0, 0, 0, 228, 3, 4096);
+	profile.sample_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_STEPPER, 0, 0, 0, 1, 228, 3, 4096);
+	profile.sample_ops[1] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD, 0, 0, 0, 0, 0, 0, 0);
+	profile.sample_ops[2] = profile.init_ops[0];
+	profile.sample_ops[3] = profile.sample_ops[1];
+	profile.sample_count = 4;
+	profile.actions[0] = (struct spaghetti_device_profile_action){ .id = 1, .first = 0, .count = 2 };
+	profile.actions[1] = (struct spaghetti_device_profile_action){ .id = 2, .first = 2, .count = 2 };
+	profile.action_count = 2;
+	zassert_ok(spaghetti_device_profile_install_decoded(&profile));
+	spaghetti_module_id_t motor, conflicting;
+	zassert_ok(configure_module(501, "stepper-native", 0, 0xff, 0xff, &motor));
+	zassert_equal(bus.coil_pattern, 0U, "Initialization must not start the motor");
+	zassert_true(configure_module(502, profile_i2c_be.profile_id, 0x48, 0xff, 0xff, &conflicting) < 0,
+		"The motor owns every supported GPIO, not just IN1");
+	struct spaghetti_record_payload output;
+	struct spaghetti_module_command command = { .command_id = 1, .result = &output };
+	zassert_ok(spaghetti_module_manager_command(motor, &command));
+	zassert_equal(output.values.field_count, 0);
+	k_sleep(K_MSEC(30));
+	command.command_id = 2;
+	zassert_ok(spaghetti_module_manager_command(motor, &command));
+	zassert_not_equal(bus.coil_pattern, 0);
+	zassert_ok(spaghetti_module_manager_remove(motor, 1));
+	zassert_equal(bus.coil_pattern, 0);
+	unsigned writes = bus.coil_writes;
+	k_sleep(K_MSEC(30));
+	zassert_equal(bus.coil_writes, writes);
+	zassert_ok(spaghetti_device_profile_remove("stepper-native", 1));
+}
+
+static K_SEM_DEFINE(stepper_busy_entered, 0, 1);
+static K_SEM_DEFINE(stepper_busy_release, 0, 1);
+static void stepper_block_system_queue(struct k_work *work)
+{
+ ARG_UNUSED(work); k_sem_give(&stepper_busy_entered); k_sem_take(&stepper_busy_release, K_FOREVER);
+}
+static K_WORK_DEFINE(stepper_busy_work, stepper_block_system_queue);
+ZTEST(device_profiles, test_stepper_keeps_cadence_with_system_queue_blocked)
+{
+ bus_reset();
+ struct spaghetti_device_profile profile = profile_i2c_be;
+ struct spaghetti_device_profile_binding binding = { .pulse_owner = &binding };
+ struct spaghetti_device_profile_op op = make_op(SPAGHETTI_DEVICE_PROFILE_OP_STEPPER, 0, 0, 0, 1, 228, 3, 4096);
+ k_work_submit(&stepper_busy_work);
+ zassert_ok(k_sem_take(&stepper_busy_entered, K_MSEC(100)));
+ int err = spaghetti_device_profile_exec(&profile, &op, 1, &fake_port, &binding, NULL);
+ unsigned before = bus.coil_writes;
+ k_sleep(K_MSEC(90));
+ unsigned after = bus.coil_writes;
+ spaghetti_device_profile_cancel_stepper(&binding);
+ k_sem_give(&stepper_busy_release);
+ zassert_ok(err);
+ zassert_true(after >= before + 40, "Phases must advance while system work is blocked");
+ before = bus.coil_writes; k_sleep(K_MSEC(20));
+ zassert_equal(bus.coil_writes, before, "Stop must prevent subsequent timer writes");
+ zassert_equal(bus.coil_pattern, 0);
+}
+
+static void sequence_config(struct spaghetti_property_set *config, const char *hex, bool repeat)
+{
+ memset(config, 0, sizeof(*config));
+ config->field_count = 7;
+ for (unsigned i = 0; i < 4; i++) {
+   config->fields[i].field_id = i + 1;
+   config->fields[i].type = SPAGHETTI_VALUE_TEXT;
+ }
+ config->fields[0].data.text.size = strlen(hex);
+ strcpy(config->fields[0].data.text.text, hex);
+ for (unsigned i = 4; i < 6; i++) {
+   config->fields[i].field_id = i + 1;
+   config->fields[i].type = SPAGHETTI_VALUE_BOOL;
+ }
+ config->fields[4].data.boolean = repeat;
+ config->fields[6].field_id = 7;
+ config->fields[6].type = SPAGHETTI_VALUE_TEXT;
+ config->fields[6].data.text.size = 4;
+ strcpy(config->fields[6].data.text.text, "test");
+}
+ZTEST(device_profiles, test_sequence_wait_pause_resume_repeat_stop)
+{
+ const struct spaghetti_module_driver *driver = spaghetti_driver_registry_find("sequence");
+ zassert_not_null(driver);
+ struct spaghetti_property_set config;
+ sequence_config(&config, "0000000064000000", true); /* 100ms wait */
+ struct spaghetti_module module = { .key = 901, .port = &fake_port };
+ zassert_ok(driver->ops->init(&module, &config));
+ struct spaghetti_record_payload out;
+ struct spaghetti_module_command cmd = { .command_id = 1 };
+ zassert_equal(driver->ops->read(&module, &out), -EAGAIN);
+ zassert_ok(driver->ops->command(&module, &cmd));
+ zassert_equal(driver->ops->read(&module, &out), -EAGAIN);
+ k_sleep(K_MSEC(30));
+ cmd.command_id = 2;
+ zassert_ok(driver->ops->command(&module, &cmd));
+ k_sleep(K_MSEC(150));
+ zassert_equal(driver->ops->read(&module, &out), -EAGAIN);
+ cmd.command_id = 1;
+ zassert_ok(driver->ops->command(&module, &cmd));
+ zassert_equal(driver->ops->read(&module, &out), -EAGAIN, "Pause freezes elapsed time");
+ k_sleep(K_MSEC(80));
+ zassert_ok(driver->ops->read(&module, &out));
+ zassert_equal(out.values.fields[0].field_id, 1);
+ zassert_equal(driver->ops->read(&module, &out), -EAGAIN); /* next cycle */
+ cmd.command_id = 3;
+ zassert_ok(driver->ops->command(&module, &cmd));
+ k_sleep(K_MSEC(150));
+ zassert_equal(driver->ops->read(&module, &out), -EAGAIN, "Stop never emits Terminata");
+ zassert_ok(driver->ops->deinit(&module));
+ sequence_config(&config, "0201010069010000", false); /* 361 degrees */
+ zassert_equal(driver->ops->validate_config(&config), -EINVAL);
+}
+ZTEST(device_profiles, test_motion_pause_completion_stop_and_zero_distance)
+{
+ bus_reset();
+ struct spaghetti_device_profile profile = profile_i2c_be;
+ struct spaghetti_device_profile_binding binding = { .module_key = 55 };
+ binding.pulse_owner = &binding;
+ struct spaghetti_device_profile_op ops[] = {
+   make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 2, 0, 180, 0),
+   make_op(SPAGHETTI_DEVICE_PROFILE_OP_STEPPER, 0, 0, 0, 2, 228, 3, 64),
+ };
+ zassert_ok(spaghetti_device_profile_exec(&profile, ops, 2, &fake_port, &binding, NULL));
+ k_sleep(K_MSEC(20));
+ zassert_ok(spaghetti_device_profile_motion_pause(55, true));
+ unsigned writes = bus.coil_writes;
+ k_sleep(K_MSEC(500));
+ zassert_equal(bus.coil_writes, writes);
+ struct spaghetti_motion_status status;
+ zassert_ok(spaghetti_device_profile_motion_status(55, &status));
+ zassert_true(status.busy && status.paused);
+ zassert_equal(status.completed, 0);
+ zassert_ok(spaghetti_device_profile_motion_pause(55, false));
+ k_sleep(K_MSEC(500));
+ zassert_ok(spaghetti_device_profile_motion_status(55, &status));
+ zassert_false(status.busy);
+ zassert_equal(status.completed, 1);
+ zassert_ok(spaghetti_device_profile_exec(&profile, ops, 2, &fake_port, &binding, NULL));
+ zassert_ok(spaghetti_device_profile_motion_status(55, &status));
+ zassert_equal(status.completed, 2, "Already at target produces one completion");
+ ops[0].imm2 = 0;
+ zassert_ok(spaghetti_device_profile_exec(&profile, ops, 2, &fake_port, &binding, NULL));
+ zassert_ok(spaghetti_device_profile_motion_stop(55));
+ k_sleep(K_MSEC(120));
+ zassert_ok(spaghetti_device_profile_motion_status(55, &status));
+ zassert_equal(status.completed, 2, "Stop is not a completed movement");
+ zassert_false(status.busy);
+ zassert_equal(bus.coil_pattern, 0);
+ spaghetti_device_profile_cancel_stepper(&binding);
+ zassert_equal(spaghetti_device_profile_motion_status(55, &status), -ENOENT);
+}
+ZTEST(device_profiles, test_sequence_waits_for_motor_and_emits_one_motion_event)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile, "motion-sequence-test", SPAGHETTI_PORT_TRANSPORT_GPIO,
+   SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT | SPAGHETTI_PORT_CAP_DIGITAL_INPUT);
+ profile.sample_field_count = 1;
+ profile.sample_fields[0].field_id = 65534;
+ profile.sample_fields[0].type = SPAGHETTI_VALUE_UINT64;
+ strcpy(profile.sample_fields[0].name, "movement_completed");
+ profile.init_count = 1;
+ profile.init_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_STEPPER, 0, 0, 0, 0, 228, 3, 64);
+ profile.sample_count = 3;
+ profile.sample_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 2, 0, 90, 0);
+ profile.sample_ops[1] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_STEPPER, 0, 0, 0, 2, 228, 3, 64);
+ profile.sample_ops[2] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD, 0, 0, 0, 0, 0, 0, 0);
+ profile.action_count = 1;
+ profile.actions[0] = (struct spaghetti_device_profile_action){ .id = 1, .first = 0, .count = 3 };
+ zassert_ok(spaghetti_device_profile_install_decoded(&profile));
+ spaghetti_module_id_t motor;
+ zassert_ok(configure_module(55, profile.profile_id, 0, 0xff, 0xff, &motor));
+ const struct spaghetti_module_driver *driver = spaghetti_driver_registry_find("sequence");
+ struct spaghetti_property_set config;
+ sequence_config(&config, "023701005a000000", false);
+ struct spaghetti_module module = { .key = 902, .port = &fake_port };
+ zassert_ok(driver->ops->init(&module, &config));
+ struct spaghetti_module_command cmd = { .command_id = 1 };
+ zassert_ok(driver->ops->command(&module, &cmd));
+ struct spaghetti_record_payload out;
+ zassert_equal(driver->ops->read(&module, &out), -EAGAIN);
+ zassert_equal(driver->ops->read(&module, &out), -EAGAIN, "ACK is not completion");
+ k_sleep(K_MSEC(250));
+ zassert_ok(driver->ops->read(&module, &out));
+ zassert_equal(out.values.fields[0].field_id, 1);
+ struct spaghetti_record record;
+ zassert_ok(spaghetti_module_manager_read(motor, &record));
+ zassert_equal(record.payload.values.fields[0].field_id, 65534);
+ zassert_equal(record.payload.values.fields[0].data.unsigned_integer, 1);
+ zassert_equal(spaghetti_module_manager_read(motor, &record), -EAGAIN);
+ zassert_ok(driver->ops->deinit(&module));
+ zassert_ok(spaghetti_module_manager_remove(motor, 1));
+ zassert_ok(spaghetti_device_profile_remove(profile.profile_id, 1));
+}
+
+ZTEST(device_profiles, test_sequence_missing_target_reports_error_not_completion)
+{
+ struct spaghetti_property_set config;
+ sequence_config(&config, "01fa010000000000", false);
+ config.fields[5].data.boolean = true;
+ struct spaghetti_module_request request = {
+   .key = 904, .port_id = 0, .type_id = "sequence", .config = &config,
+   .placement = { .bay_id = SPAGHETTI_BAY_ID_UNSPECIFIED,
+                  .power_rail_id = SPAGHETTI_POWER_RAIL_UNSPECIFIED }, .revision = 1,
+ };
+ spaghetti_module_id_t id;
+ zassert_ok(spaghetti_module_manager_configure(&request, &id));
+ struct spaghetti_module_snapshot snapshot;
+ zassert_ok(spaghetti_module_manager_get_by_id(id, &snapshot));
+ zassert_equal(snapshot.endpoint.kind, SPAGHETTI_ENDPOINT_LOGICAL);
+ struct spaghetti_record record;
+ zassert_ok(spaghetti_module_manager_read(id, &record));
+ zassert_equal(record.payload.values.fields[0].field_id, 2);
+ zassert_equal(record.payload.values.fields[0].data.signed_integer, -ENOENT);
+ zassert_equal(spaghetti_module_manager_read(id, &record), -EAGAIN);
+ zassert_ok(spaghetti_module_manager_remove(id, 1));
+}
+
+ZTEST(device_profiles, test_rgb_remembers_color_and_inverts_common_anode)
+{
+ struct spaghetti_rgb_state state = {0};
+ struct spaghetti_device_profile_binding binding = { .rgb = &state };
+ struct spaghetti_device_profile profile = profile_i2c_be;
+ uint8_t data[] = {2,0,0,128,255,0, 0,0,0,0,0,0, 1,0,0,0,0,0};
+ profile.message_data = data; profile.message_data_size = sizeof(data);
+ struct spaghetti_device_profile_op op = make_op(SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM,0,0,0,0,6,36,0);
+ zassert_ok(spaghetti_device_profile_exec(&profile,&op,1,&fake_port,&binding,NULL));
+ zassert_equal(rgb_duties[0],10000); zassert_equal(rgb_duties[1],5020); zassert_equal(rgb_duties[2],0);
+ op.imm0 = 6;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&op,1,&fake_port,&binding,NULL));
+ zassert_equal(rgb_duties[0],0); zassert_equal(state.color,0xff8000);
+ op.imm0 = 12; op.imm3 = 1;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&op,1,&fake_port,&binding,NULL));
+ zassert_equal(rgb_duties[0],0); zassert_equal(rgb_duties[1],4980); zassert_equal(rgb_duties[2],10000);
+ spaghetti_device_profile_rgb_stop(&state,&fake_port);
+ zassert_equal(rgb_duties[0],10000); zassert_equal(rgb_duties[1],10000); zassert_false(state.initialized);
+}
+
+ZTEST(device_profiles, test_rgb_profile_variable_validation_and_public_state)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"rgb-test",SPAGHETTI_PORT_TRANSPORT_GPIO,SPAGHETTI_PORT_CAP_PWM);
+ uint8_t program[] = {4,0,0,0,0,0, 3,0,0,0,0,0};
+ profile.message_data=program; profile.message_data_size=sizeof(program);
+ profile.sample_count=3;
+ profile.sample_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT,0,1,1,4,1,0,0);
+ profile.sample_ops[1]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM,0,0,0,0,12,36,0);
+ profile.sample_ops[2]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0);
+ profile.action_count=1; profile.actions[0]=(struct spaghetti_device_profile_action){.id=1,.first=0,.count=3};
+ profile.sample_field_count=2;
+ profile.sample_fields[0]=(struct spaghetti_device_profile_field){.field_id=65531,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_on"};
+ profile.sample_fields[1]=(struct spaghetti_device_profile_field){.field_id=65532,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_color"};
+ profile.max_transactions=3;
+ zassert_ok(spaghetti_device_profile_validate(&profile,NULL));
+ struct spaghetti_property_set args={.field_count=1,.fields={{.field_id=1,.type=SPAGHETTI_VALUE_UINT64,.data.unsigned_integer=0x0080ff}}};
+ struct spaghetti_rgb_state state={0};
+ struct spaghetti_device_profile_binding binding={.rgb=&state,.arguments=&args};
+ struct spaghetti_record_payload out;
+ zassert_ok(spaghetti_device_profile_exec(&profile,profile.sample_ops,3,&fake_port,&binding,&out));
+ zassert_equal(state.variables[0],0x0080ff); zassert_equal(out.values.fields[0].data.unsigned_integer,1);
+ zassert_equal(out.values.fields[1].data.unsigned_integer,0x0080ff);
+ zassert_equal(rgb_duties[0],0); zassert_equal(rgb_duties[1],5020); zassert_equal(rgb_duties[2],10000);
+ args.fields[0].data.unsigned_integer=0x1000000;
+ zassert_equal(spaghetti_device_profile_exec(&profile,profile.sample_ops,3,&fake_port,&binding,&out),-ERANGE);
+ zassert_equal(state.color,0x0080ff); zassert_equal(rgb_duties[2],10000);
+ profile.sample_ops[1].imm2=0;
+ zassert_equal(spaghetti_device_profile_validate(&profile,NULL),-EINVAL);
+}
+
+ZTEST(device_profiles, test_rgb_native_module_reports_state_without_replaying_action)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"rgb-native",SPAGHETTI_PORT_TRANSPORT_GPIO,SPAGHETTI_PORT_CAP_PWM);
+ uint8_t data[]={2,0,0,0,255,0,0,0,0,0,0,0,1,0,0,0,0,0};
+ profile.message_data=data; profile.message_data_size=sizeof(data);
+ profile.init_count=1;
+ profile.init_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM,0,0,0,0,12,36,0);
+ profile.sample_count=2;
+ profile.sample_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM,0,0,0,12,6,36,0);
+ profile.sample_ops[1]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0);
+ profile.action_count=1; profile.actions[0]=(struct spaghetti_device_profile_action){.id=1,.first=0,.count=2};
+ profile.sample_field_count=2;
+ profile.sample_fields[0]=(struct spaghetti_device_profile_field){.field_id=65531,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_on"};
+ profile.sample_fields[1]=(struct spaghetti_device_profile_field){.field_id=65532,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_color"};
+ profile.max_transactions=6;
+ fake_port.capabilities |= SPAGHETTI_PORT_CAP_PWM;
+ zassert_ok(spaghetti_device_profile_install_decoded(&profile));
+ spaghetti_module_id_t module,conflict;
+ zassert_ok(configure_module(601,"rgb-native",0,0xff,0xff,&module));
+ zassert_true(configure_module(602,"rgb-native",0,0xff,0xff,&conflict)<0,"Overlapping RGB pins must be reserved");
+ struct spaghetti_record_payload out;
+ struct spaghetti_record record;
+ zassert_ok(spaghetti_module_manager_read(module,&record));
+ zassert_equal(record.payload.values.fields[0].data.unsigned_integer,0,"Polling must not invoke first On action");
+ zassert_equal(spaghetti_module_manager_read(module,&record),-EAGAIN);
+ struct spaghetti_module_command command={.command_id=1,.result=&out};
+ zassert_ok(spaghetti_module_manager_command(module,&command));
+ zassert_equal(rgb_duties[0],10000);
+ zassert_ok(spaghetti_module_manager_read(module,&record));
+ zassert_equal(record.payload.values.fields[1].data.unsigned_integer,0xff0000);
+ zassert_ok(spaghetti_module_manager_remove(module,1));
+ zassert_equal(rgb_duties[0],0,"Global Stop must deactivate RGB");
+ zassert_ok(spaghetti_device_profile_remove("rgb-native",1));
+}
+
+
+static int dht22_reads;
+static bool dht22_powered;
+int spaghetti_port_dht22_power(const struct spaghetti_port *port, uint8_t data, uint8_t power, bool on)
+{
+ ARG_UNUSED(port); if (data == power || data > 3 || power > 3) return -EINVAL;
+ dht22_powered = on; return 0;
+}
+int spaghetti_port_dht22_read(const struct spaghetti_port *port, uint8_t data, uint8_t power, int16_t *temperature, uint16_t *humidity)
+{
+ ARG_UNUSED(port); ARG_UNUSED(data); ARG_UNUSED(power);
+ dht22_reads++; *temperature = -123; *humidity = 567; return 0;
+}
+ZTEST(device_profiles, test_dht22_warmup_cache_negative_temperature_and_power_off)
+{
+ struct spaghetti_dht22_state state = {0};
+ struct spaghetti_device_profile_binding binding = { .dht22 = &state };
+ struct spaghetti_device_profile profile = {0};
+ struct spaghetti_device_profile_op power = { .opcode = SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER, .imm0 = 0, .imm1 = 1, .imm2 = 1 };
+ struct spaghetti_device_profile_op read[] = {
+   { .opcode = SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ, .imm0 = 0, .imm1 = 1, .dst = 0, .src_a = 1 },
+   { .opcode = SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD, .src_a = 0, .imm0 = 1, .imm1 = 2 | 0x200 },
+ };
+ struct spaghetti_record_payload record;
+ dht22_reads = 0;
+ zassert_ok(spaghetti_device_profile_exec(&profile, &power, 1, &fake_port, &binding, NULL));
+ zassert_true(dht22_powered);
+ zassert_equal(spaghetti_device_profile_exec(&profile, read, 1, &fake_port, &binding, NULL), -EAGAIN);
+ zassert_equal(dht22_reads, 0);
+ state.ready_at = 0;
+ zassert_ok(spaghetti_device_profile_exec(&profile, read, 1, &fake_port, &binding, &record));
+ zassert_equal(state.temperature, -123); zassert_equal(state.humidity, 567);
+ zassert_ok(spaghetti_device_profile_exec(&profile, read, 1, &fake_port, &binding, NULL));
+ zassert_equal(dht22_reads, 1);
+ power.imm2 = 0;
+ zassert_ok(spaghetti_device_profile_exec(&profile, &power, 1, &fake_port, &binding, NULL));
+ zassert_false(dht22_powered); zassert_false(state.valid);
+ zassert_equal(spaghetti_device_profile_exec(&profile, read, 1, &fake_port, &binding, NULL), -EHOSTDOWN);
+}
+
+ZTEST(device_profiles, test_dht22_frame_checksum_sign_and_range)
+{
+ int16_t t = 0; uint16_t h = 0;
+ uint8_t frame[] = { 2, 55, 128, 123, 52 };
+ zassert_ok(spaghetti_dht22_decode_frame(frame, &t, &h));
+ zassert_equal(t, -123); zassert_equal(h, 567);
+ frame[4] ^= 1;
+ zassert_equal(spaghetti_dht22_decode_frame(frame, &t, &h), -EBADMSG);
+ uint8_t invalid[] = { 4, 0, 0, 0, 4 };
+ zassert_equal(spaghetti_dht22_decode_frame(invalid, &t, &h), -ERANGE);
+}
+
+ZTEST(device_profiles, test_dht22_emits_float_and_text_degrees_and_queues_early_trigger)
+{
+ struct spaghetti_device_profile profile = {0};
+ fill_base(&profile, "dht-decimal", SPAGHETTI_PORT_TRANSPORT_GPIO,
+           SPAGHETTI_PORT_CAP_DIGITAL_INPUT | SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT);
+ profile.sample_fields[0] = (struct spaghetti_device_profile_field){ .field_id = 1, .type = SPAGHETTI_VALUE_FLOAT, .name = "temperature", .unit = "°C" };
+ profile.sample_field_count = 1;
+ struct spaghetti_dht22_state state = { .powered = true, .data_channel = 0, .power_channel = 1, .ready_at = k_uptime_get() + 2000 };
+ struct spaghetti_device_profile_binding binding = { .dht22 = &state };
+ struct spaghetti_device_profile_op ops[] = {
+   { .opcode = SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ, .imm0 = 0, .imm1 = 1, .imm2 = 1, .dst = 0, .src_a = 1 },
+   { .opcode = SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL, .src_a = 0, .dst = 1 },
+   { .opcode = SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD },
+ };
+ struct spaghetti_record_payload record;
+ memcpy(profile.sample_ops, ops, sizeof(ops)); profile.sample_count = 3;
+ struct spaghetti_device_profile_budget budget;
+ zassert_ok(spaghetti_device_profile_validate(&profile, &budget));
+ dht22_reads = 0;
+ zassert_equal(spaghetti_device_profile_exec(&profile, ops, 3, &fake_port, &binding, &record), -EAGAIN);
+ zassert_true(state.pending); zassert_equal(dht22_reads, 0);
+ state.ready_at = 0;
+ zassert_ok(spaghetti_device_profile_exec(&profile, ops, 3, &fake_port, &binding, &record));
+ zassert_false(state.pending); zassert_equal(dht22_reads, 1);
+ zassert_equal(record.values.fields[0].type, SPAGHETTI_VALUE_FLOAT);
+ zassert_within(record.values.fields[0].data.decimal, -12.3, 0.00001);
+ zassert_equal(spaghetti_device_profile_exec(&profile, ops, 3, &fake_port, &binding, &record), -EAGAIN);
+ zassert_true(state.pending); zassert_equal(dht22_reads, 1);
+ state.attempted = false;
+ ops[1].imm0 = 1;
+ profile.sample_fields[0].type = SPAGHETTI_VALUE_TEXT;
+ zassert_ok(spaghetti_device_profile_exec(&profile, ops, 3, &fake_port, &binding, &record));
+ zassert_equal(record.values.fields[0].type, SPAGHETTI_VALUE_TEXT);
+ zassert_str_equal(record.values.fields[0].data.text.text, "-12.3 °C");
+}
+
+/* Wire-v2 LOW/HIGH profile: logical sources have no physical capabilities. */
+ZTEST(device_profiles, test_manual_trigger_wire_profile)
+{
+    const uint8_t cbor[] = {
+        0xaf, 0x00, 0x02, 0x01, 0x71, 0x66, 0x6c, 0x6f, 0x77, 0x2e, 0x74, 0x72, 0x69, 0x67, 0x67, 0x65,
+        0x72, 0x2e, 0x74, 0x65, 0x73, 0x74, 0x02, 0x01, 0x03, 0x06, 0x04, 0x00, 0x05, 0x01, 0x06, 0x00,
+        0x07, 0x00, 0x08, 0x80, 0x09, 0x86, 0x88, 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x88,
+        0x15, 0x01, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x88, 0x16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x88, 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x88, 0x15, 0x01, 0x00, 0x00, 0x01,
+        0x01, 0x00, 0x00, 0x88, 0x16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x80, 0x0b, 0x73,
+        0x66, 0x6c, 0x6f, 0x77, 0x2e, 0x74, 0x72, 0x69, 0x67, 0x67, 0x65, 0x72, 0x2e, 0x74, 0x65, 0x73,
+        0x74, 0x2e, 0x73, 0x0c, 0x01, 0x0d, 0x81, 0x84, 0x01, 0x02, 0x67, 0x74, 0x72, 0x69, 0x67, 0x67,
+        0x65, 0x72, 0x60, 0x0e, 0x82, 0x83, 0x01, 0x00, 0x03, 0x83, 0x02, 0x03, 0x03
+    };
+    zassert_ok(spaghetti_device_profile_install(cbor, sizeof(cbor)));
+    spaghetti_module_id_t id;
+    zassert_ok(configure_module(78U, "flow.trigger.test", 0, 0xff, 0xff, &id));
+    struct spaghetti_record_payload output;
+    struct spaghetti_module_command command = {.command_id = 1, .result = &output};
+    zassert_ok(spaghetti_module_manager_command(id, &command));
+    zassert_equal(output.values.fields[0].data.unsigned_integer, 0);
+    command.command_id = 2;
+    zassert_ok(spaghetti_module_manager_command(id, &command));
+    zassert_equal(output.values.fields[0].data.unsigned_integer, 1);
+    command.command_id = 1;
+    zassert_ok(spaghetti_module_manager_command(id, &command));
+    zassert_equal(output.values.fields[0].data.unsigned_integer, 0);
+    zassert_ok(spaghetti_module_manager_remove(id, 1));
+    zassert_ok(spaghetti_device_profile_remove("flow.trigger.test", 1));
+}
+
+ZTEST(device_profiles, test_dht22_complete_module_command_and_record)
+{
+    struct spaghetti_device_profile profile;
+    fill_base(&profile, "dht-command", SPAGHETTI_PORT_TRANSPORT_GPIO,
+        SPAGHETTI_PORT_CAP_DIGITAL_INPUT | SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT);
+    profile.sample_fields[0].type = SPAGHETTI_VALUE_FLOAT;
+    profile.init_count = 1;
+    profile.init_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER,
+        0, 0, 0, 0, 1, 1, 0);
+    profile.sample_count = 3;
+    profile.sample_ops[0] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ,
+        0, 1, 0, 0, 1, 1, 0);
+    profile.sample_ops[1] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL,
+        1, 0, 0, 0, 0, 0, 0);
+    profile.sample_ops[2] = make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,
+        0, 0, 0, 0, 0, 0, 0);
+    profile.action_count = 1;
+    profile.actions[0] = (struct spaghetti_device_profile_action){1, 0, 3};
+    zassert_ok(spaghetti_device_profile_install_decoded(&profile));
+    spaghetti_module_id_t id;
+    zassert_ok(configure_module(79U, "dht-command", 0, 0xff, 0xff, &id));
+    k_sleep(K_MSEC(2001));
+    struct spaghetti_record_payload output;
+    struct spaghetti_module_command command = {.command_id = 1, .result = &output};
+    zassert_ok(spaghetti_module_manager_command(id, &command));
+    zassert_equal(output.action_id, 1);
+    zassert_equal(output.values.fields[0].type, SPAGHETTI_VALUE_FLOAT);
+    zassert_within(output.values.fields[0].data.decimal, -12.3, 0.001);
+    zassert_ok(spaghetti_module_manager_remove(id, 1));
+    zassert_ok(spaghetti_device_profile_remove("dht-command", 1));
 }

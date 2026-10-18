@@ -519,3 +519,58 @@ ZTEST(processing, test_physical_outputs_follow_records_and_reject_stale_modes)
 }
 
 ZTEST_SUITE(processing, NULL, processing_setup, NULL, NULL, NULL);
+
+static const void *test_led_owner;
+static bool test_led_on;
+int spaghetti_status_led_set(const void *owner, bool on) { if (test_led_owner && test_led_owner != owner) return -EBUSY; test_led_owner = owner; test_led_on = on; return 0; }
+void spaghetti_status_led_release(const void *owner) { if (test_led_owner == owner) test_led_owner = NULL; }
+ZTEST(processing, test_status_led_bool_threshold_invert_and_release)
+{
+ const struct spaghetti_block_driver *driver = spaghetti_block_registry_find("status_led"); zassert_not_null(driver);
+ for (unsigned inverted = 0; inverted < 2; ++inverted) {
+  struct spaghetti_property_set config = {0}; prop_u64(&config, 1U, 50U);
+  config.fields[config.field_count++] = (struct spaghetti_value){ .field_id = 2U, .type = SPAGHETTI_VALUE_BOOL, .data.boolean = inverted != 0 };
+  uint64_t state[8] = {0}; zassert_ok(driver->ops->init(&config, state));
+  struct spaghetti_value value = { .type = SPAGHETTI_VALUE_BOOL, .data.boolean = true }; bool valid = true;
+  zassert_ok(driver->ops->process(state,NULL,&value,&valid,1,NULL,NULL,0,NULL,NULL,NULL)); zassert_equal(test_led_on, !inverted);
+  value = make_i64(0,49); zassert_ok(driver->ops->process(state,NULL,&value,&valid,1,NULL,NULL,0,NULL,NULL,NULL)); zassert_equal(test_led_on, inverted != 0);
+  value = make_i64(0,50); zassert_ok(driver->ops->process(state,NULL,&value,&valid,1,NULL,NULL,0,NULL,NULL,NULL)); zassert_equal(test_led_on, !inverted);
+  driver->ops->reset(state); zassert_false(test_led_on);
+  driver->ops->deinit(state); zassert_is_null(test_led_owner);
+ }
+}
+
+/* Reproduces the production runtime caller: records must fit a small worker
+ * even when the graph is empty. The old all-block output array exceeded 8 KB. */
+K_THREAD_STACK_DEFINE(record_worker_stack, 4096);
+static struct k_thread record_worker;
+static struct spaghetti_record worker_record;
+static int worker_result;
+static void process_record_on_worker(void *a, void *b, void *c)
+{
+	ARG_UNUSED(a); ARG_UNUSED(b); ARG_UNUSED(c);
+	worker_result = spaghetti_processing_on_record(&worker_record, NULL, NULL);
+}
+
+ZTEST(processing, test_records_fit_runtime_worker_stack)
+{
+	struct spaghetti_block_config block = { .key = 10U, .min_version = 1U };
+	struct spaghetti_edge_config edge = {
+		.source_kind = SPAGHETTI_EDGE_SOURCE_MODULE,
+		.source_key = 1U, .source_port_or_field = 1U,
+		.target_key = 10U, .target_input = 0U,
+	};
+	strcpy(block.type_id, "fake_double");
+	worker_record = make_record(1U, 1U, 7);
+	for (unsigned active = 0U; active < 2U; ++active) {
+		zassert_ok(spaghetti_processing_configure(active ? &block : NULL,
+			active, active ? &edge : NULL, active));
+		worker_result = -EINPROGRESS;
+		k_thread_create(&record_worker, record_worker_stack,
+			K_THREAD_STACK_SIZEOF(record_worker_stack), process_record_on_worker,
+			NULL, NULL, NULL, K_PRIO_PREEMPT(5), 0, K_NO_WAIT);
+		zassert_ok(k_thread_join(&record_worker, K_SECONDS(2)));
+		zassert_ok(worker_result);
+	}
+	zassert_ok(spaghetti_processing_configure(NULL, 0U, NULL, 0U));
+}

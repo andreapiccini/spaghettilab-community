@@ -267,7 +267,7 @@ describe("physical composition", () => {
     expect(modesProvideBus([8, 9, 10, 11], "spi")).toBe(true);
     expect(modesProvideBus([14, 0, 0, 0], "adc")).toBe(true);
     expect(modesProvideBus([0, 0, 0, 0], "gpio")).toBe(true);
-    expect(STATUS_LED_GPIO).toBe(11);
+    expect(STATUS_LED_GPIO).toBe(10);
   });
 
   it("reads the first draft modes for a core binding", () => {

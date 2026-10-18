@@ -8,6 +8,11 @@
  * delle istruzioni catalogate").
  */
 export const DeviceProfileOpcode = {
+  DHT22_POWER: 36,
+  EMIT_DECIMAL: 38,
+  DHT22_READ: 37,
+  RGB_PROGRAM: 35,
+  STEPPER: 34,
   MESSAGE_LOAD: 29,
   MESSAGE_PATCH: 30,
   I2C_MESSAGE_WRITE: 31,
@@ -20,6 +25,7 @@ export const DeviceProfileOpcode = {
   GPIO_GET: 7,
   GPIO_SET: 8,
   GPIO_SET_VALUE: 32,
+  GPIO_PULSE: 33,
   ADC_READ: 9,
   DELAY_BOUNDED: 10,
   WAIT_FIELD_MASK: 11,

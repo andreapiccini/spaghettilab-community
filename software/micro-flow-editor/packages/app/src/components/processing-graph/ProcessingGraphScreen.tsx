@@ -1,18 +1,66 @@
-import { SENSOR_INSTANCE_PROP, SENSOR_INPUT_PROP, SENSOR_OUTPUT_PROP } from "../../lib/sensor-instance.js";
+import { upgradeDht22Driver } from "../../lib/gpio-driver-presets.js";
+import {
+  SENSOR_INSTANCE_PROP,
+  SENSOR_INPUT_PROP,
+  SENSOR_OUTPUT_PROP,
+} from "../../lib/sensor-instance.js";
 import { prepareDriverDeployment } from "../../lib/driver-deployment-plan.js";
 import { planDriverCanvasChanges } from "../../lib/driver-canvas-plan.js";
 import { encodeConfigCbor, sha256 } from "@spaghettilab/config-compiler";
 import { physicalPinsForBinding } from "../../lib/physical-pin-bindings.js";
 import { dryRunConfig, type DryRunResult } from "@spaghettilab/config-decompiler";
-import { isBlockNodeData, type DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
+import {
+  isBlockNodeData,
+  type DeviceProcessingNodeData,
+} from "@spaghettilab/device-processing-graph-model";
 import type { CoreBindingRecord, GraphNode, GraphState } from "@spaghettilab/domain";
-import { isModuleNodeData, type PhysicalCompositionNodeData } from "@spaghettilab/physical-composition-model";
-import { findCatalogEntryById, isBayEntry, shippedTypeIds, type ProcessingCatalogEntry } from "@spaghettilab/processing-block-catalog";
-import { addGraphEdgeCommand, addGraphNodeCommand, deviceGraphLens, edgeChangesToCommands, nodeChangesToCommands, removeGraphEdgeCommand, removeGraphNodeCommand, toReactFlowEdges, updateGraphNodeCommand } from "@spaghettilab/react-flow-adapter";
-import { applyEdgeChanges, applyNodeChanges, Background, Controls, MiniMap, Position, ReactFlow, ReactFlowProvider, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type ReactFlowInstance } from "@xyflow/react";
+import {
+  isModuleNodeData,
+  type PhysicalCompositionNodeData,
+} from "@spaghettilab/physical-composition-model";
+import {
+  findCatalogEntryById,
+  isBayEntry,
+  shippedTypeIds,
+  type ProcessingCatalogEntry,
+} from "@spaghettilab/processing-block-catalog";
+import {
+  addGraphEdgeCommand,
+  addGraphNodeCommand,
+  deviceGraphLens,
+  edgeChangesToCommands,
+  nodeChangesToCommands,
+  removeGraphEdgeCommand,
+  removeGraphNodeCommand,
+  toReactFlowEdges,
+  updateGraphNodeCommand,
+} from "@spaghettilab/react-flow-adapter";
+import {
+  applyEdgeChanges,
+  applyNodeChanges,
+  Background,
+  Controls,
+  MiniMap,
+  Position,
+  ReactFlow,
+  ReactFlowProvider,
+  type Connection,
+  type Edge,
+  type EdgeChange,
+  type Node,
+  type NodeChange,
+  type ReactFlowInstance,
+} from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { CircleAlert, PlayCircle, Square, Workflow } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+} from "react";
 import { labelForNumericSignal } from "../../lib/port-protocol-mock.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
@@ -27,7 +75,10 @@ import {
 } from "../../lib/stop-deployed-runtime.js";
 import { portCardId } from "../physical-composition/ConfiguredPortNode.js";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
-import { localizeCatalogEntry, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
+import {
+  localizeCatalogEntry,
+  localizedBaySideLabel,
+} from "../../lib/processing-catalog-copy.js";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { DEMO_VISITOR_PROJECT_NAME } from "../../lib/demo-project.js";
 import { DEMO_ADD_BLOCK_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
@@ -52,6 +103,7 @@ import {
   DEVICE_RECIPE_PENDING_CREATE_META_KEY,
   draftToCanvasSensorRecipes,
   parseDeviceRecipeDraft,
+  serializeDeviceRecipeDraft,
 } from "../../lib/device-recipe-draft.js";
 import {
   draftModesForBinding,
@@ -83,12 +135,22 @@ import {
 } from "./catalog-to-node.js";
 import { catalogEntryForNode } from "./catalog-entry-for-node.js";
 import { positionForBayDrop } from "./bay-layout.js";
-import { isIncompatibleDemoEdge, isValidDemoProcessingConnection, isValidProcessingConnection } from "./connection-rules.js";
+import {
+  isIncompatibleDemoEdge,
+  isValidDemoProcessingConnection,
+  isValidProcessingConnection,
+} from "./connection-rules.js";
 import { PROCESSING_EDGE_TYPES } from "./DeletableEdge.js";
 import { NodeInspector, type ProcessingInspectorMode } from "./NodeInspector.js";
 import { DemoInspectorBubble } from "./DemoInspectorBubble.js";
-import { DEMO_BACKBONE_FRAME_ID, DEMO_BACKBONE_NODE_TYPES } from "./DemoBackboneFrame.js";
-import { EVENT_CONTAINER_NODE_TYPES, type EventContainerNodeData } from "./EventContainerNode.js";
+import {
+  DEMO_BACKBONE_FRAME_ID,
+  DEMO_BACKBONE_NODE_TYPES,
+} from "./DemoBackboneFrame.js";
+import {
+  EVENT_CONTAINER_NODE_TYPES,
+  type EventContainerNodeData,
+} from "./EventContainerNode.js";
 import {
   canBeNested,
   canChainIntoEventContainer,
@@ -106,19 +168,54 @@ import {
   triggerToContainerOrigin,
   type EventContainer,
 } from "./event-containers.js";
-import { activeActuatorsAt, activeTriggersAt, buildDryRunPreviewChannels, isBackboneSensorBlock, isCompareIf, isDigitalCommandSource, isFlowStartBlock, isLedBlock, isRelayBlock, isTemperatureSensor, ledIntensitiesAt, numberFromProperty, previewParticipantIds, rgbVisualsAt, type DryRunPreviewChannel } from "./dry-run-preview.js";
-import { NODE_HEIGHT, NODE_PADDING, NODE_WIDTH, ENTRY_FEED_INSET, EVENT_CONTAINER_HEADER_HEIGHT, FLOW_START_SIZE, fixedTickAbsolute, fixedTickRelativePosition } from "./layout-constants.js";
+import {
+  activeActuatorsAt,
+  activeTriggersAt,
+  buildDryRunPreviewChannels,
+  isBackboneSensorBlock,
+  isCompareIf,
+  isDigitalCommandSource,
+  isFlowStartBlock,
+  isLedBlock,
+  isRelayBlock,
+  isTemperatureSensor,
+  ledIntensitiesAt,
+  numberFromProperty,
+  previewParticipantIds,
+  rgbVisualsAt,
+} from "./dry-run-preview.js";
+import {
+  NODE_HEIGHT,
+  NODE_PADDING,
+  NODE_WIDTH,
+  ENTRY_FEED_INSET,
+  EVENT_CONTAINER_HEADER_HEIGHT,
+  FLOW_START_SIZE,
+  fixedTickAbsolute,
+  fixedTickRelativePosition,
+} from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
-import { containerAtPosition, resolveRectOverlap, resolveSiblingOverlap, type SizedRect } from "./node-overlap.js";
+import {
+  containerAtPosition,
+  resolveRectOverlap,
+  resolveSiblingOverlap,
+  type SizedRect,
+} from "./node-overlap.js";
 import { ProcessingBlockPalette } from "./ProcessingBlockPalette.js";
 import { PROCESSING_NODE_TYPES } from "./ProcessingNode.js";
 import { toProcessingNodes, type ProcessingNodeUiData } from "./to-nodes.js";
 
 /** The member with no outgoing edge to another non-trigger member — where a chained-in block attaches next. Nested event-sources have their own chain. */
-function chainTailId(container: EventContainer, edges: GraphState<"device-processing">["edges"], triggerIds: ReadonlySet<string>): string {
+function chainTailId(
+  container: EventContainer,
+  edges: GraphState<"device-processing">["edges"],
+  triggerIds: ReadonlySet<string>,
+): string {
   const members = container.memberIds.filter((id) => !triggerIds.has(id));
   for (const id of members) {
-    const hasDownstreamMember = edges.some((e) => e.source === id && members.includes(e.target));
+    const hasDownstreamMember = edges.some(
+      (e) => e.source === id && members.includes(e.target),
+    );
     if (!hasDownstreamMember) return id;
   }
   return container.triggerId;
@@ -126,24 +223,44 @@ function chainTailId(container: EventContainer, edges: GraphState<"device-proces
 
 const TEMP_PROBE_EXTRA_H = 36;
 
-function layoutSizeForUiNode(node: Node<ProcessingNodeUiData>): { w: number; h: number } {
+function layoutSizeForUiNode(node: Node<ProcessingNodeUiData>): {
+  w: number;
+  h: number;
+} {
   if (node.data.circular) return { w: FLOW_START_SIZE, h: FLOW_START_SIZE };
   return {
     w: node.data.cardWidth ?? NODE_WIDTH,
-    h: (node.data.cardHeight ?? NODE_HEIGHT) + (node.data.tempProbe ? TEMP_PROBE_EXTRA_H : 0),
+    h:
+      (node.data.cardHeight ?? NODE_HEIGHT) +
+      (node.data.tempProbe ? TEMP_PROBE_EXTRA_H : 0),
   };
 }
 
-function demoSpawnPosition(entryId: (typeof DEMO_ADD_BLOCK_IDS)[number]): { x: number; y: number } {
+function demoSpawnPosition(entryId: (typeof DEMO_ADD_BLOCK_IDS)[number]): {
+  x: number;
+  y: number;
+} {
   if (entryId === "appblocks.compare_if") return { x: 300, y: 36 };
   if (entryId === "appblocks.relay") return { x: 420, y: 260 };
   return { x: 20, y: 280 };
 }
 
-const NODE_TYPES = { ...PROCESSING_NODE_TYPES, ...EVENT_CONTAINER_NODE_TYPES, ...DEMO_BACKBONE_NODE_TYPES };
+const NODE_TYPES = {
+  ...PROCESSING_NODE_TYPES,
+  ...EVENT_CONTAINER_NODE_TYPES,
+  ...DEMO_BACKBONE_NODE_TYPES,
+};
 
-const EMPTY_GRAPH: GraphState<"device-processing"> = { layer: "device-processing", nodes: [], edges: [] };
-const EMPTY_PHYSICAL_GRAPH: GraphState<"physical-composition"> = { layer: "physical-composition", nodes: [], edges: [] };
+const EMPTY_GRAPH: GraphState<"device-processing"> = {
+  layer: "device-processing",
+  nodes: [],
+  edges: [],
+};
+const EMPTY_PHYSICAL_GRAPH: GraphState<"physical-composition"> = {
+  layer: "physical-composition",
+  nodes: [],
+  edges: [],
+};
 const SHIPPED_TYPE_IDS = shippedTypeIds();
 
 /**
@@ -162,20 +279,35 @@ export function ProcessingGraphScreen() {
 }
 
 function ProcessingGraphScreenInner() {
-  const { session, execute, navigate, requestDeploy, openBackbonePhysical } = useSession();
-  const { getClient, getSnapshot, observeConfig, removeProfile, lockTransport, unlockTransport } =
-    useCoreSessions();
+  const { session, execute, navigate, requestDeploy, canvasFocus } = useSession();
+  const {
+    getClient,
+    getSnapshot,
+    observeConfig,
+    removeProfile,
+    lockTransport,
+    unlockTransport,
+  } = useCoreSessions();
   const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
   const demoAutoStarted = useRef(false);
   const createdDriverToken = useRef<string | null>(null);
-  const { configuredPorts, pinMapOf, protocolFor, selectedBindingId, setSelectedBindingId } = usePortProtocol();
+  const {
+    configuredPorts,
+    pinMapOf,
+    protocolFor,
+    selectedBindingId,
+    setSelectedBindingId,
+  } = usePortProtocol();
   const bindings = session?.stack.current.coreBindings ?? [];
 
-  const selected: CoreBindingRecord | null = bindings.find((b) => b.bindingId === selectedBindingId) ?? bindings[0] ?? null;
-  const bindingIndex = selected ? bindings.findIndex((b) => b.bindingId === selected.bindingId) : -1;
+  const selected: CoreBindingRecord | null =
+    bindings.find((b) => b.bindingId === selectedBindingId) ?? bindings[0] ?? null;
+  const bindingIndex = selected
+    ? bindings.findIndex((b) => b.bindingId === selected.bindingId)
+    : -1;
 
   const [inspector, setInspector] = useState<ProcessingInspectorMode | null>(null);
   const [sensorWizardOpen, setSensorWizardOpen] = useState(false);
@@ -187,14 +319,26 @@ function ProcessingGraphScreenInner() {
   const [pausing, setPausing] = useState(false);
   const [pauseError, setPauseError] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
-  const [previewActiveIds, setPreviewActiveIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [previewActiveIds, setPreviewActiveIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const [previewElapsedMs, setPreviewElapsedMs] = useState(0);
-  const [previewLedIntensity, setPreviewLedIntensity] = useState<ReadonlyMap<string, number>>(() => new Map());
-  const [previewRgbVisual, setPreviewRgbVisual] = useState<ReadonlyMap<string, { readonly color: string; readonly intensity: number }>>(() => new Map());
-  const [previewTriggerIds, setPreviewTriggerIds] = useState<ReadonlySet<string>>(() => new Set());
-  const [previewActuatorIds, setPreviewActuatorIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [previewLedIntensity, setPreviewLedIntensity] = useState<
+    ReadonlyMap<string, number>
+  >(() => new Map());
+  const [previewRgbVisual, setPreviewRgbVisual] = useState<
+    ReadonlyMap<string, { readonly color: string; readonly intensity: number }>
+  >(() => new Map());
+  const [previewTriggerIds, setPreviewTriggerIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const [previewActuatorIds, setPreviewActuatorIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const [hashHex, setHashHex] = useState<string | null>(null);
-  const [rf, setRf] = useState<ReactFlowInstance<Node<ProcessingNodeUiData>> | null>(null);
+  const [rf, setRf] = useState<ReactFlowInstance<Node<ProcessingNodeUiData>> | null>(
+    null,
+  );
   const [dropPreview, setDropPreview] = useState<{ x: number; y: number } | null>(null);
   const [overlapWarning, setOverlapWarning] = useState<string | null>(null);
   const [containerHint, setContainerHint] = useState<{
@@ -204,9 +348,10 @@ function ProcessingGraphScreenInner() {
     readonly previewWidth?: number;
     readonly previewHeight?: number;
   } | null>(null);
-  const previewChannelsRef = useRef<readonly DryRunPreviewChannel[]>([]);
   const previewStartedAtRef = useRef(0);
-  const persistTempTestRef = useRef<(nodeId: string, celsius: number) => void>(() => {});
+  const persistTempTestRef = useRef<(nodeId: string, celsius: number) => void>(
+    () => {},
+  );
 
   useEffect(() => {
     if (!overlapWarning) return;
@@ -216,7 +361,6 @@ function ProcessingGraphScreenInner() {
 
   const stopPreview = useCallback(() => {
     setSimulating(false);
-    previewChannelsRef.current = [];
     setPreviewActiveIds(new Set());
     setPreviewTriggerIds(new Set());
     setPreviewActuatorIds(new Set());
@@ -225,10 +369,55 @@ function ProcessingGraphScreenInner() {
     setPreviewElapsedMs(0);
   }, []);
 
-  const graphState: GraphState<"device-processing"> = (bindingIndex >= 0 ? session?.stack.current.deviceGraphs[bindingIndex] : undefined) ?? EMPTY_GRAPH;
-  const physicalGraphState: GraphState<"physical-composition"> = (bindingIndex >= 0 ? session?.stack.current.physicalGraphs[bindingIndex] : undefined) ?? EMPTY_PHYSICAL_GRAPH;
+  const graphState: GraphState<"device-processing"> =
+    (bindingIndex >= 0
+      ? session?.stack.current.deviceGraphs[bindingIndex]
+      : undefined) ?? EMPTY_GRAPH;
+  const focusedDeployRequest = useRef(0);
+  useEffect(() => {
+    if (!canvasFocus || !rf || canvasFocus.request === focusedDeployRequest.current)
+      return;
+    if (selected?.bindingId !== canvasFocus.bindingId) {
+      const binding = bindings.find((item) => item.bindingId === canvasFocus.bindingId);
+      if (binding) setSelectedBindingId(binding.bindingId);
+      return;
+    }
+    const frame = requestAnimationFrame(() => {
+      if (
+        canvasFocus.nodeId &&
+        graphState.nodes.some((node) => node.id === canvasFocus.nodeId)
+      ) {
+        rf.updateNode(canvasFocus.nodeId, { selected: true });
+        void rf.fitView({
+          nodes: [{ id: canvasFocus.nodeId }],
+          padding: 0.7,
+          maxZoom: 1.3,
+          duration: 250,
+        });
+      } else void rf.fitView({ padding: 0.2, maxZoom: 0.8, duration: 250 });
+      focusedDeployRequest.current = canvasFocus.request;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [
+    canvasFocus,
+    rf,
+    selected?.bindingId,
+    setSelectedBindingId,
+    graphState,
+    bindings,
+  ]);
+  const physicalGraphState: GraphState<"physical-composition"> =
+    (bindingIndex >= 0
+      ? session?.stack.current.physicalGraphs[bindingIndex]
+      : undefined) ?? EMPTY_PHYSICAL_GRAPH;
   const graphStateRef = useRef(graphState);
-  graphStateRef.current = graphState;
+  useEffect(() => {
+    graphStateRef.current = graphState;
+  }, [graphState]);
+  const previewChannelsForRender = useMemo(
+    () => (simulating ? buildDryRunPreviewChannels(graphState) : []),
+    [simulating, graphState],
+  );
 
   useEffect(() => {
     if (!simulating) return;
@@ -236,7 +425,6 @@ function ProcessingGraphScreenInner() {
       // Rebuild from the live graph so Inspector period edits apply immediately
       // without stopping and re-running Dry-run.
       const channels = buildDryRunPreviewChannels(graphStateRef.current);
-      previewChannelsRef.current = channels;
       const actuators = previewParticipantIds(channels);
       setPreviewActuatorIds(actuators);
       const elapsed = performance.now() - previewStartedAtRef.current;
@@ -251,12 +439,26 @@ function ProcessingGraphScreenInner() {
     return () => window.clearInterval(id);
   }, [simulating]);
 
-  const domainNodes = graphState.nodes as readonly GraphNode<"device-processing", string, DeviceProcessingNodeData>[];
-  const moduleNodes = physicalGraphState.nodes as readonly GraphNode<"physical-composition", string, PhysicalCompositionNodeData>[];
+  const domainNodes = graphState.nodes as readonly GraphNode<
+    "device-processing",
+    string,
+    DeviceProcessingNodeData
+  >[];
+  const moduleNodes = physicalGraphState.nodes as readonly GraphNode<
+    "physical-composition",
+    string,
+    PhysicalCompositionNodeData
+  >[];
   const projectAuthoringMetadata = session?.stack.current.authoringMetadata;
-  const authoringMetadata = useMemo(() => projectAuthoringMetadata ?? {}, [projectAuthoringMetadata]);
+  const authoringMetadata = useMemo(
+    () => projectAuthoringMetadata ?? {},
+    [projectAuthoringMetadata],
+  );
   const sensorModulesProject = useMemo(
-    () => parseBackboneSensorModules(authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment),
+    () =>
+      parseBackboneSensorModules(
+        authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
+      ),
     [authoringMetadata],
   );
   const backboneSensorModules = useMemo(
@@ -292,6 +494,234 @@ function ProcessingGraphScreenInner() {
     [execute],
   );
 
+  /** Creates the fixed violet tick disc for a Schedule and wires Schedule → tick. */
+  function spawnScheduleTick(
+    scheduleId: string,
+    schedulePosition: { readonly x: number; readonly y: number },
+  ) {
+    if (!execute || bindingIndex < 0) return;
+    const startEntry = findCatalogEntryById("native.flow_start");
+    if (!startEntry) return;
+    const startData = nodeDataFromCatalogEntry(startEntry, moduleOptions[0]?.id);
+    if (!startData || startData.kind !== "block") return;
+    const tickId = `dp-tick-${scheduleId}`;
+    if (domainNodes.some((n) => n.id === tickId)) return;
+    const origin = triggerToContainerOrigin(schedulePosition);
+    const tickPos = fixedTickAbsolute(origin);
+    const lens = deviceGraphLens(bindingIndex);
+    execute(
+      addGraphNodeCommand(lens, {
+        layer: "device-processing",
+        id: tickId,
+        data: startData,
+      }),
+    );
+    execute(
+      addGraphEdgeCommand(lens, {
+        id: `dpe-tick-${scheduleId}`,
+        source: scheduleId,
+        target: tickId,
+        sourceHandle: "0",
+        targetHandle: "0",
+      }),
+    );
+    execute({
+      kind: "UpdateAuthoringMetadata",
+      apply: (project) => ({
+        ok: true,
+        value: {
+          ...project,
+          authoringMetadata: {
+            ...project.authoringMetadata,
+            [tickId]: { comment: "", position: tickPos },
+          },
+        },
+      }),
+    });
+  }
+
+  function placeFromCatalog(
+    entry: ProcessingCatalogEntry,
+    requestedPosition = nextSpawnPosition(domainNodes.length),
+    baySide = peekPaletteDragBaySide(),
+    physicalPinId?: string,
+    overrides?: {
+      readonly comment?: string;
+      readonly properties?: Readonly<
+        Record<string, string | number | boolean | bigint>
+      >;
+    },
+  ): string | undefined {
+    if (!execute || bindingIndex < 0) return undefined;
+    // Tick discs are spawned with each Schedule — never from the palette.
+    if (entry.id === "native.flow_start" || entry.typeId === "ab.flow_start")
+      return undefined;
+    let data = nodeDataFromCatalogEntry(entry, moduleOptions[0]?.id, baySide);
+    if (!data) return undefined;
+    if (physicalPinId) {
+      const pin = physicalPinsForBinding(
+        session?.stack.current,
+        selected?.bindingId,
+      ).find(
+        (item) => item.id === physicalPinId && item.local && item.entryId === entry.id,
+      );
+      if (!pin) return undefined;
+      if (data.kind === "event-source")
+        data = {
+          ...data,
+          moduleNodeId: pin.moduleNodeId,
+          properties: { ...data.properties, physicalPinId },
+        };
+      else if (data.kind === "block")
+        data = {
+          ...data,
+          properties: {
+            ...data.properties,
+            "1": BigInt(pin.backendPortId),
+            "2": BigInt(pin.channel),
+            physicalPinId,
+          },
+        };
+    }
+    if (overrides?.properties && data.kind === "block") {
+      data = { ...data, properties: { ...data.properties, ...overrides.properties } };
+    }
+
+    const id = `dp-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+    const bay = isBayEntry(entry);
+    const resolvedBaySide = baySide ?? (bay ? "output" : undefined);
+
+    // Same attachment handling as an existing block being dragged (onNodesChange):
+    // a new Block dropped inside a dashed container has no edge yet, so chain it
+    // onto that trigger (or its last member) instead of leaving it merely
+    // overlapping. Only a Block can be chained this way — see onNodesChange.
+    // Bay endpoints stay outside the box (left = ingresso, right = uscita).
+    let position = requestedPosition;
+    let attachEdgeCommand: ReturnType<typeof addGraphEdgeCommand> | undefined;
+    let attachLowerBound: { x: number; y: number } | undefined;
+    if (bay && resolvedBaySide) {
+      position = positionForBayDrop(
+        resolvedBaySide,
+        requestedPosition,
+        eventContainers,
+      );
+    } else if (canChainIntoEventContainer(data)) {
+      const target = containerAtPosition(position, eventContainers);
+      if (target) {
+        attachEdgeCommand = addGraphEdgeCommand(deviceGraphLens(bindingIndex), {
+          id: `dpe-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+          source: chainTailId(
+            target,
+            graphState.edges,
+            new Set(containerByTriggerId.keys()),
+          ),
+          target: id,
+          sourceHandle: "0",
+          targetHandle: "0",
+        });
+        setOverlapWarning(copy.connectedTo(target.label));
+        attachLowerBound = {
+          x: target.x + NODE_PADDING + ENTRY_FEED_INSET,
+          y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
+        };
+        position = {
+          x: Math.max(position.x, attachLowerBound.x),
+          y: Math.max(position.y, attachLowerBound.y),
+        };
+      }
+    } else if (isNestableContainer(data.kind)) {
+      const target = canBeNested(data.kind)
+        ? containerAtPosition(position, eventContainers)
+        : undefined;
+      if (target) {
+        attachEdgeCommand = addGraphEdgeCommand(deviceGraphLens(bindingIndex), {
+          id: `dpe-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+          source: target.triggerId,
+          target: id,
+          sourceHandle: "0",
+          targetHandle: "0",
+        });
+        setOverlapWarning(copy.insertedInto(target.label));
+        attachLowerBound = {
+          x: target.x + NODE_PADDING + ENTRY_FEED_INSET,
+          y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
+        };
+        position = {
+          x: Math.max(position.x, attachLowerBound.x),
+          y: Math.max(position.y, attachLowerBound.y),
+        };
+      } else if (
+        data.kind === "schedule" &&
+        containerAtPosition(position, eventContainers)
+      ) {
+        setOverlapWarning(copy.scheduleInsideSchedule);
+      }
+      const size = emptyEventContainerSize();
+      const origin = triggerToContainerOrigin(position);
+      const extra = new Set(target ? [target.triggerId] : []);
+      const resolved = resolveRectOverlap(
+        "",
+        origin,
+        { w: size.width, h: size.height },
+        overlapObstaclesFor("", extra),
+      );
+      position = containerOriginToTrigger(resolved);
+      if (attachLowerBound)
+        position = {
+          x: Math.max(position.x, attachLowerBound.x),
+          y: Math.max(position.y, attachLowerBound.y),
+        };
+    }
+    if (!isNestableContainer(data.kind)) {
+      position = resolveSiblingOverlap(
+        "",
+        position,
+        localNodes
+          .filter((n) => !containerByTriggerId.has(n.id))
+          .map((n) => {
+            const size = layoutSizeForUiNode(n);
+            return { id: n.id, position: n.position, w: size.w, h: size.h };
+          }),
+        attachLowerBound,
+      );
+    }
+
+    // The node must exist before an edge can reference its id as a target.
+    execute(
+      addGraphNodeCommand(deviceGraphLens(bindingIndex), {
+        layer: "device-processing",
+        id,
+        data,
+      }),
+    );
+    if (attachEdgeCommand) execute(attachEdgeCommand);
+    const comment =
+      overrides?.comment ??
+      (demoOnly || !bay || !resolvedBaySide
+        ? localizeCatalogEntry(entry, locale).label
+        : `${localizeCatalogEntry(entry, locale).label} · ${localizedBaySideLabel(resolvedBaySide, locale)}`);
+    execute({
+      kind: "UpdateAuthoringMetadata",
+      apply: (project) => ({
+        ok: true,
+        value: {
+          ...project,
+          authoringMetadata: {
+            ...project.authoringMetadata,
+            [id]: { comment, position },
+          },
+        },
+      }),
+    });
+
+    if (data.kind === "schedule") {
+      spawnScheduleTick(id, position);
+    }
+
+    setInspector({ kind: "edit", nodeId: id, data, comment });
+    return id;
+  }
+
   function placeSensorRecipeOnCanvas(
     recipe: SensorRecipe,
     position?: { readonly x: number; readonly y: number },
@@ -302,7 +732,12 @@ function ProcessingGraphScreenInner() {
       setMissingBus(recipe.bus);
       return false;
     }
-    let module = backboneSensorModules.find(m => recipe.driverInstanceId && m.recipe.driverInstanceId === recipe.driverInstanceId) ?? createModuleFromRecipe(recipe);
+    let module =
+      backboneSensorModules.find(
+        (m) =>
+          recipe.driverInstanceId &&
+          m.recipe.driverInstanceId === recipe.driverInstanceId,
+      ) ?? createModuleFromRecipe(recipe);
     const entry = findCatalogEntryById(BACKBONE_SENSOR_BLOCK_CATALOG_ID);
     if (entry && (recipeChannels(recipe).length > 0 || recipe.actionId)) {
       const graphNodeId = placeFromCatalog(
@@ -315,9 +750,20 @@ function ProcessingGraphScreenInner() {
           properties: propertiesForSensorModule(module, recipe),
         },
       );
-      if (graphNodeId) module = { ...module, graphNodeId: module.graphNodeId ?? graphNodeId, graphNodeIds: [...(module.graphNodeIds ?? (module.graphNodeId ? [module.graphNodeId] : [])), graphNodeId] };
+      if (graphNodeId)
+        module = {
+          ...module,
+          graphNodeId: module.graphNodeId ?? graphNodeId,
+          graphNodeIds: [
+            ...(module.graphNodeIds ??
+              (module.graphNodeId ? [module.graphNodeId] : [])),
+            graphNodeId,
+          ],
+        };
     }
-    persistSensorModules(upsertModule(sensorModulesProject, selected.bindingId, module));
+    persistSensorModules(
+      upsertModule(sensorModulesProject, selected.bindingId, module),
+    );
     return true;
   }
 
@@ -368,14 +814,39 @@ function ProcessingGraphScreenInner() {
             ...node.data,
             properties: {
               ...node.data.properties,
-              ...propertiesForSensorModule(module, update.recipe, node.data.properties[SENSOR_INSTANCE_PROP] === true ? {inputId: String(node.data.properties[SENSOR_INPUT_PROP] ?? ""), outputId: String(node.data.properties[SENSOR_OUTPUT_PROP] ?? "")} : undefined),
+              ...propertiesForSensorModule(
+                module,
+                update.recipe,
+                node.data.properties[SENSOR_INSTANCE_PROP] === true
+                  ? {
+                      inputId: String(node.data.properties[SENSOR_INPUT_PROP] ?? ""),
+                      outputId: String(node.data.properties[SENSOR_OUTPUT_PROP] ?? ""),
+                    }
+                  : undefined,
+              ),
             },
           },
         }),
       );
-      const selectedProperties = propertiesForSensorModule(module, update.recipe, node.data.properties[SENSOR_INSTANCE_PROP] === true ? {inputId: String(node.data.properties[SENSOR_INPUT_PROP] ?? ""), outputId: String(node.data.properties[SENSOR_OUTPUT_PROP] ?? "")} : undefined);
-      for (const edge of selectedProperties[SENSOR_INSTANCE_PROP] === true ? graphState.edges : []) {
-        if ((edge.target === node.id && edge.targetHandle !== selectedProperties[SENSOR_INPUT_PROP]) || (edge.source === node.id && edge.sourceHandle !== selectedProperties[SENSOR_OUTPUT_PROP]))
+      const selectedProperties = propertiesForSensorModule(
+        module,
+        update.recipe,
+        node.data.properties[SENSOR_INSTANCE_PROP] === true
+          ? {
+              inputId: String(node.data.properties[SENSOR_INPUT_PROP] ?? ""),
+              outputId: String(node.data.properties[SENSOR_OUTPUT_PROP] ?? ""),
+            }
+          : undefined,
+      );
+      for (const edge of selectedProperties[SENSOR_INSTANCE_PROP] === true
+        ? graphState.edges
+        : []) {
+        if (
+          (edge.target === node.id &&
+            edge.targetHandle !== selectedProperties[SENSOR_INPUT_PROP]) ||
+          (edge.source === node.id &&
+            edge.sourceHandle !== selectedProperties[SENSOR_OUTPUT_PROP])
+        )
           execute(removeGraphEdgeCommand(deviceGraphLens(bindingIndex), edge.id));
       }
       graphNodeIds.push(node.id);
@@ -466,14 +937,12 @@ function ProcessingGraphScreenInner() {
 
   function handleSensorModuleRemove(moduleId: string) {
     if (!selected) return;
-    const existing = modulesForBinding(
-      sensorModulesProject,
-      selected.bindingId,
-    ).find((item) => item.id === moduleId);
+    const existing = modulesForBinding(sensorModulesProject, selected.bindingId).find(
+      (item) => item.id === moduleId,
+    );
     if (execute && bindingIndex >= 0) {
       const linked = new Set(
-        existing?.graphNodeIds ??
-          (existing?.graphNodeId ? [existing.graphNodeId] : []),
+        existing?.graphNodeIds ?? (existing?.graphNodeId ? [existing.graphNodeId] : []),
       );
       for (const node of domainNodes) {
         if (
@@ -481,9 +950,7 @@ function ProcessingGraphScreenInner() {
           (isBlockNodeData(node.data) &&
             node.data.properties[SENSOR_MODULE_ID_PROP] === moduleId)
         ) {
-          execute(
-            removeGraphNodeCommand(deviceGraphLens(bindingIndex), node.id),
-          );
+          execute(removeGraphNodeCommand(deviceGraphLens(bindingIndex), node.id));
         }
       }
     }
@@ -503,20 +970,33 @@ function ProcessingGraphScreenInner() {
       label: next.chip,
     };
     setSensorDetail(updated);
-    persistSensorModules(upsertModule(sensorModulesProject, selected.bindingId, updated));
+    persistSensorModules(
+      upsertModule(sensorModulesProject, selected.bindingId, updated),
+    );
     const nodeId =
       updated.graphNodeId ??
       domainNodes.find(
-        (node) => isBlockNodeData(node.data) && node.data.properties[SENSOR_MODULE_ID_PROP] === updated.id,
+        (node) =>
+          isBlockNodeData(node.data) &&
+          node.data.properties[SENSOR_MODULE_ID_PROP] === updated.id,
       )?.id;
     if (nodeId && execute && bindingIndex >= 0) {
       const domainNode = domainNodes.find((node) => node.id === nodeId);
       if (domainNode && isBlockNodeData(domainNode.data)) {
         const data: DeviceProcessingNodeData = {
           ...domainNode.data,
-          properties: { ...domainNode.data.properties, ...propertiesForSensorModule(updated, next) },
+          properties: {
+            ...domainNode.data.properties,
+            ...propertiesForSensorModule(updated, next),
+          },
         };
-        execute(updateGraphNodeCommand(deviceGraphLens(bindingIndex), { layer: "device-processing", id: nodeId, data }));
+        execute(
+          updateGraphNodeCommand(deviceGraphLens(bindingIndex), {
+            layer: "device-processing",
+            id: nodeId,
+            data,
+          }),
+        );
         execute({
           kind: "UpdateAuthoringMetadata",
           apply: (project) => ({
@@ -538,11 +1018,17 @@ function ProcessingGraphScreenInner() {
     for (const node of domainNodes) {
       if (!isBlockNodeData(node.data) || !isLedBlock(node.data)) continue;
       const props = node.data.properties;
-      if (props.statusLed === true || props.statusLed === "true" || props.statusLed === 1 || props.statusLed === 1n) {
+      if (
+        props.statusLed === true ||
+        props.statusLed === "true" ||
+        props.statusLed === 1 ||
+        props.statusLed === 1n
+      ) {
         return node.id;
       }
       const comment = authoringMetadata[node.id]?.comment ?? "";
-      if (comment.includes(STATUS_LED_LABEL) || comment.includes("STATUS LED")) return node.id;
+      if (comment.includes(STATUS_LED_LABEL) || comment.includes("STATUS LED"))
+        return node.id;
     }
     return undefined;
   }
@@ -563,15 +1049,21 @@ function ProcessingGraphScreenInner() {
     }
     const entry = findCatalogEntryById("appblocks.led");
     if (!entry) return;
-    placeFromCatalog(entry, nextSpawnPosition(domainNodes.length), "output", undefined, {
-      comment: `${STATUS_LED_LABEL} · IO${STATUS_LED_GPIO}`,
-      properties: {
-        statusLed: true,
-        gpio: STATUS_LED_GPIO,
-        color: "#22C55E",
-        line: "STATUS",
+    placeFromCatalog(
+      entry,
+      nextSpawnPosition(domainNodes.length),
+      "output",
+      undefined,
+      {
+        comment: `${STATUS_LED_LABEL} · IO${STATUS_LED_GPIO}`,
+        properties: {
+          statusLed: true,
+          gpio: STATUS_LED_GPIO,
+          color: "#EF4444",
+          line: "STATUS",
+        },
       },
-    });
+    );
   }
 
   useEffect(() => {
@@ -594,12 +1086,22 @@ function ProcessingGraphScreenInner() {
       .filter((n) => isModuleNodeData(n.data))
       .map((n) => ({
         id: n.id,
-        label: authoringMetadata[n.id]?.comment && authoringMetadata[n.id]!.comment!.trim() !== "" ? authoringMetadata[n.id]!.comment! : n.id,
+        label:
+          authoringMetadata[n.id]?.comment &&
+          authoringMetadata[n.id]!.comment!.trim() !== ""
+            ? authoringMetadata[n.id]!.comment!
+            : n.id,
         portId: isModuleNodeData(n.data) ? n.data.portId : undefined,
       }));
-    const takenPorts = new Set(fromModules.map((m) => m.portId).filter((id): id is number => id !== undefined));
+    const takenPorts = new Set(
+      fromModules.map((m) => m.portId).filter((id): id is number => id !== undefined),
+    );
     const fromPorts = configuredPorts
-      .filter((port) => !takenPorts.has(port.portId) && port.pins.some((pin) => pin.peripheral !== "unused"))
+      .filter(
+        (port) =>
+          !takenPorts.has(port.portId) &&
+          port.pins.some((pin) => pin.peripheral !== "unused"),
+      )
       .map((port) => ({
         id: portCardId(port.portId),
         label: `Porta ${port.portId}`,
@@ -607,8 +1109,15 @@ function ProcessingGraphScreenInner() {
       }));
     return [...fromModules, ...fromPorts];
   }, [moduleNodes, authoringMetadata, configuredPorts]);
-  const knownModuleNodeIds = useMemo(() => new Set(moduleOptions.map((m) => m.id)), [moduleOptions]);
-  const moduleLabel = useCallback((moduleNodeId: string) => moduleOptions.find((m) => m.id === moduleNodeId)?.label ?? moduleNodeId, [moduleOptions]);
+  const knownModuleNodeIds = useMemo(
+    () => new Set(moduleOptions.map((m) => m.id)),
+    [moduleOptions],
+  );
+  const moduleLabel = useCallback(
+    (moduleNodeId: string) =>
+      moduleOptions.find((m) => m.id === moduleNodeId)?.label ?? moduleNodeId,
+    [moduleOptions],
+  );
   const fieldLabel = useCallback(
     (moduleNodeId: string, fieldId: number) => {
       const option = moduleOptions.find((m) => m.id === moduleNodeId);
@@ -621,13 +1130,38 @@ function ProcessingGraphScreenInner() {
 
   const errorsByNode = useMemo(() => {
     const map = new Map<string, string>();
-    if (dryRun) for (const issue of dryRun.issues) for (const segment of issue.path) map.set(segment, issue.remediation);
+    if (dryRun)
+      for (const issue of dryRun.issues)
+        for (const segment of issue.path) map.set(segment, issue.remediation);
     return map;
   }, [dryRun]);
   const errorCount = dryRun?.issues.filter((i) => i.severity !== "warning").length ?? 0;
-  const warningCount = dryRun?.issues.filter((i) => i.severity === "warning").length ?? 0;
+  const warningCount =
+    dryRun?.issues.filter((i) => i.severity === "warning").length ?? 0;
 
-  const domainRfNodes = useMemo(() => toProcessingNodes(graphState, authoringMetadata, new Set(errorsByNode.keys()), moduleLabel, fieldLabel, new Set(), locale), [graphState, authoringMetadata, errorsByNode, moduleLabel, fieldLabel, locale]);
+  const viewerPlan = useMemo(() => {
+    if (!session || !selected || !domainNodes.some(node => node.data.kind === "block" && node.data.blockTypeId === "ui.data_viewer")) return { observations: [] };
+    try {
+      return prepareDriverDeployment(session.stack.current, selected.bindingId, { physicalGraph: physicalGraphState, processingGraph: graphState, mqtt: DISABLED_MQTT, connectivity: 0, energy: DEFAULT_ENERGY });
+    } catch (error) { return { observations: [], error: error instanceof Error ? error.message : String(error) }; }
+  }, [session?.stack.current, selected?.bindingId, graphState, physicalGraphState, domainNodes]);
+  const domainRfNodes = useMemo(
+    () =>
+      toProcessingNodes(
+        graphState,
+        authoringMetadata,
+        new Set(errorsByNode.keys()),
+        moduleLabel,
+        fieldLabel,
+        new Set(),
+        locale,
+      ).map(node => node.data.manualTrigger ? { ...node, data: { ...node.data, manualTrigger: { bindingId: selected?.bindingId } }} : node.data.dataViewer ? { ...node, data: { ...node.data, dataViewer: { ...node.data.dataViewer,
+        bindingId: selected?.bindingId,
+        source: viewerPlan.observations?.find(item => item.viewerId === node.id),
+        error: "error" in viewerPlan ? viewerPlan.error : undefined,
+      }}} : node),
+    [graphState, authoringMetadata, errorsByNode, moduleLabel, fieldLabel, locale, selected?.bindingId, viewerPlan],
+  );
   // "deletable" (DeletableEdge.tsx) routes around other blocks on H/V
   // segments with rounded corners, plus a hover trash control.
   const edges = useMemo<Edge[]>(() => {
@@ -644,7 +1178,10 @@ function ProcessingGraphScreenInner() {
       };
     });
   }, [graphState, demoOnly, domainNodes]);
-  const processingNodeLabel = useCallback((id: string) => domainRfNodes.find((n) => n.id === id)?.data.label ?? id, [domainRfNodes]);
+  const processingNodeLabel = useCallback(
+    (id: string) => domainRfNodes.find((n) => n.id === id)?.data.label ?? id,
+    [domainRfNodes],
+  );
 
   const resolveCatalogEntry = useCallback(
     (nodeId: string) => {
@@ -655,15 +1192,28 @@ function ProcessingGraphScreenInner() {
   );
 
   const isValidConnection = useCallback(
-    (connection: Connection | { source?: string | null; target?: string | null; sourceHandle?: string | null; targetHandle?: string | null }) => {
+    (
+      connection:
+        | Connection
+        | {
+            source?: string | null;
+            target?: string | null;
+            sourceHandle?: string | null;
+            targetHandle?: string | null;
+          },
+    ) => {
       if (!isValidProcessingConnection(connection, resolveCatalogEntry)) return false;
       if (!demoOnly) return true;
-      return isValidDemoProcessingConnection(connection, { nodes: domainNodes, edges: graphState.edges });
+      return isValidDemoProcessingConnection(connection, {
+        nodes: domainNodes,
+        edges: graphState.edges,
+      });
     },
     [resolveCatalogEntry, demoOnly, domainNodes, graphState.edges],
   );
 
-  const [localNodes, setLocalNodes] = useState<Node<ProcessingNodeUiData>[]>(domainRfNodes);
+  const [localNodes, setLocalNodes] =
+    useState<Node<ProcessingNodeUiData>[]>(domainRfNodes);
   const [syncedFrom, setSyncedFrom] = useState(domainRfNodes);
   if (domainRfNodes !== syncedFrom) {
     setSyncedFrom(domainRfNodes);
@@ -675,7 +1225,10 @@ function ProcessingGraphScreenInner() {
   // livePositions comes from localNodes (updates every drag frame, not just on
   // drop), so a container grows/shrinks live while the trigger or a member is
   // still being dragged.
-  const livePositions = useMemo(() => new Map(localNodes.map((n) => [n.id, n.position])), [localNodes]);
+  const livePositions = useMemo(
+    () => new Map(localNodes.map((n) => [n.id, n.position])),
+    [localNodes],
+  );
   const eventContainers = useMemo(
     () =>
       computeEventContainers(
@@ -693,10 +1246,14 @@ function ProcessingGraphScreenInner() {
       ),
     [graphState, authoringMetadata, livePositions, containerHint],
   );
-  const containerByTriggerId = useMemo(() => new Map(eventContainers.map((c) => [c.triggerId, c])), [eventContainers]);
+  const containerByTriggerId = useMemo(
+    () => new Map(eventContainers.map((c) => [c.triggerId, c])),
+    [eventContainers],
+  );
   const containerByMemberId = useMemo(() => {
     const map = new Map<string, (typeof eventContainers)[number]>();
-    for (const container of eventContainers) for (const memberId of container.memberIds) map.set(memberId, container);
+    for (const container of eventContainers)
+      for (const memberId of container.memberIds) map.set(memberId, container);
     return map;
   }, [eventContainers]);
   // The container node's own id is the trigger's real domain id (not a "container-" prefix) —
@@ -708,62 +1265,94 @@ function ProcessingGraphScreenInner() {
   // recomputes, which clears React Flow's DOM-measured handleBounds. Without a
   // static handles list, Schedule → member edges silently vanish (getEdgePosition
   // returns null). Coordinates match EventContainerNode (right/left, top: 16).
-  const containerNodes = useMemo<Node<EventContainerNodeData>[]>(
-    () => {
-      const depthOf = (c: EventContainer): number => {
-        let d = 0;
-        let parentId = c.parentTriggerId;
-        const seen = new Set<string>();
-        while (parentId && !seen.has(parentId)) {
-          seen.add(parentId);
-          d += 1;
-          parentId = containerByTriggerId.get(parentId)?.parentTriggerId;
-        }
-        return d;
-      };
-      return [...eventContainers]
-        .sort((a, b) => depthOf(a) - depthOf(b))
-        .map((container) => {
-          const triggerData = domainNodes.find((n) => n.id === container.triggerId)?.data;
-          const parent = container.parentTriggerId ? containerByTriggerId.get(container.parentTriggerId) : undefined;
-          const kind = triggerData?.kind === "schedule" ? "schedule" : "event-source";
-          const handleY = 16;
-          // Schedule wires to the tick are domain-only (hidden) — no canvas handles.
-          const handles =
-            kind === "event-source"
-              ? [
-                  { id: "0", type: "target" as const, position: Position.Left, x: -5, y: handleY, width: 10, height: 14 },
-                  { id: "0", type: "source" as const, position: Position.Right, x: container.width - 14, y: handleY, width: 14, height: 14 },
-                ]
-              : [];
-          return {
-            id: container.triggerId,
-            type: "event-container",
-            parentId: parent?.triggerId,
-            position: parent ? { x: container.x - parent.x, y: container.y - parent.y } : { x: container.x, y: container.y },
+  const containerNodes = useMemo<Node<EventContainerNodeData>[]>(() => {
+    const depthOf = (c: EventContainer): number => {
+      let d = 0;
+      let parentId = c.parentTriggerId;
+      const seen = new Set<string>();
+      while (parentId && !seen.has(parentId)) {
+        seen.add(parentId);
+        d += 1;
+        parentId = containerByTriggerId.get(parentId)?.parentTriggerId;
+      }
+      return d;
+    };
+    return [...eventContainers]
+      .sort((a, b) => depthOf(a) - depthOf(b))
+      .map((container) => {
+        const triggerData = domainNodes.find((n) => n.id === container.triggerId)?.data;
+        const parent = container.parentTriggerId
+          ? containerByTriggerId.get(container.parentTriggerId)
+          : undefined;
+        const kind = triggerData?.kind === "schedule" ? "schedule" : "event-source";
+        const handleY = 16;
+        // Schedule wires to the tick are domain-only (hidden) — no canvas handles.
+        const handles =
+          kind === "event-source"
+            ? [
+                {
+                  id: "0",
+                  type: "target" as const,
+                  position: Position.Left,
+                  x: -5,
+                  y: handleY,
+                  width: 10,
+                  height: 14,
+                },
+                {
+                  id: "0",
+                  type: "source" as const,
+                  position: Position.Right,
+                  x: container.width - 14,
+                  y: handleY,
+                  width: 14,
+                  height: 14,
+                },
+              ]
+            : [];
+        return {
+          id: container.triggerId,
+          type: "event-container",
+          parentId: parent?.triggerId,
+          position: parent
+            ? { x: container.x - parent.x, y: container.y - parent.y }
+            : { x: container.x, y: container.y },
+          width: container.width,
+          height: container.height,
+          style: {
             width: container.width,
             height: container.height,
-            style: { width: container.width, height: container.height, overflow: "visible" },
-            handles,
-            draggable: true,
-            selectable: true,
-            connectable: kind === "event-source",
-            focusable: true,
-            zIndex: parent ? 0 : -1,
-            data: {
-              label: container.label,
-              kind,
-              roleLabel: demoOnly && kind === "schedule" ? "Firmware" : undefined,
-              periodMs: container.periodMs,
-              rejecting: containerHint?.kind === "rejecting" && containerHint.triggerId === container.triggerId,
-              accepting: containerHint?.kind === "accepting" && containerHint.triggerId === container.triggerId,
-              previewActive: previewTriggerIds.has(container.triggerId),
-            },
-          };
-        });
-    },
-    [demoOnly, eventContainers, domainNodes, containerHint, containerByTriggerId, previewTriggerIds],
-  );
+            overflow: "visible",
+          },
+          handles,
+          draggable: true,
+          selectable: true,
+          connectable: kind === "event-source",
+          focusable: true,
+          zIndex: parent ? 0 : -1,
+          data: {
+            label: container.label,
+            kind,
+            roleLabel: demoOnly && kind === "schedule" ? "Firmware" : undefined,
+            periodMs: container.periodMs,
+            rejecting:
+              containerHint?.kind === "rejecting" &&
+              containerHint.triggerId === container.triggerId,
+            accepting:
+              containerHint?.kind === "accepting" &&
+              containerHint.triggerId === container.triggerId,
+            previewActive: previewTriggerIds.has(container.triggerId),
+          },
+        };
+      });
+  }, [
+    demoOnly,
+    eventContainers,
+    domainNodes,
+    containerHint,
+    containerByTriggerId,
+    previewTriggerIds,
+  ]);
   // Real React Flow children: relative-to-container position + parentId, so
   // dragging the container (or a sibling member) behaves natively instead of
   // the old floating-box-behind-independent-nodes hack. Deliberately no
@@ -782,8 +1371,9 @@ function ProcessingGraphScreenInner() {
   // is the rewirable entry. Relative position is pinned inside the dashed box.
   const renderedNodes = useMemo<Node<ProcessingNodeUiData>[]>(() => {
     const periodByToggleId = new Map<string, number>();
-    for (const channel of previewChannelsRef.current) {
-      for (const toggleId of channel.toggleIds) periodByToggleId.set(toggleId, channel.periodMs);
+    for (const channel of previewChannelsForRender) {
+      for (const toggleId of channel.toggleIds)
+        periodByToggleId.set(toggleId, channel.periodMs);
     }
     const tickRel = fixedTickRelativePosition();
     const rest = localNodes
@@ -816,7 +1406,9 @@ function ProcessingGraphScreenInner() {
         return {
           ...withPreview,
           parentId: container.triggerId,
-          position: isTick ? { x: tickRel.x, y: tickRel.y } : { x: n.position.x - container.x, y: n.position.y - container.y },
+          position: isTick
+            ? { x: tickRel.x, y: tickRel.y }
+            : { x: n.position.x - container.x, y: n.position.y - container.y },
         };
       })
       .map((n) => {
@@ -844,9 +1436,12 @@ function ProcessingGraphScreenInner() {
         }
         return n;
       });
-    if (!demoOnly) return [...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
+    if (!demoOnly)
+      return [...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
     const led = rest.find((n) => n.id === "demo-led");
-    const outputHardware = rest.filter((n) => n.id === "demo-led" || n.data.tileGlyph === "power");
+    const outputHardware = rest.filter(
+      (n) => n.id === "demo-led" || n.data.tileGlyph === "power",
+    );
     const temps = rest.filter((n) => n.data.tempProbe);
     const pad = NODE_PADDING;
     const header = EVENT_CONTAINER_HEADER_HEIGHT;
@@ -871,7 +1466,12 @@ function ProcessingGraphScreenInner() {
         position: { x: minX - pad, y: minY - header - pad },
         width: frameW,
         height: frameH,
-        style: { width: frameW, height: frameH, overflow: "visible", pointerEvents: "none" },
+        style: {
+          width: frameW,
+          height: frameH,
+          overflow: "visible",
+          pointerEvents: "none",
+        },
         className: "!pointer-events-none",
         draggable: false,
         selectable: false,
@@ -890,7 +1490,12 @@ function ProcessingGraphScreenInner() {
         position: { x: temp.position.x - pad, y: temp.position.y - header - pad },
         width: frameW,
         height: frameH,
-        style: { width: frameW, height: frameH, overflow: "visible", pointerEvents: "none" },
+        style: {
+          width: frameW,
+          height: frameH,
+          overflow: "visible",
+          pointerEvents: "none",
+        },
         className: "!pointer-events-none",
         draggable: false,
         selectable: false,
@@ -899,8 +1504,26 @@ function ProcessingGraphScreenInner() {
         data: { label: "Backbone", caption: "Hardware" },
       });
     }
-    return [...frames, ...containerNodes, ...rest] as unknown as Node<ProcessingNodeUiData>[];
-  }, [demoOnly, containerNodes, localNodes, containerByTriggerId, containerByMemberId, previewActiveIds, previewActuatorIds, previewTriggerIds, previewElapsedMs, previewLedIntensity, previewRgbVisual, domainNodes]);
+    return [
+      ...frames,
+      ...containerNodes,
+      ...rest,
+    ] as unknown as Node<ProcessingNodeUiData>[];
+  }, [
+    demoOnly,
+    containerNodes,
+    localNodes,
+    containerByTriggerId,
+    containerByMemberId,
+    previewActiveIds,
+    previewActuatorIds,
+    previewTriggerIds,
+    previewElapsedMs,
+    previewChannelsForRender,
+    previewLedIntensity,
+    previewRgbVisual,
+    domainNodes,
+  ]);
 
   // Domain keeps Schedule → entry edges for membership/dry-run; the canvas hides
   // them so the dashed box + “entry” badge carry that meaning instead of a
@@ -929,8 +1552,10 @@ function ProcessingGraphScreenInner() {
       apply: (project) => {
         const physicalGraphs = [...project.physicalGraphs];
         const deviceGraphs = [...project.deviceGraphs];
-        while (physicalGraphs.length <= bindingIndex) physicalGraphs.push({ layer: "physical-composition", nodes: [], edges: [] });
-        while (deviceGraphs.length <= bindingIndex) deviceGraphs.push({ layer: "device-processing", nodes: [], edges: [] });
+        while (physicalGraphs.length <= bindingIndex)
+          physicalGraphs.push({ layer: "physical-composition", nodes: [], edges: [] });
+        while (deviceGraphs.length <= bindingIndex)
+          deviceGraphs.push({ layer: "device-processing", nodes: [], edges: [] });
         return { ok: true, value: { ...project, physicalGraphs, deviceGraphs } };
       },
     });
@@ -959,7 +1584,13 @@ function ProcessingGraphScreenInner() {
       if (domainNodes.some((n) => n.id === tickId)) continue;
       const schedulePos = authoringMetadata[scheduleId]?.position ?? { x: 40, y: 100 };
       const tickPos = fixedTickAbsolute(triggerToContainerOrigin(schedulePos));
-      execute(addGraphNodeCommand(lens, { layer: "device-processing", id: tickId, data: startData }));
+      execute(
+        addGraphNodeCommand(lens, {
+          layer: "device-processing",
+          id: tickId,
+          data: startData,
+        }),
+      );
       for (const edge of outs) {
         execute(removeGraphEdgeCommand(lens, edge.id));
         execute(
@@ -996,16 +1627,28 @@ function ProcessingGraphScreenInner() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bindingIndex, domainNodes.map((n) => n.id).join(","), graphState.edges.map((e) => e.id).join(",")]);
+  }, [
+    bindingIndex,
+    domainNodes.map((n) => n.id).join(","),
+    graphState.edges.map((e) => e.id).join(","),
+  ]);
 
-  function overlapObstaclesFor(draggedId: string, extraExclude: ReadonlySet<string> = new Set()): SizedRect[] {
+  function overlapObstaclesFor(
+    draggedId: string,
+    extraExclude: ReadonlySet<string> = new Set(),
+  ): SizedRect[] {
     const skip = new Set(extraExclude);
     skip.add(draggedId);
     const dragged = containerByTriggerId.get(draggedId);
     if (dragged) {
-      for (const id of collectDescendantMemberIds(dragged, containerByTriggerId)) skip.add(id);
+      for (const id of collectDescendantMemberIds(dragged, containerByTriggerId))
+        skip.add(id);
     }
-    const containers = peerContainerObstacles(draggedId, eventContainers, containerByTriggerId).filter((o) => !skip.has(o.id));
+    const containers = peerContainerObstacles(
+      draggedId,
+      eventContainers,
+      containerByTriggerId,
+    ).filter((o) => !skip.has(o.id));
     const cards = localNodes
       .filter((n) => !containerByTriggerId.has(n.id) && !skip.has(n.id))
       .map((n) => {
@@ -1016,7 +1659,12 @@ function ProcessingGraphScreenInner() {
   }
 
   function onNodesChange(changes: NodeChange<Node<ProcessingNodeUiData>>[]) {
-    if (inspector?.kind === "edit" && changes.some((change) => change.type === "remove" && change.id === inspector.nodeId)) {
+    if (
+      inspector?.kind === "edit" &&
+      changes.some(
+        (change) => change.type === "remove" && change.id === inspector.nodeId,
+      )
+    ) {
       setInspector(null);
     }
     const newEdgeCommands: ReturnType<typeof addGraphEdgeCommand>[] = [];
@@ -1041,7 +1689,9 @@ function ProcessingGraphScreenInner() {
       if (change.type !== "position" || !change.position) return change;
       const isContainer = containerByTriggerId.has(change.id);
       const container = containerByMemberId.get(change.id);
-      let position = container ? { x: change.position.x + container.x, y: change.position.y + container.y } : change.position;
+      let position = container
+        ? { x: change.position.x + container.x, y: change.position.y + container.y }
+        : change.position;
 
       if (isContainer) {
         // React Flow reports the dashed-box origin (relative to a parent
@@ -1049,7 +1699,9 @@ function ProcessingGraphScreenInner() {
         // stored absolute position, carry descendants, and handle nest/unnest.
         const info = containerByTriggerId.get(change.id);
         const parent = containerByMemberId.get(change.id);
-        const boxOrigin = parent ? { x: change.position.x + parent.x, y: change.position.y + parent.y } : change.position;
+        const boxOrigin = parent
+          ? { x: change.position.x + parent.x, y: change.position.y + parent.y }
+          : change.position;
         let triggerPosition = {
           x: boxOrigin.x + NODE_PADDING,
           y: boxOrigin.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
@@ -1060,11 +1712,16 @@ function ProcessingGraphScreenInner() {
           if (!draggedKind || !canBeNested(draggedKind)) return undefined;
           const hovered = containerAtPosition(at, eventContainers, excludeSelf);
           if (!hovered || hovered.triggerId === change.id) return undefined;
-          if (info && containerContainsTrigger(info, hovered.triggerId, containerByTriggerId)) return undefined;
+          if (
+            info &&
+            containerContainsTrigger(info, hovered.triggerId, containerByTriggerId)
+          )
+            return undefined;
           return hovered;
         };
 
-        const escapingParent = parent !== undefined && memberEscapesContainer(triggerPosition, parent);
+        const escapingParent =
+          parent !== undefined && memberEscapesContainer(triggerPosition, parent);
         const target = nestTarget(triggerPosition);
 
         if (change.dragging === true) {
@@ -1079,8 +1736,20 @@ function ProcessingGraphScreenInner() {
           } else if (parent && escapingParent) {
             setContainerHint({ triggerId: parent.triggerId, kind: "rejecting" });
           } else if (info) {
-            const peer = overlappingPeerContainer({ x: boxOrigin.x, y: boxOrigin.y, width: info.width, height: info.height }, change.id, eventContainers, containerByTriggerId);
-            setContainerHint(peer ? { triggerId: peer.triggerId, kind: "rejecting" } : null);
+            const peer = overlappingPeerContainer(
+              {
+                x: boxOrigin.x,
+                y: boxOrigin.y,
+                width: info.width,
+                height: info.height,
+              },
+              change.id,
+              eventContainers,
+              containerByTriggerId,
+            );
+            setContainerHint(
+              peer ? { triggerId: peer.triggerId, kind: "rejecting" } : null,
+            );
           }
         }
 
@@ -1089,11 +1758,14 @@ function ProcessingGraphScreenInner() {
           const lens = deviceGraphLens(bindingIndex);
           if (parent && escapingParent) {
             const plan = detachMemberEdges(change.id, parent, graphState.edges);
-            for (const edgeId of plan.removeIds) removeEdgeCommands.push(removeGraphEdgeCommand(lens, edgeId));
-              setOverlapWarning(copy.removedFrom(parent.label));
+            for (const edgeId of plan.removeIds)
+              removeEdgeCommands.push(removeGraphEdgeCommand(lens, edgeId));
+            setOverlapWarning(copy.removedFrom(parent.label));
           }
           if (target && target.triggerId !== parent?.triggerId) {
-            const alreadyNested = graphState.edges.some((e) => e.source === target.triggerId && e.target === change.id);
+            const alreadyNested = graphState.edges.some(
+              (e) => e.source === target.triggerId && e.target === change.id,
+            );
             if (!alreadyNested) {
               newEdgeCommands.push(
                 addGraphEdgeCommand(lens, {
@@ -1108,7 +1780,12 @@ function ProcessingGraphScreenInner() {
             }
           } else if (!canBeNested(draggedKind ?? "block") && info) {
             const origin = triggerToContainerOrigin(triggerPosition);
-            const peer = overlappingPeerContainer({ x: origin.x, y: origin.y, width: info.width, height: info.height }, change.id, eventContainers, containerByTriggerId);
+            const peer = overlappingPeerContainer(
+              { x: origin.x, y: origin.y, width: info.width, height: info.height },
+              change.id,
+              eventContainers,
+              containerByTriggerId,
+            );
             if (peer) setOverlapWarning(copy.scheduleInsideSchedule);
           }
         }
@@ -1118,20 +1795,37 @@ function ProcessingGraphScreenInner() {
           if (target) extraExclude.add(target.triggerId);
           if (parent && !escapingParent) extraExclude.add(parent.triggerId);
           const origin = triggerToContainerOrigin(triggerPosition);
-          const resolved = resolveRectOverlap(change.id, origin, { w: info.width, h: info.height }, overlapObstaclesFor(change.id, extraExclude));
+          const resolved = resolveRectOverlap(
+            change.id,
+            origin,
+            { w: info.width, h: info.height },
+            overlapObstaclesFor(change.id, extraExclude),
+          );
           triggerPosition = containerOriginToTrigger(resolved);
           if (parent && !escapingParent) {
-            const bound = { x: parent.x + NODE_PADDING + ENTRY_FEED_INSET, y: parent.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT };
-            triggerPosition = { x: Math.max(triggerPosition.x, bound.x), y: Math.max(triggerPosition.y, bound.y) };
+            const bound = {
+              x: parent.x + NODE_PADDING + ENTRY_FEED_INSET,
+              y: parent.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
+            };
+            triggerPosition = {
+              x: Math.max(triggerPosition.x, bound.x),
+              y: Math.max(triggerPosition.y, bound.y),
+            };
           }
         }
 
         const oldPos = livePositions.get(change.id);
         if (info && oldPos) {
-          const delta = { x: triggerPosition.x - oldPos.x, y: triggerPosition.y - oldPos.y };
+          const delta = {
+            x: triggerPosition.x - oldPos.x,
+            y: triggerPosition.y - oldPos.y,
+          };
           const moved = delta.x !== 0 || delta.y !== 0;
           const newOrigin = triggerToContainerOrigin(triggerPosition);
-          for (const memberId of collectDescendantMemberIds(info, containerByTriggerId)) {
+          for (const memberId of collectDescendantMemberIds(
+            info,
+            containerByTriggerId,
+          )) {
             const memberData = domainNodes.find((n) => n.id === memberId)?.data;
             if (memberData && isFlowStartBlock(memberData)) {
               carriedChanges.push({
@@ -1148,7 +1842,9 @@ function ProcessingGraphScreenInner() {
             carriedChanges.push({
               id: memberId,
               type: "position",
-              position: moved ? { x: memberPos.x + delta.x, y: memberPos.y + delta.y } : memberPos,
+              position: moved
+                ? { x: memberPos.x + delta.x, y: memberPos.y + delta.y }
+                : memberPos,
               dragging: change.dragging,
             });
           }
@@ -1156,19 +1852,39 @@ function ProcessingGraphScreenInner() {
         return { ...change, position: triggerPosition };
       }
 
-      const escaping = container !== undefined && memberEscapesContainer(position, container);
-      const isChainableBlock = canChainIntoEventContainer(domainNodes.find((n) => n.id === change.id)?.data);
+      const escaping =
+        container !== undefined && memberEscapesContainer(position, container);
+      const isChainableBlock = canChainIntoEventContainer(
+        domainNodes.find((n) => n.id === change.id)?.data,
+      );
       const hovered = isChainableBlock
-        ? containerAtPosition(position, eventContainers, escaping && container ? new Set([container.triggerId]) : undefined)
+        ? containerAtPosition(
+            position,
+            eventContainers,
+            escaping && container ? new Set([container.triggerId]) : undefined,
+          )
         : undefined;
-      const sticky = containerHint?.kind === "accepting" ? eventContainers.find((c) => c.triggerId === containerHint.triggerId) : undefined;
-      const acceptTarget = hovered ?? (sticky && !memberEscapesContainer(position, sticky) ? sticky : undefined);
+      const sticky =
+        containerHint?.kind === "accepting"
+          ? eventContainers.find((c) => c.triggerId === containerHint.triggerId)
+          : undefined;
+      const acceptTarget =
+        hovered ??
+        (sticky && !memberEscapesContainer(position, sticky) ? sticky : undefined);
 
       if (change.dragging === true) {
         if (escaping && container) {
           setContainerHint({ triggerId: container.triggerId, kind: "rejecting" });
-        } else if (isChainableBlock && acceptTarget && acceptTarget.triggerId !== container?.triggerId) {
-          setContainerHint({ triggerId: acceptTarget.triggerId, kind: "accepting", previewPosition: position });
+        } else if (
+          isChainableBlock &&
+          acceptTarget &&
+          acceptTarget.triggerId !== container?.triggerId
+        ) {
+          setContainerHint({
+            triggerId: acceptTarget.triggerId,
+            kind: "accepting",
+            previewPosition: position,
+          });
         } else {
           setContainerHint(null);
         }
@@ -1180,11 +1896,16 @@ function ProcessingGraphScreenInner() {
       if (change.dragging === false) {
         setContainerHint(null);
         if (isChainableBlock) {
-          const plan = planMembershipDrop({ current: container, hovered: acceptTarget, escaping });
+          const plan = planMembershipDrop({
+            current: container,
+            hovered: acceptTarget,
+            escaping,
+          });
           const lens = deviceGraphLens(bindingIndex);
           if (plan.detachFrom && container) {
             const detached = detachMemberEdges(change.id, container, graphState.edges);
-            for (const edgeId of detached.removeIds) removeEdgeCommands.push(removeGraphEdgeCommand(lens, edgeId));
+            for (const edgeId of detached.removeIds)
+              removeEdgeCommands.push(removeGraphEdgeCommand(lens, edgeId));
             if (detached.splice) {
               newEdgeCommands.push(
                 addGraphEdgeCommand(lens, {
@@ -1200,8 +1921,14 @@ function ProcessingGraphScreenInner() {
           if (plan.attachTo) {
             const target = eventContainers.find((c) => c.triggerId === plan.attachTo);
             if (target) {
-              const source = chainTailId(target, graphState.edges, new Set(containerByTriggerId.keys()));
-              const alreadyLinked = graphState.edges.some((e) => e.source === source && e.target === change.id);
+              const source = chainTailId(
+                target,
+                graphState.edges,
+                new Set(containerByTriggerId.keys()),
+              );
+              const alreadyLinked = graphState.edges.some(
+                (e) => e.source === source && e.target === change.id,
+              );
               if (!alreadyLinked) {
                 newEdgeCommands.push(
                   addGraphEdgeCommand(lens, {
@@ -1212,26 +1939,52 @@ function ProcessingGraphScreenInner() {
                     targetHandle: "0",
                   }),
                 );
-                setOverlapWarning(plan.detachFrom ? copy.movedInto(target.label) : copy.connectedTo(target.label));
+                setOverlapWarning(
+                  plan.detachFrom
+                    ? copy.movedInto(target.label)
+                    : copy.connectedTo(target.label),
+                );
               }
-              attachLowerBound = { x: target.x + NODE_PADDING + ENTRY_FEED_INSET, y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT };
-              position = { x: Math.max(position.x, attachLowerBound.x), y: Math.max(position.y, attachLowerBound.y) };
+              attachLowerBound = {
+                x: target.x + NODE_PADDING + ENTRY_FEED_INSET,
+                y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
+              };
+              position = {
+                x: Math.max(position.x, attachLowerBound.x),
+                y: Math.max(position.y, attachLowerBound.y),
+              };
             }
           } else if (plan.detachFrom && container) {
             setOverlapWarning(copy.removedFrom(container.label));
           }
         }
       }
-      const insideIds = container && escaping ? new Set([container.triggerId, ...container.memberIds]) : null;
+      const insideIds =
+        container && escaping
+          ? new Set([container.triggerId, ...container.memberIds])
+          : null;
       const draggedNode = localNodes.find((n) => n.id === change.id);
-      const selfSize = draggedNode ? layoutSizeForUiNode(draggedNode) : { w: NODE_WIDTH, h: NODE_HEIGHT };
+      const selfSize = draggedNode
+        ? layoutSizeForUiNode(draggedNode)
+        : { w: NODE_WIDTH, h: NODE_HEIGHT };
       const siblings = localNodes
         .filter((n) => !containerByTriggerId.has(n.id) && !insideIds?.has(n.id))
         .map((n) => {
           const size = layoutSizeForUiNode(n);
-          return { id: n.id, position: n.id === change.id ? position : n.position, w: size.w, h: size.h };
+          return {
+            id: n.id,
+            position: n.id === change.id ? position : n.position,
+            w: size.w,
+            h: size.h,
+          };
         });
-      position = resolveSiblingOverlap(change.id, position, siblings, attachLowerBound, selfSize);
+      position = resolveSiblingOverlap(
+        change.id,
+        position,
+        siblings,
+        attachLowerBound,
+        selfSize,
+      );
 
       return { ...change, position };
     });
@@ -1240,7 +1993,9 @@ function ProcessingGraphScreenInner() {
     if (!execute || bindingIndex < 0) return;
     for (const command of removeEdgeCommands) execute(command);
     for (const command of newEdgeCommands) execute(command);
-    const committable = allChanges.filter((c) => !(c.type === "position" && c.dragging === true));
+    const committable = allChanges.filter(
+      (c) => !(c.type === "position" && c.dragging === true),
+    );
     const commands = nodeChangesToCommands(committable, deviceGraphLens(bindingIndex));
     for (const command of commands) execute(command);
   }
@@ -1255,7 +2010,9 @@ function ProcessingGraphScreenInner() {
   function onConnect(connection: Connection) {
     if (!execute || bindingIndex < 0 || !isValidConnection(connection)) return;
     const lens = deviceGraphLens(bindingIndex);
-    const targetData = connection.target ? domainNodes.find((node) => node.id === connection.target)?.data : undefined;
+    const targetData = connection.target
+      ? domainNodes.find((node) => node.id === connection.target)?.data
+      : undefined;
     if (demoOnly && connection.target) {
       const oneInput =
         !!targetData &&
@@ -1265,7 +2022,8 @@ function ProcessingGraphScreenInner() {
           isBackboneSensorBlock(targetData));
       if (oneInput) {
         for (const edge of graphState.edges) {
-          if (edge.target === connection.target) execute(removeGraphEdgeCommand(lens, edge.id));
+          if (edge.target === connection.target)
+            execute(removeGraphEdgeCommand(lens, edge.id));
         }
       }
     }
@@ -1279,14 +2037,24 @@ function ProcessingGraphScreenInner() {
         targetHandle: connection.targetHandle ?? undefined,
       }),
     );
-    if (demoOnly && connection.source && connection.target && targetData && isCompareIf(targetData) && isBlockNodeData(targetData)) {
+    if (
+      demoOnly &&
+      connection.source &&
+      connection.target &&
+      targetData &&
+      isCompareIf(targetData) &&
+      isBlockNodeData(targetData)
+    ) {
       const src = domainNodes.find((node) => node.id === connection.source)?.data;
       if (src && (isDigitalCommandSource(src) || isTemperatureSensor(src))) {
         persistNode(
           connection.target,
           {
             ...targetData,
-            properties: { ...targetData.properties, inputType: isTemperatureSensor(src) ? "analog" : "digital" },
+            properties: {
+              ...targetData.properties,
+              inputType: isTemperatureSensor(src) ? "analog" : "digital",
+            },
           },
           authoringMetadata[connection.target]?.comment ?? "",
         );
@@ -1294,6 +2062,13 @@ function ProcessingGraphScreenInner() {
     }
   }
 
+  function openRgbModule(module: BackboneSensorModule): boolean {
+    const draft = module.recipe.deviceDraft && upgradeDht22Driver(module.recipe.deviceDraft);
+    if (!draft || !execute) return false;
+    execute({ kind: "EditRgbModule", apply: project => ({ ok: true, value: { ...project, authoringMetadata: { ...project.authoringMetadata, [DEVICE_RECIPE_DRAFT_META_KEY]: { comment: serializeDeviceRecipeDraft(draft) } } } }) });
+    navigate("device-recipe-editor");
+    return true;
+  }
   function onNodeClick(_: unknown, node: Node<ProcessingNodeUiData>) {
     const domainNode = domainNodes.find((n) => n.id === node.id);
     if (!domainNode) return;
@@ -1301,185 +2076,44 @@ function ProcessingGraphScreenInner() {
     if (node.id === DEMO_BACKBONE_FRAME_ID || node.id.startsWith("demo-hw-")) return;
     if (node.data.circular || isFlowStartBlock(domainNode.data)) return;
     const meta = authoringMetadata[node.id];
-    setInspector({ kind: "edit", nodeId: node.id, data: domainNode.data, comment: meta?.comment ?? "" });
-  }
-
-  function placeFromCatalog(
-    entry: ProcessingCatalogEntry,
-    requestedPosition = nextSpawnPosition(domainNodes.length),
-    baySide = peekPaletteDragBaySide(),
-    physicalPinId?: string,
-    overrides?: {
-      readonly comment?: string;
-      readonly properties?: Readonly<Record<string, string | number | boolean | bigint>>;
-    },
-  ): string | undefined {
-    if (!execute || bindingIndex < 0) return undefined;
-    // Tick discs are spawned with each Schedule — never from the palette.
-    if (entry.id === "native.flow_start" || entry.typeId === "ab.flow_start") return undefined;
-    let data = nodeDataFromCatalogEntry(entry, moduleOptions[0]?.id, baySide);
-    if (!data) return undefined;
-    if (physicalPinId) {
-      const pin = physicalPinsForBinding(session?.stack.current, selected?.bindingId).find(item => item.id === physicalPinId && item.local && item.entryId === entry.id);
-      if (!pin) return undefined;
-      if (data.kind === "event-source") data = {...data,moduleNodeId:pin.moduleNodeId,properties:{...data.properties,physicalPinId}};
-      else if (data.kind === "block") data = {...data,properties:{...data.properties,"1":BigInt(pin.backendPortId),"2":BigInt(pin.channel),physicalPinId}};
-    }
-    if (overrides?.properties && data.kind === "block") {
-      data = { ...data, properties: { ...data.properties, ...overrides.properties } };
-    }
-
-    const id = `dp-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
-    const bay = isBayEntry(entry);
-    const resolvedBaySide = baySide ?? (bay ? "output" : undefined);
-
-    // Same attachment handling as an existing block being dragged (onNodesChange):
-    // a new Block dropped inside a dashed container has no edge yet, so chain it
-    // onto that trigger (or its last member) instead of leaving it merely
-    // overlapping. Only a Block can be chained this way — see onNodesChange.
-    // Bay endpoints stay outside the box (left = ingresso, right = uscita).
-    let position = requestedPosition;
-    let attachEdgeCommand: ReturnType<typeof addGraphEdgeCommand> | undefined;
-    let attachLowerBound: { x: number; y: number } | undefined;
-    if (bay && resolvedBaySide) {
-      position = positionForBayDrop(resolvedBaySide, requestedPosition, eventContainers);
-    } else if (canChainIntoEventContainer(data)) {
-      const target = containerAtPosition(position, eventContainers);
-      if (target) {
-        attachEdgeCommand = addGraphEdgeCommand(deviceGraphLens(bindingIndex), {
-          id: `dpe-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
-          source: chainTailId(target, graphState.edges, new Set(containerByTriggerId.keys())),
-          target: id,
-          sourceHandle: "0",
-          targetHandle: "0",
-        });
-        setOverlapWarning(copy.connectedTo(target.label));
-        attachLowerBound = { x: target.x + NODE_PADDING + ENTRY_FEED_INSET, y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT };
-        position = { x: Math.max(position.x, attachLowerBound.x), y: Math.max(position.y, attachLowerBound.y) };
-      }
-    } else if (isNestableContainer(data.kind)) {
-      const target = canBeNested(data.kind) ? containerAtPosition(position, eventContainers) : undefined;
-      if (target) {
-        attachEdgeCommand = addGraphEdgeCommand(deviceGraphLens(bindingIndex), {
-          id: `dpe-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
-          source: target.triggerId,
-          target: id,
-          sourceHandle: "0",
-          targetHandle: "0",
-        });
-        setOverlapWarning(copy.insertedInto(target.label));
-        attachLowerBound = { x: target.x + NODE_PADDING + ENTRY_FEED_INSET, y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT };
-        position = { x: Math.max(position.x, attachLowerBound.x), y: Math.max(position.y, attachLowerBound.y) };
-      } else if (data.kind === "schedule" && containerAtPosition(position, eventContainers)) {
-        setOverlapWarning(copy.scheduleInsideSchedule);
-      }
-      const size = emptyEventContainerSize();
-      const origin = triggerToContainerOrigin(position);
-      const extra = new Set(target ? [target.triggerId] : []);
-      const resolved = resolveRectOverlap("", origin, { w: size.width, h: size.height }, overlapObstaclesFor("", extra));
-      position = containerOriginToTrigger(resolved);
-      if (attachLowerBound) position = { x: Math.max(position.x, attachLowerBound.x), y: Math.max(position.y, attachLowerBound.y) };
-    }
-    if (!isNestableContainer(data.kind)) {
-      position = resolveSiblingOverlap(
-        "",
-        position,
-        localNodes
-          .filter((n) => !containerByTriggerId.has(n.id))
-          .map((n) => {
-            const size = layoutSizeForUiNode(n);
-            return { id: n.id, position: n.position, w: size.w, h: size.h };
-          }),
-        attachLowerBound,
-      );
-    }
-
-    // The node must exist before an edge can reference its id as a target.
-    execute(addGraphNodeCommand(deviceGraphLens(bindingIndex), { layer: "device-processing", id, data }));
-    if (attachEdgeCommand) execute(attachEdgeCommand);
-    const comment =
-      overrides?.comment ??
-      (demoOnly || !bay || !resolvedBaySide
-        ? localizeCatalogEntry(entry, locale).label
-        : `${localizeCatalogEntry(entry, locale).label} · ${localizedBaySideLabel(resolvedBaySide, locale)}`);
-    execute({
-      kind: "UpdateAuthoringMetadata",
-      apply: (project) => ({
-        ok: true,
-        value: {
-          ...project,
-          authoringMetadata: {
-            ...project.authoringMetadata,
-            [id]: { comment, position },
-          },
-        },
-      }),
+    setInspector({
+      kind: "edit",
+      nodeId: node.id,
+      data: domainNode.data,
+      comment: meta?.comment ?? "",
     });
-
-    if (data.kind === "schedule") {
-      spawnScheduleTick(id, position);
-    }
-
-    setInspector({ kind: "edit", nodeId: id, data, comment });
-    return id;
   }
 
-  /** Creates the fixed violet tick disc for a Schedule and wires Schedule → tick. */
-  function spawnScheduleTick(scheduleId: string, schedulePosition: { readonly x: number; readonly y: number }) {
+  function onNodeDoubleClick(_: unknown, node: Node<ProcessingNodeUiData>) {
+    const domain = domainNodes.find(item => item.id === node.id);
+    if (!domain || domain.data.kind !== "block") return;
+    const moduleId = domain.data.properties[SENSOR_MODULE_ID_PROP];
+    const module = backboneSensorModules.find(item => item.id === moduleId);
+    if (module) {
+      setInspector(null);
+      openRgbModule(module);
+    }
+  }
+
+  function persistNode(
+    nodeId: string,
+    data: DeviceProcessingNodeData,
+    comment: string,
+  ) {
     if (!execute || bindingIndex < 0) return;
-    const startEntry = findCatalogEntryById("native.flow_start");
-    if (!startEntry) return;
-    const startData = nodeDataFromCatalogEntry(startEntry, moduleOptions[0]?.id);
-    if (!startData || startData.kind !== "block") return;
-    const tickId = `dp-tick-${scheduleId}`;
-    if (domainNodes.some((n) => n.id === tickId)) return;
-    const origin = triggerToContainerOrigin(schedulePosition);
-    const tickPos = fixedTickAbsolute(origin);
     const lens = deviceGraphLens(bindingIndex);
-    execute(addGraphNodeCommand(lens, { layer: "device-processing", id: tickId, data: startData }));
     execute(
-      addGraphEdgeCommand(lens, {
-        id: `dpe-tick-${scheduleId}`,
-        source: scheduleId,
-        target: tickId,
-        sourceHandle: "0",
-        targetHandle: "0",
-      }),
+      updateGraphNodeCommand(lens, { layer: "device-processing", id: nodeId, data }),
     );
-    execute({
-      kind: "UpdateAuthoringMetadata",
-      apply: (project) => ({
-        ok: true,
-        value: {
-          ...project,
-          authoringMetadata: {
-            ...project.authoringMetadata,
-            [tickId]: { comment: "", position: tickPos },
-          },
-        },
-      }),
-    });
-  }
-
-  persistTempTestRef.current = (nodeId, celsius) => {
-    const node = domainNodes.find((item) => item.id === nodeId);
-    if (!node || !isBlockNodeData(node.data)) return;
-    persistNode(nodeId, {
-      ...node.data,
-      properties: { ...node.data.properties, testC: BigInt(Math.round(celsius)) },
-    }, authoringMetadata[nodeId]?.comment ?? "");
-  };
-
-  function persistNode(nodeId: string, data: DeviceProcessingNodeData, comment: string) {
-    if (!execute || bindingIndex < 0) return;
-    const lens = deviceGraphLens(bindingIndex);
-    execute(updateGraphNodeCommand(lens, { layer: "device-processing", id: nodeId, data }));
     if (data.kind === "block" && data.properties[SENSOR_INSTANCE_PROP] === true) {
       const entry = catalogEntryForNode(data);
-      const inputs = new Set(entry?.inputs?.map(port => port.id));
-      const outputs = new Set(entry?.outputs?.map(port => port.id));
+      const inputs = new Set(entry?.inputs?.map((port) => port.id));
+      const outputs = new Set(entry?.outputs?.map((port) => port.id));
       for (const edge of graphState.edges) {
-        if ((edge.target === nodeId && !inputs.has(edge.targetHandle ?? "")) || (edge.source === nodeId && !outputs.has(edge.sourceHandle ?? "")))
+        if (
+          (edge.target === nodeId && !inputs.has(edge.targetHandle ?? "")) ||
+          (edge.source === nodeId && !outputs.has(edge.sourceHandle ?? ""))
+        )
           execute(removeGraphEdgeCommand(lens, edge.id));
       }
     }
@@ -1498,6 +2132,21 @@ function ProcessingGraphScreenInner() {
     });
   }
 
+  useEffect(() => {
+    persistTempTestRef.current = (nodeId, celsius) => {
+      const node = domainNodes.find((item) => item.id === nodeId);
+      if (!node || !isBlockNodeData(node.data)) return;
+      persistNode(
+        nodeId,
+        {
+          ...node.data,
+          properties: { ...node.data.properties, testC: BigInt(Math.round(celsius)) },
+        },
+        authoringMetadata[nodeId]?.comment ?? "",
+      );
+    };
+  });
+
   function handleApply(data: DeviceProcessingNodeData, comment: string) {
     if (inspector?.kind !== "edit") return;
     persistNode(inspector.nodeId, data, comment);
@@ -1513,7 +2162,16 @@ function ProcessingGraphScreenInner() {
       execute(addGraphNodeCommand(lens, { layer: "device-processing", id, data }));
       execute({
         kind: "UpdateAuthoringMetadata",
-        apply: (project) => ({ ok: true, value: { ...project, authoringMetadata: { ...project.authoringMetadata, [id]: { comment, position: nextSpawnPosition(domainNodes.length) } } } }),
+        apply: (project) => ({
+          ok: true,
+          value: {
+            ...project,
+            authoringMetadata: {
+              ...project.authoringMetadata,
+              [id]: { comment, position: nextSpawnPosition(domainNodes.length) },
+            },
+          },
+        }),
       });
     }
     setInspector(null);
@@ -1530,13 +2188,21 @@ function ProcessingGraphScreenInner() {
     event.preventDefault();
     event.dataTransfer.dropEffect = "copy";
     const rect = event.currentTarget.getBoundingClientRect();
-    setDropPreview({ x: snapToGrid(event.clientX - rect.left), y: snapToGrid(event.clientY - rect.top) });
+    setDropPreview({
+      x: snapToGrid(event.clientX - rect.left),
+      y: snapToGrid(event.clientY - rect.top),
+    });
     const flowPosRaw = rf?.screenToFlowPosition({ x: event.clientX, y: event.clientY });
     if (!flowPosRaw) return;
     const flowPos = { x: snapToGrid(flowPosRaw.x), y: snapToGrid(flowPosRaw.y) };
     const hovered = containerAtPosition(flowPos, eventContainers);
-    const sticky = containerHint?.kind === "accepting" ? eventContainers.find((c) => c.triggerId === containerHint.triggerId) : undefined;
-    const target = hovered ?? (sticky && !memberEscapesContainer(flowPos, sticky) ? sticky : undefined);
+    const sticky =
+      containerHint?.kind === "accepting"
+        ? eventContainers.find((c) => c.triggerId === containerHint.triggerId)
+        : undefined;
+    const target =
+      hovered ??
+      (sticky && !memberEscapesContainer(flowPos, sticky) ? sticky : undefined);
     if (!target) {
       setContainerHint(null);
       return;
@@ -1550,19 +2216,32 @@ function ProcessingGraphScreenInner() {
       setContainerHint(null);
       return;
     }
-    setContainerHint({ triggerId: target.triggerId, kind: "accepting", previewPosition: flowPos });
+    setContainerHint({
+      triggerId: target.triggerId,
+      kind: "accepting",
+      previewPosition: flowPos,
+    });
   }
 
   function onCanvasDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDropPreview(null);
     setContainerHint(null);
-    const payload = decodePaletteDrag(event.dataTransfer.getData(PROCESSING_BLOCK_MIME));
+    const payload = decodePaletteDrag(
+      event.dataTransfer.getData(PROCESSING_BLOCK_MIME),
+    );
     if (!payload) return;
-    const flowPos = rf?.screenToFlowPosition({ x: event.clientX, y: event.clientY }) ?? { x: 80, y: 80 };
+    const flowPos = rf?.screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    }) ?? { x: 80, y: 80 };
     const position = { x: snapToGrid(flowPos.x), y: snapToGrid(flowPos.y) };
     if (payload.sensorRecipeId) {
-      const recipe = findSensorRecipeById(payload.sensorRecipeId) ?? backboneSensorModules.flatMap(m => m.actions ?? [m.recipe]).find(r => r.id === payload.sensorRecipeId);
+      const recipe =
+        findSensorRecipeById(payload.sensorRecipeId) ??
+        backboneSensorModules
+          .flatMap((m) => m.actions ?? [m.recipe])
+          .find((r) => r.id === payload.sensorRecipeId);
       if (!recipe) return;
       placeSensorRecipeOnCanvas(recipe, position);
       return;
@@ -1577,6 +2256,7 @@ function ProcessingGraphScreenInner() {
   );
 
   async function handlePauseRuntime() {
+    stopPreview();
     if (!selected || bindingIndex < 0) return;
     const client = getClient(selected.bindingId);
     if (!client) {
@@ -1596,13 +2276,16 @@ function ProcessingGraphScreenInner() {
       const stopped = await applyStoppedRuntime(client);
       observeConfig(selected.bindingId, stopped.config);
       await waitConfigWriteGap();
-      await forgetOwnedDriverProfiles(selected.expectedDeviceId, async (profileId, version) => {
-        const removed = await removeProfile(selected.bindingId, profileId, version, {
-          isReferencedLocally: false,
-        });
-        return removed?.ok === true;
-      });
-      openBackbonePhysical(selected.bindingId, selected.expectedDeviceId);
+      await forgetOwnedDriverProfiles(
+        selected.expectedDeviceId,
+        async (profileId, version) => {
+          const removed = await removeProfile(selected.bindingId, profileId, version, {
+            isReferencedLocally: false,
+          });
+          return removed?.ok === true;
+        },
+      );
+      // Stop leaves the current canvas visible; physical setup has its own navigation.
     } catch (cause) {
       setPauseError(formatApplyConfigError(cause, locale === "it"));
     } finally {
@@ -1620,16 +2303,34 @@ function ProcessingGraphScreenInner() {
     setRunning(true);
     setHashHex(null);
     try {
-      const input = { physicalGraph: physicalGraphState, processingGraph: graphState, mqtt: DISABLED_MQTT, connectivity: 0, energy: DEFAULT_ENERGY };
-      const plan = !demoOnly && session && selected ? prepareDriverDeployment(session.stack.current, selected.bindingId, input) : { input, profiles: [], options: {} };
-      const result = dryRunConfig(plan.input, { ...plan.options, availableBlockRuleTypeIds: demoOnly ? new Set([...SHIPPED_TYPE_IDS, "ab.relay", "ab.compare_if", "ab.temperature_sensor"]) : new Set([...SHIPPED_TYPE_IDS, "device-action"]) });
+      const input = {
+        physicalGraph: physicalGraphState,
+        processingGraph: graphState,
+        mqtt: DISABLED_MQTT,
+        connectivity: 0,
+        energy: DEFAULT_ENERGY,
+      };
+      const plan =
+        !demoOnly && session && selected
+          ? prepareDriverDeployment(session.stack.current, selected.bindingId, input)
+          : { input, profiles: [], options: {} };
+      const result = dryRunConfig(plan.input, {
+        ...plan.options,
+        availableBlockRuleTypeIds: demoOnly
+          ? new Set([
+              ...SHIPPED_TYPE_IDS,
+              "ab.relay",
+              "ab.compare_if",
+              "ab.temperature_sensor",
+            ])
+          : new Set([...SHIPPED_TYPE_IDS, "device-action", "status_led"]),
+      });
       setDryRun(result);
       const hardErrors = result.issues.filter((i) => i.severity !== "warning").length;
       // Start local LED/GPIO preview immediately after validate — before the
       // async hash — so the blink is not lost if something remounts mid-await.
       if (hardErrors === 0) {
         const channels = buildDryRunPreviewChannels(graphState);
-        previewChannelsRef.current = channels;
         previewStartedAtRef.current = performance.now();
         if (channels.length > 0) {
           setSimulating(true);
@@ -1647,7 +2348,11 @@ function ProcessingGraphScreenInner() {
       }
       if (result.compiled) {
         const digest = await sha256(encodeConfigCbor(result.compiled));
-        setHashHex(Array.from(digest.slice(0, 8)).map((b) => b.toString(16).padStart(2, "0")).join(""));
+        setHashHex(
+          Array.from(digest.slice(0, 8))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join(""),
+        );
       }
     } finally {
       setRunning(false);
@@ -1685,17 +2390,34 @@ function ProcessingGraphScreenInner() {
       <div className="flex h-12 shrink-0 items-center gap-2 overflow-hidden border-b border-border bg-surface px-3 sm:h-14 sm:gap-3 sm:px-4">
         {!demoOnly && (
           <div className="shrink-0">
-            <CoreSelector bindings={bindings} selected={selected} onSelect={(b) => setSelectedBindingId(b.bindingId)} />
+            <CoreSelector
+              bindings={bindings}
+              selected={selected}
+              onSelect={(b) => setSelectedBindingId(b.bindingId)}
+            />
           </div>
         )}
         {!demoOnly && (
           <div className="flex shrink-0 gap-1">
-            <button type="button" className="rounded-slpill px-3 py-1 text-xs text-ink-muted" onClick={() => navigate("physical-composition")}>Modules</button>
-            <button type="button" className="rounded-slpill bg-brand-blue/10 px-3 py-1 text-xs text-brand-blue">Logic</button>
+            <button
+              type="button"
+              className="rounded-slpill px-3 py-1 text-xs text-ink-muted"
+              onClick={() => navigate("physical-composition")}
+            >
+              Modules
+            </button>
+            <button
+              type="button"
+              className="rounded-slpill bg-brand-blue/10 px-3 py-1 text-xs text-brand-blue"
+            >
+              Logic
+            </button>
           </div>
         )}
         <div className="min-w-0">
-          <h1 className="truncate font-heading text-lg font-semibold text-ink">{demoOnly ? DEMO_VISITOR_PROJECT_NAME : copy.title}</h1>
+          <h1 className="truncate font-heading text-lg font-semibold text-ink">
+            {demoOnly ? DEMO_VISITOR_PROJECT_NAME : copy.title}
+          </h1>
           {demoOnly && (
             <p className="hidden truncate font-body text-[11px] text-ink-muted sm:block">
               Firmware functions command hardware modules on the Backbone
@@ -1715,18 +2437,38 @@ function ProcessingGraphScreenInner() {
                 ? "bg-brand-blue text-white hover:bg-brand-blue-dark"
                 : "border border-border-strong font-body text-ink"
           }`}
-          style={simulating ? { backgroundColor: "color-mix(in srgb, #F5C518 14%, transparent)" } : undefined}
+          style={
+            simulating
+              ? { backgroundColor: "color-mix(in srgb, #F5C518 14%, transparent)" }
+              : undefined
+          }
         >
-          {simulating ? <Square size={14} fill="currentColor" /> : <PlayCircle size={16} />}
-          {running ? copy.running : simulating ? copy.stopPreview : demoOnly ? copy.run : copy.dryRun}
+          {simulating ? (
+            <Square size={14} fill="currentColor" />
+          ) : (
+            <PlayCircle size={16} />
+          )}
+          {running
+            ? copy.running
+            : simulating
+              ? copy.stopPreview
+              : demoOnly
+                ? copy.run
+                : copy.dryRun}
         </button>
         {errorCount > 0 && (
-          <span className="flex shrink-0 items-center gap-1.5 rounded-slpill px-3 py-1.5 font-body text-sm text-error" style={{ backgroundColor: "color-mix(in srgb, var(--color-error) 10%, transparent)" }}>
+          <span
+            className="flex shrink-0 items-center gap-1.5 rounded-slpill px-3 py-1.5 font-body text-sm text-error"
+            style={{
+              backgroundColor:
+                "color-mix(in srgb, var(--color-error) 10%, transparent)",
+            }}
+          >
             <CircleAlert size={14} />
             {copy.errorsCount(errorCount)}
           </span>
         )}
-        {!demoOnly && (liveRuntime || graphState.nodes.length > 0) && (
+        {!demoOnly && (selected || liveRuntime || graphState.nodes.length > 0) && (
           <button
             type="button"
             onClick={() => void handlePauseRuntime()}
@@ -1738,13 +2480,20 @@ function ProcessingGraphScreenInner() {
           </button>
         )}
         {!demoOnly && (
-          <button type="button" onClick={requestDeploy} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
+          <button
+            type="button"
+            onClick={requestDeploy}
+            className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
+          >
             Run Deploy
           </button>
         )}
       </div>
       {pauseError && (
-        <div role="alert" className="border-b border-error bg-error/5 px-4 py-2 font-body text-sm text-error">
+        <div
+          role="alert"
+          className="border-b border-error bg-error/5 px-4 py-2 font-body text-sm text-error"
+        >
           {pauseError}
         </div>
       )}
@@ -1759,15 +2508,32 @@ function ProcessingGraphScreenInner() {
             <ProcessingBlockPalette
               bindingId={selected?.bindingId}
               onCreateRecipe={() => navigate("device-recipe-editor")}
+              onAddTrigger={() => {
+                const entry = findCatalogEntryById("appblocks.manual_trigger");
+                if (entry) placeFromCatalog(entry);
+              }}
+              onAddViewer={() => {
+                const entry = findCatalogEntryById("appblocks.data_viewer");
+                if (entry) placeFromCatalog(entry);
+              }}
             />
           )}
 
-          <div className="relative flex-1" onDragOver={onCanvasDragOver} onDragLeave={() => { setDropPreview(null); setContainerHint(null); }} onDrop={onCanvasDrop}>
+          <div
+            className="relative flex-1"
+            onDragOver={onCanvasDragOver}
+            onDragLeave={() => {
+              setDropPreview(null);
+              setContainerHint(null);
+            }}
+            onDrop={onCanvasDrop}
+          >
             {!demoOnly && (
               <BackboneModulesPanel
                 modules={backboneSensorModules}
                 onAdd={() => navigate("device-recipe-editor")}
-                onSelect={(module) => setSensorDetail(module)}
+                onSelect={setSensorDetail}
+                onEdit={(module) => { setSensorDetail(null); openRgbModule(module); }}
                 onRemove={handleSensorModuleRemove}
                 onUseStatusLed={handleUseStatusLed}
               />
@@ -1790,10 +2556,19 @@ function ProcessingGraphScreenInner() {
             />
             {sensorDetail && (
               <div className="absolute inset-0 z-40 flex items-center justify-center bg-ink/25 p-4">
-                <button type="button" aria-label="Close" className="absolute inset-0 cursor-default" onClick={() => setSensorDetail(null)} />
+                <button
+                  type="button"
+                  aria-label="Close"
+                  className="absolute inset-0 cursor-default"
+                  onClick={() => setSensorDetail(null)}
+                />
                 <div className="relative z-10 max-h-[min(90dvh,44rem)] w-full max-w-3xl overflow-y-auto rounded-slmd border border-border-strong bg-surface p-4 shadow-e2">
                   <SensorRecipeCard
-                    recipe={resolveRecipe(backboneSensorModules.find((module) => module.id === sensorDetail.id) ?? sensorDetail)}
+                    recipe={resolveRecipe(
+                      backboneSensorModules.find(
+                        (module) => module.id === sensorDetail.id,
+                      ) ?? sensorDetail,
+                    )}
                     it={locale === "it"}
                     editable
                     onRecipeChange={handleSensorRecipeEdit}
@@ -1801,7 +2576,11 @@ function ProcessingGraphScreenInner() {
                   {selected && (
                     <div className="mt-4 border-t border-border pt-4">
                       <ModuleGpioPinField
-                        module={backboneSensorModules.find((module) => module.id === sensorDetail.id) ?? sensorDetail}
+                        module={
+                          backboneSensorModules.find(
+                            (module) => module.id === sensorDetail.id,
+                          ) ?? sensorDetail
+                        }
                         bindingId={selected.bindingId}
                         it={locale === "it"}
                       />
@@ -1835,12 +2614,20 @@ function ProcessingGraphScreenInner() {
               onConnect={onConnect}
               isValidConnection={isValidConnection}
               onNodeClick={onNodeClick}
+              onNodeDoubleClick={onNodeDoubleClick}
+              zoomOnDoubleClick={false}
               onInit={setRf}
               deleteKeyCode={demoOnly ? null : ["Backspace", "Delete"]}
               proOptions={demoOnly ? { hideAttribution: true } : undefined}
-              defaultEdgeOptions={{ type: "deletable", interactionWidth: 24, style: { stroke: "var(--color-ink-faint)", strokeWidth: 1.75 } }}
+              defaultEdgeOptions={{
+                type: "deletable",
+                interactionWidth: 24,
+                style: { stroke: "var(--color-ink-faint)", strokeWidth: 1.75 },
+              }}
               fitView
-              fitViewOptions={demoOnly ? { padding: 0.22, minZoom: 0.18, maxZoom: 1.15 } : undefined}
+              fitViewOptions={
+                demoOnly ? { padding: 0.22, minZoom: 0.18, maxZoom: 1.15 } : { padding: 0.2, maxZoom: 0.8 }
+              }
               minZoom={demoOnly ? 0.15 : undefined}
               maxZoom={demoOnly ? 1.5 : undefined}
               panOnScroll={!demoOnly}
@@ -1848,25 +2635,47 @@ function ProcessingGraphScreenInner() {
               preventScrolling={demoOnly}
             >
               <Background gap={20} color="#E1E4EB" />
-              <Controls position="bottom-left" showInteractive={!demoOnly} />
-              {!demoOnly && domainNodes.length > 0 && <MiniMap position="bottom-right" pannable zoomable className="!rounded-slsm !border !border-border-strong !shadow-e1" nodeColor={(n) => PROCESSING_NODE_KIND_CONFIG[(n.data as ProcessingNodeUiData).kind]?.colorVar ?? "#8A8F99"} />}
+              <Controls position="bottom-left" showInteractive={!demoOnly} fitViewOptions={{ padding: 0.2, maxZoom: demoOnly ? 1.15 : 0.8 }} />
+              {!demoOnly && domainNodes.length > 0 && (
+                <MiniMap
+                  position="bottom-right"
+                  pannable
+                  zoomable
+                  className="!rounded-slsm !border !border-border-strong !shadow-e1"
+                  nodeColor={(n) =>
+                    PROCESSING_NODE_KIND_CONFIG[(n.data as ProcessingNodeUiData).kind]
+                      ?.colorVar ?? "#8A8F99"
+                  }
+                />
+              )}
             </ReactFlow>
             {demoOnly && (
               <DemoRadialAdd
                 onPick={(entryId) => {
                   const entry = findCatalogEntryById(entryId);
                   if (!entry) return;
-                  const baySide = entry.family === "bay" ? (entry.bayIo === "input" ? "input" : "output") : undefined;
+                  const baySide =
+                    entry.family === "bay"
+                      ? entry.bayIo === "input"
+                        ? "input"
+                        : "output"
+                      : undefined;
                   placeFromCatalog(entry, demoSpawnPosition(entryId), baySide);
                 }}
               />
             )}
 
             {domainNodes.length === 0 && !dropPreview && (
-              <div className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center${demoOnly || simulating ? "" : " mb-10"}`}>
+              <div
+                className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center${demoOnly || simulating ? "" : " mb-10"}`}
+              >
                 <Workflow size={48} strokeWidth={1.5} className="text-ink-faint" />
-                <p className="mt-2 font-heading text-lg font-semibold text-ink">{copy.emptyTitle}</p>
-                <p className="mt-2 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white opacity-70">{copy.emptyHint}</p>
+                <p className="mt-2 font-heading text-lg font-semibold text-ink">
+                  {copy.emptyTitle}
+                </p>
+                <p className="mt-2 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white opacity-70">
+                  {copy.emptyHint}
+                </p>
               </div>
             )}
 
@@ -1878,22 +2687,33 @@ function ProcessingGraphScreenInner() {
                   height: 48,
                   left: dropPreview.x,
                   top: dropPreview.y,
-                  backgroundColor: "color-mix(in srgb, var(--color-brand-blue) 8%, transparent)",
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-brand-blue) 8%, transparent)",
                 }}
               />
             )}
 
             {overlapWarning && (
-              <div className="pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-slpill bg-surface px-3 py-1.5 font-body text-sm text-ink shadow-e1" style={{ outline: "1px solid var(--color-warning)" }}>
+              <div
+                className="pointer-events-none absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-slpill bg-surface px-3 py-1.5 font-body text-sm text-ink shadow-e1"
+                style={{ outline: "1px solid var(--color-warning)" }}
+              >
                 {overlapWarning}
               </div>
             )}
 
             {!demoOnly && !simulating && (
               <div className="absolute bottom-0 left-0 right-0 flex h-10 items-center gap-2 border-t border-border bg-surface px-4">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: statusColor }} />
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: statusColor }}
+                />
                 <span className="font-body text-xs text-ink-muted">{statusText}</span>
-                {hashHex && <span className="font-mono text-xs text-ink-faint">hash: {hashHex}…</span>}
+                {hashHex && (
+                  <span className="font-mono text-xs text-ink-faint">
+                    hash: {hashHex}…
+                  </span>
+                )}
                 <span className="ml-auto font-mono text-xs text-ink-faint">
                   {copy.nodesEdges(domainNodes.length, graphState.edges.length)}
                 </span>
@@ -1901,15 +2721,55 @@ function ProcessingGraphScreenInner() {
             )}
           </div>
 
-          {inspector && (demoOnly || (inspector.kind === "edit" && recipeForActionNode(inspector.data))) && (
-            <DemoInspectorBubble
-              nodeId={inspector.kind === "edit" ? inspector.nodeId : undefined}
-              onDismiss={() => setInspector(null)}
-            >
+          {inspector &&
+            (demoOnly ||
+              (inspector.kind === "edit" && recipeForActionNode(inspector.data))) && (
+              <DemoInspectorBubble
+                nodeId={inspector.kind === "edit" ? inspector.nodeId : undefined}
+                onDismiss={() => setInspector(null)}
+              >
+                <NodeInspector
+                  driverBindingId={selected?.bindingId}
+                  driverRecipe={
+                    inspector.kind === "edit"
+                      ? recipeForActionNode(inspector.data)
+                      : undefined
+                  }
+                  key={
+                    inspector.kind === "edit"
+                      ? inspector.nodeId
+                      : `create-${inspector.nodeKind}`
+                  }
+                  mode={inspector}
+                  moduleOptions={moduleOptions}
+                  existingNodes={domainNodes}
+                  existingEdges={graphState.edges}
+                  nodeLabel={processingNodeLabel}
+                  knownModuleNodeIds={knownModuleNodeIds}
+                  onSave={handleSave}
+                  onApply={handleApply}
+                  onDelete={
+                    inspector.kind === "edit" && !demoOnly ? handleDelete : undefined
+                  }
+                  onClose={() => setInspector(null)}
+                />
+              </DemoInspectorBubble>
+            )}
+          {inspector &&
+            !demoOnly &&
+            !(inspector.kind === "edit" && recipeForActionNode(inspector.data)) && (
               <NodeInspector
                 driverBindingId={selected?.bindingId}
-                driverRecipe={inspector.kind === "edit" ? recipeForActionNode(inspector.data) : undefined}
-                key={inspector.kind === "edit" ? inspector.nodeId : `create-${inspector.nodeKind}`}
+                driverRecipe={
+                  inspector.kind === "edit"
+                    ? recipeForActionNode(inspector.data)
+                    : undefined
+                }
+                key={
+                  inspector.kind === "edit"
+                    ? inspector.nodeId
+                    : `create-${inspector.nodeKind}`
+                }
                 mode={inspector}
                 moduleOptions={moduleOptions}
                 existingNodes={domainNodes}
@@ -1918,28 +2778,10 @@ function ProcessingGraphScreenInner() {
                 knownModuleNodeIds={knownModuleNodeIds}
                 onSave={handleSave}
                 onApply={handleApply}
-                onDelete={inspector.kind === "edit" && !demoOnly ? handleDelete : undefined}
+                onDelete={inspector.kind === "edit" ? handleDelete : undefined}
                 onClose={() => setInspector(null)}
               />
-            </DemoInspectorBubble>
-          )}
-          {inspector && !demoOnly && !(inspector.kind === "edit" && recipeForActionNode(inspector.data)) && (
-            <NodeInspector
-                driverBindingId={selected?.bindingId}
-                driverRecipe={inspector.kind === "edit" ? recipeForActionNode(inspector.data) : undefined}
-              key={inspector.kind === "edit" ? inspector.nodeId : `create-${inspector.nodeKind}`}
-              mode={inspector}
-              moduleOptions={moduleOptions}
-              existingNodes={domainNodes}
-              existingEdges={graphState.edges}
-              nodeLabel={processingNodeLabel}
-              knownModuleNodeIds={knownModuleNodeIds}
-              onSave={handleSave}
-              onApply={handleApply}
-              onDelete={inspector.kind === "edit" ? handleDelete : undefined}
-              onClose={() => setInspector(null)}
-            />
-          )}
+            )}
         </div>
       )}
     </div>

@@ -192,6 +192,32 @@ def _run(coro):
 
 
 class BridgeSessionTest(unittest.TestCase):
+    def test_timeout_closes_session_without_sending_next_request(self) -> None:
+        from websockets.exceptions import ConnectionClosed
+        class SilentSerial(FakeSerial):
+            def write(self, data: bytes) -> int:
+                self.written.extend(data)
+                return len(data)
+        async def scenario() -> None:
+            serial = SilentSerial()
+            bridge = UsbBridge()
+            bridge.cores[DEVICE_ID_HEX] = BoundCore(
+                device_id_hex=DEVICE_ID_HEX, device_name="Test", version="test",
+                port="fake", connection=serial, write_lock=threading.Lock(),
+            )
+            async with serve(make_handler(bridge), "127.0.0.1", 0) as server:
+                port = server.sockets[0].getsockname()[1]
+                first = encode_request(1, Operation.GET_STATUS, b"")
+                second = encode_request(2, Operation.GET_CONFIG, b"")
+                async with ws_connect(f"ws://127.0.0.1:{port}/core/{DEVICE_ID_HEX}") as ws:
+                    await ws.send(first)
+                    await ws.send(second)
+                    with self.assertRaises(ConnectionClosed):
+                        await asyncio.wait_for(ws.recv(), timeout=2)
+                self.assertEqual(bytes(serial.written), encode_usb_frame(KIND_REQUEST, first))
+        with mock.patch("tools.usb_bridge.RESPONSE_WAIT_S", 0.03):
+            _run(scenario())
+
     def test_missing_serial_port_ends_only_the_active_pipe(self) -> None:
         async def scenario() -> None:
             queue: asyncio.Queue[bytes] = asyncio.Queue()

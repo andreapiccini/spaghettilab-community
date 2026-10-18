@@ -36,6 +36,7 @@
 #include <spaghetti/port.h>
 #include <spaghetti/power.h>
 #include <spaghetti/protocol.h>
+#include <spaghetti/runtime.h>
 #include <spaghetti/remote_console.h>
 #include <spaghetti/resources.h>
 #include <spaghetti/rule_registry.h>
@@ -1275,6 +1276,10 @@ ZTEST(communication, test_command_arguments_decode_and_reject_duplicates)
 	memcpy(request.bytes, encoded, sizeof(encoded));
 	zassert_true(spaghetti_ops_decode_arguments(&request, &arguments) < 0);
 }
+
+int spaghetti_runtime_post_command_result(spaghetti_module_key_t key,
+    const struct spaghetti_record_payload *payload)
+{ ARG_UNUSED(key); ARG_UNUSED(payload); return 0; }
 
 ZTEST_SUITE(communication, NULL, NULL, NULL, NULL, NULL);
 

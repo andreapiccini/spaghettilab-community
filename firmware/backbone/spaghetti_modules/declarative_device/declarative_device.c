@@ -28,6 +28,11 @@ struct spaghetti_declarative_context {
 	struct spaghetti_device_profile_binding binding;
 	bool initialized;
 	uint8_t pending_commands;
+	uint32_t motion_completed;
+	struct spaghetti_rgb_state rgb;
+	struct spaghetti_dht22_state dht22;
+	uint32_t rgb_published;
+	bool rgb_read;
 };
 
 K_MEM_SLAB_DEFINE(declarative_context_slab, sizeof(struct spaghetti_declarative_context),
@@ -265,6 +270,21 @@ static int declarative_validate_config(const struct spaghetti_property_set *conf
 	return resolve_profile(config, &profile, &binding);
 }
 
+static bool profile_uses_physical_port(const struct spaghetti_device_profile *profile)
+{
+	const struct spaghetti_device_profile_op *plans[] = { profile->init_ops, profile->sample_ops, profile->safe_stop_ops };
+	size_t counts[] = { profile->init_count, profile->sample_count, profile->safe_stop_count };
+	for (size_t p = 0; p < ARRAY_SIZE(plans); ++p)
+		for (size_t i = 0; i < counts[p]; ++i) {
+			uint8_t code = plans[p][i].opcode;
+			if (code <= SPAGHETTI_DEVICE_PROFILE_OP_ADC_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_WAIT_FIELD_MASK ||
+			    code == SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_UART_READ ||
+			    code == SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO || code == SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE ||
+			    code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE || code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || code == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER || code == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) return true;
+		}
+	return false;
+}
+
 static int declarative_describe_endpoint(const struct spaghetti_property_set *config,
 	struct spaghetti_module_endpoint *out)
 {
@@ -282,6 +302,7 @@ static int declarative_describe_endpoint(const struct spaghetti_property_set *co
 	}
 
 	memset(out, 0, sizeof(*out));
+	if (!profile_uses_physical_port(profile)) { out->kind = SPAGHETTI_ENDPOINT_LOGICAL; return 0; }
 	switch (profile->transport) {
 	case SPAGHETTI_PORT_TRANSPORT_I2C:
 		out->kind = SPAGHETTI_ENDPOINT_I2C_ADDRESS;
@@ -297,6 +318,19 @@ static int declarative_describe_endpoint(const struct spaghetti_property_set *co
 		out->kind = SPAGHETTI_ENDPOINT_UART_EXCLUSIVE;
 		break;
 	case SPAGHETTI_PORT_TRANSPORT_GPIO:
+		for (size_t i = 0; i < profile->init_count + profile->sample_count; ++i) {
+			const struct spaghetti_device_profile_op *op = i < profile->init_count ? &profile->init_ops[i] : &profile->sample_ops[i - profile->init_count];
+			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER) { out->kind = SPAGHETTI_ENDPOINT_PORT_EXCLUSIVE; return 0; }
+      if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) {
+        out->kind = SPAGHETTI_ENDPOINT_GPIO_LINE; out->value_size = 2;
+        out->value[0] = op->imm0; out->value[1] = op->imm1; return 0;
+      }
+      if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM) {
+        out->kind = SPAGHETTI_ENDPOINT_GPIO_LINE; out->value_size = 3;
+        for (unsigned channel = 0; channel < 3; channel++) out->value[channel] = (op->imm2 >> (2 * channel)) & 3;
+        return 0;
+      }
+		}
 		out->kind = SPAGHETTI_ENDPOINT_GPIO_LINE;
 		out->value_size = 1U;
 		out->value[0] = 0U;
@@ -304,7 +338,7 @@ static int declarative_describe_endpoint(const struct spaghetti_property_set *co
 			const struct spaghetti_device_profile_op *op = i < profile->init_count
 				? &profile->init_ops[i] : &profile->sample_ops[i - profile->init_count];
 			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET) { out->value[0] = op->imm1; break; }
-			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE) { out->value[0] = op->imm0; break; }
+			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE) { out->value[0] = op->imm0; break; }
 		}
 		break;
 	case SPAGHETTI_PORT_TRANSPORT_ADC:
@@ -327,6 +361,9 @@ static int declarative_describe_endpoint(const struct spaghetti_property_set *co
 static int declarative_run_safe_stop(struct spaghetti_declarative_context *context,
 				     const struct spaghetti_port *port)
 {
+	spaghetti_device_profile_cancel_pulses(context);
+	spaghetti_device_profile_cancel_stepper(context);
+	spaghetti_device_profile_rgb_stop(&context->rgb, port);
 	if ((context->profile == NULL) || (context->profile->safe_stop_count == 0U)) {
 		return 0;
 	}
@@ -353,7 +390,7 @@ static int declarative_init(struct spaghetti_module *module,
 		return err;
 	}
 
-	if (!spaghetti_port_has_capability(module->port, profile->required_capabilities)) {
+	if (profile->required_capabilities != 0U && !spaghetti_port_has_capability(module->port, profile->required_capabilities)) {
 		return -ENOTSUP;
 	}
 
@@ -365,6 +402,10 @@ static int declarative_init(struct spaghetti_module *module,
 	memset(context, 0, sizeof(*context));
 	context->profile = profile;
 	context->binding = binding;
+	context->binding.pulse_owner = context;
+	context->binding.module_key = module->key;
+	context->binding.rgb = &context->rgb;
+	context->binding.dht22 = &context->dht22;
 	context->values = k_calloc(1, sizeof(*context->values));
 	if (!context->values) {
 		k_mem_slab_free(&declarative_context_slab, context);
@@ -373,7 +414,7 @@ static int declarative_init(struct spaghetti_module *module,
 	module->context = context;
 
 	err = spaghetti_device_profile_exec(profile, profile->init_ops, profile->init_count,
-					    module->port, &binding, NULL);
+					    module->port, &context->binding, NULL);
 	if (err < 0) {
 		(void)declarative_run_safe_stop(context, module->port);
 		k_free(context->values);
@@ -623,6 +664,41 @@ static int declarative_read(struct spaghetti_module *module, struct spaghetti_re
 	if (!context->initialized || (context->profile == NULL)) {
 		return -EINVAL;
 	}
+
+ if (context->rgb.initialized) {
+   if (context->rgb_read && context->rgb_published == context->rgb.revision) return -EAGAIN;
+   context->rgb_read = true; context->rgb_published = context->rgb.revision;
+   memset(out, 0, sizeof(*out));
+   strncpy(out->schema_id, context->profile->sample_schema_id, sizeof(out->schema_id) - 1);
+   out->schema_version = context->profile->sample_schema_version;
+   out->kind = SPAGHETTI_RECORD_EVENT;
+   spaghetti_device_profile_rgb_record(&context->rgb, out);
+   return validate_result(context->profile, out);
+ }
+ /* Stepper schedules monitor completion; they must never replay action 1 (Stop). */
+ bool motion = false;
+ for (size_t i = 0; i < context->profile->sample_count; i++)
+   if (context->profile->sample_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ && context->profile->sample_ops[i].imm2 == 1U && !context->dht22.pending)
+     return -EAGAIN;
+ for (size_t i = 0; i < context->profile->sample_count; i++)
+   if (context->profile->sample_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER) motion = true;
+ if (motion) {
+   struct spaghetti_motion_status status;
+   err = spaghetti_device_profile_motion_status(module->key, &status);
+   if (err < 0) return err;
+   if (status.error) return status.error;
+   if (status.completed == context->motion_completed) return -EAGAIN;
+   context->motion_completed++;
+   memset(out, 0, sizeof(*out));
+   out->kind = SPAGHETTI_RECORD_EVENT;
+   strncpy(out->schema_id, context->profile->sample_schema_id, sizeof(out->schema_id) - 1);
+   out->schema_version = context->profile->sample_schema_version;
+   out->values.field_count = 1;
+   out->values.fields[0].field_id = 65534;
+   out->values.fields[0].type = SPAGHETTI_VALUE_UINT64;
+   out->values.fields[0].data.unsigned_integer = 1;
+   return validate_result(context->profile, out);
+ }
 
 	if (context->profile->action_count > 0U) {
 		struct spaghetti_module_command *command = k_calloc(1, sizeof(*command));

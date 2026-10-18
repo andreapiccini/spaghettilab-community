@@ -1,4 +1,6 @@
-import { Cpu, Lightbulb, Plus, Trash2 } from "lucide-react";
+import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
+import { useEffect, useRef } from "react";
+import { Cpu, Plus, Trash2 } from "lucide-react";
 import type { BackboneSensorModule } from "../../lib/backbone-sensor-modules.js";
 import { resolveRecipe } from "../../lib/backbone-sensor-modules.js";
 import { STATUS_LED_GPIO, STATUS_LED_LABEL } from "../../lib/backbone-physical.js";
@@ -12,16 +14,20 @@ export function BackboneModulesPanel({
   modules,
   onAdd,
   onSelect,
+  onEdit,
   onRemove,
   onUseStatusLed,
 }: {
   readonly modules: readonly BackboneSensorModule[];
   readonly onAdd: () => void;
   readonly onSelect: (module: BackboneSensorModule) => void;
+  readonly onEdit: (module: BackboneSensorModule) => void;
   readonly onRemove: (moduleId: string) => void;
   readonly onUseStatusLed: () => void;
 }) {
   const { locale } = useLocale();
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(clickTimer.current), []);
   const it = locale === "it";
 
   return (
@@ -37,7 +43,9 @@ export function BackboneModulesPanel({
     >
       <div className="flex h-8 shrink-0 items-center gap-1.5 border-b border-slate-400/25 px-2">
         <Cpu size={13} className="shrink-0 text-slate-500" />
-        <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted">Backbone</span>
+        <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted">
+          Backbone
+        </span>
         <span
           className="ml-auto shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-slate-600"
           style={{ backgroundColor: "color-mix(in srgb, #64748B 12%, transparent)" }}
@@ -50,13 +58,23 @@ export function BackboneModulesPanel({
         <button
           type="button"
           onClick={onUseStatusLed}
-          title={it ? `${STATUS_LED_LABEL} · pin fisso IO${STATUS_LED_GPIO}` : `${STATUS_LED_LABEL} · fixed pin IO${STATUS_LED_GPIO}`}
+          title={
+            it
+              ? `${STATUS_LED_LABEL} · pin fisso IO${STATUS_LED_GPIO}`
+              : `${STATUS_LED_LABEL} · fixed pin IO${STATUS_LED_GPIO}`
+          }
           className="flex h-[4.5rem] w-[4.5rem] flex-col items-center justify-center gap-1 rounded-slsm border border-border-strong bg-surface px-1 text-center shadow-e1 hover:border-brand-blue"
           style={{ outline: "1px solid color-mix(in srgb, #22C55E 35%, transparent)" }}
         >
-          <Lightbulb size={16} className="text-emerald-600" />
-          <span className="line-clamp-2 w-full font-body text-[10px] font-semibold leading-tight text-ink">STATUS</span>
-          <span className="font-mono text-[9px] uppercase text-ink-faint">IO{STATUS_LED_GPIO}</span>
+          <span className="h-8 w-8">
+            <ModuleArtwork kind="led" name="STATUS" />
+          </span>
+          <span className="line-clamp-2 w-full font-body text-[10px] font-semibold leading-tight text-ink">
+            STATUS
+          </span>
+          <span className="font-mono text-[9px] uppercase text-ink-faint">
+            IO{STATUS_LED_GPIO}
+          </span>
         </button>
 
         {modules.map((module) => {
@@ -65,13 +83,26 @@ export function BackboneModulesPanel({
             <div key={module.id} className="group relative">
               <button
                 type="button"
-                onClick={() => onSelect(module)}
+                onClick={() => {
+                  clearTimeout(clickTimer.current);
+                  clickTimer.current = setTimeout(() => onSelect(module), 400);
+                }}
+                onDoubleClick={() => { clearTimeout(clickTimer.current); onEdit(module); }}
                 title={recipe.oneLiner}
                 className="flex h-[4.5rem] w-[4.5rem] flex-col items-center justify-center gap-1 rounded-slsm border border-border-strong bg-surface px-1 text-center shadow-e1 hover:border-brand-blue"
               >
-                <Cpu size={16} className="text-slate-600" />
-                <span className="line-clamp-2 w-full font-body text-[10px] font-semibold leading-tight text-ink">{module.label}</span>
-                <span className="font-mono text-[9px] uppercase text-ink-faint">{module.bus}</span>
+                <span className="h-8 w-8">
+                  <ModuleArtwork
+                    kind={recipe.deviceDraft?.gpioHardware?.kind ?? "generic"}
+                    name={module.label}
+                  />
+                </span>
+                <span className="line-clamp-2 w-full font-body text-[10px] font-semibold leading-tight text-ink">
+                  {module.label}
+                </span>
+                <span className="font-mono text-[9px] uppercase text-ink-faint">
+                  {module.bus}
+                </span>
               </button>
               <button
                 type="button"
@@ -95,7 +126,9 @@ export function BackboneModulesPanel({
           className="flex h-[4.5rem] w-[4.5rem] flex-col items-center justify-center gap-1 rounded-slsm border-2 border-dashed border-slate-400/50 bg-surface/60 text-slate-500 transition-colors hover:border-brand-blue hover:text-brand-blue"
         >
           <Plus size={22} strokeWidth={2} />
-          <span className="font-body text-[10px] font-semibold">{it ? "Aggiungi" : "Add"}</span>
+          <span className="font-body text-[10px] font-semibold">
+            {it ? "Aggiungi" : "Add"}
+          </span>
         </button>
       </div>
 

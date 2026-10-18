@@ -33,10 +33,7 @@ const POLL_MS = 1000;
 const DISCOVERY_CONFIRM_MS = 180;
 
 type NfcPresenceContextValue = {
-  readonly observations: ReadonlyMap<
-    CoreBindingId,
-    readonly NfcTagInput[]
-  >;
+  readonly observations: ReadonlyMap<CoreBindingId, readonly NfcTagInput[]>;
   readonly nodesByBinding: ReadonlyMap<CoreBindingId, readonly NfcNode[]>;
   readonly loadingBindings: ReadonlySet<CoreBindingId>;
   readonly queue: NfcDetectQueue;
@@ -82,9 +79,9 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
   const pendingPollRef = useRef<"now" | "fresh" | false>(false);
   const pendingConfirmLaterRef = useRef(false);
   const pauseCountRef = useRef(0);
-  const refreshRef = useRef<(options?: { fresh?: boolean; confirmLater?: boolean }) => void>(
-    () => {},
-  );
+  const refreshRef = useRef<
+    (options?: { fresh?: boolean; confirmLater?: boolean }) => void
+  >(() => {});
 
   const readyRoots = useMemo(
     () =>
@@ -209,7 +206,8 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
       }
       inFlightRef.current = true;
       try {
-        let confirmLater = Boolean(options?.confirmLater) || pendingConfirmLaterRef.current;
+        let confirmLater =
+          Boolean(options?.confirmLater) || pendingConfirmLaterRef.current;
         pendingConfirmLaterRef.current = false;
         let wantFresh = Boolean(options?.fresh);
         do {
@@ -248,7 +246,8 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
               }
             }
           }
-          wantFresh = pendingPollRef.current === "fresh";
+          wantFresh =
+            ((): "now" | "fresh" | false => pendingPollRef.current)() === "fresh";
         } while (pendingPollRef.current && !cancelled);
         confirmLater = confirmLater || pendingConfirmLaterRef.current;
         pendingConfirmLaterRef.current = false;
@@ -275,12 +274,7 @@ export function NfcPresenceProvider({ children }: { readonly children: ReactNode
       window.clearInterval(timer);
       for (const confirm of confirmTimers) window.clearTimeout(confirm);
     };
-  }, [
-    readyKey,
-    readyRoots.length,
-    discoverNetwork,
-    ingestStatus,
-  ]);
+  }, [readyKey, readyRoots.length, discoverNetwork, ingestStatus]);
 
   useEffect(() => {
     const unsubs: (() => void)[] = [];

@@ -93,14 +93,9 @@ export function nodeWidthForPorts(ports: NodePortLayout): number {
   return n > 1 ? 200 : NODE_WIDTH;
 }
 
-const CLOSED = 28;
-const OPEN = 12;
-/** Sharp corners; only bottom-left is rounded. */
-const MARK = 2;
-
-export function nodeShellRadius(ports: Pick<NodePortLayout, "hasInput" | "hasOutput">): string {
-  const round = ports.hasInput ? OPEN : CLOSED;
-  return `${MARK}px ${MARK}px ${MARK}px ${round}px`;
+/** Uniform, restrained rounding for rectangular canvas blocks. */
+export function nodeShellRadius(): string {
+  return "8px";
 }
 
 /** Type-icon handle (replaces the old circle / input bar). */

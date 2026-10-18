@@ -1,3 +1,4 @@
+import { upgradeMotionPorts } from "../lib/upgrade-motion-ports.js";
 import { CommandStack, type ProjectId, type ProjectV1 } from "@spaghettilab/domain";
 import {
   createContext,
@@ -20,7 +21,11 @@ type SessionState = {
 type SessionContextValue = {
   readonly session: SessionState | null;
   readonly activeScreen: ScreenId;
-  openProject(projectId: ProjectId, project: ProjectV1, options?: { readonly screen?: ScreenId }): void;
+  openProject(
+    projectId: ProjectId,
+    project: ProjectV1,
+    options?: { readonly screen?: ScreenId },
+  ): void;
   closeProject(): void;
   /** Bumped on every `execute()`/`undo()`/`redo()` so consumers re-render — `CommandStack` itself is a plain mutable class, not React state. */
   revision: number;
@@ -28,13 +33,20 @@ type SessionContextValue = {
   undo(): void;
   redo(): void;
   navigate(screen: ScreenId): void;
-  readonly physicalTarget: { readonly bindingId: string; readonly deviceIdHex: string } | null;
+  readonly physicalTarget: {
+    readonly bindingId: string;
+    readonly deviceIdHex: string;
+  } | null;
   openBackbonePhysical(bindingId: string, deviceIdHex: string): void;
   /** Set on every execute()/undo()/redo() since the project was opened or last saved — drives the `beforeunload` warning below. */
   readonly dirty: boolean;
   markSaved(): void;
   readonly deployRequestId: number;
   requestDeploy(): void;
+  readonly deployOpen: boolean;
+  closeDeploy(): void;
+  readonly canvasFocus: { bindingId: string; nodeId?: string; request: number } | null;
+  focusCanvas(bindingId: string, nodeId?: string): void;
 };
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
@@ -45,18 +57,38 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
   const [revision, setRevision] = useState(0);
   const [dirty, setDirty] = useState(false);
   const [deployRequestId, setDeployRequestId] = useState(0);
-  const [physicalTarget, setPhysicalTarget] = useState<SessionContextValue["physicalTarget"]>(null);
-
-  const openProject = useCallback((projectId: ProjectId, project: ProjectV1, options?: { readonly screen?: ScreenId }) => {
-    setSession({ projectId, stack: new CommandStack(project) });
-    setActiveScreen(options?.screen ?? "core-connections");
-    setRevision((r) => r + 1);
-    setDirty(false);
-    setPhysicalTarget(null);
+  const [deployOpen, setDeployOpen] = useState(false);
+  const [canvasFocus, setCanvasFocus] =
+    useState<SessionContextValue["canvasFocus"]>(null);
+  const closeDeploy = useCallback(() => setDeployOpen(false), []);
+  const focusCanvas = useCallback((bindingId: string, nodeId?: string) => {
+    setCanvasFocus({ bindingId, nodeId, request: Date.now() });
+    setDeployOpen(false);
+    setActiveScreen("processing-graph");
   }, []);
+  const [physicalTarget, setPhysicalTarget] =
+    useState<SessionContextValue["physicalTarget"]>(null);
+
+  const openProject = useCallback(
+    (
+      projectId: ProjectId,
+      project: ProjectV1,
+      options?: { readonly screen?: ScreenId },
+    ) => {
+      setSession({ projectId, stack: new CommandStack(upgradeMotionPorts(project)) });
+      setDeployOpen(false);
+      setCanvasFocus(null);
+      setActiveScreen(options?.screen ?? "core-connections");
+      setRevision((r) => r + 1);
+      setDirty(false);
+      setPhysicalTarget(null);
+    },
+    [],
+  );
 
   const closeProject = useCallback(() => {
     setSession(null);
+    setDeployOpen(false);
     setActiveScreen("workspace");
     setPhysicalTarget(null);
   }, []);
@@ -100,14 +132,17 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [dirty]);
 
-  const navigate = useCallback((screen: ScreenId) => setActiveScreen(screen), []);
+  const navigate = useCallback((screen: ScreenId) => {
+    if (screen === "deploy-diff") setDeployOpen(true);
+    else setActiveScreen(screen);
+  }, []);
   const openBackbonePhysical = useCallback((bindingId: string, deviceIdHex: string) => {
     setPhysicalTarget({ bindingId, deviceIdHex });
     setActiveScreen("physical-composition");
   }, []);
   const requestDeploy = useCallback(() => {
     setDeployRequestId((value) => value + 1);
-    setActiveScreen("deploy-diff");
+    setDeployOpen(true);
   }, []);
 
   const value: SessionContextValue = {
@@ -126,6 +161,10 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
     markSaved,
     deployRequestId,
     requestDeploy,
+    deployOpen,
+    closeDeploy,
+    canvasFocus,
+    focusCanvas,
   };
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

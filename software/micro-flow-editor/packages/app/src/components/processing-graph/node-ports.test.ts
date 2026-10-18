@@ -109,16 +109,7 @@ describe("handlesForNode", () => {
 });
 
 describe("nodeShellRadius", () => {
-  it("rounds only the bottom-left; closed when no input", () => {
-    expect(nodeShellRadius({ hasInput: false, hasOutput: true })).toBe("2px 2px 2px 28px");
-  });
-
-  it("opens the left side when the card has an input", () => {
-    expect(nodeShellRadius({ hasInput: true, hasOutput: false })).toBe("2px 2px 2px 12px");
-  });
-
-  it("keeps the same radii for dual-port and closed cards", () => {
-    expect(nodeShellRadius({ hasInput: true, hasOutput: true })).toBe("2px 2px 2px 12px");
-    expect(nodeShellRadius({ hasInput: false, hasOutput: false })).toBe("2px 2px 2px 28px");
+  it("uses the same modest radius on all four corners", () => {
+    expect(nodeShellRadius()).toBe("8px");
   });
 });

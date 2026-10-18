@@ -33,6 +33,9 @@
 /** Stable non-zero ID for the BLE record consumer. */
 #define SPAGHETTI_RECORD_CONSUMER_ID_BLE 2U
 
+/** Local USB telemetry consumer; bounded to ten records per second. */
+#define SPAGHETTI_RECORD_CONSUMER_ID_USB 3U
+
 /**
  * @brief Cursor identifying one pending record for a single consumer.
  *

@@ -27,7 +27,7 @@
 #define SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS 8U
 
 /** Opcode vocabulary revision understood by this firmware image. */
-#define SPAGHETTI_DEVICE_PROFILE_OPCODE_VERSION 5U
+#define SPAGHETTI_DEVICE_PROFILE_OPCODE_VERSION 8U
 
 /** Compact CBOR map wire revision decoded by install. */
 #define SPAGHETTI_DEVICE_PROFILE_WIRE_VERSION 3U
@@ -56,6 +56,12 @@
  * firmware Capability Pack; install never extends this set.
  */
 enum spaghetti_device_profile_opcode {
+	SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL = 38U,
+	SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER = 36U,
+	SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ = 37U,
+	SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM = 35U,
+	SPAGHETTI_DEVICE_PROFILE_OP_STEPPER = 34U, /**< Nonblocking four-coil half-step motor: stop/start/position. */
+	SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE = 33U, /**< Indexed pulse; timer restores the level without blocking execution. */
 	SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE = 32U, /**< Drive imm0 channel from src_a (0/1), optional imm1 invert. */
 	SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_LOAD =
 	    29U, /**< Copy immutable data slice to dedicated workspace. */
@@ -227,7 +233,27 @@ struct spaghetti_device_profile_failure {
  *
  * Values come from Module config property fields, not from the shared profile.
  */
+struct spaghetti_rgb_state {
+ uint32_t variables[8];
+ uint32_t color;
+ uint32_t revision;
+ uint8_t channels;
+ bool on, inverted, initialized;
+};
+void spaghetti_device_profile_rgb_stop(struct spaghetti_rgb_state *state, const struct spaghetti_port *port);
+void spaghetti_device_profile_rgb_record(const struct spaghetti_rgb_state *state, struct spaghetti_record_payload *out);
+struct spaghetti_dht22_state {
+ int64_t ready_at, sampled_at;
+ int16_t temperature;
+ uint16_t humidity;
+ uint8_t data_channel, power_channel;
+ bool powered, valid, attempted, pending;
+};
 struct spaghetti_device_profile_binding {
+ struct spaghetti_dht22_state *dht22;
+	struct spaghetti_rgb_state *rgb;
+	uint32_t module_key; /**< Stable motion identity; zero for standalone profile tests. */
+	const void *pulse_owner; /**< Instance identity; cancelled before releasing its Port. */
 	const struct spaghetti_property_set *arguments;
 	const struct spaghetti_property_set *values; /**< Borrowed for one command only. */
 	uint16_t i2c_address; /**< 7-bit I2C address when transport is I2C. */
@@ -450,5 +476,22 @@ void spaghetti_device_profile_reset_for_test(void);
  */
 void spaghetti_device_profile_clear_persisted_for_test(void);
 #endif
+
+/** Motion completion counts only successful finite moves, never Stop/faults. */
+struct spaghetti_motion_status {
+	uint32_t completed;
+	bool busy;
+	bool paused;
+	int error;
+};
+int spaghetti_device_profile_motion_status(uint32_t key, struct spaghetti_motion_status *out);
+int spaghetti_device_profile_motion_pause(uint32_t key, bool pause);
+int spaghetti_device_profile_motion_stop(uint32_t key);
+/** Cancel a motor and release all coils before its owner/Port is destroyed. */
+void spaghetti_device_profile_cancel_stepper(const void *owner);
+/** Cancel this instance's outstanding pulses and restore their inactive level. */
+void spaghetti_device_profile_cancel_pulses(const void *owner);
+
+bool spaghetti_device_profile_execution_cancelled(void);
 
 #endif /* SPAGHETTI_DEVICE_PROFILE_H */

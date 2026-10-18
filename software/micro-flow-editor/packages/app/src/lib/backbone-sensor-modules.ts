@@ -13,6 +13,7 @@ export type BackboneSensorModule = {
   readonly label: string;
   readonly createdAt: number;
   /** Logical DATA assignment chosen on the module popup or in Module Function. */
+  readonly gpioAssignments?: { readonly boardKey: string; readonly channels: Readonly<Record<string, number>> };
   readonly gpioAssignment?: { readonly boardKey: string; readonly channel: number };
   /** Flow canvas node created for this module's channels (if any). */
   readonly graphNodeId?: string;
@@ -123,4 +124,19 @@ export function createModuleFromRecipe(recipe: SensorRecipe, bus?: SensorBus): B
 
 export function catalogRecipeCount(): number {
   return SENSOR_RECIPE_CATALOG.length;
+}
+
+/** Moving a signal onto a sibling's pin swaps them, preserving distinct wires. */
+export function reassignGpioSignal(
+  channels: Readonly<Record<string, number>>,
+  signal: string,
+  channel: number,
+): Readonly<Record<string, number>> {
+  const previous = channels[signal];
+  if (previous === undefined || !Number.isInteger(channel) || channel < 0 || channel > 3)
+    throw new Error("Assegnazione del segnale GPIO non valida.");
+  const sibling = Object.keys(channels).find(
+    (other) => other !== signal && channels[other] === channel,
+  );
+  return { ...channels, ...(sibling ? { [sibling]: previous } : {}), [signal]: channel };
 }

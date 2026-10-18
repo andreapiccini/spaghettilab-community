@@ -1,3 +1,6 @@
+import { SequenceControls } from "./SequenceControls.js";
+import { SEQUENCE_TYPE } from "../../lib/flow-sequence.js";
+import { SequenceEditor } from "./SequenceEditor.js";
 import { draftToCanvasSensorRecipes } from "../../lib/device-recipe-draft.js";
 import {
   propertiesForSensorModule,
@@ -255,13 +258,20 @@ export function NodeInspector({
     ),
   );
   const gpioModule =
-    driverBindingId && data.kind === "block" && typeof data.properties[SENSOR_MODULE_ID_PROP] === "string"
+    driverBindingId &&
+    data.kind === "block" &&
+    typeof data.properties[SENSOR_MODULE_ID_PROP] === "string"
       ? modulesForBinding(
           parseBackboneSensorModules(
-            session?.stack.current.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
+            session?.stack.current.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]
+              ?.comment,
           ),
           driverBindingId,
-        ).find((module) => module.id === data.properties[SENSOR_MODULE_ID_PROP] && isGpioModule(module))
+        ).find(
+          (module) =>
+            module.id === data.properties[SENSOR_MODULE_ID_PROP] &&
+            isGpioModule(module),
+        )
       : undefined;
   const driverChoices = driverRecipe?.deviceDraft
     ? draftToCanvasSensorRecipes(driverRecipe.deviceDraft)
@@ -301,7 +311,10 @@ export function NodeInspector({
           locale,
         ).fields ?? [])
       : (localizedEntry?.fields ?? []);
-  const namedFields = inspectorVisibleFields(catalogEntry, catalogFields);
+  const namedFields =
+    data.kind === "block" && data.properties.statusLed === true
+      ? catalogFields.filter((field) => ["threshold", "negated"].includes(field.id))
+      : inspectorVisibleFields(catalogEntry, catalogFields);
   const showModulePicker =
     data.kind === "event-source" && catalogEntry?.needsModule !== false;
   const authoringType = Boolean(
@@ -587,7 +600,11 @@ export function NodeInspector({
 
         {!demoOnly && gpioModule && driverBindingId && (
           <div className="mb-4">
-            <ModuleGpioPinField module={gpioModule} bindingId={driverBindingId} it={locale === "it"} />
+            <ModuleGpioPinField
+              module={gpioModule}
+              bindingId={driverBindingId}
+              it={locale === "it"}
+            />
           </div>
         )}
 
@@ -690,7 +707,9 @@ export function NodeInspector({
 
         {data.kind === "block" && (
           <>
-            {!demoOnly && !driverRecipe && (
+            {data.blockTypeId === "ui.manual_trigger" && <p className="mb-4 text-sm text-ink-muted">Collega «Avvia azione» a un ingresso trigger. Dopo Run Deploy, usa il pulsante «Invia trigger» nel blocco. Ogni clic avvia una volta le azioni collegate, con il PC connesso.</p>}
+            {data.blockTypeId === "ui.data_viewer" && <p className="mb-4 text-sm text-ink-muted">Collega un’uscita a «Mostra valore». Il blocco mostra l’ultimo dato ricevuto e si aggiorna automaticamente durante l’esecuzione.</p>}
+            {!demoOnly && !driverRecipe && !["ui.data_viewer", "ui.manual_trigger"].includes(data.blockTypeId) && (
               <>
                 <label
                   className="mb-1 block font-body text-xs font-semibold text-ink-muted"
@@ -790,7 +809,7 @@ export function NodeInspector({
               />
             ) : demoTempBlock ? (
               <p className="font-body text-sm text-ink-muted">{copy.tempProbeHint}</p>
-            ) : namedFields.length > 0 ? (
+            ) : data.blockTypeId === "ui.manual_trigger" ? null : namedFields.length > 0 ? (
               <CatalogFieldsEditor
                 fields={namedFields}
                 properties={data.properties}
@@ -808,6 +827,12 @@ export function NodeInspector({
                 />
               </>
             )}
+            {data.blockTypeId === SEQUENCE_TYPE && <SequenceEditor
+              properties={data.properties}
+              modules={driverBindingId ? modulesForBinding(parseBackboneSensorModules(session?.stack.current.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment), driverBindingId) : []}
+              onChange={(properties) => patch({ properties })}
+            />}
+            {data.blockTypeId === SEQUENCE_TYPE && mode.kind === "edit" && <SequenceControls nodeId={nodeId} bindingId={driverBindingId} />}
             {isRgbLedBlock(data) && (
               <RgbLedSequenceEditor
                 properties={data.properties}
@@ -1029,7 +1054,8 @@ function fieldVisible(
 function numberFieldDisplay(value: unknown, fallback: unknown): string {
   if (value === undefined || value === null) {
     if (fallback === undefined || fallback === null) return "";
-    if (typeof fallback === "bigint" || typeof fallback === "number") return String(fallback);
+    if (typeof fallback === "bigint" || typeof fallback === "number")
+      return String(fallback);
     return typeof fallback === "string" ? fallback : "";
   }
   if (typeof value === "bigint" || typeof value === "number") return String(value);

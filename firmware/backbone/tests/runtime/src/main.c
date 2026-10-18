@@ -418,8 +418,18 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	zassert_equal(record.source_key, 30U);
 	zassert_equal(strcmp(record.payload.schema_id, "spaghetti.test.button"), 0);
 	zassert_equal(record.payload.kind, SPAGHETTI_RECORD_EVENT);
+    event_payload.action_id = 2U;
+    zassert_ok(spaghetti_runtime_post_command_result(30U, &event_payload));
+    receive_record(&record);
+    zassert_equal(record.source_key, 30U);
+    zassert_equal(record.payload.action_id, 2U);
+    zassert_true(record.payload.values.fields[0].data.boolean);
+    zassert_equal(spaghetti_runtime_post_command_result(0U, &event_payload), -EINVAL);
+    zassert_ok(spaghetti_runtime_post_command_result(999U, &event_payload));
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
 	zassert_true(stop_events_count >= 1U);
+    zassert_ok(spaghetti_runtime_post_command_result(30U, &event_payload));
+
 
 	/* Fill the event queue while the worker is blocked in Manager read. */
 	{
@@ -558,3 +568,37 @@ ZTEST(runtime, test_device_action_filter_edge_and_parameter)
 }
 
 ZTEST_SUITE(runtime, NULL, NULL, NULL, NULL, NULL);
+
+static int capture_rgb_action(const struct spaghetti_rule_action *action, void *user)
+{
+ ARG_UNUSED(user);
+ zassert_equal(action->target_key,20U);
+ zassert_equal(action->command.command_id,7U);
+ zassert_false(action->command.update_only);
+ zassert_true(action->command.trigger_pending);
+ action_emits++;
+ return 0;
+}
+ZTEST(runtime, test_device_action_color_only_on_value_change)
+{
+ const struct spaghetti_rule_driver *driver = spaghetti_rule_registry_find("device-action");
+ struct spaghetti_property_set config = { .field_count = 6 };
+ uint16_t ids[] = {1,3,4,5,6,8}; uint64_t values[] = {10,20,7,1,1,5};
+ for (unsigned i=0;i<6;i++) { config.fields[i].field_id=ids[i]; config.fields[i].type=SPAGHETTI_VALUE_UINT64; config.fields[i].data.unsigned_integer=values[i]; }
+ void *context = NULL;
+ zassert_ok(driver->ops->init(&config,&context));
+ struct spaghetti_record record = { .source_key=10 };
+ record.payload.values.field_count=1;
+ record.payload.values.fields[0].field_id=1;
+ record.payload.values.fields[0].type=SPAGHETTI_VALUE_UINT64;
+ record.payload.values.fields[0].data.unsigned_integer=0;
+ action_emits=0;
+ zassert_ok(driver->ops->on_record(context,&record,capture_rgb_action,NULL));
+ zassert_equal(action_emits,1,"Initial black must be accepted");
+ zassert_ok(driver->ops->on_record(context,&record,capture_rgb_action,NULL));
+ zassert_equal(action_emits,1,"Unchanged input must not replay actions");
+ record.payload.values.fields[0].data.unsigned_integer=0xff8000;
+ zassert_ok(driver->ops->on_record(context,&record,capture_rgb_action,NULL));
+ zassert_equal(action_emits,2);
+ zassert_ok(driver->ops->deinit(context));
+}

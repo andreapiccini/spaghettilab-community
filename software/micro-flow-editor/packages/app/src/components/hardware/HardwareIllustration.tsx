@@ -9,12 +9,18 @@ export type HardwareTerminal = {
 /** Shared front-view artwork. Geometry is illustrative; terminal labels are authoritative. */
 export function HardwareIllustration({
   kind,
+  compact = false,
+  canvasFace = false,
+  action,
   name,
   terminals,
   onSelectTerminal,
 }: {
   kind: GpioHardwareAppearance["kind"] | "connector-v1" | "connector-v2";
   name: string;
+  compact?: boolean;
+  canvasFace?: boolean;
+  action?: string;
   terminals: readonly HardwareTerminal[];
   onSelectTerminal?: (id: string) => void;
 }) {
@@ -25,7 +31,18 @@ export function HardwareIllustration({
   return (
     <svg
       className="hardware-illustration"
-      viewBox={`0 0 650 ${h}`}
+      style={
+        compact || canvasFace
+          ? { minHeight: 0, maxHeight: "none", height: canvasFace ? "100%" : undefined }
+          : undefined
+      }
+      viewBox={
+        canvasFace
+          ? `256 33 162 ${bodyHeight + 4}`
+          : compact
+            ? `250 25 175 ${bodyHeight + 20}`
+            : `0 0 650 ${h}`
+      }
       role="group"
       aria-label={`${name}: ${terminals.map((t) => t.label).join(", ")}`}
     >
@@ -161,6 +178,18 @@ export function HardwareIllustration({
       >
         {name.length > 21 ? `${name.slice(0, 20)}…` : name}
       </text>
+      {canvasFace && action && (
+        <text
+          x="337"
+          y={top + bodyHeight - 14}
+          textAnchor="middle"
+          fill="#4e75df"
+          fontSize="12"
+          fontWeight="600"
+        >
+          {action.length > 22 ? `${action.slice(0, 21)}…` : action}
+        </text>
+      )}
       {terminals.map((terminal, index) => {
         const y = (h - (terminals.length - 1) * 30) / 2 + index * 30;
         const color =

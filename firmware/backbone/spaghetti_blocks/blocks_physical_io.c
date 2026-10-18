@@ -34,7 +34,10 @@ static int io_process(void *state, void *workspace, const struct spaghetti_value
 	if (!ctx->acquired) {
 		const enum spaghetti_port_transport transport = ctx->kind == 2U || ctx->kind == 3U ? SPAGHETTI_PORT_TRANSPORT_UART : ctx->kind == 4U ? SPAGHETTI_PORT_TRANSPORT_SPI : SPAGHETTI_PORT_TRANSPORT_GPIO;
 		err = spaghetti_port_acquire(ctx->port, (spaghetti_port_owner_t)(uintptr_t)ctx, transport);
-		if (err) return err; ctx->acquired = true;
+		if (err) {
+			return err;
+		}
+		ctx->acquired = true;
 	}
 	if (inputs[0].type != SPAGHETTI_VALUE_BOOL && inputs[0].type != SPAGHETTI_VALUE_INT64 && inputs[0].type != SPAGHETTI_VALUE_UINT64 && inputs[0].type != SPAGHETTI_VALUE_BYTES) return -EINVAL;
 	if (ctx->kind < 2U && inputs[0].type == SPAGHETTI_VALUE_BYTES) return -EINVAL;
@@ -74,3 +77,44 @@ IO_DRIVER(physical_pwm_out, "physical_pwm_out", pwm_init, 0U)
 IO_DRIVER(physical_uart_tx, "physical_uart_tx", tx_init, 0U)
 IO_DRIVER(physical_uart_rx, "physical_uart_rx", rx_init, 1U)
 IO_DRIVER(physical_spi, "physical_spi", spi_init, 1U)
+
+/* Board LED is separate from Function connector GPIO and uses DT polarity. */
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+#include <spaghetti/field_update.h>
+#else
+__weak int spaghetti_status_led_set(const void *owner, bool on) { ARG_UNUSED(owner); ARG_UNUSED(on); return -ENOTSUP; }
+__weak void spaghetti_status_led_release(const void *owner) { ARG_UNUSED(owner); }
+#endif
+struct status_led_state { uint8_t threshold; bool negated; };
+static const struct spaghetti_field_descriptor status_fields[] = {
+ { .field_id = 1U, .type = SPAGHETTI_VALUE_UINT64, .flags = SPAGHETTI_FIELD_REQUIRED, .unsigned_maximum = 100U, .name = "threshold", .description = "Numeric ON threshold", .unit = "" },
+ { .field_id = 2U, .type = SPAGHETTI_VALUE_BOOL, .flags = SPAGHETTI_FIELD_REQUIRED, .name = "negated", .description = "Invert logical LED state", .unit = "" },
+};
+static const struct spaghetti_schema_descriptor status_schema = { .schema_id = "spaghetti.status_led", .version = 1U, .fields = status_fields, .field_count = ARRAY_SIZE(status_fields) };
+static const struct spaghetti_block_port_descriptor status_in[] = { { .port_id = 0U, .name = "value", .accepted_types = SPAGHETTI_BLOCK_TYPE_NUMERIC | SPAGHETTI_BLOCK_TYPE_BOOL, .required = true } };
+static int status_validate(const struct spaghetti_property_set *config) { return spaghetti_property_validate(config, &status_schema); }
+static int status_init(const struct spaghetti_property_set *config, void *state)
+{
+ int err = status_validate(config); if (err) return err;
+ struct status_led_state *ctx = state;
+ ctx->threshold = spaghetti_property_find(config, 1U)->data.unsigned_integer;
+ ctx->negated = spaghetti_property_find(config, 2U)->data.boolean;
+ return spaghetti_status_led_set(ctx, false);
+}
+static int status_process(void *state, void *workspace, const struct spaghetti_value *inputs, const bool *valid, size_t count, struct spaghetti_value *outputs, bool *out_valid, size_t out_count, const struct spaghetti_record *record, spaghetti_block_publish_cb_t publish, void *user)
+{
+ ARG_UNUSED(workspace); ARG_UNUSED(outputs); ARG_UNUSED(out_valid); ARG_UNUSED(out_count); ARG_UNUSED(record); ARG_UNUSED(publish); ARG_UNUSED(user);
+ if (!count || !valid[0]) return 0;
+ struct status_led_state *ctx = state; bool on;
+ switch (inputs[0].type) {
+ case SPAGHETTI_VALUE_BOOL: on = inputs[0].data.boolean; break;
+ case SPAGHETTI_VALUE_UINT64: on = inputs[0].data.unsigned_integer >= ctx->threshold; break;
+ case SPAGHETTI_VALUE_INT64: on = inputs[0].data.signed_integer >= ctx->threshold; break;
+ default: return -EINVAL;
+ }
+ return spaghetti_status_led_set(ctx, on != ctx->negated);
+}
+static void status_reset(void *state) { (void)spaghetti_status_led_set(state, false); }
+static void status_deinit(void *state) { spaghetti_status_led_release(state); }
+static const struct spaghetti_block_driver_ops status_ops = { .validate = status_validate, .init = status_init, .process = status_process, .reset = status_reset, .deinit = status_deinit };
+SPAGHETTI_BLOCK_DRIVER_DEFINE(board_status_led) = { .type_id = "status_led", .api_version = SPAGHETTI_BLOCK_DRIVER_API_VERSION, .algorithm_version = 1U, .config_schema = &status_schema, .inputs = status_in, .input_count = 1U, .state_size = sizeof(struct status_led_state), .state_align = __alignof__(struct status_led_state), .max_cost_per_record = 8U, .ops = &status_ops };

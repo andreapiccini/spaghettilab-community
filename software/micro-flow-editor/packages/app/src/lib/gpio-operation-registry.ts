@@ -86,11 +86,7 @@ export const GPIO_OPERATION_DEFINITIONS: readonly GpioOperationDefinition[] = [
     },
     signalTypes: ["digital_output"],
     capabilities: ["digital_write", "timed_output"],
-    runtime: "representation_only",
-    runtimeNote: {
-      it: "Il runtime deve garantire la temporizzazione dell’impulso.",
-      en: "The runtime must guarantee pulse timing.",
-    },
+    runtime: "supported",
   },
   {
     type: "gpio_debounce",

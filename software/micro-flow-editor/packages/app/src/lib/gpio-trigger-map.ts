@@ -36,8 +36,20 @@ export function mappedTriggerActionSteps(
   op: Extract<DeviceRecipeOp, { type: "sample_external" }>,
 ): readonly DeviceRecipeOp[] {
   const { high, low } = triggerActionNames(op);
-  const highLevel = actionFixedWriteLevel(draft, high) ?? 1;
-  const lowLevel = actionFixedWriteLevel(draft, low) ?? 0;
+  const highLevel = actionFixedWriteLevel(draft, high);
+  const lowLevel = actionFixedWriteLevel(draft, low);
+  if (highLevel === undefined || lowLevel === undefined)
+    throw new Error("Associa due azioni digitali esistenti ai livelli HIGH e LOW.");
+  for (const name of [high, low]) {
+    const steps = draft.commands.find((command) => command.name === name)!.steps;
+    if (
+      steps.filter((step) => step.type === "gpio_write").length !== 1 ||
+      steps.some((step) => !["gpio_write", "gpio_read", "emit"].includes(step.type))
+    )
+      throw new Error(
+        `L’azione «${name}» contiene altri passi: questa associazione digitale non può sostituirli.`,
+      );
+  }
   const signalId =
     draft.binding.gpioSignals.find(
       (signal) => gpioSignalType(signal) === "digital_output",

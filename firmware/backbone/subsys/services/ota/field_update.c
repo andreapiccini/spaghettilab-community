@@ -223,12 +223,36 @@ K_THREAD_STACK_DEFINE(slup_led_stack, SPAGHETTI_SLUP_LED_STACK);
 
 static void slup_led_set_mode(int mode);
 
+K_MUTEX_DEFINE(status_led_lock);
+static const void *status_led_owner;
+int spaghetti_status_led_set(const void *owner, bool on)
+{
+#if DT_HAS_ALIAS(led0)
+	if (!owner) return -EINVAL;
+	if (!gpio_is_ready_dt(&slup_led)) return -ENODEV;
+	k_mutex_lock(&status_led_lock, K_FOREVER);
+	int err = status_led_owner && status_led_owner != owner ? -EBUSY : 0;
+	if (!err) err = gpio_pin_set_dt(&slup_led, on ? 1 : 0);
+	if (!err) status_led_owner = owner;
+	k_mutex_unlock(&status_led_lock);
+	return err;
+#else
+	ARG_UNUSED(owner); ARG_UNUSED(on); return -ENOTSUP;
+#endif
+}
+void spaghetti_status_led_release(const void *owner)
+{
+	k_mutex_lock(&status_led_lock, K_FOREVER);
+	if (status_led_owner == owner) status_led_owner = NULL;
+	k_mutex_unlock(&status_led_lock);
+}
 static void slup_led_pin(bool on)
 {
 #if DT_HAS_ALIAS(led0)
-	if (gpio_is_ready_dt(&slup_led)) {
+	k_mutex_lock(&status_led_lock, K_FOREVER);
+	if (!status_led_owner && gpio_is_ready_dt(&slup_led))
 		(void)gpio_pin_set_dt(&slup_led, on ? 1 : 0);
-	}
+	k_mutex_unlock(&status_led_lock);
 #else
 	ARG_UNUSED(on);
 #endif

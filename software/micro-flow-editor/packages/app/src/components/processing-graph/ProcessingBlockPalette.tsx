@@ -1,5 +1,9 @@
 import { BACKBONE_SENSOR_BLOCK_CATALOG_ID } from "../../lib/backbone-sensor-block.js";
-import { BACKBONE_SENSOR_MODULES_META_KEY, parseBackboneSensorModules, modulesForBinding } from "../../lib/backbone-sensor-modules.js";
+import {
+  BACKBONE_SENSOR_MODULES_META_KEY,
+  parseBackboneSensorModules,
+  modulesForBinding,
+} from "../../lib/backbone-sensor-modules.js";
 import {
   findCatalogEntryById,
   isPlaceableOnDeviceGraph,
@@ -18,25 +22,41 @@ import { useSession } from "../../state/session-context.js";
 import { physicalPinsForBinding } from "../../lib/physical-pin-bindings.js";
 import { FLOW_START_IDS } from "./dry-run-preview.js";
 import { visualForCatalogEntryId } from "./block-visuals.js";
-import { beginPaletteDrag, endPaletteDrag, encodePaletteDrag, nodeDataFromCatalogEntry, PROCESSING_BLOCK_MIME } from "./catalog-to-node.js";
+import {
+  beginPaletteDrag,
+  endPaletteDrag,
+  encodePaletteDrag,
+  nodeDataFromCatalogEntry,
+  PROCESSING_BLOCK_MIME,
+} from "./catalog-to-node.js";
 import { canChainIntoEventContainer } from "./event-containers.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
-import { expandPalettePlaceables, groupPlaceablesByFamily, type PalettePlaceable } from "./palette-placeables.js";
+import {
+  expandPalettePlaceables,
+  groupPlaceablesByFamily,
+  type PalettePlaceable,
+} from "./palette-placeables.js";
 
 /** Authoring surface: only these blocks (plus Schedule trigger). Flow Start is auto-spawned. */
 const PALETTE_ALLOWED_IDS = new Set([
   "native.schedule",
   "appblocks.digital_out_toggle",
   "appblocks.square_wave",
+  "appblocks.sequence",
+  "appblocks.data_viewer",
+  "appblocks.manual_trigger",
   "appblocks.led",
-  "appblocks.rgb_led",
-  "appblocks.relay",
   "appblocks.terminal_block",
 ]);
 
 function catalogEntryNeedsConfiguredPort(entry: ProcessingCatalogEntry): boolean {
   if (entry.needsModule === false) return false;
-  if (entry.nodeKind === "schedule" || entry.nodeKind === "event-source" || entry.nodeKind === "rule") return true;
+  if (
+    entry.nodeKind === "schedule" ||
+    entry.nodeKind === "event-source" ||
+    entry.nodeKind === "rule"
+  )
+    return true;
   return Boolean(entry.fields?.some((field) => field.id === "line"));
 }
 
@@ -52,12 +72,16 @@ const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "ba
 export function ProcessingBlockPalette({
   bindingId,
   onCreateRecipe,
+  onAddViewer,
+  onAddTrigger,
 }: {
   readonly bindingId?: string;
+  readonly onAddViewer?: () => void;
+  readonly onAddTrigger?: () => void;
   /** Opens the sensor-recipe wizard on the create form. */
   readonly onCreateRecipe?: () => void;
 }) {
-  const {session} = useSession();
+  const { session } = useSession();
   const project = session?.stack.current;
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
@@ -78,7 +102,12 @@ export function ProcessingBlockPalette({
     () =>
       searchCatalog(query).filter(
         (e) =>
-          (demoOnly ? (DEMO_PALETTE_IDS as readonly string[]).includes(e.id) : PALETTE_ALLOWED_IDS.has(e.id) || (e.id.startsWith("native.") && e.runtime === "core-block" && !e.id.startsWith("native.physical_"))) &&
+          (demoOnly
+            ? (DEMO_PALETTE_IDS as readonly string[]).includes(e.id)
+            : PALETTE_ALLOWED_IDS.has(e.id) ||
+              (e.id.startsWith("native.") &&
+                e.runtime === "core-block" &&
+                !e.id.startsWith("native.physical_"))) &&
           e.availability !== "unavailable" &&
           !FLOW_START_IDS.has(e.id) &&
           !FLOW_START_IDS.has(e.typeId ?? ""),
@@ -86,16 +115,50 @@ export function ProcessingBlockPalette({
     [query, demoOnly],
   );
   const placeables = useMemo(() => {
-    const pins = physicalPinsForBinding(project, bindingId).filter(pin => pin.local).flatMap(pin => {
-      const entry = findCatalogEntryById(pin.entryId);
-      if (!entry || !`${entry.label} ${pin.name} pin ${pin.pin}`.toLowerCase().includes(query.toLowerCase())) return [];
-      return expandPalettePlaceables([entry], locale).map(row => ({...row,rowKey:pin.id,physicalPinId:pin.id,label:`${entry.label} · pin ${pin.pin}`,subtitle:`${pin.name} · GPIO ${38-pin.channel}`}));
-    });
+    const pins = physicalPinsForBinding(project, bindingId)
+      .filter((pin) => pin.local)
+      .flatMap((pin) => {
+        const entry = findCatalogEntryById(pin.entryId);
+        if (
+          !entry ||
+          !`${entry.label} ${pin.name} pin ${pin.pin}`
+            .toLowerCase()
+            .includes(query.toLowerCase())
+        )
+          return [];
+        return expandPalettePlaceables([entry], locale).map((row) => ({
+          ...row,
+          rowKey: pin.id,
+          physicalPinId: pin.id,
+          label: `${entry.label} · pin ${pin.pin}`,
+          subtitle: `${pin.name} · GPIO ${38 - pin.channel}`,
+        }));
+      });
     const driverEntry = findCatalogEntryById(BACKBONE_SENSOR_BLOCK_CATALOG_ID);
-    const driverActions: PalettePlaceable[] = driverEntry ? modulesForBinding(parseBackboneSensorModules(project?.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment), bindingId).flatMap(module => {
-      const recipe = module.actions?.[0];
-      return recipe && module.label.toLowerCase().includes(query.toLowerCase()) ? [{entry: driverEntry, rowKey: module.id, label: module.label, subtitle: locale === "it" ? "Sensore · scegli azione e pin nel blocco" : "Sensor · choose action and pins in the block", sensorRecipeId: recipe.id}] : [];
-    }) : [];
+    const driverActions: PalettePlaceable[] = driverEntry
+      ? modulesForBinding(
+          parseBackboneSensorModules(
+            project?.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
+          ),
+          bindingId,
+        ).flatMap((module) => {
+          const recipe = module.actions?.[0];
+          return recipe && module.label.toLowerCase().includes(query.toLowerCase())
+            ? [
+                {
+                  entry: driverEntry,
+                  rowKey: module.id,
+                  label: module.label,
+                  subtitle: recipe.deviceDraft?.rgbModule ? (locale === "it" ? "Comandi colore e stato del LED" : "Color commands and LED status") :
+                    locale === "it"
+                      ? "Dispositivo · scegli azione, ingresso e uscita"
+                      : "Sensor · choose action and pins in the block",
+                  sensorRecipeId: recipe.id,
+                },
+              ]
+            : [];
+        })
+      : [];
     return [...expandPalettePlaceables(filtered, locale), ...pins, ...driverActions];
   }, [filtered, locale, project, bindingId, query]);
   const groups = useMemo(() => groupPlaceablesByFamily(placeables), [placeables]);
@@ -130,7 +193,9 @@ export function ProcessingBlockPalette({
       </div>
       <div className="min-h-0 flex-1 overflow-auto px-2 pb-3">
         {placeables.length === 0 ? (
-          <p className="px-2 py-6 text-center font-body text-sm text-ink-faint">{copy.noResults}</p>
+          <p className="px-2 py-6 text-center font-body text-sm text-ink-faint">
+            {copy.noResults}
+          </p>
         ) : (
           sections.map(({ id, rows }, index) => {
             if (rows.length === 0 && searching) return null;
@@ -147,15 +212,25 @@ export function ProcessingBlockPalette({
                   className="flex h-10 w-full items-center gap-2 rounded-slsm px-2 text-left hover:bg-surface-raised disabled:hover:bg-transparent"
                   style={{ opacity: rows.length === 0 ? 0.45 : 1 }}
                 >
-                  <motion.span animate={{ rotate: open ? 0 : -90 }} transition={motionTokens.duration.base} className="text-ink-faint">
+                  <motion.span
+                    animate={{ rotate: open ? 0 : -90 }}
+                    transition={motionTokens.duration.base}
+                    className="text-ink-faint"
+                  >
                     ▾
                   </motion.span>
                   <Icon size={14} className="shrink-0 text-ink-muted" />
-                  <span className="min-w-0 flex-1 truncate font-body text-sm font-semibold text-ink">{label}</span>
-                  <span className="font-body text-xs text-ink-faint">{rows.length}</span>
+                  <span className="min-w-0 flex-1 truncate font-body text-sm font-semibold text-ink">
+                    {label}
+                  </span>
+                  <span className="font-body text-xs text-ink-faint">
+                    {rows.length}
+                  </span>
                 </button>
                 {!searching && open && (
-                  <p className="mb-1 px-2 pl-8 font-body text-[10px] leading-snug text-ink-faint">{hint}</p>
+                  <p className="mb-1 px-2 pl-8 font-body text-[10px] leading-snug text-ink-faint">
+                    {hint}
+                  </p>
                 )}
                 <AnimatePresence initial={false}>
                   {open && (
@@ -177,20 +252,28 @@ export function ProcessingBlockPalette({
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="block truncate font-body text-sm font-semibold text-brand-blue">
-                              {locale === "it" ? "Crea nuova ricetta" : "Create new recipe"}
+                              {locale === "it"
+                                ? "Crea nuova ricetta"
+                                : "Create new recipe"}
                             </span>
                             <span className="block truncate font-body text-xs text-ink-faint">
-                              {locale === "it" ? "Editor I2C / SPI / GPIO" : "I2C / SPI / GPIO editor"}
+                              {locale === "it"
+                                ? "Editor I2C / SPI / GPIO"
+                                : "I2C / SPI / GPIO editor"}
                             </span>
                           </span>
                         </button>
                       ) : null}
                       {rows.map((row, entryIndex) => {
-                        const kindConfig = row.entry.nodeKind ? PROCESSING_NODE_KIND_CONFIG[row.entry.nodeKind] : undefined;
+                        const kindConfig = row.entry.nodeKind
+                          ? PROCESSING_NODE_KIND_CONFIG[row.entry.nodeKind]
+                          : undefined;
                         const catalogVisual = visualForCatalogEntryId(row.entry.id);
                         const isLed = catalogVisual?.solidSwatch === true;
                         const isCircular = catalogVisual?.circular === true;
-                        const ledDefault = row.entry.fields?.find((f) => f.id === "color")?.default;
+                        const ledDefault = row.entry.fields?.find(
+                          (f) => f.id === "color",
+                        )?.default;
                         return (
                           <PaletteRow
                             key={row.rowKey}
@@ -198,14 +281,16 @@ export function ProcessingBlockPalette({
                             color={
                               isLed && typeof ledDefault === "string"
                                 ? ledDefault
-                                : (catalogVisual?.colorVar ?? kindConfig?.colorVar ?? "#8A8F99")
+                                : (catalogVisual?.colorVar ??
+                                  kindConfig?.colorVar ??
+                                  "#8A8F99")
                             }
                             icon={catalogVisual?.icon ?? kindConfig?.icon ?? Icon}
                             solidSwatch={isLed}
                             circular={isCircular}
                             delay={index * 0 + entryIndex * motionTokens.stagger.list}
                             portsConfigured={portsConfigured}
-                            onClickRemind={() => setDragReminder(true)}
+                            onClickRemind={() => row.entry.id === "appblocks.data_viewer" && onAddViewer ? onAddViewer() : row.entry.id === "appblocks.manual_trigger" && onAddTrigger ? onAddTrigger() : setDragReminder(true)}
                             onDragBegan={() => setDragReminder(false)}
                           />
                         );
@@ -219,7 +304,10 @@ export function ProcessingBlockPalette({
         )}
       </div>
       {dragReminder && (
-        <div className="mx-2 mb-3 rounded-slsm bg-surface-raised px-3 py-2 font-body text-xs text-ink" style={{ outline: "1px solid var(--color-brand-blue)" }}>
+        <div
+          className="mx-2 mb-3 rounded-slsm bg-surface-raised px-3 py-2 font-body text-xs text-ink"
+          style={{ outline: "1px solid var(--color-brand-blue)" }}
+        >
           {copy.dragReminder}
         </div>
       )}
@@ -253,7 +341,8 @@ function PaletteRow({
   const entry = row.entry;
   const needsPort = !row.physicalPinId && catalogEntryNeedsConfiguredPort(entry);
   const placeable = isPlaceableOnDeviceGraph(entry) && (!needsPort || portsConfigured);
-  const badge = !portsConfigured && needsPort ? copy.needsPort : availabilityBadge(entry, copy);
+  const badge =
+    !portsConfigured && needsPort ? copy.needsPort : availabilityBadge(entry, copy);
 
   return (
     <motion.div
@@ -265,7 +354,13 @@ function PaletteRow({
       <button
         type="button"
         draggable={placeable}
-        title={placeable ? copy.dragToInsert : needsPort && !portsConfigured ? copy.configurePortFirst : entry.notes}
+        title={
+          placeable
+            ? copy.dragToInsert
+            : needsPort && !portsConfigured
+              ? copy.configurePortFirst
+              : entry.notes
+        }
         onClick={() => {
           if (placeable) onClickRemind();
         }}
@@ -286,7 +381,11 @@ function PaletteRow({
           e.dataTransfer.effectAllowed = "copy";
           e.currentTarget.style.opacity = "0.6";
           const placed = nodeDataFromCatalogEntry(entry, undefined, row.baySide);
-          beginPaletteDrag(entry.nodeKind, row.baySide, canChainIntoEventContainer(placed ?? undefined));
+          beginPaletteDrag(
+            entry.nodeKind,
+            row.baySide,
+            canChainIntoEventContainer(placed ?? undefined),
+          );
           onDragBegan();
         }}
         onDragEnd={(e: DragEvent<HTMLButtonElement>) => {
@@ -299,7 +398,9 @@ function PaletteRow({
           className={`flex h-7 w-7 shrink-0 items-center justify-center ${circular ? "rounded-full" : "rounded-md"}`}
           style={{ backgroundColor: placeable ? color : "#E1E4EB" }}
         >
-          {solidSwatch || circular ? null : <Icon size={14} color={placeable ? "#fff" : "#8A8F99"} />}
+          {solidSwatch || circular ? null : (
+            <Icon size={14} color={placeable ? "#fff" : "#8A8F99"} />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
@@ -307,7 +408,9 @@ function PaletteRow({
             {row.baySide && (
               <span
                 className="inline-flex shrink-0 items-center gap-0.5 rounded-[3px] px-1 py-px font-mono text-[9px] font-semibold uppercase tracking-wide text-ink-muted"
-                style={{ outline: "1px solid color-mix(in srgb, #64748B 40%, transparent)" }}
+                style={{
+                  outline: "1px solid color-mix(in srgb, #64748B 40%, transparent)",
+                }}
                 title={copy.bayModule}
               >
                 <Cpu size={9} strokeWidth={2.5} aria-hidden />
@@ -324,7 +427,10 @@ function PaletteRow({
   );
 }
 
-function availabilityBadge(entry: ProcessingCatalogEntry, copy: ReturnType<typeof processingGraphCopy>): string | undefined {
+function availabilityBadge(
+  entry: ProcessingCatalogEntry,
+  copy: ReturnType<typeof processingGraphCopy>,
+): string | undefined {
   if (entry.availability === "planned") return copy.planned;
   if (entry.availability === "pack") return "pack";
   if (!isPlaceableOnDeviceGraph(entry)) {

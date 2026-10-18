@@ -43,6 +43,7 @@ target_sources(app PRIVATE
   spaghetti_modules/digital_input_trigger/digital_input_trigger.c
   spaghetti_modules/digital_line_set/digital_line_set.c
   spaghetti_modules/on_boot/on_boot.c
+  spaghetti_modules/sequence/sequence.c
   spaghetti_rules/threshold/threshold.c
   spaghetti_rules/device_action/device_action.c
   spaghetti_blocks/blocks_math.c
@@ -68,6 +69,7 @@ target_sources(app PRIVATE
   subsys/resources/resources.c
   subsys/resources/resources_note_weak.c
   subsys/port/port.c
+  subsys/port/dht22.c
   subsys/topology/physical.c
   subsys/port/port_backend_board.c
   subsys/topology/topology.c

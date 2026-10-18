@@ -263,6 +263,7 @@ static bool connectivity_policy_is_valid(
 static bool endpoint_is_valid(const struct spaghetti_module_endpoint *endpoint)
 {
 	switch (endpoint->kind) {
+	case SPAGHETTI_ENDPOINT_LOGICAL:
 	case SPAGHETTI_ENDPOINT_PORT_EXCLUSIVE:
 	case SPAGHETTI_ENDPOINT_UART_EXCLUSIVE:
 		return endpoint->value_size == 0U;
@@ -272,7 +273,16 @@ static bool endpoint_is_valid(const struct spaghetti_module_endpoint *endpoint)
 	case SPAGHETTI_ENDPOINT_SPI_CHIP_SELECT:
 		return (endpoint->value_size == 1U) &&
 		       (endpoint->value[0] <= 4U);
-	case SPAGHETTI_ENDPOINT_GPIO_LINE:
+ case SPAGHETTI_ENDPOINT_GPIO_LINE: {
+   if (!endpoint->value_size || endpoint->value_size > 4U) return false;
+   uint8_t mask = 0;
+   for (unsigned i = 0; i < endpoint->value_size; i++) {
+     uint8_t line = endpoint->value[i];
+     if (line > 4U || (mask & BIT(line))) return false;
+     mask |= BIT(line);
+   }
+   return true;
+ }
 	case SPAGHETTI_ENDPOINT_ADC_CHANNEL:
 		return (endpoint->value_size == 1U) &&
 		       (endpoint->value[0] <= 4U);
@@ -294,6 +304,13 @@ static bool endpoints_conflict(
 		return true;
 	}
 
+ if (first->kind == SPAGHETTI_ENDPOINT_LOGICAL || second->kind == SPAGHETTI_ENDPOINT_LOGICAL) return false;
+ if (first->kind == SPAGHETTI_ENDPOINT_GPIO_LINE && second->kind == SPAGHETTI_ENDPOINT_GPIO_LINE) {
+   for (unsigned i = 0; i < first->value_size; i++)
+     for (unsigned j = 0; j < second->value_size; j++)
+       if (first->value[i] == second->value[j]) return true;
+   return false;
+ }
 	return (first->kind == second->kind) &&
 	       (first->value_size == second->value_size) &&
 	       (memcmp(first->value, second->value, first->value_size) == 0);
@@ -949,14 +966,14 @@ int spaghetti_config_validate(const struct spaghetti_config *candidate,
 	return 0;
 }
 
-int spaghetti_config_apply(
+static int apply_config_with_transaction(
 	const struct spaghetti_config *candidate,
 	uint32_t expected_generation,
-	struct spaghetti_config_commit_result *out_result)
+	struct spaghetti_config_commit_result *out_result,
+	struct spaghetti_config_transaction *transaction)
 {
 	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
 
-	struct spaghetti_config_transaction transaction = {0};
 	struct spaghetti_config_revision old_revision = {0};
 	uint8_t candidate_hash[SPAGHETTI_CONFIG_HASH_SIZE];
 	bool mqtt_changed;
@@ -1042,7 +1059,7 @@ int spaghetti_config_apply(
 	for (size_t old_idx = 0U; old_idx < current_config.module_count; ++old_idx) {
 		err = spaghetti_module_manager_get_by_key(
 			current_config.modules[old_idx].key,
-			&transaction.old_live[old_idx]);
+			&transaction->old_live[old_idx]);
 		if (err < 0) {
 			apply_error = err;
 			goto rollback;
@@ -1063,10 +1080,10 @@ int spaghetti_config_apply(
 		}
 
 		phase = "remove_module";
-		err = remove_module(&transaction.old_live[old_idx]);
+		err = remove_module(&transaction->old_live[old_idx]);
 		if ((err == 0) ||
 		    module_is_absent(current_config.modules[old_idx].key)) {
-			transaction.old_removed[old_idx] = true;
+			transaction->old_removed[old_idx] = true;
 		}
 		if (err < 0) {
 			apply_error = err;
@@ -1091,12 +1108,12 @@ int spaghetti_config_apply(
 		phase = "activate_module";
 		err = configure_module(&candidate->modules[candidate_idx],
 				       next_generation,
-				       &transaction.candidate_live[candidate_idx]);
+				       &transaction->candidate_live[candidate_idx]);
 		if (err < 0) {
 			apply_error = err;
 			goto rollback;
 		}
-		transaction.candidate_added[candidate_idx] = true;
+		transaction->candidate_added[candidate_idx] = true;
 	}
 
 	phase = "configure_runtime";
@@ -1157,7 +1174,7 @@ int spaghetti_config_apply(
 	return 0;
 
 rollback:
-	err = rollback_transaction(&current_config, &transaction);
+	err = rollback_transaction(&current_config, transaction);
 	if (err == 0) {
 		err = restore_runtime(&current_config);
 	}
@@ -1202,6 +1219,26 @@ rollback:
 
 unlock:
 	k_mutex_unlock(&config_lock);
+	return err;
+}
+
+int spaghetti_config_apply(
+	const struct spaghetti_config *candidate,
+	uint32_t expected_generation,
+	struct spaghetti_config_commit_result *out_result)
+{
+	/* Snapshots survive rollback, but must not occupy the small mutation stack. */
+	struct spaghetti_config_transaction *transaction =
+		k_calloc(1U, sizeof(*transaction));
+	if (transaction == NULL) {
+		if (out_result != NULL) {
+			memset(out_result, 0, sizeof(*out_result));
+		}
+		return -ENOMEM;
+	}
+	int err = apply_config_with_transaction(candidate, expected_generation,
+		out_result, transaction);
+	k_free(transaction);
 	return err;
 }
 

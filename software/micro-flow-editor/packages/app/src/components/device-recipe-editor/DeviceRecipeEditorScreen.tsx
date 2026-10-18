@@ -6,6 +6,7 @@ import {
   upsertModule,
 } from "../../lib/backbone-sensor-modules.js";
 import { GpioDigitalSettings } from "./GpioDigitalSettings.js";
+import { Dht22FlowPanel } from "./Dht22FlowPanel.js";
 import "./gpio-workbench.css";
 import { NfcBell } from "../nfc/NfcBell.js";
 import { workbenchStepLabel, workbenchStepKind } from "./sensor-workbench-labels.js";
@@ -274,6 +275,7 @@ export function DeviceRecipeEditorScreen({
     : (ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null);
   const library = libraryOpsForBus(draft.binding.bus).filter(
     (entry) =>
+      draft.dht22Module ? ["dht22_read", "dht22_convert", "dht22_power", "wait", "emit"].includes(entry.type) :
       draft.binding.bus !== "gpio" ||
       draft.binding.gpioSignals.length > 1 ||
       ["gpio_read", "gpio_write", "wait", "sample_external", "emit"].includes(
@@ -1138,7 +1140,7 @@ export function DeviceRecipeEditorScreen({
             </details>
           </>
         )}
-        {!isDisplay && draft.binding.bus === "gpio" && (
+        {!isDisplay && draft.binding.bus === "gpio" && !draft.dht22Module && (
           <div className="sensor-workbench-pins font-body text-[10px] text-ink-muted">
             <div>
               <span>{draft.binding.gpioSignals[0]?.name ?? "DATA"}</span>
@@ -1466,7 +1468,7 @@ export function DeviceRecipeEditorScreen({
           className={`${isWorkbench ? "sensor-workbench-main" : ""} flex min-h-0 flex-col overflow-y-auto p-4`}
         >
           <>
-            {draft.binding.bus === "gpio" && (
+            {draft.binding.bus === "gpio" && !draft.dht22Module && (
               <GpioDigitalSettings draft={draft} it={it} onChange={setDraft} />
             )}
             {isWorkbench && (
@@ -1480,7 +1482,7 @@ export function DeviceRecipeEditorScreen({
                   onChange={setDraft}
                   onSelectAction={selectDriverAction}
                 />
-                {flowEditing && (
+                {flowEditing && !draft.dht22Module && (
                   <div className="sensor-workbench-interface-tools">
                     <button
                       type="button"
@@ -1570,7 +1572,7 @@ export function DeviceRecipeEditorScreen({
                         isWorkbench ? "sensor-workbench-flow-preview" : undefined
                       }
                     >
-                      {flowPreview}
+                      {draft.dht22Module ? <Dht22FlowPanel draft={draft} onChange={setDraft} /> : flowPreview}
                     </div>
                   </>
                 ) : (
@@ -1745,7 +1747,7 @@ export function DeviceRecipeEditorScreen({
               <div
                 className={`mt-3 space-y-3 ${isWorkbench && flowEditing ? "sensor-workbench-inspector" : ""}`}
               >
-                {(!isWorkbench || (flowEditing && selected)) && selectedInspector}
+                {(!isWorkbench || (flowEditing && selected && !draft.dht22Module)) && selectedInspector}
                 {draft.binding.bus === "adc" && draft.binding.adc ? (
                   <section className="rounded-slmd border border-border-strong p-3">
                     <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
@@ -1834,7 +1836,7 @@ export function DeviceRecipeEditorScreen({
                 {tryMessage}
               </p>
             ) : null}
-            {draft.binding.bus === "gpio" && draft.binding.gpioSignals.length > 1 && (
+            {draft.binding.bus === "gpio" && draft.binding.gpioSignals.length > 1 && !draft.dht22Module && (
               <div className="gpio-context-panels">
                 {flowEditing ? (
                   <>
@@ -1921,7 +1923,7 @@ export function DeviceRecipeEditorScreen({
             className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue"
           >
             <Save size={14} />
-            {it ? "Salva bozza" : "Save draft"}
+            {draft.dht22Module ? (it ? "Salva modulo" : "Save module") : (it ? "Salva bozza" : "Save draft")}
           </button>
           <button
             type="button"
@@ -2679,6 +2681,13 @@ function StepInspector({
     <div className="sensor-step-fields space-y-2">
       {op.type !== "i2c_write" && op.type !== "i2c_write_read" && heading}
 
+      {op.type === "stepper" && <div className="space-y-3 rounded-xl border border-border bg-surface-sunken/40 p-3">
+        <p className="font-body text-xs text-ink-muted">ULN2003 · IN1–IN4. Movimento in background; lo zero è la posizione all’avvio.</p>
+        <Field label="Comando"><select value={op.command} className={inputClass} onChange={event => onChange({ ...op, command: event.target.value as "start" | "stop" | "position" })}><option value="start">Start</option><option value="stop">Stop · mantieni posizione</option><option value="position">Vai a posizione · 0–360°</option></select></Field>
+        {op.command === "position" && <Field label="Variabile posizione"><select className={inputClass} value={op.positionVariable ?? ""} onChange={event => onChange({ ...op, positionVariable: event.target.value })}>{draft.variables.filter(variable => variable.valueType === "number").map(variable => <option key={variable.id} value={variable.name}>{variable.name}</option>)}</select></Field>}
+        <Field label="Intervallo tra mezzi passi (ms)"><input type="number" min={2} max={100} value={op.intervalMs} className={inputClass} onChange={event => onChange({ ...op, intervalMs: Number(event.target.value) })} /></Field>
+        <Field label="Mezzi passi per giro"><input type="number" min={8} max={16384} value={op.stepsPerRevolution} className={inputClass} onChange={event => onChange({ ...op, stepsPerRevolution: Number(event.target.value) })} /></Field>
+      </div>}
       {op.type === "sample_external" ? (
         <SampleExternalFields
           op={op}
@@ -2861,6 +2870,17 @@ function StepInspector({
         </>
       ) : null}
 
+      {op.type === "dht22_power" && <Field label="Alimentazione del sensore"><select className={inputClass} value={op.on ? "on" : "off"} onChange={event => onChange({ ...op, on: event.target.value === "on" })}><option value="on">Accesa · GPIO HIGH</option><option value="off">Spenta · GPIO LOW</option></select><p className="mt-2 text-xs text-ink-muted">Dopo l’accensione il firmware attende 2 secondi prima di acquisire dati.</p></Field>}
+      {op.type === "dht22_convert" && <>
+        <Field label="Variabile letta"><input className={inputClass} value={op.input} onChange={event => onChange({ ...op, input: event.target.value })} /></Field>
+        <Field label="Salva temperatura in gradi nella variabile"><input className={inputClass} value={op.into} onChange={event => onChange({ ...op, into: event.target.value })} /></Field>
+        <Field label="Formato"><select className={inputClass} value={op.format} onChange={event => onChange({ ...op, format: event.target.value as "float" | "string" })}><option value="float">Numero decimale · 23.4</option><option value="string">Testo con unità · 23.4 °C</option></select></Field>
+      </>}
+      {op.type === "dht22_read" && <>
+        <Field label="Salva temperatura nella variabile"><input className={inputClass} value={op.temperatureInto} onChange={event => onChange({ ...op, temperatureInto: event.target.value })} /></Field>
+        <Field label="Salva umidità nella variabile"><input className={inputClass} value={op.humidityInto} onChange={event => onChange({ ...op, humidityInto: event.target.value })} /></Field>
+        <p className="text-xs text-ink-muted">Il driver verifica la risposta e il checksum. Tra due acquisizioni trascorrono almeno 2 secondi; le richieste ravvicinate restano in attesa dell’acquisizione successiva. Le variabili contengono decimi di °C e di %; ad esempio 234 significa 23,4 °C.</p>
+      </>}
       {op.type === "gpio_read" || op.type === "gpio_debounce" ? (
         <>
           <Field label={it ? "Segnale" : "Signal"}>

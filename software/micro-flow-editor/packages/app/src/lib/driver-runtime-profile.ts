@@ -1,3 +1,5 @@
+import { compileRgbRuntime } from "./rgb-runtime.js";
+import { MOVEMENT_COMPLETED_FIELD } from "./flow-sequence.js";
 import {
   gpioSignalType,
   gpioWriteLogicalLevel,
@@ -42,6 +44,7 @@ type Value = {
   multiply?: number;
   divide?: number;
   offset?: number;
+  decimalFormat?: "float" | "string";
 };
 export function stableDriverHash(text: string): string {
   let hash = 0xcbf29ce484222325n;
@@ -84,7 +87,9 @@ export function compileRuntimeDriver(
   draft: DeviceRecipeDraft,
   connectedInputs: ReadonlyMap<string, ReadonlySet<string>> = new Map(),
   gpioChannels: ReadonlyMap<string, number> = new Map(),
+  scheduledActionId?: string,
 ): RuntimeDriver {
+  if (draft.rgbModule) return compileRgbRuntime(draft, gpioChannels);
   if (draft.binding.bus !== "i2c" && draft.binding.bus !== "gpio")
     throw new Error(`${draft.name}: il driver richiede I²C o GPIO digitale.`);
   const gpioSignal = (id: string, write = false) => {
@@ -106,7 +111,17 @@ export function compileRuntimeDriver(
   };
   const commands = draft.commands
     .map((command) => ({ ...command, steps: effectiveActionSteps(draft, command) }))
-    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    .sort((a, b) =>
+      a.id === scheduledActionId
+        ? -1
+        : b.id === scheduledActionId
+          ? 1
+          : a.id < b.id
+            ? -1
+            : a.id > b.id
+              ? 1
+              : 0,
+    );
   if (!commands.length || commands.length > 8)
     throw new Error(`${draft.name}: sono ammesse da 1 a 8 azioni.`);
   const emitted = [
@@ -130,7 +145,7 @@ export function compileRuntimeDriver(
       }
     }),
   );
-  const fieldTypes = new Map<string, "int64" | "uint64">();
+  const fieldTypes = new Map<string, "int64" | "uint64" | "float" | "text">();
   const actions = new Map<string, RuntimeAction>();
   const initOps: Instruction[] = [],
     sampleOps: Instruction[] = [];
@@ -293,6 +308,103 @@ export function compileRuntimeDriver(
       if (op.type.startsWith("i2c_") && draft.binding.bus !== "i2c")
         throw new Error("Un passo I²C richiede un driver I²C.");
       switch (op.type) {
+        case "stepper": {
+          if (op.signalIds.length !== 4)
+            throw new Error("ULN2003 richiede IN1, IN2, IN3 e IN4.");
+          const channels = op.signalIds.map((id) => gpioSignal(id, true).channel);
+          if (new Set(channels).size !== 4)
+            throw new Error("ULN2003 richiede quattro GPIO distinti.");
+          let src = 0;
+          if (op.command === "position") {
+            const value = get(op.positionVariable ?? "posizione");
+            src = materialize(value);
+            if (
+              value.byteOrder === "be" ||
+              value.multiply !== undefined ||
+              value.offset !== undefined ||
+              value.divide !== undefined
+            ) {
+              const dst = take();
+              target.push({
+                op: "SCALE_PACK",
+                src,
+                dst,
+                flags: (value.byteOrder === "be" ? 1 : 0) | (value.signed ? 2 : 0),
+                width: 8,
+                divisor: integer(value.divide ?? 1, "Divisore posizione", 1, 65535),
+                multiplier: integer(
+                  value.multiply ?? 1,
+                  "Scala posizione",
+                  -2147483648,
+                  2147483647,
+                ),
+                offset: integer(
+                  value.offset ?? 0,
+                  "Offset posizione",
+                  -2147483648,
+                  2147483647,
+                ),
+              });
+              src = dst;
+            }
+          }
+          target.push({
+            op: "STEPPER",
+            command: op.command === "start" ? 1 : op.command === "stop" ? 0 : 2,
+            channels: channels.reduce(
+              (packed, channel, index) => packed | (channel << (2 * index)),
+              0,
+            ),
+            intervalMs: integer(op.intervalMs, "Intervallo passo", 2, 100),
+            stepsPerRevolution: integer(
+              op.stepsPerRevolution,
+              "Passi per giro",
+              8,
+              16384,
+            ),
+            src,
+          });
+          break;
+        }
+        case "gpio_pulse": {
+          const { signal, channel } = gpioSignal(op.signalId, true);
+          if (op.durationMs.kind !== "fixed")
+            throw new Error("L’impulso richiede una durata costante.");
+          target.push({
+            op: "GPIO_PULSE",
+            channel,
+            milliseconds: integer(
+              Number(op.durationMs.value),
+              "Durata impulso",
+              1,
+              60000,
+            ),
+            activeHigh: physicalLevelForSignal(signal, op.activeState) === 1,
+            restoreHigh: physicalLevelForSignal(signal, op.restoreState) === 1,
+          });
+          break;
+        }
+        case "dht22_convert": {
+          values.set(op.into, { ...get(op.input), decimalFormat: op.format });
+          break;
+        }
+        case "dht22_power": {
+          const data = gpioSignal("DATA").channel;
+          const power = gpioSignal("POWER", true).channel;
+          if (data === power) throw new Error("DATA e alimentazione richiedono pin distinti.");
+          target.push({ op: "DHT22_POWER", dataChannel: data, powerChannel: power, on: op.on });
+          break;
+        }
+        case "dht22_read": {
+          const data = gpioSignal("DATA").channel;
+          const power = gpioSignal("POWER", true).channel;
+          if (data === power) throw new Error("DATA e alimentazione richiedono pin distinti.");
+          const temperature = take(), humidity = take();
+          target.push({ op: "DHT22_READ", dst: temperature, humidityDst: humidity, dataChannel: data, powerChannel: power, ...(draft.dht22Version ? { queued: true } : {}) });
+          values.set(op.temperatureInto, { slot: temperature, width: 2, byteOrder: "le", signed: true });
+          values.set(op.humidityInto, { slot: humidity, width: 2, byteOrder: "le", signed: false });
+          break;
+        }
         case "gpio_read": {
           const { signal, channel } = gpioSignal(op.signalId);
           const slot = take();
@@ -539,6 +651,11 @@ export function compileRuntimeDriver(
         case "emit": {
           if (isInit) throw new Error("Pubblica le uscite dentro le azioni.");
           const value = get(op.from);
+          if (value.decimalFormat) {
+            fieldTypes.set(op.channelId, value.decimalFormat === "float" ? "float" : "text");
+            target.push({ op: "EMIT_DECIMAL", src: materialize(value), fieldId: fields.get(op.channelId)!, text: value.decimalFormat === "string" });
+            break;
+          }
           let src = materialize(value),
             width = value.width,
             byteOrder = value.byteOrder;
@@ -621,6 +738,10 @@ export function compileRuntimeDriver(
     );
     for (const value of values.values())
       if (value.argument && !argumentsUsed.has(value.argument)) {
+        // Motor controls remain usable before the first position event. Unused
+        // position inputs may latch a value but cannot gate Start or Stop.
+        if (steps.some((op) => op.type === "stepper" && op.command !== "position"))
+          value.required = false;
         value.slot = undefined;
         materialize(value);
         argumentsUsed.add(value.argument);
@@ -673,6 +794,8 @@ export function compileRuntimeDriver(
     name: `value_${fields.get(id)!}`,
     unit: draft.channels.find((c) => c.id === id)?.unit || undefined,
   }));
+  if (commands.some((command) => command.steps.some((step) => step.type === "stepper")))
+    sampleFields.push({ fieldId: MOVEMENT_COMPLETED_FIELD, type: "uint64", name: "movement_completed", unit: undefined });
   const semantic = {
     initOps,
     sampleOps,
@@ -699,7 +822,7 @@ export function compileRuntimeDriver(
     maxBytes: messageData.length ? 65535 : 256,
     initOps,
     sampleOps,
-    safeStopOps: [],
+    safeStopOps: draft.dht22Module ? [{ op: "DHT22_POWER", dataChannel: gpioChannels.get("DATA")!, powerChannel: gpioChannels.get("POWER")!, on: false }] : [],
     sampleSchemaId: `${profileId}.s`,
     sampleSchemaVersion: 1,
     sampleFields,

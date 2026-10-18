@@ -287,6 +287,42 @@ int spaghetti_protocol_encode_record_event_payload(
 	return 0;
 }
 
+/* Optional keys 4/5 extend the existing event; old clients ignore them. */
+int spaghetti_protocol_encode_record_values_event(
+    const struct spaghetti_record *record,
+    struct spaghetti_protocol_payload *out)
+{
+    if (record == NULL || out == NULL || record->source_key == 0U ||
+        record->sequence == 0U ||
+        record->payload.values.field_count > SPAGHETTI_PROPERTY_MAX_FIELDS) return -EINVAL;
+    ZCBOR_STATE_E(state, SPAGHETTI_PROTOCOL_CBOR_BACKUP, out->bytes, sizeof(out->bytes), 1U);
+    bool ok = zcbor_map_start_encode(state, 6U) &&
+        zcbor_uint32_put(state, 0U) && zcbor_uint32_put(state, record->source_key) &&
+        zcbor_uint32_put(state, 1U) && zcbor_uint32_put(state, record->sequence) &&
+        zcbor_uint32_put(state, 2U) && zcbor_tstr_encode_ptr(state, record->payload.schema_id, strlen(record->payload.schema_id)) &&
+        zcbor_uint32_put(state, 3U) && zcbor_uint32_put(state, record->payload.schema_version) &&
+        zcbor_uint32_put(state, 4U) && zcbor_map_start_encode(state, record->payload.values.field_count);
+    for (size_t i = 0; ok && i < record->payload.values.field_count; ++i) {
+        const struct spaghetti_value *value = &record->payload.values.fields[i];
+        ok = zcbor_uint32_put(state, value->field_id);
+        if (!ok) break;
+        switch (value->type) {
+        case SPAGHETTI_VALUE_BOOL: ok = zcbor_bool_put(state, value->data.boolean); break;
+        case SPAGHETTI_VALUE_INT64: ok = zcbor_int64_put(state, value->data.signed_integer); break;
+        case SPAGHETTI_VALUE_UINT64: ok = zcbor_uint64_put(state, value->data.unsigned_integer); break;
+        case SPAGHETTI_VALUE_FLOAT: ok = zcbor_float64_put(state, value->data.decimal); break;
+        case SPAGHETTI_VALUE_TEXT: ok = zcbor_tstr_encode_ptr(state, value->data.text.text, value->data.text.size); break;
+        case SPAGHETTI_VALUE_BYTES: ok = zcbor_bstr_encode_ptr(state, value->data.bytes.bytes, value->data.bytes.size); break;
+        default: return -EINVAL;
+        }
+    }
+    if (!ok || !zcbor_map_end_encode(state, record->payload.values.field_count) ||
+        !zcbor_uint32_put(state, 5U) || !zcbor_uint32_put(state, record->payload.action_id) ||
+        !zcbor_map_end_encode(state, 6U)) return -EMSGSIZE;
+    out->size = (size_t)(state->payload - out->bytes);
+    return 0;
+}
+
 int spaghetti_protocol_encode_status_event_payload(
 	const uint8_t *device_id,
 	size_t device_id_size,

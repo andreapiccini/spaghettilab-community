@@ -15,7 +15,6 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Cable,
   Check,
-  Cpu,
   Layers,
   LoaderCircle,
   Radio,
@@ -41,12 +40,14 @@ import {
   topologyForBoard,
   validatePhysicalModes,
   type BackbonePhysicalDraft,
-  type FunctionModuleVariant,
   type PhysicalCatalogEntry,
   type PhysicalProject,
 } from "../../lib/backbone-physical.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
-import { applyStoppedRuntime, waitConfigWriteGap } from "../../lib/stop-deployed-runtime.js";
+import {
+  applyStoppedRuntime,
+  waitConfigWriteGap,
+} from "../../lib/stop-deployed-runtime.js";
 import {
   attachedFromStatus,
   useCoreSessions,
@@ -148,8 +149,15 @@ export function BackbonePhysicalScreen() {
   const { locale } = useLocale();
   const it = locale === "it";
   const { session, execute, navigate, physicalTarget } = useSession();
-  const { rows, getSnapshot, getClient, observeStatus, observeConfig, lockTransport, unlockTransport } =
-    useCoreSessions();
+  const {
+    rows,
+    getSnapshot,
+    getClient,
+    observeStatus,
+    observeConfig,
+    lockTransport,
+    unlockTransport,
+  } = useCoreSessions();
   const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
   const bindings = session?.stack.current.coreBindings ?? [];
   const [bindingId, setBindingId] = useState<string | null>(
@@ -238,7 +246,7 @@ export function BackbonePhysicalScreen() {
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface-sunken">
-      <header className="flex flex-wrap items-center gap-3 border-b border-border bg-surface px-5 py-4">
+      <header className="flex flex-wrap items-center gap-3 border-b border-border bg-surface px-5 py-2.5">
         <CoreSelector
           bindings={bindings}
           selected={selected}
@@ -249,11 +257,11 @@ export function BackbonePhysicalScreen() {
           }}
         />
         <div className="min-w-0 flex-1">
-          <h1 className="font-heading text-2xl font-bold text-ink">Module Function</h1>
+          <h1 className="font-heading text-xl font-bold text-ink">Module Function</h1>
           <p className="mt-1 font-body text-xs text-ink-muted">
             {it
-              ? "Trascina i segnali delle periferiche sui pin del modulo"
-              : "Drag peripheral signals onto the module pins"}
+              ? "Scegli una funzione e assegnala ai pin del connettore"
+              : "Choose a function and assign it to connector pins"}
           </p>
         </div>
         <button className={secondary} onClick={() => setCatalogOpen(true)}>
@@ -319,6 +327,8 @@ export function BackbonePhysicalScreen() {
             <BoardDetail
               key={`${session?.projectId}:${selected.bindingId}:${board.deviceIdHex}:${board.nodeId}`}
               board={board}
+              bindingId={selected.bindingId}
+              boardKey={stableBoardKey}
               topology={topology}
               status={status}
               ready={ready}
@@ -401,80 +411,78 @@ export function BackbonePhysicalScreen() {
                     const stopped = await applyStoppedRuntime(client);
                     observeConfig(selected.bindingId, stopped.config);
                     if (stopped.changed) await waitConfigWriteGap();
-                    await client.applyPhysical(
-                      {
-                        nodeId: currentBoard.local ? 0 : currentBoard.nodeId,
-                        modes: new Uint8Array(draft.modes),
-                        i2cSpeed: draft.i2cSpeed,
-                        settings:
-                          topology?.version === 2
-                            ? (draft.settings ?? DEFAULT_PHYSICAL_SETTINGS)
-                            : undefined,
-                        expectedTag: expectedFunctionTag(
-                          tagForSlot(fresh, currentBoard, 2),
-                          draft.automatic,
-                        ),
-                      },
-                    );
+                    await client.applyPhysical({
+                      nodeId: currentBoard.local ? 0 : currentBoard.nodeId,
+                      modes: new Uint8Array(draft.modes),
+                      i2cSpeed: draft.i2cSpeed,
+                      settings:
+                        topology?.version === 2
+                          ? (draft.settings ?? DEFAULT_PHYSICAL_SETTINGS)
+                          : undefined,
+                      expectedTag: expectedFunctionTag(
+                        tagForSlot(fresh, currentBoard, 2),
+                        draft.automatic,
+                      ),
+                    });
                   } catch (error) {
                     throw new Error(formatConfigureError(error, it, backboneLabel), {
                       cause: error,
                     });
                   }
-                /* APPLY_PHYSICAL ACK is authoritative; refresh status for UI. */
-                let next = fresh;
-                try {
-                  next = await client.getStatus();
-                  observeStatus(selected.bindingId, next);
-                } catch {
-                  /* Keep last known status — apply already succeeded. */
-                }
-                const actual = topologyForBoard(next, currentBoard);
-                const confirmed = {
-                  ...draft,
-                  settings: actual?.settings ?? draft.settings,
-                  applied: true,
-                  nodeId: currentBoard.nodeId,
-                  local: currentBoard.local,
-                  backendPortId: actual?.backendPortId,
-                };
-                execute?.({
-                  kind: "ConfirmPhysicalPins",
-                  apply: (project) => {
-                    const current = parsePhysicalProject(
-                      project.authoringMetadata[PHYSICAL_META_KEY]?.comment,
-                    );
-                    const updated = addConfirmedPinModules(
-                      project,
-                      selected.bindingId,
-                      stableBoardKey,
-                      confirmed,
-                      legacyMasterKey && legacyMasterKey !== stableBoardKey
-                        ? [legacyMasterKey]
-                        : [],
-                    );
-                    return {
-                      ok: true,
-                      value: {
-                        ...updated,
-                        authoringMetadata: {
-                          ...updated.authoringMetadata,
-                          [PHYSICAL_META_KEY]: {
-                            comment: JSON.stringify({
-                              ...current,
-                              drafts: storeStableBoardDraft(
-                                current.drafts,
-                                stableBoardKey,
-                                legacyMasterKey,
-                                confirmed,
-                              ),
-                            }),
+                  /* APPLY_PHYSICAL ACK is authoritative; refresh status for UI. */
+                  let next = fresh;
+                  try {
+                    next = await client.getStatus();
+                    observeStatus(selected.bindingId, next);
+                  } catch {
+                    /* Keep last known status — apply already succeeded. */
+                  }
+                  const actual = topologyForBoard(next, currentBoard);
+                  const confirmed = {
+                    ...draft,
+                    settings: actual?.settings ?? draft.settings,
+                    applied: true,
+                    nodeId: currentBoard.nodeId,
+                    local: currentBoard.local,
+                    backendPortId: actual?.backendPortId,
+                  };
+                  execute?.({
+                    kind: "ConfirmPhysicalPins",
+                    apply: (project) => {
+                      const current = parsePhysicalProject(
+                        project.authoringMetadata[PHYSICAL_META_KEY]?.comment,
+                      );
+                      const updated = addConfirmedPinModules(
+                        project,
+                        selected.bindingId,
+                        stableBoardKey,
+                        confirmed,
+                        legacyMasterKey && legacyMasterKey !== stableBoardKey
+                          ? [legacyMasterKey]
+                          : [],
+                      );
+                      return {
+                        ok: true,
+                        value: {
+                          ...updated,
+                          authoringMetadata: {
+                            ...updated.authoringMetadata,
+                            [PHYSICAL_META_KEY]: {
+                              comment: JSON.stringify({
+                                ...current,
+                                drafts: storeStableBoardDraft(
+                                  current.drafts,
+                                  stableBoardKey,
+                                  legacyMasterKey,
+                                  confirmed,
+                                ),
+                              }),
+                            },
                           },
                         },
-                      },
-                    };
-                  },
-                });
+                      };
+                    },
+                  });
                 } finally {
                   unlockTransport();
                   resumePolling();
@@ -501,6 +509,8 @@ export function BackbonePhysicalScreen() {
 
 function BoardDetail({
   board,
+  bindingId,
+  boardKey,
   topology,
   status,
   ready,
@@ -512,6 +522,8 @@ function BoardDetail({
   driverAssignments,
 }: {
   readonly board: AttachedBackbone;
+  readonly bindingId: string;
+  readonly boardKey: string;
   readonly topology?: PhysicalBackbone;
   readonly status?: GetStatusResponse;
   readonly ready: boolean;
@@ -573,8 +585,7 @@ function BoardDetail({
   const localAutomatic =
     !!functionDefinition?.modes &&
     !validatePhysicalModes(functionDefinition.modes, functionDefinition.i2cSpeed ?? 0);
-  const automatic =
-    localAutomatic || (topology?.source === 2 && !!functionDefinition);
+  const automatic = localAutomatic || (topology?.source === 2 && !!functionDefinition);
   const effective: BackbonePhysicalDraft = localAutomatic
     ? {
         name: functionDefinition!.name,
@@ -601,17 +612,6 @@ function BoardDetail({
           automatic: true,
         }
       : draft;
-  const variant = functionVariantOf(effective);
-
-  function setVariant(next: FunctionModuleVariant) {
-    if (automatic || busy) return;
-    setDraft({
-      ...draft,
-      variant: next,
-      modes: modesForVariant(draft.modes, next),
-      applied: false,
-    });
-  }
   const attempted = useRef<string | null>(null);
   const onApplyRef = useRef(onApply);
   useEffect(() => {
@@ -697,65 +697,33 @@ function BoardDetail({
 
   const knownLayout = topology?.layout === 1;
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center gap-3 px-5 pt-5 lg:px-8">
-        <span className="flex h-10 w-10 items-center justify-center rounded-slmd bg-brand-blue/10 text-brand-blue">
-          <Cpu size={20} />
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto lg:overflow-hidden">
+      <div className="flex shrink-0 items-center gap-2 px-5 pt-2 text-[11px] text-ink-muted">
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${ready ? "bg-success" : "bg-ink-faint"}`}
+        />
+        <span>
+          {ready
+            ? it
+              ? "Connessa"
+              : "Connected"
+            : it
+              ? "Bozza offline"
+              : "Offline draft"}
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-heading text-lg font-bold text-ink">
-              {it ? "Module Function" : "Module Function"}
-            </h2>
-            <span
-              className={`rounded-slpill px-2.5 py-0.5 text-[10px] font-semibold ${ready ? "bg-success/10 text-success" : "bg-surface text-ink-faint"}`}
-            >
-              {ready
-                ? it
-                  ? "Connessa"
-                  : "Connected"
-                : it
-                  ? "Non connessa"
-                  : "Disconnected"}
-            </span>
-            {functionTag && (
-              <span className="inline-flex items-center gap-1 rounded-slpill bg-brand-blue/10 px-2 py-0.5 text-[10px] text-brand-blue">
-                <Radio size={10} /> NFC
-              </span>
-            )}
-          </div>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            {functionDefinition
-              ? it
-                ? (functionDefinition.nameIt ?? functionDefinition.name)
-                : functionDefinition.name
-              : it
-                ? "Configura il connettore fisico della Backbone"
-                : "Configure the Backbone physical connector"}
-            {topology?.mcu ? ` · ${topology.mcu}` : ""}
-          </p>
-        </div>
-        <label className="flex items-center gap-2 text-xs text-ink-muted">
-          {it ? "Versione" : "Version"}
-          <select
-            className={`${control} w-auto min-w-[8.5rem]`}
-            value={variant}
-            disabled={!!automatic || busy}
-            onChange={(event) =>
-              setVariant(event.target.value as FunctionModuleVariant)
-            }
-          >
-            <option value="v2">V2 · 12 pin</option>
-            <option value="v1">V1 · 6 pin</option>
-          </select>
-        </label>
+        {topology?.mcu && <span>· {topology.mcu}</span>}
+        {functionTag && (
+          <span className="inline-flex items-center gap-1 text-brand-blue">
+            <Radio size={10} /> NFC
+          </span>
+        )}
       </div>
 
       <motion.div
         initial={reducedMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={motionTokens.duration.base}
-        className="mx-auto flex w-full max-w-[1440px] min-h-0 flex-1 flex-col gap-4 px-5 py-4 lg:px-8"
+        className="flex w-full min-h-0 flex-1 flex-col gap-2 px-4 py-2"
       >
         {!knownLayout && (
           <div className="rounded-slmd border border-border bg-surface px-4 py-3 text-xs text-ink-muted">
@@ -765,7 +733,10 @@ function BoardDetail({
           </div>
         )}
         <PhysicalInterfaceEditor
+          driverAssignments={driverAssignments}
           draft={effective}
+          bindingId={bindingId}
+          boardKey={boardKey}
           capabilities={topology?.capabilities ?? AUTHORING_CAPABILITIES}
           extended={topology?.version === 2 || !topology}
           disabled={!!automatic || busy}
@@ -779,7 +750,6 @@ function BoardDetail({
           }
         />
 
-        {driverAssignments}
         {result && (
           <p
             role="status"
@@ -789,7 +759,7 @@ function BoardDetail({
           </p>
         )}
 
-        <div className="flex flex-col gap-2 border-t border-border pt-3">
+        <div className="flex shrink-0 flex-col gap-1.5 border-t border-border bg-surface px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
           {(() => {
             const modeError = validatePhysicalModes(
               effective.modes,
@@ -809,7 +779,7 @@ function BoardDetail({
             return (
               <>
                 {configureBlockedReason ? (
-                  <p className="rounded-slsm bg-warning/15 px-2.5 py-1.5 font-body text-[11px] text-ink">
+                  <p className="font-body text-[11px] text-ink-muted">
                     {configureBlockedReason}
                   </p>
                 ) : null}

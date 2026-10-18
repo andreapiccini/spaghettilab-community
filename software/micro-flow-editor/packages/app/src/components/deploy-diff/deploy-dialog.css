@@ -1,0 +1,28 @@
+.deploy-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(600px, calc(100vw - 32px));
+  max-height: min(850px, calc(100dvh - 48px));
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: 0 24px 80px #15223830;
+  overflow: hidden;
+}
+.deploy-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.deploy-dialog::backdrop {
+  background: #18223666;
+  backdrop-filter: blur(2px);
+}
+.deploy-dialog button:focus-visible,
+.deploy-dialog summary:focus-visible,
+.deploy-dialog input:focus-visible {
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 3px;
+}

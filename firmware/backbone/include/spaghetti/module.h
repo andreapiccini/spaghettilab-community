@@ -51,9 +51,10 @@ enum spaghetti_module_endpoint_kind {
 	SPAGHETTI_ENDPOINT_I2C_ADDRESS, /**< One-byte 7-bit I2C address. */
 	SPAGHETTI_ENDPOINT_SPI_CHIP_SELECT, /**< One-byte SPI chip-select index. */
 	SPAGHETTI_ENDPOINT_UART_EXCLUSIVE, /**< Exclusive UART termination. */
-	SPAGHETTI_ENDPOINT_GPIO_LINE, /**< Logical connector signal index 0..4. */
-	SPAGHETTI_ENDPOINT_ADC_CHANNEL, /**< Logical connector signal index 0..4. */
-	SPAGHETTI_ENDPOINT_W1_ROM, /**< Full eight-byte 1-Wire ROM identity. */
+	SPAGHETTI_ENDPOINT_GPIO_LINE, /**< One to four distinct connector signal indices 0..4. */
+	SPAGHETTI_ENDPOINT_ADC_CHANNEL, /**< One to four distinct connector signal indices 0..4. */
+	SPAGHETTI_ENDPOINT_LOGICAL = 7, /**< Software-only source: no Port ownership or pinmux. */
+	SPAGHETTI_ENDPOINT_W1_ROM = 6, /**< Full eight-byte 1-Wire ROM identity. */
 };
 
 /**

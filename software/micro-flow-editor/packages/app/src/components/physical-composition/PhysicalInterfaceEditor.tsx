@@ -57,8 +57,7 @@ import {
   type PortInterfaceKind,
   type W1PeripheralConfig,
 } from "../../lib/backbone-physical.js";
-import { publicAsset } from "../../lib/public-asset.js";
-import { PhysicalConnectorPreview } from "./PhysicalConnectorPreview.js";
+import { PhysicalWiringDiagram } from "./PhysicalWiringDiagram.js";
 
 type ActiveSelection =
   | { readonly kind: Exclude<PortInterfaceKind, BusPortKind> }
@@ -115,7 +114,14 @@ function peripheralBlurb(kind: PortInterfaceKind, it: boolean): string {
 }
 
 function kindHasSettings(kind: PortInterfaceKind): boolean {
-  return kind === "gpio" || kind === "i2c" || kind === "uart" || kind === "spi" || kind === "pwm" || kind === "w1";
+  return (
+    kind === "gpio" ||
+    kind === "i2c" ||
+    kind === "uart" ||
+    kind === "spi" ||
+    kind === "pwm" ||
+    kind === "w1"
+  );
 }
 
 export function PhysicalInterfaceEditor({
@@ -124,6 +130,9 @@ export function PhysicalInterfaceEditor({
   extended,
   disabled,
   automatic,
+  bindingId,
+  driverAssignments,
+  boardKey,
   onChange,
 }: {
   readonly draft: BackbonePhysicalDraft;
@@ -131,6 +140,9 @@ export function PhysicalInterfaceEditor({
   readonly extended: boolean;
   readonly disabled: boolean;
   readonly automatic?: boolean;
+  readonly bindingId?: string;
+  readonly driverAssignments?: ReactNode;
+  readonly boardKey?: string;
   readonly onChange: (draft: BackbonePhysicalDraft) => void;
 }) {
   const { locale } = useLocale();
@@ -143,6 +155,7 @@ export function PhysicalInterfaceEditor({
   const invalid = validatePhysicalModes(draft.modes, draft.i2cSpeed);
   const [active, setActive] = useState<ActiveSelection | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [selectedPin, setSelectedPin] = useState<number | null>(null);
   const [gpioInMode, setGpioInMode] = useState(1);
   const [gpioOutMode, setGpioOutMode] = useState(2);
   const [query, setQuery] = useState("");
@@ -154,7 +167,6 @@ export function PhysicalInterfaceEditor({
         outMode: gpioOutMode,
       })
     : [];
-  const pendingAccent = activeKind ? PERIPHERAL_ACCENT[activeKind] : undefined;
 
   const commitModes = (modes: readonly number[]) =>
     onChange(ensureW1Config({ ...draft, modes, variant, settings, applied: false }));
@@ -176,6 +188,7 @@ export function PhysicalInterfaceEditor({
   const setVariant = (next: FunctionModuleVariant) => {
     if (next === variant || disabled) return;
     setPendingSignal(null);
+    setSelectedPin(null);
     setActive(null);
     onChange({
       ...draft,
@@ -190,8 +203,7 @@ export function PhysicalInterfaceEditor({
     const base = signalMode & 15;
     if (signalModeIsPlaced(draft.modes, signalMode) && !isRepeatableSignalBase(base)) {
       const pinIndex = pinIdToModeIndex(pinId, variant);
-      const alreadyHere =
-        pinIndex >= 0 && (draft.modes[pinIndex]! & 15) === base;
+      const alreadyHere = pinIndex >= 0 && (draft.modes[pinIndex]! & 15) === base;
       if (!alreadyHere) {
         setPendingSignal(null);
         return;
@@ -199,12 +211,15 @@ export function PhysicalInterfaceEditor({
     }
     commitModes(dropSignalOnPin(draft.modes, signalMode, pinId, variant));
     setPendingSignal(null);
+    setSelectedPin(null);
   };
 
   const commitGpioSettings = (nextIn: number, nextOut: number) => {
     setGpioInMode(nextIn);
     setGpioOutMode(nextOut);
-    commitModes(applyGpioSettingsToModes(draft.modes, { inMode: nextIn, outMode: nextOut }));
+    commitModes(
+      applyGpioSettingsToModes(draft.modes, { inMode: nextIn, outMode: nextOut }),
+    );
   };
 
   const updateSettings = (patch: Partial<PhysicalInterfaceSettings>) =>
@@ -257,10 +272,9 @@ export function PhysicalInterfaceEditor({
     });
   }, [peripherals, query, it]);
 
-  const pinRows = useMemo(() => {
-    const grid = functionPinGrid(draft.modes, variant);
-    return grid.flat().map((cell, flatIndex) => ({ cell, flatIndex }));
-  }, [draft.modes, variant]);
+  const pinRows = functionPinGrid(draft.modes, variant)
+    .flat()
+    .map((cell, flatIndex) => ({ cell, flatIndex }));
 
   const freeCount = freeConfigurablePinIndices(draft.modes).length;
 
@@ -275,22 +289,33 @@ export function PhysicalInterfaceEditor({
 
   if (automatic) {
     return (
-      <div className="space-y-4">
-        <p className="rounded-slmd border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-ink-muted">
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
+        <p className="shrink-0 rounded-slmd border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-ink-muted">
           {it
             ? "Configurazione automatica dal modulo NFC."
             : "Automatic configuration from the NFC module."}
         </p>
-        <PhysicalConnectorPreview modes={draft.modes} variant={variant} title="Module Function" />
+        <PhysicalWiringDiagram
+          modes={draft.modes}
+          variant={variant}
+          bindingId={bindingId}
+          boardKey={boardKey}
+          disabled
+          pendingSignal={null}
+          signals={[]}
+          it={it}
+          onAssign={() => {}}
+          onClear={() => {}}
+        />
       </div>
     );
   }
 
   return (
-    <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[272px_minmax(0,1fr)_300px]">
+    <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[224px_minmax(0,1fr)_260px]">
       {/* Left — peripheral library */}
       <aside className="flex min-h-0 flex-col rounded-slmd border border-border bg-surface shadow-e1">
-        <div className="border-b border-border px-4 py-3">
+        <div className="shrink-0 border-b border-border px-3 py-2">
           <h3 className="font-heading text-sm font-semibold text-ink">
             {it ? "Periferiche e funzioni" : "Peripherals & functions"}
           </h3>
@@ -302,7 +327,7 @@ export function PhysicalInterfaceEditor({
             className={`${input} mt-2`}
           />
         </div>
-        <div className="flex-1 space-y-2 overflow-y-auto p-3">
+        <div className="min-h-[90px] flex-1 space-y-1.5 overflow-y-auto p-2">
           {filteredKinds.flatMap((kind) => {
             const accent = PERIPHERAL_ACCENT[kind];
             const Icon = PERIPHERAL_ICON[kind];
@@ -354,7 +379,7 @@ export function PhysicalInterfaceEditor({
               animate={{ opacity: 1, y: 0 }}
               exit={reducedMotion ? undefined : { opacity: 0, y: 6 }}
               transition={motionTokens.duration.fast}
-              className="border-t border-border bg-surface-sunken/80 px-3 py-3"
+              className="max-h-[48vh] shrink-0 overflow-y-auto border-t border-border bg-surface-sunken/80 px-3 py-2"
             >
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-[11px] font-semibold text-ink">
@@ -392,8 +417,12 @@ export function PhysicalInterfaceEditor({
                     ? `Selezionato ${pendingSignal.label}: clicca un pin sul connettore.`
                     : `${pendingSignal.label} selected: click a pin on the connector.`
                   : it
-                    ? "Clicca un segnale, poi un pin — oppure apri il fumetto sul pin."
-                    : "Click a signal then a pin — or open the pin popover."}
+                    ? selectedPin !== null
+                      ? `Pin ${formatPinLabel(modeIndexToPinId(selectedPin, variant), variant)} selezionato: scegli il segnale da assegnare.`
+                      : "Scegli un segnale e un pin, nell’ordine che preferisci."
+                    : selectedPin !== null
+                      ? `${formatPinLabel(modeIndexToPinId(selectedPin, variant), variant)} selected: choose a signal to assign.`
+                      : "Choose a signal and a pin in either order."}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {activeSignals.map((signal) => {
@@ -416,9 +445,17 @@ export function PhysicalInterfaceEditor({
                       }
                       onClick={() => {
                         if (placed) return;
-                        setPendingSignal((prev) =>
-                          prev?.id === signal.id ? null : signal,
-                        );
+                        if (selectedPin !== null) {
+                          placeSignal(
+                            signal.mode,
+                            modeIndexToPinId(selectedPin, variant),
+                          );
+                          setSelectedPin(null);
+                        } else {
+                          setPendingSignal((prev) =>
+                            prev?.id === signal.id ? null : signal,
+                          );
+                        }
                       }}
                       className="inline-flex items-center gap-1 rounded-slmd border-2 bg-surface px-2.5 py-1.5 text-[11px] font-bold disabled:opacity-40"
                       style={{
@@ -492,22 +529,18 @@ export function PhysicalInterfaceEditor({
 
       {/* Center — physical connector */}
       <section
-        className="relative flex min-h-0 flex-col overflow-visible rounded-slmd border border-border p-3 shadow-e1 sm:p-4"
-        style={{
-          backgroundColor: "#ffffff",
-          backgroundImage: `url(${publicAsset("ux-assets/physical-configurator-bg.jpg")})`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "top center",
-          backgroundSize: "cover",
-        }}
+        className="relative flex min-h-0 flex-col overflow-hidden rounded-slmd border border-border bg-surface p-3 shadow-e1"
+        style={{ backgroundColor: "#ffffff" }}
       >
         <div className="relative z-[1] mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="font-heading text-sm font-semibold text-ink">
-              {it ? "Configuratore fisico" : "Physical configurator"}
+              {it ? "Collegamenti da effettuare" : "Wiring connections"}
             </h3>
             <p className="mt-0.5 text-[11px] text-ink-muted">
-              {it ? "Module Function · Backbone" : "Module Function · Backbone"}
+              {it
+                ? "Disposizione adattata alla versione della Backbone"
+                : "Layout adapted to the Backbone version"}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -525,7 +558,11 @@ export function PhysicalInterfaceEditor({
                     ? "bg-brand-blue text-white"
                     : "text-ink-muted hover:bg-surface-raised hover:text-ink"
                 }`}
-                title={it ? "Module Function V1 · 6 pin (4 segnali)" : "Module Function V1 · 6 pins (4 signals)"}
+                title={
+                  it
+                    ? "Module Function V1 · 6 pin (4 segnali)"
+                    : "Module Function V1 · 6 pins (4 signals)"
+                }
               >
                 V1 · 6 pin
               </button>
@@ -538,7 +575,11 @@ export function PhysicalInterfaceEditor({
                     ? "bg-brand-blue text-white"
                     : "text-ink-muted hover:bg-surface-raised hover:text-ink"
                 }`}
-                title={it ? "Module Function V2 · 12 pin (A0–A7)" : "Module Function V2 · 12 pins (A0–A7)"}
+                title={
+                  it
+                    ? "Module Function V2 · 12 pin (A0–A7)"
+                    : "Module Function V2 · 12 pins (A0–A7)"
+                }
               >
                 V2 · 12 pin
               </button>
@@ -551,29 +592,31 @@ export function PhysicalInterfaceEditor({
             </p>
           </div>
         </div>
-        <div className="relative z-[1] flex min-h-0 flex-1 items-center justify-center overflow-visible">
-          <div className="flex h-full w-full max-w-xl items-center justify-center overflow-visible">
-            <PhysicalConnectorPreview
+        <div className="relative z-[1] flex min-h-[240px] flex-1 items-stretch justify-center lg:min-h-0">
+          <div className="flex min-h-0 w-full items-stretch justify-center overflow-hidden">
+            <PhysicalWiringDiagram
               modes={draft.modes}
-              busUnits={draft.busUnits}
               variant={variant}
-              interactive={!disabled}
+              bindingId={bindingId}
+              boardKey={boardKey}
+              disabled={disabled}
               pendingSignal={pendingSignal}
-              pendingAccent={pendingAccent}
-              popoverSignals={activeSignals}
-              localeIt={it}
-              onAssignSignal={(modeIndex, signalMode) => {
-                placeSignal(signalMode, modeIndexToPinId(modeIndex, variant));
-              }}
-              onClearPin={(modeIndex) => {
+              selected={selectedPin}
+              onSelect={setSelectedPin}
+              signals={activeSignals}
+              it={it}
+              onAssign={(modeIndex, mode) =>
+                placeSignal(mode, modeIndexToPinId(modeIndex, variant))
+              }
+              onClear={(modeIndex) =>
                 commitModes(
                   clearPinAssignment(
                     draft.modes,
                     modeIndexToPinId(modeIndex, variant),
                     variant,
                   ),
-                );
-              }}
+                )
+              }
             />
           </div>
         </div>
@@ -585,8 +628,8 @@ export function PhysicalInterfaceEditor({
       </section>
 
       {/* Right — live summary */}
-      <aside className="flex min-h-0 flex-col rounded-slmd border border-border bg-surface shadow-e1">
-        <div className="border-b border-border px-4 py-3">
+      <aside className="flex min-h-0 flex-col overflow-y-auto rounded-slmd border border-border bg-surface shadow-e1">
+        <div className="shrink-0 border-b border-border px-3 py-2">
           <h3 className="font-heading text-sm font-semibold text-ink">
             {it ? "Configurazione porta" : "Port configuration"}
           </h3>
@@ -596,82 +639,91 @@ export function PhysicalInterfaceEditor({
               : `${freeCount} free pins · ${interfaces.length} peripherals`}
           </p>
         </div>
-        <ul className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-          {pinRows.map(({ cell, flatIndex }) => {
-            const kind = pinVisualKind(cell.label);
-            const accentKind = cell.mode !== undefined ? kindForMode(cell.mode) : null;
-            const accent =
-              accentKind != null
-                ? PERIPHERAL_ACCENT[accentKind]
-                : kind === "power"
-                  ? "#DC2626"
-                  : kind === "ground"
-                    ? "#3F3F46"
-                    : "#A1A1AA";
-            const pinId =
-              cell.modeIndex !== undefined
-                ? modeIndexToPinId(cell.modeIndex, variant)
-                : undefined;
-            const name =
-              pinId !== undefined ? formatPinLabel(pinId, variant) : cell.label;
-            const status =
-              kind === "unused" || cell.label === "NC"
-                ? it
-                  ? "Libero"
-                  : "Free"
-                : kind === "power"
+        <details className="shrink-0 border-b border-border">
+          <summary className="cursor-pointer px-3 py-2 text-xs text-ink-muted">
+            {it ? "Tutti i pin" : "All pins"}
+          </summary>
+          <ul className="space-y-0.5 px-2 pb-2">
+            {pinRows.map(({ cell, flatIndex }) => {
+              const kind = pinVisualKind(cell.label);
+              const accentKind =
+                cell.mode !== undefined ? kindForMode(cell.mode) : null;
+              const accent =
+                accentKind != null
+                  ? PERIPHERAL_ACCENT[accentKind]
+                  : kind === "power"
+                    ? "#DC2626"
+                    : kind === "ground"
+                      ? "#3F3F46"
+                      : "#A1A1AA";
+              const pinId =
+                cell.modeIndex !== undefined
+                  ? modeIndexToPinId(cell.modeIndex, variant)
+                  : undefined;
+              const name =
+                pinId !== undefined ? formatPinLabel(pinId, variant) : cell.label;
+              const status =
+                kind === "unused" || cell.label === "NC"
                   ? it
-                    ? `Alimentazione ${cell.label}`
-                    : `${cell.label} power`
-                  : kind === "ground"
+                    ? "Libero"
+                    : "Free"
+                  : kind === "power"
                     ? it
-                      ? "Massa"
-                      : "Ground"
-                    : cell.label;
-            const clearable =
-              !disabled && cell.modeIndex !== undefined && kind === "signal";
-            return (
-              <li key={`pin-${flatIndex}-${name}`}>
-                <button
-                  type="button"
-                  disabled={!clearable}
-                  onClick={() => {
-                    if (cell.modeIndex === undefined) return;
-                    commitModes(
-                      clearPinAssignment(
-                        draft.modes,
-                        modeIndexToPinId(cell.modeIndex, variant),
-                        variant,
-                      ),
-                    );
-                  }}
-                  className={`flex w-full items-center gap-2 rounded-slsm px-2 py-1.5 text-left text-xs transition-colors ${
-                    clearable
-                      ? "hover:bg-surface-raised"
-                      : "cursor-default opacity-90"
-                  }`}
-                  title={
-                    clearable
+                      ? `Alimentazione ${cell.label}`
+                      : `${cell.label} power`
+                    : kind === "ground"
                       ? it
-                        ? "Click per rimuovere"
-                        : "Click to remove"
-                      : undefined
-                  }
-                >
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: accent }}
-                  />
-                  <span className="w-10 shrink-0 font-mono text-[11px] font-bold text-ink">
-                    {name}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-ink-muted">{status}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                        ? "Massa"
+                        : "Ground"
+                      : cell.label;
+              const clearable =
+                !disabled && cell.modeIndex !== undefined && kind === "signal";
+              return (
+                <li key={`pin-${flatIndex}-${name}`}>
+                  <button
+                    type="button"
+                    disabled={!clearable}
+                    onClick={() => {
+                      if (cell.modeIndex === undefined) return;
+                      commitModes(
+                        clearPinAssignment(
+                          draft.modes,
+                          modeIndexToPinId(cell.modeIndex, variant),
+                          variant,
+                        ),
+                      );
+                    }}
+                    className={`flex w-full items-center gap-2 rounded-slsm px-2 py-1.5 text-left text-xs transition-colors ${
+                      clearable
+                        ? "hover:bg-surface-raised"
+                        : "cursor-default opacity-90"
+                    }`}
+                    title={
+                      clearable
+                        ? it
+                          ? "Click per rimuovere"
+                          : "Click to remove"
+                        : undefined
+                    }
+                  >
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: accent }}
+                    />
+                    <span className="w-10 shrink-0 font-mono text-[11px] font-bold text-ink">
+                      {name}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-ink-muted">
+                      {status}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
 
+        {driverAssignments}
         {interfaces.length > 0 && (
           <div className="border-t border-border px-3 py-2">
             <h4 className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
@@ -750,8 +802,10 @@ function LibraryCard({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-slmd border-2 bg-surface px-3 py-2.5 text-left transition-all duration-200 disabled:opacity-40 ${
-        selected ? "shadow-e1" : "border-border hover:border-border-strong hover:bg-surface-raised"
+      className={`flex w-full items-center gap-2 rounded-slmd border bg-surface px-2.5 py-2 text-left transition-all duration-200 disabled:opacity-40 ${
+        selected
+          ? "shadow-e1"
+          : "border-border hover:border-border-strong hover:bg-surface-raised"
       }`}
       style={selected ? { borderColor: pastelBorder(accent) } : undefined}
     >
@@ -773,7 +827,9 @@ function LibraryCard({
             </span>
           )}
         </span>
-        <span className="mt-0.5 block truncate text-[10px] text-ink-muted">{subtitle}</span>
+        <span className="mt-0.5 block truncate text-[10px] text-ink-muted">
+          {subtitle}
+        </span>
       </span>
     </button>
   );
@@ -813,7 +869,9 @@ function PeripheralSettingsFields({
             className={`${input} mt-1`}
             disabled={disabled}
             value={gpioInMode}
-            onChange={(event) => onGpioSettings(Number(event.target.value), gpioOutMode)}
+            onChange={(event) =>
+              onGpioSettings(Number(event.target.value), gpioOutMode)
+            }
           >
             {GPIO_IN_PULL_OPTIONS.map((option) => (
               <option key={option.mode} value={option.mode}>
@@ -1032,7 +1090,9 @@ function PeripheralSettingsFields({
           >
             <option value="external">{it ? "Esterna (VDD)" : "External (VDD)"}</option>
             <option value="parasitic" disabled={!w1.parasiticSupported}>
-              {it ? "Parassita (non supportata dal runtime)" : "Parasitic (runtime unsupported)"}
+              {it
+                ? "Parassita (non supportata dal runtime)"
+                : "Parasitic (runtime unsupported)"}
             </option>
           </select>
         </label>

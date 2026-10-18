@@ -60,6 +60,7 @@ enum spaghetti_port_transport {
 	SPAGHETTI_PORT_TRANSPORT_GPIO, /**< Digital GPIO family. */
 	SPAGHETTI_PORT_TRANSPORT_ADC, /**< ADC family. */
 	SPAGHETTI_PORT_TRANSPORT_W1, /**< Shared 1-Wire bus. */
+	SPAGHETTI_PORT_TRANSPORT_LOGICAL, /**< Software-only source; no physical controller. */
 };
 
 /**
@@ -474,5 +475,11 @@ int spaghetti_port_w1_write_read(
 	uint8_t *read_data,
 	size_t read_size,
 	k_timeout_t timeout);
+
+
+int spaghetti_dht22_decode_frame(const uint8_t bytes[5], int16_t *temperature, uint16_t *humidity);
+/* DHT22 protocol: dedicated GPIO power, open-drain-style DATA start, bounded capture. */
+int spaghetti_port_dht22_power(const struct spaghetti_port *port, uint8_t data, uint8_t power, bool on);
+int spaghetti_port_dht22_read(const struct spaghetti_port *port, uint8_t data, uint8_t power, int16_t *temperature, uint16_t *humidity);
 
 #endif /* SPAGHETTI_PORT_H */

@@ -1,3 +1,14 @@
+import { MANUAL_TRIGGER_TYPE, manualTriggerProfile } from "./flow-trigger.js";
+import { rgbInputCommand } from "./rgb-runtime.js";
+import {
+  SEQUENCE_TYPE,
+  MOVEMENT_COMPLETED,
+  MOVEMENT_COMPLETED_FIELD,
+  sequenceSteps,
+  validateSequenceSteps,
+  sequenceActionNodeId,
+  encodeSequenceProgram,
+} from "./flow-sequence.js";
 import { gpioSignalType } from "./gpio-operation-registry.js";
 import {
   SENSOR_INSTANCE_PROP,
@@ -24,10 +35,7 @@ import {
   findCatalogEntriesByTypeId,
 } from "@spaghettilab/processing-block-catalog";
 import type { DeviceProfileDraft } from "@spaghettilab/device-profile-authoring-model";
-import {
-  PortCapability,
-  PortTransport,
-} from "@spaghettilab/device-profile-authoring-model";
+import { PortTransport } from "@spaghettilab/device-profile-authoring-model";
 import {
   BACKBONE_SENSOR_MODULES_META_KEY,
   modulesForBinding,
@@ -50,40 +58,55 @@ import {
   type DeviceRecipeDraft,
   type DeviceRecipeOp,
 } from "./device-recipe-draft.js";
-import { isMappedTrigger, mappedTriggerActionSteps } from "./gpio-trigger-map.js";
+import {
+  isMappedTrigger,
+  mappedTriggerActionSteps,
+  actionFixedWriteLevel,
+  triggerActionNames,
+} from "./gpio-trigger-map.js";
 
 const SQUARE_WAVE_IDS = new Set(["appblocks.square_wave", "ab.square_wave"]);
 
 function isSquareWaveNode(data: DeviceProcessingNodeData): boolean {
   if (data.kind !== "block") return false;
-  return SQUARE_WAVE_IDS.has(data.catalogEntryId ?? "") || SQUARE_WAVE_IDS.has(data.blockTypeId);
-}
-
-function numberFromUnknown(value: unknown, fallback: number): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "bigint") return Number(value);
-  if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return fallback;
+  return (
+    SQUARE_WAVE_IDS.has(data.catalogEntryId ?? "") ||
+    SQUARE_WAVE_IDS.has(data.blockTypeId)
+  );
 }
 
 function squareWavePeriodMs(properties: Readonly<Record<string, unknown>>): number {
-  return Math.max(20, Math.min(60_000, numberFromUnknown(properties.periodMs, 500)));
+  const value = Number(properties.periodMs ?? 500);
+  if (!Number.isInteger(value) || value < 20 || value > 60000)
+    throw new Error("Onda quadra: il periodo deve essere tra 20 e 60000 ms.");
+  return value;
 }
-
 function squareWavePulseMs(properties: Readonly<Record<string, unknown>>): number {
   const period = squareWavePeriodMs(properties);
-  const duty = Math.max(1, Math.min(99, numberFromUnknown(properties.dutyCycle, 50)));
+  const duty = Number(properties.dutyCycle ?? 50);
+  if (!Number.isFinite(duty) || duty < 1 || duty > 99)
+    throw new Error("Onda quadra: il duty cycle deve essere tra 1 e 99%.");
   return Math.max(1, Math.min(period - 1, Math.round((period * duty) / 100)));
 }
 
-function squareWavePulseSteps(nodeId: string, signalId: string, pulseMs: number): readonly DeviceRecipeOp[] {
+function squareWavePulseSteps(
+  nodeId: string,
+  signalId: string,
+  pulseMs: number,
+  high: 0 | 1,
+  low: 0 | 1,
+  into: string,
+): readonly DeviceRecipeOp[] {
   return [
-    { id: `${nodeId}-sq-high`, type: "gpio_write", signalId, level: 1 },
-    { id: `${nodeId}-sq-wait`, type: "wait", ms: pulseMs },
-    { id: `${nodeId}-sq-low`, type: "gpio_write", signalId, level: 0 },
+    {
+      id: `${nodeId}-pulse`,
+      type: "gpio_pulse",
+      signalId,
+      activeState: high,
+      restoreState: low,
+      durationMs: { kind: "fixed", value: pulseMs },
+    },
+    { id: `${nodeId}-read`, type: "gpio_read", signalId, into },
   ];
 }
 
@@ -93,19 +116,97 @@ export type DriverDeploymentPlan = {
   input: CompileConfigInput;
   profiles: readonly DeviceProfileDraft[];
   options: CompileConfigOptions;
+  observations?: readonly { viewerId: string; key: number; field: number; action?: number; schemaId?: string }[];
 };
 export function prepareDriverDeployment(
   project: ProjectV1,
   bindingId: string,
   input: CompileConfigInput,
 ): DriverDeploymentPlan {
-  const nodes = input.processingGraph.nodes as readonly Node[];
+  const viewerIds = new Set((input.processingGraph.nodes as readonly Node[]).filter(node => node.data.kind === "block" && node.data.blockTypeId === "ui.data_viewer").map(node => node.id));
+  const viewerEdges = input.processingGraph.edges.filter(edge => viewerIds.has(edge.target));
+  for (const id of viewerIds)
+    if (viewerEdges.filter(edge => edge.target === id).length > 1)
+      throw new Error("Visualizza dati: collega una sola uscita a ciascun visualizzatore.");
+  input = { ...input, processingGraph: { ...input.processingGraph,
+    nodes: input.processingGraph.nodes.filter(node => !viewerIds.has(node.id)),
+    edges: input.processingGraph.edges.filter(edge => !viewerIds.has(edge.target) && !viewerIds.has(edge.source)),
+  }};
+  input = {
+    ...input,
+    processingGraph: {
+      ...input.processingGraph,
+      nodes: (input.processingGraph.nodes as readonly Node[]).map((node) => {
+        if (
+          node.data.kind !== "block" ||
+          !node.data.properties.statusLed ||
+          !["ab.led", "status_led"].includes(node.data.blockTypeId)
+        )
+          return node;
+        const p = node.data.properties;
+        for (const field of [
+          "delayOnMs",
+          "delayOffMs",
+          "softStartMs",
+          "softStopMs",
+          "softOnMs",
+          "softOffMs",
+        ])
+          if (Number(p[field] ?? 0) !== 0)
+            throw new Error(
+              "STATUS: usa il controllo digitale senza ritardi o dissolvenze.",
+            );
+        const threshold = Number(p.threshold ?? p["1"] ?? 50);
+        if (!Number.isInteger(threshold) || threshold < 0 || threshold > 100)
+          throw new Error("STATUS: la soglia deve essere tra 0 e 100.");
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            blockTypeId: "status_led",
+            properties: {
+              "1": BigInt(threshold),
+              "2": p.negated === true || p["2"] === true,
+            },
+          },
+        };
+      }),
+    },
+  };
+  const originalNodes = input.processingGraph.nodes as readonly Node[];
+  const manualTriggers = originalNodes.filter(node => node.data.kind === "block" && node.data.blockTypeId === MANUAL_TRIGGER_TYPE);
+  const sequences = originalNodes.filter(
+    (node) => node.data.kind === "block" && node.data.blockTypeId === SEQUENCE_TYPE,
+  );
+  const synthetic = new Map<string, Node>();
+  for (const node of sequences) {
+    const steps = sequenceSteps((node.data as BlockNodeData).properties);
+    validateSequenceSteps(steps);
+    for (const step of steps)
+      if (step.kind === "action") {
+        const id = sequenceActionNodeId(step.moduleId, step.actionId);
+        synthetic.set(id, {
+          layer: "device-processing",
+          id,
+          data: {
+            kind: "block",
+            blockTypeId: BACKBONE_SENSOR_BLOCK_TYPE_ID,
+            properties: {
+              [SENSOR_MODULE_ID_PROP]: step.moduleId,
+              [SENSOR_ACTION_ID_PROP]: step.actionId,
+            },
+          },
+        });
+      }
+  }
+  const nodes: readonly Node[] = [...originalNodes, ...synthetic.values()];
   const sensorNodes = nodes.filter(
     (node): node is Node & { data: BlockNodeData } =>
       node.data.kind === "block" &&
       node.data.blockTypeId === BACKBONE_SENSOR_BLOCK_TYPE_ID,
   );
-  if (!sensorNodes.length) return { input, profiles: [], options: {} };
+  if (!sensorNodes.length && !sequences.length && !viewerEdges.length && !manualTriggers.length)
+    return { input, profiles: [], options: {} };
   const stored = modulesForBinding(
     parseBackboneSensorModules(
       project.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
@@ -124,11 +225,11 @@ export function prepareDriverDeployment(
   >();
   const generated = new Map<string, Node>();
   const squareDriven = new Set<string>();
-  const squareWaveModules = new Map<
-    string,
-    { moduleId: string; periodMs: number }[]
-  >();
+  const scheduledActions = new Map<string, string>();
+  const squareWaveModules = new Map<string, { moduleId: string; periodMs: number }[]>();
   const gpioOwners = new Set<string>();
+  const motionModules = new Set<string>();
+  const rgbTargets = new Map<string, DeviceRecipeDraft>();
   const originalEdges = [...input.processingGraph.edges];
   const aliases = new Map<string, string>();
   // The violet activation disc is authoring-only: its source is the real schedule.
@@ -197,50 +298,81 @@ export function prepareDriverDeployment(
     const gpioChannels = new Map<string, number>();
     let driverPortId: number;
     if (draft.binding.bus === "gpio") {
-      if (draft.binding.gpioSignals.length !== 1)
-        throw new Error(`${draft.name}: usa un segnale digitale per dispositivo.`);
-      const signal = draft.binding.gpioSignals[0]!;
-      const output = gpioSignalType(signal) === "digital_output";
-      const candidates = applied
-        .filter(
-          ([key, config]) =>
-            config.local !== false &&
-            (!metadata?.gpioAssignment || key === metadata.gpioAssignment.boardKey),
-        )
-        .flatMap(([, config]) =>
-          config.modes
-            .slice(0, 4)
-            .flatMap((mode, channel) =>
-              (output ? [2, 3].includes(mode & 15) : (mode & 15) === 1) &&
-              (!metadata?.gpioAssignment || channel === metadata.gpioAssignment.channel)
-                ? [{ portId: config.backendPortId ?? 0, channel }]
-                : [],
-            ),
-        );
-      if (candidates.length !== 1)
-        throw new Error(
-          `${draft.name}: assegna DATA a un ${output ? "output" : "input"} digitale applicato nel Module Function.`,
-        );
-      driverPortId = candidates[0]!.portId;
-      gpioChannels.set(signal.id, candidates[0]!.channel);
-      // An explicit driver owns this line instead of the auto-generated raw-input module.
-      for (let i = physical.length - 1; i >= 0; --i) {
-        const node = physical[i]!;
-        const data = node.data as ModuleNodeData;
-        if (
-          node.id.startsWith("physical-pin:") &&
-          data.driverTypeId === "digital_input_trigger" &&
-          data.portId === driverPortId &&
-          Number(data.properties["1"]) === candidates[0]!.channel
-        )
-          physical.splice(i, 1);
+      const multi = metadata?.gpioAssignments;
+      if (draft.binding.gpioSignals.length > 1) {
+        if (!multi)
+          throw new Error(`${draft.name}: assegna i segnali dalla sezione Moduli.`);
+        const config = applied.find(([key]) => key === multi.boardKey)?.[1];
+        if (!config || config.local === false)
+          throw new Error(`${draft.name}: applica i pin richiesti sul master.`);
+        driverPortId = config.backendPortId ?? 0;
+        const used = new Set<number>();
+        for (const signal of draft.binding.gpioSignals) {
+          const channel = multi.channels[signal.id];
+          if (
+            !Number.isInteger(channel) ||
+            channel! < 0 ||
+            channel! > 3 ||
+            used.has(channel!) ||
+            !(draft.rgbModule ? [12] : draft.dht22Module && signal.id === "DATA" ? [1] : [2, 3]).includes((config.modes[channel!] ?? 0) & 15)
+          )
+            throw new Error(
+              `${draft.name}: i segnali richiedono pin distinti, configurati con la funzione corretta.`,
+            );
+          used.add(channel!);
+          gpioChannels.set(signal.id, channel!);
+          const ownerKey = `${driverPortId}:${channel}`;
+          if (gpioOwners.has(ownerKey))
+            throw new Error(`${draft.name}: pin già assegnato a un altro dispositivo.`);
+          gpioOwners.add(ownerKey);
+        }
+      } else {
+        if (draft.binding.gpioSignals.length !== 1)
+          throw new Error(`${draft.name}: usa un segnale digitale per dispositivo.`);
+        const signal = draft.binding.gpioSignals[0]!;
+        const output = gpioSignalType(signal) === "digital_output";
+        const candidates = applied
+          .filter(
+            ([key, config]) =>
+              config.local !== false &&
+              (!metadata?.gpioAssignment || key === metadata.gpioAssignment.boardKey),
+          )
+          .flatMap(([, config]) =>
+            config.modes
+              .slice(0, 4)
+              .flatMap((mode, channel) =>
+                (output ? [2, 3].includes(mode & 15) : (mode & 15) === 1) &&
+                (!metadata?.gpioAssignment ||
+                  channel === metadata.gpioAssignment.channel)
+                  ? [{ portId: config.backendPortId ?? 0, channel }]
+                  : [],
+              ),
+          );
+        if (candidates.length !== 1)
+          throw new Error(
+            `${draft.name}: assegna DATA a un ${output ? "output" : "input"} digitale applicato nel Module Function.`,
+          );
+        driverPortId = candidates[0]!.portId;
+        gpioChannels.set(signal.id, candidates[0]!.channel);
+        // An explicit driver owns this line instead of the auto-generated raw-input module.
+        for (let i = physical.length - 1; i >= 0; --i) {
+          const node = physical[i]!;
+          const data = node.data as ModuleNodeData;
+          if (
+            node.id.startsWith("physical-pin:") &&
+            data.driverTypeId === "digital_input_trigger" &&
+            data.portId === driverPortId &&
+            Number(data.properties["1"]) === candidates[0]!.channel
+          )
+            physical.splice(i, 1);
+        }
+        const ownerKey = `${driverPortId}:${candidates[0]!.channel}`;
+        if (gpioOwners.has(ownerKey))
+          throw new Error(
+            `${draft.name}: questo pin è già assegnato a un altro dispositivo.`,
+          );
+        gpioOwners.add(ownerKey);
       }
-      const ownerKey = `${driverPortId}:${candidates[0]!.channel}`;
-      if (gpioOwners.has(ownerKey))
-        throw new Error(
-          `${draft.name}: questo pin è già assegnato a un altro dispositivo.`,
-        );
-      gpioOwners.add(ownerKey);
     } else {
       const ports = [
         ...new Set(
@@ -262,6 +394,22 @@ export function prepareDriverDeployment(
     const instances = sensorNodes
       .filter((node) => node.data.properties[SENSOR_MODULE_ID_PROP] === groupId)
       .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    if (draft.rgbModule) {
+      const compiled = compileRuntimeDriver(draft, new Map(), gpioChannels);
+      profiles.push(compiled.profile);
+      const moduleId = `driver:${groupId}`;
+      module(moduleId, { kind: "module", driverTypeId: "declarative-device", profileId: compiled.profile.profileId, portId: driverPortId, bayId: 255, railId: 255, electricalMode: "input-output", properties: { "1": compiled.profile.profileId, "2": 1n } });
+      generated.set(`driver-rgb:${groupId}`, { layer: "device-processing", id: `driver-rgb:${groupId}`, data: { kind: "schedule", moduleNodeId: moduleId, periodMs: 100, enabled: true } });
+      for (const node of instances) {
+        const actionId = String(node.data.properties[SENSOR_ACTION_ID_PROP] ?? draft.commands[0]!.id);
+        const action = compiled.actions.get(actionId);
+        if (!action) throw new Error("L’azione RGB non esiste più.");
+        runtime.set(node.id, { moduleId, action });
+        rgbTargets.set(node.id, draft);
+        generated.set(node.id, { ...node, data: { kind: "event-source", moduleNodeId: moduleId } });
+      }
+      continue;
+    }
     const connected = new Map<string, ReadonlySet<string>>();
     const channels = [...draft.channels];
     const commands = instances.map((node) => {
@@ -275,8 +423,7 @@ export function prepareDriverDeployment(
       const selectedOutput = String(node.data.properties[SENSOR_OUTPUT_PROP] ?? "");
       const { inputs: interfaces, outputs: outputInterfaces } = sensorInterfaces(draft);
       const triggerInput = interfaces.find(
-        (step) =>
-          step.fromChannelId === selectedInput && step.inputMode === "trigger",
+        (step) => step.fromChannelId === selectedInput && step.inputMode === "trigger",
       );
       const mappedTrigger = triggerInput ? isMappedTrigger(triggerInput) : false;
       const trigger =
@@ -304,10 +451,43 @@ export function prepareDriverDeployment(
             ),
           );
       const incoming = edges.filter((edge) => edge.target === node.id);
+      if (draft.dht22Module) inIds.add("read-trigger");
       const squareSource = incoming
         .map((edge) => nodes.find((item) => item.id === edge.source))
         .find((source) => source && isSquareWaveNode(source.data));
       if (squareSource && draft.binding.bus === "gpio") {
+        if (!mappedTrigger || !triggerInput)
+          throw Object.assign(
+            new Error(
+              `${draft.name}: collega l’onda a un ingresso comando con azioni HIGH e LOW associate.`,
+            ),
+            {
+              nodeId: node.id,
+              code: action.steps.some(
+                (step) => step.type === "stepper" && step.command === "start",
+              )
+                ? "wave-stepper-start"
+                : "wave-trigger",
+            },
+          );
+        const names = triggerActionNames(triggerInput);
+        for (const name of [names.high, names.low]) {
+          const selected = draft.commands.find((command) => command.name === name);
+          if (
+            !selected ||
+            actionFixedWriteLevel(draft, name) === undefined ||
+            selected.steps.some(
+              (step) => !["gpio_write", "gpio_read", "emit"].includes(step.type),
+            ) ||
+            selected.steps.filter((step) => step.type === "gpio_write").length !== 1
+          )
+            throw new Error(
+              `${draft.name}: l’onda richiede due azioni digitali semplici; l’azione «${name}» contiene altri passi e non viene sostituita.`,
+            );
+        }
+        if (scheduledActions.has(groupId) && scheduledActions.get(groupId) !== node.id)
+          throw new Error(`${draft.name}: usa una sola onda per questo pin.`);
+        scheduledActions.set(groupId, node.id);
         squareDriven.add(node.id);
         const periodMs = isBlockNodeData(squareSource.data)
           ? squareWavePeriodMs(squareSource.data.properties)
@@ -346,6 +526,11 @@ export function prepareDriverDeployment(
       connected.set(
         node.id,
         new Set([
+          ...(synthetic.has(node.id)
+            ? interfaces
+                .filter((input) => input.inputMode !== "trigger")
+                .map((input) => input.fromChannelId)
+            : []),
           ...(single ? sharedWiredInputs : []),
           ...incoming.flatMap((edge) =>
             edge.targetHandle &&
@@ -365,6 +550,12 @@ export function prepareDriverDeployment(
               node.id,
               draft.binding.gpioSignals[0].id,
               squareWavePulseMs(squareSource.data.properties),
+              actionFixedWriteLevel(draft, triggerActionNames(triggerInput!).high)!,
+              actionFixedWriteLevel(draft, triggerActionNames(triggerInput!).low)!,
+              outputInterfaces.find((step) => step.channelId === selectedOutput)
+                ?.from ??
+                draft.variables[0]?.name ??
+                "stato",
             )
           : undefined;
       const effective = squarePulse
@@ -398,9 +589,38 @@ export function prepareDriverDeployment(
       flowInterfaces: [],
       flowInterfaceActions: {},
     };
-    const compiled = compileRuntimeDriver(driverDraft, connected, gpioChannels);
+    const compiled = compileRuntimeDriver(
+      driverDraft,
+      connected,
+      gpioChannels,
+      scheduledActions.get(groupId),
+    );
     profiles.push(compiled.profile);
     const moduleId = `driver:${groupId}`;
+    if (
+      draft.commands.some((command) =>
+        command.steps.some((op) => op.type === "stepper"),
+      )
+    ) {
+      motionModules.add(moduleId);
+      const id = `driver-motion:${groupId}`;
+      generated.set(id, {
+        layer: "device-processing",
+        id,
+        data: {
+          kind: "schedule",
+          moduleNodeId: moduleId,
+          periodMs: 20,
+          enabled: true,
+        },
+      });
+    }
+    if (draft.dht22Module) {
+      const id = `driver-dht22:${groupId}`;
+      generated.set(id, { layer: "device-processing", id, data: {
+        kind: "schedule", moduleNodeId: moduleId, periodMs: 100, enabled: true,
+      } });
+    }
     const address = Number.parseInt(
       draft.binding.i2c?.address.replace(/^0x/i, "") ?? "",
       16,
@@ -461,7 +681,9 @@ export function prepareDriverDeployment(
       runtime.set(node.id, {
         moduleId,
         action: { ...info, outputIds },
-        ...(isTrigger || squareDriven.has(node.id) ? { triggerHandle: selectedInput || "comando" } : {}),
+        ...(isTrigger || squareDriven.has(node.id)
+          ? { triggerHandle: selectedInput || "comando" }
+          : {}),
       });
       generated.set(node.id, {
         ...node,
@@ -469,9 +691,17 @@ export function prepareDriverDeployment(
       });
     }
   }
-  let clockAddress = 1;
+
   for (const node of nodes) {
     const gpioClocks = squareWaveModules.get(node.id);
+    if (
+      isSquareWaveNode(node.data) &&
+      (!gpioClocks?.length ||
+        edges.some((edge) => edge.source === node.id && !squareDriven.has(edge.target)))
+    )
+      throw new Error(
+        "Collega l’onda quadra direttamente a un ingresso comando di un dispositivo GPIO. Questo collegamento non è ancora supportato.",
+      );
     if (gpioClocks?.length && isSquareWaveNode(node.data)) {
       const [primary] = gpioClocks;
       generated.set(node.id, {
@@ -491,22 +721,23 @@ export function prepareDriverDeployment(
         node.data.catalogEntryId === "appblocks.time_interval") ||
       isSquareWaveNode(node.data);
     if (isPeriod) {
-      const periodMs = isSquareWaveNode(node.data) && isBlockNodeData(node.data)
-        ? squareWavePeriodMs(node.data.properties)
-        : node.data.kind === "schedule"
-          ? node.data.periodMs
-          : Number(
-              (node.data as { properties?: Record<string, unknown> }).properties
-                ?.periodSec ?? 1,
-            ) * 1000;
+      const periodMs =
+        isSquareWaveNode(node.data) && isBlockNodeData(node.data)
+          ? squareWavePeriodMs(node.data.properties)
+          : node.data.kind === "schedule"
+            ? node.data.periodMs
+            : Number(
+                (node.data as { properties?: Record<string, unknown> }).properties
+                  ?.periodSec ?? 1,
+              ) * 1000;
       if (!Number.isInteger(periodMs) || periodMs < 1 || periodMs > 60000)
         throw new Error("Il periodo deve essere un intero tra 1 e 60000 ms.");
       const id = `driver-clock:${node.id}`;
       const profile: DeviceProfileDraft = {
         profileId: "flow.clock",
         version: 1,
-        transport: PortTransport.I2C,
-        requiredCapabilities: PortCapability.I2C,
+        transport: PortTransport.LOGICAL,
+        requiredCapabilities: 0,
         maxTotalTimeMs: 1,
         maxTransactions: 0,
         maxBytes: 0,
@@ -538,9 +769,9 @@ export function prepareDriverDeployment(
         portId,
         bayId: 255,
         railId: 255,
-        endpoint: { address: clockAddress },
+
         electricalMode: "input-only",
-        properties: { "1": profile.profileId, "2": 1n, "4": BigInt(clockAddress++) },
+        properties: { "1": profile.profileId, "2": 1n },
       });
       generated.set(node.id, {
         ...node,
@@ -572,6 +803,19 @@ export function prepareDriverDeployment(
       });
     }
   }
+  for (const node of manualTriggers) {
+    const profile = manualTriggerProfile(node.id);
+    profiles.push(profile);
+    const id = `driver-manual:${node.id}`;
+    module(id, { kind: "module", driverTypeId: "declarative-device", profileId: profile.profileId,
+      portId, bayId: 255, railId: 255, electricalMode: "input-only",
+      properties: { "1": profile.profileId, "2": 1n },
+    });
+    generated.set(node.id, { ...node, data: { kind: "event-source", moduleNodeId: id } });
+    generated.set(`${id}:armed`, { layer: "device-processing", id: `${id}:armed`,
+      data: { kind: "schedule", moduleNodeId: id, periodMs: 1000, enabled: false },
+    });
+  }
   if (
     physical.filter(
       (node) => (node.data as ModuleNodeData).driverTypeId === "declarative-device",
@@ -580,14 +824,138 @@ export function prepareDriverDeployment(
     throw new Error(
       "Il Core supporta al massimo 4 istanze di driver e timer complessive.",
     );
+  for (const node of sequences) {
+    module(`driver-sequence:${node.id}`, {
+      kind: "module",
+      driverTypeId: "sequence",
+      portId,
+      bayId: 255,
+      railId: 255,
+      electricalMode: "input-output",
+      properties: {},
+    });
+    generated.set(node.id, {
+      ...node,
+      data: { kind: "event-source", moduleNodeId: `driver-sequence:${node.id}` },
+    });
+  }
+  // Module Function exposes digital inputs as potential canvas sources. A sensor
+  // that owns a pin must not also acquire a generic edge watcher on that line.
+  // Keep the project/palette intact; remove only unused automatic runtime nodes.
+  for (let index = physical.length - 1; index >= 0; index--) {
+    const node = physical[index]!;
+    const data = node.data as ModuleNodeData;
+    if (!node.id.startsWith("physical-pin:") || data.driverTypeId !== "digital_input_trigger") continue;
+    if (!gpioOwners.has(`${data.portId}:${Number(data.properties["1"])}`)) continue;
+    if (nodes.some(item => "moduleNodeId" in item.data && item.data.moduleNodeId === node.id))
+      throw new Error("Un pin del dispositivo è usato anche da un ingresso GPIO nel canvas. Rimuovi l’ingresso duplicato o scegli un altro pin.");
+    physical.splice(index, 1);
+  }
   const ids = physical
     .filter((node) => isModuleNodeData(node.data as ModuleNodeData))
     .map((node) => node.id)
     .sort();
   const keyOf = new Map(ids.map((id, index) => [id, index + 1]));
-  const processing: Node[] = nodes
+  const controlledModules = new Set<string>();
+  for (const node of sequences) {
+    const properties = (node.data as BlockNodeData).properties;
+    const targets = new Set<string>();
+    const program = encodeSequenceProgram(sequenceSteps(properties), (step) => {
+      const target = runtime.get(sequenceActionNodeId(step.moduleId, step.actionId));
+      if (!target) throw new Error("Sequenza: il modulo o l’azione non esistono più.");
+      targets.add(step.moduleId);
+      const metadata = stored.find((item) => item.id === step.moduleId);
+      const draft = metadata?.recipe.deviceDraft;
+      const action = draft?.commands.find((item) => item.id === step.actionId);
+      const motion =
+        action?.steps.some(
+          (op) => op.type === "stepper" && op.command === "position",
+        ) ?? false;
+      if (motion && !step.waitForMotion)
+        throw new Error(
+          "Sequenza: attendi il movimento terminato prima del passo successivo.",
+        );
+      if (
+        action &&
+        draft &&
+        effectiveActionSteps(draft, action).some((op) => op.type === "wait")
+      )
+        throw new Error(
+          "Sequenza: sposta le attese dell’azione in un passo Attendi per mantenere Pausa e Stop reattivi.",
+        );
+      const args = Object.values(target.action.inputIds);
+      const consumesInput =
+        action?.steps.some(
+          (op) => op.type === "stepper" && op.command === "position",
+        ) ||
+        (draft &&
+          action &&
+          effectiveActionSteps(draft, action).some(
+            (op) => op.type === "gpio_write" && op.value?.kind === "variable",
+          ));
+      if (args.length > 1)
+        throw new Error(
+          "Sequenza: questa azione richiede più di un valore; usa un’azione con un solo ingresso dati.",
+        );
+      return {
+        key: keyOf.get(target.moduleId)!,
+        command: target.action.commandId,
+        argument: consumesInput ? (args[0] ?? 0) : 0,
+        motion,
+      };
+    });
+    for (const target of targets) {
+      if (controlledModules.has(target))
+        throw new Error("Due sequenze non possono comandare lo stesso modulo.");
+      if (
+        edges.some((edge) => runtime.get(edge.target)?.moduleId === `driver:${target}`)
+      )
+        throw new Error(
+          "Il modulo è comandato dalla Sequenza: rimuovi gli altri fili di comando per evitare movimenti in conflitto.",
+        );
+      controlledModules.add(target);
+    }
+    const index = physical.findIndex(
+      (item) => item.id === `driver-sequence:${node.id}`,
+    );
+    const item = physical[index]!;
+    physical[index] = {
+      ...item,
+      data: {
+        ...(item.data as ModuleNodeData),
+        properties: {
+          ...Object.fromEntries(
+            [0, 1, 2, 3].map((part) => [
+              String(part + 1),
+              [...program.slice(part * 16, part * 16 + 16)]
+                .map((byte) => byte.toString(16).padStart(2, "0"))
+                .join(""),
+            ]),
+          ),
+          "5": properties.repeat === true,
+          "6": properties.autostart === true,
+          "7": stableDriverHash(node.id),
+        },
+      },
+    };
+  }
+  const processing: Node[] = originalNodes
     .filter((node) => !aliases.has(node.id))
     .map((node) => generated.get(node.id) ?? node);
+  for (const [id, node] of generated)
+    if (!processing.some((item) => item.id === id) && !synthetic.has(id))
+      processing.push(node);
+  for (const node of sequences)
+    processing.push({
+      layer: "device-processing",
+      id: `sequence-tick:${node.id}`,
+      data: {
+        kind: "schedule",
+        moduleNodeId: `driver-sequence:${node.id}`,
+        periodMs: 20,
+        enabled: true,
+      },
+    });
   for (const [squareId, clocks] of squareWaveModules) {
     for (const extra of clocks.slice(1)) {
       const id = `driver-square:${squareId}:${extra.moduleId}`;
@@ -633,7 +1001,21 @@ export function prepareDriverDeployment(
   function sourceFor(edge: Edge): { key: number; field: number; action?: number } {
     const node = byId.get(edge.source);
     if (!node) throw new Error(`Sorgente del filo «${edge.id}» non disponibile.`);
+    const sequence = sequences.find((item) => item.id === node.id);
+    if (sequence)
+      return {
+        key: keyOf.get(`driver-sequence:${node.id}`)!,
+        field: edge.sourceHandle === "completed" ? 1 : 2,
+      };
     const sensor = runtime.get(node.id);
+    if (
+      sensor &&
+      edge.sourceHandle === MOVEMENT_COMPLETED &&
+      !motionModules.has(sensor.moduleId)
+    )
+      throw new Error("Movimento terminato è disponibile soltanto per uno stepper.");
+    if (sensor && edge.sourceHandle === MOVEMENT_COMPLETED)
+      return { key: keyOf.get(sensor.moduleId)!, field: MOVEMENT_COMPLETED_FIELD };
     if (sensor) {
       const field = sensor.action.outputIds[edge.sourceHandle ?? ""];
       if (field === undefined)
@@ -641,7 +1023,7 @@ export function prepareDriverDeployment(
       return {
         key: keyOf.get(sensor.moduleId)!,
         field,
-        action: sensor.action.commandId,
+        ...(rgbTargets.has(node.id) ? {} : { action: sensor.action.commandId }),
       };
     }
     if (node.data.kind === "event-source" || node.data.kind === "schedule") {
@@ -654,6 +1036,7 @@ export function prepareDriverDeployment(
         key,
         field:
           node.data.kind === "schedule" ||
+          manualTriggers.some(item => item.id === node.id) ||
           moduleData?.driverTypeId === "digital_input_trigger"
             ? 1
             : Number(edge.sourceHandle ?? 0),
@@ -683,7 +1066,17 @@ export function prepareDriverDeployment(
   for (const edge of [...edges].sort((a, b) =>
     a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
   )) {
-    const target = runtime.get(edge.target);
+    const sequenceTarget = sequences.find((node) => node.id === edge.target);
+    const sequenceCommand = { start: 1, pause: 2, stop: 3 }[edge.targetHandle ?? ""];
+    if (sequenceTarget && !sequenceCommand)
+      throw new Error("Sequenza: ingresso sconosciuto.");
+    const target = sequenceTarget
+      ? {
+          moduleId: `driver-sequence:${edge.target}`,
+          action: { commandId: sequenceCommand!, inputIds: {}, outputIds: {} },
+          triggerHandle: edge.targetHandle,
+        }
+      : runtime.get(edge.target);
     if (!target) {
       compiledEdges.push(edge);
       continue;
@@ -696,6 +1089,26 @@ export function prepareDriverDeployment(
     )
       continue;
     const source = sourceFor(edge);
+    const rgb = rgbTargets.get(edge.target);
+    if (rgb) {
+      if (edges.filter((item) => item.target === edge.target && item.targetHandle === edge.targetHandle).length > 1) throw new Error("Collega una sola sorgente a ciascun ingresso RGB.");
+      const input = rgbInputCommand(rgb, edge.targetHandle ?? "");
+      processing.push({ layer: "device-processing", id: `rgb-input:${edge.id}`, data: { kind: "rule", ruleTypeId: "device-action", properties: { "1": BigInt(source.key), "3": BigInt(keyOf.get(target.moduleId)!), "4": BigInt(input.commandId), "5": BigInt(source.field), ...(source.action ? { "2": BigInt(source.action) } : {}), ...(input.argument ? { "6": BigInt(input.argument) } : {}), "8": BigInt(input.mode) } } });
+      continue;
+    }
+    const targetSensorNode = sensorNodes.find(item => item.id === edge.target);
+    const targetSensor = targetSensorNode && stored.find(item => item.id === targetSensorNode.data.properties[SENSOR_MODULE_ID_PROP]);
+    if (targetSensor?.recipe.deviceDraft?.dht22Module && ["read-trigger", "execute"].includes(edge.targetHandle ?? "")) {
+      if (!source.field) throw new Error("DHT22: collega al trigger un segnale digitale o booleano.");
+      processing.push({ layer: "device-processing", id: `dht22-trigger:${edge.id}`, data: {
+        kind: "rule", ruleTypeId: "device-action", properties: {
+          "1": BigInt(source.key), "3": BigInt(keyOf.get(target.moduleId)!),
+          "4": BigInt(target.action.commandId), "5": BigInt(source.field), "8": 1n,
+          ...(source.action ? { "2": BigInt(source.action) } : {}),
+        },
+      } });
+      continue;
+    }
     const execute =
       edge.targetHandle === "execute" ||
       Boolean(target.triggerHandle && edge.targetHandle === target.triggerHandle);
@@ -728,7 +1141,7 @@ export function prepareDriverDeployment(
             : {}),
           "8": BigInt(
             execute
-              ? sourceNode.data.kind === "block"
+              ? sourceNode.data.kind === "block" || manualTriggers.some(node => node.id === edge.source)
                 ? 1
                 : 0
               : explicit ||
@@ -744,6 +1157,13 @@ export function prepareDriverDeployment(
       },
     });
   }
+  const observations = [...viewerEdges].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0).map(edge => {
+    const source = sourceFor(edge);
+    const moduleId = [...keyOf].find(([, key]) => key === source.key)?.[0];
+    const moduleData = physical.find(node => node.id === moduleId)?.data as ModuleNodeData | undefined;
+    const profile = profiles.find(item => item.profileId === moduleData?.profileId);
+    return { viewerId: edge.target, ...source, schemaId: profile?.sampleSchemaId ?? (moduleId ? undefined : `flow.${stableDriverHash(edge.id)}`) };
+  });
   const outputField = ({
     node,
     handle,
@@ -752,12 +1172,16 @@ export function prepareDriverDeployment(
     handle: string | undefined;
   }): number | undefined => {
     const sensor = runtime.get(node.id);
+    if (sensor && handle === MOVEMENT_COMPLETED) return MOVEMENT_COMPLETED_FIELD;
     if (sensor) return sensor.action.outputIds[handle ?? ""];
+    if (sequences.some((item) => item.id === node.id))
+      return handle === "completed" ? 1 : 2;
     if (node.data.kind === "schedule") return 1;
     return numericPort(node, handle, "outputs");
   };
   return {
     profiles,
+    observations,
     input: {
       ...input,
       physicalGraph: { ...input.physicalGraph, nodes: physical },

@@ -58,6 +58,14 @@ struct spaghetti_block_output_slot {
 	struct spaghetti_value value;
 };
 
+/* Evaluation storage grows with the live graph, never with a caller's stack.
+ * An empty graph (including a standalone RGB module) needs no allocation. */
+struct spaghetti_processing_evaluation {
+	struct spaghetti_value inputs[SPAGHETTI_BLOCK_MAX_PORTS];
+	struct spaghetti_value out_values[SPAGHETTI_BLOCK_MAX_PORTS];
+	struct spaghetti_block_output_slot outputs[][SPAGHETTI_BLOCK_MAX_PORTS];
+};
+
 static K_MUTEX_DEFINE(processing_lock);
 static bool is_initialized;
 static struct spaghetti_processing_plan live_plan;
@@ -638,9 +646,8 @@ int spaghetti_processing_on_record(
 	spaghetti_processing_publish_cb_t publish,
 	void *publish_user_data)
 {
-	struct spaghetti_block_output_slot
-		outputs[CONFIG_SPAGHETTI_MAX_PROCESSING_BLOCKS]
-		       [SPAGHETTI_BLOCK_MAX_PORTS];
+	struct spaghetti_processing_evaluation *evaluation;
+	struct spaghetti_block_output_slot (*outputs)[SPAGHETTI_BLOCK_MAX_PORTS];
 	struct {
 		spaghetti_processing_publish_cb_t cb;
 		void *user;
@@ -667,7 +674,6 @@ int spaghetti_processing_on_record(
 	}
 
 	++stats.evaluations;
-	memset(outputs, 0, sizeof(outputs));
 
 	for (size_t field_idx = 0U;
 	     field_idx < record->payload.values.field_count; ++field_idx) {
@@ -691,21 +697,30 @@ int spaghetti_processing_on_record(
 		return 0;
 	}
 
+	evaluation = k_calloc(1U, sizeof(*evaluation) +
+		live_plan.block_count * sizeof(evaluation->outputs[0]));
+	if (evaluation == NULL) {
+		++stats.block_errors;
+		k_mutex_unlock(&processing_lock);
+		return -ENOMEM;
+	}
+	outputs = evaluation->outputs;
+
 	for (size_t order_idx = 0U; order_idx < live_plan.block_count;
 	     ++order_idx) {
 		uint16_t block_idx = live_plan.topo_order[order_idx];
 		struct spaghetti_processing_block *block =
 			&live_plan.blocks[block_idx];
 		const struct spaghetti_block_driver *driver = block->driver;
-		struct spaghetti_value inputs[SPAGHETTI_BLOCK_MAX_PORTS];
+		struct spaghetti_value *inputs = evaluation->inputs;
 		bool input_valid[SPAGHETTI_BLOCK_MAX_PORTS] = { false };
-		struct spaghetti_value out_values[SPAGHETTI_BLOCK_MAX_PORTS];
+		struct spaghetti_value *out_values = evaluation->out_values;
 		bool out_valid[SPAGHETTI_BLOCK_MAX_PORTS] = { false };
 		bool missing_required = false;
 		int err;
 
-		memset(inputs, 0, sizeof(inputs));
-		memset(out_values, 0, sizeof(out_values));
+		memset(inputs, 0, sizeof(evaluation->inputs));
+		memset(out_values, 0, sizeof(evaluation->out_values));
 
 		for (size_t edge_idx = 0U; edge_idx < live_plan.edge_count;
 		     ++edge_idx) {
@@ -758,6 +773,7 @@ int spaghetti_processing_on_record(
 				if ((port->accepted_types &
 				     BIT(value.type)) == 0U) {
 					++stats.block_errors;
+					k_free(evaluation);
 					k_mutex_unlock(&processing_lock);
 					return 0;
 				}
@@ -808,6 +824,7 @@ int spaghetti_processing_on_record(
 		}
 	}
 
+	k_free(evaluation);
 	k_mutex_unlock(&processing_lock);
 	return 0;
 }

@@ -605,12 +605,9 @@ int spaghetti_core_start(void)
 				LOG_WRN("stored Config not applied; empty state remains live: "
 					"err=%d",
 					err);
-				/* A failed Relè/GPIO activate was leaving live
-				 * pointers smashed; main then died (VADDR 0)
-				 * and the Master vanished from USB. Drop the
-				 * bad record so the next boot stays empty.
-				 */
-				(void)spaghetti_storage_delete_config();
+				/* A missing module or rejected profile is not consent to erase
+				 * the saved project. Keep its record for diagnosis/retry. */
+				LOG_WRN("stored Config retained; reconnect and correct the project");
 			}
 		}
 	}

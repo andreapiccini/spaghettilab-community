@@ -313,7 +313,8 @@ static struct spaghetti_mutation_slot *mutation_acquire(void)
 	for (size_t idx = 0U; idx < ARRAY_SIZE(mutation_slots); ++idx) {
 		if (!mutation_slots[idx].used) {
 			mutation_slots[idx].used = true;
-			k_sem_init(&mutation_slots[idx].done, 0, 1);
+			/* The previous giver may still be returning: never reinitialize its wait queue. */
+			k_sem_reset(&mutation_slots[idx].done);
 			return &mutation_slots[idx];
 		}
 	}
@@ -574,6 +575,9 @@ int spaghetti_communication_init(void)
 
 	memset(replay_cache, 0, sizeof(replay_cache));
 	memset(mutation_slots, 0, sizeof(mutation_slots));
+	for (size_t idx = 0U; idx < ARRAY_SIZE(mutation_slots); ++idx) {
+		k_sem_init(&mutation_slots[idx].done, 0, 1);
+	}
 	memset(job_slots, 0, sizeof(job_slots));
 	atomic_set(&next_job_id, 0);
 	atomic_set(&event_sequence, 1);

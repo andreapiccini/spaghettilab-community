@@ -1,4 +1,5 @@
-import { Nfc, Cable, CircuitBoard, Layers, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
+import { newDeviceDriverMetadata } from "../../lib/new-device-driver.js";
+import { Blocks, Nfc, Cable, CircuitBoard, Layers, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
 import { useState } from "react";
 import { chromeCopy } from "../../lib/chrome-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -15,7 +16,7 @@ type RailItem = {
 
 /** MVP rail: Discover, Physical Composition, Run Deploy, Settings. */
 export function LeftRail() {
-  const { activeScreen, navigate } = useSession();
+  const { activeScreen, navigate, execute } = useSession();
   const { openSettings } = useSettingsModal();
   const { locale } = useLocale();
   const copy = chromeCopy(locale);
@@ -24,6 +25,7 @@ export function LeftRail() {
     { id: "core-connections", icon: Cable, label: "Discover" },
     { id: "physical-composition", icon: Layers, label: copy.screens.physicalComposition },
     { id: "device-recipe-editor", icon: CircuitBoard, label: locale === "it" ? "Dispositivi" : "Devices" },
+    { id: "modules", icon: Blocks, label: locale === "it" ? "Moduli" : "Modules" },
     { id: "nfc-tags", icon: Nfc, label: "Tag NFC" },
     { id: "processing-graph", icon: Workflow, label: "Run Deploy" },
   ];
@@ -41,7 +43,15 @@ export function LeftRail() {
               key={item.id}
               type="button"
               data-tour-target={`rail-${item.id}`}
-              onClick={() => navigate(item.id)}
+              onClick={() => {
+                if (item.id === "device-recipe-editor") execute?.({
+                  kind: "StartNewDeviceDriver",
+                  apply: project => ({ ok: true, value: {
+                    ...project, authoringMetadata: newDeviceDriverMetadata(project.authoringMetadata),
+                  } }),
+                });
+                navigate(item.id);
+              }}
               title={expanded ? undefined : item.label}
               className={`group relative flex h-10 w-full items-center gap-3 rounded-slsm px-3 font-body text-sm ${active ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-surface-raised"}`}
             >

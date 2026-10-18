@@ -14,6 +14,7 @@ export const PortTransport = {
   GPIO: 3,
   ADC: 4,
   W1: 5,
+  LOGICAL: 6,
 } as const;
 
 /**
@@ -30,4 +31,5 @@ export const PortCapability = {
   DIGITAL_OUTPUT: 1 << 4,
   ADC: 1 << 5,
   W1: 1 << 6,
+  PWM: 1 << 7,
 } as const;

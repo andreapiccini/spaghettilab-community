@@ -1,5 +1,18 @@
-import { catalogGpioRelayDriver, createGpioDigitalDriver } from "../gpio-driver-presets.js";
-import { SENSOR_INSTANCE_PROP, SENSOR_INPUT_PROP, SENSOR_OUTPUT_PROP } from "../sensor-instance.js";
+import { catalogUln2003Driver } from "../gpio-driver-presets.js";
+import {
+  SEQUENCE_TYPE,
+  MOVEMENT_COMPLETED_FIELD,
+  sequenceActionNodeId,
+} from "../flow-sequence.js";
+import {
+  catalogGpioRelayDriver,
+  createGpioDigitalDriver,
+} from "../gpio-driver-presets.js";
+import {
+  SENSOR_INSTANCE_PROP,
+  SENSOR_INPUT_PROP,
+  SENSOR_OUTPUT_PROP,
+} from "../sensor-instance.js";
 import { describe, expect, it } from "vitest";
 import type { ProjectV1 } from "@spaghettilab/domain";
 import { compileConfig, type CompileConfigInput } from "@spaghettilab/config-compiler";
@@ -264,28 +277,48 @@ describe("production driver deployment", () => {
   });
   it("persists custom step names in actions and initialization without changing executable behavior", () => {
     const base = readDriver();
-    const draft = { ...base, phases: { ...base.phases, init: [{ id: "init-write", type: "i2c_write" as const, bytes: ["00"] }] } };
+    const draft = {
+      ...base,
+      phases: {
+        ...base.phases,
+        init: [{ id: "init-write", type: "i2c_write" as const, bytes: ["00"] }],
+      },
+    };
     const step = draft.commands[0]!.steps[0]!;
     const before = compileRuntimeDriver(draft);
-    const renamed = updateOpAnywhere(updateOpAnywhere(draft, step.id, { ...step, label: "Acquisisci temperatura" }), "init-write", { ...draft.phases.init[0]!, label: "Prepara il sensore" });
+    const renamed = updateOpAnywhere(
+      updateOpAnywhere(draft, step.id, { ...step, label: "Acquisisci temperatura" }),
+      "init-write",
+      { ...draft.phases.init[0]!, label: "Prepara il sensore" },
+    );
     const restored = parseDeviceRecipeDraft(serializeDeviceRecipeDraft(renamed))!;
     expect(restored.commands[0]!.steps[0]!.label).toBe("Acquisisci temperatura");
     expect(restored.phases.init[0]!.label).toBe("Prepara il sensore");
     expect(restored.commands[0]!.steps[0]!.id).toBe(step.id);
-    expect(readableI2cStep(restored, restored.commands[0]!.steps[0]!)).toContain("Acquisisci temperatura");
-    expect(compileRuntimeDriver(restored).profile.profileId).toBe(before.profile.profileId);
+    expect(readableI2cStep(restored, restored.commands[0]!.steps[0]!)).toContain(
+      "Acquisisci temperatura",
+    );
+    expect(compileRuntimeDriver(restored).profile.profileId).toBe(
+      before.profile.profileId,
+    );
   });
   it("preserves the canvas action reference and firmware identity when renaming an action identifier", () => {
     const draft = readDriver();
     const action = draft.commands[0]!;
     const before = compileRuntimeDriver(draft);
-    const renamed = updateCommand(draft, action.id, { ...action, name: "leggi_temperatura", label: "Leggi temperatura" });
+    const renamed = updateCommand(draft, action.id, {
+      ...action,
+      name: "leggi_temperatura",
+      label: "Leggi temperatura",
+    });
     const restored = parseDeviceRecipeDraft(serializeDeviceRecipeDraft(renamed))!;
     const after = compileRuntimeDriver(restored);
     expect(restored.commands[0]!.id).toBe(action.id);
     expect(restored.commands[0]!.name).toBe("leggi_temperatura");
     expect(restored.commands[0]!.steps).toEqual(action.steps);
-    expect(after.actions.get(action.id)?.commandId).toBe(before.actions.get(action.id)?.commandId);
+    expect(after.actions.get(action.id)?.commandId).toBe(
+      before.actions.get(action.id)?.commandId,
+    );
     expect(after.profile.profileId).toBe(before.profile.profileId);
   });
   it("keeps profile identities stable across labels/positions, changes identity when bytes change", () => {
@@ -687,27 +720,66 @@ describe("single sensor instances", () => {
 describe("GPIO physical deployment", () => {
   it("routes DATA to the applied output channel and compiles real Flow rules", () => {
     const draft = createGpioDigitalDriver();
-    const fixture = deployment(draft, [{ id: "run-gpio", source: "activation", target: draft.commands[0]!.id, sourceHandle: "0", targetHandle: "execute" }]);
-    const physical = JSON.parse(fixture.project.authoringMetadata[PHYSICAL_META_KEY]!.comment!);
+    const fixture = deployment(draft, [
+      {
+        id: "run-gpio",
+        source: "activation",
+        target: draft.commands[0]!.id,
+        sourceHandle: "0",
+        targetHandle: "execute",
+      },
+    ]);
+    const physical = JSON.parse(
+      fixture.project.authoringMetadata[PHYSICAL_META_KEY]!.comment!,
+    );
     physical.drafts["core:physical"].modes = [0, 0, 2, 0];
-    const project = { ...fixture.project, authoringMetadata: { ...fixture.project.authoringMetadata, [PHYSICAL_META_KEY]: { comment: JSON.stringify(physical) } } };
+    const project = {
+      ...fixture.project,
+      authoringMetadata: {
+        ...fixture.project.authoringMetadata,
+        [PHYSICAL_META_KEY]: { comment: JSON.stringify(physical) },
+      },
+    };
     const plan = prepareDriverDeployment(project, "core", fixture.input);
-    expect(plan.profiles[0]!.initOps).toEqual([{ op: "GPIO_SET", channel: 2, value: false }]);
-    expect(plan.profiles[0]!.sampleOps.some(op => op.op === "GPIO_SET_VALUE" && op.channel === 2)).toBe(true);
+    expect(plan.profiles[0]!.initOps).toEqual([
+      { op: "GPIO_SET", channel: 2, value: false },
+    ]);
+    expect(
+      plan.profiles[0]!.sampleOps.some(
+        (op) => op.op === "GPIO_SET_VALUE" && op.channel === 2,
+      ),
+    ).toBe(true);
     expect(compileConfig(plan.input, plan.options).ok).toBe(true);
     physical.drafts["core:physical"].modes = [2, 0, 2, 0];
-    expect(() => prepareDriverDeployment({ ...project, authoringMetadata: { ...project.authoringMetadata, [PHYSICAL_META_KEY]: { comment: JSON.stringify(physical) } } }, "core", fixture.input)).toThrow("assegna DATA");
+    expect(() =>
+      prepareDriverDeployment(
+        {
+          ...project,
+          authoringMetadata: {
+            ...project.authoringMetadata,
+            [PHYSICAL_META_KEY]: { comment: JSON.stringify(physical) },
+          },
+        },
+        "core",
+        fixture.input,
+      ),
+    ).toThrow("assegna DATA");
   });
 
   it("schedules the relay itself so the square wave never opens a fake I2C clock", () => {
     const draft = catalogGpioRelayDriver();
     const fixture = deployment(draft);
-    const physical = JSON.parse(fixture.project.authoringMetadata[PHYSICAL_META_KEY]!.comment!);
+    const physical = JSON.parse(
+      fixture.project.authoringMetadata[PHYSICAL_META_KEY]!.comment!,
+    );
     physical.drafts["core:physical"].modes = [2, 0, 0, 0];
     const modules = JSON.parse(
       fixture.project.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]!.comment!,
     );
-    modules.byBinding.core[0].gpioAssignment = { boardKey: "core:physical", channel: 0 };
+    modules.byBinding.core[0].gpioAssignment = {
+      boardKey: "core:physical",
+      channel: 0,
+    };
     const project = {
       ...fixture.project,
       authoringMetadata: {
@@ -766,23 +838,315 @@ describe("GPIO physical deployment", () => {
       periodMs: 400,
       enabled: true,
     });
-    expect(plan.profiles.some((profile) => profile.profileId === "flow.clock")).toBe(false);
+    expect(plan.profiles.some((profile) => profile.profileId === "flow.clock")).toBe(
+      false,
+    );
     expect(
-      plan.input.physicalGraph.nodes.some((node) => node.id.startsWith("driver-clock:")),
+      plan.input.physicalGraph.nodes.some((node) =>
+        node.id.startsWith("driver-clock:"),
+      ),
     ).toBe(false);
     expect(
       plan.input.processingGraph.nodes.some(
         (node) => node.data.kind === "rule" && node.data.ruleTypeId === "device-action",
       ),
     ).toBe(false);
-    const relayProfile = plan.profiles.find((profile) => profile.profileId !== "flow.clock");
+    const relayProfile = plan.profiles.find(
+      (profile) => profile.profileId !== "flow.clock",
+    );
     expect(relayProfile?.sampleOps).toEqual(
       expect.arrayContaining([
-        { op: "GPIO_SET", channel: 0, value: true },
-        { op: "DELAY_BOUNDED", milliseconds: 100 },
-        { op: "GPIO_SET", channel: 0, value: false },
+        {
+          op: "GPIO_PULSE",
+          channel: 0,
+          milliseconds: 100,
+          activeHigh: true,
+          restoreHigh: false,
+        },
       ]),
     );
     expect(compileConfig(plan.input, plan.options).ok).toBe(true);
+  });
+});
+
+describe("board STATUS LED deployment", () => {
+  it("binds STATUS to the native LED backend without exposing a connector GPIO", () => {
+    const fixture = deployment(readDriver());
+    const input = {
+      ...fixture.input,
+      processingGraph: {
+        ...fixture.input.processingGraph,
+        nodes: [
+          {
+            layer: "device-processing" as const,
+            id: "status",
+            data: {
+              kind: "block" as const,
+              blockTypeId: "ab.led",
+              properties: { statusLed: true, gpio: 11, threshold: 50, negated: true },
+            },
+          },
+        ],
+        edges: [],
+      },
+    };
+    const plan = prepareDriverDeployment(fixture.project, "core", input);
+    expect(plan.input.processingGraph.nodes[0]?.data).toMatchObject({
+      blockTypeId: "status_led",
+      properties: { "1": 50n, "2": true },
+    });
+    expect(
+      (plan.input.processingGraph.nodes[0]?.data as { properties: object }).properties,
+    ).not.toHaveProperty("gpio");
+  });
+  it("does not remap an ordinary LED and rejects unsupported STATUS timing", () => {
+    const fixture = deployment(readDriver());
+    const input = {
+      ...fixture.input,
+      processingGraph: {
+        ...fixture.input.processingGraph,
+        nodes: [
+          {
+            layer: "device-processing" as const,
+            id: "status",
+            data: {
+              kind: "block" as const,
+              blockTypeId: "ab.led",
+              properties: { statusLed: true, delayOnMs: 10 },
+            },
+          },
+        ],
+        edges: [],
+      },
+    };
+    expect(() => prepareDriverDeployment(fixture.project, "core", input)).toThrow(
+      "senza ritardi",
+    );
+    const ordinary = {
+      ...input,
+      processingGraph: {
+        ...input.processingGraph,
+        nodes: [
+          {
+            ...input.processingGraph.nodes[0]!,
+            data: {
+              ...input.processingGraph.nodes[0]!.data,
+              properties: { statusLed: false },
+            },
+          },
+        ],
+      },
+    };
+    expect(
+      prepareDriverDeployment(fixture.project, "core", ordinary).input.processingGraph
+        .nodes[0]?.data,
+    ).toMatchObject({ blockTypeId: "ab.led" });
+  });
+});
+
+describe("sequence deployment", () => {
+  function fixture() {
+    const draft = catalogUln2003Driver();
+    const original = deployment(draft);
+    const physical = JSON.parse(
+      original.project.authoringMetadata[PHYSICAL_META_KEY]!.comment!,
+    );
+    physical.drafts["core:physical"].modes = [2, 2, 2, 2];
+    const modules = JSON.parse(
+      original.project.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]!.comment!,
+    );
+    modules.byBinding.core[0].gpioAssignments = {
+      boardKey: "core:physical",
+      channels: { IN1: 0, IN2: 1, IN3: 2, IN4: 3 },
+    };
+    const project = {
+      ...original.project,
+      authoringMetadata: {
+        ...original.project.authoringMetadata,
+        [PHYSICAL_META_KEY]: { comment: JSON.stringify(physical) },
+        [BACKBONE_SENSOR_MODULES_META_KEY]: { comment: JSON.stringify(modules) },
+      },
+    };
+    const rows = [
+      {
+        id: "a",
+        kind: "action",
+        moduleId: "sensor",
+        actionId: "uln-03-position",
+        value: 90,
+        waitForMotion: true,
+      },
+      { id: "w", kind: "wait", durationMs: 1000 },
+      {
+        id: "b",
+        kind: "action",
+        moduleId: "sensor",
+        actionId: "uln-03-position",
+        value: 0,
+        waitForMotion: true,
+      },
+    ];
+    const sequence = {
+      layer: "device-processing" as const,
+      id: "sequence-1",
+      data: {
+        kind: "block" as const,
+        blockTypeId: SEQUENCE_TYPE,
+        catalogEntryId: "appblocks.sequence",
+        properties: { stepsJson: JSON.stringify(rows), autostart: true, repeat: true },
+      },
+    };
+    const input = {
+      ...original.input,
+      processingGraph: {
+        ...original.input.processingGraph,
+        nodes: [sequence],
+        edges: [],
+      },
+    };
+    return { project, input, rows, sequence };
+  }
+  it("compiles actions without hidden canvas blocks, waits for completion and shares one driver", () => {
+    const { project, input } = fixture();
+    const plan = prepareDriverDeployment(project, "core", input);
+    expect(plan.profiles).toHaveLength(1);
+    expect(plan.profiles[0]!.actions).toHaveLength(1);
+    expect(
+      plan.profiles[0]!.sampleFields.some(
+        (field) => field.fieldId === MOVEMENT_COMPLETED_FIELD,
+      ),
+    ).toBe(true);
+    expect(plan.profiles[0]!.sampleOps.some((op) => op.op === "LOAD_ARGUMENT")).toBe(
+      true,
+    );
+    const result = compileConfig(plan.input, plan.options);
+    expect(
+      result.ok,
+      JSON.stringify(result, (_, v) => (typeof v === "bigint" ? String(v) : v)),
+    ).toBe(true);
+    if (!result.ok) return;
+    const module = result.value.modules.find((module) => module.typeId === "sequence")!;
+    const hex = String(module.properties[1]);
+    expect(hex.slice(0, 2)).toBe("02");
+    expect(hex.slice(8, 16)).toBe("5a000000");
+    expect(module.properties[5]).toBe(true);
+    expect(result.value.schedules.every((schedule) => schedule.periodMs === 20)).toBe(
+      true,
+    );
+    expect(
+      plan.input.processingGraph.nodes.some(
+        (node) => node.id === sequenceActionNodeId("sensor", "uln-03-position"),
+      ),
+    ).toBe(false);
+  });
+  it("maps Avvia, Pausa and Stop to distinct native commands", () => {
+    const { project, input } = fixture();
+    const activation = {
+      layer: "device-processing" as const,
+      id: "boot",
+      data: {
+        kind: "event-source" as const,
+        catalogEntryId: "appblocks.system",
+        moduleNodeId: "",
+      },
+    };
+    for (const [port, command] of [
+      ["start", 1],
+      ["pause", 2],
+      ["stop", 3],
+    ] as const) {
+      const plan = prepareDriverDeployment(project, "core", {
+        ...input,
+        processingGraph: {
+          ...input.processingGraph,
+          nodes: [...input.processingGraph.nodes, activation],
+          edges: [
+            {
+              id: "control",
+              source: "boot",
+              sourceHandle: "0",
+              target: "sequence-1",
+              targetHandle: port,
+            },
+          ],
+        },
+      });
+      const rule = plan.input.processingGraph.nodes.find(
+        (node) => node.data.kind === "rule",
+      )!;
+      expect(rule.data.kind === "rule" && rule.data.properties["4"]).toBe(
+        BigInt(command),
+      );
+      expect(compileConfig(plan.input, plan.options).ok).toBe(true);
+    }
+  });
+  it("routes the native motion completion event without confusing it with the command ACK", () => {
+    const { project, input } = fixture();
+    const motor = {
+      layer: "device-processing" as const,
+      id: "motor-card",
+      data: {
+        kind: "block" as const,
+        blockTypeId: BACKBONE_SENSOR_BLOCK_TYPE_ID,
+        properties: {
+          [SENSOR_MODULE_ID_PROP]: "sensor",
+          [SENSOR_ACTION_ID_PROP]: "uln-01-stop",
+          [SENSOR_INSTANCE_PROP]: true,
+          [SENSOR_INPUT_PROP]: "execute",
+          sensorMotion: true,
+        },
+      },
+    };
+    const plan = prepareDriverDeployment(project, "core", {
+      ...input,
+      processingGraph: {
+        ...input.processingGraph,
+        nodes: [...input.processingGraph.nodes, motor],
+        edges: [
+          {
+            id: "motion-done",
+            source: "motor-card",
+            sourceHandle: "movement-completed",
+            target: "sequence-1",
+            targetHandle: "start",
+          },
+        ],
+      },
+    });
+    const rule = plan.input.processingGraph.nodes.find(
+      (node) => node.data.kind === "rule",
+    )!;
+    expect(rule.data.kind === "rule" && rule.data.properties["5"]).toBe(
+      BigInt(MOVEMENT_COMPLETED_FIELD),
+    );
+    expect(rule.data.kind === "rule" && rule.data.properties["2"]).toBeUndefined();
+    expect(compileConfig(plan.input, plan.options).ok).toBe(true);
+  });
+  it("rejects invalid angles and stale module references before deployment", () => {
+    const { project, input, rows, sequence } = fixture();
+    const broken = (changes: Record<string, unknown>) => ({
+      ...input,
+      processingGraph: {
+        ...input.processingGraph,
+        nodes: [
+          {
+            ...sequence,
+            data: {
+              ...sequence.data,
+              properties: {
+                ...sequence.data.properties,
+                stepsJson: JSON.stringify([{ ...rows[0], ...changes }]),
+              },
+            },
+          },
+        ],
+      },
+    });
+    expect(() =>
+      prepareDriverDeployment(project, "core", broken({ value: 361 })),
+    ).toThrow("0 e 360");
+    expect(() =>
+      prepareDriverDeployment(project, "core", broken({ moduleId: "deleted" })),
+    ).toThrow();
   });
 });

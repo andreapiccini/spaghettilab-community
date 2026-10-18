@@ -263,3 +263,12 @@ describe("validateDeviceProfile — S061 § Verifiche", () => {
     expect(validateDeviceProfile(gpio).ok).toBe(true);
   });
 });
+
+it("prevents a logical timer from accessing physical GPIO", () => {
+  expect(validateDeviceProfile(baseDraft({ transport: PortTransport.LOGICAL,
+    initOps: [{ op: "GPIO_SET", channel: 0, value: true }],
+  })).ok).toBe(false);
+  expect(validateDeviceProfile(baseDraft({ transport: PortTransport.LOGICAL,
+    initOps: [{ op: "LOAD_CONST", dst: 0, length: 1, low: 1, high: 0 }],
+  })).ok).toBe(true);
+});

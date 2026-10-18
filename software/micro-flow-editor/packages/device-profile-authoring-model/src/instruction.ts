@@ -1,3 +1,6 @@
+export type Dht22PowerInstruction = Op<"DHT22_POWER"> & { readonly dataChannel: number; readonly powerChannel: number; readonly on: boolean };
+export type Dht22ReadInstruction = Op<"DHT22_READ"> & { readonly dst: TempSlot; readonly humidityDst: TempSlot; readonly dataChannel: number; readonly powerChannel: number; readonly queued?: boolean };
+export type RgbProgramInstruction = Op<"RGB_PROGRAM"> & { readonly offset: number; readonly length: number; readonly channels: number; readonly inverted: boolean };
 /**
  * Typed, ergonomic instructions for authoring an acquisition plan — one
  * variant per opcode in `opcodes.ts`, with named fields instead of raw
@@ -71,6 +74,19 @@ export type UartReadInstruction = Op<"UART_READ"> & {
   readonly dst: TempSlot;
   readonly length: number;
   readonly timeoutMs: number;
+};
+export type StepperInstruction = Op<"STEPPER"> & {
+  readonly command: number;
+  readonly channels: number;
+  readonly intervalMs: number;
+  readonly stepsPerRevolution: number;
+  readonly src: TempSlot;
+};
+export type GpioPulseInstruction = Op<"GPIO_PULSE"> & {
+  readonly channel: number;
+  readonly milliseconds: number;
+  readonly activeHigh: boolean;
+  readonly restoreHigh: boolean;
 };
 export type GpioGetInstruction = Op<"GPIO_GET"> & {
   readonly dst: TempSlot;
@@ -225,6 +241,11 @@ export type I2cMessageWriteInstruction = Op<"I2C_MESSAGE_WRITE"> & {
 };
 
 export type Instruction =
+  | (Op<"EMIT_DECIMAL"> & { readonly src: TempSlot; readonly fieldId: number; readonly text: boolean })
+  | Dht22PowerInstruction
+  | Dht22ReadInstruction
+  | RgbProgramInstruction
+  | StepperInstruction
   | MessageLoadInstruction
   | MessagePatchInstruction
   | I2cMessageWriteInstruction
@@ -237,6 +258,7 @@ export type Instruction =
   | UartWriteInstruction
   | UartReadUntilInstruction
   | UartReadInstruction
+  | GpioPulseInstruction
   | GpioGetInstruction
   | GpioSetInstruction
   | GpioSetValueInstruction

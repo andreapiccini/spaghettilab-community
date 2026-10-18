@@ -1,3 +1,6 @@
+import { RgbModuleEditor } from "./components/device-recipe-editor/RgbModuleEditor.js";
+import { dht22OutputFormat, setDht22OutputFormat } from "./lib/dht22-driver.js";
+import { ModulesScreen } from "./components/modules/ModulesScreen.js";
 import { NFC_CONTEXT_META } from "./lib/nfc-workspace.js";
 import { NfcWorkspaceProvider, useNfcWorkspace } from "./state/nfc-workspace-context.js";
 import { NfcScreen } from "./components/nfc/NfcScreen.js";
@@ -107,7 +110,8 @@ function DeviceRecipeEditorRoute({ initialDraft }: { readonly initialDraft?: Dev
   const { execute, navigate, session } = useSession();
 
   const nfc = useNfcWorkspace();
-  function persistDraft(draft: DeviceRecipeDraft, pendingCreate: boolean) {
+  function persistDraft(inputDraft: DeviceRecipeDraft, pendingCreate: boolean) {
+    const draft = inputDraft.dht22Module ? setDht22OutputFormat(inputDraft, dht22OutputFormat(inputDraft)) : inputDraft;
     if (nfc.finishDriver(draft, pendingCreate)) return true;
     if (!execute) return;
     execute({
@@ -126,13 +130,16 @@ function DeviceRecipeEditorRoute({ initialDraft }: { readonly initialDraft?: Dev
     });
   }
 
+  if (initialDraft?.rgbModule) return <RgbModuleEditor initialDraft={initialDraft} onCancel={() => navigate("processing-graph")} onSave={draft => { if (!persistDraft(draft, true)) navigate("processing-graph"); }} />;
+
   return (
     <DeviceRecipeEditorScreen
       initialDraft={initialDraft}
       saveDriverOnly={!!session?.stack.current.authoringMetadata[NFC_CONTEXT_META]?.comment}
       onCancel={() => { if (!nfc.cancelDriver()) navigate("processing-graph"); }}
       onSaveDraft={(draft) => {
-        persistDraft(draft, false);
+        persistDraft(draft, Boolean(draft.dht22Module));
+        if (draft.dht22Module) navigate("processing-graph");
       }}
       onCreate={(draft) => {
         if (persistDraft(draft, true)) return;
@@ -189,10 +196,12 @@ function AppContent() {
     const draft = parseDeviceRecipeDraft(session?.stack.current.authoringMetadata[DEVICE_RECIPE_DRAFT_META_KEY]?.comment);
     return (
       <AppShell>
-        <DeviceRecipeEditorRoute initialDraft={draft ?? undefined} />
+        <DeviceRecipeEditorRoute key={draft?.id ?? "new-device-driver"} initialDraft={draft ?? undefined} />
       </AppShell>
     );
   }
+
+  if (activeScreen === "modules") return <AppShell><ModulesScreen /></AppShell>;
 
   if (activeScreen === "tools") return <AppShell><ToolsScreen /></AppShell>;
 

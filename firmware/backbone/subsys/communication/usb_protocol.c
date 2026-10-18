@@ -24,6 +24,7 @@
 #include <spaghetti/field_update.h>
 #endif
 #include <spaghetti/protocol.h>
+#include <spaghetti/record_delivery.h>
 
 LOG_MODULE_REGISTER(spaghetti_usb_protocol,
 		    CONFIG_SPAGHETTI_COMMUNICATION_LOG_LEVEL);
@@ -34,6 +35,9 @@ LOG_MODULE_REGISTER(spaghetti_usb_protocol,
 
 #if IS_ENABLED(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG)
 
+SPAGHETTI_RECORD_CONSUMER_DEFINE(spaghetti_usb_record_consumer) = {
+    .id = SPAGHETTI_RECORD_CONSUMER_ID_USB, .name = "usb",
+};
 static struct shell_uart_int_driven *uart_ctx;
 static struct spaghetti_usb_frame_decoder decoder;
 static struct spaghetti_protocol_request usb_request;
@@ -44,6 +48,7 @@ static size_t tx_frame_sent;
 static atomic_t protocol_mode;
 static atomic_t work_pending;
 static atomic_t tx_pending;
+static atomic_t tx_releases_request;
 K_MUTEX_DEFINE(usb_tx_lock);
 /* Protected by usb_tx_lock, including encoding and the complete UART send. */
 static uint8_t event_frame[SPAGHETTI_USB_FRAME_MAX];
@@ -129,6 +134,19 @@ static void usb_handle_rx_byte(uint8_t byte)
 	k_sem_give(&work_sem);
 }
 
+/* Release RX from the TX interrupt once the last reply byte has been
+ * consumed. A fast host may send its next request before the worker resumes;
+ * clearing work_pending later in the worker would drop that request. */
+static void usb_tx_complete(const struct device *dev)
+{
+    atomic_set(&tx_pending, 0);
+    if (atomic_cas(&tx_releases_request, 1, 0)) {
+        atomic_set(&work_pending, 0);
+    }
+    uart_irq_tx_disable(dev);
+    k_sem_give(&tx_done_sem);
+}
+
 static void usb_uart_tx_handle(const struct device *dev)
 {
 	uint32_t len;
@@ -139,9 +157,7 @@ static void usb_uart_tx_handle(const struct device *dev)
 		int filled;
 
 		if (remain == 0U) {
-			atomic_set(&tx_pending, 0);
-			k_sem_give(&tx_done_sem);
-			uart_irq_tx_disable(dev);
+			usb_tx_complete(dev);
 			return;
 		}
 
@@ -150,9 +166,7 @@ static void usb_uart_tx_handle(const struct device *dev)
 			tx_frame_sent += (size_t)filled;
 		}
 		if (tx_frame_sent >= tx_frame_size) {
-			atomic_set(&tx_pending, 0);
-			k_sem_give(&tx_done_sem);
-			uart_irq_tx_disable(dev);
+			usb_tx_complete(dev);
 		}
 		return;
 	}
@@ -203,7 +217,7 @@ static void usb_uart_callback(const struct device *dev, void *user_data)
 	}
 }
 
-static int usb_send_frame(const uint8_t *bytes, size_t size)
+static int usb_send_frame(const uint8_t *bytes, size_t size, bool release_request)
 {
 	int err;
 
@@ -215,14 +229,52 @@ static int usb_send_frame(const uint8_t *bytes, size_t size)
 	tx_frame_size = size;
 	tx_frame_sent = 0U;
 	k_sem_reset(&tx_done_sem);
+	atomic_set(&tx_releases_request, release_request ? 1 : 0);
 	atomic_set(&tx_pending, 1);
 	uart_irq_tx_enable(uart_ctx->common.dev);
 	err = k_sem_take(&tx_done_sem, K_SECONDS(2));
 	if (err < 0) {
 		atomic_set(&tx_pending, 0);
+		atomic_set(&tx_releases_request, 0);
 		return -ETIMEDOUT;
 	}
 	return 0;
+}
+
+/* Worker-only scratch: reuse its response payload and the existing TX frame.
+ * A bounded heap record avoids another large static allocation or worker stack copy. */
+static void usb_deliver_record(void)
+{
+    static int64_t next_delivery;
+    bool active = atomic_get(&protocol_mode) != 0;
+    (void)spaghetti_record_delivery_set_consumer_active(SPAGHETTI_RECORD_CONSUMER_ID_USB, active);
+    if (!active || k_uptime_get() < next_delivery) return;
+    next_delivery = k_uptime_get() + 100;
+    struct spaghetti_record *record = k_malloc(sizeof(*record));
+    struct spaghetti_record_cursor cursor;
+    if (record == NULL) return;
+    int err = spaghetti_record_delivery_peek(SPAGHETTI_RECORD_CONSUMER_ID_USB, record, &cursor);
+    if (err == 0) {
+        err = spaghetti_protocol_encode_record_values_event(record, &usb_response.payload);
+        if (err == 0) {
+            size_t size = 0U;
+            (void)k_mutex_lock(&usb_tx_lock, K_FOREVER);
+            err = spaghetti_protocol_encode_event(SPAGHETTI_PROTOCOL_EVENT_RECORD,
+                record->sequence, &usb_response.payload,
+                &event_frame[SPAGHETTI_USB_FRAME_HEADER_SIZE],
+                sizeof(event_frame) - SPAGHETTI_USB_FRAME_HEADER_SIZE, &size);
+            if (err == 0) {
+                event_frame[0] = SPAGHETTI_USB_FRAME_KIND_EVENT;
+                sys_put_be32((uint32_t)size, &event_frame[1]);
+                err = usb_send_frame(event_frame, size + SPAGHETTI_USB_FRAME_HEADER_SIZE, false);
+            }
+            k_mutex_unlock(&usb_tx_lock);
+        }
+        /* Drop unencodable records rather than blocking the consumer forever. */
+        if (err == 0 || err == -EMSGSIZE || err == -EINVAL)
+            (void)spaghetti_record_delivery_ack(SPAGHETTI_RECORD_CONSUMER_ID_USB, &cursor);
+    }
+    k_free(record);
 }
 
 static void usb_worker(void *first, void *second, void *third)
@@ -237,7 +289,8 @@ static void usb_worker(void *first, void *second, void *third)
 		size_t encoded_size = 0U;
 		int err;
 
-		(void)k_sem_take(&work_sem, K_FOREVER);
+		usb_deliver_record();
+        if (k_sem_take(&work_sem, K_MSEC(100)) < 0) continue;
 
 		err = spaghetti_protocol_decode_request(
 			spaghetti_usb_frame_envelope(&decoder),
@@ -282,12 +335,13 @@ static void usb_worker(void *first, void *second, void *third)
 			decoder.bytes[0] = SPAGHETTI_USB_FRAME_KIND_RESPONSE;
 			sys_put_be32((uint32_t)encoded_size, &decoder.bytes[1]);
 			(void)k_mutex_lock(&usb_tx_lock, K_FOREVER);
-			(void)usb_send_frame(
+			err = usb_send_frame(
 				decoder.bytes,
-				SPAGHETTI_USB_FRAME_HEADER_SIZE + encoded_size);
+				SPAGHETTI_USB_FRAME_HEADER_SIZE + encoded_size, true);
 			k_mutex_unlock(&usb_tx_lock);
 		}
-		atomic_set(&work_pending, 0);
+		/* Success released RX in the ISR. Never clear a newer request here. */
+		if (err < 0) atomic_set(&work_pending, 0);
 	}
 }
 
@@ -315,7 +369,7 @@ int spaghetti_usb_protocol_send_event(const uint8_t *envelope, size_t size)
 		return err;
 	}
 
-	err = usb_send_frame(event_frame, written);
+	err = usb_send_frame(event_frame, written, false);
 	k_mutex_unlock(&usb_tx_lock);
 	if (err == 0) {
 		(void)k_work_reschedule(&idle_work,

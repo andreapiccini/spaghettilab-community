@@ -16,6 +16,7 @@ import {
   remoteDriverCatalog,
   associateTagInLibrary,
   encodeModuleTag,
+  decodeModuleTag,
   type ModuleTag,
   type TagScan,
 } from "../../lib/nfc-workspace.js";
@@ -121,8 +122,8 @@ export function NfcScreen() {
                 <strong className="text-sm">NFC tramite master</strong>
               </div>
               <p className="nfc-muted">
-                La memoria dei tag richiede il nuovo firmware NFC. Nessuna scrittura
-                reale è simulata.
+                Avvicina un tag al lettore collegato al master per leggerlo o
+                modificarlo.
               </p>
               <details>
                 <summary className="nfc-text-button cursor-pointer py-2">
@@ -235,7 +236,13 @@ function TagDetail({ scan }: { scan: TagScan }) {
     payloadError = e instanceof Error ? e.message : "Contenuto non valido";
   }
   const canAssociate = !!name.trim() && !!driver && !payloadError;
-  const canPrepareWrite = present && canAssociate;
+  const memoryKind = scan.memory
+    ? decodeModuleTag(Uint8Array.from(scan.memory)).kind
+    : "unknown";
+  const canPrepareWrite =
+    present &&
+    canAssociate &&
+    (!scan.memory || (scan.writable && ["empty", "module"].includes(memoryKind)));
   const writing = nfc.writeSession?.uid === scan.uid;
   const dirty =
     name !== (value?.name ?? "") ||
@@ -261,6 +268,7 @@ function TagDetail({ scan }: { scan: TagScan }) {
     setFeedback("");
     try {
       await nfc.beginWriteSession(scan);
+      await confirmWrite();
     } catch (e) {
       setFailure(e instanceof Error ? e.message : "Impossibile aprire la scrittura.");
     }
@@ -287,8 +295,17 @@ function TagDetail({ scan }: { scan: TagScan }) {
               ? "Tag vuoto"
               : "Tag NFC"}
         </span>
+        {scan.recognition === "library" && (
+          <span className="nfc-badge">Associazione locale</span>
+        )}
         {scan.simulated && <span className="nfc-badge sim">Simulazione</span>}
       </div>
+      {scan.recognition === "library" && (
+        <p className="nfc-info mt-3">
+          Nome e driver provengono dalla tua libreria. Questa associazione non conferma
+          una scrittura nel tag.
+        </p>
+      )}
       <p className="nfc-muted mt-3">
         <span className={`nfc-dot ${present ? "" : "off"}`} />
         {present
@@ -398,23 +415,24 @@ function TagDetail({ scan }: { scan: TagScan }) {
           )}
           {writing && (
             <div className="nfc-info nfc-write-mode mt-4" role="status">
-              <strong>Modalità Scrivi tag</strong>
+              <strong>Scrittura e verifica in corso</strong>
               <p>
-                Poll, discovery e GET_STATUS sono in pausa. Tieni il tag fermo sul
-                lettore, poi conferma. La lettura e l’associazione restano il percorso
-                normale: qui si scrive solo il tag nuovo o una modifica.
+                Tieni il tag fermo sul lettore fino alla conferma. Puoi annullare
+                l’operazione.
               </p>
             </div>
           )}
-          {scan.decoded.kind !== "module" && scan.decoded.kind !== "empty" && !writing && (
-            <p className="nfc-info nfc-error mt-4">
-              {scan.decoded.reason?.includes("SpaghettiClient") ||
-              scan.decoded.reason?.includes("INTERNAL_ERROR") ||
-              scan.decoded.reason?.includes("INVALID_ARGUMENT")
-                ? "Lettura memoria non riuscita. Tieni il tag fermo sul lettore e premi Rileggi."
-                : (scan.decoded.reason ?? "Formato non supportato per la scrittura.")}
-            </p>
-          )}
+          {scan.decoded.kind !== "module" &&
+            scan.decoded.kind !== "empty" &&
+            !writing && (
+              <p className="nfc-info nfc-error mt-4">
+                {scan.decoded.reason?.includes("SpaghettiClient") ||
+                scan.decoded.reason?.includes("INTERNAL_ERROR") ||
+                scan.decoded.reason?.includes("INVALID_ARGUMENT")
+                  ? "Lettura memoria non riuscita. Tieni il tag fermo sul lettore e premi Rileggi."
+                  : (scan.decoded.reason ?? "Formato non supportato per la scrittura.")}
+              </p>
+            )}
           {!present && (
             <p className="nfc-info mt-4">
               Riavvicina lo stesso tag per leggerlo o scriverlo.
@@ -489,15 +507,6 @@ function TagDetail({ scan }: { scan: TagScan }) {
                 >
                   Annulla
                 </button>
-                <button
-                  type="button"
-                  className="nfc-btn"
-                  title={payloadError || undefined}
-                  disabled={nfc.busy || !canPrepareWrite}
-                  onClick={() => void confirmWrite()}
-                >
-                  {nfc.busy ? "Scrittura in corso…" : "Conferma scrittura"}
-                </button>
               </>
             ) : (
               <button
@@ -507,7 +516,7 @@ function TagDetail({ scan }: { scan: TagScan }) {
                 disabled={nfc.busy || !canPrepareWrite}
                 onClick={() => void startWrite()}
               >
-                Scrivi tag
+                Scrivi e verifica
               </button>
             )}
           </div>

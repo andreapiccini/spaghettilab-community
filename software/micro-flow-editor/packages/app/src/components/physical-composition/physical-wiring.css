@@ -1,0 +1,19 @@
+.physical-wiring-pin {
+  outline: none;
+}
+.physical-wiring-pin .physical-pin-halo {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.physical-wiring-pin[role="button"]:hover .physical-pin-halo {
+  opacity: 0.45;
+}
+.physical-wiring-pin[data-selected="true"] .physical-pin-halo,
+.physical-wiring-pin:focus-visible .physical-pin-halo {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .physical-wiring-pin .physical-pin-halo {
+    transition: none;
+  }
+}

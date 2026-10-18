@@ -59,8 +59,10 @@ const KEY = {
 export const DEVICE_PROFILE_WIRE_VERSION = 1;
 
 /** `enum spaghetti_value_type` (`schema.h`): `BOOL=0, INT64=1, UINT64=2, TEXT=3, BYTES=4`. Device Profile sample fields only ever use `INT64`/`UINT64` (S061's `SampleFieldType`). */
-const VALUE_TYPE = { int64: 1, uint64: 2 } as const;
-const VALUE_TYPE_REVERSE: Record<number, "int64" | "uint64"> = {
+const VALUE_TYPE = { int64: 1, uint64: 2, text: 3, float: 5 } as const;
+const VALUE_TYPE_REVERSE: Record<number, "int64" | "uint64" | "text" | "float"> = {
+  3: "text",
+  5: "float",
   1: "int64",
   2: "uint64",
 };

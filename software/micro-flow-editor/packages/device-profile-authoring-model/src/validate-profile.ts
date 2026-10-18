@@ -5,6 +5,7 @@ import {
   type DomainError,
   type Result,
 } from "@spaghettilab/domain";
+import { DeviceProfileOpcode } from "./opcodes.js";
 import { DeviceProfileErrorCode } from "./errors.js";
 import type { Instruction } from "./instruction.js";
 import { MAX_TEMP_SLOTS } from "./instruction.js";
@@ -74,7 +75,14 @@ function tempSlots(instruction: Instruction): number[] {
       return [instruction.srcA, instruction.srcB, instruction.dst];
     case "EMIT_FIELD":
       return [instruction.src];
+    case "EMIT_DECIMAL": return [instruction.src];
+    case "DHT22_READ": return [instruction.dst, instruction.humidityDst];
+    case "DHT22_POWER":
+    case "RGB_PROGRAM": return [];
+    case "STEPPER":
+      return instruction.command === 2 ? [instruction.src] : [];
     case "GPIO_SET":
+    case "GPIO_PULSE":
     case "DELAY_BOUNDED":
     case "EMIT_RECORD":
       return [];
@@ -84,6 +92,13 @@ function tempSlots(instruction: Instruction): number[] {
 /** "Count of Port bus operations including wait polls" per `spaghetti_device_profile_budget`'s own doc comment — mirrors `accumulate_op_budget` exactly. */
 function transactionsFor(instruction: Instruction): number {
   switch (instruction.op) {
+    case "DHT22_READ":
+    case "DHT22_POWER": return 2;
+    case "RGB_PROGRAM": return 3;
+    case "STEPPER":
+      return 4;
+    case "GPIO_PULSE":
+      return 2;
     case "I2C_MESSAGE_WRITE":
     case "I2C_WRITE":
     case "I2C_READ":
@@ -135,6 +150,7 @@ function bytesFor(instruction: Instruction): number {
 
 function timeFor(instruction: Instruction): number {
   switch (instruction.op) {
+    case "DHT22_READ": return 12;
     case "I2C_MESSAGE_WRITE":
     case "I2C_WRITE":
     case "I2C_READ":
@@ -177,6 +193,46 @@ function structuralError(
   instruction: Instruction,
 ): { target: string; remediation: string } | undefined {
   switch (instruction.op) {
+    case "DHT22_POWER":
+    case "DHT22_READ": return !Number.isInteger(instruction.dataChannel) || !Number.isInteger(instruction.powerChannel) || instruction.dataChannel < 0 || instruction.dataChannel > 3 || instruction.powerChannel < 0 || instruction.powerChannel > 3 || instruction.dataChannel === instruction.powerChannel || (instruction.op === "DHT22_READ" && instruction.dst === instruction.humidityDst) ? { target: instruction.op, remediation: "DHT22 requires distinct DATA and power GPIOs and output slots" } : undefined;
+    case "RGB_PROGRAM": return instruction.offset < 0 || !Number.isInteger(instruction.offset) || instruction.length < 6 || instruction.length > 96 || instruction.length % 6 || !Number.isInteger(instruction.channels) || instruction.channels < 0 || instruction.channels > 63 || new Set([instruction.channels & 3, (instruction.channels >> 2) & 3, (instruction.channels >> 4) & 3]).size !== 3 ? { target: "RGB_PROGRAM", remediation: "Invalid RGB program or channels" } : undefined;
+    case "STEPPER": {
+      const channels = Array.from(
+        { length: 4 },
+        (_, i) => (instruction.channels >> (2 * i)) & 3,
+      );
+      return !Number.isInteger(instruction.command) ||
+        instruction.command < 0 ||
+        instruction.command > 2 ||
+        !Number.isInteger(instruction.channels) ||
+        instruction.channels < 0 ||
+        instruction.channels > 255 ||
+        new Set(channels).size !== 4 ||
+        !Number.isInteger(instruction.intervalMs) ||
+        instruction.intervalMs < 2 ||
+        instruction.intervalMs > 100 ||
+        !Number.isInteger(instruction.stepsPerRevolution) ||
+        instruction.stepsPerRevolution < 8 ||
+        instruction.stepsPerRevolution > 16384
+        ? {
+            target: "STEPPER",
+            remediation:
+              "Invalid stepper command, four unique channels, interval (2..100 ms) or steps/revolution (8..16384)",
+          }
+        : undefined;
+    }
+    case "GPIO_PULSE":
+      return !Number.isInteger(instruction.channel) ||
+        instruction.channel < 0 ||
+        instruction.channel > 3 ||
+        !Number.isInteger(instruction.milliseconds) ||
+        instruction.milliseconds < 1 ||
+        instruction.milliseconds > 60000
+        ? {
+            target: "GPIO_PULSE",
+            remediation: "Invalid channel or pulse duration (1..60000 ms)",
+          }
+        : undefined;
     case "GPIO_GET":
     case "GPIO_SET":
     case "GPIO_SET_VALUE":
@@ -300,8 +356,24 @@ export function validateDeviceProfile(
     let messageLength = 0;
     ops.forEach((instruction, index) => {
       const path = [planName, String(index)];
+      const opcode = DeviceProfileOpcode[instruction.op];
+      if (
+        draft.transport === 6 &&
+        (opcode <= 9 || [11, 23, 24, 25, 31, 32, 33, 34, 35].includes(opcode))
+      ) {
+        errors.push(
+          failure(
+            DeviceProfileErrorCode.TEMP_SLOT_OUT_OF_RANGE,
+            path,
+            instruction.op,
+            "Logical profiles cannot access physical pins or buses",
+          ),
+        );
+      }
       let messageError = false;
-      if (instruction.op === "MESSAGE_LOAD") {
+      if (instruction.op === "RGB_PROGRAM") {
+        messageError = instruction.offset + instruction.length > (draft.messageData?.length ?? 0) || draft.transport !== 3;
+      } else if (instruction.op === "MESSAGE_LOAD") {
         messageLength = instruction.length;
         messageError =
           !Number.isInteger(instruction.offset) ||
@@ -375,7 +447,7 @@ export function validateDeviceProfile(
           ),
         );
       }
-      if (instruction.op === "EMIT_FIELD") {
+      if (instruction.op === "EMIT_FIELD" || instruction.op === "EMIT_DECIMAL") {
         emittedFieldIds.add(instruction.fieldId);
       }
     });
@@ -427,7 +499,9 @@ export function validateDeviceProfile(
         ),
       );
     }
-    if (!emittedFieldIds.has(field.fieldId)) {
+    if (!emittedFieldIds.has(field.fieldId) && !(((field.fieldId === 65531 || field.fieldId === 65532) && field.type === "uint64" && draft.sampleOps.some((op) => op.op === "RGB_PROGRAM")) || field.fieldId === 65534 &&
+      field.type === "uint64" && field.name === "movement_completed" &&
+      draft.sampleOps.some((op) => op.op === "STEPPER"))) {
       errors.push(
         failure(
           DeviceProfileErrorCode.UNEMITTED_FIELD,

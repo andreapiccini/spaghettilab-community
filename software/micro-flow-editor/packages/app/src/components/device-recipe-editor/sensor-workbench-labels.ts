@@ -25,6 +25,13 @@ export function workbenchStepDetail(
   it: boolean,
   signals: readonly { id: string; name: string }[] = [],
 ) {
+  if (op.type === "dht22_read") return `$${op.temperatureInto} · $${op.humidityInto}`;
+  if (op.type === "dht22_convert") return `$${op.input} → $${op.into} · ${op.format === "float" ? "float °C" : "testo con °C"}`;
+  if (op.type === "dht22_power") return op.on ? "GPIO HIGH · avvio 2 s" : "GPIO LOW · DATA ad alta impedenza";
+  if (op.type === "stepper")
+    return op.command === "position"
+      ? `$${op.positionVariable} · 0–360°`
+      : "IN1 · IN2 · IN3 · IN4";
   const signalName =
     "signalId" in op
       ? (signals.find((signal) => signal.id === op.signalId)?.name ?? op.signalId)
@@ -65,6 +72,8 @@ export function workbenchStepDetail(
 }
 
 export function workbenchStepKind(op: DeviceRecipeOp, it: boolean) {
+  if (op.type === "dht22_read" || op.type === "dht22_power" || op.type === "dht22_convert") return "DHT22";
+  if (op.type === "stepper") return "ULN2003";
   const gpio = gpioOperationDefinition(op.type);
   if (gpio)
     return gpio.runtime === "supported"

@@ -4,6 +4,8 @@ import {
   encodeBool,
   encodeBytes,
   encodeArray,
+  encodeFloat,
+  encodeText,
   ProtocolCodecError,
 } from "../cbor.js";
 import { encodeMap, requireMap, requireU32, u32Field, boolField } from "../fields.js";
@@ -15,7 +17,7 @@ export type ModuleCommandRequest = {
   readonly arguments?: Readonly<Record<number, ModuleCommandValue>>;
 };
 export type ModuleCommandResponse = {
-  readonly fields?: Readonly<Record<number, bigint>>;
+  readonly fields?: Readonly<Record<number, bigint | number | string>>;
   readonly rxReads?: readonly Uint8Array[];
   readonly rxTruncated?: boolean;
 };
@@ -73,7 +75,7 @@ export function encodeModuleCommandResponse(r: ModuleCommandResponse = {}): Uint
       0,
       encodeMap(
         Object.entries(r.fields).map(
-          ([id, value]) => [Number(id), encodeInt(value)] as const,
+          ([id, value]) => [Number(id), typeof value === "number" ? encodeFloat(value) : typeof value === "string" ? encodeText(value) : encodeInt(value)] as const,
         ),
       ),
     ],
@@ -84,11 +86,11 @@ export function encodeModuleCommandResponse(r: ModuleCommandResponse = {}): Uint
 export function decodeModuleCommandResponse(bytes: Uint8Array): ModuleCommandResponse {
   const map = requireMap(decodeOne(bytes), "ModuleCommandResponse");
   if (!map.has(0)) return {};
-  const fields: Record<number, bigint> = {};
+  const fields: Record<number, bigint | number | string> = {};
   const values = requireMap(map.get(0)!, "Command fields");
   if (values.size > 8) throw new ProtocolCodecError("Too many result fields");
   for (const [id, value] of values) {
-    if (value.kind !== "uint" && value.kind !== "int")
+    if (value.kind !== "uint" && value.kind !== "int" && value.kind !== "float" && value.kind !== "text")
       throw new ProtocolCodecError("Invalid result field");
     fields[id] = value.value;
   }

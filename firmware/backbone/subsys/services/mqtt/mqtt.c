@@ -1113,10 +1113,7 @@ int spaghetti_mqtt_format_record(
 		return -EMSGSIZE;
 	}
 
-	err = spaghetti_protocol_encode_record_event_payload(
-		record->source_key, record->sequence,
-		record->payload.schema_id, record->payload.schema_version,
-		&body);
+	err = spaghetti_protocol_encode_record_values_event(record, &body);
 	if (err < 0) {
 		return err;
 	}

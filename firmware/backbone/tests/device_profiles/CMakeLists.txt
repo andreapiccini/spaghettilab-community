@@ -5,6 +5,8 @@ project(spaghetti_device_profiles_test)
 
 target_sources(app PRIVATE
   src/main.c
+  ../../subsys/port/dht22.c
+  ../../spaghetti_modules/sequence/sequence.c
   ../../subsys/device_profiles/device_profile.c
   ../../subsys/device_profiles/device_profile_exec.c
   ../../subsys/schema/schema.c

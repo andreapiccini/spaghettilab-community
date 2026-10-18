@@ -292,7 +292,35 @@ export class SpaghettiClient {
       const responsePromise = new Promise<Uint8Array>((resolve, reject) => {
         this.pending.set(correlationId, { operation, resolve, reject });
       });
-      await this.transport.send(encodeRequest({ correlationId, operation, payload }));
+      // A disconnect may reject the reply while send is still pending.
+      void responsePromise.catch(() => {});
+      // A stalled transport write must obey the same deadline as the reply.
+      // Do not retry an ambiguous write: it may still reach the device later.
+      let sendTimer: ReturnType<typeof setTimeout> | undefined;
+      let abortSend: (() => void) | undefined;
+      try {
+        await Promise.race([
+          this.transport.send(encodeRequest({ correlationId, operation, payload })),
+          new Promise<never>((_, reject) => {
+            sendTimer = setTimeout(() => reject(new SpaghettiClientError({
+              code: "TIMEOUT", operation, correlationId,
+            })), Math.max(0, deadline - Date.now()));
+            if (signal) {
+              abortSend = () => reject(new SpaghettiClientError({
+                code: "CANCELLED", operation, correlationId,
+              }));
+              signal.addEventListener("abort", abortSend, { once: true });
+              if (signal.aborted) abortSend();
+            }
+          }),
+        ]);
+      } catch (error) {
+        this.pending.delete(correlationId);
+        throw error;
+      } finally {
+        clearTimeout(sendTimer);
+        if (abortSend) signal?.removeEventListener("abort", abortSend);
+      }
 
       if (signal?.aborted) {
         // Aborted during the `send` await, too late for the listener below
@@ -335,6 +363,7 @@ export class SpaghettiClient {
         raced = await Promise.race(racers);
       } finally {
         if (onAbort) signal!.removeEventListener("abort", onAbort);
+        this.pending.delete(correlationId);
       }
 
       if (raced !== timeoutMarker) {

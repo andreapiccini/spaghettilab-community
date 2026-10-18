@@ -119,8 +119,8 @@ describe("encodeDeviceProfileCbor / decodeDeviceProfileCbor — S063 wire encode
     expect(result.ok).toBe(false);
   });
 
-  it("rejects a sample field claiming a value type other than INT64(1)/UINT64(2) — e.g. TEXT(3), unsupported for Device Profiles", () => {
-    const craftedField = encodeArray([u32(1), u32(3), encodeText("x"), encodeText("")]);
+  it("rejects a sample field with an unknown value type", () => {
+    const craftedField = encodeArray([u32(1), u32(99), encodeText("x"), encodeText("")]);
     const bytes = encodeMap([
       [0, u32(1)],
       [1, encodeText("s")],
