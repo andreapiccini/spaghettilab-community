@@ -32,7 +32,15 @@ export const STEP_CATEGORIES: readonly StepCategory[] = [
   { label: "Wait (bounded)", ops: ["DELAY_BOUNDED", "WAIT_FIELD_MASK", "WAIT_GPIO"] },
   {
     label: "Byte operation",
-    ops: ["LOAD_CONST", "LOAD_ARGUMENT", "LOAD_VALUE", "SCALE_PACK", "COPY_BYTES", "CONCAT", "BYTE_SWAP"],
+    ops: [
+      "LOAD_CONST",
+      "LOAD_ARGUMENT",
+      "LOAD_VALUE",
+      "SCALE_PACK",
+      "COPY_BYTES",
+      "CONCAT",
+      "BYTE_SWAP",
+    ],
   },
   { label: "Mask/Shift/Sign", ops: ["MASK", "SHIFT", "SIGN_EXTEND"] },
   { label: "CRC", ops: ["CRC8", "CRC16"] },
@@ -40,7 +48,9 @@ export const STEP_CATEGORIES: readonly StepCategory[] = [
 ];
 
 export const OP_LABEL: Record<Instruction["op"], string> = {
-  MESSAGE_LOAD: "Load message", MESSAGE_PATCH: "Patch message", I2C_MESSAGE_WRITE: "I2C message write",
+  MESSAGE_LOAD: "Load message",
+  MESSAGE_PATCH: "Patch message",
+  I2C_MESSAGE_WRITE: "I2C message write",
   I2C_WRITE: "I2C write",
   I2C_READ: "I2C read",
   I2C_WRITE_READ: "I2C write-read",
@@ -51,6 +61,7 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
   W1_WRITE_READ: "1-Wire write-read",
   GPIO_GET: "GPIO get",
   GPIO_SET: "GPIO set",
+  GPIO_SET_VALUE: "GPIO da variabile",
   ADC_READ: "ADC read",
   DELAY_BOUNDED: "Delay (bounded)",
   WAIT_FIELD_MASK: "Wait field mask",
@@ -72,10 +83,33 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
 };
 
 const FIELDS: Record<Instruction["op"], readonly FieldSpec[]> = {
-  MESSAGE_LOAD: [{ key: "offset", label: "Offset", kind: "number" }, { key: "length", label: "Byte", kind: "number" }],
-  MESSAGE_PATCH: [{ key: "src", label: "Sorgente", kind: "tempSlot" }, { key: "offset", label: "Offset", kind: "number" }, { key: "length", label: "Byte", kind: "number" }],
-  I2C_MESSAGE_WRITE: [{ key: "length", label: "Byte", kind: "number" }, { key: "timeoutMs", label: "Timeout (ms)", kind: "number" }],
-  SCALE_PACK: [{ key: "src", label: "Sorgente", kind: "tempSlot" }, { key: "dst", label: "Destinazione", kind: "tempSlot" }, { key: "flags", label: "Endian / segno", kind: "number" }, { key: "width", label: "Byte", kind: "number" }, { key: "divisor", label: "Divisore", kind: "number" }, { key: "multiplier", label: "Moltiplicatore", kind: "number" }, { key: "offset", label: "Offset", kind: "number" }],
+  GPIO_SET_VALUE: [
+    { key: "src", label: "Sorgente", kind: "tempSlot" },
+    { key: "channel", label: "Canale", kind: "number" },
+    { key: "invert", label: "Inverti", kind: "boolean" },
+  ],
+  MESSAGE_LOAD: [
+    { key: "offset", label: "Offset", kind: "number" },
+    { key: "length", label: "Byte", kind: "number" },
+  ],
+  MESSAGE_PATCH: [
+    { key: "src", label: "Sorgente", kind: "tempSlot" },
+    { key: "offset", label: "Offset", kind: "number" },
+    { key: "length", label: "Byte", kind: "number" },
+  ],
+  I2C_MESSAGE_WRITE: [
+    { key: "length", label: "Byte", kind: "number" },
+    { key: "timeoutMs", label: "Timeout (ms)", kind: "number" },
+  ],
+  SCALE_PACK: [
+    { key: "src", label: "Sorgente", kind: "tempSlot" },
+    { key: "dst", label: "Destinazione", kind: "tempSlot" },
+    { key: "flags", label: "Endian / segno", kind: "number" },
+    { key: "width", label: "Byte", kind: "number" },
+    { key: "divisor", label: "Divisore", kind: "number" },
+    { key: "multiplier", label: "Moltiplicatore", kind: "number" },
+    { key: "offset", label: "Offset", kind: "number" },
+  ],
   I2C_WRITE: [
     { key: "src", label: "src (temp slot)", kind: "tempSlot" },
     { key: "length", label: "length", kind: "number" },
@@ -151,7 +185,15 @@ const FIELDS: Record<Instruction["op"], readonly FieldSpec[]> = {
     { key: "low", label: "low", kind: "number" },
     { key: "high", label: "high", kind: "number" },
   ],
-  LOAD_VALUE: [{ key: "dst", label: "Destinazione", kind: "tempSlot" }, { key: "argumentId", label: "ID variabile", kind: "number" }, { key: "length", label: "Byte", kind: "number" }, { key: "littleEndian", label: "Little endian", kind: "boolean" }, { key: "required", label: "Obbligatorio", kind: "boolean" }, { key: "low", label: "Default low", kind: "number" }, { key: "high", label: "Default high", kind: "number" }],
+  LOAD_VALUE: [
+    { key: "dst", label: "Destinazione", kind: "tempSlot" },
+    { key: "argumentId", label: "ID variabile", kind: "number" },
+    { key: "length", label: "Byte", kind: "number" },
+    { key: "littleEndian", label: "Little endian", kind: "boolean" },
+    { key: "required", label: "Obbligatorio", kind: "boolean" },
+    { key: "low", label: "Default low", kind: "number" },
+    { key: "high", label: "Default high", kind: "number" },
+  ],
   LOAD_ARGUMENT: [
     { key: "dst", label: "Destinazione", kind: "tempSlot" },
     { key: "argumentId", label: "Parametro (1–8)", kind: "number" },
@@ -214,9 +256,12 @@ export function fieldsFor(op: Instruction["op"]): readonly FieldSpec[] {
 /** A minimal, valid default instance for each opcode — every numeric field starts at a small, real, executable value (never `NaN`/negative where the firmware would reject it). */
 export function defaultInstruction(op: Instruction["op"]): Instruction {
   switch (op) {
-    case "MESSAGE_LOAD": return { op, offset: 0, length: 1 };
-    case "MESSAGE_PATCH": return { op, src: 0, offset: 0, length: 1 };
-    case "I2C_MESSAGE_WRITE": return { op, length: 1, timeoutMs: 100 };
+    case "MESSAGE_LOAD":
+      return { op, offset: 0, length: 1 };
+    case "MESSAGE_PATCH":
+      return { op, src: 0, offset: 0, length: 1 };
+    case "I2C_MESSAGE_WRITE":
+      return { op, length: 1, timeoutMs: 100 };
     case "I2C_WRITE":
       return { op, src: 0, length: 1, timeoutMs: 20 };
     case "I2C_READ":
@@ -245,6 +290,8 @@ export function defaultInstruction(op: Instruction["op"]): Instruction {
       return { op, dst: 0 };
     case "GPIO_SET":
       return { op, value: true };
+    case "GPIO_SET_VALUE":
+      return { op, src: 0, channel: 0 };
     case "ADC_READ":
       return { op, dst: 0, timeoutMs: 20 };
     case "DELAY_BOUNDED":
@@ -264,7 +311,16 @@ export function defaultInstruction(op: Instruction["op"]): Instruction {
     case "LOAD_CONST":
       return { op, dst: 0, length: 1, low: 0, high: 0 };
     case "SCALE_PACK":
-      return { op, src: 0, dst: 1, flags: 0, width: 1, divisor: 1, multiplier: 1, offset: 0 };
+      return {
+        op,
+        src: 0,
+        dst: 1,
+        flags: 0,
+        width: 1,
+        divisor: 1,
+        multiplier: 1,
+        offset: 0,
+      };
     case "LOAD_VALUE":
     case "LOAD_ARGUMENT":
       return {

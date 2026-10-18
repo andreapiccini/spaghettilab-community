@@ -62,7 +62,7 @@ type CoreConnectionsCopy = {
   readonly viaCanShort: string;
   readonly online: string;
   /** One-line cluster summary under the header. */
-  readonly clusterSummary: (backbones: number, nfcModules: number) => string;
+  readonly clusterSummary: (backbones: number) => string;
   /** Card title for a host-linked cluster. */
   readonly clusterTitle: (index: number) => string;
   readonly linkToSoftware: (link: "cable" | "wifi") => string;
@@ -156,8 +156,8 @@ const IT: CoreConnectionsCopy = {
   viaWifi: "Wi-Fi",
   viaCanShort: "Catena CAN",
   online: "Online",
-  clusterSummary: (backbones, nfcModules) =>
-    `${backbones === 1 ? "1 Backbone" : `${backbones} Backbone`} · ${nfcModules === 0 ? "moduli non identificati" : nfcModules === 1 ? "1 modulo NFC" : `${nfcModules} moduli NFC`}`,
+  clusterSummary: (backbones) =>
+    backbones === 1 ? "1 Backbone" : `${backbones} Backbone`,
   clusterTitle: (index) => `Cluster ${index}`,
   linkToSoftware: (link) => (link === "wifi" ? "Collegamento a Flow: Wi-Fi" : "Collegamento a Flow: Cavo"),
   nfcTitle: "Moduli",
@@ -250,8 +250,8 @@ const EN: CoreConnectionsCopy = {
   viaWifi: "Wi-Fi",
   viaCanShort: "CAN chain",
   online: "Online",
-  clusterSummary: (backbones, nfcModules) =>
-    `${backbones === 1 ? "1 Backbone" : `${backbones} Backbones`} · ${nfcModules === 0 ? "modules not identified" : nfcModules === 1 ? "1 NFC module" : `${nfcModules} NFC modules`}`,
+  clusterSummary: (backbones) =>
+    backbones === 1 ? "1 Backbone" : `${backbones} Backbones`,
   clusterTitle: (index) => `Cluster ${index}`,
   linkToSoftware: (link) => (link === "wifi" ? "Link to Flow: Wi-Fi" : "Link to Flow: Cable"),
   nfcTitle: "Modules",

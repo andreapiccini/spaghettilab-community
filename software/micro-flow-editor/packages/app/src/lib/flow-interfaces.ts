@@ -55,7 +55,14 @@ export function addFlowInterface(
         draft.commands.find((command) => command.id === actionId)?.steps ?? [];
       const read = [...body]
         .reverse()
-        .find((item) => item.type === "i2c_read" || item.type === "i2c_write_read");
+        .find(
+          (item) =>
+            item.type === "i2c_read" ||
+            item.type === "i2c_write_read" ||
+            item.type === "gpio_read" ||
+            item.type === "gpio_read_analog" ||
+            item.type === "gpio_debounce",
+        );
       op = {
         ...op,
         into,
@@ -64,7 +71,9 @@ export function addFlowInterface(
               input: read.into,
               endByte: (read.type === "i2c_read" ? read.len : read.readLen) - 1,
             }
-          : {}),
+          : read && "into" in read
+            ? { input: read.into, endByte: 0 }
+            : {}),
       };
     }
   }
@@ -86,7 +95,14 @@ export function addFlowInterface(
       ...(draft.commands.find((command) => command.id === actionId)?.steps ?? []),
     ]
       .reverse()
-      .find((step) => step.type === "i2c_read" || step.type === "i2c_write_read");
+      .find(
+        (step) =>
+          step.type === "i2c_read" ||
+          step.type === "i2c_write_read" ||
+          step.type === "gpio_read" ||
+          step.type === "gpio_read_analog" ||
+          step.type === "gpio_debounce",
+      );
     const from =
       decoded?.type === "decode"
         ? decoded.into

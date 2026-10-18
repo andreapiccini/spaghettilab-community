@@ -169,6 +169,7 @@ static uint32_t nfc_generation = 1U;
 static struct spaghetti_nfc_tag nfc_tags[NFC_ANTENNAS];
 static size_t nfc_tag_count;
 K_MUTEX_DEFINE(nfc_lock);
+K_MUTEX_DEFINE(nfc_rf_lock);
 
 #if SPAGHETTI_NFC_HAS_IRQ_GPIO
 static struct gpio_callback nfc_irq_cb;
@@ -643,7 +644,7 @@ static int nfc_read_slm1(struct spaghetti_nfc_tag *tag)
 	return 0;
 }
 
-static int nfc_scan_antenna(uint8_t antenna, struct spaghetti_nfc_tag *tag)
+static int nfc_select_antenna(uint8_t antenna, struct spaghetti_nfc_tag *tag)
 {
 	uint8_t wupa = NFCA_WUPA;
 	uint8_t atqa[2] = { 0 };
@@ -717,19 +718,23 @@ static int nfc_scan_antenna(uint8_t antenna, struct spaghetti_nfc_tag *tag)
 	tag->uid_len = uid_len;
 	memcpy(tag->uid, uid, uid_len);
 	tag->local = true;
-	if ((sak & NFCA_SAK_T4T) != 0U) {
-		/* SLM1 lives on ST25TN01K Type 2 tags only. */
-		(void)nfc_field_off();
-		return -ENOENT;
-	}
-	tag->type = SPAGHETTI_NFC_TYPE_T2T;
-	err = nfc_read_slm1(tag);
-	(void)nfc_field_off();
-	if (err < 0) {
-		memset(tag, 0, sizeof(*tag));
-		return -ENOENT;
-	}
+	tag->type = (sak & NFCA_SAK_T4T) ? SPAGHETTI_NFC_TYPE_T4T : SPAGHETTI_NFC_TYPE_T2T;
 	return 0;
+}
+
+static int nfc_scan_antenna(uint8_t antenna, struct spaghetti_nfc_tag *tag)
+{
+	int err = nfc_select_antenna(antenna, tag);
+	if (err == 0) {
+		if (tag->type == SPAGHETTI_NFC_TYPE_T2T) err = nfc_read_slm1(tag);
+		else err = -ENOTSUP;
+		/* The dedicated reader reports empty and non-SLM1 tags as well.
+		 * Ordinary Backbones keep their existing automatic module policy. */
+		if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) err = 0;
+	}
+	(void)nfc_field_off();
+	if (err < 0) memset(tag, 0, sizeof(*tag));
+	return err;
 }
 
 static bool nfc_tags_same(const struct spaghetti_nfc_tag *left, size_t left_n,
@@ -780,7 +785,8 @@ static void nfc_notify_host(uint8_t port_id)
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
 	spaghetti_field_update_nfc_changed(port_id, generation);
 #endif
-	(void)spaghetti_communication_emit_discovery(candidate_id, port_id,
+	if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE))
+		(void)spaghetti_communication_emit_discovery(candidate_id, port_id,
 						     generation);
 }
 
@@ -895,7 +901,7 @@ static void nfc_store_scan(const struct spaghetti_nfc_tag *found, size_t count)
 		memcpy(nfc_tags, found, count * sizeof(found[0]));
 	}
 	k_mutex_unlock(&nfc_lock);
-	(void)spaghetti_physical_refresh();
+	if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) (void)spaghetti_physical_refresh();
 	if (changed) {
 		if (count > 0U) {
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
@@ -962,17 +968,20 @@ static void nfc_irq_work_fn(struct k_work *work)
 		return;
 	}
 
+	(void)k_mutex_lock(&nfc_rf_lock, K_FOREVER);
 	(void)nfc_read_reg(ST25_REG_IRQ3, &irq3);
 	nfc_clear_irq();
 	load_changed = (irq3 & (ST25_IRQ3_WUI | ST25_IRQ3_WUQ)) != 0U;
 	timed_out = (irq3 & ST25_IRQ3_WUT) != 0U;
 	if (!load_changed && !timed_out) {
 		if (nfc_wum_on) {
+			k_mutex_unlock(&nfc_rf_lock);
 			return;
 		}
 		load_changed = true;
 	}
 	nfc_handle_wakeup(load_changed);
+	k_mutex_unlock(&nfc_rf_lock);
 }
 
 #if SPAGHETTI_NFC_HAS_IRQ_GPIO
@@ -993,9 +1002,90 @@ static void nfc_fallback_work(struct k_work *work)
 		return;
 	}
 
+	(void)k_mutex_lock(&nfc_rf_lock, K_FOREVER);
 	nfc_handle_wakeup(true);
+	k_mutex_unlock(&nfc_rf_lock);
 	(void)k_work_schedule(&nfc_fallback_dwork,
 			      K_MSEC(NFC_FALLBACK_PERIOD_MS));
+}
+
+int spaghetti_nfc_user_page(uint8_t antenna, const uint8_t uid[7], uint8_t page,
+			    uint8_t data[4], bool write)
+{
+	struct spaghetti_nfc_tag tag;
+	uint8_t chunk[16];
+	const bool user_page = page >= 4U && page <= 43U;
+	const bool metadata_page = !write && (page == 3U || page == 45U);
+	int err;
+
+	if (uid == NULL || data == NULL || antenna < 1U || antenna > 2U ||
+	    (!user_page && !metadata_page)) {
+		return -EINVAL;
+	}
+	if (!nfc_ready) {
+		return -ENODEV;
+	}
+	err = k_mutex_lock(&nfc_rf_lock, K_MSEC(1000));
+	if (err < 0) {
+		return -EBUSY;
+	}
+	nfc_irq_disable();
+	nfc_wum_stop();
+	err = nfc_select_antenna(antenna, &tag);
+	if (err == 0 && (tag.uid_len != 7U || memcmp(tag.uid, uid, 7U) != 0)) {
+		err = -ESTALE;
+	}
+	if (err == 0 && tag.type != SPAGHETTI_NFC_TYPE_T2T) {
+		err = -ENOTSUP;
+	}
+	if (err == 0 && write) {
+		/* This first writer is deliberately ST25TN01K/160-byte only. */
+		err = nfc_t2t_read_chunk(3U, chunk);
+		if (err == 0 && (chunk[0] != 0xE1U || chunk[2] != 20U)) {
+			err = -ENOTSUP;
+		}
+		if (err == 0 && (chunk[3] & 15U) != 0U) {
+			err = -EACCES;
+		}
+		if (err == 0) err = nfc_t2t_read_chunk(45U, chunk);
+		if (err == 0 && (chunk[0] != 0x90U || chunk[1] != 0x90U)) {
+			err = -ENOTSUP;
+		}
+		if (err == 0) err = nfc_t2t_read_chunk(4U, chunk);
+		if (err == 0) {
+			bool blank = true;
+
+			for (size_t i = 0U; i < 4U; i++) {
+				if (chunk[i] != 0U && chunk[i] != 0xFFU) blank = false;
+			}
+			if (!blank && memcmp(chunk, "SLF1", 4U) != 0) err = -EACCES;
+		}
+		if (err == 0) {
+			uint8_t command[6] = {0xA2U, page, data[0], data[1], data[2], data[3]};
+			uint8_t ack[2] = {0};
+			size_t ack_len = 0U;
+
+			err = nfc_transceive(command, sizeof(command), 48U, ack,
+					     sizeof(ack), &ack_len, false, true);
+			if (err == 0 && (ack_len == 0U || (ack[0] & 15U) != 0x0AU)) {
+				err = -EACCES;
+			}
+			if (err == 0) k_sleep(K_MSEC(6));
+			if (err == 0) err = nfc_t2t_read_chunk(page, chunk);
+			if (err == 0 && memcmp(chunk, data, 4U) != 0) err = -EIO;
+		}
+	} else if (err == 0) {
+		err = nfc_t2t_read_chunk(page, chunk);
+		if (err == 0) memcpy(data, chunk, 4U);
+	}
+	(void)nfc_field_off();
+	if (nfc_wum_start(antenna) == 0) {
+		nfc_irq_enable();
+	} else {
+		(void)k_work_schedule(&nfc_fallback_dwork, K_MSEC(NFC_FALLBACK_PERIOD_MS));
+	}
+	k_mutex_unlock(&nfc_rf_lock);
+	return err;
 }
 
 static int nfc_probe_chip(void)
@@ -1120,6 +1210,11 @@ int spaghetti_nfc_copy_tags(struct spaghetti_nfc_tag *out, size_t max,
 }
 
 #else /* !NFC DT */
+
+int spaghetti_nfc_user_page(uint8_t antenna, const uint8_t uid[7], uint8_t page, uint8_t data[4], bool write)
+{
+	ARG_UNUSED(antenna); ARG_UNUSED(uid); ARG_UNUSED(page); ARG_UNUSED(data); ARG_UNUSED(write); return -ENOTSUP;
+}
 
 int spaghetti_nfc_init(void)
 {

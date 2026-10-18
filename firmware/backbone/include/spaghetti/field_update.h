@@ -30,6 +30,9 @@
 /** Discover/status flag: USB Serial/JTAG host is attached. */
 #define SPAGHETTI_SLUP_FLAG_USB 0x01U
 
+/** Dedicated NFC-only peripheral; never a master or a hardware destination. */
+#define SPAGHETTI_SLUP_FLAG_NFC_MODULE 0x02U
+
 /** List-only flag: this row is the local board. Never sent on the bus. */
 #define SPAGHETTI_SLUP_FLAG_LOCAL 0x80U
 
@@ -193,6 +196,11 @@ int spaghetti_field_update_copy_peers(struct spaghetti_slup_peer *out,
  *
  * @note Thread-safe after @ref spaghetti_field_update_init.
  */
+/** Access one UID-checked NFC page through an addressed CAN reader (bounded). */
+int spaghetti_field_update_nfc_page(uint32_t node, uint8_t antenna,
+                                  const uint8_t uid[7], uint8_t page,
+                                  uint8_t data[4], bool write);
+
 int spaghetti_field_update_copy_nfc_tags(struct spaghetti_nfc_tag *out,
 					 size_t max, size_t *count);
 

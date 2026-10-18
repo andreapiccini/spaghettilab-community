@@ -1,6 +1,25 @@
-import { publicAsset } from "../../lib/public-asset.js";
+import {
+  BACKBONE_SENSOR_MODULES_META_KEY,
+  createModuleFromRecipe,
+  modulesForBinding,
+  parseBackboneSensorModules,
+  upsertModule,
+} from "../../lib/backbone-sensor-modules.js";
+import { GpioDigitalSettings } from "./GpioDigitalSettings.js";
+import "./gpio-workbench.css";
+import { NfcBell } from "../nfc/NfcBell.js";
+import { workbenchStepLabel, workbenchStepKind } from "./sensor-workbench-labels.js";
+import { BrandMark } from "../shell/BrandMark.js";
 import "./sensor-workbench.css";
 import { SensorWorkbenchNav, SensorWorkbenchHeading } from "./SensorWorkbenchNav.js";
+import {
+  GpioActionParametersPanel,
+  GpioEventsPanel,
+  GpioOperationFields,
+  GpioOutputsPanel,
+  GpioTestingPanel,
+  ValueSourceField,
+} from "./GpioDriverPanels.js";
 import { readableI2cStep } from "../../lib/i2c-step-label.js";
 import { EditorSection } from "./EditorSection.js";
 import { parseI2cMessage } from "../../lib/i2c-message-input.js";
@@ -16,18 +35,17 @@ import {
   SlidersHorizontal,
   Braces,
   Workflow,
-  ArrowDown,
-  ArrowUp,
   Check,
   CircuitBoard,
   Cpu,
   Info,
   Play,
+  Pencil,
   Plus,
   Save,
   Trash2,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
   addCommand,
   createAnalogLevelExample,
@@ -63,6 +81,7 @@ import {
   validateDraftForCreate,
   validateI2cTransactionPhases,
   writeChannelsOf,
+  draftToSensorRecipe,
   type DeviceRecipeBus,
   type DeviceRecipeDraft,
   type DeviceRecipeEditorPane,
@@ -75,6 +94,7 @@ import {
 } from "../../lib/device-recipe-draft.js";
 import type { SensorOutputKind } from "../../lib/sensor-recipe.js";
 import {
+  configuredDigitalOutputPins,
   draftForBinding,
   functionVariantOf,
   parsePhysicalProject,
@@ -107,9 +127,20 @@ import {
   DriverCanvasPreview,
 } from "./DriverActionsPanel.js";
 import { bindEncoderFlowInput, registerStep } from "../../lib/i2c-driver-actions.js";
+import {
+  GPIO_DRIVER_PRESETS,
+  applyGpioPreset,
+  gpioInitialStateOps,
+  createGpioDigitalDriver,
+} from "../../lib/gpio-driver-presets.js";
+import {
+  gpioSignalType,
+  gpioWriteLogicalLevel,
+} from "../../lib/gpio-operation-registry.js";
 
 type Props = {
   readonly initialDraft?: DeviceRecipeDraft;
+  readonly saveDriverOnly?: boolean;
   readonly onCancel?: () => void;
   readonly onSaveDraft?: (draft: DeviceRecipeDraft) => void;
   readonly onCreate?: (draft: DeviceRecipeDraft) => void;
@@ -120,6 +151,7 @@ type Props = {
  */
 export function DeviceRecipeEditorScreen({
   initialDraft,
+  saveDriverOnly = false,
   onCancel,
   onSaveDraft,
   onCreate,
@@ -136,6 +168,14 @@ export function DeviceRecipeEditorScreen({
     const project = parsePhysicalProject(physicalMetadata);
     return draftForBinding(project, physicalBindingId);
   }, [physicalMetadata, physicalBindingId]);
+  const physicalProject = useMemo(
+    () => parsePhysicalProject(physicalMetadata),
+    [physicalMetadata],
+  );
+  const gpioOutputPins = useMemo(
+    () => configuredDigitalOutputPins(physicalProject.drafts, physicalBindingId),
+    [physicalProject, physicalBindingId],
+  );
   function updateI2cSpeed(speed: number) {
     if (!session || !physicalDraft) return;
     const bindingId = session.stack.current.coreBindings[0]?.bindingId;
@@ -181,9 +221,12 @@ export function DeviceRecipeEditorScreen({
     }
     return rows.find((r) => r.sessionState === "READY")?.binding.bindingId;
   }, [session, rows]);
-  const [draft, setDraft] = useState<DeviceRecipeDraft>(() =>
-    organizeDriverInterfaces(initialDraft ?? createBlankDraft("i2c")),
-  );
+  const [draft, setDraft] = useState<DeviceRecipeDraft>(() => {
+    const initial = organizeDriverInterfaces(initialDraft ?? createBlankDraft("i2c"));
+    return initial.binding.bus === "i2c" && initial.name === "Sensore I2C"
+      ? { ...initial, name: "Dispositivo I2C" }
+      : initial;
+  });
   const [editorPane, setEditorPane] = useState<DeviceRecipeEditorPane>("actions");
   const [selectedCommandId, setSelectedCommandId] = useState<string | null>(
     draft.commands[0]?.id ?? null,
@@ -206,7 +249,9 @@ export function DeviceRecipeEditorScreen({
   const [testSelectionKey, setTestSelectionKey] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<RecipeHardwareTestResult | null>(null);
 
-  const isWorkbench = draft.binding.bus === "i2c" && draft.category !== "display";
+  const isWorkbench =
+    (draft.binding.bus === "i2c" || draft.binding.bus === "gpio") &&
+    draft.category !== "display";
   const isDisplay = draft.category === "display";
   const activeActionId =
     draft.commands.find((c) => c.id === selectedCommandId)?.id ??
@@ -227,13 +272,22 @@ export function DeviceRecipeEditorScreen({
   const selected = flowEditing
     ? (draft.flowInterfaces?.find((op) => op.id === selectedInterfaceId) ?? null)
     : (ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null);
-  const library = libraryOpsForBus(draft.binding.bus);
+  const library = libraryOpsForBus(draft.binding.bus).filter(
+    (entry) =>
+      draft.binding.bus !== "gpio" ||
+      draft.binding.gpioSignals.length > 1 ||
+      ["gpio_read", "gpio_write", "wait", "sample_external", "emit"].includes(
+        entry.type,
+      ),
+  );
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
 
   function switchMode(mode: DeviceRecipeMode) {
-    const next = createBlankDraft(mode, draft.name);
-    setDraft({ ...next, name: draft.name || next.name });
+    const name = /^Dispositivo (I2C|GPIO)$/.test(draft.name) ? undefined : draft.name;
+    const next =
+      mode === "gpio" ? createGpioDigitalDriver(name) : createBlankDraft(mode, name);
+    setDraft(next);
     setEditorPane("actions");
     setFlowEditing(false);
     setSelectedInterfaceId(null);
@@ -395,12 +449,35 @@ export function DeviceRecipeEditorScreen({
       const i2cAddress = addrRaw
         ? Number.parseInt(addrRaw.replace(/^0x/i, ""), 16)
         : undefined;
+      const gpioModule =
+        draft.binding.bus === "gpio"
+          ? modulesForBinding(
+              parseBackboneSensorModules(
+                session?.stack.current.authoringMetadata[
+                  BACKBONE_SENSOR_MODULES_META_KEY
+                ]?.comment,
+              ),
+              connectedBindingId,
+            ).find((module) => module.recipe.deviceDraft?.id === draft.id)
+          : undefined;
+      const gpioPhysical = gpioModule?.gpioAssignment
+        ? parsePhysicalProject(physicalMetadata).drafts[
+            gpioModule.gpioAssignment.boardKey
+          ]
+        : undefined;
+      if (gpioPhysical?.local === false)
+        throw new Error("La prova GPIO richiede la Backbone collegata via USB.");
       const result = await runRecipeHardwareTest({
         client,
         draft,
         selection,
         labels: testLabels,
         i2cAddress: Number.isFinite(i2cAddress) ? i2cAddress : undefined,
+        portId:
+          draft.binding.bus === "gpio"
+            ? (gpioPhysical?.backendPortId ?? physicalDraft?.backendPortId)
+            : undefined,
+        gpioChannel: gpioModule?.gpioAssignment?.channel,
         preferredPhysicalModes: physicalDraft?.modes,
         preferredI2cSpeed: physicalDraft?.i2cSpeed,
         preferredPhysicalSettings: physicalDraft?.settings,
@@ -515,6 +592,56 @@ export function DeviceRecipeEditorScreen({
             </button>
           </div>
         )}
+        {draft.binding.bus === "gpio" && (
+          <div className="mb-2 flex flex-wrap gap-2">
+            {(
+              [
+                ["gpio_read", it ? "+ Leggi" : "+ Read"],
+                ["gpio_write", it ? "+ Scrivi" : "+ Write"],
+                ["wait", it ? "+ Attendi" : "+ Wait"],
+              ] as const
+            ).map(([type, label]) => (
+              <button
+                key={type}
+                type="button"
+                disabled={type !== "wait" && draft.binding.gpioSignals.length === 0}
+                onClick={() => addLibraryOp(type)}
+                title={
+                  type !== "wait" && draft.binding.gpioSignals.length === 0
+                    ? it
+                      ? "Aggiungi prima un segnale GPIO"
+                      : "Add a GPIO signal first"
+                    : undefined
+                }
+                className="rounded-slsm border border-border-strong px-2 py-2 font-body text-xs text-ink disabled:opacity-40"
+              >
+                {label}
+              </button>
+            ))}
+            {editorPane === "init" && (
+              <button
+                type="button"
+                disabled={draft.binding.gpioSignals.length === 0}
+                onClick={() => {
+                  const extras = gpioInitialStateOps(draft);
+                  if (!extras.length) return;
+                  setDraft({
+                    ...draft,
+                    phases: {
+                      ...draft.phases,
+                      init: [...draft.phases.init, ...extras],
+                    },
+                    updatedAt: Date.now(),
+                  });
+                  setSelectedOpId(extras[0]?.id ?? null);
+                }}
+                className="rounded-slsm border border-dashed border-border-strong px-2 py-2 font-body text-xs text-ink disabled:opacity-40"
+              >
+                {it ? "+ Stati iniziali" : "+ Initial states"}
+              </button>
+            )}
+          </div>
+        )}
         <p className="mb-2 font-body text-[10px] text-ink-muted">
           {it
             ? editorPane === "init"
@@ -524,7 +651,7 @@ export function DeviceRecipeEditorScreen({
               ? "These steps run at device startup."
               : "Steps added here belong only to this action."}
         </p>
-        <details open={draft.binding.bus !== "i2c"}>
+        <details open={draft.binding.bus !== "i2c" && draft.binding.bus !== "gpio"}>
           <summary className="mb-2 cursor-pointer font-body text-xs text-ink-muted">
             {it ? "Avanzati" : "Advanced"}
           </summary>
@@ -540,21 +667,44 @@ export function DeviceRecipeEditorScreen({
         {draft.binding.bus === "gpio" ? (
           <div className="mt-3">
             <p className="mb-1 font-body text-[10px] font-semibold text-ink-muted">
-              {it ? "Modelli" : "Templates"}
+              {it ? "Modelli generici" : "Generic presets"}
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                const next = createGpioDigitalExample(draft.name);
-                setDraft(next);
-                setEditorPane("actions");
-                setSelectedCommandId(next.commands[0]?.id ?? null);
-                setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
-              }}
-              className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
-            >
-              {it ? "Ingresso digitale" : "Digital input"}
-            </button>
+            <div className="grid grid-cols-2 gap-1">
+              {GPIO_DRIVER_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => {
+                    const next = applyGpioPreset(draft, preset.id);
+                    setDraft(next);
+                    setEditorPane("actions");
+                    setSelectedCommandId(next.commands[0]?.id ?? null);
+                    setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                  }}
+                  className="rounded-slsm border border-border-strong px-2 py-1.5 text-left font-body text-[11px] hover:border-brand-blue"
+                >
+                  <span className="block font-semibold">
+                    {it ? preset.name.it : preset.name.en}
+                  </span>
+                  <span className="block text-[9px] text-ink-faint">
+                    {it ? preset.description.it : preset.description.en}
+                  </span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = createGpioDigitalExample(draft.name);
+                  setDraft(next);
+                  setEditorPane("actions");
+                  setSelectedCommandId(next.commands[0]?.id ?? null);
+                  setSelectedOpId(next.commands[0]?.steps[0]?.id ?? null);
+                }}
+                className="col-span-2 rounded-slsm border border-dashed border-border-strong px-2 py-1.5 font-body text-[11px] hover:border-brand-blue"
+              >
+                {it ? "Esempio misto digitale" : "Mixed digital example"}
+              </button>
+            </div>
           </div>
         ) : null}
         {draft.binding.bus === "adc" ? (
@@ -705,7 +855,7 @@ export function DeviceRecipeEditorScreen({
   );
   const flowPreview = (
     <EditorSection title={it ? "Anteprima nel Flow" : "Flow preview"} icon={Workflow}>
-      {draft.binding.bus === "i2c" ? (
+      {draft.binding.bus === "i2c" || draft.binding.bus === "gpio" ? (
         <div className="mx-auto w-full max-w-xl">
           <DriverCanvasPreview draft={draft} it={it} />
         </div>
@@ -747,7 +897,7 @@ export function DeviceRecipeEditorScreen({
           </div>
         </>
       )}
-      {draft.runtimeUnavailable.length > 0 ? (
+      {draft.binding.bus !== "gpio" && draft.runtimeUnavailable.length > 0 ? (
         <p className="mt-2 font-body text-[10px] text-ink-faint">
           {it ? "Runtime non disponibile:" : "Runtime unavailable:"}{" "}
           {draft.runtimeUnavailable.join(", ")}
@@ -775,10 +925,7 @@ export function DeviceRecipeEditorScreen({
       {isWorkbench && (
         <div className="sensor-workbench-breadcrumb">
           <div className="sensor-workbench-identity">
-            <img src={publicAsset("ux-assets/icon-transparent-28@2x.png")} alt="" />
-            <strong>
-              Spaghetti<span>LAB</span>
-            </strong>
+            <BrandMark />
             <span className="sensor-workbench-path">
               {it ? "Dispositivi" : "Devices"}
               <span aria-hidden>/</span>
@@ -786,6 +933,7 @@ export function DeviceRecipeEditorScreen({
             </span>
           </div>
           <div>
+            <NfcBell />
             <span className="sensor-workbench-status">
               {draft.status === "draft"
                 ? it
@@ -989,6 +1137,108 @@ export function DeviceRecipeEditorScreen({
               </div>
             </details>
           </>
+        )}
+        {!isDisplay && draft.binding.bus === "gpio" && (
+          <div className="sensor-workbench-pins font-body text-[10px] text-ink-muted">
+            <div>
+              <span>{draft.binding.gpioSignals[0]?.name ?? "DATA"}</span>
+              <select
+                aria-label={it ? "Pin digitale" : "Digital pin"}
+                value={(() => {
+                  const stored = parseBackboneSensorModules(
+                    session?.stack.current.authoringMetadata[
+                      BACKBONE_SENSOR_MODULES_META_KEY
+                    ]?.comment,
+                  );
+                  const module = (physicalBindingId
+                    ? modulesForBinding(stored, physicalBindingId)
+                    : Object.values(stored.byBinding).flat()
+                  ).find((item) => item.recipe.deviceDraft?.id === draft.id);
+                  return module?.gpioAssignment
+                    ? `${module.gpioAssignment.boardKey}:${module.gpioAssignment.channel}`
+                    : "";
+                })()}
+                disabled={!gpioOutputPins.length || !execute}
+                onChange={(event) => {
+                  const [boardKey, channelText] = event.target.value.split(":");
+                  const channel =
+                    channelText === undefined ? undefined : Number(channelText);
+                  if (!boardKey || channel === undefined || !physicalBindingId) return;
+                  execute?.({
+                    kind: "AssignGpioDriverPin",
+                    apply: (current) => {
+                      const latest = parseBackboneSensorModules(
+                        current.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]
+                          ?.comment,
+                      );
+                      const existing = modulesForBinding(
+                        latest,
+                        physicalBindingId,
+                      ).find((item) => item.recipe.deviceDraft?.id === draft.id);
+                      const recipe = {
+                        ...draftToSensorRecipe(draft),
+                        deviceDraft: draft,
+                      };
+                      const module = existing
+                        ? {
+                            ...existing,
+                            gpioAssignment: { boardKey, channel },
+                          }
+                        : {
+                            ...createModuleFromRecipe(recipe),
+                            label: draft.name,
+                            gpioAssignment: { boardKey, channel },
+                          };
+                      return {
+                        ok: true,
+                        value: {
+                          ...current,
+                          authoringMetadata: {
+                            ...current.authoringMetadata,
+                            [BACKBONE_SENSOR_MODULES_META_KEY]: {
+                              comment: JSON.stringify(
+                                upsertModule(latest, physicalBindingId, module),
+                              ),
+                            },
+                          },
+                        },
+                      };
+                    },
+                  });
+                }}
+              >
+                <option value="">
+                  {gpioOutputPins.length
+                    ? it
+                      ? "Scegli pin"
+                      : "Choose pin"
+                    : "—"}
+                </option>
+                {gpioOutputPins.map((pin) => (
+                  <option
+                    key={`${pin.boardKey}:${pin.channel}`}
+                    value={`${pin.boardKey}:${pin.channel}`}
+                  >
+                    {pin.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("physical-composition")}
+              aria-label={it ? "Configura pin digitali" : "Configure digital pins"}
+              title={
+                physicalDraft?.applied === false
+                  ? it
+                    ? "Da applicare in Module Function"
+                    : "Apply in Module Function"
+                  : undefined
+              }
+            >
+              <SlidersHorizontal size={16} />
+            </button>
+          </div>
         )}
         <span className="mb-2 ml-auto rounded-slpill bg-warning/20 px-2 py-0.5 font-body text-[10px] text-ink">
           {draft.status === "draft"
@@ -1215,366 +1465,406 @@ export function DeviceRecipeEditorScreen({
         <main
           className={`${isWorkbench ? "sensor-workbench-main" : ""} flex min-h-0 flex-col overflow-y-auto p-4`}
         >
-          {isWorkbench && (
-            <>
-              <SensorWorkbenchHeading
-                draft={draft}
-                it={it}
-                initialization={editorPane === "init"}
-                flow={flowEditing}
-                activeId={activeActionId}
-                onChange={setDraft}
-                onSelectAction={selectDriverAction}
-              />
-              {flowEditing && (
-                <div className="sensor-workbench-interface-tools">
-                  <button type="button" onClick={() => addInterface("sample_external")}>
-                    <Plus size={14} />
-                    {it ? "Ingresso" : "Input"}
-                  </button>
-                  <button type="button" onClick={() => addInterface("emit")}>
-                    <Plus size={14} />
-                    {it ? "Uscita" : "Output"}
-                  </button>
-                </div>
-              )}
-              {!flowEditing && (
-                <div className="sensor-workbench-sequence">
-                  <DriverSequence
-                    draft={draft}
-                    ops={ops}
-                    it={it}
-                    selectedId={selected?.id ?? null}
-                    onSelect={setSelectedOpId}
-                    initialization={editorPane === "init"}
-                  />
-                  <details
-                    className="sensor-workbench-add-step"
-                    onKeyDown={(event) => {
-                      if (event.key === "Escape") {
-                        event.currentTarget.open = false;
-                        event.currentTarget.querySelector("summary")?.focus();
-                      }
-                    }}
-                    onBlur={(event) => {
-                      if (!event.currentTarget.contains(event.relatedTarget))
-                        event.currentTarget.open = false;
-                    }}
-                    onClick={(event) => {
-                      if ((event.target as HTMLElement).closest("button"))
-                        event.currentTarget.open = false;
-                    }}
-                  >
-                    <summary>
-                      <Plus size={14} />
-                      {it ? "Passo" : "Step"}
-                    </summary>
-                    {stepLibrary}
-                  </details>
-                </div>
-              )}
-              {!flowEditing && (
-                <div className="sensor-workbench-inspector">{selectedInspector}</div>
-              )}
-            </>
-          )}
-          {isDisplay && draft.display ? (
-            <>
-              <DisplayCenter
-                draft={draft}
-                it={it}
-                onChange={setDraft}
-                selectedCommandId={selectedCommandId}
-                onSelectCommand={(id) => {
-                  setSelectedCommandId(id);
-                  const c = draft.commands.find((x) => x.id === id);
-                  setSelectedCommandStepId(c?.steps[0]?.id ?? null);
-                }}
-                selectedStepId={selectedCommandStepId}
-                onSelectStep={setSelectedCommandStepId}
-              />
-              <DisplayInspector
-                draft={draft}
-                it={it}
-                onChange={setDraft}
-                selectedCommandId={selectedCommandId}
-                onSelectCommand={setSelectedCommandId}
-                selectedStepId={selectedCommandStepId}
-                onSelectStep={setSelectedCommandStepId}
-                createBlocked={createBlocked}
-              />
-            </>
-          ) : (
-            <>
-              {flowEditing ? (
-                <>
-                  <div
-                    className={
-                      isWorkbench ? "sensor-workbench-flow-preview" : undefined
-                    }
-                  >
-                    {flowPreview}
-                  </div>
-                </>
-              ) : (
-                <DerivedSignalView
+          <>
+            {draft.binding.bus === "gpio" && (
+              <GpioDigitalSettings draft={draft} it={it} onChange={setDraft} />
+            )}
+            {isWorkbench && (
+              <>
+                <SensorWorkbenchHeading
                   draft={draft}
-                  ops={ops}
                   it={it}
-                  rxByOpId={
-                    visibleTestResult?.ok
-                      ? visibleTestResult.capture.rxByOpId
-                      : undefined
-                  }
-                  onChangeByte={(id, index, value) => {
-                    const op = ops.find((item) => item.id === id);
-                    if (!op) return;
-                    if (op.type === "i2c_write") {
-                      setDraft(
-                        updateOpAnywhere(draft, id, {
-                          ...op,
-                          bytes: op.bytes.map((byte, i) =>
-                            i === index ? value : byte,
-                          ),
-                        }),
-                      );
-                    } else if (op.type === "i2c_write_read") {
-                      setDraft(
-                        updateOpAnywhere(draft, id, {
-                          ...op,
-                          writeBytes: op.writeBytes.map((byte, i) =>
-                            i === index ? value : byte,
-                          ),
-                        }),
-                      );
-                    } else if (op.type === "spi_transfer") {
-                      setDraft(
-                        updateOpAnywhere(draft, id, {
-                          ...op,
-                          txBytes: op.txBytes.map((byte, i) =>
-                            i === index ? value : byte,
-                          ),
-                        }),
-                      );
-                    }
-                    setTestResult(null);
-                  }}
-                  onAddByte={(id) => {
-                    const op = ops.find((item) => item.id === id);
-                    if (!op) return;
-                    if (op.type === "i2c_write")
-                      setDraft(
-                        updateOpAnywhere(draft, id, {
-                          ...op,
-                          bytes: [...op.bytes, "00"],
-                        }),
-                      );
-                    else if (op.type === "i2c_write_read")
-                      setDraft(
-                        updateOpAnywhere(draft, id, {
-                          ...op,
-                          writeBytes: [...op.writeBytes, "00"],
-                        }),
-                      );
-                    else if (op.type === "spi_transfer")
-                      setDraft(
-                        updateOpAnywhere(draft, id, {
-                          ...op,
-                          txBytes: [...op.txBytes, "00"],
-                        }),
-                      );
-                    setTestResult(null);
-                    setSelectedOpId(id);
-                  }}
-                  selectedOpId={selectedOpId}
-                  onSelectOp={(id) => {
-                    setSelectedInterfaceId(null);
-                    setFlowEditing(false);
-                    setSelectedOpId(id);
-                  }}
+                  initialization={editorPane === "init"}
+                  flow={flowEditing}
+                  activeId={activeActionId}
+                  onChange={setDraft}
+                  onSelectAction={selectDriverAction}
                 />
-              )}
-
-              {isWorkbench && !flowEditing && (
-                <div className="sensor-workbench-test">
-                  {testControls}
-                  {visibleTestResult && (
-                    <RecipeTestResultPanel result={visibleTestResult} it={it} compact />
-                  )}
-                </div>
-              )}
-              {!isWorkbench && !flowEditing && draft.binding.bus === "i2c" && (
-                <>
-                  <DriverSequence
-                    controls={testControls}
-                    result={
-                      visibleTestResult ? (
-                        <RecipeTestResultPanel result={visibleTestResult} it={it} />
-                      ) : null
-                    }
-                    initialization={editorPane === "init"}
+                {flowEditing && (
+                  <div className="sensor-workbench-interface-tools">
+                    <button
+                      type="button"
+                      onClick={() => addInterface("sample_external")}
+                    >
+                      <Plus size={14} />
+                      {it ? "Ingresso" : "Input"}
+                    </button>
+                    <button type="button" onClick={() => addInterface("emit")}>
+                      <Plus size={14} />
+                      {it ? "Uscita" : "Output"}
+                    </button>
+                  </div>
+                )}
+                {!flowEditing && (
+                  <div className="sensor-workbench-sequence">
+                    <DriverSequence
+                      draft={draft}
+                      ops={ops}
+                      it={it}
+                      selectedId={selected?.id ?? null}
+                      onSelect={setSelectedOpId}
+                      initialization={editorPane === "init"}
+                    />
+                    <details
+                      className="sensor-workbench-add-step"
+                      onKeyDown={(event) => {
+                        if (event.key === "Escape") {
+                          event.currentTarget.open = false;
+                          event.currentTarget.querySelector("summary")?.focus();
+                        }
+                      }}
+                      onBlur={(event) => {
+                        if (!event.currentTarget.contains(event.relatedTarget))
+                          event.currentTarget.open = false;
+                      }}
+                      onClick={(event) => {
+                        if ((event.target as HTMLElement).closest("button"))
+                          event.currentTarget.open = false;
+                      }}
+                    >
+                      <summary>
+                        <Plus size={14} />
+                        {it ? "Passo" : "Step"}
+                      </summary>
+                      {stepLibrary}
+                    </details>
+                  </div>
+                )}
+                {!flowEditing && (
+                  <div className="sensor-workbench-inspector">{selectedInspector}</div>
+                )}
+              </>
+            )}
+            {isDisplay && draft.display ? (
+              <>
+                <DisplayCenter
+                  draft={draft}
+                  it={it}
+                  onChange={setDraft}
+                  selectedCommandId={selectedCommandId}
+                  onSelectCommand={(id) => {
+                    setSelectedCommandId(id);
+                    const c = draft.commands.find((x) => x.id === id);
+                    setSelectedCommandStepId(c?.steps[0]?.id ?? null);
+                  }}
+                  selectedStepId={selectedCommandStepId}
+                  onSelectStep={setSelectedCommandStepId}
+                />
+                <DisplayInspector
+                  draft={draft}
+                  it={it}
+                  onChange={setDraft}
+                  selectedCommandId={selectedCommandId}
+                  onSelectCommand={setSelectedCommandId}
+                  selectedStepId={selectedCommandStepId}
+                  onSelectStep={setSelectedCommandStepId}
+                  createBlocked={createBlocked}
+                />
+              </>
+            ) : (
+              <>
+                {flowEditing ? (
+                  <>
+                    <div
+                      className={
+                        isWorkbench ? "sensor-workbench-flow-preview" : undefined
+                      }
+                    >
+                      {flowPreview}
+                    </div>
+                  </>
+                ) : (
+                  <DerivedSignalView
                     draft={draft}
                     ops={ops}
                     it={it}
-                    selectedId={selected?.id ?? null}
-                    onSelect={(id) => {
+                    rxByOpId={
+                      visibleTestResult?.ok
+                        ? visibleTestResult.capture.rxByOpId
+                        : undefined
+                    }
+                    onChangeByte={(id, index, value) => {
+                      const op = ops.find((item) => item.id === id);
+                      if (!op) return;
+                      if (op.type === "i2c_write") {
+                        setDraft(
+                          updateOpAnywhere(draft, id, {
+                            ...op,
+                            bytes: op.bytes.map((byte, i) =>
+                              i === index ? value : byte,
+                            ),
+                          }),
+                        );
+                      } else if (op.type === "i2c_write_read") {
+                        setDraft(
+                          updateOpAnywhere(draft, id, {
+                            ...op,
+                            writeBytes: op.writeBytes.map((byte, i) =>
+                              i === index ? value : byte,
+                            ),
+                          }),
+                        );
+                      } else if (op.type === "spi_transfer") {
+                        setDraft(
+                          updateOpAnywhere(draft, id, {
+                            ...op,
+                            txBytes: op.txBytes.map((byte, i) =>
+                              i === index ? value : byte,
+                            ),
+                          }),
+                        );
+                      }
+                      setTestResult(null);
+                    }}
+                    onAddByte={(id) => {
+                      const op = ops.find((item) => item.id === id);
+                      if (!op) return;
+                      if (op.type === "i2c_write")
+                        setDraft(
+                          updateOpAnywhere(draft, id, {
+                            ...op,
+                            bytes: [...op.bytes, "00"],
+                          }),
+                        );
+                      else if (op.type === "i2c_write_read")
+                        setDraft(
+                          updateOpAnywhere(draft, id, {
+                            ...op,
+                            writeBytes: [...op.writeBytes, "00"],
+                          }),
+                        );
+                      else if (op.type === "spi_transfer")
+                        setDraft(
+                          updateOpAnywhere(draft, id, {
+                            ...op,
+                            txBytes: [...op.txBytes, "00"],
+                          }),
+                        );
+                      setTestResult(null);
+                      setSelectedOpId(id);
+                    }}
+                    selectedOpId={selected?.id ?? null}
+                    onSelectOp={(id) => {
                       setSelectedInterfaceId(null);
                       setFlowEditing(false);
                       setSelectedOpId(id);
                     }}
                   />
-                </>
-              )}
+                )}
 
-              {!flowEditing &&
-              draft.binding.bus === "adc" &&
-              editorPane === "actions" ? (
-                <AnalogSamplingSummary ops={ops} it={it} />
-              ) : null}
-
-              {flowEditing ||
-              draft.binding.bus === "i2c" ||
-              draft.binding.bus === "spi" ? null : (
-                <section className="mb-4 mt-4 rounded-slmd border border-border-strong bg-surface p-3">
-                  <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                    {it
-                      ? `Sequenza ${draft.binding.bus.toUpperCase()}`
-                      : `${draft.binding.bus.toUpperCase()} sequence`}
-                  </h2>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {ops.length === 0 ? (
-                      <p className="font-body text-xs text-ink-faint">
-                        {it
-                          ? "Nessun passo — aggiungi dalla libreria."
-                          : "No steps — add from the library."}
-                      </p>
-                    ) : (
-                      ops.map((op, index) => (
-                        <div key={op.id} className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedOpId(op.id)}
-                            className={`rounded-slsm border px-2.5 py-2 text-left ${
-                              selectedOpId === op.id
-                                ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/25"
-                                : "border-border-strong bg-surface-sunken hover:border-brand-blue/40"
-                            }`}
-                          >
-                            <span className="block font-mono text-[9px] text-ink-faint">
-                              {index + 1}
-                            </span>
-                            <span className="block font-body text-xs font-semibold text-ink">
-                              {describeDeviceOp(op)}
-                            </span>
-                          </button>
-                          {index < ops.length - 1 ? (
-                            <span className="text-ink-faint">→</span>
-                          ) : null}
-                        </div>
-                      ))
+                {isWorkbench && !flowEditing && (
+                  <div className="sensor-workbench-test">
+                    {testControls}
+                    {visibleTestResult && (
+                      <RecipeTestResultPanel
+                        result={visibleTestResult}
+                        it={it}
+                        compact
+                      />
                     )}
                   </div>
-                </section>
-              )}
-            </>
-          )}
+                )}
+                {!isWorkbench && !flowEditing && draft.binding.bus === "i2c" && (
+                  <>
+                    <DriverSequence
+                      controls={testControls}
+                      result={
+                        visibleTestResult ? (
+                          <RecipeTestResultPanel result={visibleTestResult} it={it} />
+                        ) : null
+                      }
+                      initialization={editorPane === "init"}
+                      draft={draft}
+                      ops={ops}
+                      it={it}
+                      selectedId={selected?.id ?? null}
+                      onSelect={(id) => {
+                        setSelectedInterfaceId(null);
+                        setFlowEditing(false);
+                        setSelectedOpId(id);
+                      }}
+                    />
+                  </>
+                )}
 
-          {!isDisplay && (
-            <div
-              className={`mt-3 space-y-3 ${isWorkbench && flowEditing ? "sensor-workbench-inspector" : ""}`}
-            >
-              {(!isWorkbench || flowEditing) && selectedInspector}
-              {draft.binding.bus === "adc" && draft.binding.adc ? (
-                <section className="rounded-slmd border border-border-strong p-3">
-                  <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
-                    {it ? "Calibrazione" : "Calibration"}
-                  </h2>
-                  <div className="space-y-2">
-                    <Field label={it ? "Minimo (mV)" : "Minimum (mV)"}>
-                      <input
-                        type="number"
-                        placeholder={it ? "Da impostare" : "Unset"}
-                        value={draft.binding.adc.calibMinMv ?? ""}
-                        onChange={(e) => {
-                          const v =
-                            e.target.value === "" ? null : Number(e.target.value);
-                          const adc = { ...draft.binding.adc!, calibMinMv: v };
-                          const commands = draft.commands.map((c) => ({
-                            ...c,
-                            steps: c.steps.map((op) =>
-                              op.type === "map_range" ? { ...op, inMin: v } : op,
-                            ),
-                          }));
-                          setDraft({
-                            ...draft,
-                            binding: { ...draft.binding, adc },
-                            commands,
-                          });
-                        }}
-                        className={inputClass}
+                {!flowEditing &&
+                draft.binding.bus === "adc" &&
+                editorPane === "actions" ? (
+                  <AnalogSamplingSummary ops={ops} it={it} />
+                ) : null}
+
+                {isWorkbench ||
+                flowEditing ||
+                draft.binding.bus === "i2c" ||
+                draft.binding.bus === "spi" ? null : (
+                  <section className="mb-4 mt-4 rounded-slmd border border-border-strong bg-surface p-3">
+                    <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                      {it
+                        ? `Sequenza ${draft.binding.bus.toUpperCase()}`
+                        : `${draft.binding.bus.toUpperCase()} sequence`}
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {ops.length === 0 ? (
+                        <p className="font-body text-xs text-ink-faint">
+                          {it
+                            ? "Nessun passo — aggiungi dalla libreria."
+                            : "No steps — add from the library."}
+                        </p>
+                      ) : (
+                        ops.map((op, index) => (
+                          <div key={op.id} className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedOpId(op.id)}
+                              className={`rounded-slsm border px-2.5 py-2 text-left ${
+                                selectedOpId === op.id
+                                  ? "border-brand-blue bg-brand-blue/10 ring-2 ring-brand-blue/25"
+                                  : "border-border-strong bg-surface-sunken hover:border-brand-blue/40"
+                              }`}
+                            >
+                              <span className="block font-mono text-[9px] text-ink-faint">
+                                {index + 1}
+                              </span>
+                              <span className="block font-body text-xs font-semibold text-ink">
+                                {describeDeviceOp(op)}
+                              </span>
+                            </button>
+                            {index < ops.length - 1 ? (
+                              <span className="text-ink-faint">→</span>
+                            ) : null}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+
+            {!isDisplay && (
+              <div
+                className={`mt-3 space-y-3 ${isWorkbench && flowEditing ? "sensor-workbench-inspector" : ""}`}
+              >
+                {(!isWorkbench || (flowEditing && selected)) && selectedInspector}
+                {draft.binding.bus === "adc" && draft.binding.adc ? (
+                  <section className="rounded-slmd border border-border-strong p-3">
+                    <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
+                      {it ? "Calibrazione" : "Calibration"}
+                    </h2>
+                    <div className="space-y-2">
+                      <Field label={it ? "Minimo (mV)" : "Minimum (mV)"}>
+                        <input
+                          type="number"
+                          placeholder={it ? "Da impostare" : "Unset"}
+                          value={draft.binding.adc.calibMinMv ?? ""}
+                          onChange={(e) => {
+                            const v =
+                              e.target.value === "" ? null : Number(e.target.value);
+                            const adc = { ...draft.binding.adc!, calibMinMv: v };
+                            const commands = draft.commands.map((c) => ({
+                              ...c,
+                              steps: c.steps.map((op) =>
+                                op.type === "map_range" ? { ...op, inMin: v } : op,
+                              ),
+                            }));
+                            setDraft({
+                              ...draft,
+                              binding: { ...draft.binding, adc },
+                              commands,
+                            });
+                          }}
+                          className={inputClass}
+                        />
+                      </Field>
+                      <Field label={it ? "Massimo (mV)" : "Maximum (mV)"}>
+                        <input
+                          type="number"
+                          placeholder={it ? "Da impostare" : "Unset"}
+                          value={draft.binding.adc.calibMaxMv ?? ""}
+                          onChange={(e) => {
+                            const v =
+                              e.target.value === "" ? null : Number(e.target.value);
+                            const adc = { ...draft.binding.adc!, calibMaxMv: v };
+                            const commands = draft.commands.map((c) => ({
+                              ...c,
+                              steps: c.steps.map((op) =>
+                                op.type === "map_range" ? { ...op, inMax: v } : op,
+                              ),
+                            }));
+                            setDraft({
+                              ...draft,
+                              binding: { ...draft.binding, adc },
+                              commands,
+                            });
+                          }}
+                          className={inputClass}
+                        />
+                      </Field>
+                      {!calibOk ? (
+                        <p className="rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[11px] text-ink">
+                          {it
+                            ? "Calibrazione mancante — puoi salvare la bozza; Crea sensore resta bloccato. Canale % non disponibile."
+                            : "Calibration missing — draft save ok; Create sensor blocked. % channel unavailable."}
+                        </p>
+                      ) : null}
+                    </div>
+                  </section>
+                ) : null}{" "}
+              </div>
+            )}
+            {fieldErrors.length > 0 ? (
+              <ul className="mt-3 rounded-slmd border border-error/40 bg-error/5 px-3 py-2 font-body text-xs text-error">
+                {fieldErrors.map((err) => (
+                  <li key={err.field}>
+                    {err.field}: {err.message}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {!isWorkbench && !flowEditing && draft.binding.bus !== "i2c" && (
+              <section className="mt-3 rounded-slmd border border-border-strong bg-surface p-3">
+                {testControls}
+                {visibleTestResult && (
+                  <RecipeTestResultPanel result={visibleTestResult} it={it} />
+                )}
+              </section>
+            )}
+            {!flowEditing && !testResult && tryMessage ? (
+              <p className="mt-3 rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-xs text-ink-muted">
+                {tryMessage}
+              </p>
+            ) : null}
+            {draft.binding.bus === "gpio" && draft.binding.gpioSignals.length > 1 && (
+              <div className="gpio-context-panels">
+                {flowEditing ? (
+                  <>
+                    <GpioOutputsPanel draft={draft} it={it} onChange={setDraft} />
+                    <GpioEventsPanel draft={draft} it={it} onChange={setDraft} />
+                  </>
+                ) : (
+                  <>
+                    {editorPane === "actions" && (
+                      <GpioActionParametersPanel
+                        draft={draft}
+                        actionId={activeActionId}
+                        it={it}
+                        onChange={setDraft}
                       />
-                    </Field>
-                    <Field label={it ? "Massimo (mV)" : "Maximum (mV)"}>
-                      <input
-                        type="number"
-                        placeholder={it ? "Da impostare" : "Unset"}
-                        value={draft.binding.adc.calibMaxMv ?? ""}
-                        onChange={(e) => {
-                          const v =
-                            e.target.value === "" ? null : Number(e.target.value);
-                          const adc = { ...draft.binding.adc!, calibMaxMv: v };
-                          const commands = draft.commands.map((c) => ({
-                            ...c,
-                            steps: c.steps.map((op) =>
-                              op.type === "map_range" ? { ...op, inMax: v } : op,
-                            ),
-                          }));
-                          setDraft({
-                            ...draft,
-                            binding: { ...draft.binding, adc },
-                            commands,
-                          });
-                        }}
-                        className={inputClass}
-                      />
-                    </Field>
-                    {!calibOk ? (
-                      <p className="rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[11px] text-ink">
-                        {it
-                          ? "Calibrazione mancante — puoi salvare la bozza; Crea sensore resta bloccato. Canale % non disponibile."
-                          : "Calibration missing — draft save ok; Create sensor blocked. % channel unavailable."}
-                      </p>
-                    ) : null}
-                  </div>
-                </section>
-              ) : null}{" "}
-            </div>
-          )}
-          {fieldErrors.length > 0 ? (
-            <ul className="mt-3 rounded-slmd border border-error/40 bg-error/5 px-3 py-2 font-body text-xs text-error">
-              {fieldErrors.map((err) => (
-                <li key={err.field}>
-                  {err.field}: {err.message}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {!flowEditing && draft.binding.bus !== "i2c" && (
-            <section className="mt-3 rounded-slmd border border-border-strong bg-surface p-3">
-              {testControls}
-              {visibleTestResult && (
-                <RecipeTestResultPanel result={visibleTestResult} it={it} />
-              )}
-            </section>
-          )}
-          {!flowEditing && !testResult && tryMessage ? (
-            <p className="mt-3 rounded-slmd border border-border-strong bg-surface px-3 py-2 font-body text-xs text-ink-muted">
-              {tryMessage}
-            </p>
-          ) : null}
+                    )}
+                    <details>
+                      <summary>
+                        {it ? "Compatibilità del test" : "Test compatibility"}
+                      </summary>
+                      <GpioTestingPanel draft={draft} it={it} />
+                    </details>
+                  </>
+                )}
+              </div>
+            )}
+          </>
         </main>
 
-        {/* RIGHT: only the shared internal variable list. */}
+        {/* RIGHT: protocol configuration and shared internal variables. */}
         <aside
           className={`${isWorkbench ? "sensor-workbench-variables" : ""} flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain border-l border-border bg-surface p-3`}
         >
@@ -1608,7 +1898,9 @@ export function DeviceRecipeEditorScreen({
                 </div>
                 <p>
                   {it
-                    ? "Trascina una variabile in un byte, oppure usala nei messaggi e nelle letture."
+                    ? draft.binding.bus === "gpio"
+                      ? "Usa le variabili nei passi delle azioni, nelle letture e nelle uscite."
+                      : "Trascina una variabile in un byte, oppure usala nei messaggi e nelle letture."
                     : "Drag a variable into a byte, or use it in messages and reads."}
                 </p>
               </div>
@@ -1645,7 +1937,17 @@ export function DeviceRecipeEditorScreen({
             className="inline-flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={14} />
-            {it ? "Genera blocco sensore" : "Generate sensor block"}
+            {saveDriverOnly
+              ? it
+                ? "Completa driver"
+                : "Complete driver"
+              : it
+                ? draft.binding.bus === "gpio"
+                  ? "Genera blocco"
+                  : "Genera blocco sensore"
+                : draft.binding.bus === "gpio"
+                  ? "Generate block"
+                  : "Generate sensor block"}
           </button>
         </div>
       </footer>
@@ -1683,7 +1985,13 @@ export function DeviceRecipeEditorScreen({
                 className="inline-flex items-center gap-1.5 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
               >
                 <Check size={14} />
-                {it ? "Crea blocco nel canvas" : "Create canvas block"}
+                {saveDriverOnly
+                  ? it
+                    ? "Salva driver e continua"
+                    : "Save driver and continue"
+                  : it
+                    ? "Crea blocco nel canvas"
+                    : "Create canvas block"}
               </button>
             </div>
           </div>
@@ -2053,33 +2361,124 @@ function BindingPanel({
   }
 
   return (
-    <div className="space-y-2">
-      <table className="w-full font-body text-[10px]">
-        <thead>
-          <tr className="text-left text-ink-faint">
-            <th className="pb-1">{it ? "Nome" : "Name"}</th>
-            <th className="pb-1">{it ? "Dir" : "Dir"}</th>
-            <th className="pb-1">Pin</th>
-          </tr>
-        </thead>
-        <tbody>
-          {draft.binding.gpioSignals.map((sig) => (
-            <tr key={sig.id} className="text-ink">
-              <td className="py-0.5 font-semibold">{sig.name}</td>
-              <td>
-                {sig.direction === "in"
-                  ? it
-                    ? "ingresso"
-                    : "in"
-                  : it
-                    ? "uscita"
-                    : "out"}
-              </td>
-              <td className="font-mono">{sig.pinLabel}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-3">
+      {draft.binding.gpioSignals.length === 0 && (
+        <p className="rounded-slsm border border-dashed border-border-strong px-2 py-3 text-center font-body text-[11px] text-ink-faint">
+          {it
+            ? "Aggiungi un segnale per iniziare il driver GPIO."
+            : "Add a signal to start the GPIO driver."}
+        </p>
+      )}
+      {draft.binding.gpioSignals.map((signal, index) => {
+        const patchSignal = (patch: Partial<GpioSignalDef>) =>
+          onChange({
+            ...draft,
+            binding: {
+              ...draft.binding,
+              gpioSignals: draft.binding.gpioSignals.map((item) =>
+                item.id === signal.id ? { ...item, ...patch } : item,
+              ),
+            },
+          });
+        return (
+          <section
+            key={signal.id}
+            className="space-y-2 rounded-slsm border border-border bg-surface-sunken/55 p-2"
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-blue/10 font-mono text-[9px] text-brand-blue">
+                {index + 1}
+              </span>
+              <input
+                aria-label={it ? "Nome segnale GPIO" : "GPIO signal name"}
+                value={signal.name}
+                onChange={(event) =>
+                  patchSignal({
+                    name: event.target.value,
+                    role:
+                      signal.role === signal.name ? event.target.value : signal.role,
+                  })
+                }
+                className="min-w-0 flex-1 rounded-slsm border border-border-strong bg-surface px-2 py-1 font-body text-xs font-semibold text-ink"
+              />
+              <button
+                type="button"
+                aria-label={
+                  it ? `Elimina segnale ${signal.name}` : `Delete ${signal.name} signal`
+                }
+                onClick={() =>
+                  onChange({
+                    ...draft,
+                    binding: {
+                      ...draft.binding,
+                      gpioSignals: draft.binding.gpioSignals.filter(
+                        (item) => item.id !== signal.id,
+                      ),
+                    },
+                  })
+                }
+                className="rounded-slsm p-1.5 text-ink-faint hover:bg-error/10 hover:text-error"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label={it ? "Direzione" : "Direction"}>
+                <select
+                  value={signal.direction}
+                  onChange={(event) =>
+                    patchSignal({
+                      direction: event.target.value as GpioSignalDef["direction"],
+                    })
+                  }
+                  className={inputClass}
+                >
+                  <option value="in">{it ? "Ingresso" : "Input"}</option>
+                  <option value="out">{it ? "Uscita" : "Output"}</option>
+                  <option value="bidir">
+                    {it ? "Bidirezionale" : "Bidirectional"}
+                  </option>
+                </select>
+              </Field>
+              <Field label="Pin">
+                <select
+                  value={signal.pinLabel}
+                  onChange={(event) => patchSignal({ pinLabel: event.target.value })}
+                  className={inputClass}
+                >
+                  {pinOptions.map((pin) => (
+                    <option key={pin} value={pin}>
+                      {pin}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={it ? "Pull interno" : "Internal pull"}>
+                <select
+                  value={signal.pull}
+                  disabled={signal.direction === "out"}
+                  onChange={(event) =>
+                    patchSignal({ pull: event.target.value as GpioSignalDef["pull"] })
+                  }
+                  className={inputClass}
+                >
+                  <option value="none">{it ? "Nessuno" : "None"}</option>
+                  <option value="up">Pull-up</option>
+                  <option value="down">Pull-down</option>
+                </select>
+              </Field>
+              <label className="flex items-end gap-2 pb-1 font-body text-[10px] text-ink-muted">
+                <input
+                  type="checkbox"
+                  checked={signal.activeLow}
+                  onChange={(event) => patchSignal({ activeLow: event.target.checked })}
+                />
+                {it ? "Attivo basso" : "Active low"}
+              </label>
+            </div>
+          </section>
+        );
+      })}
       <button
         type="button"
         onClick={() => {
@@ -2106,6 +2505,7 @@ function BindingPanel({
         <Plus size={12} />
         {it ? "Aggiungi segnale" : "Add signal"}
       </button>
+      {physicalHint}
     </div>
   );
 }
@@ -2230,7 +2630,6 @@ function StepInspector({
   onChange,
   onDraftChange,
   onRemove,
-  onMove,
 }: {
   op: DeviceRecipeOp;
   draft: DeviceRecipeDraft;
@@ -2240,45 +2639,45 @@ function StepInspector({
   onRemove: () => void;
   onMove: (dir: -1 | 1) => void;
 }) {
+  const stepNameRef = useRef<HTMLInputElement>(null);
+  const heading = (
+    <div className="sensor-step-heading flex items-center gap-1">
+      <div className="sensor-step-name">
+        <input
+          ref={stepNameRef}
+          aria-label={it ? "Nome del passo" : "Step name"}
+          value={op.label ?? workbenchStepLabel(op, it)}
+          onChange={(event) => onChange({ ...op, label: event.target.value })}
+          onBlur={() => {
+            if (op.label !== undefined && !op.label.trim())
+              onChange({ ...op, label: undefined });
+          }}
+        />
+        <button
+          type="button"
+          aria-label={it ? "Rinomina passo" : "Rename step"}
+          onClick={() => {
+            stepNameRef.current?.focus();
+            stepNameRef.current?.select();
+          }}
+        >
+          <Pencil size={13} aria-hidden />
+        </button>
+        <span className="sensor-step-kind">{workbenchStepKind(op, it)}</span>
+      </div>
+      <button
+        type="button"
+        aria-label={it ? "Rimuovi passo" : "Remove step"}
+        onClick={onRemove}
+        className="rounded-slsm border border-border p-0.5 text-error"
+      >
+        <Trash2 size={12} />
+      </button>
+    </div>
+  );
   return (
     <div className="sensor-step-fields space-y-2">
-      <div className="sensor-step-heading flex items-center gap-1">
-        <span className="min-w-0 flex-1 font-body text-xs font-semibold text-ink">
-          {op.type === "i2c_write"
-            ? it
-              ? "Scrivi messaggio"
-              : "Write message"
-            : op.type === "i2c_read" || op.type === "i2c_write_read"
-              ? it
-                ? "Leggi risposta"
-                : "Read response"
-              : describeDeviceOp(op)}
-        </span>
-        <button
-          type="button"
-          aria-label={it ? "Sposta passo prima" : "Move step earlier"}
-          onClick={() => onMove(-1)}
-          className="ml-auto rounded-slsm border border-border p-0.5 text-ink-faint"
-        >
-          <ArrowUp size={12} />
-        </button>
-        <button
-          type="button"
-          aria-label={it ? "Sposta passo dopo" : "Move step later"}
-          onClick={() => onMove(1)}
-          className="rounded-slsm border border-border p-0.5 text-ink-faint"
-        >
-          <ArrowDown size={12} />
-        </button>
-        <button
-          type="button"
-          aria-label={it ? "Rimuovi passo" : "Remove step"}
-          onClick={onRemove}
-          className="rounded-slsm border border-border p-0.5 text-error"
-        >
-          <Trash2 size={12} />
-        </button>
-      </div>
+      {op.type !== "i2c_write" && op.type !== "i2c_write_read" && heading}
 
       {op.type === "sample_external" ? (
         <SampleExternalFields
@@ -2291,7 +2690,13 @@ function StepInspector({
       ) : null}
 
       {op.type === "i2c_write" ? (
-        <I2cWriteFields op={op} draft={draft} it={it} onChange={onChange} />
+        <I2cWriteFields
+          op={op}
+          draft={draft}
+          it={it}
+          onChange={onChange}
+          heading={heading}
+        />
       ) : null}
 
       {op.type === "i2c_read" ? (
@@ -2329,6 +2734,7 @@ function StepInspector({
       {op.type === "i2c_write_read" ? (
         <>
           <HexByteCellsEditor
+            heading={heading}
             key={op.id}
             opId={op.id}
             bytes={op.writeBytes}
@@ -2463,11 +2869,17 @@ function StepInspector({
               onChange={(e) => onChange({ ...op, signalId: e.target.value })}
               className={inputClass}
             >
-              {draft.binding.gpioSignals.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
+              {draft.binding.gpioSignals
+                .filter(
+                  (s) =>
+                    gpioSignalType(s) === "digital_input" ||
+                    (op.type === "gpio_read" && gpioSignalType(s) === "digital_output"),
+                )
+                .map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
             </select>
           </Field>
           {op.type === "gpio_debounce" ? (
@@ -2495,13 +2907,136 @@ function StepInspector({
             </>
           ) : null}
           <Field label={it ? "Salva in" : "Save to"}>
-            <input
+            <select
               value={op.into}
-              onChange={(e) => onChange({ ...op, into: e.target.value })}
+              onChange={(event) => onChange({ ...op, into: event.target.value })}
               className={inputClass}
-            />
+            >
+              {!recipeVariables(draft).some(
+                (variable) => variable.name === op.into,
+              ) && <option value={op.into}>{op.into}</option>}
+              {recipeVariables(draft)
+                .filter(
+                  (variable) =>
+                    variable.valueType === "bool" || variable.valueType === "number",
+                )
+                .map((variable) => (
+                  <option key={variable.id} value={variable.name}>
+                    {variable.name}
+                  </option>
+                ))}
+            </select>
           </Field>
         </>
+      ) : null}
+
+      {op.type === "gpio_write" ? (
+        <>
+          <Field label={it ? "Segnale di uscita" : "Output signal"}>
+            <select
+              value={op.signalId}
+              onChange={(e) => onChange({ ...op, signalId: e.target.value })}
+              className={inputClass}
+            >
+              {draft.binding.gpioSignals
+                .filter((signal) => gpioSignalType(signal) === "digital_output")
+                .map((signal) => (
+                  <option key={signal.id} value={signal.id}>
+                    {signal.name}
+                  </option>
+                ))}
+            </select>
+          </Field>
+          <Field label={it ? "Valore da scrivere" : "Value to write"}>
+            <select
+              className={inputClass}
+              value={
+                op.value?.kind === "variable"
+                  ? "variable"
+                  : op.value?.kind === "parameter"
+                    ? "parameter"
+                    : String(gpioWriteLogicalLevel(op) ?? op.level)
+              }
+              onChange={(event) =>
+                onChange(
+                  event.target.value === "variable"
+                    ? {
+                        ...op,
+                        value: {
+                          kind: "variable",
+                          name:
+                            recipeVariables(draft).find(
+                              (variable) =>
+                                variable.valueType === "bool" ||
+                                variable.valueType === "number",
+                            )?.name ?? "",
+                        },
+                      }
+                    : {
+                        ...op,
+                        level: Number(event.target.value) as 0 | 1,
+                        value: undefined,
+                      },
+                )
+              }
+            >
+              <option value="1">HIGH · 1</option>
+              <option value="0">LOW · 0</option>
+              <option value="variable">{it ? "Da variabile" : "From variable"}</option>
+              {op.value?.kind === "parameter" && (
+                <option value="parameter">
+                  {it ? "Da parametro" : "From parameter"}
+                </option>
+              )}
+            </select>
+          </Field>
+          {op.value?.kind === "variable" && (
+            <Field label={it ? "Variabile" : "Variable"}>
+              <select
+                className={inputClass}
+                value={op.value.name}
+                onChange={(event) =>
+                  onChange({
+                    ...op,
+                    value: { kind: "variable", name: event.target.value },
+                  })
+                }
+              >
+                <option value="">
+                  {it ? "Seleziona una variabile" : "Choose a variable"}
+                </option>
+                {recipeVariables(draft)
+                  .filter(
+                    (variable) =>
+                      variable.valueType === "bool" || variable.valueType === "number",
+                  )
+                  .map((variable) => (
+                    <option key={variable.id} value={variable.name}>
+                      {variable.name}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+          )}
+          {!draft.binding.gpioSignals.some(
+            (signal) => gpioSignalType(signal) === "digital_output",
+          ) && (
+            <p className="rounded-slsm bg-warning/15 px-2 py-1.5 font-body text-[10px] text-ink-muted">
+              {it
+                ? "Configura almeno un segnale GPIO come uscita digitale."
+                : "Configure at least one GPIO signal as a digital output."}
+            </p>
+          )}
+        </>
+      ) : null}
+
+      {op.type === "gpio_toggle" ||
+      op.type === "gpio_pulse" ||
+      op.type === "gpio_read_analog" ||
+      op.type === "gpio_set_pwm" ||
+      op.type === "gpio_set_pwm_pulse" ||
+      op.type === "gpio_stop_pwm" ? (
+        <GpioOperationFields op={op} draft={draft} it={it} onChange={onChange} />
       ) : null}
 
       {op.type === "decode" ? (
@@ -2529,30 +3064,50 @@ function StepInspector({
       ) : null}
 
       {op.type === "wait" ? (
-        <div className="flex gap-1.5">
-          <Field label={it ? "Durata" : "Duration"}>
-            <input
-              type="number"
-              min={0}
-              value={op.ms}
-              onChange={(e) =>
-                onChange({ ...op, ms: Math.max(0, Number(e.target.value) || 0) })
+        <div className="space-y-2">
+          <div className="flex gap-1.5">
+            <Field label={it ? "Durata" : "Duration"}>
+              <input
+                type="number"
+                min={0}
+                value={op.ms}
+                onChange={(e) =>
+                  onChange({ ...op, ms: Math.max(0, Number(e.target.value) || 0) })
+                }
+                className={inputClass}
+              />
+            </Field>
+            <Field label={it ? "Unità" : "Unit"}>
+              <select
+                value={op.unit === "us" ? "us" : "ms"}
+                onChange={(e) =>
+                  onChange({ ...op, unit: e.target.value as WaitTimeUnit })
+                }
+                className={inputClass}
+              >
+                <option value="ms">ms</option>
+                <option value="us">µs</option>
+              </select>
+            </Field>
+          </div>
+          {draft.commands.some((command) => command.params.length > 0) && (
+            <ValueSourceField
+              label={it ? "Durata da parametro" : "Duration from parameter"}
+              value={op.duration ?? { kind: "fixed", value: op.ms }}
+              draft={draft}
+              it={it}
+              onChange={(duration) =>
+                onChange({
+                  ...op,
+                  duration,
+                  ms:
+                    duration.kind === "fixed" && typeof duration.value === "number"
+                      ? duration.value
+                      : op.ms,
+                })
               }
-              className={inputClass}
             />
-          </Field>
-          <Field label={it ? "Unità" : "Unit"}>
-            <select
-              value={op.unit === "us" ? "us" : "ms"}
-              onChange={(e) =>
-                onChange({ ...op, unit: e.target.value as WaitTimeUnit })
-              }
-              className={inputClass}
-            >
-              <option value="ms">ms</option>
-              <option value="us">µs</option>
-            </select>
-          </Field>
+          )}
         </div>
       ) : null}
 
@@ -3575,7 +4130,9 @@ function HexByteCellsEditor({
   label,
   onChange,
   variables = [],
+  heading,
 }: {
+  readonly heading?: ReactNode;
   readonly opId: string;
   readonly bytes: readonly string[];
   readonly it: boolean;
@@ -3676,14 +4233,10 @@ function HexByteCellsEditor({
   return (
     <div className="sensor-byte-editor space-y-2">
       <div className="sensor-byte-toolbar">
-        <p>
-          {it
-            ? "I byte vengono inviati nella stessa transazione."
-            : "Bytes are sent in the same transaction."}{" "}
-          <span className="sr-only">
-            {label}: {cells.length} byte
-          </span>
-        </p>
+        {heading}
+        <span className="sr-only">
+          {label}: {cells.length} byte
+        </span>
         <div className="sensor-byte-toolbar-actions">
           <details
             className="sensor-byte-paste"
@@ -3875,11 +4428,13 @@ function HexByteCellsEditor({
 }
 
 function I2cWriteFields({
+  heading,
   draft,
   op,
   it,
   onChange,
 }: {
+  readonly heading?: ReactNode;
   readonly draft: DeviceRecipeDraft;
   readonly op: Extract<DeviceRecipeOp, { type: "i2c_write" }>;
   readonly it: boolean;
@@ -3888,6 +4443,7 @@ function I2cWriteFields({
   return (
     <div className="space-y-2">
       <HexByteCellsEditor
+        heading={heading}
         key={op.id}
         variables={recipeVariables(draft).map((variable) => variable.name)}
         opId={op.id}
@@ -4043,24 +4599,35 @@ function SampleExternalFields({
   readonly onDraftChange: (draft: DeviceRecipeDraft) => void;
 }) {
   const writeChannels = writeChannelsOf(draft);
+  const relayIo = draft.gpioHardware?.kind === "relay";
+  const digitalActions = draft.commands.filter(
+    (command) =>
+      command.exposeOnCanvas !== false &&
+      command.steps.some((step) => step.type === "gpio_write"),
+  );
   return (
     <>
       <p className="font-body text-[11px] leading-snug text-ink-muted">
         {it
           ? op.inputMode === "trigger"
-            ? "Il segnale ricevuto attiva l’azione scelta nel blocco del canvas."
+            ? "Il livello ricevuto chiama ON o OFF come impostato qui sotto."
             : "Il valore ricevuto dal canvas aggiorna questa variabile. Usa $nome nei messaggi I²C."
-          : "The canvas input updates this variable. Use $name in I²C messages."}
+          : op.inputMode === "trigger"
+            ? "The incoming level calls ON or OFF as configured below."
+            : "The canvas input updates this variable. Use $name in I²C messages."}
       </p>
       <Field label={it ? "Modalità ingresso" : "Input mode"}>
         <select
-          value={op.inputMode ?? "data"}
+          value={relayIo ? "trigger" : (op.inputMode ?? "data")}
           className={inputClass}
+          disabled={relayIo}
           onChange={(event) =>
             onChange({ ...op, inputMode: event.target.value as "data" | "trigger" })
           }
         >
-          <option value="data">{it ? "Dato → variabile" : "Data → variable"}</option>
+          {!relayIo && (
+            <option value="data">{it ? "Dato → variabile" : "Data → variable"}</option>
+          )}
           <option value="trigger">
             {it ? "Trigger → azione" : "Trigger → action"}
           </option>
@@ -4105,7 +4672,53 @@ function SampleExternalFields({
           </button>
         </div>
       </Field>
-      {op.inputMode !== "trigger" && (
+      {(op.inputMode === "trigger" || relayIo) && digitalActions.length > 0 && (
+        <>
+          <Field label={it ? "Se ingresso è ALTO" : "If input is HIGH"}>
+            <select
+              aria-label={it ? "Azione se ingresso ALTO" : "Action when input is HIGH"}
+              value={op.triggerHighAction ?? digitalActions[0]?.name ?? "on"}
+              className={inputClass}
+              onChange={(event) =>
+                onChange({
+                  ...op,
+                  inputMode: "trigger",
+                  triggerHighAction: event.target.value,
+                  triggerLowAction: op.triggerLowAction ?? digitalActions[1]?.name ?? "off",
+                })
+              }
+            >
+              {digitalActions.map((command) => (
+                <option key={command.id} value={command.name}>
+                  {command.label || command.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label={it ? "Se ingresso è BASSO" : "If input is LOW"}>
+            <select
+              aria-label={it ? "Azione se ingresso BASSO" : "Action when input is LOW"}
+              value={op.triggerLowAction ?? digitalActions.at(-1)?.name ?? "off"}
+              className={inputClass}
+              onChange={(event) =>
+                onChange({
+                  ...op,
+                  inputMode: "trigger",
+                  triggerHighAction: op.triggerHighAction ?? digitalActions[0]?.name ?? "on",
+                  triggerLowAction: event.target.value,
+                })
+              }
+            >
+              {digitalActions.map((command) => (
+                <option key={command.id} value={command.name}>
+                  {command.label || command.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </>
+      )}
+      {op.inputMode !== "trigger" && !relayIo && (
         <>
           <Field label={it ? "Variabile" : "Variable"}>
             <input

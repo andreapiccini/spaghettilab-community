@@ -412,11 +412,14 @@ export function freeConfigurablePinIndices(modes: readonly number[]): number[] {
 
 /**
  * Bus / 1-Wire signal bases that must stay unique on the Function bay
- * (one SDA, one SCL, one GPIO IN, one ADC, …). Re-assign is blocked until cleared.
+ * (one SDA, one SCL, one TX, …). GPIO, ADC and PWM may occupy many pins.
  */
-export const UNIQUE_SIGNAL_BASES = new Set([
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-]);
+export const UNIQUE_SIGNAL_BASES = new Set([4, 5, 6, 7, 8, 9, 10, 11, 13]);
+
+/** GPIO IN/OUT, PWM and ADC can be assigned to more than one Function pin. */
+export function isRepeatableSignalBase(base: number): boolean {
+  return base === 1 || base === 2 || base === 3 || base === 12 || base === 14;
+}
 
 /**
  * Module Function pad map from the connector silkscreen:
@@ -647,10 +650,40 @@ export function silkPinLabels(variant: FunctionModuleVariant): readonly string[]
   return Array.from({ length: n }, (_, index) => formatPinLabel(modeIndexToPinId(index, variant), variant));
 }
 
-/**
- * Human label for where a signal mode (base nibble) is assigned, e.g. "A3 · ADC".
- * Returns undefined when that signal is not placed.
- */
+/** Digital OUT pins already configured in Module Function (mode 2 / 3). */
+export function configuredDigitalOutputPins(
+  drafts: Readonly<Record<string, BackbonePhysicalDraft>>,
+  bindingId?: string,
+): readonly { boardKey: string; channel: number; label: string }[] {
+  const pins: { boardKey: string; channel: number; label: string }[] = [];
+  for (const [boardKey, draft] of Object.entries(drafts)) {
+    if (bindingId && !boardKey.startsWith(`${bindingId}:`)) continue;
+    const variant = functionVariantOf(draft);
+    const count = configurablePinCount(variant);
+    draft.modes.slice(0, count).forEach((mode, channel) => {
+      if (![2, 3].includes(mode & 15)) return;
+      pins.push({
+        boardKey,
+        channel,
+        label: `${formatPinLabel(modeIndexToPinId(channel, variant), variant)} · OUT`,
+      });
+    });
+  }
+  return pins;
+}
+
+/** Declarative GPIO runtime only writes Function channels 0–3 (A0–A3 / Pin 2–5). */
+export const RUNTIME_GPIO_CHANNEL_MAX = 3;
+
+export function runtimeDigitalOutputPins(
+  drafts: Readonly<Record<string, BackbonePhysicalDraft>>,
+  bindingId?: string,
+): readonly { boardKey: string; channel: number; label: string }[] {
+  return configuredDigitalOutputPins(drafts, bindingId).filter(
+    (pin) => pin.channel <= RUNTIME_GPIO_CHANNEL_MAX,
+  );
+}
+
 export function physicalLabelForSignalMode(
   modes: readonly number[],
   signalModeBase: number,
@@ -899,8 +932,8 @@ export function removePortInterface(
 
 /**
  * Drop a peripheral signal onto a pin. Occupied pins overwrite: the previous
- * peripheral is cleared from every pin it owned. A signal already placed on
- * another pin is refused (clear it first) — never duplicated.
+ * peripheral is cleared from every pin it owned. Unique bus signals already
+ * placed on another pin are refused (clear first). GPIO / ADC / PWM may repeat.
  */
 export function dropSignalOnPin(
   modes: readonly number[],
@@ -912,7 +945,11 @@ export function dropSignalOnPin(
   if (index < 0 || index >= modes.length) return [...modes];
   const base = signalMode & 15;
   const existingIndex = modes.findIndex((mode) => (mode & 15) === base && base !== 0);
-  if (existingIndex >= 0 && existingIndex !== index) {
+  if (
+    UNIQUE_SIGNAL_BASES.has(base) &&
+    existingIndex >= 0 &&
+    existingIndex !== index
+  ) {
     return [...modes];
   }
   let next = [...modes];

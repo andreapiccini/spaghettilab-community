@@ -51,6 +51,9 @@ export function DeletableEdge({
   const invalid = edgeMarkedInvalid(data);
 
   const { edgePath, labelX, labelY } = useMemo(() => {
+    if (![sourceX, sourceY, targetX, targetY].every(Number.isFinite)) {
+      return { edgePath: "", labelX: 0, labelY: 0 };
+    }
     const start: Point = { x: sourceX, y: sourceY };
     const end: Point = { x: targetX, y: targetY };
     const leadStart = leadFromHandle(start, handleSide(sourcePosition));

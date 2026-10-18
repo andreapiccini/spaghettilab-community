@@ -477,9 +477,9 @@ int spaghetti_port_apply_user_config(spaghetti_port_id_t id,
 			flags = GPIO_INPUT;
 		}
 		if (mode == 2U) {
-			flags = GPIO_OUTPUT_LOW;
+			flags = GPIO_INPUT | GPIO_OUTPUT_LOW;
 		} else if (mode == 3U) {
-			flags = GPIO_OUTPUT_HIGH;
+			flags = GPIO_INPUT | GPIO_OUTPUT_HIGH;
 		} else if (mode == 1U) {
 			flags |= (modes[i] & 0x10U) ? GPIO_PULL_UP : 0U;
 			flags |= (modes[i] & 0x20U) ? GPIO_PULL_DOWN : 0U;
@@ -1011,6 +1011,20 @@ int spaghetti_port_digital_output_set(
 	return gpio_pin_set_raw(port->digital_outputs[channel].port,
 				 port->digital_outputs[channel].pin,
 				 high ? 1 : 0);
+}
+
+int spaghetti_port_digital_state_get(const struct spaghetti_port *port, uint8_t channel, bool *out_high)
+{
+	if (port == NULL || out_high == NULL) return -EINVAL;
+	if (channel >= 4U || channel >= port->digital_input_count || port->digital_inputs == NULL) return -ENOTSUP;
+	uint8_t mode = port->user_modes[channel] & 15U;
+	if (port->user_config[0] != 1U || mode < 1U || mode > 3U) return -ESTALE;
+	const struct gpio_dt_spec *pin = &port->digital_inputs[channel];
+	if (!gpio_is_ready_dt(pin)) return -ENODEV;
+	int value = gpio_pin_get_raw(pin->port, pin->pin);
+	if (value < 0) return value;
+	*out_high = value != 0;
+	return 0;
 }
 
 int spaghetti_port_digital_input_get(

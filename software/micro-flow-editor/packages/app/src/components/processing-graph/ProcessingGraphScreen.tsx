@@ -15,7 +15,16 @@ import { CircleAlert, PlayCircle, Square, Workflow } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { labelForNumericSignal } from "../../lib/port-protocol-mock.js";
 import { usePortProtocol } from "../../state/port-protocol-context.js";
+import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { useNfcPresence } from "../../state/nfc-presence-context.js";
 import { useSession } from "../../state/session-context.js";
+import {
+  applyStoppedRuntime,
+  configBytesHaveLiveRuntime,
+  forgetOwnedDriverProfiles,
+  formatApplyConfigError,
+  waitConfigWriteGap,
+} from "../../lib/stop-deployed-runtime.js";
 import { portCardId } from "../physical-composition/ConfiguredPortNode.js";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
 import { localizeCatalogEntry, localizedBaySideLabel } from "../../lib/processing-catalog-copy.js";
@@ -58,6 +67,7 @@ import { VisitorDemoTour } from "./VisitorDemoTour.js";
 import { DemoRadialAdd } from "./DemoRadialAdd.js";
 import { BackboneModulesPanel } from "./BackboneModulesPanel.js";
 import { PhysicalBusMissingModal } from "./PhysicalBusMissingModal.js";
+import { ModuleGpioPinField } from "./ModuleGpioPinField.js";
 import { SensorRecipeCard, SensorRecipeWizard } from "./SensorRecipeWizard.js";
 import { useLocale } from "../../state/locale-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
@@ -67,6 +77,7 @@ import {
   nextSpawnPosition,
   nodeDataFromCatalogEntry,
   peekPaletteDragBaySide,
+  peekPaletteDragChainable,
   peekPaletteDragKind,
   snapToGrid,
 } from "./catalog-to-node.js";
@@ -95,7 +106,7 @@ import {
   triggerToContainerOrigin,
   type EventContainer,
 } from "./event-containers.js";
-import { activeActuatorsAt, activeTriggersAt, buildDryRunPreviewChannels, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRelayBlock, isTemperatureSensor, ledIntensitiesAt, numberFromProperty, previewParticipantIds, rgbVisualsAt, type DryRunPreviewChannel } from "./dry-run-preview.js";
+import { activeActuatorsAt, activeTriggersAt, buildDryRunPreviewChannels, isBackboneSensorBlock, isCompareIf, isDigitalCommandSource, isFlowStartBlock, isLedBlock, isRelayBlock, isTemperatureSensor, ledIntensitiesAt, numberFromProperty, previewParticipantIds, rgbVisualsAt, type DryRunPreviewChannel } from "./dry-run-preview.js";
 import { NODE_HEIGHT, NODE_PADDING, NODE_WIDTH, ENTRY_FEED_INSET, EVENT_CONTAINER_HEADER_HEIGHT, FLOW_START_SIZE, fixedTickAbsolute, fixedTickRelativePosition } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { containerAtPosition, resolveRectOverlap, resolveSiblingOverlap, type SizedRect } from "./node-overlap.js";
@@ -151,7 +162,10 @@ export function ProcessingGraphScreen() {
 }
 
 function ProcessingGraphScreenInner() {
-  const { session, execute, navigate, requestDeploy } = useSession();
+  const { session, execute, navigate, requestDeploy, openBackbonePhysical } = useSession();
+  const { getClient, getSnapshot, observeConfig, removeProfile, lockTransport, unlockTransport } =
+    useCoreSessions();
+  const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
@@ -170,6 +184,8 @@ function ProcessingGraphScreenInner() {
   const [missingBus, setMissingBus] = useState<SensorBus | null>(null);
   const [dryRun, setDryRun] = useState<DryRunResult | null>(null);
   const [running, setRunning] = useState(false);
+  const [pausing, setPausing] = useState(false);
+  const [pauseError, setPauseError] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [previewActiveIds, setPreviewActiveIds] = useState<ReadonlySet<string>>(() => new Set());
   const [previewElapsedMs, setPreviewElapsedMs] = useState(0);
@@ -444,7 +460,7 @@ function ProcessingGraphScreenInner() {
     return module?.actions?.find(
       (r) =>
         r.actionId === data.properties[SENSOR_ACTION_ID_PROP] &&
-        r.deviceDraft?.binding.bus === "i2c",
+        ["i2c", "gpio"].includes(r.deviceDraft?.binding.bus ?? ""),
     );
   }
 
@@ -1242,7 +1258,11 @@ function ProcessingGraphScreenInner() {
     const targetData = connection.target ? domainNodes.find((node) => node.id === connection.target)?.data : undefined;
     if (demoOnly && connection.target) {
       const oneInput =
-        !!targetData && (isCompareIf(targetData) || isLedBlock(targetData) || isRelayBlock(targetData));
+        !!targetData &&
+        (isCompareIf(targetData) ||
+          isLedBlock(targetData) ||
+          isRelayBlock(targetData) ||
+          isBackboneSensorBlock(targetData));
       if (oneInput) {
         for (const edge of graphState.edges) {
           if (edge.target === connection.target) execute(removeGraphEdgeCommand(lens, edge.id));
@@ -1261,7 +1281,7 @@ function ProcessingGraphScreenInner() {
     );
     if (demoOnly && connection.source && connection.target && targetData && isCompareIf(targetData) && isBlockNodeData(targetData)) {
       const src = domainNodes.find((node) => node.id === connection.source)?.data;
-      if (src && (isDigitalOutToggle(src) || isTemperatureSensor(src))) {
+      if (src && (isDigitalCommandSource(src) || isTemperatureSensor(src))) {
         persistNode(
           connection.target,
           {
@@ -1323,7 +1343,7 @@ function ProcessingGraphScreenInner() {
     let attachLowerBound: { x: number; y: number } | undefined;
     if (bay && resolvedBaySide) {
       position = positionForBayDrop(resolvedBaySide, requestedPosition, eventContainers);
-    } else if (data.kind === "block") {
+    } else if (canChainIntoEventContainer(data)) {
       const target = containerAtPosition(position, eventContainers);
       if (target) {
         attachEdgeCommand = addGraphEdgeCommand(deviceGraphLens(bindingIndex), {
@@ -1525,8 +1545,8 @@ function ProcessingGraphScreenInner() {
       setContainerHint({ triggerId: target.triggerId, kind: "rejecting" });
       return;
     }
-    // Bay hardware stays outside the dashed box — no nest accept highlight.
-    if (peekPaletteDragBaySide() !== undefined) {
+    // Bay hardware and source-only blocks (Square wave) stay outside the dashed box.
+    if (peekPaletteDragBaySide() !== undefined || !peekPaletteDragChainable()) {
       setContainerHint(null);
       return;
     }
@@ -1550,6 +1570,46 @@ function ProcessingGraphScreenInner() {
     const entry = findCatalogEntryById(payload.entryId);
     if (!entry) return;
     placeFromCatalog(entry, position, payload.baySide, payload.physicalPinId);
+  }
+
+  const liveRuntime = configBytesHaveLiveRuntime(
+    selected ? getSnapshot(selected.bindingId)?.config?.configBytes : undefined,
+  );
+
+  async function handlePauseRuntime() {
+    if (!selected || bindingIndex < 0) return;
+    const client = getClient(selected.bindingId);
+    if (!client) {
+      setPauseError(
+        locale === "it"
+          ? "Collega la Backbone per lo Stop."
+          : "Connect the Backbone to Stop.",
+      );
+      return;
+    }
+    setPausing(true);
+    setPauseError(null);
+    pausePolling();
+    lockTransport();
+    try {
+      await waitUntilIdle();
+      const stopped = await applyStoppedRuntime(client);
+      observeConfig(selected.bindingId, stopped.config);
+      await waitConfigWriteGap();
+      await forgetOwnedDriverProfiles(selected.expectedDeviceId, async (profileId, version) => {
+        const removed = await removeProfile(selected.bindingId, profileId, version, {
+          isReferencedLocally: false,
+        });
+        return removed?.ok === true;
+      });
+      openBackbonePhysical(selected.bindingId, selected.expectedDeviceId);
+    } catch (cause) {
+      setPauseError(formatApplyConfigError(cause, locale === "it"));
+    } finally {
+      unlockTransport();
+      resumePolling();
+      setPausing(false);
+    }
   }
 
   async function handleDryRun() {
@@ -1666,12 +1726,28 @@ function ProcessingGraphScreenInner() {
             {copy.errorsCount(errorCount)}
           </span>
         )}
+        {!demoOnly && (liveRuntime || graphState.nodes.length > 0) && (
+          <button
+            type="button"
+            onClick={() => void handlePauseRuntime()}
+            disabled={pausing}
+            className="flex shrink-0 items-center gap-1.5 rounded-slpill border border-border-strong px-4 py-1.5 font-body-strong text-sm text-ink hover:bg-surface-raised disabled:opacity-50"
+          >
+            <Square size={14} fill="currentColor" />
+            {pausing ? copy.pausing : copy.pause}
+          </button>
+        )}
         {!demoOnly && (
           <button type="button" onClick={requestDeploy} className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark">
             Run Deploy
           </button>
         )}
       </div>
+      {pauseError && (
+        <div role="alert" className="border-b border-error bg-error/5 px-4 py-2 font-body text-sm text-error">
+          {pauseError}
+        </div>
+      )}
 
       {!selected ? (
         <div className="flex flex-1 items-center justify-center">
@@ -1717,11 +1793,20 @@ function ProcessingGraphScreenInner() {
                 <button type="button" aria-label="Close" className="absolute inset-0 cursor-default" onClick={() => setSensorDetail(null)} />
                 <div className="relative z-10 max-h-[min(90dvh,44rem)] w-full max-w-3xl overflow-y-auto rounded-slmd border border-border-strong bg-surface p-4 shadow-e2">
                   <SensorRecipeCard
-                    recipe={resolveRecipe(sensorDetail)}
+                    recipe={resolveRecipe(backboneSensorModules.find((module) => module.id === sensorDetail.id) ?? sensorDetail)}
                     it={locale === "it"}
                     editable
                     onRecipeChange={handleSensorRecipeEdit}
                   />
+                  {selected && (
+                    <div className="mt-4 border-t border-border pt-4">
+                      <ModuleGpioPinField
+                        module={backboneSensorModules.find((module) => module.id === sensorDetail.id) ?? sensorDetail}
+                        bindingId={selected.bindingId}
+                        it={locale === "it"}
+                      />
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => setSensorDetail(null)}

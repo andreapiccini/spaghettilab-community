@@ -49,18 +49,26 @@ export function ConnectCoreDialog({
   useEffect(() => {
     if (!open || (method !== "auto" && method !== "usb")) return undefined;
     let cancelled = false;
-    void probeUsbCores()
-      .then((found) => {
-        if (cancelled) return;
-        setUsbCores(found);
-        setSelectedIds(new Set(found.filter((core) => core.source !== "can").map((core) => core.deviceIdHex)));
-      })
-      .catch((cause: unknown) => {
-        if (cancelled) return;
-        setError(localizeUsbError(cause, copy));
-      });
+    const apply = (found: readonly FoundUsbCore[]) => {
+      if (cancelled) return;
+      setUsbCores(found);
+      setSelectedIds(new Set(found.filter((core) => core.source !== "can").map((core) => core.deviceIdHex)));
+    };
+    const run = () =>
+      probeUsbCores()
+        .then(apply)
+        .catch((cause: unknown) => {
+          if (cancelled) return;
+          setError(localizeUsbError(cause, copy));
+        });
+    void run();
+    // USB plug resets the Master; the first /list is often empty while it boots.
+    const retry = window.setTimeout(() => {
+      void run();
+    }, 2500);
     return () => {
       cancelled = true;
+      window.clearTimeout(retry);
     };
   }, [open, method]);
 

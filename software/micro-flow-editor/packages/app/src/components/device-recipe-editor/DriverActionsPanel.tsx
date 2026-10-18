@@ -1,4 +1,8 @@
-import { workbenchStepLabel, workbenchStepDetail } from "./sensor-workbench-labels.js";
+import {
+  workbenchStepLabel,
+  workbenchStepDetail,
+  workbenchStepKind,
+} from "./sensor-workbench-labels.js";
 import { SensorSchematic } from "./SensorSchematic.js";
 import { sensorInterfaces } from "../../lib/sensor-instance.js";
 import type { ReactNode } from "react";
@@ -182,6 +186,7 @@ export function DriverActionsList({
 }
 
 export function DriverSequence({
+  draft,
   ops,
   it,
   selectedId,
@@ -229,7 +234,12 @@ export function DriverSequence({
               <span className="sensor-step-number">{i + 1}</span>
               <span>
                 <strong>{workbenchStepLabel(op, it)}</strong>
-                <small>{workbenchStepDetail(op, it)}</small>
+                <small
+                  title={`${workbenchStepKind(op, it)} · ${workbenchStepDetail(op, it, draft.binding.gpioSignals)}`}
+                >
+                  {workbenchStepKind(op, it)} ·{" "}
+                  {workbenchStepDetail(op, it, draft.binding.gpioSignals)}
+                </small>
               </span>
             </button>
           </li>

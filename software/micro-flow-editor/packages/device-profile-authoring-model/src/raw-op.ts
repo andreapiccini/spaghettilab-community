@@ -107,12 +107,26 @@ export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
         imm2: instruction.timeoutMs,
       };
     case "GPIO_GET":
-      return { ...base, opcode: DeviceProfileOpcode.GPIO_GET, dst: instruction.dst };
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.GPIO_GET,
+        dst: instruction.dst,
+        imm0: instruction.channel ?? 0,
+      };
     case "GPIO_SET":
       return {
         ...base,
         opcode: DeviceProfileOpcode.GPIO_SET,
         imm0: instruction.value ? 1 : 0,
+        imm1: instruction.channel ?? 0,
+      };
+    case "GPIO_SET_VALUE":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.GPIO_SET_VALUE,
+        srcA: instruction.src,
+        imm0: instruction.channel,
+        imm1: instruction.invert ? 1 : 0,
       };
     case "ADC_READ":
       return {
@@ -375,9 +389,24 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
         timeoutMs: raw.imm2,
       });
     case DeviceProfileOpcode.GPIO_GET:
-      return ok({ op: "GPIO_GET", dst: raw.dst });
+      return ok({
+        op: "GPIO_GET",
+        dst: raw.dst,
+        ...(raw.imm0 ? { channel: raw.imm0 } : {}),
+      });
     case DeviceProfileOpcode.GPIO_SET:
-      return ok({ op: "GPIO_SET", value: raw.imm0 !== 0 });
+      return ok({
+        op: "GPIO_SET",
+        value: raw.imm0 !== 0,
+        ...(raw.imm1 ? { channel: raw.imm1 } : {}),
+      });
+    case DeviceProfileOpcode.GPIO_SET_VALUE:
+      return ok({
+        op: "GPIO_SET_VALUE",
+        src: raw.srcA,
+        channel: raw.imm0,
+        ...(raw.imm1 ? { invert: true } : {}),
+      });
     case DeviceProfileOpcode.ADC_READ:
       return ok({ op: "ADC_READ", dst: raw.dst, timeoutMs: raw.imm0 });
     case DeviceProfileOpcode.DELAY_BOUNDED:

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { readableTimingScale } from "../../lib/timing-scale.js";
 /**
  * Logic-analyzer / oscilloscope-style timing diagram (illustrative SVG).
@@ -58,8 +58,37 @@ export function TimingScopeChart({
   onChangeByte,
   onAddByte,
 }: Props) {
+  const viewportRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [byteFormat, setByteFormat] = useState<"hex" | "binary">("hex");
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    function alignSelectedStep() {
+      if (!viewport) return;
+      const anchors = [
+        ...viewport.querySelectorAll<SVGRectElement>("[data-timing-step-id]"),
+      ];
+      const anchor = anchors.find(
+        (element) => element.dataset.timingStepId === highlightOpId,
+      );
+      if (!anchor || anchor === anchors[0]) {
+        viewport.scrollLeft = 0;
+        return;
+      }
+      // Keep the selected transaction start visible, with space for lane labels.
+      const offset =
+        anchor.getBoundingClientRect().left -
+        viewport.getBoundingClientRect().left +
+        viewport.scrollLeft;
+      viewport.scrollTo({ left: Math.max(0, offset - 78), behavior: "auto" });
+    }
+    alignSelectedStep();
+    const observer = new ResizeObserver(alignSelectedStep);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [highlightOpId, zoom, byteFormat]);
+
   const displayByte = (value: string) =>
     byteFormat === "binary" && /^(?:0x)?[0-9a-f]{1,2}$/i.test(value)
       ? `0b${Number.parseInt(value.replace(/^0x/i, ""), 16).toString(2).padStart(8, "0")}`
@@ -143,6 +172,7 @@ export function TimingScopeChart({
         </div>
       )}
       <div
+        ref={viewportRef}
         className="max-w-full overflow-x-auto"
         tabIndex={0}
         aria-label="Diagramma scorrevole"
@@ -195,6 +225,7 @@ export function TimingScopeChart({
                   >
                     <title>{`${step.index + 1}. ${step.label}`}</title>
                     <rect
+                      data-timing-step-id={step.opId}
                       x={x0}
                       y={stepY + 2}
                       width={w}

@@ -72,9 +72,21 @@ export type UartReadInstruction = Op<"UART_READ"> & {
   readonly length: number;
   readonly timeoutMs: number;
 };
-export type GpioGetInstruction = Op<"GPIO_GET"> & { readonly dst: TempSlot };
+export type GpioGetInstruction = Op<"GPIO_GET"> & {
+  readonly dst: TempSlot;
+  readonly channel?: number;
+};
 /** `spaghetti_port_set_output(port, imm0 != 0)` — an immediate boolean, never a temp slot read (the firmware doesn't even validate `src_a` for this opcode). */
-export type GpioSetInstruction = Op<"GPIO_SET"> & { readonly value: boolean };
+export type GpioSetValueInstruction = Op<"GPIO_SET_VALUE"> & {
+  readonly src: TempSlot;
+  readonly channel: number;
+  readonly invert?: boolean;
+};
+
+export type GpioSetInstruction = Op<"GPIO_SET"> & {
+  readonly value: boolean;
+  readonly channel?: number;
+};
 /** `imm0` is the ADC read timeout in ms; the channel itself comes from the instance `binding`, not this op. */
 export type AdcReadInstruction = Op<"ADC_READ"> & {
   readonly dst: TempSlot;
@@ -227,6 +239,7 @@ export type Instruction =
   | UartReadInstruction
   | GpioGetInstruction
   | GpioSetInstruction
+  | GpioSetValueInstruction
   | AdcReadInstruction
   | DelayBoundedInstruction
   | WaitFieldMaskInstruction

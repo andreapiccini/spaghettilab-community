@@ -1,7 +1,7 @@
 export type ModulePosition = 1 | 2;
 
 export type NfcNode = {
-  readonly portId: ModulePosition;
+  readonly portId: number;
   readonly label: string;
   readonly uid?: string;
   readonly nodeId?: number;
@@ -74,6 +74,90 @@ export function nfcNodeKey(node: NfcNode): string {
   return `${node.nodeId ?? ""}\0${node.portId}\0${node.moduleTypeId ?? node.label}\0${node.uid ?? ""}`;
 }
 
+function nfcPresenceKey(node: NfcNode): string {
+  return node.uid ? `uid:${node.uid}` : nfcNodeKey(node);
+}
+
+/** Empty snapshots from a periodic poll: keep the last tag once, then drop it. */
+export const NFC_EMPTY_CONFIRM_POLLS = 2;
+
+/**
+ * Live presence from GET_STATUS. Appear immediately. A periodic empty list
+ * must be confirmed once so a dropped field or missed RF read does not
+ * flicker; a discovery-triggered refresh may drop the tag on the first empty.
+ * An omitted `nfcTags` field counts as a miss so removal still clears when
+ * the firmware omits the field instead of sending an empty array.
+ */
+export function stabilizeNfcPresence<T>(
+  previous: readonly T[],
+  incoming: readonly T[] | undefined,
+  emptyStreak: number,
+  options?: { readonly immediateLeave?: boolean },
+): { readonly tags: readonly T[]; readonly emptyStreak: number } {
+  if (incoming === undefined) {
+    if (previous.length === 0) return { tags: [], emptyStreak: 0 };
+    if (options?.immediateLeave) return { tags: [], emptyStreak: 0 };
+    const omittedStreak = emptyStreak + 1;
+    if (omittedStreak >= NFC_EMPTY_CONFIRM_POLLS) {
+      return { tags: [], emptyStreak: 0 };
+    }
+    return { tags: previous, emptyStreak: omittedStreak };
+  }
+  if (incoming.length > 0) {
+    return { tags: incoming, emptyStreak: 0 };
+  }
+  if (previous.length === 0) {
+    return { tags: [], emptyStreak: 0 };
+  }
+  if (options?.immediateLeave) {
+    return { tags: [], emptyStreak: 0 };
+  }
+  const streak = emptyStreak + 1;
+  if (streak >= NFC_EMPTY_CONFIRM_POLLS) {
+    return { tags: [], emptyStreak: 0 };
+  }
+  return { tags: previous, emptyStreak: streak };
+}
+
+/**
+ * Optional hysteresis for flaky antennas. Live presence should use
+ * `stabilizeNfcPresence` instead of holding a removed tag across polls.
+ */
+export function retainSeenNfcNodes(
+  previous: readonly NfcNode[],
+  incoming: readonly NfcNode[],
+  misses: ReadonlyMap<string, number>,
+  missLimit: number,
+): { readonly nodes: readonly NfcNode[]; readonly misses: ReadonlyMap<string, number> } {
+  const incomingByKey = new Map(incoming.map((node) => [nfcPresenceKey(node), node]));
+  const nextMisses = new Map<string, number>();
+  const nodes: NfcNode[] = [];
+  const seen = new Set<string>();
+
+  for (const node of previous) {
+    const key = nfcPresenceKey(node);
+    const fresh = incomingByKey.get(key);
+    if (fresh) {
+      nextMisses.set(key, 0);
+      nodes.push(fresh);
+      seen.add(key);
+      continue;
+    }
+    const count = (misses.get(key) ?? 0) + 1;
+    nextMisses.set(key, count);
+    if (count < missLimit) nodes.push(node);
+  }
+
+  for (const node of incoming) {
+    const key = nfcPresenceKey(node);
+    if (seen.has(key)) continue;
+    nextMisses.set(key, 0);
+    nodes.push(node);
+  }
+
+  return { nodes, misses: nextMisses };
+}
+
 function uidHex(uid: Uint8Array | string | undefined): string | undefined {
   if (uid === undefined) return undefined;
   if (typeof uid === "string") return uid.toUpperCase();
@@ -89,7 +173,9 @@ export function isSlm1Tag(tag: NfcTagInput): boolean {
   return TYPE_LABELS[typeId] !== undefined;
 }
 
-export function moduleTypeLabel(tag: Pick<NfcTagInput, "typeId" | "fallbackClass" | "moduleTypeId">): string {
+export function moduleTypeLabel(
+  tag: Pick<NfcTagInput, "typeId" | "fallbackClass" | "moduleTypeId">,
+): string {
   if (tag.fallbackClass !== undefined && FALLBACK_CLASS_LABELS[tag.fallbackClass]) {
     return FALLBACK_CLASS_LABELS[tag.fallbackClass]!;
   }
@@ -102,6 +188,11 @@ export function moduleTypeLabel(tag: Pick<NfcTagInput, "typeId" | "fallbackClass
 export function asModulePosition(portId: number): ModulePosition | undefined {
   if (portId === 1 || portId === 2) return portId;
   return undefined;
+}
+
+function asReaderPort(portId: number): number | undefined {
+  if (!Number.isInteger(portId) || portId < 0) return undefined;
+  return portId;
 }
 
 export function nfcNodesForBoard(
@@ -129,15 +220,20 @@ export function nfcNodesForBoard(
   });
 }
 
-/** Collect only SLM1-validated module tags from GET_STATUS `nfcTags`. */
-export function collectNfcNodes(tags: readonly NfcTagInput[] = []): NfcNode[] {
+/** Hardware mapping stays SLM1-only; reader displays may include unidentified tags. */
+export function collectNfcNodes(
+  tags: readonly NfcTagInput[] = [],
+  includeUnidentified = false,
+): NfcNode[] {
   const nodes: NfcNode[] = [];
   const seen = new Set<string>();
   for (const tag of tags) {
-    if (!isSlm1Tag(tag)) continue;
-    const portId = asModulePosition(tag.portId);
+    if (!isSlm1Tag(tag) && !includeUnidentified) continue;
+    const portId = includeUnidentified
+      ? asReaderPort(tag.portId)
+      : asModulePosition(tag.portId);
     if (portId === undefined) continue;
-    const label = moduleTypeLabel(tag);
+    const label = isSlm1Tag(tag) ? moduleTypeLabel(tag) : "Tag NFC";
     const node: NfcNode = {
       portId,
       label,

@@ -1,3 +1,12 @@
+config SPAGHETTI_NFC_MODULE
+	bool "Dedicated NFC CAN peripheral (never master)"
+	depends on SPAGHETTI_NFC && SPAGHETTI_FIELD_UPDATE_CAN
+	default n
+	help
+	  NFC-only product using the Backbone electronics. Ignores stored hardware
+	  configurations, never starts the Flow engine or host communication, never
+	  takes master slot 1, and rejects physical pin configuration requests.
+
 module = SPAGHETTI_APP
 module-str = spaghetti_app
 source "subsys/logging/Kconfig.template.log_config"

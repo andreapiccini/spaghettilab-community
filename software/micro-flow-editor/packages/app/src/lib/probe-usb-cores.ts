@@ -63,7 +63,7 @@ function mergeUsbCores(...groups: readonly (readonly FoundUsbCore[])[]): FoundUs
 /** Probe the localhost USB bridge (`make usb-bridge`). Empty if it is not running. */
 export async function probeUsbBridgeCores(): Promise<readonly FoundUsbCore[]> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), 12000);
   try {
     const response = await fetch(usbBridgeListUrl(), { signal: controller.signal, cache: "no-store" });
     if (!response.ok) return [];

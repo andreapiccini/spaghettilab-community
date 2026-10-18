@@ -6,6 +6,9 @@ type ProcessingGraphCopy = {
   readonly run: string;
   readonly running: string;
   readonly stopPreview: string;
+  readonly pause: string;
+  readonly pausing: string;
+  readonly stopHint: string;
   readonly sendToDeploy: string;
   readonly noCore: string;
   readonly emptyTitle: string;
@@ -126,6 +129,9 @@ const IT: ProcessingGraphCopy = {
   run: "Esegui",
   running: "In corso…",
   stopPreview: "Ferma anteprima",
+  pause: "Stop",
+  pausing: "Stop…",
+  stopHint: "Runtime fermo. Riconfigura i pin del Master oppure crea un nuovo flow.",
   sendToDeploy: "Invia a Deploy",
   noCore: "Nessuna Backbone nel progetto — vai a Backbone per connetterne una.",
   emptyTitle: "Nessun blocco ancora",
@@ -235,6 +241,9 @@ const EN: ProcessingGraphCopy = {
   run: "Run",
   running: "Running…",
   stopPreview: "Stop preview",
+  pause: "Stop",
+  pausing: "Stopping…",
+  stopHint: "Runtime stopped. Reconfigure the Master pins or create a new flow.",
   sendToDeploy: "Send to Deploy",
   noCore: "No Backbone in the project — go to Backbone to connect one.",
   emptyTitle: "No blocks yet",

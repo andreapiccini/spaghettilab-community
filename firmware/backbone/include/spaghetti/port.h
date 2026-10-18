@@ -426,6 +426,9 @@ int spaghetti_port_digital_output_set(
 	uint8_t channel,
 	bool high);
 
+/** Read a configured digital input or output without changing its direction. */
+int spaghetti_port_digital_state_get(const struct spaghetti_port *port, uint8_t channel, bool *out_high);
+
 /**
  * @brief Read one indexed digital input line on the connector.
  *

@@ -137,6 +137,18 @@ static int64_t slup_peer_pub_seen_ms[SPAGHETTI_SLUP_PEERS_MAX];
 static struct spaghetti_nfc_tag slup_nfc_remotes[SPAGHETTI_NFC_TAGS_MAX];
 static uint8_t slup_nfc_remote_indices[SPAGHETTI_NFC_TAGS_MAX];
 static size_t slup_nfc_remote_count;
+/* Host-visible snapshot stays intact while a Discover sweep rebuilds staging. */
+static struct spaghetti_nfc_tag slup_nfc_published[SPAGHETTI_NFC_TAGS_MAX];
+static size_t slup_nfc_published_count;
+static void publish_nfc_node_locked(uint32_t node)
+{
+ size_t kept = 0U;
+ for (size_t i=0; i<slup_nfc_published_count; ++i)
+  if (slup_nfc_published[i].node_id != node) slup_nfc_published[kept++] = slup_nfc_published[i];
+ for (size_t i=0; i<slup_nfc_remote_count && kept<ARRAY_SIZE(slup_nfc_published); ++i)
+  if (slup_nfc_remotes[i].node_id == node) slup_nfc_published[kept++] = slup_nfc_remotes[i];
+ slup_nfc_published_count = kept;
+}
 
 static void slup_publish_peers_locked(void);
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
@@ -640,6 +652,7 @@ static uint32_t node_id_from_mac(const uint8_t mac[6])
 
 static bool slup_usb_present(void)
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return false;
 #if defined(CONFIG_UART_LINE_CTRL)
 #if DT_HAS_CHOSEN(zephyr_shell_uart)
 	const struct device *dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_shell_uart));
@@ -694,7 +707,8 @@ uint32_t spaghetti_field_update_local_node_id(void)
 
 uint8_t spaghetti_field_update_local_flags(void)
 {
-	return slup_usb_present() ? SPAGHETTI_SLUP_FLAG_USB : 0U;
+	return IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE) ? SPAGHETTI_SLUP_FLAG_NFC_MODULE :
+		(slup_usb_present() ? SPAGHETTI_SLUP_FLAG_USB : 0U);
 }
 
 uint8_t spaghetti_field_update_local_chain_index(void)
@@ -704,7 +718,8 @@ uint8_t spaghetti_field_update_local_chain_index(void)
 
 int spaghetti_field_update_set_chain_index(uint8_t index)
 {
-	if (index > SPAGHETTI_SLUP_PEERS_MAX) {
+	if ((IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE) && index == 1U) ||
+	    index > SPAGHETTI_SLUP_PEERS_MAX) {
 		return -EINVAL;
 	}
 
@@ -1341,6 +1356,11 @@ int spaghetti_field_update_recv_usb(uint32_t dest_node_id)
 int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 				    size_t *count)
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) {
+		if (count != NULL) *count = 0U;
+		return -ENOTSUP;
+	}
+
 	int err;
 
 	if (count == NULL) {
@@ -1450,6 +1470,17 @@ int spaghetti_field_update_discover(struct spaghetti_slup_peer *out, size_t max,
 	 * this sweep so an unplugged board cannot linger in GET_STATUS.
 	 */
 	slup_prune_unconfirmed_locked();
+	/* Publish complete NFC snapshots only, and drop readers that left the bus. */
+	for (size_t i = slup_nfc_published_count; i > 0; --i) {
+		bool live = false;
+		for (size_t j = 0; j < slup_peer_count; ++j)
+			if (slup_peers[j].node_id == slup_nfc_published[i - 1].node_id) live = true;
+		if (!live) {
+			memmove(&slup_nfc_published[i - 1], &slup_nfc_published[i],
+				(slup_nfc_published_count - i) * sizeof(slup_nfc_published[0]));
+			--slup_nfc_published_count;
+		}
+	}
 	slup_publish_peers_locked();
 	if (out == NULL) {
 		*count = slup_peer_pub_count;
@@ -1538,7 +1569,7 @@ int spaghetti_field_update_copy_nfc_tags(struct spaghetti_nfc_tag *out,
 		return 0;
 	}
 	if (out == NULL) {
-		*count = local_count + slup_nfc_remote_count;
+		*count = local_count + slup_nfc_published_count;
 		k_mutex_unlock(&field_update_lock);
 		return 0;
 	}
@@ -1549,8 +1580,8 @@ int spaghetti_field_update_copy_nfc_tags(struct spaghetti_nfc_tag *out,
 		out[total].local = true;
 		total += 1U;
 	}
-	for (size_t i = 0U; (i < slup_nfc_remote_count) && (total < max); ++i) {
-		out[total] = slup_nfc_remotes[i];
+	for (size_t i = 0U; (i < slup_nfc_published_count) && (total < max); ++i) {
+		out[total] = slup_nfc_published[i];
 		out[total].local = false;
 		total += 1U;
 	}
@@ -1600,6 +1631,8 @@ static void slup_presence_work(struct k_work *work)
 
 int spaghetti_field_update_enter_update(uint32_t dest_node_id)
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
+
 	const uint32_t node = dest_node_id & SPAGHETTI_SLUP_NODE_MASK;
 	uint8_t attempt;
 	uint8_t status = 0U;
@@ -2143,6 +2176,13 @@ static void slup_reply(uint8_t cmd, const uint8_t *extra, uint8_t extra_len)
 					       (uint8_t)(1U + extra_len));
 }
 
+/* Staging belongs to the serialized CAN receive worker. Identity is checked
+ * again by RF selection on every page, and expires after 10 seconds. */
+static uint8_t nfc_target[10];
+static uint8_t nfc_target_token;
+static uint8_t nfc_target_parts;
+static int64_t nfc_target_until;
+
 static void handle_slup_command(const struct field_update_rx *msg)
 {
 	const uint8_t cmd = msg->u.can[0];
@@ -2245,6 +2285,31 @@ static void handle_slup_command(const struct field_update_rx *msg)
 		}
 		break;
 	}
+	case SPAGHETTI_SLUP_CMD_NFC_TARGET: {
+		if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE) || msg->dlc != 8U || msg->can_id == SPAGHETTI_SLUP_TWAI_CMD_ID) break;
+		const uint8_t part = msg->u.can[2];
+		if (part == 0U) {nfc_target_parts=0U;nfc_target_token=msg->u.can[1];nfc_target_until=k_uptime_get()+10000;}
+		if (part < 2U && part == nfc_target_parts && msg->u.can[1] == nfc_target_token && k_uptime_get() < nfc_target_until) {
+			memcpy(&nfc_target[part*5U],&msg->u.can[3],5U);nfc_target_parts++;
+		}
+		break;
+	}
+	case SPAGHETTI_SLUP_CMD_NFC_READ_PAGE:
+	case SPAGHETTI_SLUP_CMD_NFC_WRITE_PAGE: {
+		if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE) || msg->can_id == SPAGHETTI_SLUP_TWAI_CMD_ID || msg->dlc < 3U) break;
+		const bool write = cmd == SPAGHETTI_SLUP_CMD_NFC_WRITE_PAGE;
+		uint8_t data[4] = {0};
+		int err = -ESTALE;
+		if (msg->dlc == (write ? 7U : 3U) && nfc_target_parts == 2U && msg->u.can[1] == nfc_target_token && nfc_target[1] == 7U && k_uptime_get() < nfc_target_until) {
+			if (write) memcpy(data,&msg->u.can[3],4U);
+			err = spaghetti_nfc_user_page(nfc_target[0],&nfc_target[2],msg->u.can[2],data,write);
+		}
+		if (err == -ESTALE || err == -ENOENT) nfc_target_parts=0U;
+		uint8_t payload[7] = {msg->u.can[1],(uint8_t)(err < 0 ? -err : 0),msg->u.can[2]};
+		if (err == 0) memcpy(&payload[3],data,4U);
+		slup_reply(write ? SPAGHETTI_SLUP_RSP_NFC_WRITE_PAGE : SPAGHETTI_SLUP_RSP_NFC_READ_PAGE,payload,7U);
+		break;
+	}
 	case SPAGHETTI_SLUP_CMD_NFC: {
 		struct spaghetti_nfc_tag tags[SPAGHETTI_NFC_TAGS_MAX];
 		size_t tag_count = 0U;
@@ -2264,9 +2329,8 @@ static void handle_slup_command(const struct field_update_rx *msg)
 			uint8_t part2[7];
 			uint8_t part3[7];
 
-			if (tags[i].module_type_id == 0U) {
-				continue;
-			}
+			/* Report presence independently of SLM1 metadata. Dedicated readers
+			 * also retain blank and SLF1 tags with module_type_id zero. */
 			part0[0] = (uint8_t)((i << 4) | 0U);
 			part0[1] = tags[i].antenna;
 			part0[2] = tags[i].type;
@@ -2301,6 +2365,9 @@ static void handle_slup_command(const struct field_update_rx *msg)
 		break;
 	}
 	case SPAGHETTI_SLUP_CMD_ENTER_UPDATE:
+		/* A normal master clones its own Backbone image. Until target-aware
+		 * OTA exists, refuse that conversion; this product updates over USB. */
+		if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) break;
 		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
 		session.load_armed = true;
 		k_mutex_unlock(&field_update_lock);
@@ -2326,6 +2393,105 @@ static void handle_slup_command(const struct field_update_rx *msg)
 	}
 }
 
+K_MUTEX_DEFINE(nfc_page_lock);
+K_SEM_DEFINE(nfc_page_done, 0, 1);
+static uint32_t nfc_page_node;
+static uint8_t nfc_page_token;
+static uint8_t nfc_page_expected;
+static uint8_t nfc_page_command;
+static uint8_t nfc_page_data[4];
+static int nfc_page_result;
+
+int spaghetti_field_update_nfc_page(uint32_t node, uint8_t antenna,
+                                  const uint8_t uid[7], uint8_t page,
+                                  uint8_t data[4], bool write)
+{
+ if (!uid || !data || antenna < 1U || antenna > 2U ||
+     !((page >= 4U && page <= 43U) || (!write && (page == 3U || page == 45U)))) return -EINVAL;
+ if (node == 0U || node == session.node_id)
+  return spaghetti_nfc_user_page(antenna, uid, page, data, write);
+ int err = k_mutex_lock(&nfc_page_lock, K_MSEC(200));
+ if (err < 0) return -EBUSY;
+ uint8_t target[10] = {antenna, 7U};
+ memcpy(&target[2], uid, 7U);
+ (void)k_mutex_lock(&field_update_lock, K_FOREVER);
+ nfc_page_token++; if (!nfc_page_token) nfc_page_token++;
+ nfc_page_node = node; nfc_page_expected = page;
+ nfc_page_command = write ? SPAGHETTI_SLUP_RSP_NFC_WRITE_PAGE : SPAGHETTI_SLUP_RSP_NFC_READ_PAGE;
+ nfc_page_result = -ETIMEDOUT;
+ const uint8_t token = nfc_page_token;
+ k_sem_reset(&nfc_page_done);
+ k_mutex_unlock(&field_update_lock);
+ for (uint8_t part = 0; part < 2U; ++part) {
+  uint8_t payload[7] = {token, part};
+  memcpy(&payload[2], &target[part * 5U], 5U);
+  err = spaghetti_field_update_can_ctrl(node, SPAGHETTI_SLUP_CMD_NFC_TARGET, payload, 7U);
+  if (err < 0) break;
+ }
+ if (err == 0) {
+  uint8_t payload[6] = {token, page};
+  if (write) memcpy(&payload[2], data, 4U);
+  err = spaghetti_field_update_can_ctrl(node, write ? SPAGHETTI_SLUP_CMD_NFC_WRITE_PAGE : SPAGHETTI_SLUP_CMD_NFC_READ_PAGE, payload, write ? 6U : 2U);
+ }
+ if (err == 0) err = k_sem_take(&nfc_page_done, K_MSEC(1800));
+ (void)k_mutex_lock(&field_update_lock, K_FOREVER);
+ if (err == 0) { err = nfc_page_result; if (err == 0) memcpy(data, nfc_page_data, 4U); }
+ nfc_page_node = 0U;
+ k_mutex_unlock(&field_update_lock);
+ k_mutex_unlock(&nfc_page_lock);
+ return err;
+}
+
+/* Accessed only by the CAN receive worker. Publish the host event after
+ * the requested UID snapshot has arrived, never against the stale cache. */
+static struct {
+	uint32_t node;
+	uint32_t generation;
+	uint8_t antenna;
+} nfc_refresh[SPAGHETTI_SLUP_PEERS_MAX];
+
+static void slup_nfc_refresh_complete(uint32_t node)
+{
+	for (size_t i = 0U; i < ARRAY_SIZE(nfc_refresh); ++i) {
+		if (nfc_refresh[i].node == node && node != 0U) {
+			const uint32_t generation = nfc_refresh[i].generation;
+			const uint8_t antenna = nfc_refresh[i].antenna;
+
+			nfc_refresh[i].node = 0U;
+			(void)spaghetti_communication_emit_discovery(node, antenna, generation);
+			break;
+		}
+	}
+}
+
+static void slup_nfc_refresh_request(uint32_t node, uint8_t antenna, uint32_t generation)
+{
+	size_t slot = ARRAY_SIZE(nfc_refresh);
+
+	for (size_t i = 0U; i < ARRAY_SIZE(nfc_refresh); ++i) {
+		if (nfc_refresh[i].node == node) { slot = i; break; }
+		if (nfc_refresh[i].node == 0U) slot = i;
+	}
+	if (slot == ARRAY_SIZE(nfc_refresh)) return;
+	nfc_refresh[slot].node = node;
+	nfc_refresh[slot].antenna = antenna;
+	nfc_refresh[slot].generation = generation;
+	(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+	size_t retained = 0U;
+
+	for (size_t i = 0U; i < slup_nfc_remote_count; ++i) {
+		if (slup_nfc_remotes[i].node_id != node) {
+			slup_nfc_remotes[retained] = slup_nfc_remotes[i];
+			slup_nfc_remote_indices[retained++] = slup_nfc_remote_indices[i];
+		}
+	}
+	slup_nfc_remote_count = retained;
+	k_mutex_unlock(&field_update_lock);
+	const int err = spaghetti_field_update_can_ctrl(node, SPAGHETTI_SLUP_CMD_NFC, NULL, 0U);
+
+	if (err < 0) slup_nfc_refresh_complete(node);
+}
+
 static void handle_slup_response(const struct field_update_rx *msg)
 {
 	const uint32_t node = ((msg->can_id & 0x1F000000U) ==
@@ -2334,9 +2500,21 @@ static void handle_slup_response(const struct field_update_rx *msg)
 				      0U;
 	const uint8_t cmd = msg->u.can[0];
 
+	if ((cmd == SPAGHETTI_SLUP_RSP_NFC_READ_PAGE || cmd == SPAGHETTI_SLUP_RSP_NFC_WRITE_PAGE) && msg->dlc == 8U) {
+		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+		if (node == nfc_page_node && node != 0U && cmd == nfc_page_command && msg->u.can[1] == nfc_page_token && msg->u.can[3] == nfc_page_expected) {
+			nfc_page_result = -(int)msg->u.can[2];
+			memcpy(nfc_page_data, &msg->u.can[4], 4U);
+			k_sem_give(&nfc_page_done);
+		}
+		k_mutex_unlock(&field_update_lock);
+		return;
+	}
 	if ((cmd == SPAGHETTI_SLUP_RSP_NFC_CHANGED) && (msg->dlc == 6U)) {
-		(void)spaghetti_communication_emit_discovery(
-			node, msg->u.can[1], sys_get_be32(&msg->u.can[2]));
+		if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) {
+			slup_nfc_refresh_request(node, msg->u.can[1],
+						 sys_get_be32(&msg->u.can[2]));
+		}
 		return;
 	}
 
@@ -2496,6 +2674,13 @@ static void handle_slup_response(const struct field_update_rx *msg)
 				}
 			}
 			k_mutex_unlock(&field_update_lock);
+		}
+		if ((msg->dlc >= 5U) && (((msg->u.can[1] & 15U) == 3U) ||
+		    (((msg->u.can[1] & 15U) == 0U) && msg->u.can[4] == 0U))) {
+			(void)k_mutex_lock(&field_update_lock, K_FOREVER);
+			publish_nfc_node_locked(node);
+			k_mutex_unlock(&field_update_lock);
+			slup_nfc_refresh_complete(node);
 		}
 		if (!slup_xfer_is_active()) {
 			spaghetti_field_update_note_ack(SPAGHETTI_SLUP_CMD_NFC,
@@ -2773,7 +2958,8 @@ int spaghetti_field_update_init(void)
 
 	LOG_INF("SLUP ready: node=0x%06x", session.node_id);
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
-	(void)k_work_schedule(&slup_presence_dwork, K_MSEC(SLUP_PRESENCE_FIRST_MS));
+	if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE))
+		(void)k_work_schedule(&slup_presence_dwork, K_MSEC(SLUP_PRESENCE_FIRST_MS));
 #endif
 	return first_error;
 }

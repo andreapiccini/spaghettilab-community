@@ -27,7 +27,7 @@ import {
   type HubPost,
 } from "../../lib/community-hub.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
-import { publicAsset } from "../../lib/public-asset.js";
+import { BrandMark } from "../shell/BrandMark.js";
 import { useCommunityHub } from "../../state/community-hub-context.js";
 import { useLocale } from "../../state/locale-context.js";
 
@@ -72,11 +72,7 @@ export function CommunityScreen({
     <div className="min-h-full bg-surface-sunken font-body text-ink">
       {onOpenProjects && (
         <header className="flex flex-wrap items-center gap-3 border-b border-border bg-surface px-5 py-4 lg:px-10">
-          <img
-            src={publicAsset("ux-assets/logo-full.png")}
-            alt="Spaghetti LAB"
-            className="h-8"
-          />
+          <BrandMark />
           <span className="ml-auto" />
           <button className={button} onClick={onOpenProjects}>
             <FolderOpen size={16} />

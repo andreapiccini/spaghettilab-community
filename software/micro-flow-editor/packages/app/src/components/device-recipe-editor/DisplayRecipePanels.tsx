@@ -1039,6 +1039,8 @@ function paramTypeLabel(type: DeviceCommandParam["type"], it: boolean): string {
       return "float";
     case "bool":
       return "bool";
+    case "enum":
+      return it ? "scelta" : "enum";
   }
 }
 

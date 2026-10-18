@@ -18,7 +18,8 @@ import { useSession } from "../../state/session-context.js";
 import { physicalPinsForBinding } from "../../lib/physical-pin-bindings.js";
 import { FLOW_START_IDS } from "./dry-run-preview.js";
 import { visualForCatalogEntryId } from "./block-visuals.js";
-import { beginPaletteDrag, endPaletteDrag, encodePaletteDrag, PROCESSING_BLOCK_MIME } from "./catalog-to-node.js";
+import { beginPaletteDrag, endPaletteDrag, encodePaletteDrag, nodeDataFromCatalogEntry, PROCESSING_BLOCK_MIME } from "./catalog-to-node.js";
+import { canChainIntoEventContainer } from "./event-containers.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { expandPalettePlaceables, groupPlaceablesByFamily, type PalettePlaceable } from "./palette-placeables.js";
 
@@ -26,6 +27,7 @@ import { expandPalettePlaceables, groupPlaceablesByFamily, type PalettePlaceable
 const PALETTE_ALLOWED_IDS = new Set([
   "native.schedule",
   "appblocks.digital_out_toggle",
+  "appblocks.square_wave",
   "appblocks.led",
   "appblocks.rgb_led",
   "appblocks.relay",
@@ -283,7 +285,8 @@ function PaletteRow({
           );
           e.dataTransfer.effectAllowed = "copy";
           e.currentTarget.style.opacity = "0.6";
-          beginPaletteDrag(entry.nodeKind, row.baySide);
+          const placed = nodeDataFromCatalogEntry(entry, undefined, row.baySide);
+          beginPaletteDrag(entry.nodeKind, row.baySide, canChainIntoEventContainer(placed ?? undefined));
           onDragBegan();
         }}
         onDragEnd={(e: DragEvent<HTMLButtonElement>) => {

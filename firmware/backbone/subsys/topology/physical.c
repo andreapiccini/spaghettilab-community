@@ -89,6 +89,8 @@ SETTINGS_STATIC_HANDLER_DEFINE(spaghetti_physical, "physical", NULL,
 
 int spaghetti_physical_init(void)
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
+
 #if DT_HAS_COMPAT_STATUS_OKAY(spaghettilab_physical_backbone)
 	int err = settings_subsys_init();
 
@@ -113,6 +115,8 @@ int spaghetti_physical_init(void)
 
 int spaghetti_physical_refresh(void)
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
+
 #if DT_HAS_COMPAT_STATUS_OKAY(spaghettilab_physical_backbone)
 	struct spaghetti_nfc_tag tag;
 	uint8_t identity[8];
@@ -151,6 +155,8 @@ int spaghetti_physical_refresh(void)
 
 int spaghetti_physical_describe(uint8_t out[SPAGHETTI_PHYSICAL_SIZE])
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
+
 	if (out == NULL) {
 		return -EINVAL;
 	}
@@ -180,6 +186,8 @@ int spaghetti_physical_describe(uint8_t out[SPAGHETTI_PHYSICAL_SIZE])
 
 int spaghetti_physical_apply(const uint8_t modes[4], uint8_t speed)
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
+
 	const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE] = {0};
 
 	return spaghetti_physical_apply_checked(modes, speed, expected);
@@ -187,12 +195,16 @@ int spaghetti_physical_apply(const uint8_t modes[4], uint8_t speed)
 
 int spaghetti_physical_apply_checked(const uint8_t modes[4], uint8_t speed, const uint8_t expected[20])
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
+
 	return spaghetti_physical_apply_config(modes, speed, expected, NULL);
 }
 
 int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
 		const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE], const uint8_t config[20])
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
+
 #if DT_HAS_COMPAT_STATUS_OKAY(spaghettilab_physical_backbone)
 	struct spaghetti_nfc_tag tag;
 	uint8_t identity[8];

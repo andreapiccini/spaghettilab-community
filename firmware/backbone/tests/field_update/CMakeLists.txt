@@ -6,7 +6,7 @@ project(spaghetti_field_update_test)
 target_sources(app PRIVATE
   src/main.c
   ../../subsys/services/ota/field_update.c
-  ../../subsys/nfc/nfc_disabled.c
+  ../communication/src/nfc_fake.c
 )
 
 target_include_directories(app PRIVATE

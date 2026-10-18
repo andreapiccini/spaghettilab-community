@@ -13,15 +13,22 @@ export { PROCESSING_BLOCK_MIME, decodePaletteDrag, encodePaletteDrag, type Palet
 
 let paletteDragNodeKind: DeviceProcessingNodeData["kind"] | undefined;
 let paletteDragBaySide: BaySide | undefined;
+let paletteDragChainable = false;
 
-export function beginPaletteDrag(kind: DeviceProcessingNodeData["kind"] | undefined, baySide?: BaySide): void {
+export function beginPaletteDrag(
+  kind: DeviceProcessingNodeData["kind"] | undefined,
+  baySide?: BaySide,
+  chainable = true,
+): void {
   paletteDragNodeKind = kind;
   paletteDragBaySide = baySide;
+  paletteDragChainable = chainable;
 }
 
 export function endPaletteDrag(): void {
   paletteDragNodeKind = undefined;
   paletteDragBaySide = undefined;
+  paletteDragChainable = false;
 }
 
 export function peekPaletteDragKind(): DeviceProcessingNodeData["kind"] | undefined {
@@ -30,6 +37,10 @@ export function peekPaletteDragKind(): DeviceProcessingNodeData["kind"] | undefi
 
 export function peekPaletteDragBaySide(): BaySide | undefined {
   return paletteDragBaySide;
+}
+
+export function peekPaletteDragChainable(): boolean {
+  return paletteDragChainable;
 }
 
 export function nodeDataFromCatalogEntry(

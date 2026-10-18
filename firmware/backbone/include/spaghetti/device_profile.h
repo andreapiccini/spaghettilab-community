@@ -56,6 +56,7 @@
  * firmware Capability Pack; install never extends this set.
  */
 enum spaghetti_device_profile_opcode {
+	SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE = 32U, /**< Drive imm0 channel from src_a (0/1), optional imm1 invert. */
 	SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_LOAD =
 	    29U, /**< Copy immutable data slice to dedicated workspace. */
 	SPAGHETTI_DEVICE_PROFILE_OP_MESSAGE_PATCH = 30U, /**< Patch workspace from a small temp. */

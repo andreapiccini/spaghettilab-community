@@ -33,6 +33,17 @@ describe("portsForKind", () => {
 });
 
 describe("portsForNode", () => {
+  it("Square wave is a free-running source (output only)", () => {
+    expect(
+      portsForNode({
+        kind: "block",
+        blockTypeId: "ab.square_wave",
+        catalogEntryId: "appblocks.square_wave",
+        properties: {},
+      }),
+    ).toMatchObject({ hasInput: false, hasOutput: true, inputs: [], outputs: [{ id: "0" }] });
+  });
+
   it("LED is a sink (input only) from catalog ports", () => {
     expect(
       portsForNode({

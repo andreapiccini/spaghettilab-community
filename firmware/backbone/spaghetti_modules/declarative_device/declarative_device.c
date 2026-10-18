@@ -300,6 +300,12 @@ static int declarative_describe_endpoint(const struct spaghetti_property_set *co
 		out->kind = SPAGHETTI_ENDPOINT_GPIO_LINE;
 		out->value_size = 1U;
 		out->value[0] = 0U;
+		for (size_t i = 0; i < profile->init_count + profile->sample_count; ++i) {
+			const struct spaghetti_device_profile_op *op = i < profile->init_count
+				? &profile->init_ops[i] : &profile->sample_ops[i - profile->init_count];
+			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET) { out->value[0] = op->imm1; break; }
+			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE) { out->value[0] = op->imm0; break; }
+		}
 		break;
 	case SPAGHETTI_PORT_TRANSPORT_ADC:
 		out->kind = SPAGHETTI_ENDPOINT_ADC_CHANNEL;

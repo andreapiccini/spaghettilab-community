@@ -1,3 +1,4 @@
+import { encodeNfcPageRequest, decodeNfcPageResponse, type NfcPageRequest } from "../operations/nfc.js";
 import {
   decodeEvent,
   decodeResponse,
@@ -272,15 +273,19 @@ export class SpaghettiClient {
     operation: Operation,
     payload: Uint8Array,
     signal?: AbortSignal,
+    overrides?: Pick<
+      SpaghettiClientOptions,
+      "defaultTimeoutMs" | "maxRetries" | "retryDelayMs" | "attemptTimeoutMs"
+    >,
   ): Promise<Uint8Array> {
     if (signal?.aborted) {
       throw new SpaghettiClientError({ code: "CANCELLED", operation });
     }
     const correlationId = this.allocateCorrelationId();
-    const timeoutMs = this.options.defaultTimeoutMs ?? 5000;
-    const maxRetries = this.options.maxRetries ?? 2;
-    const retryDelayMs = this.options.retryDelayMs ?? 200;
-    const attemptTimeoutMs = this.options.attemptTimeoutMs ?? 2000;
+    const timeoutMs = overrides?.defaultTimeoutMs ?? this.options.defaultTimeoutMs ?? 5000;
+    const maxRetries = overrides?.maxRetries ?? this.options.maxRetries ?? 2;
+    const retryDelayMs = overrides?.retryDelayMs ?? this.options.retryDelayMs ?? 200;
+    const attemptTimeoutMs = overrides?.attemptTimeoutMs ?? this.options.attemptTimeoutMs ?? 2000;
     const deadline = Date.now() + timeoutMs;
 
     for (let attempt = 0; ; attempt++) {
@@ -414,6 +419,20 @@ export class SpaghettiClient {
     return decodeGetTopologyResponse(bytes);
   }
 
+  async nfcPage(request: NfcPageRequest, signal?: AbortSignal): Promise<Uint8Array> {
+    const bytes = await this.request(
+      Operation.NFC_PAGE,
+      encodeNfcPageRequest(request),
+      signal,
+      {
+        defaultTimeoutMs: Math.max(this.options.defaultTimeoutMs ?? 5000, 8000),
+        attemptTimeoutMs: Math.max(this.options.attemptTimeoutMs ?? 2000, 4000),
+        maxRetries: 1,
+      },
+    );
+    return decodeNfcPageResponse(bytes, request.page);
+  }
+
   async applyPhysical(
     request: ApplyPhysicalRequest,
     signal?: AbortSignal,
@@ -422,6 +441,11 @@ export class SpaghettiClient {
       Operation.APPLY_PHYSICAL,
       encodeApplyPhysicalRequest(request),
       signal,
+      {
+        defaultTimeoutMs: Math.max(this.options.defaultTimeoutMs ?? 5000, 8000),
+        attemptTimeoutMs: Math.max(this.options.attemptTimeoutMs ?? 2000, 4000),
+        maxRetries: 1,
+      },
     );
     const confirmed = decodeApplyPhysicalResponse(bytes);
     if (

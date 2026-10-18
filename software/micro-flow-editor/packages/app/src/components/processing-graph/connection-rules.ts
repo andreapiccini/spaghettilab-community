@@ -7,7 +7,8 @@ import {
   ifInputCompatibleWith,
   ifOutputType,
   isCompareIf,
-  isDigitalOutToggle,
+  isBackboneSensorBlock,
+  isDigitalCommandSource,
   isLedBlock,
   isRelayBlock,
   isTemperatureSensor,
@@ -69,11 +70,12 @@ export function isValidDemoProcessingConnection(
     return isCompareIf(target);
   }
   if (isCompareIf(target)) {
-    return isDigitalOutToggle(source) || isTemperatureSensor(source);
+    return isDigitalCommandSource(source) || isTemperatureSensor(source);
   }
   if (isTemperatureSensor(target)) return false;
-  if (isCompareIf(source)) return isLedBlock(target) || isRelayBlock(target);
-  if (isLedBlock(target) || isRelayBlock(target)) return isDigitalOutToggle(source) || isCompareIf(source);
+  if (isCompareIf(source)) return isLedBlock(target) || isRelayBlock(target) || isBackboneSensorBlock(target);
+  if (isLedBlock(target) || isRelayBlock(target) || isBackboneSensorBlock(target))
+    return isDigitalCommandSource(source) || isCompareIf(source);
   return true;
 }
 
@@ -85,11 +87,11 @@ export function isIncompatibleDemoEdge(
   const source = ctx.nodes.find((node) => node.id === edge.source)?.data;
   const target = ctx.nodes.find((node) => node.id === edge.target)?.data;
   if (!source || !target) return false;
-  if (isCompareIf(target) && (isDigitalOutToggle(source) || isTemperatureSensor(source))) {
+  if (isCompareIf(target) && (isDigitalCommandSource(source) || isTemperatureSensor(source))) {
     return !ifInputCompatibleWith(target, source);
   }
   if (!isCompareIf(source)) return false;
-  if (!(isLedBlock(target) || isRelayBlock(target))) return false;
+  if (!(isLedBlock(target) || isRelayBlock(target) || isBackboneSensorBlock(target))) return false;
   return ifOutputType(source) === "boolean";
 }
 
@@ -101,7 +103,7 @@ export function ifSourceKind(
   if (!incoming) return "none";
   const source = ctx.nodes.find((node) => node.id === incoming.source)?.data;
   if (!source) return "none";
-  if (isDigitalOutToggle(source)) return "toggle";
+  if (isDigitalCommandSource(source)) return "toggle";
   if (isTemperatureSensor(source)) return "temperature";
   return "none";
 }

@@ -36,6 +36,7 @@ function failure(
 /** Every temp slot an instruction reads or writes — for bounds checking only; not every opcode that touches a slot is checked by the firmware's own validator (e.g. `GPIO_SET` reads no slot at all), but any slot reference this package emits must still be in range. */
 function tempSlots(instruction: Instruction): number[] {
   switch (instruction.op) {
+    case "GPIO_SET_VALUE":
     case "MESSAGE_PATCH":
       return [instruction.src];
     case "MESSAGE_LOAD":
@@ -93,6 +94,7 @@ function transactionsFor(instruction: Instruction): number {
     case "UART_READ":
     case "GPIO_GET":
     case "GPIO_SET":
+    case "GPIO_SET_VALUE":
     case "ADC_READ":
       return 1;
     case "WAIT_FIELD_MASK":
@@ -175,6 +177,14 @@ function structuralError(
   instruction: Instruction,
 ): { target: string; remediation: string } | undefined {
   switch (instruction.op) {
+    case "GPIO_GET":
+    case "GPIO_SET":
+    case "GPIO_SET_VALUE":
+      return !Number.isInteger(instruction.channel ?? 0) ||
+        (instruction.channel ?? 0) < 0 ||
+        (instruction.channel ?? 0) > 3
+        ? { target: "GPIO channel", remediation: "GPIO channel must be 0..3" }
+        : undefined;
     case "I2C_READ":
     case "SPI_TRANSCEIVE":
     case "UART_READ":

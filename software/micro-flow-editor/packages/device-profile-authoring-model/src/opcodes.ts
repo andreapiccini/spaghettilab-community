@@ -19,6 +19,7 @@ export const DeviceProfileOpcode = {
   UART_READ_UNTIL: 6,
   GPIO_GET: 7,
   GPIO_SET: 8,
+  GPIO_SET_VALUE: 32,
   ADC_READ: 9,
   DELAY_BOUNDED: 10,
   WAIT_FIELD_MASK: 11,

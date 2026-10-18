@@ -1,0 +1,493 @@
+.can-network {
+  padding: 18px 12px 4px;
+  background: var(--color-surface);
+  font-family: var(--font-body);
+  color: var(--color-ink);
+}
+.can-network-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 24px 7px;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+.can-network-heading svg {
+  color: var(--color-ink-muted);
+}
+.can-network-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 620px;
+}
+.can-network-node {
+  position: relative;
+  padding: 0 0 25px 30px;
+  min-height: 116px;
+}
+.can-network-node:last-child {
+  padding-bottom: 12px;
+  min-height: 100px;
+}
+.can-network-line {
+  position: absolute;
+  left: 8px;
+  top: 25px;
+  bottom: -25px;
+  width: 1px;
+  background: var(--color-border);
+  overflow: visible;
+}
+.can-network-signal {
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 22px;
+  margin-left: -1px;
+  border-radius: 999px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--color-ink-faint) 70%, transparent) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 5px 1px color-mix(in srgb, var(--color-ink-faint) 35%, transparent);
+  animation: can-network-signal 2.8s linear infinite;
+}
+@keyframes can-network-signal {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  16% {
+    top: 0;
+    opacity: 1;
+  }
+  84% {
+    top: calc(100% - 22px);
+    opacity: 1;
+  }
+  100% {
+    top: calc(100% - 22px);
+    opacity: 0;
+  }
+}
+.can-network-junction {
+  position: absolute;
+  left: 4px;
+  top: 24px;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  z-index: 1;
+}
+.can-network-junction.is-master {
+  border-color: var(--color-brand-blue);
+}
+.can-network-junction.is-reader {
+  border-color: var(--color-brand-purple-glow);
+}
+.can-network-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 17px;
+  width: 100%;
+  padding: 2px 10px 8px 4px;
+  text-align: left;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  border: 0;
+}
+button.can-network-card {
+  cursor: pointer;
+  transition: background 0.18s;
+}
+button.can-network-card:hover {
+  background: var(--color-surface-sunken);
+}
+button.can-network-card:focus-visible {
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 4px;
+}
+.can-network-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border: 1px solid color-mix(in srgb, var(--color-brand-blue) 42%, var(--color-border));
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 32%,
+    color-mix(in srgb, var(--color-brand-blue) 16%, #fff)
+  );
+  color: var(--color-brand-blue);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-brand-blue) 10%, transparent),
+    0 0 16px color-mix(in srgb, var(--color-brand-blue) 28%, transparent);
+}
+.can-network-icon.is-reader {
+  background: radial-gradient(
+    circle,
+    #fff 32%,
+    color-mix(in srgb, var(--color-brand-purple-glow) 16%, #fff)
+  );
+  border-color: color-mix(in srgb, var(--color-brand-purple-glow) 42%, var(--color-border));
+  color: var(--color-brand-purple-glow);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-brand-purple-glow) 10%, transparent),
+    0 0 16px color-mix(in srgb, var(--color-brand-purple-glow) 28%, transparent);
+}
+.can-network-icon > svg {
+  position: relative;
+  z-index: 1;
+}
+.can-network-burst-glow,
+.can-network-burst-ring,
+.can-network-particles {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+}
+.can-network-burst-glow {
+  z-index: 0;
+  width: 86px;
+  height: 86px;
+  margin: -43px 0 0 -43px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 35deg,
+    #ff5a5a55,
+    #ffe14a66,
+    #3dce6e55,
+    #3ec6ff66,
+    #8b5cf666,
+    #ff5ad455,
+    #ff5a5a55
+  );
+  filter: blur(8px);
+  animation: nfc-scan-glow 0.95s ease-out forwards;
+}
+.can-network-burst-ring {
+  z-index: 0;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  border-radius: 50%;
+  padding: 1.5px;
+  background: conic-gradient(
+    #ff5a5a,
+    #ff9a2e,
+    #ffe14a,
+    #3dce6e,
+    #3ec6ff,
+    #8b5cf6,
+    #ff5ad4,
+    #ff5a5a
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--color-brand-purple-glow) 32%, transparent);
+  animation: nfc-scan-ring 0.82s ease-out forwards;
+}
+.can-network-particles {
+  z-index: 2;
+  width: 0;
+  height: 0;
+}
+.can-network-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #ff5a5a;
+  color: #ff5a5a;
+  box-shadow: 0 0 7px 1px currentColor;
+  animation: nfc-particle 1.05s ease-out forwards;
+}
+.can-network-particle:nth-child(6n + 2) {
+  background: #ffb02e;
+  color: #ffb02e;
+}
+.can-network-particle:nth-child(6n + 3) {
+  background: #ffe14a;
+  color: #ffe14a;
+}
+.can-network-particle:nth-child(6n + 4) {
+  background: #3dce6e;
+  color: #3dce6e;
+}
+.can-network-particle:nth-child(6n + 5) {
+  background: #3ec6ff;
+  color: #3ec6ff;
+}
+.can-network-particle:nth-child(6n + 6) {
+  background: #a96cff;
+  color: #a96cff;
+}
+@keyframes nfc-scan-glow {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.45);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+@keyframes nfc-scan-ring {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+@keyframes nfc-particle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.45);
+  }
+  16% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.3);
+  }
+}
+.can-network-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding-top: 2px;
+}
+.can-network-info > strong {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 650;
+  letter-spacing: -0.15px;
+}
+.can-network-description {
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--color-ink-muted);
+}
+.can-network-role {
+  display: inline-flex;
+  align-items: center;
+  min-height: 21px;
+  padding: 2px 9px;
+  border-radius: 5px;
+  background: var(--color-surface-sunken);
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--color-ink-muted);
+}
+.can-network-role.is-master {
+  background: var(--color-brand-blue);
+  color: white;
+  box-shadow: 0 1px 3px #4167be20;
+}
+.can-network-meta {
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--color-ink-faint);
+  overflow-wrap: anywhere;
+}
+.can-network-host {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-ink-faint);
+  font-size: 10px;
+}
+.can-network-tags {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 3px;
+}
+.can-network-tags > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 22px;
+  padding: 3px 7px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--color-ink-muted);
+  box-sizing: border-box;
+}
+.can-network-tags > span.is-empty {
+  color: var(--color-ink-faint);
+}
+.can-network-tags > span.is-live {
+  position: relative;
+  isolation: isolate;
+}
+.can-network-tag-ring {
+  position: absolute;
+  z-index: 2;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  overflow: visible;
+  pointer-events: none;
+}
+.can-network-tag-comet {
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-dasharray: 18 200;
+  stroke-dashoffset: 18;
+  stroke-opacity: 0.96;
+  vector-effect: non-scaling-stroke;
+  animation: can-tag-rgb 5s linear infinite;
+}
+.can-network-tag-comet.is-soft {
+  stroke-width: 1.9;
+  stroke-dasharray: 26 200;
+  stroke-dashoffset: 22;
+  stroke-opacity: 0.5;
+  filter: blur(0.55px);
+  animation-name: can-tag-rgb-soft;
+}
+.can-network-tag-comet.is-glow {
+  stroke-width: 3;
+  stroke-dasharray: 34 200;
+  stroke-dashoffset: 26;
+  stroke-opacity: 0.24;
+  filter: blur(1.6px);
+  animation-name: can-tag-rgb-glow;
+}
+.can-network-tag-face {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+@keyframes can-tag-rgb {
+  0% {
+    stroke-dashoffset: 18;
+    opacity: 0;
+  }
+  8% {
+    stroke-dashoffset: -9.2;
+    opacity: 1;
+  }
+  32% {
+    stroke-dashoffset: -90.8;
+    opacity: 1;
+  }
+  40% {
+    stroke-dashoffset: -118;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: -118;
+    opacity: 0;
+  }
+}
+@keyframes can-tag-rgb-soft {
+  0% {
+    stroke-dashoffset: 22;
+    opacity: 0;
+  }
+  8% {
+    stroke-dashoffset: -5.2;
+    opacity: 1;
+  }
+  32% {
+    stroke-dashoffset: -86.8;
+    opacity: 1;
+  }
+  40% {
+    stroke-dashoffset: -114;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: -114;
+    opacity: 0;
+  }
+}
+@keyframes can-tag-rgb-glow {
+  0% {
+    stroke-dashoffset: 26;
+    opacity: 0;
+  }
+  8% {
+    stroke-dashoffset: -1.2;
+    opacity: 1;
+  }
+  32% {
+    stroke-dashoffset: -82.8;
+    opacity: 1;
+  }
+  40% {
+    stroke-dashoffset: -110;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: -110;
+    opacity: 0;
+  }
+}
+.can-network-tags small {
+  font-size: 10px;
+  color: var(--color-ink-faint);
+}
+.can-network-loading {
+  padding: 0 0 12px 38px;
+  font-size: 11px;
+  color: var(--color-ink-faint);
+}
+@media (prefers-reduced-motion: reduce) {
+  .can-network-signal,
+  .can-network-burst-glow,
+  .can-network-burst-ring,
+  .can-network-particle,
+  .can-network-tag-ring {
+    animation: none;
+    opacity: 0;
+  }
+}
+@media (max-width: 480px) {
+  .can-network {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .can-network-card {
+    gap: 12px;
+  }
+  .can-network-node {
+    padding-left: 25px;
+  }
+  .can-network-meta {
+    font-size: 10px;
+  }
+}

@@ -94,6 +94,49 @@ describe("device-recipe-draft", () => {
     expect(gpio.commands[0]?.steps.some((op) => op.type === "gpio_debounce" && op.stableMs === 20)).toBe(true);
   });
 
+  it("validates GPIO signal existence and direction", () => {
+    const gpio = createGpioDigitalExample();
+    expect(
+      validateDraftForCreate(gpio).some((error) => error.field.startsWith("gpio.")),
+    ).toBe(false);
+
+    const missingSignals = {
+      ...gpio,
+      binding: { ...gpio.binding, gpioSignals: [] },
+    };
+    expect(
+      validateDraftForCreate(missingSignals).some(
+        (error) => error.field === "gpioSignals",
+      ),
+    ).toBe(true);
+    expect(
+      validateDraftForCreate(missingSignals).some((error) =>
+        error.field.startsWith("gpio."),
+      ),
+    ).toBe(true);
+
+    const wrongDirection = {
+      ...gpio,
+      binding: {
+        ...gpio.binding,
+        gpioSignals: gpio.binding.gpioSignals.map((signal) =>
+          signal.id === "IN_A"
+            ? {
+                ...signal,
+                direction: "out" as const,
+                signalType: "digital_output" as const,
+              }
+            : signal,
+        ),
+      },
+    };
+    expect(
+      validateDraftForCreate(wrongDirection).some((error) =>
+        error.field.startsWith("gpio."),
+      ),
+    ).toBe(true);
+  });
+
   it("seeds analog level example with incomplete calibration", () => {
     const adc = createAnalogLevelExample();
     expect(adc.binding.bus).toBe("adc");

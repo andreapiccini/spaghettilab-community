@@ -45,6 +45,8 @@ static atomic_t protocol_mode;
 static atomic_t work_pending;
 static atomic_t tx_pending;
 K_MUTEX_DEFINE(usb_tx_lock);
+/* Protected by usb_tx_lock, including encoding and the complete UART send. */
+static uint8_t event_frame[SPAGHETTI_USB_FRAME_MAX];
 K_SEM_DEFINE(work_sem, 0, 1);
 K_SEM_DEFINE(tx_done_sem, 0, 1);
 K_THREAD_STACK_DEFINE(usb_worker_stack, SPAGHETTI_USB_WORKER_STACK);
@@ -291,7 +293,6 @@ static void usb_worker(void *first, void *second, void *third)
 
 int spaghetti_usb_protocol_send_event(const uint8_t *envelope, size_t size)
 {
-	uint8_t frame[SPAGHETTI_USB_FRAME_MAX];
 	size_t written = 0U;
 	int err;
 
@@ -305,15 +306,16 @@ int spaghetti_usb_protocol_send_event(const uint8_t *envelope, size_t size)
 		return -ENODEV;
 	}
 
+	(void)k_mutex_lock(&usb_tx_lock, K_FOREVER);
 	err = spaghetti_usb_frame_encode(SPAGHETTI_USB_FRAME_KIND_EVENT,
-					 envelope, size, frame, sizeof(frame),
+					 envelope, size, event_frame, sizeof(event_frame),
 					 &written);
 	if (err < 0) {
+		k_mutex_unlock(&usb_tx_lock);
 		return err;
 	}
 
-	(void)k_mutex_lock(&usb_tx_lock, K_FOREVER);
-	err = usb_send_frame(frame, written);
+	err = usb_send_frame(event_frame, written);
 	k_mutex_unlock(&usb_tx_lock);
 	if (err == 0) {
 		(void)k_work_reschedule(&idle_work,

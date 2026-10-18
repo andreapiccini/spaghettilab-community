@@ -46,7 +46,9 @@ KIND_REQUEST = 0x02
 HEADER_SIZE = 5
 ENVELOPE_MAX = 2048 + 64
 DEFAULT_LISTEN = "127.0.0.1:8766"
-IDENTIFY_TIMEOUT_S = 4.0
+IDENTIFY_TIMEOUT_S = 3.0
+IDENTIFY_ATTEMPTS = 1
+IDENTIFY_RETRY_S = 0.4
 RESPONSE_WAIT_S = 8.0
 # SpaghettiClient starts at 1; a colliding GET_STATUS with a different payload
 # is CONFLICT for the whole replay window (~30 s on Core V1).
@@ -258,30 +260,56 @@ def _close_quiet(connection: Any) -> None:
         pass
 
 
-def _identify_sync(port: str) -> BoundCore | None:
+def _serial_usable(connection: Any) -> bool:
+    """False after USB unplug/replug leaves a closed or unconfigured handle."""
+    if getattr(connection, "is_open", True) is False:
+        return False
+    fileno = getattr(connection, "fileno", None)
+    if not callable(fileno):
+        return True
     try:
-        import serial as serial_mod
-    except ImportError:
-        logger.error("pyserial missing; run make host-tools")
-        return None
+        fileno()
+    except Exception:  # noqa: BLE001
+        return False
+    return True
 
-    try:
-        conn = open_serial_without_reset(serial_mod, port, 115200)
-    except Exception as exc:  # noqa: BLE001
-        logger.debug("skip %s: %s", port, exc)
-        return None
 
+def _pulse_usb_run(connection: Any) -> None:
+    """Release a wedged ESP32 USB-JTAG chip (RTS=EN). Same port often stays open."""
+    connection.dtr = False
+    connection.rts = True
+    time.sleep(0.1)
+    connection.dtr = False
+    connection.rts = False
+
+
+def _wait_core_ready(connection: Any, timeout_s: float) -> None:
+    deadline = time.monotonic() + timeout_s
+    acc = bytearray()
+    while time.monotonic() < deadline:
+        waiting = getattr(connection, "in_waiting", 0) or 0
+        chunk = connection.read(waiting if waiting else 1)
+        if chunk:
+            acc.extend(chunk)
+            if b"Spaghetti Core ready" in acc:
+                break
+    time.sleep(0.35)
+    _drain_serial(connection, 0.2)
+
+
+def _identify_from_conn(conn: Any, port: str, timeout_s: float) -> BoundCore | None:
     buffer = bytearray()
     try:
-        conn.reset_input_buffer()
+        if hasattr(conn, "reset_input_buffer"):
+            conn.reset_input_buffer()
         envelope = encode_request(
             IDENTIFY_CORRELATION, Operation.GET_STATUS, EMPTY_MAP_PAYLOAD
         )
         conn.write(encode_usb_frame(KIND_REQUEST, envelope))
         conn.flush()
-        deadline = time.monotonic() + IDENTIFY_TIMEOUT_S
+        deadline = time.monotonic() + timeout_s
         while time.monotonic() < deadline:
-            waiting = conn.in_waiting
+            waiting = getattr(conn, "in_waiting", 0) or 0
             chunk = conn.read(waiting if waiting else 1)
             if chunk:
                 buffer.extend(chunk)
@@ -294,7 +322,6 @@ def _identify_sync(port: str) -> BoundCore | None:
                     continue
                 _corr, name, _code, payload = decode_response(body)
                 if name != "ok":
-                    _close_quiet(conn)
                     return None
                 status = decode_get_status_response(payload)
                 if status.device_id:
@@ -311,12 +338,51 @@ def _identify_sync(port: str) -> BoundCore | None:
                 )
                 _apply_status(core, status)
                 return core
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("identify failed on %s: %s", port, exc)
+    return None
+
+
+def _identify_once(port: str) -> BoundCore | None:
+    try:
+        import serial as serial_mod
+    except ImportError:
+        logger.error("pyserial missing; run make host-tools")
+        return None
+
+    try:
+        conn = open_serial_without_reset(serial_mod, port, 115200)
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("skip %s: %s", port, exc)
+        return None
+
+    try:
+        core = _identify_from_conn(conn, port, 1.2)
+        if core is not None:
+            return core
+        logger.info("USB Master on %s silent after open; resetting and waiting for boot", port)
+        _pulse_usb_run(conn)
+        _wait_core_ready(conn, 4.0)
+        core = _identify_from_conn(conn, port, IDENTIFY_TIMEOUT_S)
+        if core is not None:
+            return core
         _close_quiet(conn)
         return None
     except Exception as exc:  # noqa: BLE001
         logger.debug("identify failed on %s: %s", port, exc)
         _close_quiet(conn)
         return None
+
+
+def _identify_sync(port: str) -> BoundCore | None:
+    """Open and GET_STATUS. If open wedges USB-JTAG, reset once and wait for boot."""
+    for attempt in range(IDENTIFY_ATTEMPTS):
+        core = _identify_once(port)
+        if core is not None:
+            return core
+        if attempt + 1 < IDENTIFY_ATTEMPTS:
+            time.sleep(IDENTIFY_RETRY_S)
+    return None
 
 
 class UsbBridge:
@@ -337,11 +403,10 @@ class UsbBridge:
             stale = [
                 device_id
                 for device_id, core in self.cores.items()
-                if core.port not in present and device_id not in self._busy
+                if core.port not in present or not _serial_usable(core.connection)
             ]
             for device_id in stale:
-                _close_quiet(self.cores[device_id].connection)
-                del self.cores[device_id]
+                self._forget_locked(device_id)
 
             # A macOS USB serial path is commonly reused when boards are
             # swapped. Revalidate every idle root instead of treating the
@@ -436,6 +501,17 @@ class UsbBridge:
                 }
             )
         return {"cores": document}
+
+    def _forget_locked(self, device_id_hex: str) -> None:
+        core = self.cores.pop(device_id_hex, None)
+        if core is not None:
+            _close_quiet(core.connection)
+        self._busy.discard(device_id_hex)
+        self._session_ws.pop(device_id_hex, None)
+
+    def forget(self, device_id_hex: str) -> None:
+        with self._lock:
+            self._forget_locked(device_id_hex)
 
     def get(self, device_id_hex: str) -> BoundCore | None:
         with self._lock:
@@ -574,6 +650,7 @@ async def _pipe_core(websocket: Any, core: BoundCore) -> None:
             except Exception:
                 idle.set()
                 logger.exception("usb write failed port=%s", core.port)
+                _close_quiet(core.connection)
                 break
     finally:
         stop.set()
@@ -642,7 +719,10 @@ def make_handler(bridge: UsbBridge):
                     with bridge._lock:
                         if bridge._session_ws.get(device_id) is websocket:
                             bridge._session_ws.pop(device_id, None)
-                    bridge.release(device_id)
+                    if not _serial_usable(acquired.connection):
+                        bridge.forget(device_id)
+                    else:
+                        bridge.release(device_id)
                 return
             await websocket.close(4404, "unknown path")
         except ConnectionClosed:
@@ -699,19 +779,33 @@ async def run_server(listen: str) -> None:
     port = int(port_s)
     bridge = UsbBridge()
     await asyncio.to_thread(bridge.refresh)
-    async with serve(
-        make_handler(bridge),
-        host,
-        port,
-        max_size=4096,
-        process_request=make_process_request(bridge),
-    ):
-        logger.info(
-            "USB bridge on ws://%s:%s  (Safari: keep make monitor closed)",
+
+    async def rescan_empty() -> None:
+        while True:
+            await asyncio.sleep(2.0)
+            present = serial_ports()
+            with bridge._lock:
+                known = len(bridge.cores)
+            if present and known == 0:
+                await asyncio.to_thread(bridge.refresh)
+
+    watcher = asyncio.create_task(rescan_empty())
+    try:
+        async with serve(
+            make_handler(bridge),
             host,
             port,
-        )
-        await asyncio.Future()
+            max_size=4096,
+            process_request=make_process_request(bridge),
+        ):
+            logger.info(
+                "USB bridge on ws://%s:%s  (Safari: keep make monitor closed)",
+                host,
+                port,
+            )
+            await asyncio.Future()
+    finally:
+        watcher.cancel()
 
 
 def main(argv: list[str] | None = None) -> int:

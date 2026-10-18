@@ -284,6 +284,24 @@ int spaghetti_core_init(void)
 	if (err < 0) {
 		goto maintenance_link_failed;
 	}
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) {
+		/* No Port, physical settings, Module Manager, Config or runtime is
+		 * initialized. In particular, old Backbone NVS cannot activate I/O. */
+		err = select_boot_mode(&update_status);
+		if (err < 0) goto boot_mode_failed;
+		err = spaghetti_nfc_init();
+		if (err < 0) {
+			(void)fail_initialization("NFC module reader", err);
+			goto unlock;
+		}
+		err = spaghetti_field_update_init();
+		if (err < 0) {
+			(void)fail_initialization("NFC module CAN", err);
+			goto unlock;
+		}
+		LOG_INF("PRODUCT=NFC_MODULE role=CAN_PERIPHERAL master=NEVER hardware_io=DISABLED");
+		goto core_ready;
+	}
 	err = spaghetti_port_init_all();
 	if (err < 0) {
 		goto port_failed;
@@ -413,6 +431,7 @@ int spaghetti_core_init(void)
 	}
 #endif
 
+core_ready:
 	status_led_on();
 	atomic_set(&core_state, SPAGHETTI_CORE_READY);
 	core_info.state = SPAGHETTI_CORE_READY;
@@ -559,7 +578,8 @@ int spaghetti_core_start(void)
 		return -EACCES;
 	}
 
-	if ((core_info.mode == SPAGHETTI_CORE_MODE_NORMAL) &&
+	if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE) &&
+	    (core_info.mode == SPAGHETTI_CORE_MODE_NORMAL) &&
 	    startup_config_present) {
 		struct spaghetti_config *startup_config =
 			spaghetti_config_acquire_workspace();
@@ -585,6 +605,12 @@ int spaghetti_core_start(void)
 				LOG_WRN("stored Config not applied; empty state remains live: "
 					"err=%d",
 					err);
+				/* A failed Relè/GPIO activate was leaving live
+				 * pointers smashed; main then died (VADDR 0)
+				 * and the Master vanished from USB. Drop the
+				 * bad record so the next boot stays empty.
+				 */
+				(void)spaghetti_storage_delete_config();
 			}
 		}
 	}
@@ -613,6 +639,8 @@ int spaghetti_core_start(void)
 		core_info.image_confirmed = true;
 		k_mutex_unlock(&core_lock);
 	}
+
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return 0;
 
 	if (core_info.mode == SPAGHETTI_CORE_MODE_NORMAL) {
 		err = spaghetti_wifi_profiles_request_connect();

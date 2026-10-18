@@ -6,7 +6,7 @@ import { bytesToHex, CatalogCache, CoreSession, type CoreSessionSnapshot, type S
 import type { DeviceProfileDraft } from "@spaghettilab/device-profile-authoring-model";
 import type { InstallProfileResult } from "@spaghettilab/device-profile-install";
 import type { CoreBindingId, CoreBindingRecord, DomainError, PermissionSet, Result } from "@spaghettilab/domain";
-import { EventStream, SpaghettiClient, WebSerialProtocolTransport, WebSocketProtocolTransport, type AcceptDiscoveryRequest, type AcceptDiscoveryResponse, type AuditLogEntry, type DeviceProfileSummary, type DiscoveryCandidate, type DiscoveryEventPayload, type GetConnectivityStatusResponse, type GetJobStatusResponse, type GetStatusResponse, type GetUpdateStatusResponse, type ProtocolTransport, type RecordEventPayload } from "@spaghettilab/protocol-sdk";
+import { EventStream, SpaghettiClient, WebSerialProtocolTransport, WebSocketProtocolTransport, type AcceptDiscoveryRequest, type AcceptDiscoveryResponse, type AuditLogEntry, type DeviceProfileSummary, type DiscoveryCandidate, type DiscoveryEventPayload, type GetConfigResponse, type GetConnectivityStatusResponse, type GetJobStatusResponse, type GetStatusResponse, type GetUpdateStatusResponse, type ProtocolTransport, type RecordEventPayload } from "@spaghettilab/protocol-sdk";
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { connectBrowserWebSocket } from "../lib/browser-websocket-connection.js";
 import { openBrowserSerial, type UsbSerialPort } from "../lib/browser-serial-connection.js";
@@ -26,6 +26,7 @@ export type CanVia = {
 export type HostLink = "usb" | "wifi";
 
 export type AttachedBackbone = {
+  readonly productKind?: "backbone" | "nfc-reader";
   /** Stable board identity: factory MAC encoded as 64 lowercase hex chars. */
   readonly deviceIdHex: string;
   readonly mac: string;
@@ -56,6 +57,7 @@ export function attachedFromStatus(status: GetStatusResponse | undefined, expect
       mac,
       nodeId: peer.nodeId,
       local: peer.local,
+      ...((peer.flags & 0x02) !== 0 ? {productKind:"nfc-reader" as const} : {}),
       ...(version ? { version } : {}),
     };
   });
@@ -95,6 +97,7 @@ type CoreSessionsContextValue = {
   connect(binding: CoreBindingRecord, link: CoreLink): Promise<void>;
   setAttachedBackbones(bindingId: CoreBindingId, peers: readonly AttachedBackbone[]): void;
   observeStatus(bindingId: CoreBindingId, status: GetStatusResponse): void;
+  observeConfig(bindingId: CoreBindingId, config: GetConfigResponse): void;
   cancel(bindingId: CoreBindingId): void;
   fail(bindingId: CoreBindingId, message: string): void;
   getSnapshot(bindingId: CoreBindingId): CoreSessionSnapshot | undefined;
@@ -118,8 +121,17 @@ type CoreSessionsContextValue = {
   requestFactoryReset(bindingId: CoreBindingId, scope: number, granted: PermissionSet, confirmation: DestructiveConfirmation): Promise<ResetScopeOutcome> | undefined;
   getUpdateStatus(bindingId: CoreBindingId): Promise<GetUpdateStatusResponse> | undefined;
   getClient(bindingId: CoreBindingId): SpaghettiClient | undefined;
-  /** One fresh GET_STATUS per connected host root, shared by Discover and Run Deploy. */
-  discoverNetwork(): Promise<readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]>;
+  /**
+   * One GET_STATUS per connected host root, shared by Discover and presence.
+   * Pass `{ fresh: true }` after an NFC appear/leave IRQ so we do not reuse a
+   * GET_STATUS that started before the antenna changed.
+   */
+  discoverNetwork(options?: {
+    readonly fresh?: boolean;
+  }): Promise<readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]>;
+  /** Blocks GET_STATUS while an exclusive NFC write owns the transport. */
+  lockTransport(): void;
+  unlockTransport(): void;
 };
 
 const CoreSessionsContext = createContext<CoreSessionsContextValue | undefined>(undefined);
@@ -178,6 +190,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
   const attachedRef = useRef(new Map<CoreBindingId, readonly AttachedBackbone[]>());
   const hostLinkRef = useRef(new Map<CoreBindingId, HostLink>());
   const discoveryRef = useRef<Promise<readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]> | null>(null);
+  const transportLockRef = useRef(0);
   const [renderCount, forceRender] = useState(0);
   const rerender = useCallback(() => forceRender((n) => n + 1), []);
   const [errors, setErrors] = useState<Map<CoreBindingId, DomainError | string>>(new Map());
@@ -314,6 +327,11 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     sessionsRef.current.get(bindingId)?.observeStatus(status);
   }, []);
 
+  const observeConfig = useCallback((bindingId: CoreBindingId, config: GetConfigResponse) => {
+    sessionsRef.current.get(bindingId)?.observeConfig(config);
+    rerender();
+  }, [rerender]);
+
   const rows = useMemo<readonly CoreRowState[]>(() => {
     const bindings = session?.stack.current.coreBindings ?? [];
     return bindings.map((binding) => {
@@ -380,9 +398,20 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
   );
   const getUpdateStatus = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.getUpdateStatus(), []);
   const getClient = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.client, []);
-  const discoverNetwork = useCallback(() => {
-    if (discoveryRef.current) return discoveryRef.current;
+  const lockTransport = useCallback(() => {
+    transportLockRef.current += 1;
+  }, []);
+  const unlockTransport = useCallback(() => {
+    transportLockRef.current = Math.max(0, transportLockRef.current - 1);
+  }, []);
+  const discoverNetwork = useCallback((options?: { readonly fresh?: boolean }) => {
+    if (transportLockRef.current > 0) {
+      return discoveryRef.current ?? Promise.resolve([]);
+    }
+    if (discoveryRef.current && !options?.fresh) return discoveryRef.current;
+    const previous = discoveryRef.current;
     const request = (async () => {
+      if (previous) await previous.catch(() => {});
       const discovered: { bindingId: CoreBindingId; status: GetStatusResponse }[] = [];
       for (const [bindingId, coreSession] of sessionsRef.current) {
         if (canViaRef.current.has(bindingId)) continue;
@@ -416,6 +445,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     connect,
     setAttachedBackbones,
     observeStatus,
+    observeConfig,
     cancel,
     fail,
     getSnapshot,
@@ -440,6 +470,8 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     getUpdateStatus,
     getClient,
     discoverNetwork,
+    lockTransport,
+    unlockTransport,
   };
   return <CoreSessionsContext.Provider value={value}>{children}</CoreSessionsContext.Provider>;
 }

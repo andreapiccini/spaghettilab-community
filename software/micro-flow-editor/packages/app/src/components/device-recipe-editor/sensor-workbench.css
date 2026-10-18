@@ -876,8 +876,20 @@
   font: 12px var(--font-mono);
   color: var(--color-ink);
 }
-.sensor-workbench-pins > div > button {
+.sensor-workbench-pins > div > button,
+.sensor-workbench-pins select {
   min-width: 64px;
+}
+.sensor-workbench-pins select {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-slsm);
+  min-height: 32px;
+  padding: 6px 10px;
+  background: var(--color-surface);
+  font: 12px var(--font-mono);
+  color: var(--color-ink);
 }
 .sensor-workbench-pins > button {
   padding: 8px;
@@ -1045,4 +1057,177 @@
 .sensor-nav-delete-action:hover {
   color: var(--color-error);
   background: color-mix(in srgb, var(--color-error) 8%, transparent);
+}
+.sensor-nav-rename-action {
+  display: flex;
+  flex-shrink: 0;
+  padding: 6px;
+  border-radius: 4px;
+  color: var(--color-ink-faint);
+}
+.sensor-nav-rename-action:hover {
+  color: var(--color-brand-blue);
+  background: color-mix(in srgb, var(--color-brand-blue) 8%, transparent);
+}
+.sensor-nav-action-rename {
+  width: 0;
+  min-width: 0;
+  flex: 1;
+  margin: 8px;
+  padding: 6px;
+  border: 1px solid var(--color-brand-blue);
+  border-radius: 4px;
+  background: var(--color-surface);
+  font: 600 13px var(--font-body);
+}
+/* Keep message editing and the timing diagram together on short desktop screens. */
+.sensor-byte-toolbar > .sensor-step-heading {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+.sensor-workbench .sensor-byte-toolbar > .sensor-step-heading {
+  margin-bottom: 0;
+}
+.sensor-workbench .sensor-byte-toolbar {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.sensor-workbench .sensor-byte-toolbar-actions {
+  gap: 8px;
+}
+.sensor-workbench .sensor-workbench-heading {
+  margin-bottom: 10px;
+}
+.sensor-workbench .sensor-workbench-sequence {
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.sensor-workbench .sensor-sequence li button {
+  padding: 10px 12px;
+}
+.sensor-workbench .sensor-workbench-inspector {
+  margin-bottom: 10px;
+}
+.sensor-workbench .sensor-byte-actions {
+  margin-top: 8px;
+}
+.sensor-workbench .sensor-workbench-connection {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.sensor-workbench footer {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+@media (max-width: 600px) {
+  .sensor-workbench .sensor-byte-toolbar {
+    flex-wrap: wrap;
+  }
+  .sensor-byte-toolbar > .sensor-step-heading {
+    flex-basis: 100%;
+  }
+}
+.sensor-workbench .sensor-workbench-heading {
+  margin-bottom: 8px;
+}
+.sensor-workbench .sensor-workbench-main {
+  padding-top: 12px;
+}
+.sensor-workbench .sensor-workbench-sequence {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+.sensor-workbench .sensor-sequence li button {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.sensor-workbench .sensor-byte-toolbar {
+  margin-bottom: 0;
+}
+.sensor-workbench .sensor-byte-grid input {
+  height: 32px;
+}
+.sensor-workbench .sensor-byte-actions {
+  margin-top: 0;
+}
+.sensor-workbench .sensor-byte-actions > button,
+.sensor-workbench .sensor-byte-variables > summary {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.sensor-workbench .sensor-workbench-inspector {
+  margin-bottom: 8px;
+}
+.sensor-step-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+.sensor-step-name input {
+  min-width: 0;
+  width: 120px;
+  flex: 1;
+  padding: 2px 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  font: 700 18px var(--font-heading);
+  color: var(--color-ink);
+}
+.sensor-step-name input:hover {
+  border-color: var(--color-border);
+}
+.sensor-step-name > button {
+  color: var(--color-ink-muted);
+  flex-shrink: 0;
+}
+.sensor-step-kind {
+  display: inline-block;
+  flex-shrink: 0;
+  font: 10px var(--font-body);
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: var(--color-surface-sunken);
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+.sensor-nav-step-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 3px;
+}
+.sensor-nav-step-name > span {
+  overflow-wrap: anywhere;
+}
+.sensor-nav .sensor-nav-step-name > .sensor-step-kind {
+  margin: 0;
+  font-size: 9px;
+  padding: 2px 4px;
+}
+.sensor-sequence strong {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sensor-sequence small {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 1000px) {
+  .sensor-step-name {
+    flex-wrap: wrap;
+  }
+  .sensor-step-name .sensor-step-kind {
+    font-size: 9px;
+  }
 }

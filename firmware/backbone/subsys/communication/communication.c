@@ -721,13 +721,18 @@ void spaghetti_communication_invalidate_sessions(void)
 	 */
 }
 
+/* Discovery can originate on the small CAN and system-workqueue stacks.
+ * Serialize owned scratch storage rather than nesting protocol-sized buffers
+ * on those callers. No communication_lock is held while waiting for USB. */
+K_MUTEX_DEFINE(discovery_event_lock);
+static struct spaghetti_protocol_payload discovery_body;
+static uint8_t discovery_envelope[SPAGHETTI_PROTOCOL_PAYLOAD_MAX + 64U];
+
 int spaghetti_communication_emit_discovery(
 	uint32_t candidate_id,
 	uint8_t port_id,
 	uint32_t generation)
 {
-	struct spaghetti_protocol_payload body;
-	uint8_t envelope[SPAGHETTI_PROTOCOL_PAYLOAD_MAX + 64U];
 	size_t written = 0U;
 	uint32_t sequence;
 	int err;
@@ -735,26 +740,25 @@ int spaghetti_communication_emit_discovery(
 	if (atomic_get(&is_initialized) == 0) {
 		return -EACCES;
 	}
-
+	k_mutex_lock(&discovery_event_lock, K_FOREVER);
 	err = spaghetti_protocol_encode_discovery_event_payload(
-		candidate_id, port_id, generation, &body);
+		candidate_id, port_id, generation, &discovery_body);
 	if (err < 0) {
-		return err;
+		goto out;
 	}
-
 	sequence = (uint32_t)atomic_inc(&event_sequence);
 	if (sequence == 0U) {
 		sequence = (uint32_t)atomic_inc(&event_sequence);
 	}
-
 	err = spaghetti_protocol_encode_event(
-		SPAGHETTI_PROTOCOL_EVENT_DISCOVERY, sequence, &body, envelope,
-		sizeof(envelope), &written);
-	if (err < 0) {
-		return err;
+		SPAGHETTI_PROTOCOL_EVENT_DISCOVERY, sequence, &discovery_body,
+		discovery_envelope, sizeof(discovery_envelope), &written);
+	if (err == 0) {
+		err = spaghetti_usb_protocol_send_event(discovery_envelope, written);
 	}
-
-	return spaghetti_usb_protocol_send_event(envelope, written);
+out:
+	k_mutex_unlock(&discovery_event_lock);
+	return err;
 }
 
 void spaghetti_communication_invalidate_principal(

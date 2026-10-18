@@ -224,3 +224,11 @@ ports:
 
 clean:
 	@$(COMPOSE) run --rm --entrypoint west dev build -d build -t pristine
+
+# Dedicated NFC peripheral; never replaces the normal Backbone build directory.
+.PHONY: build-nfc
+build-nfc:
+	@$(COMPOSE) run --rm --entrypoint sh dev -lc \
+		'west build --sysbuild -p auto -b spaghettilab_backbone_v1/esp32s3/procpu \
+		-d build-nfc . -- -DBOARD_ROOT=/opt/zephyrproject/app \
+		-DDTS_ROOT=/opt/zephyrproject/app -DEXTRA_CONF_FILE=nfc-module.conf'

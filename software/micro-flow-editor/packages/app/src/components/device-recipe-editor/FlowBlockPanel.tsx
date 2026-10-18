@@ -115,7 +115,11 @@ export function FlowBlockPanel({
                 {interfaceLabel(op, labels)}
                 <span className="block truncate text-[10px] text-ink-muted">
                   {op.type === "sample_external"
-                    ? op.inputMode === "trigger" ? "Trigger → azione selezionata nel canvas" : `${draft.channels.find((channel) => channel.id === op.fromChannelId)?.label ?? op.fromChannelId} → $${op.into}`
+                    ? op.inputMode === "trigger"
+                      ? op.triggerHighAction || op.triggerLowAction
+                        ? `ALTO → ${op.triggerHighAction ?? "on"} · BASSO → ${op.triggerLowAction ?? "off"}`
+                        : "Trigger → azione selezionata nel canvas"
+                      : `${draft.channels.find((channel) => channel.id === op.fromChannelId)?.label ?? op.fromChannelId} → $${op.into}`
                     : op.type === "emit"
                       ? `$${op.from} → ${draft.channels.find((channel) => channel.id === op.channelId)?.label ?? op.channelId}`
                       : describeDeviceOp(op)}

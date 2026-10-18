@@ -20,11 +20,16 @@ describe("bay family model", () => {
     const rows = expandPalettePlaceables([
       findCatalogEntryById("native.schedule")!,
       findCatalogEntryById("appblocks.digital_out_toggle")!,
+      findCatalogEntryById("appblocks.square_wave")!,
       findCatalogEntryById("appblocks.led")!,
       findCatalogEntryById("appblocks.relay")!,
     ]);
     const groups = groupPlaceablesByFamily(rows);
-    expect(groups.functionality.map((r) => r.entry.id)).toEqual(["native.schedule", "appblocks.digital_out_toggle"]);
+    expect(groups.functionality.map((r) => r.entry.id)).toEqual([
+      "native.schedule",
+      "appblocks.digital_out_toggle",
+      "appblocks.square_wave",
+    ]);
     expect(groups.bay.map((r) => r.entry.id)).toEqual(["appblocks.led", "appblocks.relay"]);
     expect(groups.bay.every((r) => r.baySide === "output")).toBe(true);
   });

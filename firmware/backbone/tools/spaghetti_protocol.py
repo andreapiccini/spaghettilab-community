@@ -117,6 +117,8 @@ class Operation(IntEnum):
     WRITE_BLE_UPDATE = 29
     FINISH_BLE_UPDATE = 30
     CANCEL_BLE_UPDATE = 31
+    APPLY_PHYSICAL = 32
+    NFC_PAGE = 33
 
 
 PROTOCOL_STATUS_CODES = {
@@ -366,7 +368,7 @@ def encode_response(
 
 def decode_request(data: bytes) -> tuple[int, int, bytes]:
     field1, field2, payload = decode_envelope(data)
-    if not 1 <= field2 <= 31:
+    if not 1 <= field2 <= 33:
         raise ProtocolCodecError(f"unsupported operation {field2}")
     return field1, field2, payload
 

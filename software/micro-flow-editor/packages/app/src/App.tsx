@@ -1,3 +1,8 @@
+import { NFC_CONTEXT_META } from "./lib/nfc-workspace.js";
+import { NfcWorkspaceProvider, useNfcWorkspace } from "./state/nfc-workspace-context.js";
+import { NfcScreen } from "./components/nfc/NfcScreen.js";
+import { NfcToast } from "./components/nfc/NfcBell.js";
+import { NfcModuleDialog } from "./components/nfc/NfcModuleDialog.js";
 import { ToolsScreen } from "./components/tools/ToolsScreen.js";
 import { saveDriverMetadata } from "./lib/device-driver-library.js";
 import { useEffect, useState } from "react";
@@ -31,7 +36,7 @@ import { SettingsModal } from "./components/settings-modal/SettingsModal.js";
 import { TourOverlay } from "./components/shell/TourOverlay.js";
 import { isDemoOnlyEnabled, isScreenAllowedInDemo } from "./lib/demo-only.js";
 import { prepareDemoProject } from "./lib/open-demo.js";
-import { publicAsset } from "./lib/public-asset.js";
+import { BrandMark } from "./components/shell/BrandMark.js";
 import { CoreSessionsProvider } from "./state/core-sessions-context.js";
 import { NfcPresenceProvider } from "./state/nfc-presence-context.js";
 import { LocaleProvider } from "./state/locale-context.js";
@@ -90,11 +95,7 @@ function useDemoOnlyBootstrap() {
 function DemoBootScreen({ error }: { readonly error?: string | null }) {
   return (
     <div className="flex h-screen flex-col items-center justify-center gap-3 bg-surface">
-      <img
-        src={publicAsset("ux-assets/logo-full.png")}
-        alt="Spaghetti LAB"
-        className="h-8"
-      />
+      <BrandMark />
       <p className="font-body text-sm text-ink-muted">
         {error ?? "Opening the Processing Graph demo…"}
       </p>
@@ -103,9 +104,11 @@ function DemoBootScreen({ error }: { readonly error?: string | null }) {
 }
 
 function DeviceRecipeEditorRoute({ initialDraft }: { readonly initialDraft?: DeviceRecipeDraft }) {
-  const { execute, navigate } = useSession();
+  const { execute, navigate, session } = useSession();
 
+  const nfc = useNfcWorkspace();
   function persistDraft(draft: DeviceRecipeDraft, pendingCreate: boolean) {
+    if (nfc.finishDriver(draft, pendingCreate)) return true;
     if (!execute) return;
     execute({
       kind: "SaveDeviceRecipeDraft",
@@ -126,12 +129,13 @@ function DeviceRecipeEditorRoute({ initialDraft }: { readonly initialDraft?: Dev
   return (
     <DeviceRecipeEditorScreen
       initialDraft={initialDraft}
-      onCancel={() => navigate("processing-graph")}
+      saveDriverOnly={!!session?.stack.current.authoringMetadata[NFC_CONTEXT_META]?.comment}
+      onCancel={() => { if (!nfc.cancelDriver()) navigate("processing-graph"); }}
       onSaveDraft={(draft) => {
         persistDraft(draft, false);
       }}
       onCreate={(draft) => {
-        persistDraft(draft, true);
+        if (persistDraft(draft, true)) return;
         navigate("processing-graph");
       }}
     />
@@ -191,6 +195,8 @@ function AppContent() {
   }
 
   if (activeScreen === "tools") return <AppShell><ToolsScreen /></AppShell>;
+
+  if (activeScreen === "nfc-tags") return <AppShell><NfcScreen /></AppShell>;
 
   if (activeScreen === "device-profile-studio") {
     return (
@@ -316,9 +322,13 @@ export default function App() {
                   <TourProvider>
                     <CoreSessionsProvider>
                       <NfcPresenceProvider>
+                        <NfcWorkspaceProvider>
                         <AppContent />
+                        <NfcToast />
+                        <NfcModuleDialog />
                         {!isDemoOnlyEnabled() && <SettingsModal />}
                         {!isDemoOnlyEnabled() && <TourOverlay />}
+                        </NfcWorkspaceProvider>
                       </NfcPresenceProvider>
                     </CoreSessionsProvider>
                   </TourProvider>

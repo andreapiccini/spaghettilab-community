@@ -3,6 +3,7 @@ import type { NfcNode } from "./nfc-presence.js";
 export type HostLinkKind = "usb" | "wifi" | "can";
 
 export type NetworkBoard = {
+  readonly productKind?: "backbone" | "nfc-reader";
   readonly id: string;
   readonly label: string;
   readonly sublabel: string;
@@ -12,7 +13,7 @@ export type NetworkBoard = {
 
 export type NetworkLaidNode = {
   readonly id: string;
-  readonly kind: "host" | "backbone" | "nfc" | "nfc-empty";
+  readonly kind: "host" | "backbone" | "nfc-reader" | "nfc" | "nfc-empty";
   readonly x: number;
   readonly y: number;
   readonly r: number;
@@ -62,7 +63,7 @@ export function layoutBackboneNetwork(
     const x = count === 1 ? width / 2 : PAD_X + (usable * index) / (count - 1);
     nodes.push({
       id: board.id,
-      kind: "backbone",
+      kind: board.productKind === "nfc-reader" ? "nfc-reader" : "backbone",
       x,
       y: BOARD_Y,
       r: BOARD_R,
@@ -90,6 +91,7 @@ export function layoutBackboneNetwork(
       edges.push({ id: `can-${prev.id}-${board.id}`, kind: "can", from: prev.id, to: board.id });
     }
 
+    if (board.productKind !== "nfc-reader") return;
     const nfc = nfcByBoardId.get(board.id) ?? [];
     if (nfc.length === 0) {
       const emptyId = `${board.id}-nfc-empty`;

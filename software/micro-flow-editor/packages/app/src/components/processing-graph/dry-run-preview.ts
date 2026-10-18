@@ -5,6 +5,11 @@ import { parseRgbLedConfig, rgbLedPlaybackAt, type RgbLineSignal } from "./rgb-l
 
 /** Catalog / type ids for Digital Out Toggle — flips the line after hysteresis ticks. */
 export const DIGITAL_OUT_TOGGLE_IDS = new Set(["appblocks.digital_out_toggle", "ab.digital_out_toggle"]);
+export const SQUARE_WAVE_IDS = new Set(["appblocks.square_wave", "ab.square_wave"]);
+export const BACKBONE_SENSOR_BLOCK_IDS = new Set([
+  "appblocks.backbone_sensor",
+  "ab.backbone_sensor",
+]);
 
 /** Catalog / type ids for the visual LED indicator (solid color swatch). */
 export const LED_BLOCK_IDS = new Set(["appblocks.led", "ab.led"]);
@@ -216,6 +221,42 @@ export function buildDryRunPreviewChannels(
       tempIds: srcId ? [srcId] : [],
     });
   }
+
+  for (const node of graph.nodes) {
+    const data = node.data as DeviceProcessingNodeData;
+    if (!isSquareWave(data) || !isBlockNodeData(data)) continue;
+    const periodMs = squareWavePeriodMs(data.properties);
+    const duty = squareWaveDutyPercent(data.properties);
+    const pulseMs = Math.max(1, Math.round((periodMs * duty) / 100));
+    const leds: LedActuatorBinding[] = [];
+    const relays: RelayBinding[] = [];
+    for (const outId of outgoing.get(node.id) ?? []) {
+      if (claimed.has(outId)) continue;
+      const outData = nodesById.get(outId);
+      if (!outData || !isBlockNodeData(outData)) continue;
+      if (isLedBlock(outData)) {
+        leds.push(ledBindingFromProperties(outId, outData.properties));
+        claimed.add(outId);
+      } else if (isRelayBlock(outData) || isBackboneSensorBlock(outData)) {
+        relays.push(relayBindingFromProperties(outId, outData.properties));
+        claimed.add(outId);
+      }
+    }
+    channels.push({
+      triggerId: `square:${node.id}`,
+      periodMs,
+      highTicks: 1,
+      lowTicks: 1,
+      initialHigh: true,
+      toggleMode: "pulse_high",
+      pulseMs,
+      toggleIds: [node.id],
+      startIds: [],
+      actuators: leds,
+      rgbActuators: [],
+      relayBindings: relays,
+    });
+  }
   return channels;
 }
 
@@ -345,6 +386,24 @@ export function isDigitalOutToggle(data: DeviceProcessingNodeData): boolean {
   return DIGITAL_OUT_TOGGLE_IDS.has(data.blockTypeId);
 }
 
+export function isSquareWave(data: DeviceProcessingNodeData): boolean {
+  if (!isBlockNodeData(data)) return false;
+  if (data.catalogEntryId && SQUARE_WAVE_IDS.has(data.catalogEntryId)) return true;
+  return SQUARE_WAVE_IDS.has(data.blockTypeId);
+}
+
+export function isDigitalCommandSource(data: DeviceProcessingNodeData): boolean {
+  return isDigitalOutToggle(data) || isSquareWave(data);
+}
+
+export function squareWavePeriodMs(properties: Readonly<Record<string, unknown>>): number {
+  return Math.max(20, Math.min(60_000, numberFromProperty(properties.periodMs, 500)));
+}
+
+export function squareWaveDutyPercent(properties: Readonly<Record<string, unknown>>): number {
+  return Math.max(1, Math.min(99, numberFromProperty(properties.dutyCycle, 50)));
+}
+
 export function isCompareIf(data: DeviceProcessingNodeData): boolean {
   if (!isBlockNodeData(data)) return false;
   if (data.catalogEntryId && COMPARE_IF_IDS.has(data.catalogEntryId)) return true;
@@ -370,9 +429,9 @@ export function ifInputCompatibleWith(data: DeviceProcessingNodeData, source: De
   if (!isBlockNodeData(data)) return true;
   const explicit = data.properties.inputType;
   if (explicit !== "analog" && explicit !== "digital") {
-    return isDigitalOutToggle(source) || isTemperatureSensor(source);
+    return isDigitalCommandSource(source) || isTemperatureSensor(source);
   }
-  if (isDigitalOutToggle(source)) return explicit === "digital";
+  if (isDigitalCommandSource(source)) return explicit === "digital";
   if (isTemperatureSensor(source)) return explicit === "analog";
   return false;
 }
@@ -387,6 +446,12 @@ export function isRelayBlock(data: DeviceProcessingNodeData): boolean {
   if (!isBlockNodeData(data)) return false;
   if (data.catalogEntryId && RELAY_BLOCK_IDS.has(data.catalogEntryId)) return true;
   return RELAY_BLOCK_IDS.has(data.blockTypeId);
+}
+
+export function isBackboneSensorBlock(data: DeviceProcessingNodeData): boolean {
+  if (!isBlockNodeData(data)) return false;
+  if (data.catalogEntryId && BACKBONE_SENSOR_BLOCK_IDS.has(data.catalogEntryId)) return true;
+  return BACKBONE_SENSOR_BLOCK_IDS.has(data.blockTypeId);
 }
 
 export function compareOpFromProperties(properties: Readonly<Record<string, unknown>>): CompareOp {

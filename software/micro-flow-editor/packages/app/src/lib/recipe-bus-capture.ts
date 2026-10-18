@@ -27,7 +27,13 @@ function pushTx(
   const tx = txByOpId[opId] ?? [];
   for (const v of hexStringsToBytes(bytes)) {
     tx.push(v);
-    blocks.push({ opId, direction: "tx", index: tx.length - 1, value: v, label: formatHexByte(v) });
+    blocks.push({
+      opId,
+      direction: "tx",
+      index: tx.length - 1,
+      value: v,
+      label: formatHexByte(v),
+    });
   }
   txByOpId[opId] = tx;
 }
@@ -69,15 +75,30 @@ export function buildRecipeBusCapture(
   for (const op of ops) {
     if (op.type === "i2c_write") {
       pushTx(blocks, txByOpId, op.id, op.bytes);
+    } else if (op.type === "gpio_read") {
+      pushRxSlots(blocks, rxByOpId, op.id, 1, measuredRx?.[op.id]);
     } else if (op.type === "i2c_read") {
       pushRxSlots(blocks, rxByOpId, op.id, Math.max(1, op.len), measuredRx?.[op.id]);
     } else if (op.type === "i2c_write_read") {
       pushTx(blocks, txByOpId, op.id, op.writeBytes);
-      pushRxSlots(blocks, rxByOpId, op.id, Math.max(1, op.readLen), measuredRx?.[op.id]);
+      pushRxSlots(
+        blocks,
+        rxByOpId,
+        op.id,
+        Math.max(1, op.readLen),
+        measuredRx?.[op.id],
+      );
     } else if (op.type === "i2c_transaction") {
       for (const phase of op.phases) {
         if (phase.kind === "write") pushTx(blocks, txByOpId, op.id, phase.bytes);
-        if (phase.kind === "read") pushRxSlots(blocks, rxByOpId, op.id, Math.max(1, phase.len), measuredRx?.[op.id]);
+        if (phase.kind === "read")
+          pushRxSlots(
+            blocks,
+            rxByOpId,
+            op.id,
+            Math.max(1, phase.len),
+            measuredRx?.[op.id],
+          );
       }
     } else if (op.type === "spi_transfer") {
       const tx: number[] = [];
@@ -85,7 +106,13 @@ export function buildRecipeBusCapture(
       for (let i = 0; i < txBytes.length; i++) {
         const v = txBytes[i]!;
         tx.push(v);
-        blocks.push({ opId: op.id, direction: "tx", index: i, value: v, label: formatHexByte(v) });
+        blocks.push({
+          opId: op.id,
+          direction: "tx",
+          index: i,
+          value: v,
+          label: formatHexByte(v),
+        });
       }
       txByOpId[op.id] = tx;
       const measured = measuredRx?.[op.id];

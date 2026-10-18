@@ -10,7 +10,9 @@ import {
   moduleTypeLabel,
   nfcEventsFromDiff,
   nfcNodesForBoard,
+  retainSeenNfcNodes,
   selectNfcDetect,
+  stabilizeNfcPresence,
   type NfcDetectEvent,
 } from "../nfc-presence.js";
 
@@ -127,7 +129,10 @@ describe("diffNfcNodes", () => {
 describe("nfc detect queue", () => {
   it("shows the latest detection and can dismiss it", () => {
     const first = event({ id: "1", node: { portId: 1, label: "Sensor", uid: "01" } });
-    const second = event({ id: "2", node: { portId: 2, label: "Actuator", uid: "02" } });
+    const second = event({
+      id: "2",
+      node: { portId: 2, label: "Actuator", uid: "02" },
+    });
     let queue = enqueueNfcDetects(emptyNfcDetectQueue(), [first, second]);
     expect(queue.activeIndex).toBe(1);
     queue = dismissNfcDetect(queue);
@@ -155,5 +160,95 @@ describe("nfcEventsFromDiff", () => {
     );
     expect(events.map((e) => e.kind)).toEqual(["read"]);
     expect(events[0]?.node).toEqual({ portId: 2, label: "Sensor" });
+  });
+});
+
+describe("retainSeenNfcNodes", () => {
+  const tag = { portId: 1 as const, label: "Tag NFC", uid: "0474C102A02190" };
+
+  it("drops a tag on the first empty snapshot when the hold is 1", () => {
+    expect(retainSeenNfcNodes([tag], [], new Map(), 1).nodes).toEqual([]);
+  });
+
+  it("keeps a tag through brief misses and drops it after the limit", () => {
+    let misses = new Map<string, number>();
+    let nodes = [tag];
+    for (let i = 0; i < 3; i += 1) {
+      const next = retainSeenNfcNodes(nodes, [], misses, 4);
+      nodes = [...next.nodes];
+      misses = new Map(next.misses);
+      expect(nodes).toEqual([tag]);
+    }
+    const gone = retainSeenNfcNodes(nodes, [], misses, 4);
+    expect(gone.nodes).toEqual([]);
+  });
+
+  it("resets the miss count when the same tag is read again", () => {
+    const once = retainSeenNfcNodes([tag], [], new Map(), 4);
+    const back = retainSeenNfcNodes(once.nodes, [tag], once.misses, 4);
+    expect(back.nodes).toEqual([tag]);
+    expect([...back.misses.values()]).toEqual([0]);
+  });
+});
+
+describe("stabilizeNfcPresence", () => {
+  const tag = { uid: "0474C102A02190" };
+
+  it("shows a tag on the first snapshot that lists it", () => {
+    expect(stabilizeNfcPresence([], [tag], 0)).toEqual({ tags: [tag], emptyStreak: 0 });
+  });
+
+  it("keeps the last tag through one empty poll, then drops it", () => {
+    const once = stabilizeNfcPresence([tag], [], 0);
+    expect(once.tags).toEqual([tag]);
+    expect(once.emptyStreak).toBe(1);
+    expect(stabilizeNfcPresence(once.tags, [], once.emptyStreak).tags).toEqual([]);
+  });
+
+  it("treats an omitted list as a miss, and as a leave after a discovery event", () => {
+    const once = stabilizeNfcPresence([tag], undefined, 0);
+    expect(once.tags).toEqual([tag]);
+    expect(once.emptyStreak).toBe(1);
+    expect(stabilizeNfcPresence(once.tags, undefined, once.emptyStreak).tags).toEqual([]);
+    expect(
+      stabilizeNfcPresence([tag], undefined, 0, { immediateLeave: true }).tags,
+    ).toEqual([]);
+  });
+
+  it("drops the tag immediately on a discovery-triggered empty snapshot", () => {
+    expect(stabilizeNfcPresence([tag], [], 0, { immediateLeave: true }).tags).toEqual([]);
+  });
+});
+
+describe("dedicated NFC reader presence", () => {
+  it("keeps unidentified tags on any reader antenna, including port 0", () => {
+    const tag = {
+      portId: 0,
+      typeId: "t2t",
+      uid: new Uint8Array([2, 1, 2, 3, 4, 5, 6]),
+      nodeId: 0xe18030,
+    };
+    expect(collectNfcNodes([tag], true)).toMatchObject([
+      { portId: 0, label: "Tag NFC", uid: "02010203040506" },
+    ]);
+  });
+
+  it("shows blank tags in reader views without treating them as hardware module definitions", () => {
+    const tag = {
+      portId: 1,
+      typeId: "t2t",
+      uid: new Uint8Array([2, 1, 2, 3, 4, 5, 6]),
+      nodeId: 0xe18030,
+      moduleTypeId: 0,
+    };
+    expect(collectNfcNodes([tag])).toEqual([]);
+    const nodes = collectNfcNodes([tag], true);
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0]).toMatchObject({
+      label: "Tag NFC",
+      uid: "02010203040506",
+      nodeId: 0xe18030,
+    });
+    expect(isSlm1Tag(tag)).toBe(false);
   });
 });

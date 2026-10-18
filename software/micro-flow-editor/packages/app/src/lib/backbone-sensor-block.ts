@@ -79,7 +79,13 @@ export function blockPortsFromChannels(channels: readonly SensorChannel[]): {
       );
     } else {
       outputs.push(
-        outPort(channel.id, portTypesForQuantity(channel.quantity, "read"), label),
+        outPort(
+          channel.id,
+          channel.outputMode === "event"
+            ? [T.eventTrigger, T.digitalMisura]
+            : portTypesForQuantity(channel.quantity, "read"),
+          label,
+        ),
       );
     }
   }

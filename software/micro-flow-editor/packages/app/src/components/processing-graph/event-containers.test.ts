@@ -222,6 +222,14 @@ describe("canChainIntoEventContainer", () => {
         properties: {},
       }),
     ).toBe(false);
+    expect(
+      canChainIntoEventContainer({
+        kind: "block",
+        blockTypeId: "ab.square_wave",
+        catalogEntryId: "appblocks.square_wave",
+        properties: {},
+      }),
+    ).toBe(false);
   });
 });
 

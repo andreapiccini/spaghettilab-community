@@ -365,6 +365,42 @@ class BridgeSessionTest(unittest.TestCase):
             sync.assert_not_called()
             self.assertEqual(document["cores"][0]["peers"], [])
 
+    def test_refresh_rebounds_a_dead_busy_core_on_the_same_path(self) -> None:
+        class DeadSerial:
+            is_open = False
+
+            def close(self) -> None:
+                return None
+
+        alive = BoundCore(
+            device_id_hex=DEVICE_ID_HEX,
+            device_name="BridgeCore",
+            version="test",
+            port="/dev/cu.usbmodem-fake",
+            connection=FakeSerial(),
+            write_lock=threading.Lock(),
+        )
+        bridge = UsbBridge()
+        bridge.cores[DEVICE_ID_HEX] = BoundCore(
+            device_id_hex=DEVICE_ID_HEX,
+            device_name="Stale",
+            version="old",
+            port="/dev/cu.usbmodem-fake",
+            connection=DeadSerial(),
+            write_lock=threading.Lock(),
+        )
+        bridge._busy.add(DEVICE_ID_HEX)
+
+        with mock.patch(
+            "tools.usb_bridge.serial_ports",
+            return_value=["/dev/cu.usbmodem-fake"],
+        ), mock.patch("tools.usb_bridge._identify_sync", return_value=alive):
+            document = bridge.cores_document()
+
+        self.assertNotIn(DEVICE_ID_HEX, bridge._busy)
+        self.assertIs(bridge.get(DEVICE_ID_HEX), alive)
+        self.assertEqual(document["cores"][0]["deviceName"], "BridgeCore")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,8 +6,10 @@ import { formatDeviceId } from "../../lib/core-identity.js";
 import type { AttachedBackbone, CoreRowState } from "../../state/core-sessions-context.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
-import { nfcNodesForBoard } from "../../lib/nfc-presence.js";
+import { collectNfcNodes, nfcNodesForBoard } from "../../lib/nfc-presence.js";
+import { applyLibraryNamesToNfcNodes } from "../../lib/nfc-workspace.js";
 import { useNfcPresence } from "../../state/nfc-presence-context.js";
+import { useNfcWorkspace } from "../../state/nfc-workspace-context.js";
 import { BackboneNetworkGraph } from "./BackboneNetworkGraph.js";
 import { useSession } from "../../state/session-context.js";
 import { rowActionId, rowActionLabel, sessionBadgeStyle } from "./session-badge.js";
@@ -36,11 +38,17 @@ export function CoreRow({
   readonly onConnect: () => void;
 }) {
   const { cancel } = useCoreSessions();
-  const { nodesByBinding, loadingBindings } = useNfcPresence();
+  const { nodesByBinding, loadingBindings, observations } = useNfcPresence();
+  const { library } = useNfcWorkspace();
   const { locale } = useLocale();
   const { openBackbonePhysical } = useSession();
   const copy = coreConnectionsCopy(locale);
-  const nfcNodes = nodesByBinding.get(row.binding.bindingId) ?? [];
+  const observedTags = observations.get(row.binding.bindingId);
+  const fallbackNodes = nodesByBinding.get(row.binding.bindingId);
+  const nfcNodes = applyLibraryNamesToNfcNodes(
+    observedTags ? collectNfcNodes(observedTags, true) : fallbackNodes ?? [],
+    library,
+  );
   const nfcLoading = loadingBindings.has(row.binding.bindingId);
   const hasError = row.error !== null && (row.sessionState === "DISCONNECTED" || row.sessionState === "ERROR");
   const badge = sessionBadgeStyle(row.sessionState, copy.online);
@@ -52,7 +60,7 @@ export function CoreRow({
     ? attached
     : [{ deviceIdHex: row.binding.expectedDeviceId, mac: "", nodeId: 0, local: true }];
   const HostIcon = row.hostLink === "wifi" ? Wifi : Cable;
-  const nfcTotal = chain.reduce((sum, board) => sum + nfcNodesForBoard(board, nfcNodes).length, 0);
+  const backboneCount = chain.filter((board) => board.productKind !== "nfc-reader").length;
 
   function handleAction() {
     if (actionId === "connect" || actionId === "reconnect" || actionId === "review-error") onConnect();
@@ -79,7 +87,7 @@ export function CoreRow({
           <div className="font-body text-xs text-ink-muted">
             {copy.linkToSoftware(row.hostLink === "wifi" ? "wifi" : "cable")}
             {" · "}
-            {copy.clusterSummary(chain.length, nfcTotal)}
+            {copy.clusterSummary(backboneCount)}
           </div>
         </div>
 
@@ -126,15 +134,22 @@ export function CoreRow({
       <div className="mt-4 border-t border-border pt-3">
         <BackboneNetworkGraph
           boards={chain.map((board, index) => {
-            const boardNfc = nfcNodesForBoard(board, nfcNodes);
-            const roleLabel = board.local || index === 0 ? copy.masterBackbone : copy.chainedBackbone(index + 1);
+            const boardNfc =
+              board.productKind === "nfc-reader" ? nfcNodesForBoard(board, nfcNodes) : [];
+            const readerCount = chain.slice(0,index+1).filter(peer=>peer.productKind === "nfc-reader").length;
+            const roleLabel = board.productKind === "nfc-reader"
+              ? `${locale === "it" ? "Lettore NFC" : "NFC reader"} ${readerCount}`
+              : `Backbone ${index + 1 - readerCount}`;
             return {
               id: board.deviceIdHex,
+              productKind: board.productKind,
               label: roleLabel,
               sublabel: [
                 `ID ${board.mac || formatDeviceId(board.deviceIdHex)}`,
                 board.version?.trim() ? copy.fwVersion(board.version.trim()) : null,
-                copy.nfcCountShort(boardNfc.length),
+                board.productKind === "nfc-reader"
+                  ? `${locale === "it" ? "Lettore collegato" : "Reader connected"} · ${boardNfc.length} tag`
+                  : null,
               ]
                 .filter(Boolean)
                 .join(" · "),
@@ -142,11 +157,15 @@ export function CoreRow({
               hostLink: board.local ? row.hostLink : "can",
             };
           })}
-          nfcByBoardId={new Map(chain.map((board) => [board.deviceIdHex, nfcNodesForBoard(board, nfcNodes)]))}
+          nfcByBoardId={new Map(
+            chain
+              .filter((board) => board.productKind === "nfc-reader")
+              .map((board) => [board.deviceIdHex, nfcNodesForBoard(board, nfcNodes)]),
+          )}
           nfcLoading={nfcLoading && (row.sessionState === "READY" || row.sessionState === "SYNCHRONIZING")}
           locale={locale}
           onBoardClick={(deviceIdHex) =>
-            openBackbonePhysical(row.binding.bindingId, deviceIdHex)
+            chain.find(board=>board.deviceIdHex === deviceIdHex)?.productKind !== "nfc-reader" && openBackbonePhysical(row.binding.bindingId, deviceIdHex)
           }
         />
       </div>

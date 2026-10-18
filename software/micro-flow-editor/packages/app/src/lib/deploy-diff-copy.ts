@@ -9,6 +9,8 @@ type DeployDiffCopy = {
   readonly changes: (count: number) => string;
   readonly changesCores: (changes: number, cores: number) => string;
   readonly startDeploy: string;
+  readonly pause: string;
+  readonly pausing: string;
   readonly goToStudio: string;
   readonly importLive: string;
   readonly rebase: string;
@@ -25,6 +27,8 @@ const IT: DeployDiffCopy = {
   changes: (count) => `${count} ${count === 1 ? "modifica" : "modifiche"}`,
   changesCores: (changes, cores) => `${changes} ${changes === 1 ? "modifica" : "modifiche"} · ${cores} Core`,
   startDeploy: "Avvia deploy",
+  pause: "Stop",
+  pausing: "Stop…",
   goToStudio: "Vai a Device Profile Studio",
   importLive: "Importa stato live",
   rebase: "Rebase/merge strutturato",
@@ -41,6 +45,8 @@ const EN: DeployDiffCopy = {
   changes: (count) => `${count} change${count === 1 ? "" : "s"}`,
   changesCores: (changes, cores) => `${changes} change${changes === 1 ? "" : "s"} · ${cores} Core`,
   startDeploy: "Start deploy",
+  pause: "Stop",
+  pausing: "Stopping…",
   goToStudio: "Go to Device Profile Studio",
   importLive: "Import live state",
   rebase: "Structured rebase/merge",

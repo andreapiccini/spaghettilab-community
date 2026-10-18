@@ -1,3 +1,4 @@
+import { catalogGpioRelayDriver, createGpioDigitalDriver } from "../gpio-driver-presets.js";
 import { SENSOR_INSTANCE_PROP, SENSOR_INPUT_PROP, SENSOR_OUTPUT_PROP } from "../sensor-instance.js";
 import { describe, expect, it } from "vitest";
 import type { ProjectV1 } from "@spaghettilab/domain";
@@ -9,6 +10,8 @@ import {
 import {
   createBlankDraft,
   addCommand,
+  updateCommand,
+  updateOpAnywhere,
   organizeDriverInterfaces,
   effectiveActionSteps,
   parseDeviceRecipeDraft,
@@ -258,6 +261,32 @@ describe("production driver deployment", () => {
       (rule) => rule.properties[1] === BigInt(boot.key),
     )!;
     expect(rule.properties[5]).toBeUndefined();
+  });
+  it("persists custom step names in actions and initialization without changing executable behavior", () => {
+    const base = readDriver();
+    const draft = { ...base, phases: { ...base.phases, init: [{ id: "init-write", type: "i2c_write" as const, bytes: ["00"] }] } };
+    const step = draft.commands[0]!.steps[0]!;
+    const before = compileRuntimeDriver(draft);
+    const renamed = updateOpAnywhere(updateOpAnywhere(draft, step.id, { ...step, label: "Acquisisci temperatura" }), "init-write", { ...draft.phases.init[0]!, label: "Prepara il sensore" });
+    const restored = parseDeviceRecipeDraft(serializeDeviceRecipeDraft(renamed))!;
+    expect(restored.commands[0]!.steps[0]!.label).toBe("Acquisisci temperatura");
+    expect(restored.phases.init[0]!.label).toBe("Prepara il sensore");
+    expect(restored.commands[0]!.steps[0]!.id).toBe(step.id);
+    expect(readableI2cStep(restored, restored.commands[0]!.steps[0]!)).toContain("Acquisisci temperatura");
+    expect(compileRuntimeDriver(restored).profile.profileId).toBe(before.profile.profileId);
+  });
+  it("preserves the canvas action reference and firmware identity when renaming an action identifier", () => {
+    const draft = readDriver();
+    const action = draft.commands[0]!;
+    const before = compileRuntimeDriver(draft);
+    const renamed = updateCommand(draft, action.id, { ...action, name: "leggi_temperatura", label: "Leggi temperatura" });
+    const restored = parseDeviceRecipeDraft(serializeDeviceRecipeDraft(renamed))!;
+    const after = compileRuntimeDriver(restored);
+    expect(restored.commands[0]!.id).toBe(action.id);
+    expect(restored.commands[0]!.name).toBe("leggi_temperatura");
+    expect(restored.commands[0]!.steps).toEqual(action.steps);
+    expect(after.actions.get(action.id)?.commandId).toBe(before.actions.get(action.id)?.commandId);
+    expect(after.profile.profileId).toBe(before.profile.profileId);
   });
   it("keeps profile identities stable across labels/positions, changes identity when bytes change", () => {
     const draft = readDriver();
@@ -652,5 +681,108 @@ describe("single sensor instances", () => {
     expect(() => prepareDriverDeployment(fixture.project, "core", input)).toThrow(
       "Ingresso",
     );
+  });
+});
+
+describe("GPIO physical deployment", () => {
+  it("routes DATA to the applied output channel and compiles real Flow rules", () => {
+    const draft = createGpioDigitalDriver();
+    const fixture = deployment(draft, [{ id: "run-gpio", source: "activation", target: draft.commands[0]!.id, sourceHandle: "0", targetHandle: "execute" }]);
+    const physical = JSON.parse(fixture.project.authoringMetadata[PHYSICAL_META_KEY]!.comment!);
+    physical.drafts["core:physical"].modes = [0, 0, 2, 0];
+    const project = { ...fixture.project, authoringMetadata: { ...fixture.project.authoringMetadata, [PHYSICAL_META_KEY]: { comment: JSON.stringify(physical) } } };
+    const plan = prepareDriverDeployment(project, "core", fixture.input);
+    expect(plan.profiles[0]!.initOps).toEqual([{ op: "GPIO_SET", channel: 2, value: false }]);
+    expect(plan.profiles[0]!.sampleOps.some(op => op.op === "GPIO_SET_VALUE" && op.channel === 2)).toBe(true);
+    expect(compileConfig(plan.input, plan.options).ok).toBe(true);
+    physical.drafts["core:physical"].modes = [2, 0, 2, 0];
+    expect(() => prepareDriverDeployment({ ...project, authoringMetadata: { ...project.authoringMetadata, [PHYSICAL_META_KEY]: { comment: JSON.stringify(physical) } } }, "core", fixture.input)).toThrow("assegna DATA");
+  });
+
+  it("schedules the relay itself so the square wave never opens a fake I2C clock", () => {
+    const draft = catalogGpioRelayDriver();
+    const fixture = deployment(draft);
+    const physical = JSON.parse(fixture.project.authoringMetadata[PHYSICAL_META_KEY]!.comment!);
+    physical.drafts["core:physical"].modes = [2, 0, 0, 0];
+    const modules = JSON.parse(
+      fixture.project.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]!.comment!,
+    );
+    modules.byBinding.core[0].gpioAssignment = { boardKey: "core:physical", channel: 0 };
+    const project = {
+      ...fixture.project,
+      authoringMetadata: {
+        ...fixture.project.authoringMetadata,
+        [PHYSICAL_META_KEY]: { comment: JSON.stringify(physical) },
+        [BACKBONE_SENSOR_MODULES_META_KEY]: { comment: JSON.stringify(modules) },
+      },
+    };
+    const relayId = draft.commands[0]!.id;
+    const input = {
+      ...fixture.input,
+      processingGraph: {
+        ...fixture.input.processingGraph,
+        nodes: [
+          {
+            layer: "device-processing" as const,
+            id: "sq",
+            data: {
+              kind: "block" as const,
+              blockTypeId: "ab.square_wave",
+              catalogEntryId: "appblocks.square_wave",
+              properties: { periodMs: 400, dutyCycle: 25 },
+            },
+          },
+          {
+            layer: "device-processing" as const,
+            id: relayId,
+            data: {
+              kind: "block" as const,
+              blockTypeId: BACKBONE_SENSOR_BLOCK_TYPE_ID,
+              properties: {
+                [SENSOR_MODULE_ID_PROP]: "sensor",
+                [SENSOR_ACTION_ID_PROP]: relayId,
+                [SENSOR_INSTANCE_PROP]: true,
+                [SENSOR_INPUT_PROP]: "comando",
+              },
+            },
+          },
+        ],
+        edges: [
+          {
+            id: "sq-relay",
+            source: "sq",
+            target: relayId,
+            sourceHandle: "0",
+            targetHandle: "comando",
+          },
+        ],
+      },
+    };
+    const plan = prepareDriverDeployment(project, "core", input);
+    const square = plan.input.processingGraph.nodes.find((node) => node.id === "sq");
+    expect(square?.data).toMatchObject({
+      kind: "schedule",
+      moduleNodeId: "driver:sensor",
+      periodMs: 400,
+      enabled: true,
+    });
+    expect(plan.profiles.some((profile) => profile.profileId === "flow.clock")).toBe(false);
+    expect(
+      plan.input.physicalGraph.nodes.some((node) => node.id.startsWith("driver-clock:")),
+    ).toBe(false);
+    expect(
+      plan.input.processingGraph.nodes.some(
+        (node) => node.data.kind === "rule" && node.data.ruleTypeId === "device-action",
+      ),
+    ).toBe(false);
+    const relayProfile = plan.profiles.find((profile) => profile.profileId !== "flow.clock");
+    expect(relayProfile?.sampleOps).toEqual(
+      expect.arrayContaining([
+        { op: "GPIO_SET", channel: 0, value: true },
+        { op: "DELAY_BOUNDED", milliseconds: 100 },
+        { op: "GPIO_SET", channel: 0, value: false },
+      ]),
+    );
+    expect(compileConfig(plan.input, plan.options).ok).toBe(true);
   });
 });

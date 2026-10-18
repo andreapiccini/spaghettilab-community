@@ -19,13 +19,22 @@ import {
   type CoreBindingRecord,
   type GraphState,
 } from "@spaghettilab/domain";
-import { Check, PackageX, X } from "lucide-react";
+import { Check, PackageX, Square, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { installDriverProfiles } from "../../lib/driver-profile-deployment.js";
 import { prepareDriverDeployment } from "../../lib/driver-deployment-plan.js";
 import { deployDiffCopy } from "../../lib/deploy-diff-copy.js";
+import {
+  applyStoppedRuntime,
+  configBytesHaveLiveRuntime,
+  forgetOwnedDriverProfiles,
+  formatApplyConfigError,
+  isRetryableConfigApply,
+  waitConfigWriteGap,
+} from "../../lib/stop-deployed-runtime.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
+import { useNfcPresence } from "../../state/nfc-presence-context.js";
 import { useSession } from "../../state/session-context.js";
 import { ConfigDiffView } from "./ConfigDiffView.js";
 import { PipelineStepper } from "./PipelineStepper.js";
@@ -64,15 +73,20 @@ type CoreCandidate = {
 export function DeployDiffScreen() {
   const { locale } = useLocale();
   const copy = deployDiffCopy(locale);
-  const { session, execute, navigate, deployRequestId } = useSession();
+  const { session, execute, navigate, deployRequestId, openBackbonePhysical } = useSession();
   const {
     getSnapshot,
+    getClient,
+    observeConfig,
     listDeviceProfiles,
     installProfile,
     removeProfile,
     deployConfig,
     discoverNetwork,
+    lockTransport,
+    unlockTransport,
   } = useCoreSessions();
+  const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
   const bindings = session?.stack.current.coreBindings ?? EMPTY_BINDINGS;
 
   const [selected, setSelected] = useState<ReadonlySet<CoreBindingId>>(new Set());
@@ -83,6 +97,7 @@ export function DeployDiffScreen() {
     new Map(),
   );
   const [running, setRunning] = useState<ReadonlySet<CoreBindingId>>(new Set());
+  const [pausing, setPausing] = useState(false);
   const [deployError, setDeployError] = useState<string | null>(null);
   const handledRequestRef = useRef(0);
 
@@ -200,6 +215,41 @@ export function DeployDiffScreen() {
     (c) => c.missingProfiles.length > 0,
   );
   const canDeploy = running.size === 0;
+  const liveBinding = bindings.find((binding) =>
+    configBytesHaveLiveRuntime(getSnapshot(binding.bindingId)?.config?.configBytes),
+  );
+
+  async function handlePauseRuntime() {
+    if (!liveBinding) return;
+    const client = getClient(liveBinding.bindingId);
+    if (!client) {
+      setDeployError(locale === "it" ? "Collega la Backbone per lo Stop." : "Connect the Backbone to Stop.");
+      return;
+    }
+    setPausing(true);
+    setDeployError(null);
+    pausePolling();
+    lockTransport();
+    try {
+      await waitUntilIdle();
+      const stopped = await applyStoppedRuntime(client);
+      observeConfig(liveBinding.bindingId, stopped.config);
+      await waitConfigWriteGap();
+      await forgetOwnedDriverProfiles(liveBinding.expectedDeviceId, async (profileId, version) => {
+        const removed = await removeProfile(liveBinding.bindingId, profileId, version, {
+          isReferencedLocally: false,
+        });
+        return removed?.ok === true;
+      });
+      openBackbonePhysical(liveBinding.bindingId, liveBinding.expectedDeviceId);
+    } catch (cause) {
+      setDeployError(formatApplyConfigError(cause, locale === "it"));
+    } finally {
+      unlockTransport();
+      resumePolling();
+      setPausing(false);
+    }
+  }
 
   function toggle(bindingId: CoreBindingId) {
     setSelected((prev) => {
@@ -333,8 +383,15 @@ export function DeployDiffScreen() {
           if (result) {
             setResults((prev) => new Map(prev).set(c.binding.bindingId, result));
             if (result.record) execute?.(appendDeploymentRecord(result.record));
-            if (result.outcome === DeploymentOutcomeKind.SUCCESS)
+            if (result.outcome === DeploymentOutcomeKind.SUCCESS) {
               await cleanupByBinding.get(c.binding.bindingId)?.();
+              try {
+                const live = await getClient(c.binding.bindingId)?.getConfig();
+                if (live) observeConfig(c.binding.bindingId, live);
+              } catch {
+                /* Pause still works from the next GET_CONFIG. */
+              }
+            }
           }
           setRunning((prev) => {
             const next = new Set(prev);
@@ -344,7 +401,20 @@ export function DeployDiffScreen() {
         }),
       );
     } catch (cause) {
-      setDeployError(cause instanceof Error ? cause.message : String(cause));
+      if (isRetryableConfigApply(cause)) {
+        for (const candidate of targets) {
+          const client = getClient(candidate.binding.bindingId);
+          if (!client) continue;
+          try {
+            const stopped = await applyStoppedRuntime(client);
+            observeConfig(candidate.binding.bindingId, stopped.config);
+            if (stopped.changed) await waitConfigWriteGap();
+          } catch {
+            /* Best-effort free of slots before asking for another deploy. */
+          }
+        }
+      }
+      setDeployError(formatApplyConfigError(cause, locale === "it"));
     } finally {
       setRunning(new Set());
     }
@@ -365,6 +435,17 @@ export function DeployDiffScreen() {
         <span className="ml-auto flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink-muted">
           {copy.changesCores(totalChanges, selectedCandidates.length)}
         </span>
+        {liveBinding && (
+          <button
+            type="button"
+            disabled={pausing || !canDeploy}
+            onClick={() => void handlePauseRuntime()}
+            className="flex items-center gap-1.5 rounded-slpill border border-border-strong px-4 py-1.5 font-body-strong text-sm text-ink hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Square size={14} fill="currentColor" />
+            {pausing ? copy.pausing : copy.pause}
+          </button>
+        )}
         <button
           type="button"
           disabled={!canDeploy}

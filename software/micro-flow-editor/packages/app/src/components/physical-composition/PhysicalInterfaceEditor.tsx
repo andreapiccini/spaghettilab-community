@@ -36,6 +36,7 @@ import {
   functionVariantOf,
   interfaceDisplayName,
   isBusPortKind,
+  isRepeatableSignalBase,
   kindForMode,
   modeIndexToPinId,
   modesForVariant,
@@ -186,10 +187,11 @@ export function PhysicalInterfaceEditor({
   };
 
   const placeSignal = (signalMode: number, pinId: number) => {
-    if (signalModeIsPlaced(draft.modes, signalMode)) {
+    const base = signalMode & 15;
+    if (signalModeIsPlaced(draft.modes, signalMode) && !isRepeatableSignalBase(base)) {
       const pinIndex = pinIdToModeIndex(pinId, variant);
       const alreadyHere =
-        pinIndex >= 0 && (draft.modes[pinIndex]! & 15) === (signalMode & 15);
+        pinIndex >= 0 && (draft.modes[pinIndex]! & 15) === base;
       if (!alreadyHere) {
         setPendingSignal(null);
         return;
@@ -396,7 +398,9 @@ export function PhysicalInterfaceEditor({
               <div className="flex flex-wrap gap-1.5">
                 {activeSignals.map((signal) => {
                   const accent = PERIPHERAL_ACCENT[activeKind];
-                  const placed = signalModeIsPlaced(draft.modes, signal.mode);
+                  const placed =
+                    signalModeIsPlaced(draft.modes, signal.mode) &&
+                    !isRepeatableSignalBase(signal.mode & 15);
                   const selected = pendingSignal?.id === signal.id;
                   return (
                     <button
@@ -444,7 +448,8 @@ export function PhysicalInterfaceEditor({
               {(activeKind === "i2c" ||
                 activeKind === "uart" ||
                 activeKind === "spi" ||
-                activeKind === "w1") && (
+                activeKind === "w1" ||
+                activeKind === "gpio") && (
                 <button
                   type="button"
                   disabled={disabled || freeCount < activeSignals.length}

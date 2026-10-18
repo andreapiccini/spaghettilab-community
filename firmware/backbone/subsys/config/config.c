@@ -954,6 +954,8 @@ int spaghetti_config_apply(
 	uint32_t expected_generation,
 	struct spaghetti_config_commit_result *out_result)
 {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
+
 	struct spaghetti_config_transaction transaction = {0};
 	struct spaghetti_config_revision old_revision = {0};
 	uint8_t candidate_hash[SPAGHETTI_CONFIG_HASH_SIZE];

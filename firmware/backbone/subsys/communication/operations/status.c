@@ -256,13 +256,10 @@ static int execute_get_status(
 			return -EMSGSIZE;
 		}
 		if (have_nfc) {
-			size_t published = 0U;
+			/* Presence is independent of the contents of a tag. Blank and SLF1
+			 * tags from dedicated readers have module_type_id == 0. */
+			const size_t published = nfc_count;
 
-			for (size_t idx = 0U; idx < nfc_count; ++idx) {
-				if (nfc_tags[idx].module_type_id != 0U) {
-					published += 1U;
-				}
-			}
 			if (!zcbor_uint32_put(state, 13U) ||
 			    !zcbor_list_start_encode(state, published)) {
 				return -EMSGSIZE;
@@ -273,9 +270,6 @@ static int execute_get_status(
 				const char *type_id;
 				const size_t map_keys = 9U;
 
-				if (tag->module_type_id == 0U) {
-					continue;
-				}
 				type_id = spaghetti_nfc_type_id(tag);
 				if (!zcbor_map_start_encode(state, map_keys) ||
 				    !zcbor_uint32_put(state, 0U) ||

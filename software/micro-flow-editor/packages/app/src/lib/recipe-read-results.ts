@@ -25,6 +25,14 @@ export function evaluateRecipeReadResults(
         buffers.set(op.into, rx[op.id] ?? []);
         values.delete(op.into);
       }
+    } else if (op.type === "gpio_read") {
+      const level = rx[op.id]?.[0];
+      const signal = draft.binding.gpioSignals.find(
+        (signal) => signal.id === op.signalId,
+      );
+      values.delete(op.into);
+      if (level === 0 || level === 1)
+        values.set(op.into, signal?.activeLow ? 1 - level : level);
     } else if (op.type === "decode") {
       values.delete(op.into);
       const input = buffers.get(op.input)?.slice(op.startByte, op.endByte + 1);

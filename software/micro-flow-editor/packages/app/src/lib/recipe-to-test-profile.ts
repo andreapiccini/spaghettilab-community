@@ -1,3 +1,5 @@
+import { compileRuntimeDriver } from "./driver-runtime-profile.js";
+import { createNamedAction } from "./device-recipe-draft.js";
 import { appendLongI2cMessage } from "./i2c-long-message.js";
 import {
   PortCapability,
@@ -12,7 +14,16 @@ import {
   type CompileConfigInput,
 } from "@spaghettilab/config-compiler";
 import { decodeConfigCbor } from "@spaghettilab/config-decompiler";
-import { waitDurationMs, type DeviceRecipeDraft, type DeviceRecipeOp } from "./device-recipe-draft.js";
+import {
+  waitDurationMs,
+  type DeviceRecipeDraft,
+  type DeviceRecipeOp,
+} from "./device-recipe-draft.js";
+import {
+  gpioSignalType,
+  gpioWriteLogicalLevel,
+  physicalLevelForSignal,
+} from "./gpio-operation-registry.js";
 import { hexStringsToBytes } from "./i2c-hex.js";
 
 /**
@@ -28,7 +39,13 @@ function loadConst(dst: number, bytes: readonly number[]): Instruction {
     if (i < 4) low |= b << (8 * i);
     else high |= b << (8 * (i - 4));
   }
-  return { op: "LOAD_CONST", dst, length: Math.max(1, slice.length), low: low >>> 0, high: high >>> 0 };
+  return {
+    op: "LOAD_CONST",
+    dst,
+    length: Math.max(1, slice.length),
+    low: low >>> 0,
+    high: high >>> 0,
+  };
 }
 
 /** One I2C_WRITE transaction for up to 32 payload bytes (same START…STOP). */
@@ -38,20 +55,29 @@ function mapI2cWritePayload(
   take: () => number,
 ): Instruction[] {
   const bytes = payload.length > 0 ? [...payload] : [0];
-  if (bytes.length > 32) throw new Error("Una transazione I²C può contenere al massimo 32 byte.");
+  if (bytes.length > 32)
+    throw new Error("Una transazione I²C può contenere al massimo 32 byte.");
   const result: Instruction[] = [];
   let src: number | undefined;
   for (let offset = 0; offset < bytes.length; offset += 8) {
     const slot = take();
     result.push(loadConst(slot, bytes.slice(offset, offset + 8)));
     if (src === undefined) src = slot;
-    else { const dst = take(); result.push({ op: "CONCAT", srcA: src, srcB: slot, dst }); src = dst; }
+    else {
+      const dst = take();
+      result.push({ op: "CONCAT", srcA: src, srcB: slot, dst });
+      src = dst;
+    }
   }
   result.push({ op: "I2C_WRITE", src: src!, length: bytes.length, timeoutMs });
   return result;
 }
 
-function mapOp(op: DeviceRecipeOp, temp: { next: number; data: number[] }): Instruction[] {
+function mapOp(
+  op: DeviceRecipeOp,
+  temp: { next: number; data: number[] },
+  draft: DeviceRecipeDraft,
+): Instruction[] {
   const take = () => {
     const s = temp.next % 8;
     temp.next += 1;
@@ -60,18 +86,52 @@ function mapOp(op: DeviceRecipeOp, temp: { next: number; data: number[] }): Inst
 
   switch (op.type) {
     case "wait": {
+      if (op.duration && op.duration.kind !== "fixed") return [];
       const ms = Math.max(1, Math.min(Math.ceil(waitDurationMs(op)), 60_000));
       return [{ op: "DELAY_BOUNDED", milliseconds: ms }];
     }
+    case "gpio_read": {
+      const dst = take();
+      return [{ op: "GPIO_GET", dst }];
+    }
+    case "gpio_write": {
+      const logical = gpioWriteLogicalLevel(op);
+      if (logical === undefined) return [];
+      const signal = draft.binding.gpioSignals.find((item) => item.id === op.signalId);
+      const physical = signal ? physicalLevelForSignal(signal, logical) : logical;
+      return [{ op: "GPIO_SET", value: physical === 1 }];
+    }
+    case "gpio_read_analog": {
+      const dst = take();
+      return [{ op: "ADC_READ", dst, timeoutMs: op.timeoutMs ?? 20 }];
+    }
     case "i2c_write": {
       const message: Instruction[] = [];
-      if (appendLongI2cMessage(op.bytes, temp.data, message, () => { throw new Error("Per la prova usa byte costanti."); }, op.timeoutMs)) return message;
+      if (
+        appendLongI2cMessage(
+          op.bytes,
+          temp.data,
+          message,
+          () => {
+            throw new Error("Per la prova usa byte costanti.");
+          },
+          op.timeoutMs,
+        )
+      )
+        return message;
       const payload = hexStringsToBytes(op.bytes);
       return mapI2cWritePayload(payload, op.timeoutMs ?? 20, take);
     }
     case "i2c_read": {
       const dst = take();
-      return [{ op: "I2C_READ", dst, length: Math.max(1, op.len), timeoutMs: op.timeoutMs ?? 20 }];
+      return [
+        {
+          op: "I2C_READ",
+          dst,
+          length: Math.max(1, op.len),
+          timeoutMs: op.timeoutMs ?? 20,
+        },
+      ];
     }
     case "i2c_write_read": {
       const payload = hexStringsToBytes(op.writeBytes);
@@ -80,7 +140,14 @@ function mapOp(op: DeviceRecipeOp, temp: { next: number; data: number[] }): Inst
       const write = ops.pop()!;
       if (write.op !== "I2C_WRITE") throw new Error("Messaggio I²C non valido.");
       const dst = take();
-      ops.push({ op: "I2C_WRITE_READ", src: write.src, dst, readLength: Math.max(1, op.readLen), writeLength: write.length, timeoutMs });
+      ops.push({
+        op: "I2C_WRITE_READ",
+        src: write.src,
+        dst,
+        readLength: Math.max(1, op.readLen),
+        writeLength: write.length,
+        timeoutMs,
+      });
       return ops;
     }
     case "i2c_transaction": {
@@ -113,7 +180,12 @@ function mapOp(op: DeviceRecipeOp, temp: { next: number; data: number[] }): Inst
             });
             pendingWrite = [];
           } else {
-            out.push({ op: "I2C_READ", dst, length: Math.max(1, phase.len), timeoutMs });
+            out.push({
+              op: "I2C_READ",
+              dst,
+              length: Math.max(1, phase.len),
+              timeoutMs,
+            });
           }
         } else if (phase.kind === "stop" || phase.kind === "start") {
           flushWrite();
@@ -127,7 +199,10 @@ function mapOp(op: DeviceRecipeOp, temp: { next: number; data: number[] }): Inst
   }
 }
 
-function transportOf(draft: DeviceRecipeDraft): { transport: number; caps: number } {
+function transportOf(
+  draft: DeviceRecipeDraft,
+  ops: readonly DeviceRecipeOp[],
+): { transport: number; caps: number } {
   switch (draft.binding.bus) {
     case "i2c":
       return { transport: PortTransport.I2C, caps: PortCapability.I2C };
@@ -137,8 +212,29 @@ function transportOf(draft: DeviceRecipeDraft): { transport: number; caps: numbe
       return { transport: PortTransport.ADC, caps: PortCapability.ADC };
     case "w1":
       return { transport: PortTransport.W1, caps: PortCapability.W1 };
-    default:
-      return { transport: PortTransport.GPIO, caps: PortCapability.DIGITAL_INPUT };
+    default: {
+      const analog = ops.some((op) => op.type === "gpio_read_analog");
+      const digital = ops.some(
+        (op) =>
+          op.type === "gpio_read" ||
+          op.type === "gpio_write" ||
+          op.type === "gpio_toggle" ||
+          op.type === "gpio_pulse" ||
+          op.type === "gpio_debounce",
+      );
+      if (analog && !digital) {
+        return { transport: PortTransport.ADC, caps: PortCapability.ADC };
+      }
+      let caps = 0;
+      for (const signal of draft.binding.gpioSignals) {
+        const type = gpioSignalType(signal);
+        if (type === "digital_input") caps |= PortCapability.DIGITAL_INPUT;
+        if (type === "digital_output") caps |= PortCapability.DIGITAL_OUTPUT;
+        if (type === "analog_input") caps |= PortCapability.ADC;
+      }
+      if (!caps) caps = PortCapability.DIGITAL_INPUT;
+      return { transport: PortTransport.GPIO, caps };
+    }
   }
 }
 
@@ -150,39 +246,105 @@ export function recipePlanToTestProfile(
   draft: DeviceRecipeDraft,
   initOps: readonly DeviceRecipeOp[],
   bodyOps: readonly DeviceRecipeOp[],
+  gpioChannels?: ReadonlyMap<string, number>,
 ): { readonly profile: DeviceProfileDraft; readonly skipped: readonly string[] } {
+  if (draft.binding.bus === "gpio" && gpioChannels) {
+    const steps = [...initOps, ...bodyOps].filter((op) => op.type !== "emit");
+    const compiled = compileRuntimeDriver(
+      {
+        ...draft,
+        flowInterfaces: [],
+        flowInterfaceActions: {},
+        phases: { init: [], sample: [], command: [] },
+        commands: [createNamedAction({ name: "test", label: "Test", steps })],
+      },
+      new Map(),
+      gpioChannels,
+    ).profile;
+    return {
+      profile: {
+        ...compiled,
+        profileId: "try.gpio",
+        version: (Date.now() % 65535) + 1,
+        actions: [],
+        initOps: compiled.sampleOps.filter(
+          (op) => op.op !== "EMIT_RECORD" && op.op !== "EMIT_FIELD",
+        ),
+        sampleOps: [],
+        sampleFields: [],
+      },
+      skipped: [],
+    };
+  }
   const skipped: string[] = [];
   const temp = { next: 0, data: [] as number[] };
+  const planned = [...initOps, ...bodyOps];
+  const { transport, caps } = transportOf(draft, planned);
   const mappedInit: Instruction[] = [];
   for (const op of initOps) {
-    const part = mapOp(op, temp);
+    if (transport === PortTransport.GPIO && op.type === "gpio_read_analog") {
+      skipped.push(op.type);
+      continue;
+    }
+    const part = mapOp(op, temp, draft);
     if (part.length === 0 && isExecutableCandidate(op)) skipped.push(op.type);
     mappedInit.push(...part);
   }
   const mappedSample: Instruction[] = [];
   let lastReadSlot: number | null = null;
   for (const op of bodyOps) {
-    if (op.type === "emit" || op.type === "decode" || op.type === "encode" || op.type === "sample_external") {
+    if (
+      op.type === "emit" ||
+      op.type === "decode" ||
+      op.type === "encode" ||
+      op.type === "sample_external"
+    ) {
       skipped.push(op.type);
       continue;
     }
-    const part = mapOp(op, temp);
+    if (transport === PortTransport.GPIO && op.type === "gpio_read_analog") {
+      skipped.push(op.type);
+      continue;
+    }
+    const part = mapOp(op, temp, draft);
     if (part.length === 0 && isExecutableCandidate(op)) skipped.push(op.type);
     mappedSample.push(...part);
-    for (const instruction of part) if (instruction.op === "I2C_READ" || instruction.op === "I2C_WRITE_READ") lastReadSlot = instruction.dst;
+    for (const instruction of part)
+      if (
+        instruction.op === "I2C_READ" ||
+        instruction.op === "I2C_WRITE_READ" ||
+        instruction.op === "GPIO_GET" ||
+        instruction.op === "ADC_READ"
+      )
+        lastReadSlot = instruction.dst;
   }
 
   const fieldId = 1;
   if (lastReadSlot !== null) {
-    mappedSample.push({ op: "EMIT_FIELD", src: lastReadSlot, fieldId, width: 1, byteOrder: "le", signExtend: false, multiplier: 0 });
+    mappedSample.push({
+      op: "EMIT_FIELD",
+      src: lastReadSlot,
+      fieldId,
+      width: 1,
+      byteOrder: "le",
+      signExtend: false,
+      multiplier: 0,
+    });
   } else {
     // Ensure validate-profile has something to emit if sampleFields declared
     const dst = temp.next % 8;
-    mappedSample.push(loadConst(dst, [0]), { op: "EMIT_FIELD", src: dst, fieldId, width: 1, byteOrder: "le", signExtend: false, multiplier: 0 });
+    mappedSample.push(loadConst(dst, [0]), {
+      op: "EMIT_FIELD",
+      src: dst,
+      fieldId,
+      width: 1,
+      byteOrder: "le",
+      signExtend: false,
+      multiplier: 0,
+    });
   }
   mappedSample.push({ op: "EMIT_RECORD" });
 
-  const { transport, caps } = transportOf(draft);
   // Short stable id (≤31): easier to match in declarative-device config properties / catalog cleanup.
   const profileId = `try.${draft.binding.bus}`.slice(0, 31);
   // Firmware stores version as uint16 and rejects 0 or >65535 in decode_profile_cbor (-EINVAL).
@@ -217,6 +379,14 @@ function isExecutableCandidate(op: DeviceRecipeOp): boolean {
     op.type === "wait" ||
     op.type === "spi_transfer" ||
     op.type === "gpio_read" ||
+    op.type === "gpio_write" ||
+    op.type === "gpio_read_analog" ||
+    op.type === "gpio_toggle" ||
+    op.type === "gpio_pulse" ||
+    op.type === "gpio_debounce" ||
+    op.type === "gpio_set_pwm" ||
+    op.type === "gpio_set_pwm_pulse" ||
+    op.type === "gpio_stop_pwm" ||
     op.type === "adc_sample" ||
     op.type === "w1_read" ||
     op.type === "w1_write"
@@ -245,12 +415,21 @@ export type RecipeTestConfigParams = {
 /** Port 0 is the I²C-capable connector on Backbone / Core boards; port 1 is often CAN or GPIO-only. */
 const DEFAULT_I2C_PORT_ID = 0;
 
-function pickTestPortId(explicit: number | undefined, parked: CanonicalConfig | null): number {
-  if (explicit !== undefined && Number.isInteger(explicit) && explicit >= 0 && explicit <= 255) {
+function pickTestPortId(
+  explicit: number | undefined,
+  parked: CanonicalConfig | null,
+): number {
+  if (
+    explicit !== undefined &&
+    Number.isInteger(explicit) &&
+    explicit >= 0 &&
+    explicit <= 255
+  ) {
     return explicit;
   }
   const fromParked = parked?.modules[0]?.portId;
-  if (fromParked !== undefined && fromParked >= 0 && fromParked <= 255) return fromParked;
+  if (fromParked !== undefined && fromParked >= 0 && fromParked <= 255)
+    return fromParked;
   return DEFAULT_I2C_PORT_ID;
 }
 
@@ -261,7 +440,9 @@ function pickTestPortId(explicit: number | undefined, parked: CanonicalConfig | 
  * Bay/rail are left unspecified on the wire (CBOR null) — authoring defaults like railId=1000
  * exceed uint8 and the Core rejects them with MALFORMED_REQUEST.
  */
-export function buildRecipeTestConfigBytes(params: RecipeTestConfigParams): Uint8Array | null {
+export function buildRecipeTestConfigBytes(
+  params: RecipeTestConfigParams,
+): Uint8Array | null {
   const parked = params.parkedConfigBytes
     ? (() => {
         const decoded = decodeConfigCbor(params.parkedConfigBytes!);
@@ -278,20 +459,32 @@ export function buildRecipeTestConfigBytes(params: RecipeTestConfigParams): Uint
     "4": BigInt(addr),
   };
 
-  const mqtt = parked?.mqtt ?? { enabled: false, host: "", port: 0, baseTopic: "", security: 0, credentialId: 0 };
+  const mqtt = parked?.mqtt ?? {
+    enabled: false,
+    host: "",
+    port: 0,
+    baseTopic: "",
+    security: 0,
+    credentialId: 0,
+  };
   // Keep live connectivity/energy when possible — flipping LOW_ENERGY↔ONLINE during Testa
   // can fail apply/rollback with opaque INTERNAL_ERROR on some images.
   const connectivity = parked?.connectivity ?? 0;
-  const energy = parked?.energy ?? { bleAvailability: 0, advertisingWindowMs: 0, advertisingPeriodMs: 0 };
+  const energy = parked?.energy ?? {
+    bleAvailability: 0,
+    advertisingWindowMs: 0,
+    advertisingPeriodMs: 0,
+  };
   // LOW_ENERGY + mqtt.enabled is illegal; force mqtt off in that case.
   const safeMqtt =
-    connectivity === 0 && mqtt.enabled
-      ? { ...mqtt, enabled: false }
-      : mqtt;
+    connectivity === 0 && mqtt.enabled ? { ...mqtt, enabled: false } : mqtt;
 
   const periodMs = params.periodMs;
   const withSchedule =
-    periodMs !== null && periodMs !== undefined && Number.isFinite(periodMs) && periodMs > 0;
+    periodMs !== null &&
+    periodMs !== undefined &&
+    Number.isFinite(periodMs) &&
+    periodMs > 0;
 
   const input: CompileConfigInput = {
     physicalGraph: {

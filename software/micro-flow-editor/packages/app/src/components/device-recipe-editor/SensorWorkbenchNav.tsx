@@ -1,4 +1,4 @@
-import { workbenchStepLabel } from "./sensor-workbench-labels.js";
+import { workbenchStepLabel, workbenchStepKind } from "./sensor-workbench-labels.js";
 import {
   Blocks,
   Cable,
@@ -37,12 +37,14 @@ export function SensorWorkbenchNav({
   onChange,
   onSelectAction,
   onSelectFlow,
+  onSelectConnections,
   onSelectInterface,
   onSelectInit,
   onSelectStep,
   onRemoveStep,
 }: Shared & {
-  pane: "flow" | "actions" | "init";
+  pane: "flow" | "actions" | "init" | "connections";
+  onSelectConnections?: () => void;
   selectedStepId: string | null;
   selectedInterfaceId: string | null;
   onSelectFlow: () => void;
@@ -52,6 +54,7 @@ export function SensorWorkbenchNav({
   onRemoveStep: (id: string) => void;
 }) {
   const [actionsExpanded, setActionsExpanded] = useState(true);
+  const [renamingActionId, setRenamingActionId] = useState<string | null>(null);
   function stepList(steps: readonly DeviceRecipeOp[]) {
     return (
       <ol className="sensor-nav-steps">
@@ -63,7 +66,12 @@ export function SensorWorkbenchNav({
               onClick={() => onSelectStep(step.id)}
             >
               <span className="sensor-step-number">{index + 1}</span>
-              <span>{workbenchStepLabel(step, it)}</span>
+              <span className="sensor-nav-step-name">
+                <span>{workbenchStepLabel(step, it)}</span>
+                <small className="sensor-step-kind">
+                  {workbenchStepKind(step, it)}
+                </small>
+              </span>
             </button>
             <button
               type="button"
@@ -83,8 +91,19 @@ export function SensorWorkbenchNav({
   return (
     <nav
       className="sensor-nav"
-      aria-label={it ? "Editor del sensore" : "Sensor editor"}
+      aria-label={it ? "Editor del dispositivo" : "Device editor"}
     >
+      {onSelectConnections && (
+        <button
+          type="button"
+          className={`sensor-nav-primary ${pane === "connections" ? "is-selected" : ""}`}
+          aria-pressed={pane === "connections"}
+          onClick={onSelectConnections}
+        >
+          <Cable size={20} />
+          <span>{it ? "Collegamenti" : "Connections"}</span>
+        </button>
+      )}
       <button
         type="button"
         className={`sensor-nav-primary ${pane === "flow" ? "is-selected" : ""}`}
@@ -184,26 +203,64 @@ export function SensorWorkbenchNav({
             return (
               <div key={action.id}>
                 <div className={`sensor-nav-action-row ${active ? "is-selected" : ""}`}>
+                  {renamingActionId === action.id ? (
+                    <input
+                      autoFocus
+                      className="sensor-nav-action-rename"
+                      aria-label={it ? "Nome azione nel menu" : "Action name in menu"}
+                      value={action.label}
+                      onFocus={(event) => event.currentTarget.select()}
+                      onChange={(event) =>
+                        onChange(
+                          updateCommand(draft, action.id, {
+                            ...action,
+                            label: event.target.value,
+                          }),
+                        )
+                      }
+                      onBlur={() => setRenamingActionId(null)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === "Escape")
+                          event.currentTarget.blur();
+                      }}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      className="sensor-nav-action"
+                      aria-pressed={active}
+                      onClick={() => onSelectAction(action.id)}
+                    >
+                      {active ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+                      <span>
+                        <strong>{action.label || action.name}</strong>
+                        <small>
+                          {action.steps.length}{" "}
+                          {it
+                            ? action.steps.length === 1
+                              ? "passo"
+                              : "passi"
+                            : action.steps.length === 1
+                              ? "step"
+                              : "steps"}
+                        </small>
+                      </span>
+                    </button>
+                  )}
                   <button
                     type="button"
-                    className="sensor-nav-action"
-                    aria-pressed={active}
-                    onClick={() => onSelectAction(action.id)}
+                    className="sensor-nav-rename-action"
+                    aria-label={
+                      it
+                        ? `Rinomina ${action.label || action.name}`
+                        : `Rename ${action.label || action.name}`
+                    }
+                    onClick={() => {
+                      onSelectAction(action.id);
+                      setRenamingActionId(action.id);
+                    }}
                   >
-                    {active ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-                    <span>
-                      <strong>{action.label || action.name}</strong>
-                      <small>
-                        {action.steps.length}{" "}
-                        {it
-                          ? action.steps.length === 1
-                            ? "passo"
-                            : "passi"
-                          : action.steps.length === 1
-                            ? "step"
-                            : "steps"}
-                      </small>
-                    </span>
+                    <Pencil size={13} aria-hidden />
                   </button>
                   <button
                     type="button"
@@ -237,9 +294,13 @@ export function SensorWorkbenchNav({
         </div>
       </section>
       <p className="sensor-nav-help">
-        {it
-          ? "Seleziona un’azione o un passo per modificarlo."
-          : "Select an action or a step to edit it."}
+        {pane === "connections"
+          ? it
+            ? "Clicca un terminale nel disegno per configurarlo."
+            : "Click a terminal in the drawing to configure it."
+          : it
+            ? "Seleziona un’azione o un passo per modificarlo."
+            : "Select an action or a step to edit it."}
       </p>
     </nav>
   );
@@ -255,6 +316,7 @@ export function SensorWorkbenchHeading({
 }: Shared & { initialization: boolean; flow: boolean }) {
   const nameRef = useRef<HTMLInputElement>(null);
   const action = draft.commands.find((item) => item.id === activeId);
+  const protocol = draft.binding.bus === "gpio" ? "GPIO" : "I²C";
   return (
     <div className="sensor-workbench-heading">
       <div>
@@ -294,13 +356,21 @@ export function SensorWorkbenchHeading({
         <p>
           {flow
             ? it
-              ? "Collega i dati del Flow alle variabili del sensore"
-              : "Connect Flow data to sensor variables"
+              ? "Collega i dati del Flow alle variabili del dispositivo"
+              : "Connect Flow data to device variables"
             : initialization
               ? it
                 ? "Eseguita una volta all’avvio del programma"
                 : "Runs once when the program starts"
-              : `${action?.steps.length ?? 0} ${it ? (action?.steps.length === 1 ? "passo I²C" : "passi I²C") : action?.steps.length === 1 ? "I²C step" : "I²C steps"}`}
+              : `${action?.steps.length ?? 0} ${
+                  it
+                    ? action?.steps.length === 1
+                      ? `passo ${protocol}`
+                      : `passi ${protocol}`
+                    : action?.steps.length === 1
+                      ? `${protocol} step`
+                      : `${protocol} steps`
+                }`}
         </p>
       </div>
       {!flow && !initialization && action && (

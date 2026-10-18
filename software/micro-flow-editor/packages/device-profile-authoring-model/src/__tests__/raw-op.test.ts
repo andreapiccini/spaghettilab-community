@@ -211,3 +211,13 @@ describe("runtime variable and encoder operations", () => {
     expect(fromRawOp(toRawOp(instruction))).toEqual({ ok: true, value: instruction });
   });
 });
+
+describe("indexed digital GPIO", () => {
+  it("preserves the selected channel and variable polarity on the wire", () => {
+    for (const op of [
+      { op: "GPIO_GET", dst: 3, channel: 2 },
+      { op: "GPIO_SET", value: false, channel: 3 },
+      { op: "GPIO_SET_VALUE", src: 4, channel: 1, invert: true },
+    ] as const) expect(fromRawOp(toRawOp(op))).toEqual({ ok: true, value: op });
+  });
+});

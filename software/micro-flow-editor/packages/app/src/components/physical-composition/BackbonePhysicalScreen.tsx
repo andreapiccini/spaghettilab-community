@@ -1,3 +1,5 @@
+import { GpioDriverAssignments } from "./GpioDriverAssignments.js";
+import type { ReactNode } from "react";
 import { PhysicalInterfaceEditor } from "./PhysicalInterfaceEditor.js";
 import { addConfirmedPinModules } from "../../lib/physical-pin-bindings.js";
 import { useCommunityHub } from "../../state/community-hub-context.js";
@@ -44,12 +46,14 @@ import {
   type PhysicalProject,
 } from "../../lib/backbone-physical.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
+import { applyStoppedRuntime, waitConfigWriteGap } from "../../lib/stop-deployed-runtime.js";
 import {
   attachedFromStatus,
   useCoreSessions,
   type AttachedBackbone,
 } from "../../state/core-sessions-context.js";
 import { useLocale } from "../../state/locale-context.js";
+import { useNfcPresence } from "../../state/nfc-presence-context.js";
 import { useSession } from "../../state/session-context.js";
 import { CoreSelector } from "../catalog-topology/CoreSelector.js";
 
@@ -65,7 +69,11 @@ const AUTHORING_CAPABILITIES =
   PHYSICAL_CAP.PWM;
 
 /** Map protocol / transport failures to user-facing Configure messages. */
-function formatConfigureError(error: unknown, it: boolean, backboneId?: string): string {
+function formatConfigureError(
+  error: unknown,
+  it: boolean,
+  backboneId?: string,
+): string {
   const id = backboneId ? ` ${backboneId}` : "";
   if (error instanceof SpaghettiClientError) {
     if (error.code === "TIMEOUT") {
@@ -74,9 +82,7 @@ function formatConfigureError(error: unknown, it: boolean, backboneId?: string):
         : `Configuration failed: Backbone${id} not responding`;
     }
     if (error.code === "CANCELLED") {
-      return it
-        ? "Configurazione annullata"
-        : "Configuration cancelled";
+      return it ? "Configurazione annullata" : "Configuration cancelled";
     }
     switch (error.status) {
       case ProtocolStatus.UNAUTHORIZED:
@@ -105,6 +111,10 @@ function formatConfigureError(error: unknown, it: boolean, backboneId?: string):
         return it
           ? `Configurazione non riuscita: Backbone${id} non risponde`
           : `Configuration failed: Backbone${id} not responding`;
+      case ProtocolStatus.RESOURCE_EXHAUSTED:
+        return it
+          ? "Configurazione non riuscita: Core saturo. Premi Stop e riprova, oppure stacca l’USB."
+          : "Configuration failed: Core is full. Press Stop and retry, or unplug USB.";
       default:
         return it
           ? `Configurazione non riuscita: ${ProtocolStatus[error.status ?? -1] ?? error.message}`
@@ -112,9 +122,7 @@ function formatConfigureError(error: unknown, it: boolean, backboneId?: string):
     }
   }
   if (error instanceof Error && error.message.trim()) return error.message;
-  return it
-    ? "Configurazione non riuscita"
-    : "Configuration failed";
+  return it ? "Configurazione non riuscita" : "Configuration failed";
 }
 
 const control =
@@ -140,7 +148,9 @@ export function BackbonePhysicalScreen() {
   const { locale } = useLocale();
   const it = locale === "it";
   const { session, execute, navigate, physicalTarget } = useSession();
-  const { rows, getSnapshot, getClient, observeStatus } = useCoreSessions();
+  const { rows, getSnapshot, getClient, observeStatus, observeConfig, lockTransport, unlockTransport } =
+    useCoreSessions();
+  const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
   const bindings = session?.stack.current.coreBindings ?? [];
   const [bindingId, setBindingId] = useState<string | null>(
     physicalTarget?.bindingId ?? null,
@@ -239,9 +249,7 @@ export function BackbonePhysicalScreen() {
           }}
         />
         <div className="min-w-0 flex-1">
-          <h1 className="font-heading text-2xl font-bold text-ink">
-            Module Function
-          </h1>
+          <h1 className="font-heading text-2xl font-bold text-ink">Module Function</h1>
           <p className="mt-1 font-body text-xs text-ink-muted">
             {it
               ? "Trascina i segnali delle periferiche sui pin del modulo"
@@ -297,7 +305,10 @@ export function BackbonePhysicalScreen() {
                 onChange={(event) => setBoardId(event.target.value)}
               >
                 {boards.map((item, index) => (
-                  <option key={item.deviceIdHex || item.nodeId} value={item.deviceIdHex}>
+                  <option
+                    key={item.deviceIdHex || item.nodeId}
+                    value={item.deviceIdHex}
+                  >
                     {`Backbone ${index + 1}${item.local ? " · Master" : ""}`}
                   </option>
                 ))}
@@ -314,9 +325,7 @@ export function BackbonePhysicalScreen() {
               catalog={catalog}
               saved={
                 physicalProject.drafts[stableBoardKey] ??
-                (legacyMasterKey
-                  ? physicalProject.drafts[legacyMasterKey]
-                  : undefined)
+                (legacyMasterKey ? physicalProject.drafts[legacyMasterKey] : undefined)
               }
               onSave={(draft) =>
                 saveProject({
@@ -345,6 +354,12 @@ export function BackbonePhysicalScreen() {
                   ],
                 })
               }
+              driverAssignments={
+                <GpioDriverAssignments
+                  bindingId={selected.bindingId}
+                  boardKey={stableBoardKey}
+                />
+              }
               onApply={async (draft) => {
                 const client = getClient(selected.bindingId);
                 if (!client || !ready)
@@ -353,50 +368,59 @@ export function BackbonePhysicalScreen() {
                       ? "La backbone deve essere connessa."
                       : "The Backbone must be connected.",
                   );
-                /* Use the live session status when present. A redundant
-                 * getStatus→APPLY_PHYSICAL pair on USB-Serial/JTAG used to
-                 * overflow the 4 KiB USB worker during STATUS and drop APPLY. */
-                let fresh = status;
-                if (!fresh) {
-                  try {
-                    fresh = await client.getStatus();
-                    observeStatus(selected.bindingId, fresh);
-                  } catch {
-                    /* Fall through to the availability check below. */
-                  }
-                }
-                const currentBoard = attachedFromStatus(
-                  fresh,
-                  selected.expectedDeviceId,
-                )?.find((item) => item.deviceIdHex === board.deviceIdHex);
-                if (!fresh || !currentBoard)
-                  throw new Error(
-                    it
-                      ? "La Backbone selezionata non è più disponibile."
-                      : "The selected Backbone is no longer available.",
-                  );
-                const backboneLabel = currentBoard.local
-                  ? "Master"
-                  : `0x${currentBoard.nodeId.toString(16)}`;
+                pausePolling();
+                lockTransport();
                 try {
-                  await client.applyPhysical({
-                    nodeId: currentBoard.local ? 0 : currentBoard.nodeId,
-                    modes: new Uint8Array(draft.modes),
-                    i2cSpeed: draft.i2cSpeed,
-                    settings:
-                      topology?.version === 2
-                        ? (draft.settings ?? DEFAULT_PHYSICAL_SETTINGS)
-                        : undefined,
-                    expectedTag: expectedFunctionTag(
-                      tagForSlot(fresh, currentBoard, 2),
-                      draft.automatic,
-                    ),
-                  });
-                } catch (error) {
-                  throw new Error(
-                    formatConfigureError(error, it, backboneLabel),
-                  );
-                }
+                  await waitUntilIdle();
+                  /* Use the live session status when present. A redundant
+                   * getStatus→APPLY_PHYSICAL pair on USB-Serial/JTAG used to
+                   * overflow the 4 KiB USB worker during STATUS and drop APPLY. */
+                  let fresh = status;
+                  if (!fresh) {
+                    try {
+                      fresh = await client.getStatus();
+                      observeStatus(selected.bindingId, fresh);
+                    } catch {
+                      /* Fall through to the availability check below. */
+                    }
+                  }
+                  const currentBoard = attachedFromStatus(
+                    fresh,
+                    selected.expectedDeviceId,
+                  )?.find((item) => item.deviceIdHex === board.deviceIdHex);
+                  if (!fresh || !currentBoard)
+                    throw new Error(
+                      it
+                        ? "La Backbone selezionata non è più disponibile."
+                        : "The selected Backbone is no longer available.",
+                    );
+                  const backboneLabel = currentBoard.local
+                    ? "Master"
+                    : `0x${currentBoard.nodeId.toString(16)}`;
+                  try {
+                    const stopped = await applyStoppedRuntime(client);
+                    observeConfig(selected.bindingId, stopped.config);
+                    if (stopped.changed) await waitConfigWriteGap();
+                    await client.applyPhysical(
+                      {
+                        nodeId: currentBoard.local ? 0 : currentBoard.nodeId,
+                        modes: new Uint8Array(draft.modes),
+                        i2cSpeed: draft.i2cSpeed,
+                        settings:
+                          topology?.version === 2
+                            ? (draft.settings ?? DEFAULT_PHYSICAL_SETTINGS)
+                            : undefined,
+                        expectedTag: expectedFunctionTag(
+                          tagForSlot(fresh, currentBoard, 2),
+                          draft.automatic,
+                        ),
+                      },
+                    );
+                  } catch (error) {
+                    throw new Error(formatConfigureError(error, it, backboneLabel), {
+                      cause: error,
+                    });
+                  }
                 /* APPLY_PHYSICAL ACK is authoritative; refresh status for UI. */
                 let next = fresh;
                 try {
@@ -451,6 +475,10 @@ export function BackbonePhysicalScreen() {
                     };
                   },
                 });
+                } finally {
+                  unlockTransport();
+                  resumePolling();
+                }
               }}
             />
           )}
@@ -481,6 +509,7 @@ function BoardDetail({
   onSave,
   onRegister,
   onApply,
+  driverAssignments,
 }: {
   readonly board: AttachedBackbone;
   readonly topology?: PhysicalBackbone;
@@ -491,6 +520,7 @@ function BoardDetail({
   readonly onSave: (draft: BackbonePhysicalDraft) => void;
   readonly onRegister: (entry: PhysicalCatalogEntry) => void;
   readonly onApply: (draft: BackbonePhysicalDraft) => Promise<void>;
+  readonly driverAssignments?: ReactNode;
 }) {
   const { locale } = useLocale();
   const it = locale === "it";
@@ -543,7 +573,8 @@ function BoardDetail({
   const localAutomatic =
     !!functionDefinition?.modes &&
     !validatePhysicalModes(functionDefinition.modes, functionDefinition.i2cSpeed ?? 0);
-  const automatic = localAutomatic || (topology?.source === 2 && !!functionTag);
+  const automatic =
+    localAutomatic || (topology?.source === 2 && !!functionDefinition);
   const effective: BackbonePhysicalDraft = localAutomatic
     ? {
         name: functionDefinition!.name,
@@ -560,7 +591,10 @@ function BoardDetail({
     : automatic
       ? {
           name: functionDefinition?.name ?? "NFC module",
-          variant: functionVariantOf({ modes: topology!.modes, variant: draft.variant }),
+          variant: functionVariantOf({
+            modes: topology!.modes,
+            variant: draft.variant,
+          }),
           modes: topology!.modes,
           i2cSpeed: topology!.i2cSpeed,
           settings: topology!.settings,
@@ -642,9 +676,7 @@ function BoardDetail({
     }
     setBusy(true);
     setResult(null);
-    const backboneLabel = board.local
-      ? "Master"
-      : `0x${board.nodeId.toString(16)}`;
+    const backboneLabel = board.local ? "Master" : `0x${board.nodeId.toString(16)}`;
     try {
       await onApply(effective);
       setResult({
@@ -678,7 +710,13 @@ function BoardDetail({
             <span
               className={`rounded-slpill px-2.5 py-0.5 text-[10px] font-semibold ${ready ? "bg-success/10 text-success" : "bg-surface text-ink-faint"}`}
             >
-              {ready ? (it ? "Connessa" : "Connected") : it ? "Non connessa" : "Disconnected"}
+              {ready
+                ? it
+                  ? "Connessa"
+                  : "Connected"
+                : it
+                  ? "Non connessa"
+                  : "Disconnected"}
             </span>
             {functionTag && (
               <span className="inline-flex items-center gap-1 rounded-slpill bg-brand-blue/10 px-2 py-0.5 text-[10px] text-brand-blue">
@@ -703,7 +741,9 @@ function BoardDetail({
             className={`${control} w-auto min-w-[8.5rem]`}
             value={variant}
             disabled={!!automatic || busy}
-            onChange={(event) => setVariant(event.target.value as FunctionModuleVariant)}
+            onChange={(event) =>
+              setVariant(event.target.value as FunctionModuleVariant)
+            }
           >
             <option value="v2">V2 · 12 pin</option>
             <option value="v1">V1 · 6 pin</option>
@@ -712,131 +752,135 @@ function BoardDetail({
       </div>
 
       <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={motionTokens.duration.base}
-          className="mx-auto flex w-full max-w-[1440px] min-h-0 flex-1 flex-col gap-4 px-5 py-4 lg:px-8"
-        >
-          {!knownLayout && (
-            <div className="rounded-slmd border border-border bg-surface px-4 py-3 text-xs text-ink-muted">
-              {it
-                ? "Topologia non ancora ricevuta dal firmware: puoi configurare in locale; l’applicazione sulla Backbone richiede la connessione."
-                : "Topology not yet reported by firmware: you can configure locally; applying to the Backbone requires a connection."}
-            </div>
-          )}
-          <PhysicalInterfaceEditor
-            draft={effective}
-            capabilities={topology?.capabilities ?? AUTHORING_CAPABILITIES}
-            extended={topology?.version === 2 || !topology}
-            disabled={!!automatic || busy}
-            automatic={!!automatic}
-            onChange={(next) =>
-              setDraft({
-                ...next,
-                variant: functionVariantOf(next),
-                applied: false,
-              })
-            }
-          />
-
-          {result && (
-            <p
-              role="status"
-              className={`rounded-slmd p-3 text-xs ${result.ok ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
-            >
-              {result.text}
-            </p>
-          )}
-
-          <div className="flex flex-col gap-2 border-t border-border pt-3">
-            {(() => {
-              const modeError = validatePhysicalModes(effective.modes, effective.i2cSpeed);
-              const configureBlockedReason = !ready
-                ? it
-                  ? "Collega la Backbone (stato Connessa) per applicare la configurazione."
-                  : "Connect the Backbone (Connected status) to apply the configuration."
-                : modeError
-                  ? modeError
-                  : busy
-                    ? it
-                      ? "Configurazione in corso…"
-                      : "Configuration in progress…"
-                    : null;
-              return (
-                <>
-                  {configureBlockedReason ? (
-                    <p className="rounded-slsm bg-warning/15 px-2.5 py-1.5 font-body text-[11px] text-ink">
-                      {configureBlockedReason}
-                    </p>
-                  ) : null}
-                  <div className="flex flex-wrap gap-2">
-            <button
-              className={action}
-              disabled={Boolean(configureBlockedReason)}
-              title={configureBlockedReason ?? undefined}
-              onClick={() => void apply()}
-            >
-              {busy ? (
-                <LoaderCircle size={16} className="animate-spin" />
-              ) : (
-                <Check size={16} />
-              )}
-              {automatic
-                ? it
-                  ? "Riapplica NFC"
-                  : "Reapply NFC"
-                : it
-                  ? "Configura"
-                  : "Configure"}
-            </button>
-            {!automatic && (
-              <button
-                className={secondary}
-                disabled={busy}
-                onClick={() => {
-                  onSave(draft);
-                  setResult({
-                    ok: true,
-                    text: it ? "Bozza salvata." : "Draft saved.",
-                  });
-                }}
-              >
-                {it ? "Salva bozza" : "Save draft"}
-              </button>
-            )}
-            {functionTag && !automatic && (
-              <button
-                className={secondary}
-                disabled={!draft.name.trim() || busy}
-                onClick={() => {
-                  onRegister({
-                    registryId: functionTag.registryId ?? 0,
-                    vendorId: functionTag.vendorId ?? 0,
-                    moduleTypeId: functionTag.moduleTypeId ?? 0,
-                    name: draft.name || "Module Function",
-                    pins: pinsForModes(draft.modes, functionVariantOf(draft)),
-                    modes: draft.modes,
-                    i2cSpeed: draft.i2cSpeed,
-                    settings: draft.settings,
-                    protocol: draft.protocol,
-                  });
-                  setResult({
-                    ok: true,
-                    text: it
-                      ? "Definizione aggiunta al catalogo."
-                      : "Definition added to catalog.",
-                  });
-                }}
-              >
-                {it ? "Catalogo NFC" : "NFC catalog"}
-              </button>
-            )}
-                  </div>
-                </>
-              );
-            })()}
+        initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={motionTokens.duration.base}
+        className="mx-auto flex w-full max-w-[1440px] min-h-0 flex-1 flex-col gap-4 px-5 py-4 lg:px-8"
+      >
+        {!knownLayout && (
+          <div className="rounded-slmd border border-border bg-surface px-4 py-3 text-xs text-ink-muted">
+            {it
+              ? "Topologia non ancora ricevuta dal firmware: puoi configurare in locale; l’applicazione sulla Backbone richiede la connessione."
+              : "Topology not yet reported by firmware: you can configure locally; applying to the Backbone requires a connection."}
           </div>
-        </motion.div>
+        )}
+        <PhysicalInterfaceEditor
+          draft={effective}
+          capabilities={topology?.capabilities ?? AUTHORING_CAPABILITIES}
+          extended={topology?.version === 2 || !topology}
+          disabled={!!automatic || busy}
+          automatic={!!automatic}
+          onChange={(next) =>
+            setDraft({
+              ...next,
+              variant: functionVariantOf(next),
+              applied: false,
+            })
+          }
+        />
+
+        {driverAssignments}
+        {result && (
+          <p
+            role="status"
+            className={`rounded-slmd p-3 text-xs ${result.ok ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+          >
+            {result.text}
+          </p>
+        )}
+
+        <div className="flex flex-col gap-2 border-t border-border pt-3">
+          {(() => {
+            const modeError = validatePhysicalModes(
+              effective.modes,
+              effective.i2cSpeed,
+            );
+            const configureBlockedReason = !ready
+              ? it
+                ? "Collega la Backbone (stato Connessa) per applicare la configurazione."
+                : "Connect the Backbone (Connected status) to apply the configuration."
+              : modeError
+                ? modeError
+                : busy
+                  ? it
+                    ? "Configurazione in corso…"
+                    : "Configuration in progress…"
+                  : null;
+            return (
+              <>
+                {configureBlockedReason ? (
+                  <p className="rounded-slsm bg-warning/15 px-2.5 py-1.5 font-body text-[11px] text-ink">
+                    {configureBlockedReason}
+                  </p>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className={action}
+                    disabled={Boolean(configureBlockedReason)}
+                    title={configureBlockedReason ?? undefined}
+                    onClick={() => void apply()}
+                  >
+                    {busy ? (
+                      <LoaderCircle size={16} className="animate-spin" />
+                    ) : (
+                      <Check size={16} />
+                    )}
+                    {automatic
+                      ? it
+                        ? "Riapplica NFC"
+                        : "Reapply NFC"
+                      : it
+                        ? "Configura"
+                        : "Configure"}
+                  </button>
+                  {!automatic && (
+                    <button
+                      className={secondary}
+                      disabled={busy}
+                      onClick={() => {
+                        onSave(draft);
+                        setResult({
+                          ok: true,
+                          text: it ? "Bozza salvata." : "Draft saved.",
+                        });
+                      }}
+                    >
+                      {it ? "Salva bozza" : "Save draft"}
+                    </button>
+                  )}
+                  {functionTag && !automatic && (
+                    <button
+                      className={secondary}
+                      disabled={!draft.name.trim() || busy}
+                      onClick={() => {
+                        onRegister({
+                          registryId: functionTag.registryId ?? 0,
+                          vendorId: functionTag.vendorId ?? 0,
+                          moduleTypeId: functionTag.moduleTypeId ?? 0,
+                          name: draft.name || "Module Function",
+                          pins: pinsForModes(draft.modes, functionVariantOf(draft)),
+                          modes: draft.modes,
+                          i2cSpeed: draft.i2cSpeed,
+                          settings: draft.settings,
+                          protocol: draft.protocol,
+                        });
+                        setResult({
+                          ok: true,
+                          text: it
+                            ? "Definizione aggiunta al catalogo."
+                            : "Definition added to catalog.",
+                        });
+                      }}
+                    >
+                      {it ? "Catalogo NFC" : "NFC catalog"}
+                    </button>
+                  )}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      </motion.div>
     </div>
   );
 }

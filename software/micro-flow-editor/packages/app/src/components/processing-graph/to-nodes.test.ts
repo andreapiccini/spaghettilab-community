@@ -1,5 +1,7 @@
 import type { GraphState } from "@spaghettilab/domain";
+import { findCatalogEntryById } from "@spaghettilab/processing-block-catalog";
 import { describe, expect, it } from "vitest";
+import { nodeDataFromCatalogEntry } from "./catalog-to-node.js";
 import { toProcessingNodes } from "./to-nodes.js";
 
 describe("toProcessingNodes", () => {
@@ -150,6 +152,46 @@ describe("toProcessingNodes", () => {
     };
     const nodes = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
     expect(nodes.find((n) => n.id === "t1")?.data.subtitle).toBe("");
+  });
+
+  it("shows period and duty on Square wave", () => {
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [
+        {
+          layer: "device-processing",
+          id: "sq",
+          data: { kind: "block", blockTypeId: "ab.square_wave", catalogEntryId: "appblocks.square_wave", properties: { periodMs: 500, dutyCycle: 50 } },
+        },
+      ],
+      edges: [],
+    };
+    const nodes = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
+    expect(nodes.find((n) => n.id === "sq")?.data.subtitle).toBe("500 ms · 50%");
+    expect(nodes.find((n) => n.id === "sq")?.data.toggleWave).toMatchObject({
+      mode: "pulse_high",
+      pulseMs: 250,
+    });
+  });
+
+  it("builds Square wave from catalog defaults (bigint period/duty) without a target handle", () => {
+    const entry = findCatalogEntryById("appblocks.square_wave");
+    const data = entry ? nodeDataFromCatalogEntry(entry, undefined) : null;
+    expect(data?.kind).toBe("block");
+    if (!data || data.kind !== "block") throw new Error("expected square wave block");
+    expect(typeof data.properties.periodMs).toBe("bigint");
+    expect(typeof data.properties.dutyCycle).toBe("bigint");
+    const graphState: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [{ layer: "device-processing", id: "sq", data }],
+      edges: [],
+    };
+    const [node] = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
+    expect(node?.data.subtitle).toBe("500 ms · 50%");
+    expect(node?.data.toggleWave).toMatchObject({ mode: "pulse_high", pulseMs: 250 });
+    expect(node?.data.hasInput).toBe(false);
+    expect(node?.handles?.some((handle) => handle.type === "target")).toBe(false);
+    expect(node?.handles?.some((handle) => handle.type === "source")).toBe(true);
   });
 
   it("attaches static handles so wires survive a node-object rebuild", () => {

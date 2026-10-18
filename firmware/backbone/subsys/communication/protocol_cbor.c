@@ -173,7 +173,7 @@ int spaghetti_protocol_decode_request(
 		return err;
 	}
 	if ((operation < (uint32_t)SPAGHETTI_PROTOCOL_GET_CATALOG) ||
-	    (operation > (uint32_t)SPAGHETTI_PROTOCOL_APPLY_PHYSICAL)) {
+	    (operation > (uint32_t)SPAGHETTI_PROTOCOL_NFC_PAGE)) {
 		return -ENOTSUP;
 	}
 
@@ -235,7 +235,7 @@ int spaghetti_protocol_encode_event(
 	size_t capacity,
 	size_t *written_size)
 {
-	struct spaghetti_protocol_payload empty = {0};
+	static const struct spaghetti_protocol_payload empty = {0};
 	const struct spaghetti_protocol_payload *body =
 		(payload != NULL) ? payload : &empty;
 

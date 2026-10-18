@@ -21,13 +21,32 @@ export type SensorOutputKind =
 /** Semantic quantity exposed to Flow blocks (read or write). */
 export type SensorChannelDirection = "read" | "write";
 
+export type SensorChannelTransform =
+  | { readonly kind: "invert_boolean" }
+  | {
+      readonly kind: "map_range";
+      readonly inMin: number;
+      readonly inMax: number;
+      readonly outMin: number;
+      readonly outMax: number;
+      readonly clamp: boolean;
+    }
+  | { readonly kind: "offset"; readonly value: number }
+  | { readonly kind: "multiply"; readonly value: number }
+  | { readonly kind: "clamp"; readonly min: number; readonly max: number };
+
 export type SensorChannel = {
   readonly inputMode?: "data" | "trigger";
+  readonly outputMode?: "data" | "event";
   readonly id: string;
   readonly label: string;
   readonly unit: string;
   readonly quantity: SensorOutputKind;
   readonly direction: SensorChannelDirection;
+  readonly dataType?: "bool" | "number" | "int" | "string" | "enum";
+  readonly description?: string;
+  readonly source?: string;
+  readonly transforms?: readonly SensorChannelTransform[];
 };
 
 export type SensorRecipeStep =
@@ -35,8 +54,8 @@ export type SensorRecipeStep =
   | { readonly type: "i2c_write"; readonly addr: string; readonly reg?: string; readonly bytes: readonly string[] }
   | { readonly type: "i2c_read"; readonly addr: string; readonly reg?: string; readonly len: number; readonly into: string }
   | { readonly type: "adc_read"; readonly into: string }
-  | { readonly type: "gpio_write"; readonly level: 0 | 1 }
-  | { readonly type: "gpio_read"; readonly into: string }
+  | { readonly type: "gpio_write"; readonly level: 0 | 1; readonly signalId?: string }
+  | { readonly type: "gpio_read"; readonly into: string; readonly signalId?: string }
   /** Additive 1-Wire primitives — executed only if firmware exposes w1 adapters. */
   | { readonly type: "w1_reset"; readonly intoPresence?: string }
   | { readonly type: "w1_match_rom"; readonly rom: string }
@@ -46,7 +65,7 @@ export type SensorRecipeStep =
   | { readonly type: "emit"; readonly outputId: string; readonly from: string };
 
 /** Typed multi-param command (additive to v1 — not a scalar write channel). */
-export type SensorCommandParamType = "string" | "int" | "float" | "bool";
+export type SensorCommandParamType = "string" | "int" | "float" | "bool" | "enum";
 
 export type SensorCommandParam = {
   readonly name: string;

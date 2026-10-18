@@ -10,6 +10,15 @@ export function readableI2cStep(
   rx?: readonly (number | null)[],
   it = true,
 ): string {
+  const details = readableI2cStepDetails(draft, op, rx, it);
+  return op.label?.trim() ? `${op.label.trim()} · ${details}` : details;
+}
+function readableI2cStepDetails(
+  draft: DeviceRecipeDraft,
+  op: DeviceRecipeOp,
+  rx: readonly (number | null)[] | undefined,
+  it: boolean,
+): string {
   if (op.type === "i2c_write")
     return `${resolveI2cOpAddress(op, draft)} · write · ${op.bytes.length} ${it || op.bytes.length === 1 ? "byte" : "bytes"}`;
   if (op.type === "i2c_read" || op.type === "i2c_write_read") {

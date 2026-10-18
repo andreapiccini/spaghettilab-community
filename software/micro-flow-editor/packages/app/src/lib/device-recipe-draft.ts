@@ -16,6 +16,15 @@ import {
   type SensorTransform,
 } from "./sensor-recipe.js";
 import { DS18B20_CMD, validateOneWireRom } from "./onewire.js";
+import {
+  GPIO_OPERATION_DEFINITIONS,
+  defaultGpioOperation,
+  gpioSignalType,
+  normalizeGpioSignal,
+  validateGpioOperation,
+  validateGpioSignal,
+  type GpioOperationType,
+} from "./gpio-operation-registry.js";
 
 export const DEVICE_RECIPE_DRAFT_VERSION = "2" as const;
 export const DEVICE_RECIPE_DRAFT_META_KEY = "__deviceRecipeDraft";
@@ -40,7 +49,7 @@ export type DeviceRecipeMode = DeviceRecipeBus | "display";
 export type DeviceRecipeCategory = "sensor" | "display";
 export type DisplayControllerProfile = "graphic_framebuffer" | "character" | "segment";
 export type DisplayUpdateMode = "auto" | "explicit";
-export type DeviceCommandParamType = "string" | "int" | "float" | "bool";
+export type DeviceCommandParamType = "string" | "int" | "float" | "bool" | "enum";
 
 /**
  * External action trigger — same vocabulary as canvas blocks / GPIO pin settings
@@ -131,6 +140,9 @@ export type DeviceCommandParam = {
   readonly defaultValue: string | number | boolean;
   readonly min?: number;
   readonly max?: number;
+  readonly unit?: string;
+  readonly description?: string;
+  readonly options?: readonly string[];
   readonly required?: boolean;
 };
 
@@ -145,14 +157,103 @@ export type DisplayProfile = {
   readonly updateModeDefault: DisplayUpdateMode;
 };
 
+/** Hardware illustration and declared non-GPIO terminals, independent of routing. */
+export type GpioHardwareAppearance = {
+  readonly kind: "generic" | "button" | "led" | "rgb" | "mosfet" | "relay" | "sensor" | "potentiometer" | "joystick" | "buzzer" | "motor";
+  readonly power: "none" | "3.3" | "5";
+  readonly ground: boolean;
+  readonly common?: "anode" | "cathode";
+  readonly extraTerminals: readonly string[];
+};
+
+export type GpioSignalType =
+  | "digital_input"
+  | "digital_output"
+  | "analog_input"
+  | "pwm_output";
+
+export type GpioEdgeMode = "none" | "rising" | "falling" | "both";
+
+export type GpioSignalRequirements = {
+  readonly readable?: boolean;
+  readonly writable?: boolean;
+  readonly adc?: boolean;
+  readonly pwm?: boolean;
+  readonly edgeDetection?: boolean;
+  readonly dedicatedRoute?: boolean;
+  readonly minPollingIntervalMs?: number;
+};
+
+export type GpioSignalConfiguration = {
+  readonly initialState?: 0 | 1;
+  readonly safeState?: 0 | 1;
+  readonly debounceMs?: number;
+  readonly pollingIntervalMs?: number;
+  readonly edge?: GpioEdgeMode;
+  readonly adcMode?: "single" | "continuous";
+  readonly samplingIntervalMs?: number;
+  readonly rawMin?: number;
+  readonly rawMax?: number;
+  readonly scaleMin?: number;
+  readonly scaleMax?: number;
+  readonly unit?: string;
+  readonly calibrationOffset?: number;
+  readonly calibrationMultiplier?: number;
+  readonly pwmFrequencyHz?: number;
+  readonly initialDutyPercent?: number;
+  readonly dutyMinPercent?: number;
+  readonly dutyMaxPercent?: number;
+  readonly pulseWidthUs?: number;
+  readonly stopBehavior?: "low" | "high" | "hold" | "high_z";
+  readonly safeDutyPercent?: number;
+};
+
 export type GpioSignalDef = {
   readonly id: string;
+  /** User-facing label. May change without invalidating operation references. */
   readonly name: string;
+  /** Stable authoring identifier; defaults to id for migrated drivers. */
+  readonly identifier?: string;
+  readonly description?: string;
+  readonly signalType?: GpioSignalType;
   readonly role: string;
   readonly direction: "in" | "out" | "bidir";
+  /**
+   * Legacy Function-Bay summary only. New generic drivers declare requirements
+   * and are assigned to physical resources by Hardware Configuration.
+   */
   readonly pinLabel: string;
   readonly pull: "none" | "up" | "down";
   readonly activeLow: boolean;
+  readonly configuration?: GpioSignalConfiguration;
+  readonly requirements?: GpioSignalRequirements;
+};
+
+export type DeviceValueSource =
+  | { readonly kind: "fixed"; readonly value: number | boolean | string }
+  | { readonly kind: "parameter"; readonly parameterId: string }
+  | { readonly kind: "variable"; readonly name: string };
+
+export type GpioEventTrigger =
+  | "digital_rising"
+  | "digital_falling"
+  | "digital_change"
+  | "analog_threshold"
+  | "analog_change";
+
+export type GpioEventDefinition = {
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly sourceSignalId: string;
+  readonly trigger: GpioEventTrigger;
+  readonly delivery: "auto" | "interrupt" | "polling";
+  readonly pollingIntervalMs?: number;
+  readonly debounceMs?: number;
+  readonly comparison?: "gt" | "gte" | "lt" | "lte";
+  readonly threshold?: number;
+  readonly hysteresis?: number;
+  readonly payloadChannelId?: string;
 };
 
 /** Phase of an advanced I²C transaction (composer). */
@@ -165,13 +266,15 @@ export type I2cTransactionPhase =
 
 export type WaitTimeUnit = "ms" | "us";
 
-export type DeviceRecipeOp =
+export type DeviceRecipeOp = { readonly label?: string } & (
   | {
       readonly id: string;
       readonly type: "wait";
       /** Duration in `unit` (legacy field name `ms`). */
       readonly ms: number;
       readonly unit?: WaitTimeUnit;
+      /** Optional dynamic duration; `ms` remains the fallback / preview value. */
+      readonly duration?: DeviceValueSource;
       readonly timeoutMs?: number;
     }
   | {
@@ -239,6 +342,10 @@ export type DeviceRecipeOp =
       readonly type: "gpio_write";
       readonly signalId: string;
       readonly level: 0 | 1;
+      /** Optional HIGH/LOW, boolean parameter, or variable. `level` is the fallback. */
+      readonly value?: DeviceValueSource;
+      /** Invert the variable/parameter before applying signal polarity. */
+      readonly invert?: boolean;
       readonly timeoutMs?: number;
     }
   | {
@@ -248,6 +355,51 @@ export type DeviceRecipeOp =
       readonly sampleMs: number;
       readonly stableMs: number;
       readonly into: string;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "gpio_toggle";
+      readonly signalId: string;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "gpio_pulse";
+      readonly signalId: string;
+      readonly activeState: 0 | 1;
+      readonly durationMs: DeviceValueSource;
+      readonly restoreState: 0 | 1;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "gpio_read_analog";
+      readonly signalId: string;
+      readonly into: string;
+      readonly convertedInto?: string;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "gpio_set_pwm";
+      readonly signalId: string;
+      readonly frequencyHz: DeviceValueSource;
+      readonly dutyPercent: DeviceValueSource;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "gpio_set_pwm_pulse";
+      readonly signalId: string;
+      readonly pulseWidthUs: DeviceValueSource;
+      readonly timeoutMs?: number;
+    }
+  | {
+      readonly id: string;
+      readonly type: "gpio_stop_pwm";
+      readonly signalId: string;
+      readonly behavior: "configured" | "low" | "high" | "hold" | "high_z";
       readonly timeoutMs?: number;
     }
   | {
@@ -407,7 +559,10 @@ export type DeviceRecipeOp =
       readonly valueType: RecipeVarType;
       readonly widthBytes?: number;
       readonly byteOrder?: "be" | "le";
-    };
+      /** Trigger mapping: incoming HIGH/LOW calls these named actions. */
+      readonly triggerHighAction?: string;
+      readonly triggerLowAction?: string;
+    });
 
 /**
  * Named action — sensor or display.
@@ -507,6 +662,15 @@ export type DeviceRecipeDraft = {
   readonly schemaVersion: typeof DEVICE_RECIPE_DRAFT_VERSION;
   readonly id: string;
   readonly name: string;
+  readonly description?: string;
+  readonly deviceCategory?:
+    | "input"
+    | "output"
+    | "sensor"
+    | "actuator"
+    | "display"
+    | "custom";
+  readonly icon?: string;
   readonly status: "draft" | "ready";
   readonly category: DeviceRecipeCategory;
   /** @deprecated Interval is decided on the canvas; kept for migrate only. */
@@ -521,6 +685,9 @@ export type DeviceRecipeDraft = {
   readonly variables: readonly RecipeVariable[];
   /** Named actions (sensor + display). Source of truth for sequences + Flow blocks. */
   readonly commands: readonly DeviceRecipeCommand[];
+  /** GPIO-originated events exposed to Design Flow when a backend supports them. */
+  readonly gpioEvents?: readonly GpioEventDefinition[];
+  readonly gpioHardware?: GpioHardwareAppearance;
   readonly flowInterfaces?: readonly DeviceRecipeOp[];
   readonly flowInterfaceActions?: Readonly<Record<string, readonly string[]>>;
   readonly display?: DisplayProfile;
@@ -619,9 +786,13 @@ export function resolveI2cOpAddress(
   return raw.toLowerCase().startsWith("0x") ? raw : `0x${raw}`;
 }
 
-/** Wait duration in milliseconds (µs → fractional ms). */
+/** Wait duration in milliseconds (µs → fractional ms). Dynamic sources fall back to `ms`. */
 export function waitDurationMs(op: Extract<DeviceRecipeOp, { type: "wait" }>): number {
-  return op.unit === "us" ? op.ms / 1000 : op.ms;
+  const fixed =
+    op.duration?.kind === "fixed" && typeof op.duration.value === "number"
+      ? op.duration.value
+      : op.ms;
+  return op.unit === "us" ? fixed / 1000 : fixed;
 }
 
 /**
@@ -715,9 +886,27 @@ export function describeDeviceOp(op: DeviceRecipeOp): string {
     case "gpio_read":
       return `Leggi ${op.signalId}`;
     case "gpio_write":
-      return `Imposta ${op.signalId}=${op.level}`;
+      return `Imposta ${op.signalId}=${
+        op.value?.kind === "parameter"
+          ? `$${op.value.parameterId}`
+          : op.value?.kind === "variable"
+            ? `$${op.value.name}`
+            : op.level
+      }`;
     case "gpio_debounce":
       return `Antirimbalzo ${op.stableMs} ms`;
+    case "gpio_toggle":
+      return `Inverti ${op.signalId}`;
+    case "gpio_pulse":
+      return `Impulso ${op.signalId}`;
+    case "gpio_read_analog":
+      return `Leggi analogico ${op.signalId}`;
+    case "gpio_set_pwm":
+      return `Imposta PWM ${op.signalId}`;
+    case "gpio_set_pwm_pulse":
+      return `Larghezza impulso ${op.signalId}`;
+    case "gpio_stop_pwm":
+      return `Ferma PWM ${op.signalId}`;
     case "decode":
       return `Decodifica ${op.input} → $${op.into}`;
     case "encode":
@@ -727,7 +916,11 @@ export function describeDeviceOp(op: DeviceRecipeOp): string {
     case "adc_multi_sample":
       return `Acquisisci ${op.count} campioni`;
     case "sample_external":
-      return op.inputMode === "trigger" ? `Trigger ${op.fromChannelId} → azione` : `Campiona ${op.fromChannelId} → $${op.into}`;
+      return op.inputMode === "trigger"
+        ? op.triggerHighAction || op.triggerLowAction
+          ? `Trigger ${op.fromChannelId} → ALTO ${op.triggerHighAction ?? "on"} / BASSO ${op.triggerLowAction ?? "off"}`
+          : `Trigger ${op.fromChannelId} → azione`
+        : `Campiona ${op.fromChannelId} → $${op.into}`;
     case "average":
       return `Media ${op.input}`;
     case "filter":
@@ -817,6 +1010,9 @@ function createBlankSensorDraft(bus: DeviceRecipeBus, name?: string): DeviceReci
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
     id: newId("dr"),
     name: name?.trim() ? name : seed.name,
+    description: "",
+    deviceCategory: bus === "gpio" ? "custom" : "sensor",
+    icon: "",
     status: "draft",
     ...sensorDraftBase([]),
     sampleIntervalMs: 0,
@@ -837,7 +1033,7 @@ function blankBindingSeed(bus: DeviceRecipeBus): {
   switch (bus) {
     case "i2c":
       return {
-        name: "Sensore I2C",
+        name: "Dispositivo I2C",
         binding: {
           bus: "i2c",
           i2c: { address: "0x48", addressBits: 7, busUnit: "I2C0", sdaLabel: "", sclLabel: "" },
@@ -933,7 +1129,7 @@ function defaultMeasureAction(steps: readonly DeviceRecipeOp[]): DeviceRecipeCom
 }
 
 /** Generic I2C skeleton — write+read with RESTART; outputs via Uscita (emit). */
-export function createI2cGenericExample(name = "Sensore I2C"): DeviceRecipeDraft {
+export function createI2cGenericExample(name = "Dispositivo I2C"): DeviceRecipeDraft {
   const rawInto = "raw";
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
@@ -977,7 +1173,7 @@ export function createI2cGenericExample(name = "Sensore I2C"): DeviceRecipeDraft
 }
 
 /** @deprecated Use createI2cGenericExample — kept for older tests/imports. */
-export function createI2cTemperatureExample(name = "Sensore I2C"): DeviceRecipeDraft {
+export function createI2cTemperatureExample(name = "Dispositivo I2C"): DeviceRecipeDraft {
   return createI2cGenericExample(name);
 }
 
@@ -1154,9 +1350,48 @@ export function createAnalogLevelExample(name = "Sensore analogico"): DeviceReci
 
 export function createGpioDigitalExample(name = "Dispositivo GPIO"): DeviceRecipeDraft {
   const signals: readonly GpioSignalDef[] = [
-    { id: "IN_A", name: "IN_A", role: "generico", direction: "in", pinLabel: "A0", pull: "up", activeLow: true },
-    { id: "IN_B", name: "IN_B", role: "generico", direction: "in", pinLabel: "A1", pull: "none", activeLow: false },
-    { id: "OUT_A", name: "OUT_A", role: "generico", direction: "out", pinLabel: "A2", pull: "none", activeLow: false },
+    {
+      id: "IN_A",
+      identifier: "IN_A",
+      name: "IN_A",
+      description: "",
+      signalType: "digital_input",
+      role: "generico",
+      direction: "in",
+      pinLabel: "",
+      pull: "up",
+      activeLow: true,
+      configuration: { debounceMs: 20, pollingIntervalMs: 20, edge: "both" },
+      requirements: { readable: true },
+    },
+    {
+      id: "IN_B",
+      identifier: "IN_B",
+      name: "IN_B",
+      description: "",
+      signalType: "digital_input",
+      role: "generico",
+      direction: "in",
+      pinLabel: "",
+      pull: "none",
+      activeLow: false,
+      configuration: { debounceMs: 0, pollingIntervalMs: 20, edge: "none" },
+      requirements: { readable: true },
+    },
+    {
+      id: "OUT_A",
+      identifier: "OUT_A",
+      name: "OUT_A",
+      description: "",
+      signalType: "digital_output",
+      role: "generico",
+      direction: "out",
+      pinLabel: "",
+      pull: "none",
+      activeLow: false,
+      configuration: { initialState: 0, safeState: 0 },
+      requirements: { writable: true },
+    },
   ];
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
@@ -1425,9 +1660,10 @@ export function libraryOpsForBus(bus: DeviceRecipeBus): readonly { readonly type
     case "gpio":
       return [
         inputOp,
-        { type: "gpio_read", label: "Leggi livello" },
-        { type: "gpio_write", label: "Imposta livello" },
-        { type: "gpio_debounce", label: "Antirimbalzo" },
+        ...GPIO_OPERATION_DEFINITIONS.map((definition) => ({
+          type: definition.type,
+          label: definition.label.it,
+        })),
         { type: "wait", label: "Attendi" },
         ...dataOps,
       ];
@@ -1481,7 +1717,6 @@ export function libraryOpsForDisplay(): readonly {
 
 export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft): DeviceRecipeOp {
   const id = newId("op");
-  const addrSignal = draft.binding.gpioSignals[0]?.id ?? "IN_A";
   const channelId = draft.channels[0]?.id ?? "value";
   switch (type) {
     case "wait":
@@ -1538,11 +1773,15 @@ export function defaultOp(type: DeviceRecipeOp["type"], draft: DeviceRecipeDraft
     case "spi_transfer":
       return { id, type: "spi_transfer", txBytes: ["0x00"], rxLen: 1, into: "rx", keepCs: true, timeoutMs: 20 };
     case "gpio_read":
-      return { id, type: "gpio_read", signalId: addrSignal, into: "livello" };
     case "gpio_write":
-      return { id, type: "gpio_write", signalId: draft.binding.gpioSignals.find((s) => s.direction !== "in")?.id ?? "OUT_A", level: 1 };
     case "gpio_debounce":
-      return { id, type: "gpio_debounce", signalId: addrSignal, sampleMs: 5, stableMs: 20, into: "livello" };
+    case "gpio_toggle":
+    case "gpio_pulse":
+    case "gpio_read_analog":
+    case "gpio_set_pwm":
+    case "gpio_set_pwm_pulse":
+    case "gpio_stop_pwm":
+      return defaultGpioOperation(type as GpioOperationType, draft, id);
     case "decode":
       return {
         id,
@@ -1825,6 +2064,7 @@ export function renameRecipeVariable(draft: DeviceRecipeDraft, variableId: strin
       return referenceKeys.has(key) && value === variable.name ? name : value;
     }
     if (Array.isArray(value)) return value.map(item => rewrite(item, key));
+    if (value && typeof value === "object" && "kind" in value && value.kind === "variable" && "name" in value && value.name === variable.name) return {...value, name};
     if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([field, item]) => [field, rewrite(item, field)]));
     return value;
   };
@@ -2117,6 +2357,126 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
   if (draft.binding.bus === "spi" && draft.binding.spi?.misoRequired && !draft.binding.spi.misoLabel) {
     errors.push({ field: "miso", message: "MISO richiesto per questa ricetta" });
   }
+  if (draft.binding.bus === "gpio") {
+    if (draft.binding.gpioSignals.length === 0) {
+      errors.push({
+        field: "gpioSignals",
+        message: "Aggiungi almeno un segnale GPIO",
+      });
+    }
+    forEachSequenceOp(draft, (op) => {
+      for (const message of validateGpioOperation(op, draft)) {
+        errors.push({
+          field: `gpio.${op.id}`,
+          message,
+        });
+      }
+    });
+    const signalIds = new Set<string>();
+    const identifiers = new Set<string>();
+    for (const signal of draft.binding.gpioSignals) {
+      const identifier = signal.identifier ?? signal.id;
+      if (signalIds.has(signal.id))
+        errors.push({ field: "gpioSignals", message: `ID segnale duplicato: ${signal.id}` });
+      if (identifiers.has(identifier))
+        errors.push({
+          field: "gpioSignals",
+          message: `Identificatore segnale duplicato: ${identifier}`,
+        });
+      signalIds.add(signal.id);
+      identifiers.add(identifier);
+      for (const message of validateGpioSignal(signal))
+        errors.push({ field: `gpioSignal.${signal.id}`, message });
+    }
+    for (const event of draft.gpioEvents ?? []) {
+      const signal = draft.binding.gpioSignals.find(
+        (item) => item.id === event.sourceSignalId,
+      );
+      if (!signal) {
+        errors.push({
+          field: `gpioEvent.${event.id}`,
+          message: `Evento ${event.name}: segnale mancante`,
+        });
+      } else {
+        const signalType = gpioSignalType(signal);
+        if (event.trigger.startsWith("analog_") && signalType !== "analog_input") {
+          errors.push({
+            field: `gpioEvent.${event.id}`,
+            message: `Evento ${event.name}: serve un ingresso analogico`,
+          });
+        }
+        if (event.trigger.startsWith("digital_") && signalType !== "digital_input") {
+          errors.push({
+            field: `gpioEvent.${event.id}`,
+            message: `Evento ${event.name}: serve un ingresso digitale`,
+          });
+        }
+      }
+      if (event.trigger === "analog_threshold") {
+        if (event.threshold === undefined || !Number.isFinite(event.threshold)) {
+          errors.push({
+            field: `gpioEvent.${event.id}.threshold`,
+            message: `Evento ${event.name}: soglia numerica obbligatoria`,
+          });
+        }
+      }
+    }
+    for (const command of draft.commands) {
+      const paramIds = new Set<string>();
+      const paramNames = new Set<string>();
+      for (const parameter of command.params) {
+        if (paramIds.has(parameter.id))
+          errors.push({
+            field: `cmd.${command.id}.params`,
+            message: `ID parametro duplicato: ${parameter.id}`,
+          });
+        if (paramNames.has(parameter.name))
+          errors.push({
+            field: `cmd.${command.id}.params`,
+            message: `Nome parametro duplicato: ${parameter.name}`,
+          });
+        if (
+          parameter.min !== undefined &&
+          parameter.max !== undefined &&
+          parameter.min > parameter.max
+        )
+          errors.push({
+            field: `cmd.${command.id}.params`,
+            message: `${parameter.name}: minimo maggiore del massimo`,
+          });
+        if (parameter.type === "enum" && !(parameter.options?.length ?? 0))
+          errors.push({
+            field: `cmd.${command.id}.params`,
+            message: `${parameter.name}: aggiungi almeno un’opzione`,
+          });
+        paramIds.add(parameter.id);
+        paramNames.add(parameter.name);
+      }
+    }
+    for (const channel of draft.channels.filter(
+      (item) => item.direction === "read",
+    )) {
+      if (channel.dataType === "bool") {
+        if (
+          channel.transforms?.some((transform) =>
+            ["map_range", "offset", "multiply", "clamp"].includes(transform.kind),
+          )
+        )
+          errors.push({
+            field: `output.${channel.id}`,
+            message: `${channel.label}: trasformazione numerica su uscita booleana`,
+          });
+      } else if (
+        channel.transforms?.some(
+          (transform) => transform.kind === "invert_boolean",
+        )
+      )
+        errors.push({
+          field: `output.${channel.id}`,
+          message: `${channel.label}: inversione booleana su uscita non booleana`,
+        });
+    }
+  }
   if (draft.binding.bus === "adc") {
     if (!draft.binding.adc?.pinLabel) errors.push({ field: "adc_pin", message: "Ingresso ADC mancante" });
     if (!isAnalogCalibrationComplete(draft)) {
@@ -2142,8 +2502,9 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
     }
   }
   for (const cmd of draft.commands.filter(c => c.exposeOnCanvas !== false)) {
-    const reads = cmd.steps.some(op => ["i2c_read", "i2c_write_read", "spi_transfer", "adc_sample", "gpio_read", "w1_read"].includes(op.type));
-    if (reads && !cmd.steps.some(op => op.type === "emit")) {
+    const steps = effectiveActionSteps(draft, cmd);
+    const reads = steps.some(op => ["i2c_read", "i2c_write_read", "spi_transfer", "adc_sample", "gpio_read", "gpio_read_analog", "gpio_debounce", "w1_read"].includes(op.type));
+    if (reads && !steps.some(op => op.type === "emit")) {
       errors.push({ field: `cmd.${cmd.id}.emit`, message: `Aggiungi Pubblica risultato a ${cmd.label}` });
     }
   }
@@ -2155,6 +2516,18 @@ export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { rea
     }
   }
   forEachSequenceOp(draft, (op) => {
+    if (op.type === "wait" && op.duration?.kind === "parameter") {
+      const parameterId = op.duration.parameterId;
+      const exists = draft.commands.some((command) =>
+        command.params.some((parameter) => parameter.id === parameterId),
+      );
+      if (!exists) {
+        errors.push({
+          field: `wait.${op.id}`,
+          message: `Attesa: parametro mancante (${op.duration.parameterId})`,
+        });
+      }
+    }
     if (op.type !== "sample_external") return;
     if (!draft.channels.some((c) => c.id === op.fromChannelId && c.direction === "write")) {
       errors.push({
@@ -2263,6 +2636,20 @@ export function draftToSensorRecipe(draft: DeviceRecipeDraft): SensorRecipe {
   if (hasSampleExternal) {
     unknown.push("Ingresso / variabili ricetta: authoring only finché il runtime non le supporta");
   }
+  const unavailableGpioOps = new Set<string>();
+  forEachSequenceOp(draft, (op) => {
+    const definition = GPIO_OPERATION_DEFINITIONS.find(
+      (candidate) => candidate.type === op.type,
+    );
+    if (definition?.runtime === "representation_only")
+      unavailableGpioOps.add(definition.label.it);
+  });
+  for (const label of unavailableGpioOps)
+    unknown.push(`GPIO ${label}: rappresentato nel driver, backend firmware non disponibile`);
+  if ((draft.gpioEvents?.length ?? 0) > 0)
+    unknown.push(
+      "Eventi GPIO: dichiarati per Design Flow, acquisizione interrupt/polling non disponibile nel runtime",
+    );
 
   const commands = draft.commands.map((c) => ({
     id: c.id,
@@ -2273,7 +2660,22 @@ export function draftToSensorRecipe(draft: DeviceRecipeDraft): SensorRecipe {
     steps: c.steps.flatMap((op) => mapOpToV1(op, address)),
   }));
 
-  const channels = draft.category === "display" ? [] : draft.channels;
+  const eventChannels: SensorChannel[] =
+    draft.binding.bus === "gpio"
+      ? (draft.gpioEvents ?? []).map((event) => ({
+          id: `event:${event.id}`,
+          label: event.name,
+          unit: "",
+          quantity: "digital",
+          direction: "read",
+          dataType: "bool",
+          outputMode: "event",
+          description: event.description,
+          source: event.sourceSignalId,
+        }))
+      : [];
+  const channels =
+    draft.category === "display" ? [] : [...draft.channels, ...eventChannels];
 
   const withCh = withChannels(
     {
@@ -2328,6 +2730,12 @@ function mapOpToV1(op: DeviceRecipeOp, address?: string): SensorRecipeStep[] {
     case "spi_cs":
     case "spi_transfer":
     case "gpio_debounce":
+    case "gpio_toggle":
+    case "gpio_pulse":
+    case "gpio_read_analog":
+    case "gpio_set_pwm":
+    case "gpio_set_pwm_pulse":
+    case "gpio_stop_pwm":
     case "decode":
     case "average":
     case "filter":
@@ -2348,9 +2756,9 @@ function mapOpToV1(op: DeviceRecipeOp, address?: string): SensorRecipeStep[] {
     case "adc_multi_sample":
       return [{ type: "adc_read", into: op.into }];
     case "gpio_read":
-      return [{ type: "gpio_read", into: op.into }];
+      return [{ type: "gpio_read", into: op.into, signalId: op.signalId }];
     case "gpio_write":
-      return [{ type: "gpio_write", level: op.level }];
+      return [{ type: "gpio_write", level: op.level, signalId: op.signalId }];
     case "w1_reset":
       return [{ type: "w1_reset", intoPresence: op.intoPresence }];
     case "w1_match_rom":
@@ -2381,6 +2789,13 @@ export function parseDeviceRecipeDraft(raw: string | undefined | null): DeviceRe
 
 /** Normalize legacy I²C / wait op shapes onto the current model. */
 export function migrateRecipeOp(op: DeviceRecipeOp): DeviceRecipeOp {
+  const migrated = migrateRecipeOpShape(op);
+  return typeof op.label === "string" && op.label.trim()
+    ? { ...migrated, label: op.label.trim() }
+    : migrated;
+}
+
+function migrateRecipeOpShape(op: DeviceRecipeOp): DeviceRecipeOp {
   const legacy = op as DeviceRecipeOp & {
     readonly reg?: string;
     readonly repeatedStart?: boolean;
@@ -2511,6 +2926,8 @@ export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?:
 
   let commands: DeviceRecipeCommand[] = (raw.commands ?? []).map((c) => ({
     ...c,
+    description: c.description ?? "",
+    params: c.params ?? [],
     steps: migrateList(c.steps),
     trigger: normalizeActionTrigger(c.trigger ?? raw.actionTrigger),
   }));
@@ -2544,18 +2961,30 @@ export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?:
     }
   }
 
+  const binding: DeviceRecipeBinding = {
+    ...raw.binding!,
+    gpioSignals: (raw.binding?.gpioSignals ?? []).map(normalizeGpioSignal),
+    auxGpio: raw.binding?.auxGpio ?? [],
+  };
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
     id: raw.id!,
     name: raw.name ?? "Ricetta",
+    description: raw.description ?? "",
+    deviceCategory:
+      raw.deviceCategory ??
+      (category === "display" ? "display" : raw.binding?.bus === "gpio" ? "custom" : "sensor"),
+    icon: raw.icon ?? "",
     status: raw.status === "ready" ? "ready" : "draft",
     category,
     sampleIntervalMs: 0,
     actionTrigger: normalizeActionTrigger(raw.actionTrigger),
-    binding: raw.binding!,
+    binding,
     channels: raw.channels ?? [],
     variables: uniqueVars,
     commands,
+    gpioEvents: raw.gpioEvents ?? [],
+    gpioHardware: raw.gpioHardware,
     ...(raw.flowInterfaces ? { flowInterfaces: migrateList(raw.flowInterfaces), flowInterfaceActions: raw.flowInterfaceActions } : {}),
     display: raw.display,
     phases: {

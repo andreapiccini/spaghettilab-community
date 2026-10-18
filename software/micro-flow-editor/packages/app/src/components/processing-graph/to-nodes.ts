@@ -11,7 +11,7 @@ import { ifSourceKind } from "./connection-rules.js";
 import { catalogEntryForNode, propertiesOf } from "./catalog-entry-for-node.js";
 import { formatConfiguredSubtitle } from "./configured-subtitle.js";
 import { visualForCatalogEntryId, type CatalogTileGlyph } from "./block-visuals.js";
-import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifInputType, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRelayBlock, isRgbLedBlock, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
+import { compareOpFromProperties, elseOutputFromProperties, hysteresisTicksFromProperties, ifInputType, ifOutputType, initialHighFromProperties, isCompareIf, isDigitalOutToggle, isFlowStartBlock, isLedBlock, isRelayBlock, isRgbLedBlock, isSquareWave, ledColorFromProperties, numberFromProperty, pulseMsFromProperties, squareWaveDutyPercent, squareWavePeriodMs, toggleModeFromProperties, type CompareOp } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
 import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
@@ -311,6 +311,19 @@ function ifOutputFields(data: DeviceProcessingNodeData, locale: LocaleId): Pick<
 }
 
 function toggleWaveFields(data: DeviceProcessingNodeData): Pick<ProcessingNodeUiData, "toggleWave"> {
+  if (isSquareWave(data) && isBlockNodeData(data)) {
+    const period = squareWavePeriodMs(data.properties);
+    const duty = squareWaveDutyPercent(data.properties);
+    return {
+      toggleWave: {
+        mode: "pulse_high",
+        highTicks: duty,
+        lowTicks: Math.max(1, 100 - duty),
+        initialHigh: true,
+        pulseMs: Math.max(1, Math.round((period * duty) / 100)),
+      },
+    };
+  }
   if (!isDigitalOutToggle(data) || !isBlockNodeData(data)) return {};
   const hyst = hysteresisTicksFromProperties(data.properties);
   return {
@@ -402,6 +415,11 @@ function subtitleFor(
     if (isCompareIf(data)) return formatIfCondition(nodeId, data, graphState, locale);
     if (isRelayBlock(data)) return formatRelayClose(data, locale);
     if (isDigitalOutToggle(data)) return "";
+    if (isSquareWave(data) && isBlockNodeData(data)) {
+      const period = squareWavePeriodMs(data.properties);
+      const duty = squareWaveDutyPercent(data.properties);
+      return `${period} ms · ${duty}%`;
+    }
     const input = incomingLabel(nodeId, graphState, titles);
     const bay = entry && isBayEntry(entry);
     const rawRole = data.properties.bayRole;

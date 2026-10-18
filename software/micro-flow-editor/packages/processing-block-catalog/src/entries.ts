@@ -830,6 +830,26 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
       "Input: attivazione dallo Start (o jolly da Schedule). Output: comando digitale (0/1). Astabile = cambia stato a ogni impulso; impulso HIGH/LOW = monostabile (riposo + impulso sulla durata impostata).",
   }),
   e({
+    id: "appblocks.square_wave",
+    label: "Onda quadra",
+    subtitle: "Generatore periodico",
+    category: "io",
+    runtime: "core-block",
+    availability: "shipped",
+    family: "functionality",
+    appblocksId: "square_wave",
+    typeId: "ab.square_wave",
+    needsModule: false,
+    inputs: [],
+    outputs: [outPort("0", [T.digitalComando], "Comando digitale")],
+    fields: [
+      num("periodMs", "Periodo (ms)", 500, "Durata di un ciclo HIGH+LOW"),
+      num("dutyCycle", "Duty cycle (%)", 50, "Percentuale del periodo in HIGH"),
+    ],
+    notes:
+      "Generatore libero: non serve Schedule. Collegalo a un relè o a un LED per provarlo. Periodo = ciclo completo; duty cycle = quanto resta HIGH.",
+  }),
+  e({
     id: "appblocks.compare_if",
     label: "IF",
     subtitle: "Confronto → comando",

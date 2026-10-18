@@ -1309,3 +1309,64 @@ ZTEST(communication, test_large_profile_chunk_upload)
 	zassert_equal(installed_profile_size, 2048);
 	zassert_equal(installed_profile_last, 0xA5);
 }
+
+extern bool test_nfc_present;
+
+ZTEST(communication, test_get_status_reports_blank_remote_tag)
+{
+	struct spaghetti_request_context context = make_context(SPAGHETTI_PERMISSION_READ);
+	struct spaghetti_protocol_request request = {
+		.version = SPAGHETTI_PROTOCOL_VERSION,
+		.correlation_id = 9001U,
+		.operation = SPAGHETTI_PROTOCOL_GET_STATUS,
+	};
+	struct spaghetti_protocol_response response;
+	const uint8_t uid[] = {2U, 1U, 2U, 3U, 4U, 5U, 6U};
+	const int init = spaghetti_communication_init();
+
+	zassert_true(init == 0 || init == -EALREADY);
+	authorize_error = 0;
+	test_nfc_present = true;
+	zassert_ok(spaghetti_communication_handle_request(&context, &request, &response));
+	test_nfc_present = false;
+	zassert_equal(response.status, SPAGHETTI_PROTOCOL_STATUS_OK);
+	ZCBOR_STATE_D(state, 8U, response.payload.bytes, response.payload.size, 1U, 0U);
+	bool found = false;
+
+	zassert_true(zcbor_map_start_decode(state));
+	while (!zcbor_array_at_end(state)) {
+		uint32_t key;
+
+		zassert_true(zcbor_uint32_decode(state, &key));
+		if (key != 13U) {
+			zassert_true(zcbor_any_skip(state, NULL));
+			continue;
+		}
+		zassert_true(zcbor_list_start_decode(state));
+		zassert_false(zcbor_array_at_end(state), "Blank tag was filtered out");
+		zassert_true(zcbor_map_start_decode(state));
+		while (!zcbor_array_at_end(state)) {
+			zassert_true(zcbor_uint32_decode(state, &key));
+			if (key == 2U) {
+				struct zcbor_string value;
+
+				zassert_true(zcbor_bstr_decode(state, &value));
+				zassert_equal(value.len, sizeof(uid));
+				zassert_mem_equal(value.value, uid, sizeof(uid));
+				found = true;
+			} else if (key == 5U) {
+				uint32_t module_type;
+
+				zassert_true(zcbor_uint32_decode(state, &module_type));
+				zassert_equal(module_type, 0U);
+			} else {
+				zassert_true(zcbor_any_skip(state, NULL));
+			}
+		}
+		zassert_true(zcbor_map_end_decode(state));
+		zassert_true(zcbor_array_at_end(state));
+		zassert_true(zcbor_list_end_decode(state));
+	}
+	zassert_true(zcbor_map_end_decode(state));
+	zassert_true(found, "Reader UID missing from GET_STATUS");
+}

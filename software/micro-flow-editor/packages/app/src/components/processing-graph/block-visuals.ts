@@ -1,4 +1,4 @@
-import { Cable, GitBranch, Palette, Power, Thermometer, ToggleLeft, type LucideIcon } from "lucide-react";
+import { Activity, Cable, GitBranch, Palette, Power, Thermometer, ToggleLeft, type LucideIcon } from "lucide-react";
 import {
   COMPARE_IF_IDS,
   DIGITAL_OUT_TOGGLE_IDS,
@@ -6,6 +6,7 @@ import {
   LED_BLOCK_IDS,
   RELAY_BLOCK_IDS,
   RGB_LED_BLOCK_IDS,
+  SQUARE_WAVE_IDS,
   TEMPERATURE_SENSOR_IDS,
   TERMINAL_BLOCK_IDS,
 } from "./dry-run-preview.js";
@@ -34,6 +35,12 @@ export const FLOW_START_COLOR = "#4C2FB8";
 const DIGITAL_OUT_TOGGLE_VISUAL: CatalogBlockVisual = {
   colorVar: "#EA580C",
   icon: ToggleLeft,
+  tileGlyph: "toggle",
+};
+
+const SQUARE_WAVE_VISUAL: CatalogBlockVisual = {
+  colorVar: "#0891B2",
+  icon: Activity,
   tileGlyph: "toggle",
 };
 
@@ -77,6 +84,7 @@ export function visualForCatalogEntryId(entryId: string | undefined): CatalogBlo
   if (!entryId) return undefined;
   if (FLOW_START_IDS.has(entryId)) return FLOW_START_VISUAL;
   if (DIGITAL_OUT_TOGGLE_IDS.has(entryId)) return DIGITAL_OUT_TOGGLE_VISUAL;
+  if (SQUARE_WAVE_IDS.has(entryId)) return SQUARE_WAVE_VISUAL;
   if (LED_BLOCK_IDS.has(entryId)) {
     return { colorVar: "#F5C518", icon: ToggleLeft, solidSwatch: true };
   }

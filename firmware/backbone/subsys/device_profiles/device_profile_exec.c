@@ -577,7 +577,7 @@ static int exec_with_message(uint8_t *message, const struct spaghetti_device_pro
 
 			err = temp_get(temps, op->dst, &dst);
 			if (err == 0) {
-				err = spaghetti_port_get_input(port, &high);
+				err = spaghetti_port_digital_state_get(port, (uint8_t)op->imm0, &high);
 				if (err == 0) {
 					dst->bytes[0] = high ? 1U : 0U;
 					dst->size = 1U;
@@ -586,8 +586,20 @@ static int exec_with_message(uint8_t *message, const struct spaghetti_device_pro
 			break;
 		}
 		case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET:
-			err = spaghetti_port_set_output(port, op->imm0 != 0U);
+			err = spaghetti_port_digital_output_set(port, (uint8_t)op->imm1, op->imm0 != 0U);
 			break;
+		case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE: {
+			err = temp_get(temps, op->src_a, &src_a);
+			if (err == 0) {
+				/* Digital values are exactly 0 or 1; never truncate e.g. 256 to zero. */
+				if (src_a->size == 0U || src_a->size > 8U || src_a->bytes[0] > 1U) err = -ERANGE;
+				for (size_t i = 1U; err == 0 && i < src_a->size; ++i)
+					if (src_a->bytes[i] != 0U) err = -ERANGE;
+				if (err == 0) err = spaghetti_port_digital_output_set(port, (uint8_t)op->imm0,
+					(src_a->bytes[0] != 0U) != (op->imm1 != 0U));
+			}
+			break;
+		}
 		case SPAGHETTI_DEVICE_PROFILE_OP_ADC_READ: {
 			int32_t microvolts = 0;
 
@@ -855,7 +867,8 @@ static int exec_with_message(uint8_t *message, const struct spaghetti_device_pro
 		if (capture_owner == k_current_get() &&
 		    (ops == profile->init_ops || capture_commands) &&
 		    (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_READ ||
-		     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ)) {
+		     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE_READ ||
+		     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET)) {
 			if (init_rx.count < SPAGHETTI_PROFILE_RX_MAX) {
 				const uint8_t index = init_rx.count++;
 				init_rx.lengths[index] = temps[op->dst].size;

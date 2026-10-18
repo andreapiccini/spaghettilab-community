@@ -325,3 +325,49 @@ ZTEST(field_update, test_local_physical_apply_routes_directly)
 }
 
 ZTEST_SUITE(field_update, NULL, field_update_setup, NULL, NULL, NULL);
+
+/* A blank tag must leave the reader over CAN even without SLM1 metadata. */
+extern bool test_nfc_present;
+K_SEM_DEFINE(nfc_reply_sem, 0, 4);
+static uint8_t nfc_reply_parts[4][8];
+int spaghetti_field_update_can_reply(uint32_t node, const uint8_t *data, uint8_t dlc)
+{
+ ARG_UNUSED(node);
+ if (dlc == 8U && data[0] == SPAGHETTI_SLUP_RSP_NFC) {
+  uint8_t part = data[1] & 15U;
+  if (part < 4U) {
+   memcpy(nfc_reply_parts[part], data, 8U);
+   k_sem_give(&nfc_reply_sem);
+  }
+ }
+ return 0;
+}
+ZTEST(field_update, test_blank_tag_can_snapshot)
+{
+ const uint8_t command = SPAGHETTI_SLUP_CMD_NFC;
+ k_sem_reset(&nfc_reply_sem);
+ memset(nfc_reply_parts, 0, sizeof(nfc_reply_parts));
+ test_nfc_present = true;
+ int posted = spaghetti_field_update_post_can(
+  SPAGHETTI_SLUP_TWAI_NODE_CMD_BASE | 0x112233U, &command, 1U);
+ if (posted != 0) test_nfc_present = false;
+ zassert_ok(posted);
+ int received = 0;
+ for (; received < 4; ++received) {
+  if (k_sem_take(&nfc_reply_sem, K_SECONDS(1)) != 0) break;
+ }
+ test_nfc_present = false;
+ zassert_equal(received, 4, "blank tag must send all four CAN parts");
+ zassert_equal(nfc_reply_parts[0][4], 7U);
+ zassert_equal(nfc_reply_parts[0][5], 2U);
+ zassert_equal(nfc_reply_parts[1][2], 3U);
+ const uint8_t zero_metadata[4] = {0};
+ zassert_mem_equal(&nfc_reply_parts[2][2], zero_metadata, 4U);
+}
+
+int spaghetti_communication_emit_discovery(uint32_t candidate, uint8_t port,
+                                           uint32_t generation)
+{
+ ARG_UNUSED(candidate); ARG_UNUSED(port); ARG_UNUSED(generation);
+ return 0;
+}

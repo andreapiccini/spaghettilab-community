@@ -1,4 +1,4 @@
-import { Cable, CircuitBoard, Layers, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
+import { Nfc, Cable, CircuitBoard, Layers, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
 import { useState } from "react";
 import { chromeCopy } from "../../lib/chrome-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -24,6 +24,7 @@ export function LeftRail() {
     { id: "core-connections", icon: Cable, label: "Discover" },
     { id: "physical-composition", icon: Layers, label: copy.screens.physicalComposition },
     { id: "device-recipe-editor", icon: CircuitBoard, label: locale === "it" ? "Dispositivi" : "Devices" },
+    { id: "nfc-tags", icon: Nfc, label: "Tag NFC" },
     { id: "processing-graph", icon: Workflow, label: "Run Deploy" },
   ];
 

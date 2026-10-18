@@ -48,11 +48,16 @@ export const canNestTrigger = canBeNested;
  * Firmware functions (IF, Toggle, …) join a Schedule chain when dropped in
  * the dashed box. Bay hardware (Relay, LED, Temperature) must stay outside —
  * dragging a Relay over the box used to wire it to IF, the chain tail.
+ * Source-only blocks (Square wave) also stay outside: they have no input
+ * handle, so auto-wiring them as a chain target crashed the canvas.
  */
 export function canChainIntoEventContainer(data: DeviceProcessingNodeData | undefined): boolean {
   if (!data || data.kind !== "block") return false;
   const entry = catalogEntryForNode(data);
-  return !entry || !isBayEntry(entry);
+  if (!entry) return true;
+  if (isBayEntry(entry)) return false;
+  if (entry.inputs !== undefined && entry.inputs.length === 0) return false;
+  return true;
 }
 
 export function triggerToContainerOrigin(position: { readonly x: number; readonly y: number }): { x: number; y: number } {

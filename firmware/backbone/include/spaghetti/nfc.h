@@ -90,4 +90,12 @@ int spaghetti_nfc_copy_tags(struct spaghetti_nfc_tag *out, size_t max,
  */
 const char *spaghetti_nfc_type_id(const struct spaghetti_nfc_tag *tag);
 
+/** Read/write only a four-byte user page (4..43) of an expected Type2 UID.
+ * Thread context; serializes RF with scanning, bounded mutex and RF timeouts.
+ * Pages 3 (CC) and 45 (product) are also readable, never writable.
+ * Writing checks ST25TN01K product code and CC capacity, rejects SLM1/unknown contents,
+ * checks Type2 ACK and verifies the written page. Never accesses lock writes. */
+int spaghetti_nfc_user_page(uint8_t antenna, const uint8_t uid[7], uint8_t page,
+                            uint8_t data[4], bool write);
+
 #endif /* SPAGHETTI_NFC_H */

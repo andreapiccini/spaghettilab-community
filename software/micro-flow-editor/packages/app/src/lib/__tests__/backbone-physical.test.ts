@@ -146,15 +146,15 @@ describe("physical composition", () => {
     expect(modes).toEqual([14, 0, 0, 0]);
     expect(derivePortInterfaces(modes, "v1").map((i) => i.kind)).toEqual(["adc"]);
   });
-  it("refuses to place the same signal on a second pin", () => {
+  it("lets GPIO and ADC occupy many pins while bus signals stay unique", () => {
     let modes = [0, 0, 0, 0, 0, 0, 0, 0];
     modes = dropSignalOnPin(modes, 14, 0, "v2");
     modes = dropSignalOnPin(modes, 14, 1, "v2");
     modes = dropSignalOnPin(modes, 2, 2, "v2");
     modes = dropSignalOnPin(modes, 2, 3, "v2");
-    expect(modes.slice(0, 4)).toEqual([14, 0, 2, 0]);
-    expect(derivePortInterfaces(modes, "v2").filter((i) => i.kind === "adc")).toHaveLength(1);
-    expect(derivePortInterfaces(modes, "v2").filter((i) => i.kind === "gpio")).toHaveLength(1);
+    expect(modes.slice(0, 4)).toEqual([14, 14, 2, 2]);
+    expect(derivePortInterfaces(modes, "v2").filter((i) => i.kind === "adc")).toHaveLength(2);
+    expect(derivePortInterfaces(modes, "v2").filter((i) => i.kind === "gpio")).toHaveLength(2);
     expect(validatePhysicalModes(modes, 0)).toBeUndefined();
     // Bus signals stay unique and do not move when dropped again.
     modes = dropSignalOnPin(modes, 4, 4, "v2");

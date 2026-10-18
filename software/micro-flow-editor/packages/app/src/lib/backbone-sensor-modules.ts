@@ -12,6 +12,8 @@ export type BackboneSensorModule = {
   readonly bus: SensorBus;
   readonly label: string;
   readonly createdAt: number;
+  /** Logical DATA assignment chosen on the module popup or in Module Function. */
+  readonly gpioAssignment?: { readonly boardKey: string; readonly channel: number };
   /** Flow canvas node created for this module's channels (if any). */
   readonly graphNodeId?: string;
   readonly graphNodeIds?: readonly string[];
@@ -68,6 +70,44 @@ export function removeModule(
 
 export function resolveRecipe(module: BackboneSensorModule): SensorRecipe {
   return findSensorRecipeById(module.recipeId) ?? module.recipe;
+}
+
+export function isGpioModule(module: BackboneSensorModule): boolean {
+  return module.bus === "gpio" || module.recipe.deviceDraft?.binding.bus === "gpio";
+}
+
+export function gpioAssignmentValue(
+  assignment: BackboneSensorModule["gpioAssignment"],
+): string {
+  return assignment ? `${assignment.boardKey}:${assignment.channel}` : "";
+}
+
+export function parseGpioAssignment(
+  value: string,
+): { boardKey: string; channel: number } | undefined {
+  const split = value.lastIndexOf(":");
+  if (split <= 0) return undefined;
+  const boardKey = value.slice(0, split);
+  const channel = Number(value.slice(split + 1));
+  if (!boardKey || !Number.isInteger(channel) || channel < 0) return undefined;
+  return { boardKey, channel };
+}
+
+export function assignModuleGpioPin(
+  project: BackboneSensorModulesProject,
+  bindingId: string,
+  moduleId: string,
+  assignment: { readonly boardKey: string; readonly channel: number } | undefined,
+): BackboneSensorModulesProject {
+  return {
+    ...project,
+    byBinding: {
+      ...project.byBinding,
+      [bindingId]: modulesForBinding(project, bindingId).map((item) =>
+        item.id === moduleId ? { ...item, gpioAssignment: assignment } : item,
+      ),
+    },
+  };
 }
 
 export function createModuleFromRecipe(recipe: SensorRecipe, bus?: SensorBus): BackboneSensorModule {

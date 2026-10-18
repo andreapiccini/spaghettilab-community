@@ -378,6 +378,18 @@ int spaghetti_port_get_input(const struct spaghetti_port *port, bool *out_high)
 	return 0;
 }
 
+int spaghetti_port_digital_output_set(const struct spaghetti_port *port, uint8_t channel, bool high)
+{
+	if (channel > 3U) return -EINVAL;
+	return spaghetti_port_set_output(port, high);
+}
+int spaghetti_port_digital_state_get(const struct spaghetti_port *port, uint8_t channel, bool *high)
+{
+	if (channel > 3U) return -EINVAL;
+	if (channel == 2U) { *high = bus.gpio_output; return 0; }
+	return spaghetti_port_get_input(port, high);
+}
+
 int spaghetti_port_adc_read(const struct spaghetti_port *port, uint8_t channel, int32_t *out_raw,
 			    int32_t *out_microvolts, k_timeout_t timeout)
 {
@@ -1335,4 +1347,29 @@ ZTEST(device_profiles, test_wire3_owns_long_data_across_reload)
 	zassert_not_null(found);
 	zassert_equal(found->message_data[2047], 0x5A);
 	zassert_ok(spaghetti_device_profile_remove("long-owned", 1));
+}
+
+ZTEST(device_profiles, test_gpio_variable_write_readback_and_invalid_value)
+{
+	struct spaghetti_device_profile profile = profile_i2c_be;
+	struct spaghetti_device_profile_binding binding = {0};
+	struct spaghetti_record_payload record;
+	struct spaghetti_device_profile_op ops[] = {
+		make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST, 0, 0, 0, 8, 0, 1, 0),
+		make_op(SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE, 0, 0, 0, 2, 0, 0, 0),
+		make_op(SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET, 1, 0, 0, 2, 0, 0, 0),
+		make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD, FIELD_VALUE, 1, 0, 1, 1, 0, 1),
+		make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD, 0, 0, 0, 0, 0, 0, 0),
+	};
+	bus_reset();
+	zassert_ok(spaghetti_device_profile_exec(&profile, ops, ARRAY_SIZE(ops), &fake_port, &binding, &record));
+	zassert_true(bus.gpio_output);
+	zassert_equal(record.values.fields[0].data.signed_integer, 1);
+	ops[1].imm1 = 1; /* Active-low output. */
+	zassert_ok(spaghetti_device_profile_exec(&profile, ops, ARRAY_SIZE(ops), &fake_port, &binding, &record));
+	zassert_false(bus.gpio_output);
+	zassert_equal(record.values.fields[0].data.signed_integer, 0);
+	ops[0].imm2 = 256; /* A nonzero high byte must never be truncated to LOW. */
+	zassert_equal(spaghetti_device_profile_exec(&profile, ops, ARRAY_SIZE(ops), &fake_port, &binding, &record), -ERANGE);
+	zassert_false(bus.gpio_output);
 }

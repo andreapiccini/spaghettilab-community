@@ -1,3 +1,8 @@
+import {
+  gpioSignalType,
+  gpioWriteLogicalLevel,
+  physicalLevelForSignal,
+} from "./gpio-operation-registry.js";
 import { appendLongI2cMessage } from "./i2c-long-message.js";
 import {
   PortCapability,
@@ -78,11 +83,27 @@ function integer(value: unknown, label: string, min: number, max: number): numbe
 export function compileRuntimeDriver(
   draft: DeviceRecipeDraft,
   connectedInputs: ReadonlyMap<string, ReadonlySet<string>> = new Map(),
+  gpioChannels: ReadonlyMap<string, number> = new Map(),
 ): RuntimeDriver {
-  if (draft.binding.bus !== "i2c")
-    throw new Error(
-      `${draft.name}: il driver multi-azione richiede il protocollo I²C.`,
-    );
+  if (draft.binding.bus !== "i2c" && draft.binding.bus !== "gpio")
+    throw new Error(`${draft.name}: il driver richiede I²C o GPIO digitale.`);
+  const gpioSignal = (id: string, write = false) => {
+    if (draft.binding.bus !== "gpio")
+      throw new Error("Un passo GPIO richiede un driver GPIO.");
+    const signal = draft.binding.gpioSignals.find((signal) => signal.id === id);
+    if (
+      !signal ||
+      !["digital_input", "digital_output"].includes(gpioSignalType(signal))
+    )
+      throw new Error("Seleziona un segnale digitale esistente.");
+    if (write && gpioSignalType(signal) !== "digital_output")
+      throw new Error(`«${signal.name}» è un ingresso: non può essere scritto.`);
+    const channel =
+      gpioChannels.get(id) ?? (draft.binding.gpioSignals.length === 1 ? 0 : undefined);
+    if (channel === undefined)
+      throw new Error(`Assegna «${signal.name}» nel Module Function.`);
+    return { signal, channel: integer(channel, "Canale GPIO", 0, 3) };
+  };
   const commands = draft.commands
     .map((command) => ({ ...command, steps: effectiveActionSteps(draft, command) }))
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
@@ -193,7 +214,7 @@ export function compileRuntimeDriver(
             (producer.offset ?? 0) < 0
           : true;
       const value: Value = {
-        width: 1,
+        width: draft.binding.bus === "gpio" && variable?.valueType === "number" ? 8 : 1,
         byteOrder: "le",
         signed,
         defaultValue,
@@ -269,7 +290,76 @@ export function compileRuntimeDriver(
       return joined;
     };
     for (const op of steps) {
+      if (op.type.startsWith("i2c_") && draft.binding.bus !== "i2c")
+        throw new Error("Un passo I²C richiede un driver I²C.");
       switch (op.type) {
+        case "gpio_read": {
+          const { signal, channel } = gpioSignal(op.signalId);
+          const slot = take();
+          target.push({ op: "GPIO_GET", dst: slot, channel });
+          values.set(op.into, {
+            slot,
+            width: 1,
+            byteOrder: "le",
+            signed: false,
+            ...(signal.activeLow ? { multiply: -1, offset: 1 } : {}),
+          });
+          break;
+        }
+        case "gpio_write": {
+          const { signal, channel } = gpioSignal(op.signalId, true);
+          const logical = gpioWriteLogicalLevel(op);
+          if (logical !== undefined) {
+            target.push({
+              op: "GPIO_SET",
+              channel,
+              value: physicalLevelForSignal(signal, logical) === 1,
+            });
+          } else if (op.value?.kind === "variable") {
+            const value = get(op.value.name);
+            let src = materialize(value);
+            if (
+              (value.byteOrder === "be" && value.width > 1) ||
+              value.multiply !== undefined ||
+              value.offset !== undefined ||
+              value.divide !== undefined
+            ) {
+              const dst = take();
+              target.push({
+                op: "SCALE_PACK",
+                src,
+                dst,
+                flags: (value.byteOrder === "be" ? 1 : 0) | (value.signed ? 2 : 0),
+                width: 8,
+                divisor: integer(value.divide ?? 1, "Divisore digitale", 1, 65535),
+                multiplier: integer(
+                  value.multiply ?? 1,
+                  "Moltiplicatore digitale",
+                  -2147483648,
+                  2147483647,
+                ),
+                offset: integer(
+                  value.offset ?? 0,
+                  "Offset digitale",
+                  -2147483648,
+                  2147483647,
+                ),
+              });
+              src = dst;
+            }
+            // The native instruction checks every byte: invalid values never change the pin.
+            target.push({
+              op: "GPIO_SET_VALUE",
+              src,
+              channel,
+              invert: Boolean(signal.activeLow) !== Boolean(op.invert),
+            });
+          } else
+            throw new Error(
+              "Per il livello GPIO scegli Alto, Basso o una variabile digitale.",
+            );
+          break;
+        }
         case "sample_external": {
           if (op.inputMode === "trigger") break;
           if (isInit)
@@ -369,7 +459,19 @@ export function compileRuntimeDriver(
           break;
         }
         case "i2c_write": {
-          if (appendLongI2cMessage(op.bytes, messageData, target, name => { const value = get(name); return { width: value.width, materialize: () => materialize(value) }; }, op.timeoutMs)) break;
+          if (
+            appendLongI2cMessage(
+              op.bytes,
+              messageData,
+              target,
+              (name) => {
+                const value = get(name);
+                return { width: value.width, materialize: () => materialize(value) };
+              },
+              op.timeoutMs,
+            )
+          )
+            break;
           const bytes = payload(op.bytes);
           target.push({
             op: "I2C_WRITE",
@@ -494,7 +596,7 @@ export function compileRuntimeDriver(
           break;
         default:
           throw new Error(
-            `Passo «${op.type}» non compilabile per il runtime I²C: non viene ignorato.`,
+            `Passo «${op.type}» non compilabile per il runtime: non viene ignorato.`,
           );
       }
       used = new Set(
@@ -571,14 +673,27 @@ export function compileRuntimeDriver(
     name: `value_${fields.get(id)!}`,
     unit: draft.channels.find((c) => c.id === id)?.unit || undefined,
   }));
-  const semantic = { initOps, sampleOps, slices, sampleFields, ...(messageData.length ? { messageData } : {}) };
+  const semantic = {
+    initOps,
+    sampleOps,
+    slices,
+    sampleFields,
+    ...(messageData.length ? { messageData } : {}),
+  };
   const profileId = `drv.${stableDriverHash(JSON.stringify(semantic))}`;
   const profile: DeviceProfileDraft = {
     ...(messageData.length ? { messageData } : {}),
     profileId,
     version: 1,
-    transport: PortTransport.I2C,
-    requiredCapabilities: PortCapability.I2C,
+    transport: draft.binding.bus === "gpio" ? PortTransport.GPIO : PortTransport.I2C,
+    requiredCapabilities:
+      draft.binding.bus === "gpio"
+        ? (draft.binding.gpioSignals.some(
+            (signal) => gpioSignalType(signal) === "digital_output",
+          )
+            ? PortCapability.DIGITAL_OUTPUT
+            : 0) | PortCapability.DIGITAL_INPUT
+        : PortCapability.I2C,
     maxTotalTimeMs: 60000,
     maxTransactions: 64,
     maxBytes: messageData.length ? 65535 : 256,

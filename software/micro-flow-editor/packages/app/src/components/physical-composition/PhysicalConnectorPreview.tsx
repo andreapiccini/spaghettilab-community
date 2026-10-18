@@ -6,12 +6,14 @@ import {
   derivePortInterfaces,
   formatPinLabel,
   functionPinGrid,
+  isRepeatableSignalBase,
   kindForMode,
   labelForMode,
   modeIndexToPinId,
   numberedPeripheralName,
   PERIPHERAL_ACCENT,
   pinVisualKind,
+  placeableSignalsForKind,
   type FunctionModuleVariant,
   type FunctionPinCell,
   type PhysicalBusUnits,
@@ -494,20 +496,30 @@ function PcbConnectorInteractive({
                 {labelForMode(modes[openIndex] ?? 0)}
               </span>
             </div>
-            {popoverSignals.length > 0 ? (
+            {(() => {
+              const gpioSignals = placeableSignalsForKind("gpio", modes, "v2");
+              const seen = new Set<string>();
+              const offered = [...gpioSignals, ...popoverSignals].filter((signal) => {
+                if (seen.has(signal.id)) return false;
+                seen.add(signal.id);
+                return true;
+              });
+              return offered.length > 0 ? (
               <div className="flex flex-col gap-1">
                 <p className="text-[9px] font-semibold uppercase tracking-wide text-ink-faint">
                   {localeIt ? "Assegna segnale" : "Assign signal"}
                 </p>
-                {popoverSignals.map((signal) => {
+                {offered.map((signal) => {
                   const accent =
                     PERIPHERAL_ACCENT[kindForMode(signal.mode) ?? "gpio"];
-                  const placedElsewhere = modes.some(
-                    (mode, index) =>
-                      index !== openIndex &&
-                      (mode & 15) === (signal.mode & 15) &&
-                      (signal.mode & 15) !== 0,
-                  );
+                  const placedElsewhere =
+                    !isRepeatableSignalBase(signal.mode & 15) &&
+                    modes.some(
+                      (mode, index) =>
+                        index !== openIndex &&
+                        (mode & 15) === (signal.mode & 15) &&
+                        (signal.mode & 15) !== 0,
+                    );
                   return (
                     <button
                       key={signal.id}
@@ -544,7 +556,8 @@ function PcbConnectorInteractive({
                   ? "Seleziona una periferica a sinistra, oppure libera questo pin."
                   : "Select a peripheral on the left, or clear this pin."}
               </p>
-            )}
+            );
+            })()}
             {(modes[openIndex]! & 15) !== 0 && (
               <button
                 type="button"

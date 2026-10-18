@@ -122,11 +122,16 @@ target_sources(app PRIVATE
   subsys/communication/operations/job_ops.c
   subsys/communication/operations/topology_ops.c
   subsys/communication/operations/physical_ops.c
+  subsys/communication/operations/nfc_ops.c
   subsys/communication/operations/resources_ops.c
   subsys/communication/operations/features_ops.c
   subsys/communication/operations/device_profile_ops.c
   subsys/services/mqtt/mqtt_credentials.c
 )
+
+if(CONFIG_SPAGHETTI_NFC_MODULE)
+  target_sources(app PRIVATE subsys/nfc/nfc_module_shell.c)
+endif()
 
 if(CONFIG_SPAGHETTI_NFC)
   target_sources(app PRIVATE

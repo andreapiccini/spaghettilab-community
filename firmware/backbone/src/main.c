@@ -1,3 +1,4 @@
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
 #include <spaghetti/core.h>
@@ -19,6 +20,8 @@ int main(void)
 		return err;
 	}
 
-	LOG_INF("Spaghetti LAB engine running");
+	LOG_INF("%s running", IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE) ?
+		"Spaghetti NFC CAN peripheral" : "Spaghetti LAB engine");
+	k_sleep(K_FOREVER);
 	return 0;
 }

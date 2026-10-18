@@ -27,3 +27,10 @@ const char *spaghetti_nfc_type_id(const struct spaghetti_nfc_tag *tag)
 	(void)tag;
 	return "tag";
 }
+
+int spaghetti_nfc_user_page(uint8_t antenna, const uint8_t uid[7], uint8_t page,
+                            uint8_t data[4], bool write)
+{
+	(void)antenna; (void)uid; (void)page; (void)data; (void)write;
+	return -ENOTSUP;
+}

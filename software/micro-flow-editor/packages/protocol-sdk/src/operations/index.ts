@@ -15,3 +15,5 @@ export * from "./update.js";
 export * from "./features.js";
 export * from "./ble-update.js";
 export * from "./physical.js";
+
+export * from "./nfc.js";

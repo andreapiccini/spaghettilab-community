@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { DEMO_PROJECT_NAME } from "../../lib/demo-project.js";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { prepareDemoProject } from "../../lib/open-demo.js";
-import { publicAsset } from "../../lib/public-asset.js";
+import { BrandMark } from "../shell/BrandMark.js";
 import { projectRepository } from "../../lib/repository.js";
 import { projectPickerCopy } from "../../lib/project-picker-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -112,7 +112,7 @@ export function ProjectPicker() {
     <div className="flex h-full flex-col bg-surface">
       <header className="flex h-16 items-center justify-between border-b border-border px-6">
         <div className="flex items-center gap-3">
-          <img src={publicAsset("ux-assets/logo-full.png")} alt="Spaghetti LAB" className="h-8" />
+          <BrandMark />
           <span className="font-heading text-lg font-semibold text-ink">Flow</span>
         </div>
         <div className="flex items-center gap-2">

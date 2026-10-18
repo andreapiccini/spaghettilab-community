@@ -28,6 +28,12 @@ describe("isValidProcessingConnection", () => {
     expect(isValidProcessingConnection({ source: "t", target: "led" }, resolve)).toBe(true);
   });
 
+  it("allows Square wave digital comando → Relay", () => {
+    const resolve = (id: string) =>
+      id === "sq" ? findCatalogEntryById("appblocks.square_wave") : findCatalogEntryById("appblocks.relay");
+    expect(isValidProcessingConnection({ source: "sq", target: "relay" }, resolve)).toBe(true);
+  });
+
   it("rejects LED → Toggle (LED is a sink)", () => {
     const resolve = (id: string) =>
       id === "led" ? findCatalogEntryById("appblocks.led") : findCatalogEntryById("appblocks.digital_out_toggle");
@@ -60,7 +66,8 @@ describe("isValidDemoProcessingConnection", () => {
   const temp = { id: "temp", data: { kind: "block" as const, blockTypeId: "ab.temperature_sensor", catalogEntryId: "appblocks.temperature_sensor", properties: {} } };
   const led = { id: "led", data: { kind: "block" as const, blockTypeId: "ab.led", catalogEntryId: "appblocks.led", properties: {} } };
   const relay = { id: "relay", data: { kind: "block" as const, blockTypeId: "ab.relay", catalogEntryId: "appblocks.relay", properties: {} } };
-  const nodes = [toggle, iff, temp, led, relay];
+  const square = { id: "sq", data: { kind: "block" as const, blockTypeId: "ab.square_wave", catalogEntryId: "appblocks.square_wave", properties: {} } };
+  const nodes = [toggle, iff, temp, led, relay, square];
 
   it("lets Toggle or Temperature feed IF, replacing a previous input", () => {
     expect(isValidDemoProcessingConnection({ source: "t", target: "if" }, { nodes, edges: [] })).toBe(true);
@@ -77,6 +84,8 @@ describe("isValidDemoProcessingConnection", () => {
     expect(isValidDemoProcessingConnection({ source: "if", target: "led" }, { nodes, edges: [] })).toBe(true);
     expect(isValidDemoProcessingConnection({ source: "if", target: "relay" }, { nodes, edges: [] })).toBe(true);
     expect(isValidDemoProcessingConnection({ source: "t", target: "relay" }, { nodes, edges: [] })).toBe(true);
+    expect(isValidDemoProcessingConnection({ source: "sq", target: "relay" }, { nodes, edges: [] })).toBe(true);
+    expect(isValidDemoProcessingConnection({ source: "sq", target: "led" }, { nodes, edges: [] })).toBe(true);
     expect(isValidDemoProcessingConnection({ source: "if", target: "led" }, { nodes, edges: [{ source: "t", target: "led" }] })).toBe(true);
   });
 

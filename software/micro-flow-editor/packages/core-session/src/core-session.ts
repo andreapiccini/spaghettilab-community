@@ -112,6 +112,11 @@ export class CoreSession {
     this.snapshot = { ...this.snapshot, status };
   }
 
+  /** Keep the latest GET_CONFIG after an explicit apply (pause / deploy). */
+  observeConfig(config: GetConfigResponse): void {
+    this.snapshot = { ...this.snapshot, config };
+  }
+
   get syncRelationship(): SyncRelationship | null {
     return this._syncRelationship;
   }

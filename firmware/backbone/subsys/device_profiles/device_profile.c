@@ -128,7 +128,7 @@ static bool profile_id_is_valid(const char *id)
 static bool opcode_is_known(uint8_t opcode)
 {
 	return (opcode >= SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE) &&
-	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE);
+	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE);
 }
 
 static bool temp_ok(uint8_t slot)
@@ -244,12 +244,17 @@ static int accumulate_op_budget(const struct spaghetti_device_profile_op *op,
 		time_ms = (op->imm2 > UINT16_MAX) ? UINT16_MAX : (uint16_t)op->imm2;
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET:
-		if (!temp_ok(op->dst)) {
+		if (!temp_ok(op->dst) || op->imm0 > 3U) {
 			return -EINVAL;
 		}
 		transactions = 1U;
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET:
+		if (op->imm0 > 1U || op->imm1 > 3U) return -EINVAL;
+		transactions = 1U;
+		break;
+	case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE:
+		if (!temp_ok(op->src_a) || op->imm0 > 3U || op->imm1 > 1U) return -EINVAL;
 		transactions = 1U;
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_ADC_READ:

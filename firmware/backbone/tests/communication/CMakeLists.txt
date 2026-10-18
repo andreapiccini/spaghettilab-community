@@ -16,7 +16,7 @@ target_sources(app PRIVATE
   ../../subsys/communication/operations/status.c
   ../../subsys/topology/physical.c
   ../../subsys/communication/operations/physical_ops.c
-  ../../subsys/nfc/nfc_disabled.c
+  src/nfc_fake.c
   ../../subsys/communication/operations/config_ops.c
   ../../subsys/communication/operations/discovery_ops.c
   ../../subsys/communication/operations/module_command.c

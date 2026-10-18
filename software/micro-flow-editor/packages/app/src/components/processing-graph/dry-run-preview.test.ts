@@ -607,3 +607,57 @@ describe("IF / relay / temperature dry-run", () => {
     expect(activeActuatorsAt(0, channels).has("led1")).toBe(false);
   });
 });
+
+describe("Square wave generator", () => {
+  const square = (id: string, properties: Record<string, unknown> = { periodMs: 400, dutyCycle: 25 }) =>
+    ({
+      layer: "device-processing" as const,
+      id,
+      data: { kind: "block" as const, blockTypeId: "ab.square_wave", catalogEntryId: "appblocks.square_wave", properties },
+    });
+  const relay = (id: string) =>
+    ({
+      layer: "device-processing" as const,
+      id,
+      data: { kind: "block" as const, blockTypeId: "ab.relay", catalogEntryId: "appblocks.relay", properties: { closeWhen: "high" } },
+    });
+  const backbone = (id: string) =>
+    ({
+      layer: "device-processing" as const,
+      id,
+      data: { kind: "block" as const, blockTypeId: "ab.backbone_sensor", catalogEntryId: "appblocks.backbone_sensor", properties: {} },
+    });
+
+  it("free-runs into the relay without Schedule", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [square("sq1"), relay("relay1")],
+        [{ layer: "device-processing", id: "e1", source: "sq1", target: "relay1" }],
+      ),
+    );
+    expect(channels).toHaveLength(1);
+    expect(channels[0]).toMatchObject({
+      triggerId: "square:sq1",
+      periodMs: 400,
+      toggleMode: "pulse_high",
+      pulseMs: 100,
+    });
+    expect(activeActuatorsAt(0, channels).has("sq1")).toBe(true);
+    expect(activeActuatorsAt(0, channels).has("relay1")).toBe(true);
+    expect(activeActuatorsAt(100, channels).has("relay1")).toBe(false);
+    expect(activeActuatorsAt(399, channels).has("relay1")).toBe(false);
+    expect(activeActuatorsAt(400, channels).has("relay1")).toBe(true);
+  });
+
+  it("drives a Backbone sensor (NFC Relè) the same way", () => {
+    const channels = buildDryRunPreviewChannels(
+      graph(
+        [square("sq1", { periodMs: 200, dutyCycle: 50 }), backbone("nfc-relay")],
+        [{ layer: "device-processing", id: "e1", source: "sq1", target: "nfc-relay" }],
+      ),
+    );
+    expect(channels[0]?.relayBindings?.some((binding) => binding.id === "nfc-relay")).toBe(true);
+    expect(activeActuatorsAt(0, channels).has("nfc-relay")).toBe(true);
+    expect(activeActuatorsAt(100, channels).has("nfc-relay")).toBe(false);
+  });
+});

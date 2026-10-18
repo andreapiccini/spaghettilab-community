@@ -1,3 +1,4 @@
+import { gpioSignalType } from "./gpio-operation-registry.js";
 import {
   evaluateRecipeReadResults,
   type RecipeReadResult,
@@ -402,6 +403,7 @@ export type RunRecipeHardwareTestInput = {
   readonly cleanupTryProfiles?: () => Promise<void>;
   readonly i2cAddress?: number;
   readonly portId?: number;
+  readonly gpioChannel?: number;
   /** Preferred Module Function modes (from Cablaggio draft) when live Port lacks I²C. */
   readonly preferredPhysicalModes?: readonly number[];
   readonly preferredI2cSpeed?: number;
@@ -618,7 +620,38 @@ async function runRecipeHardwareTestUnlocked(
   // (A schedule + start_runtime has produced INTERNAL_ERROR after VALIDATE ok.)
   let compiled: ReturnType<typeof recipePlanToTestProfile>;
   try {
-    compiled = recipePlanToTestProfile(input.draft, [...initOps, ...bodyOps], []);
+    let gpioChannels: ReadonlyMap<string, number> | undefined;
+    if (input.draft.binding.bus === "gpio") {
+      const signals = input.draft.binding.gpioSignals;
+      if (signals.length !== 1)
+        throw new Error("La prova GPIO digitale richiede un solo segnale DATA.");
+      const status = await input.client.getStatus(input.signal);
+      const peer = status.chainPeers?.find((peer) => peer.local);
+      const physical = topologyForBoard(status, {
+        local: true,
+        nodeId: peer?.nodeId ?? 0,
+      });
+      const output = gpioSignalType(signals[0]!) === "digital_output";
+      const candidates = (physical?.modes ?? [])
+        .slice(0, 4)
+        .flatMap((mode, channel) =>
+          (output ? [2, 3].includes(mode & 15) : (mode & 15) === 1) &&
+          (input.gpioChannel === undefined || input.gpioChannel === channel)
+            ? [channel]
+            : [],
+        );
+      if (candidates.length !== 1)
+        throw new Error(
+          "Assegna e applica il pin DATA nel Module Function prima della prova GPIO.",
+        );
+      gpioChannels = new Map([[signals[0]!.id, candidates[0]!]]);
+    }
+    compiled = recipePlanToTestProfile(
+      input.draft,
+      [...initOps, ...bodyOps],
+      [],
+      gpioChannels,
+    );
     if (compiled.profile.initOps.length > 16) {
       throw new Error(
         `La sequenza richiede ${compiled.profile.initOps.length} istruzioni; il firmware ne supporta al massimo 16 per la prova. Riduci i passi o i byte dei messaggi.`,
@@ -816,13 +849,15 @@ async function runRecipeHardwareTestUnlocked(
     let readIndex = 0;
     for (const op of ops) {
       const lengths =
-        op.type === "i2c_read"
-          ? [op.len]
-          : op.type === "i2c_write_read"
-            ? [op.readLen]
-            : op.type === "i2c_transaction"
-              ? op.phases.filter((p) => p.kind === "read").map((p) => p.len)
-              : [];
+        op.type === "gpio_read"
+          ? [1]
+          : op.type === "i2c_read"
+            ? [op.len]
+            : op.type === "i2c_write_read"
+              ? [op.readLen]
+              : op.type === "i2c_transaction"
+                ? op.phases.filter((p) => p.kind === "read").map((p) => p.len)
+                : [];
       for (const length of lengths) {
         const bytes = response?.rxReads?.[readIndex++];
         if (bytes && bytes.length === length) (measured[op.id] ??= []).push(...bytes);
