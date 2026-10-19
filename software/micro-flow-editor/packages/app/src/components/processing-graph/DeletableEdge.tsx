@@ -154,31 +154,33 @@ export function DeletableEdge({
             d={edgePath}
             fill="none"
             stroke={signalColor}
-            strokeWidth={3}
+            strokeWidth={5}
             className="edge-signal-highlight"
           >
             <animate
               begin="indefinite"
               attributeName="opacity"
-              values="0.7;0.3;0"
+              values="0;0.8;0.35;0"
+              keyTimes="0;0.22;0.55;1"
               dur="0.85s"
               repeatCount={preview ? "indefinite" : 1}
               fill="freeze"
             />
           </path>
-          {[0, 0.09, 0.18].map((delay, index) => (
+          {Array.from({ length: 14 }, (_, index) => index * 0.016).map((delay, index) => (
             <circle
               key={index}
-              r={index === 0 ? 3.5 : 2.5}
-              fill={signalColor}
-              stroke="var(--color-surface)"
-              strokeWidth={1}
+              r={index === 0 ? 4 : Math.max(1.1, 3.4 - index * 0.19)}
+              fill={index === 0 ? "white" : signalColor}
+              style={{ color: signalColor }}
+              stroke={signalColor}
+              strokeWidth={index === 0 ? 2 : 0}
               opacity={0}
               className="edge-signal-packet"
             >
               <animateMotion
                 path={edgePath}
-                dur="0.6s"
+                dur="0.65s"
                 begin="indefinite"
                 data-delay={delay}
                 calcMode="paced"
@@ -187,9 +189,9 @@ export function DeletableEdge({
               />
               <animate
                 attributeName="opacity"
-                values="0;1;1;0"
+                values={`0;${1 - index * 0.045};${1 - index * 0.045};0`}
                 keyTimes="0;0.08;0.85;1"
-                dur="0.6s"
+                dur="0.65s"
                 begin="indefinite"
                 data-delay={delay}
                 repeatCount={preview ? "indefinite" : 1}

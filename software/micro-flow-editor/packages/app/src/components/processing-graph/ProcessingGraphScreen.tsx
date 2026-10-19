@@ -1673,6 +1673,22 @@ function ProcessingGraphScreenInner() {
     ],
   );
 
+  const illuminatedNodes = useMemo(() => {
+    const activity = new Map<string, { token: number; kind: string }>();
+    for (const edge of visibleEdges) {
+      const pulse = wirePulses.get(edge.id);
+      if (pulse) for (const id of [edge.source, edge.target]) {
+        if ((activity.get(id)?.token ?? -1) < pulse.token) activity.set(id, pulse);
+      }
+    }
+    return renderedNodes.map((node) => {
+      const pulse = activity.get(node.id);
+      const preview = simulating && (previewActiveIds.has(node.id) || previewTriggerIds.has(node.id));
+      if (!pulse && !preview) return node;
+      return { ...node, className: `${node.className ?? ""} signal-node-glow signal-node-glow-${(pulse?.token ?? 0) % 2} ${pulse?.kind === "data" ? "signal-node-data" : ""}` };
+    });
+  }, [renderedNodes, visibleEdges, wirePulses, simulating, previewActiveIds, previewTriggerIds]);
+
   useEffect(() => {
     if (!session || bindingIndex < 0 || !execute) return;
     if (session.stack.current.deviceGraphs.length > bindingIndex) return;
@@ -2823,7 +2839,7 @@ function ProcessingGraphScreenInner() {
               // representation now, not a separate node next to it; localNodes/the domain
               // graph still has it. Container nodes are listed first, a React Flow requirement
               // for `parentId` children to resolve.
-              nodes={renderedNodes}
+              nodes={illuminatedNodes}
               edges={visibleEdges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}

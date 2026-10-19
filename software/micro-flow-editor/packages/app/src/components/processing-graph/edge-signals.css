@@ -1,10 +1,28 @@
-/* Packets follow the exact routed SVG path, including its rounded corners. */
-.edge-signal-highlight,
-.edge-signal-packet {
-  pointer-events: none;
+/* Effects follow real events and never intercept canvas interactions. */
+.edge-signal-highlight, .edge-signal-packet { pointer-events: none; }
+.edge-signal-highlight { filter: drop-shadow(0 0 5px #6389eaaa); }
+.edge-signal-packet { filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 7px currentColor); }
+.signal-node-glow { --signal-glow: 77, 116, 222; }
+.signal-node-data { --signal-glow: 76, 165, 166; }
+.signal-node-glow::after {
+ content: ""; position: absolute; inset: -3px; border-radius: 17px;
+ pointer-events: none; border: 2px solid rgba(var(--signal-glow), .65);
+ opacity: 0; animation: signal-node-pulse-a .95s ease-in-out both;
+}
+.signal-node-glow-1::after { animation-name: signal-node-pulse-b; }
+@keyframes signal-node-pulse-a {
+0% { opacity: 0; box-shadow: 0 0 4px rgba(var(--signal-glow), 0), 0 0 12px rgba(var(--signal-glow), 0); }
+28% { opacity: .8; box-shadow: 0 0 12px rgba(var(--signal-glow), .45), 0 0 30px rgba(var(--signal-glow), .25); }
+55% { opacity: .5; box-shadow: 0 0 16px rgba(var(--signal-glow), .3), 0 0 36px rgba(var(--signal-glow), .15); }
+100% { opacity: 0; box-shadow: 0 0 22px rgba(var(--signal-glow), 0); }
+}
+@keyframes signal-node-pulse-b {
+0% { opacity: 0; box-shadow: 0 0 4px rgba(var(--signal-glow), 0), 0 0 12px rgba(var(--signal-glow), 0); }
+28% { opacity: .8; box-shadow: 0 0 12px rgba(var(--signal-glow), .45), 0 0 30px rgba(var(--signal-glow), .25); }
+55% { opacity: .5; box-shadow: 0 0 16px rgba(var(--signal-glow), .3), 0 0 36px rgba(var(--signal-glow), .15); }
+100% { opacity: 0; box-shadow: 0 0 22px rgba(var(--signal-glow), 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .edge-signal-packet {
-    display: none;
-  }
+ .edge-signal-packet { display: none; }
+ .signal-node-glow::after { animation: none; opacity: .45; box-shadow: 0 0 8px rgba(var(--signal-glow), .3); }
 }
