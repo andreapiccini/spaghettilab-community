@@ -53,3 +53,19 @@ it("does not deploy an unconnected UI viewer or consume Core resources", () => {
   expect(result.input.processingGraph.nodes).toHaveLength(0);
   expect(result.profiles).toHaveLength(0);
 });
+
+it("presents digital levels without treating arbitrary numbers or text as booleans", () => {
+  expect(formatViewerValue(1n, 2, "digital")).toEqual({ text: "1 · HIGH", type: "Digitale" });
+  expect(formatViewerValue(0, 2, "digital")).toEqual({ text: "0 · LOW", type: "Digitale" });
+  expect(formatViewerValue(false, 2, "digital").text).toBe("0 · LOW");
+  expect(formatViewerValue(0, 2, "boolean")).toEqual({ text: "false", type: "Booleano" });
+  expect(formatViewerValue(23.25, 2, "number").text).toBe("23,25");
+  expect(formatViewerValue("23.25 °C", 2, "text").text).toBe("23.25 °C");
+  expect(formatViewerValue(42, 2, "digital").type).toBe("Decimale");
+});
+
+it("uses the chosen decimals independently of the declared input kind", () => {
+  expect(formatViewerValue(23.4567, 0, "number").text).toBe("23");
+  expect(formatViewerValue(23.4567, 3, "number").text).toBe("23,457");
+  expect(formatViewerValue("testo ricevuto", 0, "text").text).toBe("testo ricevuto");
+});

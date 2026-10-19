@@ -1,3 +1,5 @@
+import { oneShotDeploymentInput } from "../one-shot-deployment.js";
+import { configHasContinuousSchedules } from "../stop-deployed-runtime.js";
 import { expect, it } from "vitest";
 import type { GraphState, ProjectV1 } from "@spaghettilab/domain";
 import { PortTransport } from "@spaghettilab/device-profile-authoring-model";
@@ -219,4 +221,19 @@ it("maps both automatic and manual signals to the visible trigger wire without e
   expect(plan.activityRoutes?.find((route) => route.edgeId === "show")).toMatchObject({
     kind: "data",
   });
+});
+
+it("uploads manual commands without starting clocks, retaining sensor completion and links", () => {
+  const f = fixture();
+  const plan = prepareDriverDeployment(f.installed, "master", f.input);
+  const completionProfiles = plan.profiles.filter(profile => profile.sampleOps.some(op => op.op === "DS18B20_READ")).map(profile => profile.profileId);
+  const input = oneShotDeploymentInput(plan.input, completionProfiles);
+  const compiled = compileConfig(input, plan.options);
+  const running = compileConfig(plan.input, plan.options);
+  if (!compiled.ok || !running.ok) throw new Error("expected valid deployment");
+  expect(configHasContinuousSchedules(compiled.value)).toBe(false);
+  expect(configHasContinuousSchedules(running.value)).toBe(true);
+  expect(compiled.value.schedules.some(schedule => schedule.enabled)).toBe(true);
+  expect(compiled.value.modules).toEqual(running.value.modules);
+  expect(compiled.value.rules).toEqual(running.value.rules);
 });

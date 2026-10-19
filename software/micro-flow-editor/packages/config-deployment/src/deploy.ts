@@ -134,7 +134,7 @@ export async function deployConfig(client: ConfigWireClient, input: CompileConfi
     applyResponse = await client.applyConfig({ expectedGeneration: context.expectedGeneration, configBytes: candidateBytes });
   } catch (cause) {
     if (isProtocolError(cause) && cause.status === STATUS_CONFLICT) {
-      return await resolveStaleGeneration(client, candidate);
+      return await resolveStaleGeneration(client, candidate, context.expectedGeneration, cause);
     }
     return await reconcileAmbiguousApply(client, candidateHash, context, cause);
   }
@@ -167,12 +167,17 @@ export async function deployConfig(client: ConfigWireClient, input: CompileConfi
   return { outcome: DeploymentOutcomeKind.SUCCESS, issues: [], record: record(context, applyResponse) };
 }
 
-async function resolveStaleGeneration(client: ConfigWireClient, candidate: CanonicalConfig): Promise<DeploymentResult> {
+async function resolveStaleGeneration(client: ConfigWireClient, candidate: CanonicalConfig, expectedGeneration: number, cause: unknown): Promise<DeploymentResult> {
   let live: GetConfigResponse;
   try {
     live = await client.getConfig();
   } catch (cause) {
     return { outcome: DeploymentOutcomeKind.REMOTE_ERROR, issues: [remoteFailure("getConfig (conflict re-fetch)", cause)] };
+  }
+  // CONFLICT also covers module activation errors (ESTALE/EEXIST).
+  // A matching generation is not a CAS failure; preserve firmware diagnostics.
+  if (live.generation === expectedGeneration) {
+    return { outcome: DeploymentOutcomeKind.REMOTE_ERROR, issues: [remoteFailure("applyConfig", cause)] };
   }
   const liveDecoded = decodeConfigCbor(live.configBytes);
   if (!liveDecoded.ok) {

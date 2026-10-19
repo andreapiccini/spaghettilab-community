@@ -1,5 +1,8 @@
+import { blockHelp } from "./block-help.js";
+import type { BlockHelp } from "./BlockInfoButton.js";
+import { signalDurations } from "../../lib/signal-timing.js";
 import { MANUAL_TRIGGER_TYPE } from "../../lib/flow-trigger.js";
-import type { DataViewerUi } from "./DataViewerValue.js";
+import type { DataViewerUi, ViewerSource } from "./DataViewerValue.js";
 import { rgbInputLabel } from "../../lib/rgb-module.js";
 import { SEQUENCE_TYPE, sequenceSteps } from "../../lib/flow-sequence.js";
 import { gpioSignalType } from "../../lib/gpio-operation-registry.js";
@@ -86,7 +89,10 @@ export type ToggleWaveUi = {
 };
 
 export type ProcessingNodeUiData = {
+  readonly statusLed?: boolean;
+  readonly logicIf?: { condition: string; whenTrue: string; whenFalse: string };
   readonly dataViewer?: DataViewerUi;
+  readonly signalGenerator?: { bindingId?: string; source?: ViewerSource; onMs: number; offMs: number };
   readonly manualTrigger?: { bindingId?: string };
   readonly sensorSchematic?: boolean;
   readonly hardwareKind?: GpioHardwareAppearance["kind"];
@@ -95,6 +101,7 @@ export type ProcessingNodeUiData = {
   readonly kind: DeviceProcessingNodeData["kind"];
   readonly label: string;
   readonly subtitle: string;
+  readonly help?: BlockHelp;
   readonly hasError: boolean;
   readonly hasInput: boolean;
   readonly hasOutput: boolean;
@@ -212,6 +219,18 @@ export function toProcessingNodes(
     );
   }
 
+  const outputNames = new Map<string, ReadonlyMap<string, string>>();
+  for (const node of graphState.nodes) {
+    const data = node.data as DeviceProcessingNodeData;
+    const names = new Map<string, string>();
+    if (isBlockNodeData(data)) {
+      const draft = devices.get(String(data.properties[SENSOR_MODULE_ID_PROP]))?.recipe.deviceDraft;
+      for (const channel of draft?.channels ?? []) names.set(channel.id, channel.label);
+    }
+    for (const port of portsForNode(data).outputs) if (port.label) names.set(port.id, localizeCatalogText(port.label, locale));
+    outputNames.set(node.id, names);
+  }
+
   return graphState.nodes.map((node) => {
     const meta = authoringMetadata[node.id];
     let data = node.data as DeviceProcessingNodeData;
@@ -219,6 +238,9 @@ export function toProcessingNodes(
     const isTick =
       accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
     let ports = portsForNode(data);
+    const statusLed = isBlockNodeData(data) && data.properties.statusLed === true;
+    if (statusLed) titles.set(node.id, locale === "it" ? "LED interno" : "Internal LED");
+
     const ifLane = isBlockNodeData(data) && isCompareIf(data);
     const relayCard = isBlockNodeData(data) && isRelayBlock(data);
     const schematic =
@@ -275,10 +297,14 @@ export function toProcessingNodes(
         : hardwareDraft
           ? `${locale === "it" ? "Dispositivo" : "Device"} ${hardwareDraft.binding.bus.toUpperCase()}`
           : undefined;
+    const alternating = isSquareWave(data);
     const manual = isBlockNodeData(data) && data.blockTypeId === MANUAL_TRIGGER_TYPE;
     const viewer = isBlockNodeData(data) && data.blockTypeId === "ui.data_viewer";
     const sequence = isBlockNodeData(data) && data.blockTypeId === SEQUENCE_TYPE;
-    const cardHeight = manual
+    const logicIf = isBlockNodeData(data) && data.blockTypeId === "logic_if"
+      ? logicIfPresentation(data, incomingLabel(node.id, graphState, titles, outputNames), locale)
+      : undefined;
+    const cardHeight = statusLed ? 225 : logicIf ? 118 : manual || alternating
       ? 118
       : viewer
         ? 140
@@ -290,7 +316,7 @@ export function toProcessingNodes(
               ? FLOW_START_SIZE
               : nodeHeightForPorts(ports) +
                 (ifLane || relayCard ? IF_FOOTER_HEIGHT : 0);
-    const cardWidth = manual
+    const cardWidth = statusLed ? 320 : logicIf ? 250 : manual || alternating
       ? 210
       : viewer
         ? 240
@@ -319,10 +345,10 @@ export function toProcessingNodes(
       // returns null) — the same bug EventContainer nodes already guard against.
       width: cardWidth,
       height: cardHeight,
-      handles: manual
+      handles: manual || alternating
         ? [
             {
-              id: "trigger",
+              id: manual ? "trigger" : "0",
               type: "source" as const,
               position: Position.Right,
               x: cardWidth - 4,
@@ -381,6 +407,7 @@ export function toProcessingNodes(
               }),
       data: {
         domainId: node.id,
+        ...(alternating && isBlockNodeData(data) ? { signalGenerator: signalDurations(data.properties) } : {}),
         ...(manual
           ? {
               manualTrigger: {},
@@ -399,8 +426,11 @@ export function toProcessingNodes(
         sensorSchematic: schematic,
         hardwareKind,
         hardwareSummary,
+        logicIf,
+        statusLed,
         kind: data.kind,
         label: titles.get(node.id) ?? PROCESSING_NODE_KIND_CONFIG[data.kind].label,
+        help: blockHelp(data, titles.get(node.id) ?? "Blocco", ports),
         subtitle: subtitleFor(
           node.id,
           data,
@@ -408,6 +438,7 @@ export function toProcessingNodes(
           titles,
           moduleLabel,
           fieldLabel,
+          outputNames,
           locale,
         ),
         hasError: errorNodeIds.has(node.id),
@@ -678,6 +709,8 @@ function canvasTitle(
   meta: AuthoringMetadata | undefined,
   locale: LocaleId,
 ): string {
+  if (isBlockNodeData(data) && ["ui.manual_trigger", "ab.square_wave"].includes(data.blockTypeId) &&
+      (!meta?.comment || ["Genera trigger", "Generatore di segnali"].includes(meta.comment.trim())) && data.blockTypeId === "ui.manual_trigger") return locale === "it" ? "Generatore di trigger" : "Trigger generator";
   if (meta?.comment && meta.comment.trim() !== "") return meta.comment.trim();
   const entry = catalogEntryForNode(data);
   if (entry) return localizeCatalogEntry(entry, locale).label;
@@ -691,6 +724,7 @@ function subtitleFor(
   titles: ReadonlyMap<string, string>,
   moduleLabel: (moduleNodeId: string) => string,
   fieldLabel: (moduleNodeId: string, fieldId: number) => string,
+  outputNames: ReadonlyMap<string, ReadonlyMap<string, string>>,
   locale: LocaleId,
 ): string {
   const rawEntry = catalogEntryForNode(data);
@@ -737,9 +771,13 @@ function subtitleFor(
     if (isSquareWave(data) && isBlockNodeData(data)) {
       const period = squareWavePeriodMs(data.properties);
       const duty = squareWaveDutyPercent(data.properties);
-      return `${period} ms · ${duty}%`;
+      return `${locale === "it" ? "Acceso" : "On"} ${(period * duty / 100000).toLocaleString(locale)} s · ${locale === "it" ? "spento" : "off"} ${(period * (100 - duty) / 100000).toLocaleString(locale)} s`;
     }
-    const input = incomingLabel(nodeId, graphState, titles);
+    const input = incomingLabel(nodeId, graphState, titles, outputNames);
+    if (data.blockTypeId === "logic_if") {
+      const presentation = logicIfPresentation(data, input, locale);
+      return `${presentation.condition} → ${locale === "it" ? "vera" : "true"}: ${presentation.whenTrue} · ${locale === "it" ? "falsa" : "false"}: ${presentation.whenFalse}`;
+    }
     const bay = entry && isBayEntry(entry);
     const rawRole = data.properties.bayRole;
     const baySide: BaySide | undefined =
@@ -803,15 +841,28 @@ function incomingLabel(
   nodeId: string,
   graphState: GraphState<"device-processing">,
   titles: ReadonlyMap<string, string>,
+  outputNames: ReadonlyMap<string, ReadonlyMap<string, string>>,
 ): string | undefined {
   const names = [
     ...new Set(
       graphState.edges
         .filter((edge) => edge.target === nodeId)
-        .map((edge) => titles.get(edge.source)?.trim())
+        .map((edge) => (outputNames.get(edge.source)?.get(edge.sourceHandle ?? "0") ?? titles.get(edge.source))?.trim())
         .filter((name): name is string => Boolean(name)),
     ),
   ];
   if (names.length === 0) return undefined;
   return names.join(", ");
+}
+
+function logicIfPresentation(data: Extract<DeviceProcessingNodeData, { kind: "block" }>, input: string | undefined, locale: LocaleId) {
+  const op = Number(data.properties.condition ?? 1);
+  const operator = [locale === "it" ? "è falso" : "is false", locale === "it" ? "è vero" : "is true", "=", "≠", ">", "≥", "<", "≤"][op] ?? "";
+  const high = locale === "it" ? "Alto" : "High";
+  const low = locale === "it" ? "Basso" : "Low";
+  return {
+    condition: `${input ?? (locale === "it" ? "Valore" : "Value")} ${operator}${op >= 2 ? ` ${String(data.properties.value ?? 0)}` : ""}`,
+    whenTrue: data.properties.whenTrue === "low" ? low : high,
+    whenFalse: data.properties.whenFalse === "high" ? high : low,
+  };
 }

@@ -1,3 +1,4 @@
+import { SIGNAL_TRAVEL_MS } from "../../lib/edge-activity.js";
 import "./edge-signals.css";
 import {
   BaseEdge,
@@ -180,7 +181,7 @@ export function DeletableEdge({
             >
               <animateMotion
                 path={edgePath}
-                dur="0.65s"
+                dur={`${SIGNAL_TRAVEL_MS}ms`}
                 begin="indefinite"
                 data-delay={delay}
                 calcMode="paced"
@@ -191,7 +192,7 @@ export function DeletableEdge({
                 attributeName="opacity"
                 values={`0;${1 - index * 0.045};${1 - index * 0.045};0`}
                 keyTimes="0;0.08;0.85;1"
-                dur="0.65s"
+                dur={`${SIGNAL_TRAVEL_MS}ms`}
                 begin="indefinite"
                 data-delay={delay}
                 repeatCount={preview ? "indefinite" : 1}

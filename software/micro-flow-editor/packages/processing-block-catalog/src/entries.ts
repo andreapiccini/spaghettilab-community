@@ -832,8 +832,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
   }),
   e({
     id: "appblocks.manual_trigger",
-    label: "Genera trigger",
-    subtitle: "Premi per avviare un’azione",
+    label: "Generatore di trigger",
+    subtitle: "Avvia le azioni collegate",
     category: "logic",
     runtime: "core-block",
     availability: "shipped",
@@ -846,7 +846,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     ],
     fields: [],
     notes:
-      "Collega Avvia azione all’ingresso trigger di un dispositivo. Dopo Run Deploy, premi Invia trigger: viene generato un singolo fronte di salita e poi il segnale torna basso. Il pulsante funziona con il PC collegato.",
+      "Collega l’uscita alle azioni da avviare. Premi Invia trigger per una prova manuale oppure inserisci il generatore in Schedule per avviarle automaticamente.",
   }),
   e({
     id: "appblocks.data_viewer",
@@ -915,8 +915,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
   }),
   e({
     id: "appblocks.square_wave",
-    label: "Onda quadra",
-    subtitle: "Generatore periodico",
+    label: "Onda quadra (precedente)",
+    subtitle: "Alterna acceso/spento",
     category: "io",
     runtime: "core-block",
     availability: "shipped",
@@ -925,7 +925,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     typeId: "ab.square_wave",
     needsModule: false,
     inputs: [],
-    outputs: [outPort("0", [T.digitalComando], "Comando digitale")],
+    outputs: [outPort("0", [T.digitalComando], "Acceso / spento")],
     fields: [
       num("periodMs", "Periodo (ms)", 500, "Durata di un ciclo HIGH+LOW"),
       num("dutyCycle", "Duty cycle (%)", 50, "Percentuale del periodo in HIGH"),
@@ -933,6 +933,28 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     notes:
       "Generatore libero: non serve Schedule. Collegalo a un relè o a un LED per provarlo. Periodo = ciclo completo; duty cycle = quanto resta HIGH.",
   }),
+  ...(["and", "or", "if", "while"] as const).map((kind) => e({
+    id: `logic.${kind}`, label: kind.toUpperCase(),
+    subtitle: ({ and: "Vero se entrambi sono veri", or: "Vero se almeno uno è vero", if: "Verifica una condizione", while: "Al cambio valore, esegue se vero" })[kind],
+    category: "logic", runtime: "core-block", availability: "shipped", family: "functionality",
+    typeId: `logic_${kind}`, needsModule: false,
+    inputs: (kind === "and" || kind === "or" ? ["0", "1"] : ["0"]).map(id => inPort(id, [{ domain: "any", role: "comando" }], { label: kind === "and" || kind === "or" ? `Valore ${id === "0" ? "A" : "B"}` : "Valore da verificare" })),
+    outputs: [outPort("0", kind === "while" ? [T.eventTrigger] : [T.digitalComando], kind === "while" ? "Esegui al cambio valore" : kind === "if" ? "Segnale alto / basso" : "Condizione vera / falsa")],
+    fields: kind === "and" || kind === "or" ? [] : [
+      sel("condition", "Condizione", [
+        { value: "1", label: "È vero / diverso da zero" }, { value: "0", label: "È falso / uguale a zero" },
+        { value: "2", label: "È uguale al valore" }, { value: "3", label: "È diverso dal valore" },
+        { value: "4", label: "È maggiore del valore" }, { value: "5", label: "È maggiore o uguale" },
+        { value: "6", label: "È minore del valore" }, { value: "7", label: "È minore o uguale" },
+      ], "1"),
+      txt("value", "Valore di confronto", "0"),
+      ...(kind === "if" ? [
+        sel("whenTrue", "Se vera, imposta l’uscita", [{ value: "high", label: "Alto (1)" }, { value: "low", label: "Basso (0)" }], "high"),
+        sel("whenFalse", "Se falsa, imposta l’uscita", [{ value: "low", label: "Basso (0)" }, { value: "high", label: "Alto (1)" }], "low"),
+      ] : []),
+    ],
+    notes: "Memorizza l’ultimo valore di ogni ingresso. Accetta booleani, segnali digitali e interi. Zero è falso, ogni altro intero è vero. Accetta anche decimali e stringhe contenenti soltanto un numero; altri testi non sono validi. WHILE controlla la condizione al primo valore e a ogni cambio del valore in ingresso. Se è vera invia un trigger; un valore invariato non genera altri trigger. Non usa timer.",
+  })),
   e({
     id: "appblocks.compare_if",
     label: "IF",

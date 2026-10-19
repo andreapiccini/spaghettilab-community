@@ -1,9 +1,11 @@
+import { portsForNode } from "./node-ports.js";
 import { SequenceControls } from "./SequenceControls.js";
 import { SEQUENCE_TYPE } from "../../lib/flow-sequence.js";
 import { SequenceEditor } from "./SequenceEditor.js";
 import { draftToCanvasSensorRecipes } from "../../lib/device-recipe-draft.js";
 import {
   propertiesForSensorModule,
+  channelsFromNodeProperties,
   SENSOR_ACTION_ID_PROP,
   SENSOR_MODULE_ID_PROP,
 } from "../../lib/backbone-sensor-block.js";
@@ -97,7 +99,7 @@ function TypeIdSelect({
 }) {
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
-  const options = uniqueTypeOptions(kind, locale);
+  const options = uniqueTypeOptions(kind, locale).filter(option => option.typeId !== "ab.square_wave");
   const known = options.some((o) => o.typeId === value);
   const selected =
     catalogEntryId && options.some((o) => o.entryId === catalogEntryId)
@@ -249,7 +251,10 @@ export function NodeInspector({
   const { session } = useSession();
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
-  const [comment, setComment] = useState(mode.kind === "edit" ? mode.comment : "");
+  const [comment, setComment] = useState(mode.kind === "edit"
+    ? mode.data.kind === "block" && mode.data.blockTypeId === "ui.manual_trigger" && ["Genera trigger", "Generatore di segnali"].includes(mode.comment)
+      ? "Generatore di trigger" : mode.comment
+    : "");
   const [data, setData] = useState<DeviceProcessingNodeData>(() =>
     withFieldDefaults(
       mode.kind === "edit"
@@ -257,6 +262,7 @@ export function NodeInspector({
         : defaultDataFor(mode.nodeKind, moduleOptions[0]?.id),
     ),
   );
+  const statusLedOnly = data.kind === "block" && data.properties.statusLed === true;
   const gpioModule =
     driverBindingId &&
     data.kind === "block" &&
@@ -311,15 +317,21 @@ export function NodeInspector({
           locale,
         ).fields ?? [])
       : (localizedEntry?.fields ?? []);
-  const namedFields =
+  const sourceEdge = existingEdges.find(edge => edge.target === nodeId && (edge.targetHandle ?? "0") === "0");
+  const sourceData = existingNodes.find(node => node.id === sourceEdge?.source)?.data;
+  const comparisonChannel = sourceData?.kind === "block" ? channelsFromNodeProperties(sourceData.properties).find(channel => channel.id === sourceEdge?.sourceHandle) : undefined;
+  const comparisonType = comparisonChannel?.quantity === "digital" ? "digital" : comparisonChannel?.dataType ?? (sourceData?.kind === "block" && ["logic_and", "logic_or"].includes(sourceData.blockTypeId) ? "bool" : sourceData?.kind === "block" && sourceData.blockTypeId === "logic_if" ? "digital" : "int");
+  const baseNamedFields =
     data.kind === "block" && data.properties.statusLed === true
-      ? catalogFields.filter((field) => ["threshold", "negated"].includes(field.id))
+      ? []
       : inspectorVisibleFields(catalogEntry, catalogFields);
+  const namedFields: readonly CatalogField[] = baseNamedFields.map(field => {
+    if (field.id !== "value" || data.kind !== "block" || !["logic_if", "logic_while"].includes(data.blockTypeId)) return field;
+    if (comparisonType === "bool" || comparisonType === "digital") return { ...field, type: "select", label: "Valore di confronto", options: comparisonType === "bool" ? [{value:"1",label:"Vero"},{value:"0",label:"Falso"}] : [{value:"1",label:"Alto (1)"},{value:"0",label:"Basso (0)"}] };
+    return { ...field, type:"text", label: comparisonType === "number" ? "Valore di confronto (2 decimali)" : comparisonType === "string" ? "Valore numerico di confronto" : "Valore intero di confronto", placeholder: comparisonType === "number" ? "es. 28,50" : "es. 28" };
+  });
   const showModulePicker =
     data.kind === "event-source" && catalogEntry?.needsModule !== false;
-  const authoringType = Boolean(
-    data.kind === "block" && data.blockTypeId.startsWith("ab."),
-  );
   const { protocolFor, pinMapOf } = usePortProtocol();
   const selectedPortId =
     data.kind === "schedule" || data.kind === "event-source"
@@ -580,7 +592,7 @@ export function NodeInspector({
           )}
         </AnimatePresence>
 
-        {!demoOnly && (
+        {!demoOnly && !statusLedOnly && (
           <>
             <label
               className="mb-1 block font-body text-xs font-semibold text-ink-muted"
@@ -608,10 +620,14 @@ export function NodeInspector({
           </div>
         )}
 
-        {!demoOnly && mode.kind === "edit" && (
+        {!demoOnly && !statusLedOnly && mode.kind === "edit" && (
           <EdgeList
             title="Input"
-            edges={incoming.map((e) => ({ id: e.id, label: nodeLabel(e.source) }))}
+            edges={incoming.map((e) => {
+              const source = existingNodes.find(node => node.id === e.source);
+              const output = source && portsForNode(source.data).outputs.find(port => port.id === (e.sourceHandle ?? "0"));
+              return { id: e.id, label: output?.label ?? nodeLabel(e.source) };
+            })}
             empty={copy.noIncoming}
           />
         )}
@@ -690,7 +706,7 @@ export function NodeInspector({
         {data.kind === "schedule" && (
           <div className="mb-4 space-y-3">
             <p className="text-sm text-ink-muted">
-              Trascina «Genera trigger» dentro questo riquadro e collega la sua uscita
+              Trascina «Generatore di trigger» dentro questo riquadro e collega la sua uscita
               alle azioni da ripetere. Run Deploy avvia l’esecuzione continua; Stop
               lascia disponibili i trigger manuali per le prove one-shot.
             </p>
@@ -726,100 +742,19 @@ export function NodeInspector({
           </div>
         )}
 
-        {data.kind === "block" && (
+        {data.kind === "block" && !statusLedOnly && (
           <>
             {data.blockTypeId === "ui.manual_trigger" && (
-              <p className="mb-4 text-sm text-ink-muted">
-                Collega «Avvia azione» a un ingresso trigger. Dopo Run Deploy, usa il
-                pulsante «Invia trigger» nel blocco. Ogni clic avvia una volta le azioni
-                collegate, con il PC connesso. Usa il pallino dello Schedule per
-                ripeterle automaticamente sulla Backbone.
-              </p>
+              <p className="mb-4 text-sm text-ink-muted">Collega l’uscita alle azioni da avviare. Premi «Invia trigger» per eseguirle una volta, oppure inserisci il generatore in Schedule per ripeterle automaticamente.</p>
             )}
             {data.blockTypeId === "ui.data_viewer" && (
               <p className="mb-4 text-sm text-ink-muted">
                 Collega un’uscita a «Mostra valore». Il blocco mostra l’ultimo dato
-                ricevuto e si aggiorna automaticamente durante l’esecuzione.
+                ricevuto e si aggiorna automaticamente durante l’esecuzione. Etichetta,
+                unità di misura e decimali sono a tua scelta: cambiare il collegamento
+                non li modifica. Lascia vuota l’unità per non mostrarla.
               </p>
             )}
-            {!demoOnly &&
-              !driverRecipe &&
-              !["ui.data_viewer", "ui.manual_trigger"].includes(data.blockTypeId) && (
-                <>
-                  <label
-                    className="mb-1 block font-body text-xs font-semibold text-ink-muted"
-                    htmlFor="ni-blocktype"
-                  >
-                    Block
-                  </label>
-                  <TypeIdSelect
-                    id="ni-blocktype"
-                    kind="block"
-                    value={data.blockTypeId}
-                    catalogEntryId={data.catalogEntryId}
-                    onChange={(blockTypeId, entry) =>
-                      applyCatalogChange(
-                        {
-                          ...data,
-                          blockTypeId,
-                          catalogEntryId: entry?.id,
-                          properties: defaultPropertiesFromFields(entry?.fields ?? []),
-                        } as DeviceProcessingNodeData,
-                        entry,
-                      )
-                    }
-                  />
-                  <CatalogNotes entry={localizedEntry} />
-                  {!authoringType && (
-                    <div className="mb-4 flex gap-2">
-                      <div className="flex-1">
-                        <label
-                          className="mb-1 block font-body text-xs font-semibold text-ink-muted"
-                          htmlFor="ni-minver"
-                        >
-                          {copy.minVersion}
-                        </label>
-                        <input
-                          id="ni-minver"
-                          type="number"
-                          value={data.minVersion ?? ""}
-                          onChange={(e) =>
-                            patch({
-                              minVersion:
-                                e.target.value === ""
-                                  ? undefined
-                                  : Number(e.target.value),
-                            })
-                          }
-                          className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label
-                          className="mb-1 block font-body text-xs font-semibold text-ink-muted"
-                          htmlFor="ni-exactver"
-                        >
-                          {copy.exactVersion}
-                        </label>
-                        <input
-                          id="ni-exactver"
-                          type="number"
-                          value={data.exactVersion ?? ""}
-                          onChange={(e) =>
-                            patch({
-                              exactVersion:
-                                e.target.value === ""
-                                  ? undefined
-                                  : Number(e.target.value),
-                            })
-                          }
-                          className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
             {driverRecipe ? (
               <p className="mb-3 font-body text-xs text-ink-muted">
                 {driverRecipe.deviceDraft?.name} ·{" "}
@@ -844,7 +779,7 @@ export function NodeInspector({
               />
             ) : demoTempBlock ? (
               <p className="font-body text-sm text-ink-muted">{copy.tempProbeHint}</p>
-            ) : data.blockTypeId === "ui.manual_trigger" ? null : namedFields.length >
+            ) : ["ui.manual_trigger", "ab.square_wave"].includes(data.blockTypeId) ? null : namedFields.length >
               0 ? (
               <CatalogFieldsEditor
                 fields={namedFields}
@@ -1185,7 +1120,7 @@ function CatalogFieldInput({
           id={id}
           rows={3}
           placeholder={field.placeholder}
-          value={typeof value === "string" ? value : ""}
+          value={value === undefined ? String(field.default ?? "") : String(value)}
           onChange={(e) => onChange(e.target.value)}
           className="w-full resize-y rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none"
         />
@@ -1217,7 +1152,7 @@ function CatalogFieldInput({
           id={id}
           type="text"
           placeholder={field.placeholder}
-          value={typeof value === "string" ? value : ""}
+          value={value === undefined ? String(field.default ?? "") : String(value)}
           onChange={(e) => onChange(e.target.value)}
           className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-body text-sm outline-none"
         />

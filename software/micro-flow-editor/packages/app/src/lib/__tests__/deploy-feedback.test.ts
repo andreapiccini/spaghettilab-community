@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeDeployProblem, uniqueDeployProblems } from "../deploy-feedback.js";
+import { describeDeployProblem, uniqueDeployProblems, canRecheckDeployProblem } from "../deploy-feedback.js";
 describe("deploy feedback", () => {
   it("groups identical problems but preserves different boards and blocks", () => {
     const problem = { bindingId: "a", nodeId: "motor", technical: "Bad connection" };
@@ -43,3 +43,21 @@ it("keeps an unconfirmed upload out of canvas wiring instructions", () => {
  expect(text.remedy).toContain("Ricontrolla");
  expect(text.remedy).not.toContain("canvas");
 });
+
+it("offers a config refresh instead of blaming the canvas for a stale generation", () => {
+  const problem = { code: "config-deployment.stale_generation", technical: "the Core's Config changed since this candidate was prepared — the candidate is untouched; choose import-live, rebase, or cancel" };
+  const text = describeDeployProblem(problem);
+  expect(text.title).toContain("configurazione");
+  expect(text.body).toContain("non è stato applicato");
+  expect(text.body).not.toContain("Core's");
+  expect(text.remedy).toContain("Ricontrolla");
+  expect(canRecheckDeployProblem(problem)).toBe(true);
+  expect(canRecheckDeployProblem({ technical: "Errore blocco" })).toBe(false);
+  expect(canRecheckDeployProblem({ technical: problem.technical })).toBe(true);
+});
+
+ it("explains pin initialization failures without claiming a newer configuration", () => {
+  const result = describeDeployProblem({ technical: "SpaghettiClient PROTOCOL_ERROR (phase activate_module, errno -133, rollback 0)" });
+  expect(result.title).toContain("pin");
+  expect(result.remedy).toContain("Configura");
+ });

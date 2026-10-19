@@ -50,11 +50,11 @@ export function PipelineStepper({ result, running }: { readonly result: Deployme
 
   return (
     <div className="flex flex-col gap-2 p-3">
-      <div className="flex items-center">
+      <div className="grid grid-cols-6 items-start">
         {STAGES.map((label, i) => (
-          <div key={label} className="flex flex-1 flex-col items-center gap-1">
+          <div key={label} className="flex min-w-0 flex-col items-center gap-1">
             <div className="flex w-full items-center">
-              {i > 0 && <div className="h-0.5 flex-1" style={{ backgroundColor: states[i - 1] === "success" ? "var(--color-success)" : "var(--color-border)" }} />}
+              <div aria-hidden="true" className="h-0.5 flex-1" style={{ backgroundColor: i === 0 ? "transparent" : states[i - 1] === "success" ? "var(--color-success)" : "var(--color-border)" }} />
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={motionTokens.spring.snappy}
@@ -68,9 +68,9 @@ export function PipelineStepper({ result, running }: { readonly result: Deployme
                 {states[i] === "error" && <X size={14} className="text-white" />}
                 {states[i] === "pending" && running && i === 0 && <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }} className="h-2 w-2 rounded-full" style={{ backgroundColor: "var(--color-info)" }} />}
               </motion.div>
-              {i < STAGES.length - 1 && <div className="h-0.5 flex-1" style={{ backgroundColor: states[i] === "success" ? "var(--color-success)" : "var(--color-border)" }} />}
+              <div aria-hidden="true" className="h-0.5 flex-1" style={{ backgroundColor: i === STAGES.length - 1 ? "transparent" : states[i] === "success" ? "var(--color-success)" : "var(--color-border)" }} />
             </div>
-            <span className="font-body text-xs text-ink-faint">{label}</span>
+            <span className="w-full px-1 text-center font-body text-xs leading-4 text-ink-faint">{label}</span>
           </div>
         ))}
       </div>

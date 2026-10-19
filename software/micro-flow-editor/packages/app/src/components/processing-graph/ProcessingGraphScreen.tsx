@@ -1,4 +1,6 @@
-import { activeEdgesForRecord } from "../../lib/edge-activity.js";
+import { WhiteLedModuleEditor } from "../device-recipe-editor/WhiteLedModuleEditor.js";
+import { useSignalNodeGlow } from "./use-signal-node-glow.js";
+import { activeEdgesForRecord, SIGNAL_ACTIVITY_MS } from "../../lib/edge-activity.js";
 import { upgradeDht22Driver } from "../../lib/gpio-driver-presets.js";
 import {
   SENSOR_INSTANCE_PROP,
@@ -41,7 +43,6 @@ import {
   applyNodeChanges,
   Background,
   Controls,
-  MiniMap,
   Position,
   ReactFlow,
   ReactFlowProvider,
@@ -193,7 +194,6 @@ import {
   fixedTickAbsolute,
   fixedTickRelativePosition,
 } from "./layout-constants.js";
-import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import {
   containerAtPosition,
   resolveRectOverlap,
@@ -310,6 +310,7 @@ function ProcessingGraphScreenInner() {
     ? bindings.findIndex((b) => b.bindingId === selected.bindingId)
     : -1;
 
+  const [whiteLedEditor, setWhiteLedEditor] = useState<string | null>(null);
   const [inspector, setInspector] = useState<ProcessingInspectorMode | null>(null);
   const [sensorWizardOpen, setSensorWizardOpen] = useState(false);
   const [sensorWizardInitialStep] = useState<"name" | "manual">("name");
@@ -1042,12 +1043,9 @@ function ProcessingGraphScreenInner() {
     if (existingId) {
       const existing = domainNodes.find((node) => node.id === existingId);
       if (existing) {
-        setInspector({
-          kind: "edit",
-          nodeId: existingId,
-          data: existing.data,
-          comment: authoringMetadata[existingId]?.comment ?? STATUS_LED_LABEL,
-        });
+        setInspector(null);
+        setWhiteLedEditor(existingId);
+        return;
       }
       return;
     }
@@ -1059,11 +1057,13 @@ function ProcessingGraphScreenInner() {
       "output",
       undefined,
       {
-        comment: `${STATUS_LED_LABEL} · IO${STATUS_LED_GPIO}`,
+        comment: STATUS_LED_LABEL,
         properties: {
           statusLed: true,
           gpio: STATUS_LED_GPIO,
-          color: "#EF4444",
+          color: "#FFFFFF",
+          threshold: 1,
+          negated: false,
           line: "STATUS",
         },
       },
@@ -1175,11 +1175,17 @@ function ProcessingGraphScreenInner() {
     if (!selected || !("activityRoutes" in viewerPlan)) return;
     const routes = viewerPlan.activityRoutes ?? [];
     const seen = new Map<string, number>();
+    const gpioLevels = new Map<string, string>();
     let clearTimer: ReturnType<typeof setTimeout> | undefined;
     const unsubscribe = onRecordEvent(selected.bindingId, (record) => {
       const key = `${record.sourceKey}:${record.schemaId}:${record.actionId ?? 0}`;
       if (seen.get(key) === record.sequence) return;
       seen.set(key, record.sequence);
+      if (record.schemaId.startsWith("flow.gpio-state.")) {
+        const level = Object.entries(record.fields ?? {}).map(([field, value]) => `${field}:${String(value)}`).join(";");
+        if (gpioLevels.get(key) === level) return;
+        gpioLevels.set(key, level);
+      }
       const active = activeEdgesForRecord(routes, record);
       if (!active.length) return;
       setWirePulses((previous) => {
@@ -1189,7 +1195,7 @@ function ProcessingGraphScreenInner() {
         return next;
       });
       clearTimeout(clearTimer);
-      clearTimer = setTimeout(() => setWirePulses(new Map()), 1000);
+      clearTimer = setTimeout(() => setWirePulses(new Map()), SIGNAL_ACTIVITY_MS);
     });
     return () => {
       unsubscribe?.();
@@ -1208,7 +1214,10 @@ function ProcessingGraphScreenInner() {
         new Set(),
         locale,
       ).map((node) =>
-        node.data.manualTrigger
+        node.data.signalGenerator
+          ? { ...node, data: { ...node.data, signalGenerator: { ...node.data.signalGenerator, bindingId: selected?.bindingId,
+              source: "signalObservations" in viewerPlan ? viewerPlan.signalObservations?.find(item => item.generatorId === node.id) : undefined } } }
+          : node.data.manualTrigger
           ? {
               ...node,
               data: {
@@ -1472,11 +1481,8 @@ function ProcessingGraphScreenInner() {
     const rest = localNodes
       .filter((n) => {
         if (containerByTriggerId.has(n.id)) return false;
-        if (!n.data.circular) return true;
-        const owner = containerByMemberId.get(n.id);
-        return !owner?.memberIds.some(
-          (id) => localNodes.find((node) => node.id === id)?.data.manualTrigger,
-        );
+        // Internal activation nodes remain in the model, not on the canvas.
+        return !n.data.circular;
       })
       .map((n) => {
         const container = containerByMemberId.get(n.id);
@@ -1638,6 +1644,7 @@ function ProcessingGraphScreenInner() {
     () =>
       localEdges
         .filter((edge) => {
+          if (localNodes.some(node => node.data.circular && (node.id === edge.source || node.id === edge.target))) return false;
           if (
             containerByMemberId.has(edge.target) &&
             localNodes.find((node) => node.id === edge.target)?.data.manualTrigger
@@ -1673,21 +1680,13 @@ function ProcessingGraphScreenInner() {
     ],
   );
 
-  const illuminatedNodes = useMemo(() => {
-    const activity = new Map<string, { token: number; kind: string }>();
-    for (const edge of visibleEdges) {
-      const pulse = wirePulses.get(edge.id);
-      if (pulse) for (const id of [edge.source, edge.target]) {
-        if ((activity.get(id)?.token ?? -1) < pulse.token) activity.set(id, pulse);
-      }
-    }
-    return renderedNodes.map((node) => {
-      const pulse = activity.get(node.id);
-      const preview = simulating && (previewActiveIds.has(node.id) || previewTriggerIds.has(node.id));
-      if (!pulse && !preview) return node;
-      return { ...node, className: `${node.className ?? ""} signal-node-glow signal-node-glow-${(pulse?.token ?? 0) % 2} ${pulse?.kind === "data" ? "signal-node-data" : ""}` };
-    });
-  }, [renderedNodes, visibleEdges, wirePulses, simulating, previewActiveIds, previewTriggerIds]);
+  const nodeGlows = useSignalNodeGlow(wirePulses, visibleEdges, selected?.bindingId);
+  const illuminatedNodes = useMemo(() => renderedNodes.map((node) => {
+    const pulse = nodeGlows.get(node.id);
+    const preview = simulating && (previewActiveIds.has(node.id) || previewTriggerIds.has(node.id));
+    if (!pulse && !preview) return node;
+    return { ...node, className: `${node.className ?? ""} signal-node-glow signal-node-glow-${(pulse?.token ?? 0) % 2} ${pulse?.kind === "data" ? "signal-node-data" : ""}` };
+  }), [renderedNodes, nodeGlows, simulating, previewActiveIds, previewTriggerIds]);
 
   useEffect(() => {
     if (!session || bindingIndex < 0 || !execute) return;
@@ -2290,6 +2289,7 @@ function ProcessingGraphScreenInner() {
   function onNodeDoubleClick(_: unknown, node: Node<ProcessingNodeUiData>) {
     const domain = domainNodes.find((item) => item.id === node.id);
     if (!domain || domain.data.kind !== "block") return;
+    if (domain.data.properties.statusLed === true) { setInspector(null); setWhiteLedEditor(node.id); return; }
     const moduleId = domain.data.properties[SENSOR_MODULE_ID_PROP];
     const module = backboneSensorModules.find((item) => item.id === moduleId);
     if (module) {
@@ -2308,6 +2308,21 @@ function ProcessingGraphScreenInner() {
     execute(
       updateGraphNodeCommand(lens, { layer: "device-processing", id: nodeId, data }),
     );
+    const oldData = domainNodes.find(node => node.id === nodeId)?.data;
+    if (data.kind === "block" && oldData?.kind === "block" &&
+        ["ui.manual_trigger", "ab.square_wave"].includes(data.blockTypeId) &&
+        ["ui.manual_trigger", "ab.square_wave"].includes(oldData.blockTypeId) &&
+        data.blockTypeId !== oldData.blockTypeId) {
+      for (const edge of graphState.edges) {
+        if (edge.source === nodeId) {
+          execute(removeGraphEdgeCommand(lens, edge.id));
+          execute(addGraphEdgeCommand(lens, { ...edge, sourceHandle: data.blockTypeId === "ui.manual_trigger" ? "trigger" : "0" }));
+        } else if (edge.target === nodeId && data.blockTypeId === "ab.square_wave") {
+          execute(removeGraphEdgeCommand(lens, edge.id));
+        }
+      }
+    }
+
     if (data.kind === "block" && data.properties[SENSOR_INSTANCE_PROP] === true) {
       const entry = catalogEntryForNode(data);
       const inputs = new Set(entry?.inputs?.map((port) => port.id));
@@ -2483,7 +2498,7 @@ function ProcessingGraphScreenInner() {
         "profiles" in viewerPlan
           ? viewerPlan.profiles
               .filter((profile) =>
-                profile.sampleOps.some((op) =>
+                profile.profileId.startsWith("flow.gpio-state.") || profile.sampleOps.some((op) =>
                   ["DS18B20_READ", "DHT22_READ", "STEPPER", "RGB_PROGRAM"].includes(
                     op.op,
                   ),
@@ -2597,6 +2612,9 @@ function ProcessingGraphScreenInner() {
         ? copy.issuesCount(errorCount, warningCount)
         : copy.valid;
 
+  const whiteLedNode = domainNodes.find(node => node.id === whiteLedEditor);
+  if (whiteLedNode?.data.kind === "block") return <WhiteLedModuleEditor properties={whiteLedNode.data.properties} onCancel={()=>setWhiteLedEditor(null)} onSave={config=>{persistNode(whiteLedNode.id,{...whiteLedNode.data,properties:{...(whiteLedNode.data.kind === "block" ? whiteLedNode.data.properties : {}),whiteLedConfig:JSON.stringify(config)}} as DeviceProcessingNodeData,authoringMetadata[whiteLedNode.id]?.comment ?? "LED interno");setWhiteLedEditor(null);}} />;
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       {demoOnly && <VisitorDemoTour enabled />}
@@ -2641,10 +2659,11 @@ function ProcessingGraphScreenInner() {
         {!demoOnly && (
           <span
             role="status"
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${executionMode === "continuous" ? "bg-success/10 text-success" : "bg-brand-blue/5 text-brand-blue"}`}
+            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${executionMode === "continuous" ? "bg-success/10 text-success" : "bg-brand-blue/5 text-brand-blue"}`}
           >
+            {executionMode === "continuous" && <span aria-hidden="true" className="logic-running-light" />}
             {executionMode === "continuous"
-              ? "● Logica in esecuzione continua"
+              ? "Logica in esecuzione continua"
               : executionMode === "busy"
                 ? "Operazione sulla Backbone…"
                 : "One-shot · test manuali"}
@@ -2697,7 +2716,7 @@ function ProcessingGraphScreenInner() {
           <button
             type="button"
             onClick={() => void handlePauseRuntime()}
-            disabled={pausing}
+            disabled={pausing || executionMode !== "continuous"}
             className="flex shrink-0 items-center gap-1.5 rounded-slpill border border-border-strong px-4 py-1.5 font-body-strong text-sm text-ink hover:bg-surface-raised disabled:opacity-50"
           >
             <Square size={14} fill="currentColor" />
@@ -2708,7 +2727,9 @@ function ProcessingGraphScreenInner() {
           <button
             type="button"
             onClick={requestDeploy}
-            className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:bg-brand-blue-dark"
+            disabled={executionMode !== "one-shot" || pausing}
+            title={executionMode === "continuous" ? "Premi Stop prima di caricare un nuovo programma" : undefined}
+            className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:enabled:bg-brand-blue-dark disabled:cursor-not-allowed disabled:bg-surface-raised disabled:text-ink-muted"
           >
             Run Deploy
           </button>
@@ -2829,6 +2850,11 @@ function ProcessingGraphScreenInner() {
               </div>
             )}
             <ReactFlow
+              className="processing-canvas"
+              nodesDraggable
+              selectNodesOnDrag
+              nodeDragThreshold={1}
+              nodeClickDistance={3}
               nodeTypes={NODE_TYPES}
               edgeTypes={PROCESSING_EDGE_TYPES}
               // EventContainerNode reads its own `data` shape at runtime regardless of this
@@ -2845,6 +2871,7 @@ function ProcessingGraphScreenInner() {
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               isValidConnection={isValidConnection}
+              connectionRadius={28}
               onNodeClick={onNodeClick}
               onNodeDoubleClick={onNodeDoubleClick}
               zoomOnDoubleClick={false}
@@ -2871,21 +2898,9 @@ function ProcessingGraphScreenInner() {
               <Background gap={20} color="#E1E4EB" />
               <Controls
                 position="bottom-left"
-                showInteractive={!demoOnly}
+                showInteractive={false}
                 fitViewOptions={{ padding: 0.2, maxZoom: demoOnly ? 1.15 : 0.8 }}
               />
-              {!demoOnly && domainNodes.length > 0 && (
-                <MiniMap
-                  position="bottom-right"
-                  pannable
-                  zoomable
-                  className="!rounded-slsm !border !border-border-strong !shadow-e1"
-                  nodeColor={(n) =>
-                    PROCESSING_NODE_KIND_CONFIG[(n.data as ProcessingNodeUiData).kind]
-                      ?.colorVar ?? "#8A8F99"
-                  }
-                />
-              )}
             </ReactFlow>
             {demoOnly && (
               <DemoRadialAdd

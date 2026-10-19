@@ -24,10 +24,10 @@ export function LeftRail() {
   const items: readonly RailItem[] = [
     { id: "core-connections", icon: Cable, label: "Discover" },
     { id: "physical-composition", icon: Layers, label: copy.screens.physicalComposition },
-    { id: "device-recipe-editor", icon: CircuitBoard, label: locale === "it" ? "Dispositivi" : "Devices" },
     { id: "modules", icon: Blocks, label: locale === "it" ? "Moduli" : "Modules" },
     { id: "nfc-tags", icon: Nfc, label: "Tag NFC" },
     { id: "processing-graph", icon: Workflow, label: "Run Deploy" },
+    { id: "device-recipe-editor", icon: CircuitBoard, label: locale === "it" ? "Crea dispositivo" : "Create device" },
   ];
 
   return (

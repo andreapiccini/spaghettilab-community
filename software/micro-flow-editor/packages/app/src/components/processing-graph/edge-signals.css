@@ -4,25 +4,52 @@
 .edge-signal-packet { filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 7px currentColor); }
 .signal-node-glow { --signal-glow: 77, 116, 222; }
 .signal-node-data { --signal-glow: 76, 165, 166; }
-.signal-node-glow::after {
- content: ""; position: absolute; inset: -3px; border-radius: 17px;
+.signal-node-glow .signal-node-surface::after {
+ content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 2;
  pointer-events: none; border: 2px solid rgba(var(--signal-glow), .65);
  opacity: 0; animation: signal-node-pulse-a .95s ease-in-out both;
 }
-.signal-node-glow-1::after { animation-name: signal-node-pulse-b; }
+.signal-node-glow-1 .signal-node-surface::after { animation-name: signal-node-pulse-b; }
 @keyframes signal-node-pulse-a {
-0% { opacity: 0; box-shadow: 0 0 4px rgba(var(--signal-glow), 0), 0 0 12px rgba(var(--signal-glow), 0); }
-28% { opacity: .8; box-shadow: 0 0 12px rgba(var(--signal-glow), .45), 0 0 30px rgba(var(--signal-glow), .25); }
-55% { opacity: .5; box-shadow: 0 0 16px rgba(var(--signal-glow), .3), 0 0 36px rgba(var(--signal-glow), .15); }
-100% { opacity: 0; box-shadow: 0 0 22px rgba(var(--signal-glow), 0); }
+0% { opacity: 0; box-shadow: inset 0 0 3px rgba(var(--signal-glow), 0); }
+18% { opacity: .9; box-shadow: inset 0 0 12px rgba(var(--signal-glow), .3); }
+55% { opacity: .5; box-shadow: inset 0 0 16px rgba(var(--signal-glow), .2); }
+100% { opacity: 0; box-shadow: inset 0 0 20px rgba(var(--signal-glow), 0); }
 }
 @keyframes signal-node-pulse-b {
-0% { opacity: 0; box-shadow: 0 0 4px rgba(var(--signal-glow), 0), 0 0 12px rgba(var(--signal-glow), 0); }
-28% { opacity: .8; box-shadow: 0 0 12px rgba(var(--signal-glow), .45), 0 0 30px rgba(var(--signal-glow), .25); }
-55% { opacity: .5; box-shadow: 0 0 16px rgba(var(--signal-glow), .3), 0 0 36px rgba(var(--signal-glow), .15); }
-100% { opacity: 0; box-shadow: 0 0 22px rgba(var(--signal-glow), 0); }
+0% { opacity: 0; box-shadow: inset 0 0 3px rgba(var(--signal-glow), 0); }
+18% { opacity: .9; box-shadow: inset 0 0 12px rgba(var(--signal-glow), .3); }
+55% { opacity: .5; box-shadow: inset 0 0 16px rgba(var(--signal-glow), .2); }
+100% { opacity: 0; box-shadow: inset 0 0 20px rgba(var(--signal-glow), 0); }
 }
 @media (prefers-reduced-motion: reduce) {
  .edge-signal-packet { display: none; }
- .signal-node-glow::after { animation: none; opacity: .45; box-shadow: 0 0 8px rgba(var(--signal-glow), .3); }
+ .signal-node-glow .signal-node-surface::after { animation: none; opacity: .45; box-shadow: inset 0 0 8px rgba(var(--signal-glow), .3); }
+}
+
+/* A breathing light indicates execution without flashing the whole label. */
+.logic-running-light {
+ display: inline-block; width: 7px; height: 7px; flex-shrink: 0;
+ border-radius: 50%; background: currentColor;
+ animation: logic-running-breathe 1.8s ease-in-out infinite;
+}
+@keyframes logic-running-breathe {
+ 0%, 100% { opacity: .5; box-shadow: 0 0 0 0 currentColor; }
+ 50% { opacity: 1; box-shadow: 0 0 8px 2px currentColor; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .logic-running-light { animation: none; opacity: 1; }
+}
+
+/* Card text and live values remain drag surfaces, rather than text-selection zones. */
+.processing-canvas .react-flow__node.draggable {
+ cursor: grab;
+ user-select: none;
+ -webkit-user-select: none;
+}
+.processing-canvas .react-flow__node.dragging,
+.processing-canvas .react-flow__node.dragging * { cursor: grabbing !important; }
+.processing-canvas .react-flow__node :is(input, textarea, select) {
+ user-select: text;
+ -webkit-user-select: text;
 }

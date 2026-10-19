@@ -176,6 +176,15 @@ static struct gpio_callback nfc_irq_cb;
 #endif
 static void nfc_irq_work_fn(struct k_work *work);
 static void nfc_fallback_work(struct k_work *work);
+/* RF scans sleep and read complete tag records. Keep them off the small
+ * system workqueue stack and away from unrelated system services. */
+#if defined(CONFIG_SPAGHETTI_NFC_MODULE)
+K_THREAD_STACK_DEFINE(nfc_work_stack, CONFIG_SPAGHETTI_NFC_WORK_STACK_SIZE);
+static struct k_work_q nfc_work_queue;
+#define NFC_WORK_QUEUE (&nfc_work_queue)
+#else
+#define NFC_WORK_QUEUE (&k_sys_work_q)
+#endif
 static K_WORK_DEFINE(nfc_irq_work, nfc_irq_work_fn);
 static K_WORK_DELAYABLE_DEFINE(nfc_fallback_dwork, nfc_fallback_work);
 
@@ -950,7 +959,7 @@ static void nfc_handle_wakeup(bool load_changed)
 
 	if (nfc_wum_start(next) < 0) {
 		LOG_WRN("wake-up restart failed, falling back to poll");
-		(void)k_work_schedule(&nfc_fallback_dwork,
+		(void)k_work_schedule_for_queue(NFC_WORK_QUEUE, &nfc_fallback_dwork,
 				      K_MSEC(NFC_FALLBACK_PERIOD_MS));
 	} else {
 		nfc_irq_enable();
@@ -991,7 +1000,7 @@ static void nfc_irq_isr(const struct device *port, struct gpio_callback *cb,
 	ARG_UNUSED(port);
 	ARG_UNUSED(cb);
 	ARG_UNUSED(pins);
-	(void)k_work_submit(&nfc_irq_work);
+	(void)k_work_submit_to_queue(NFC_WORK_QUEUE, &nfc_irq_work);
 }
 #endif
 
@@ -1005,7 +1014,7 @@ static void nfc_fallback_work(struct k_work *work)
 	(void)k_mutex_lock(&nfc_rf_lock, K_FOREVER);
 	nfc_handle_wakeup(true);
 	k_mutex_unlock(&nfc_rf_lock);
-	(void)k_work_schedule(&nfc_fallback_dwork,
+	(void)k_work_schedule_for_queue(NFC_WORK_QUEUE, &nfc_fallback_dwork,
 			      K_MSEC(NFC_FALLBACK_PERIOD_MS));
 }
 
@@ -1082,7 +1091,7 @@ int spaghetti_nfc_user_page(uint8_t antenna, const uint8_t uid[7], uint8_t page,
 	if (nfc_wum_start(antenna) == 0) {
 		nfc_irq_enable();
 	} else {
-		(void)k_work_schedule(&nfc_fallback_dwork, K_MSEC(NFC_FALLBACK_PERIOD_MS));
+		(void)k_work_schedule_for_queue(NFC_WORK_QUEUE, &nfc_fallback_dwork, K_MSEC(NFC_FALLBACK_PERIOD_MS));
 	}
 	k_mutex_unlock(&nfc_rf_lock);
 	return err;
@@ -1163,6 +1172,13 @@ int spaghetti_nfc_init(void)
 	}
 
 	nfc_initialized = true;
+
+#if defined(CONFIG_SPAGHETTI_NFC_MODULE)
+	k_work_queue_start(&nfc_work_queue, nfc_work_stack,
+			   K_THREAD_STACK_SIZEOF(nfc_work_stack),
+			   K_PRIO_PREEMPT(7), NULL);
+	(void)k_thread_name_set(&nfc_work_queue.thread, "nfc_rf");
+#endif
 	err = nfc_probe_chip();
 	if (err < 0) {
 		nfc_ready = false;
@@ -1182,7 +1198,7 @@ int spaghetti_nfc_init(void)
 		LOG_INF("NFC waiting on IRQ plus Type-A poll");
 #endif
 	}
-	(void)k_work_schedule(&nfc_fallback_dwork, K_MSEC(200));
+	(void)k_work_schedule_for_queue(NFC_WORK_QUEUE, &nfc_fallback_dwork, K_MSEC(200));
 	return 0;
 }
 

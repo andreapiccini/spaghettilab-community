@@ -167,7 +167,7 @@ describe("toProcessingNodes", () => {
       edges: [],
     };
     const nodes = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
-    expect(nodes.find((n) => n.id === "sq")?.data.subtitle).toBe("500 ms · 50%");
+    expect(nodes.find((n) => n.id === "sq")?.data.subtitle).toBe("On 0.25 s · off 0.25 s");
     expect(nodes.find((n) => n.id === "sq")?.data.toggleWave).toMatchObject({
       mode: "pulse_high",
       pulseMs: 250,
@@ -187,7 +187,7 @@ describe("toProcessingNodes", () => {
       edges: [],
     };
     const [node] = toProcessingNodes(graphState, {}, new Set(), () => "Module", undefined, new Set(), "en");
-    expect(node?.data.subtitle).toBe("500 ms · 50%");
+    expect(node?.data.subtitle).toBe("On 0.25 s · off 0.25 s");
     expect(node?.data.toggleWave).toMatchObject({ mode: "pulse_high", pulseMs: 250 });
     expect(node?.data.hasInput).toBe(false);
     expect(node?.handles?.some((handle) => handle.type === "target")).toBe(false);
@@ -204,4 +204,30 @@ describe("toProcessingNodes", () => {
     expect(node?.handles?.some((h) => h.type === "source")).toBe(true);
     expect(node?.handles?.some((h) => h.type === "target")).toBe(true);
   });
+});
+
+it("gives both signal generator modes the same card dimensions and correct output handles", () => {
+  const data = ["appblocks.manual_trigger", "appblocks.square_wave"].map(id => nodeDataFromCatalogEntry(findCatalogEntryById(id)!, undefined)!);
+  const graph: GraphState<"device-processing"> = { layer: "device-processing", nodes: data.map((data, index) => ({ layer: "device-processing", id: `generator-${index}`, data })), edges: [] };
+  const nodes = toProcessingNodes(graph, {}, new Set(), () => "Module");
+  expect(nodes.map(node => [node.width, node.height])).toEqual([[210,118], [210,118]]);
+  expect(nodes[0]?.data.manualTrigger).toBeDefined();
+  expect(nodes[1]?.data.signalGenerator).toMatchObject({ onMs: 250, offMs: 250 });
+  expect(nodes[0]?.handles?.[0]?.id).toBe("trigger");
+  expect(nodes[1]?.handles?.[0]?.id).toBe("0");
+});
+
+it("labels the IF input with the selected output rather than the device name", () => {
+  const graph: GraphState<"device-processing"> = {layer:"device-processing",nodes:[
+    {layer:"device-processing",id:"sensor",data:{kind:"block",blockTypeId:"ab.backbone_sensor",catalogEntryId:"appblocks.backbone_sensor",properties:{sensorChip:"DS18B20",sensorChannelsJson:JSON.stringify([
+      {id:"temperature",label:"Temperatura",direction:"read",dataType:"int",unit:"°C",quantity:"temperature"},
+      {id:"humidity",label:"Umidità",direction:"read",dataType:"int",unit:"%",quantity:"humidity"},
+    ])}}},
+    {layer:"device-processing",id:"if",data:{kind:"block",blockTypeId:"logic_if",catalogEntryId:"logic.if",properties:{condition:"1",value:0}}},
+  ],edges:[{layer:"device-processing",id:"wire",source:"sensor",sourceHandle:"temperature",target:"if",targetHandle:"0"}]};
+  const nodes=toProcessingNodes(graph,{sensor:{comment:"DS18B20"}},new Set(),()=>"Module");
+  expect(nodes.find(n=>n.id==="if")?.data.subtitle).toContain("Temperatura");
+  expect(nodes.find(n=>n.id==="if")?.data.subtitle).not.toContain("DS18B20");
+  const humidity=toProcessingNodes({...graph,edges:[{...graph.edges[0]!,sourceHandle:"humidity"}]},{sensor:{comment:"DS18B20"}},new Set(),()=>"Module");
+  expect(humidity.find(n=>n.id==="if")?.data.subtitle).toContain("Umidità");
 });

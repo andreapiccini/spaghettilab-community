@@ -82,6 +82,7 @@ const TERMINAL_BLOCK_VISUAL: CatalogBlockVisual = {
 
 export function visualForCatalogEntryId(entryId: string | undefined): CatalogBlockVisual | undefined {
   if (!entryId) return undefined;
+  if (entryId.startsWith("logic.")) return { colorVar: "#7C3AED", icon: GitBranch, tileGlyph: "if" };
   if (["appblocks.manual_trigger", "ui.manual_trigger"].includes(entryId)) return {colorVar:"#5975C9",icon:MousePointerClick};
   if (["appblocks.data_viewer", "ui.data_viewer"].includes(entryId)) return { colorVar: "#5975C9", icon: Monitor };
   if (["appblocks.sequence", "ab.sequence"].includes(entryId)) return { colorVar: "#5975C9", icon: ListOrdered, tileGlyph: "sequence" };

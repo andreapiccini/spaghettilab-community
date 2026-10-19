@@ -75,3 +75,21 @@ body {
 .react-flow__edgelabel-renderer {
   z-index: 1001;
 }
+
+/* Larger pointer targets preserve the visible port and wire anchor positions. */
+.react-flow__handle.port-handle-hitarea::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: var(--port-hit-width, 28px);
+  height: 28px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  cursor: crosshair;
+}
+.react-flow__handle.port-handle-hitarea.target::after { left: -7px; }
+.react-flow__handle.port-handle-hitarea.source::after { right: -7px; }
+.react-flow__handle.port-handle-hitarea:hover,
+.react-flow__handle.port-handle-hitarea.connectingto {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-blue) 20%, transparent);
+}

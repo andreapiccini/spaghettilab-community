@@ -14,8 +14,25 @@ export function uniqueDeployProblems(
     ).values(),
   ];
 }
+export function isStaleDeployProblem(problem: DeployProblem): boolean {
+  return problem.code === "config-deployment.stale_generation" ||
+    /Config changed since this candidate was prepared/i.test(problem.technical);
+}
+export function canRecheckDeployProblem(problem: DeployProblem): boolean {
+  return ["offline", "upload-unconfirmed"].includes(problem.code ?? "") || isStaleDeployProblem(problem);
+}
 export function describeDeployProblem(problem: DeployProblem, it = true) {
   const message = problem.technical.replace(/^[0-9a-f]{32,}:\s*/i, "");
+  if (/phase activate_module, errno -133, rollback 0/.test(message)) return {
+    title: it ? "I pin del modulo non sono configurati sulla Backbone" : "Module pins are not configured on the Backbone",
+    body: it ? "Il modulo non può essere inizializzato con la configurazione attuale dei pin. Il programma precedente è stato ripristinato." : "The module cannot initialize with the current pin configuration. The previous program was restored.",
+    remedy: it ? "Apri Physical Composition, controlla le assegnazioni e premi Configura. Poi riprova il caricamento." : "Open Physical Composition, check the assignments and press Configure. Then retry the upload.",
+  };
+  if (isStaleDeployProblem(problem)) return {
+    title: it ? "La configurazione della Backbone è cambiata" : "The Backbone configuration has changed",
+    body: it ? "La Backbone contiene una configurazione più recente di quella usata per preparare il caricamento. Il nuovo programma non è stato applicato." : "The Backbone has a newer configuration than the one used to prepare this upload. The new program was not applied.",
+    remedy: it ? "Premi Ricontrolla per rileggere la configurazione e aggiornare il confronto. Poi controlla le modifiche e conferma nuovamente il caricamento. Il canvas resta invariato." : "Check again to read the current configuration and update the comparison. Then review the changes and confirm the upload again. Your canvas stays unchanged.",
+  };
   if (problem.code === "upload-unconfirmed")
     return {
       title: it ? "Caricamento non confermato" : "Upload unconfirmed",

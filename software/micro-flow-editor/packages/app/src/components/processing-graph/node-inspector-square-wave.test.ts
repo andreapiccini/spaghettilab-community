@@ -42,6 +42,44 @@ describe("NodeInspector square wave", () => {
       ),
     );
     expect(html).toContain("Onda quadra");
-    expect(html).toContain("Periodo");
+    expect(html).not.toContain("Che segnale vuoi generare?");
+
   });
+  it("offers only trigger generation without waveform settings", () => {
+    const entry = findCatalogEntryById("appblocks.manual_trigger")!;
+    const data = nodeDataFromCatalogEntry(entry, undefined)!;
+    const html = renderToString(wrap(createElement(NodeInspector, {
+      mode: { kind: "edit", nodeId: "signal", data, comment: "Generatore di trigger" },
+      moduleOptions: [], existingNodes: [{ layer: "device-processing", id: "signal", data }],
+      existingEdges: [], nodeLabel: (id: string) => id, knownModuleNodeIds: new Set<string>(),
+      onSave: () => undefined, onClose: () => undefined,
+    })));
+    expect(html).toContain("Invia trigger");
+    expect(html).not.toContain("Alterna acceso/spento");
+    expect(html).not.toContain("Invia impulso");
+    expect(html).not.toContain("ni-signal-mode");
+    expect(html).toContain("Schedule");
+    expect(html).not.toContain("Duty cycle");
+    expect(entry.label).toBe("Generatore di trigger");
+  });
+
+  it("shows only Output for the fixed status LED", () => {
+    const baseData = nodeDataFromCatalogEntry(findCatalogEntryById("appblocks.led")!, undefined)!;
+    if (baseData.kind !== "block") throw new Error("expected LED block");
+    const data = { ...baseData, properties: { ...baseData.properties, statusLed: true } };
+    const html = renderToString(wrap(createElement(NodeInspector, {
+      mode: { kind: "edit", nodeId: "status", data, comment: "STATUS LED" },
+      moduleOptions: [], existingNodes: [{ layer: "device-processing", id: "status", data }],
+      existingEdges: [], nodeLabel: (id: string) => id, knownModuleNodeIds: new Set<string>(),
+      onSave: () => undefined, onClose: () => undefined,
+    })));
+    expect(html).toContain("Output");
+    expect(html).not.toContain('title="Input"');
+    expect(html).not.toContain('ni-blocktype');
+    expect(html).not.toContain('ni-name');
+    expect(html).not.toContain("Soglia");
+    expect(html).not.toContain("Negato");
+    expect(html).not.toContain("Sink su comando");
+  });
+
 });

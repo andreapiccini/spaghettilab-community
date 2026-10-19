@@ -1,3 +1,5 @@
+import { canRecheckDeployProblem } from "../../lib/deploy-feedback.js";
+import { oneShotDeploymentInput } from "../../lib/one-shot-deployment.js";
 import { deployWire } from "../../lib/deploy-wire.js";
 import { abortableModuleOperation } from "../../lib/module-operation.js";
 import { installProfile as installProfileWorkflow } from "@spaghettilab/device-profile-install";
@@ -51,6 +53,7 @@ import {
 import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
 import "./deploy-dialog.css";
 import {
+  configHasContinuousSchedules,
   applyStoppedRuntime,
   formatApplyConfigError,
   isRetryableConfigApply,
@@ -138,6 +141,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
     setDeployPhase(phase);
   };
   useEffect(() => () => deployAbort.current?.abort(), []);
+  const [manualTestMode, setManualTestMode] = useState(false);
   const [deployError, setDeployError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -158,6 +162,8 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             throw new Error(it ? "Backbone scollegata." : "Backbone disconnected.");
           const config = await client.getConfig();
           observeConfig(binding.bindingId, config);
+          const decoded = decodeConfigCbor(config.configBytes);
+          if (decoded.ok) setExecutionMode(binding.bindingId, configHasContinuousSchedules(decoded.value) ? "continuous" : "one-shot");
         } catch (cause) {
           errors.push({
             bindingId: binding.bindingId,
@@ -248,12 +254,16 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
               "Aggiorna la Backbone al firmware 0.5.8 o successivo per Sequenza e Movimento terminato dello stepper.",
             );
         }
+        const deploymentInput = manualTestMode ? oneShotDeploymentInput(plan.input,
+          plan.profiles.filter(profile => profile.profileId.startsWith("flow.gpio-state.") || profile.sampleOps.some(op =>
+            ["DS18B20_READ", "DHT22_READ", "STEPPER", "RGB_PROGRAM"].includes(op.op)
+          )).map(profile => profile.profileId)) : plan.input;
         const available = profilesByBinding.get(binding.bindingId);
         const known = new Set([
           ...(available ?? []),
           ...plan.profiles.map((profile) => profile.profileId),
         ]);
-        const dryRun = dryRunConfig(plan.input, {
+        const dryRun = dryRunConfig(deploymentInput, {
           ...plan.options,
           ...(available ? { availableProfileIds: known } : {}),
         });
@@ -281,7 +291,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
         out.push({
           binding,
           bindingIndex,
-          input: plan.input,
+          input: deploymentInput,
           profiles: plan.profiles,
           options: plan.options,
           diff,
@@ -534,8 +544,8 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           if (result) {
             setResults((prev) => new Map(prev).set(c.binding.bindingId, result));
             if (result.record) execute?.(appendDeploymentRecord(result.record));
-            if (result.outcome === DeploymentOutcomeKind.SUCCESS) {
-              setExecutionMode(c.binding.bindingId, "continuous");
+            if ([DeploymentOutcomeKind.SUCCESS, DeploymentOutcomeKind.NO_OP, DeploymentOutcomeKind.AMBIGUOUS_RESOLVED_APPLIED].some(outcome => outcome === result.outcome)) {
+              setExecutionMode(c.binding.bindingId, manualTestMode ? "one-shot" : "continuous");
               await cleanupByBinding.get(c.binding.bindingId)?.();
               try {
                 const live = await wireFor(c.binding.bindingId).getConfig();
@@ -544,6 +554,15 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                 /* Pause still works from the next GET_CONFIG. */
               }
             }
+          }
+          if (![DeploymentOutcomeKind.SUCCESS, DeploymentOutcomeKind.NO_OP, DeploymentOutcomeKind.AMBIGUOUS_RESOLVED_APPLIED].some(outcome => outcome === result.outcome)) {
+            // Read back execution state after a rejected upload; never leave the UI stuck busy.
+            try {
+              const live = await wireFor(c.binding.bindingId).getConfig();
+              observeConfig(c.binding.bindingId, live);
+              const decoded = decodeConfigCbor(live.configBytes);
+              if (decoded.ok) setExecutionMode(c.binding.bindingId, configHasContinuousSchedules(decoded.value) ? "continuous" : "one-shot");
+            } catch { /* Ricontrolla will recover the state once the link responds. */ }
           }
           setRunning((prev) => {
             const next = new Set(prev);
@@ -638,12 +657,12 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             id="deploy-dialog-title"
             className="font-heading text-xl font-bold text-ink"
           >
-            {it ? "Avvia il programma" : "Start the program"}
+            {it ? "Carica il programma" : "Upload the program"}
           </h1>
           <p className="mt-1 text-xs leading-relaxed text-ink-muted">
             {it
-              ? "Carica il Flow sulla Backbone e avvia le azioni configurate."
-              : "Upload the Flow to your Backbone and start its configured actions."}
+              ? "Scegli se avviare il Flow oppure preparare la Backbone per le prove manuali."
+              : "Choose whether to start the Flow or prepare your Backbone for manual tests."}
           </p>
         </div>
         <button
@@ -658,6 +677,19 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
         </button>
       </header>
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-5">
+        {!successful.length && (
+          <fieldset disabled={busy || checking} className="space-y-2 disabled:opacity-60">
+            <legend className="mb-2 text-sm font-semibold">{it ? "Come vuoi usare il programma?" : "How do you want to use the program?"}</legend>
+            {[{ manual: false, title: it ? "Carica e avvia" : "Upload and start", text: it ? "Avvia subito la logica continua e i segnali automatici." : "Start continuous logic and automatic signals immediately." },
+              { manual: true, title: it ? "Carica per test manuali" : "Upload for manual tests", text: it ? "Prepara moduli e comandi, senza avviare l’esecuzione automatica. Poi invia i trigger dal canvas." : "Prepare modules and commands without starting schedules or alternation. Then send impulses from the canvas." }].map(option => (
+              <label key={String(option.manual)} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${manualTestMode === option.manual ? "border-brand-blue bg-brand-blue/5" : "border-border"}`}>
+                <input type="radio" name="deployment-mode" checked={manualTestMode === option.manual} onChange={() => setManualTestMode(option.manual)} className="mt-1" />
+                <span><span className="block text-sm font-semibold">{option.title}</span><span className="mt-1 block text-xs text-ink-muted">{option.text}</span></span>
+              </label>
+            ))}
+          </fieldset>
+        )}
+
         <div
           role="status"
           aria-live="polite"
@@ -684,8 +716,8 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                   : `${shownProblems.length} issues to resolve`
                 : successful.length
                   ? it
-                    ? "Programma caricato e verificato"
-                    : "Program uploaded and verified"
+                    ? manualTestMode ? "Pronto per i test manuali" : "Programma caricato e verificato"
+                    : manualTestMode ? "Ready for manual tests" : "Program uploaded and verified"
                   : !bindings.length
                     ? it
                       ? "Collega una Backbone per iniziare"
@@ -868,7 +900,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
               <p className="mt-1 text-xs leading-relaxed text-ink-muted">
                 {text.remedy}
               </p>
-              {["offline", "upload-unconfirmed"].includes(problem.code ?? "") ? (
+              {canRecheckDeployProblem(problem) ? (
                 <button
                   disabled={busy || checking}
                   onClick={() => {
@@ -917,8 +949,8 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                   : "No changes sent to the Backbone."
                 : successful.length
                   ? it
-                    ? "Il programma sulla Backbone è stato verificato. Usa Stop dal canvas per fermarlo."
-                    : "The program was verified on the Backbone. Use Stop on the canvas to stop it."
+                    ? manualTestMode ? "Backbone pronta: torna al canvas e premi Invia trigger. La logica continua non è stata avviata." : "Il programma sulla Backbone è stato verificato. Usa Stop dal canvas per fermarlo."
+                    : manualTestMode ? "Backbone ready: return to the canvas and send an impulse. Continuous logic has not started." : "The program was verified on the Backbone. Use Stop on the canvas to stop it."
                   : !bindings.length
                     ? it
                       ? "Aggiungi e collega una Backbone dalla sezione Discover."
@@ -956,14 +988,14 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           <button
             disabled={busy || checking}
             onClick={() =>
-              ["offline", "upload-unconfirmed"].includes(shownProblems[0]?.code ?? "")
+              canRecheckDeployProblem(shownProblems[0]!)
                 ? void refresh()
                 : showProblem(shownProblems[0]!)
             }
             className="inline-flex items-center gap-2 rounded-lg bg-brand-blue px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
           >
             <LocateFixed size={15} />
-            {["offline", "upload-unconfirmed"].includes(shownProblems[0].code ?? "")
+            {canRecheckDeployProblem(shownProblems[0])
               ? it
                 ? "Ricontrolla"
                 : "Check again"
@@ -978,7 +1010,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             className="inline-flex items-center gap-2 rounded-lg bg-brand-blue px-5 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
           >
             <Play size={15} />
-            {it ? "Carica e avvia" : "Upload and start"}
+            {manualTestMode ? (it ? "Carica per test manuali" : "Upload for manual tests") : (it ? "Carica e avvia" : "Upload and start")}
           </button>
         ) : successful.length && !busy ? (
           <button

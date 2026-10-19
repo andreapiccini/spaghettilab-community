@@ -15,8 +15,9 @@
 #include <spaghetti/physical.h>
 #include <spaghetti/update.h>
 
-/** Runtime ownership of the board STATUS LED; release restores system feedback. */
+/** Runtime ownership of the board STATUS LED; release leaves the LED off. */
 int spaghetti_status_led_set(const void *owner, bool on);
+int spaghetti_status_led_set_intensity(const void *owner, uint8_t percent);
 void spaghetti_status_led_release(const void *owner);
 
 /** Broadcast destination accepted by every listening peer. */

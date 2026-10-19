@@ -852,7 +852,7 @@ describe("GPIO physical deployment", () => {
       ),
     ).toBe(false);
     const relayProfile = plan.profiles.find(
-      (profile) => profile.profileId !== "flow.clock",
+      (profile) => profile.sampleOps.some(op => op.op === "GPIO_PULSE"),
     );
     expect(relayProfile?.sampleOps).toEqual(
       expect.arrayContaining([
@@ -891,9 +891,12 @@ describe("board STATUS LED deployment", () => {
       },
     };
     const plan = prepareDriverDeployment(fixture.project, "core", input);
+    const ledResult = compileConfig(plan.input, plan.options);
+    if (!ledResult.ok) throw new Error(JSON.stringify(ledResult.error));
+    expect(ledResult.ok).toBe(true);
     expect(plan.input.processingGraph.nodes[0]?.data).toMatchObject({
       blockTypeId: "status_led",
-      properties: { "1": 50n, "2": true },
+      properties: { "1": 1n, "2": false },
     });
     expect(
       (plan.input.processingGraph.nodes[0]?.data as { properties: object }).properties,

@@ -29,6 +29,7 @@
 #endif
 
 #include <zephyr/devicetree.h>
+#include <zephyr/drivers/pwm.h>
 
 #if DT_HAS_ALIAS(led0)
 #include <zephyr/drivers/gpio.h>
@@ -225,29 +226,41 @@ static void slup_led_set_mode(int mode);
 
 K_MUTEX_DEFINE(status_led_lock);
 static const void *status_led_owner;
+int spaghetti_status_led_set_intensity(const void *owner, uint8_t percent)
+{
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+ if (!owner || percent > 100U) return -EINVAL;
+ const struct device *pwm = DEVICE_DT_GET(DT_NODELABEL(ledc0));
+ if (!device_is_ready(pwm)) return -ENODEV;
+ k_mutex_lock(&status_led_lock, K_FOREVER);
+ int err = status_led_owner && status_led_owner != owner ? -EBUSY : 0;
+ if (!err) err = pwm_set(pwm, 4U, 1000000U, (uint32_t)percent * 10000U, PWM_POLARITY_INVERTED);
+ if (!err) status_led_owner = owner;
+ k_mutex_unlock(&status_led_lock);
+ return err;
+#else
+ ARG_UNUSED(owner); ARG_UNUSED(percent); return -ENOTSUP;
+#endif
+}
 int spaghetti_status_led_set(const void *owner, bool on)
 {
-#if DT_HAS_ALIAS(led0)
-	if (!owner) return -EINVAL;
-	if (!gpio_is_ready_dt(&slup_led)) return -ENODEV;
-	k_mutex_lock(&status_led_lock, K_FOREVER);
-	int err = status_led_owner && status_led_owner != owner ? -EBUSY : 0;
-	if (!err) err = gpio_pin_set_dt(&slup_led, on ? 1 : 0);
-	if (!err) status_led_owner = owner;
-	k_mutex_unlock(&status_led_lock);
-	return err;
-#else
-	ARG_UNUSED(owner); ARG_UNUSED(on); return -ENOTSUP;
-#endif
+ return spaghetti_status_led_set_intensity(owner, on ? 100U : 0U);
 }
 void spaghetti_status_led_release(const void *owner)
 {
 	k_mutex_lock(&status_led_lock, K_FOREVER);
-	if (status_led_owner == owner) status_led_owner = NULL;
+	if (status_led_owner == owner) {
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+  (void)pwm_set(DEVICE_DT_GET(DT_NODELABEL(ledc0)), 4U, 1000000U, 0U, PWM_POLARITY_INVERTED);
+#endif
+  status_led_owner = NULL;
+ }
 	k_mutex_unlock(&status_led_lock);
 }
 static void slup_led_pin(bool on)
 {
+	/* The Backbone LED belongs exclusively to the user graph. */
+	if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return;
 #if DT_HAS_ALIAS(led0)
 	k_mutex_lock(&status_led_lock, K_FOREVER);
 	if (!status_led_owner && gpio_is_ready_dt(&slup_led))
@@ -375,7 +388,7 @@ void spaghetti_field_update_nfc_changed(uint8_t port_id, uint32_t generation)
 	data[0] = SPAGHETTI_SLUP_RSP_NFC_CHANGED;
 	data[1] = port_id;
 	sys_put_be32(generation, &data[2]);
-	(void)spaghetti_field_update_can_reply(session.node_id, data, sizeof(data));
+	(void)spaghetti_field_update_can_notify(session.node_id, data, sizeof(data));
 #else
 	ARG_UNUSED(port_id);
 	ARG_UNUSED(generation);
@@ -385,9 +398,13 @@ void spaghetti_field_update_nfc_changed(uint8_t port_id, uint32_t generation)
 static void slup_led_start(void)
 {
 #if DT_HAS_ALIAS(led0)
-	if (gpio_is_ready_dt(&slup_led)) {
+	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE) && gpio_is_ready_dt(&slup_led)) {
 		(void)gpio_pin_configure_dt(&slup_led, GPIO_OUTPUT_INACTIVE);
 	}
+#endif
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+ if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE))
+  (void)pwm_set(DEVICE_DT_GET(DT_NODELABEL(ledc0)), 4U, 1000000U, 0U, PWM_POLARITY_INVERTED);
 #endif
 	slup_led_phase = 0U;
 	slup_led_pwm_tick = 0U;
@@ -599,6 +616,15 @@ __weak int spaghetti_field_update_can_ctrl(uint32_t dest_node_id, uint8_t cmd,
 	ARG_UNUSED(cmd);
 	ARG_UNUSED(extra);
 	ARG_UNUSED(extra_len);
+	return -ENOTSUP;
+}
+
+__weak int spaghetti_field_update_can_notify(uint32_t node_id,
+                                           const uint8_t *data, uint8_t dlc)
+{
+	ARG_UNUSED(node_id);
+	ARG_UNUSED(data);
+	ARG_UNUSED(dlc);
 	return -ENOTSUP;
 }
 
@@ -1133,6 +1159,7 @@ static uint8_t slup_blink_count(uint8_t flashes)
 
 static void slup_blink_led(uint8_t flashes)
 {
+	if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return;
 	uint8_t i;
 
 	flashes = slup_blink_count(flashes);

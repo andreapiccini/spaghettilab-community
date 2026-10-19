@@ -87,6 +87,15 @@ describe("deployConfig — S080 § Verifiche", () => {
     expect(client.applyConfig).not.toHaveBeenCalled();
   });
 
+  it("preserves activation failures when CONFLICT has an unchanged generation", async () => {
+    const cause = { code: "PROTOCOL_ERROR", status: 4, configFailure: { phase: "activate_module", errno: -116, rollbackErrno: 0 } };
+    const client = fakeClient({ applyConfig: vi.fn().mockRejectedValue(cause) });
+    const result = await deployConfig(client, fixture(), context());
+    expect(result.outcome).toBe(DeploymentOutcomeKind.REMOTE_ERROR);
+    expect(result.issues[0]?.cause).toBe(cause);
+    expect(client.applyConfig).toHaveBeenCalledTimes(1);
+  });
+
   it("resolves a stale-generation conflict with the live snapshot and an explicit diff, never force-applying", async () => {
     const client = fakeClient({
       applyConfig: vi.fn().mockRejectedValue({ code: "PROTOCOL_ERROR", status: 4 }),

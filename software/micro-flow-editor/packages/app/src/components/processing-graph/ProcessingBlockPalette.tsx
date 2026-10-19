@@ -11,7 +11,7 @@ import {
   type ProcessingCatalogEntry,
 } from "@spaghettilab/processing-block-catalog";
 import { AnimatePresence, motion } from "motion/react";
-import { Boxes, ChefHat, Cpu, Search, Zap, type LucideIcon } from "lucide-react";
+import { Boxes, ChefHat, Cpu, Search, Zap, GitBranch, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { DEMO_PALETTE_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
@@ -40,9 +40,6 @@ import {
 /** Authoring surface: only these blocks (plus Schedule trigger). Flow Start is auto-spawned. */
 const PALETTE_ALLOWED_IDS = new Set([
   "native.schedule",
-  "appblocks.digital_out_toggle",
-  "appblocks.square_wave",
-  "appblocks.sequence",
   "appblocks.data_viewer",
   "appblocks.manual_trigger",
   "appblocks.led",
@@ -60,14 +57,15 @@ function catalogEntryNeedsConfiguredPort(entry: ProcessingCatalogEntry): boolean
   return Boolean(entry.fields?.some((field) => field.id === "line"));
 }
 
-type FamilySectionId = "functionality" | "bay";
+type FamilySectionId = "functionality" | "logic" | "bay";
 
 const FAMILY_ICONS: Record<FamilySectionId, LucideIcon> = {
   functionality: Zap,
+  logic: GitBranch,
   bay: Boxes,
 };
 
-const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "bay"]);
+const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "logic", "bay"]);
 
 export function ProcessingBlockPalette({
   bindingId,
@@ -106,10 +104,11 @@ export function ProcessingBlockPalette({
         (e) =>
           (demoOnly
             ? (DEMO_PALETTE_IDS as readonly string[]).includes(e.id)
-            : PALETTE_ALLOWED_IDS.has(e.id) ||
+            : PALETTE_ALLOWED_IDS.has(e.id) || e.id.startsWith("logic.") ||
               (e.id.startsWith("native.") &&
                 e.runtime === "core-block" &&
                 !e.id.startsWith("native.physical_"))) &&
+          e.id !== "appblocks.digital_out_toggle" &&
           e.availability !== "unavailable" &&
           !FLOW_START_IDS.has(e.id) &&
           !FLOW_START_IDS.has(e.typeId ?? ""),
@@ -179,8 +178,8 @@ export function ProcessingBlockPalette({
   }
 
   const sections: { id: FamilySectionId; rows: readonly PalettePlaceable[] }[] = [
-    { id: "functionality", rows: groups.functionality },
-    { id: "bay", rows: groups.bay },
+    { id: "functionality", rows: groups.functionality.filter(row => !row.entry.id.startsWith("logic.")) },
+    { id: "logic", rows: groups.functionality.filter(row => row.entry.id.startsWith("logic.")) },
   ];
 
   return (
@@ -205,8 +204,8 @@ export function ProcessingBlockPalette({
           sections.map(({ id, rows }, index) => {
             if (rows.length === 0 && searching) return null;
             const Icon = FAMILY_ICONS[id];
-            const label = id === "functionality" ? copy.functionality : copy.bay;
-            const hint = id === "functionality" ? copy.functionalityHint : copy.bayHint;
+            const label = id === "logic" ? (locale === "it" ? "Logica" : "Logic") : id === "functionality" ? copy.functionality : copy.bay;
+            const hint = id === "logic" ? (locale === "it" ? "Condizioni e decisioni" : "Conditions and decisions") : id === "functionality" ? copy.functionalityHint : copy.bayHint;
             const open = searching || openIds.has(id);
             return (
               <div key={id} className="mb-1">

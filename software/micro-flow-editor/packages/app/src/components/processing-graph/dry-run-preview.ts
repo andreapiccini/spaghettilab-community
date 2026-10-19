@@ -1,3 +1,4 @@
+import { signalDurations } from "../../lib/signal-timing.js";
 import type { DeviceProcessingNodeData } from "@spaghettilab/device-processing-graph-model";
 import { isBlockNodeData } from "@spaghettilab/device-processing-graph-model";
 import type { GraphState } from "@spaghettilab/domain";
@@ -397,11 +398,12 @@ export function isDigitalCommandSource(data: DeviceProcessingNodeData): boolean 
 }
 
 export function squareWavePeriodMs(properties: Readonly<Record<string, unknown>>): number {
-  return Math.max(20, Math.min(60_000, numberFromProperty(properties.periodMs, 500)));
+  return Math.max(20, Math.min(60_000, signalDurations(properties).periodMs));
 }
 
 export function squareWaveDutyPercent(properties: Readonly<Record<string, unknown>>): number {
-  return Math.max(1, Math.min(99, numberFromProperty(properties.dutyCycle, 50)));
+  const { onMs, periodMs } = signalDurations(properties);
+  return onMs / periodMs * 100;
 }
 
 export function isCompareIf(data: DeviceProcessingNodeData): boolean {

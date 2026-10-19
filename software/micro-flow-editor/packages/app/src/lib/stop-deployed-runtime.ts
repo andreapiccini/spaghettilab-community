@@ -231,6 +231,7 @@ export function configHasContinuousSchedules(config: CanonicalConfig): boolean {
       .map((rule) => Number(rule.properties[3])),
   );
   return config.schedules.some(
-    (schedule) => schedule.enabled && !actionTargets.has(schedule.sourceKey),
+    (schedule) => schedule.enabled && !actionTargets.has(schedule.sourceKey) &&
+      !config.modules.some(module => module.key === schedule.sourceKey && String(module.properties[1]).startsWith("flow.gpio-state.")),
   );
 }

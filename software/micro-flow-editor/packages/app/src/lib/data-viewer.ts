@@ -3,7 +3,13 @@ export type ViewerValue = bigint | number | string | boolean | Uint8Array;
 export function formatViewerValue(
   value: ViewerValue,
   decimals = 2,
+  kind?: "digital" | "boolean" | "number" | "text",
 ): { text: string; type: string } {
+  if ((kind === "digital" || kind === "boolean") &&
+      (typeof value === "boolean" || value === 0 || value === 1 || value === 0n || value === 1n)) {
+    const high = value === true || value === 1 || value === 1n;
+    return kind === "digital" ? { text: high ? "1 · HIGH" : "0 · LOW", type: "Digitale" } : { text: high ? "true" : "false", type: "Booleano" };
+  }
   if (typeof value === "string") return { text: value, type: "Testo" };
   if (typeof value === "boolean")
     return { text: value ? "true" : "false", type: "Booleano" };

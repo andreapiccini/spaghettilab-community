@@ -562,6 +562,15 @@ config SPAGHETTI_NFC
 	  on GET_STATUS and forwarded over SLUP so one USB or Wi-Fi session
 	  sees the whole chain.
 
+config SPAGHETTI_NFC_WORK_STACK_SIZE
+	int "NFC RF worker stack size"
+	depends on SPAGHETTI_NFC
+	range 2048 16384
+	default 4096
+	help
+	  Stack for the dedicated RF scan and wake-up workqueue. Scanning
+	  includes SPI transactions, tag-memory reads and CAN notifications.
+
 config SPAGHETTI_FIELD_UPDATE
 	bool "SLUP field firmware update over CAN and ESP-NOW"
 	default y if BOARD_SPAGHETTILAB_BACKBONE_V1

@@ -86,7 +86,7 @@ it("publishes the converted DHT22 field to a host viewer without sending the vie
   expect(result.input.physicalGraph.nodes.some(node => node.id === physicalPin.id)).toBe(false);
   expect(input.physicalGraph.nodes).toContain(physicalPin);
   expect(() => prepareDriverDeployment(installed, "master", { ...input, processingGraph: { ...input.processingGraph, nodes: [...input.processingGraph.nodes, { id: "duplicate-input", layer: "device-processing", data: { kind: "event-source", moduleNodeId: physicalPin.id } }] } })).toThrow("ingresso GPIO");
-  expect(result.observations).toEqual([{ viewerId: "viewer", key: 1, field: 2, action: 1, schemaId: result.profiles[0]!.sampleSchemaId }]);
+  expect(result.observations).toEqual([{ viewerId: "viewer", key: 1, field: 2, action: 1, label: "Temperatura", unit: "°C", valueKind: "number", schemaId: result.profiles[0]!.sampleSchemaId }]);
   expect(result.input.processingGraph.nodes.some(node => node.id === "viewer")).toBe(false);
   expect(result.input.processingGraph.edges.some(edge => edge.target === "viewer")).toBe(false);
   const compiled = compileConfig(result.input, result.options);

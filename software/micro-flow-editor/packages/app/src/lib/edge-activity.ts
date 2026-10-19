@@ -1,3 +1,7 @@
+/** Shared by wire travel and destination glow so they stay synchronized. */
+export const SIGNAL_TRAVEL_MS = 650;
+export const SIGNAL_ACTIVITY_MS = SIGNAL_TRAVEL_MS + 1000;
+
 import type { RecordEventPayload } from "@spaghettilab/protocol-sdk";
 export type EdgeActivityRoute = {
   edgeId: string;

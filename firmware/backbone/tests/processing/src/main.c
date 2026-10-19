@@ -574,3 +574,118 @@ ZTEST(processing, test_records_fit_runtime_worker_stack)
 	}
 	zassert_ok(spaghetti_processing_configure(NULL, 0U, NULL, 0U));
 }
+
+ZTEST(processing, test_logical_samples_and_discrete_types)
+{
+ for(int kind=0;kind<2;kind++) {
+  const struct spaghetti_block_driver *d=spaghetti_block_registry_find(kind?"logic_or":"logic_and");zassert_not_null(d);
+  struct spaghetti_property_set p={0}; uint64_t state[64]={0};zassert_true(d->state_size<=sizeof(state));zassert_ok(d->ops->init(&p,state));
+  struct spaghetti_value in[2]={make_i64(0,-2),make_i64(1,0)},out[1];bool valid[2]={true,false},ov[1]={false};
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,NULL,NULL,NULL));zassert_false(ov[0]);
+  valid[0]=false;valid[1]=true;
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,NULL,NULL,NULL));zassert_true(ov[0]);zassert_equal(out[0].data.boolean,kind==1);
+  in[1].data.signed_integer=3;
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,NULL,NULL,NULL));zassert_true(out[0].data.boolean);
+  in[1].type=SPAGHETTI_VALUE_TEXT;
+  zassert_equal(d->ops->process(state,NULL,in,valid,2,out,ov,1,NULL,NULL,NULL),-EINVAL);
+  d->ops->reset(state);valid[1]=false;ov[0]=false;
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,NULL,NULL,NULL));zassert_false(ov[0]);
+ }
+}
+ZTEST(processing, test_if_and_while_compare_on_value_change)
+{
+ for(int kind=0;kind<2;kind++) {
+  const struct spaghetti_block_driver *d=spaghetti_block_registry_find(kind?"logic_while":"logic_if");zassert_not_null(d);
+  struct spaghetti_property_set p={0};prop_u64(&p,1,4);
+  p.fields[p.field_count++]=make_i64(2,10);
+  uint64_t state[64]={0};zassert_ok(d->ops->validate(&p));zassert_ok(d->ops->init(&p,state));
+  struct spaghetti_value in[2]={make_i64(0,12),make_i64(1,1)},out[1];bool valid[2]={true,true},ov[1]={false};
+  struct spaghetti_record record={.source_key=33};
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,&record,NULL,NULL));zassert_true(ov[0]);
+  record.source_key=77;ov[0]=false;
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,&record,NULL,NULL));zassert_equal(ov[0],!kind);if(!kind)zassert_equal(out[0].data.unsigned_integer,1);
+  ov[0]=false;
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,&record,NULL,NULL));zassert_equal(ov[0],!kind);
+  in[0].data.signed_integer=9;ov[0]=false;
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,&record,NULL,NULL));zassert_equal(ov[0],!kind);if(!kind)zassert_equal(out[0].data.unsigned_integer,0);
+  in[0].type=SPAGHETTI_VALUE_UINT64;in[0].data.unsigned_integer=UINT64_MAX;ov[0]=false;
+  zassert_ok(d->ops->process(state,NULL,in,valid,2,out,ov,1,&record,NULL,NULL));zassert_true(ov[0]);zassert_true(out[0].data.boolean);
+ }
+}
+
+ZTEST(processing, test_if_configurable_true_and_false_levels)
+{
+ const struct spaghetti_block_driver *d=spaghetti_block_registry_find("logic_if");zassert_not_null(d);
+ for(uint8_t high=0;high<2;high++)for(uint8_t low=0;low<2;low++) {
+  struct spaghetti_property_set p={0};prop_u64(&p,1,1);prop_u64(&p,5,high);prop_u64(&p,6,low);
+  uint64_t state[64]={0};zassert_ok(d->ops->validate(&p));zassert_ok(d->ops->init(&p,state));
+  struct spaghetti_value input=make_i64(0,1),output;bool valid=true,ov=false;
+  zassert_ok(d->ops->process(state,NULL,&input,&valid,1,&output,&ov,1,NULL,NULL,NULL));
+  zassert_true(ov);zassert_equal(output.type,SPAGHETTI_VALUE_UINT64);zassert_equal(output.data.unsigned_integer,high);
+  input.data.signed_integer=0;
+  zassert_ok(d->ops->process(state,NULL,&input,&valid,1,&output,&ov,1,NULL,NULL,NULL));zassert_equal(output.data.unsigned_integer,low);
+ }
+}
+
+ZTEST(processing, test_logical_decimal_and_numeric_text)
+{
+ const struct spaghetti_block_driver *d=spaghetti_block_registry_find("logic_if");zassert_not_null(d);
+ struct spaghetti_property_set p={0};prop_u64(&p,1,2);prop_u64(&p,8,2);
+ p.fields[p.field_count++]=(struct spaghetti_value){.field_id=7,.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="23.56",.size=5}};
+ uint64_t state[64]={0};zassert_ok(d->ops->validate(&p));zassert_ok(d->ops->init(&p,state));
+ struct spaghetti_value input={.type=SPAGHETTI_VALUE_FLOAT,.data.decimal=23.5625},out;bool valid=true,ov=false;
+ zassert_ok(d->ops->process(state,NULL,&input,&valid,1,&out,&ov,1,NULL,NULL,NULL));zassert_true(ov);zassert_equal(out.data.unsigned_integer,1);
+ input.data.decimal=23.57;
+ zassert_ok(d->ops->process(state,NULL,&input,&valid,1,&out,&ov,1,NULL,NULL,NULL));zassert_equal(out.data.unsigned_integer,0);
+ input=(struct spaghetti_value){.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="23,56",.size=5}};
+ zassert_ok(d->ops->process(state,NULL,&input,&valid,1,&out,&ov,1,NULL,NULL,NULL));zassert_equal(out.data.unsigned_integer,1);
+ const char *bad[]={"23 C","abc","NaN","Infinity",""};
+ for(size_t i=0;i<ARRAY_SIZE(bad);i++) {
+  strcpy(input.data.text.text,bad[i]);input.data.text.size=strlen(bad[i]);
+  zassert_equal(d->ops->process(state,NULL,&input,&valid,1,&out,&ov,1,NULL,NULL,NULL),-EINVAL);
+ }
+}
+ZTEST(processing, test_while_numeric_text_is_copied_and_compares_values)
+{
+ const struct spaghetti_block_driver *d=spaghetti_block_registry_find("logic_while");struct spaghetti_property_set p={0};prop_u64(&p,1,1);prop_u64(&p,8,255);
+ uint64_t state[64]={0};zassert_ok(d->ops->init(&p,state));
+ struct spaghetti_value input={.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="12.5",.size=4}},out;bool valid=true,ov=false;
+ zassert_ok(d->ops->process(state,NULL,&input,&valid,1,&out,&ov,1,NULL,NULL,NULL));zassert_true(ov);
+ ov=false;
+ zassert_ok(d->ops->process(state,NULL,&input,&valid,1,&out,&ov,1,NULL,NULL,NULL));zassert_false(ov);
+ input.data.text.text[3]='6';ov=false;
+ zassert_ok(d->ops->process(state,NULL,&input,&valid,1,&out,&ov,1,NULL,NULL,NULL));zassert_true(ov);
+}
+
+static uint8_t test_led_intensity;
+int spaghetti_status_led_set_intensity(const void *owner, uint8_t percent)
+{
+ int err = spaghetti_status_led_set(owner, percent > 0U);
+ if (!err) test_led_intensity = percent;
+ return err;
+}
+ZTEST(processing, test_white_led_pwm_initial_actions_and_numeric_input)
+{
+ const struct spaghetti_block_driver *driver = spaghetti_block_registry_find("status_led");
+ struct spaghetti_property_set config = {0}; prop_u64(&config,1U,1U);
+ config.fields[config.field_count++] = (struct spaghetti_value){.field_id=2U,.type=SPAGHETTI_VALUE_BOOL,.data.boolean=false};
+ prop_u64(&config,3U,25U);
+ struct spaghetti_value *steps=&config.fields[config.field_count++];steps->field_id=8U;steps->type=SPAGHETTI_VALUE_TEXT;steps->data.text.size=5U;memcpy(steps->data.text.text,"12,67",6U);
+ uint64_t state[8]={0}; zassert_ok(driver->ops->init(&config,state)); zassert_equal(test_led_intensity,25U);
+ struct spaghetti_value inputs[5]={0}, outputs[2]={0}; bool valid[5]={0}, output_valid[2]={0};
+ inputs[4].type=SPAGHETTI_VALUE_FLOAT;inputs[4].data.decimal=37.4;valid[4]=true;
+ zassert_ok(driver->ops->process(state,NULL,inputs,valid,5,outputs,output_valid,2,NULL,NULL,NULL));
+ zassert_equal(test_led_intensity,37U);zassert_equal(outputs[1].data.unsigned_integer,37U);zassert_true(outputs[0].data.boolean);
+ valid[4]=false;inputs[2].type=SPAGHETTI_VALUE_BOOL;inputs[2].data.boolean=true;valid[2]=true;
+ zassert_ok(driver->ops->process(state,NULL,inputs,valid,5,outputs,output_valid,2,NULL,NULL,NULL));zassert_equal(test_led_intensity,0U);
+ valid[4]=true;
+ zassert_ok(driver->ops->process(state,NULL,inputs,valid,5,outputs,output_valid,2,NULL,NULL,NULL));zassert_equal(test_led_intensity,0U);
+ valid[4]=false;
+ valid[2]=false;inputs[1].type=SPAGHETTI_VALUE_BOOL;inputs[1].data.boolean=true;valid[1]=true;
+ zassert_ok(driver->ops->process(state,NULL,inputs,valid,5,outputs,output_valid,2,NULL,NULL,NULL));zassert_equal(test_led_intensity,100U);
+ valid[1]=false;inputs[3].type=SPAGHETTI_VALUE_BOOL;inputs[3].data.boolean=true;valid[3]=true;
+ zassert_ok(driver->ops->process(state,NULL,inputs,valid,5,outputs,output_valid,2,NULL,NULL,NULL));zassert_equal(test_led_intensity,67U);
+ valid[3]=false;inputs[4].data.decimal=101;valid[4]=true;
+ zassert_equal(driver->ops->process(state,NULL,inputs,valid,5,outputs,output_valid,2,NULL,NULL,NULL),-ERANGE);zassert_equal(test_led_intensity,67U);
+ driver->ops->reset(state);zassert_equal(test_led_intensity,0U);driver->ops->deinit(state);
+}

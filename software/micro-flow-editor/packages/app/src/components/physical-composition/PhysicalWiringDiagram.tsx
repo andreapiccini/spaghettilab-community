@@ -1,5 +1,6 @@
+import { roundedOrthogonalPath } from "../processing-graph/orthogonal-route.js";
 import "./physical-wiring.css";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { NFC_INSTALL_META } from "../../lib/nfc-workspace.js";
 import { useSession } from "../../state/session-context.js";
 import {
@@ -18,9 +19,12 @@ import {
 } from "../../lib/backbone-physical.js";
 
 type Line = { signal: string; channel?: number; rail?: string };
+const wireKey = (line: Line) => line.channel !== undefined ? `channel-${line.channel}` : `rail-${line.rail}`;
 type Device = { id: string; name: string; lines: Line[] };
-const colorFor = (line: Line) =>
-  line.rail === "GND" ? "#626b78" : line.rail ? "#ed963e" : "#4e79df";
+const SIGNAL_COLORS = ["#4e79df", "#198b83", "#9060cf", "#c85b86", "#397eaa", "#a27c24", "#5d8e42", "#9a658e"];
+const colorFor = (line: Line) => line.rail === "GND" ? "#626b78"
+  : line.rail || /power|vcc|alimentaz|supply/i.test(line.signal) ? "#dc8a2e"
+  : SIGNAL_COLORS[(line.channel ?? 0) % SIGNAL_COLORS.length]!;
 
 /** Connector geometry and wire origins share the authoritative V1/V2 pin grid. */
 export function PhysicalWiringDiagram({
@@ -52,6 +56,8 @@ export function PhysicalWiringDiagram({
 }) {
   const { session } = useSession();
   const gradient = useId().replaceAll(":", "");
+  const [hoveredWire, setHoveredWire] = useState<string | null>(null);
+  const activeWire = hoveredWire ?? (selected !== null ? `channel-${selected}` : null);
   const interfaces = derivePortInterfaces(modes, variant);
   const modules = modulesForBinding(
     parseBackboneSensorModules(
@@ -149,7 +155,10 @@ export function PhysicalWiringDiagram({
     nextY += height + 30;
     return { ...device, y, height };
   });
-  const height = Math.max(240, nextY);
+  const wireCount = boxes.reduce((count, box) => count + box.lines.length, 0);
+  const laneSpacing = Math.min(16, 200 / Math.max(1, wireCount));
+  const routeBaseY = variant === "v2" ? 220 : 175;
+  const height = Math.max(240, nextY, routeBaseY + wireCount * 12 + 24);
   const pinLabel = (channel: number) =>
     formatPinLabel(modeIndexToPinId(channel, variant), variant);
   const origin = (line: Line) =>
@@ -201,35 +210,40 @@ export function PhysicalWiringDiagram({
           <text x="12" y="97" fontSize="11" fill="#626b78">
             1
           </text>
-          {boxes.flatMap((box, d) =>
-            box.lines.map((line, i) => {
-              const start = origin(line);
-              if (!start) return null;
+          {boxes.flatMap(box => box.lines.map((line, i) => ({ box, line, i, start: origin(line) })))
+            .filter(wire => wire.start !== undefined)
+            .sort((a, b) => b.start!.x - a.start!.x || a.box.y - b.box.y || a.i - b.i)
+            .map(({ box, line, i, start }, index) => {
               const endY = box.y + 48 + i * 28;
-              const lane = 335 + d * 8 + i * 13;
-              return (
-                <path
-                  key={`${box.id}-${i}`}
-                  d={`M${start.x} ${start.y} V${200 + i * 10 + d * 5} H${lane} Q${lane + 10} ${200 + i * 10 + d * 5} ${lane + 10} ${190 + i * 10 + d * 5} V${endY + 10} Q${lane + 10} ${endY} ${lane + 20} ${endY} H596`}
-                  stroke={colorFor(line)}
-                  strokeWidth="2"
-                  fill="none"
-                />
-              );
-            }),
-          )}
+              const laneY = routeBaseY + index * 12;
+              const laneX = 330 + index * laneSpacing;
+              const path = roundedOrthogonalPath([
+                { x: start!.x, y: start!.y }, { x: start!.x, y: laneY },
+                { x: laneX, y: laneY }, { x: laneX, y: endY }, { x: 574, y: endY },
+              ], 9);
+              return <g key={`${box.id}-${i}`} className="physical-wire" data-muted={activeWire !== null && activeWire !== wireKey(line)} data-active={activeWire === wireKey(line)}
+                onMouseEnter={() => setHoveredWire(wireKey(line))} onMouseLeave={() => setHoveredWire(null)}
+                onFocus={() => setHoveredWire(wireKey(line))} onBlur={() => setHoveredWire(null)}
+                tabIndex={0} role="group" aria-label={`${line.channel !== undefined ? pinLabel(line.channel) : line.rail} → ${box.name} · ${line.signal}`}>
+                <title>{`${line.channel !== undefined ? pinLabel(line.channel) : line.rail} → ${box.name} · ${line.signal}`}</title>
+                <path d={path} stroke="var(--color-surface, white)" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <path className="physical-wire-line" d={path} stroke={colorFor(line)} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <g className="physical-wire-tracer" style={{ color: colorFor(line) }} pointerEvents="none" aria-hidden="true">
+                  <circle r="4" fill={colorFor(line)} opacity=".75" />
+                  <circle r="1.8" fill="white" />
+                  <animateMotion path={path} dur="3.4s" begin={`${-index * 0.45}s`} repeatCount="indefinite" calcMode="paced" />
+                </g>
+                <path d={path} stroke="transparent" strokeWidth="12" fill="none" pointerEvents="stroke" />
+              </g>;
+            })}
           {contacts.map((pin, i) => {
             const connected = boxes.some((box) =>
               box.lines.some((line) => origin(line) === pin),
             );
             const label =
               pin.modeIndex !== undefined ? pinLabel(pin.modeIndex) : pin.label;
-            const color =
-              pin.modeIndex !== undefined
-                ? "#4e79df"
-                : pin.label === "GND"
-                  ? "#626b78"
-                  : "#ed963e";
+            const connectedLine = boxes.flatMap(box => box.lines).find(line => origin(line) === pin);
+            const color = connectedLine ? colorFor(connectedLine) : pin.label === "GND" ? "#626b78" : pin.modeIndex !== undefined ? SIGNAL_COLORS[pin.modeIndex % SIGNAL_COLORS.length]! : "#dc8a2e";
             const activate = () => {
               if (disabled || pin.modeIndex === undefined) return;
               if (pendingSignal) onAssign(pin.modeIndex, pendingSignal.mode);
@@ -239,6 +253,10 @@ export function PhysicalWiringDiagram({
               <g
                 key={i}
                 className="physical-wiring-pin"
+                onMouseEnter={() => setHoveredWire(pin.modeIndex !== undefined ? `channel-${pin.modeIndex}` : `rail-${pin.label}`)}
+                onMouseLeave={() => setHoveredWire(null)}
+                onFocus={() => setHoveredWire(pin.modeIndex !== undefined ? `channel-${pin.modeIndex}` : `rail-${pin.label}`)}
+                onBlur={() => setHoveredWire(null)}
                 data-selected={
                   pin.modeIndex !== undefined && selected === pin.modeIndex
                 }
@@ -318,7 +336,9 @@ export function PhysicalWiringDiagram({
                 stroke="#939ba8"
               />
               {box.lines.map((line, i) => (
-                <g key={i}>
+                <g key={i} className="physical-wire-terminal" data-active={activeWire === wireKey(line)}
+                  onMouseEnter={() => setHoveredWire(wireKey(line))} onMouseLeave={() => setHoveredWire(null)}>
+                  <title>{`${line.channel !== undefined ? pinLabel(line.channel) : line.rail} → ${box.name} · ${line.signal}`}</title>
                   <rect
                     x="565"
                     y={box.y + 39 + i * 28}
@@ -372,6 +392,7 @@ export function PhysicalWiringDiagram({
           </button>
         </div>
       )}
+      {devices.length > 0 && <p className="text-[10px] text-ink-muted">{it ? "Animazione guida dei collegamenti · passa su un filo o un contatto per seguirne il percorso." : "Wiring guide animation · hover a wire or contact to trace its path."}</p>}
       {devices.length > 0 && (
         <details className="shrink-0 rounded-lg border border-border">
           <summary className="cursor-pointer px-3 py-1.5 text-[11px] text-ink-muted">

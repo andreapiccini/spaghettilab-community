@@ -20,6 +20,13 @@ export function catalogEntryForNode(data: DeviceProcessingNodeData): ProcessingC
   }
 
   if (entry && data.kind === "block") {
+    if (data.properties.statusLed === true) return { ...entry, inputs: [
+      { direction:"in", id:"0", label:"Accendi / spegni", types:[{domain:"digital",role:"comando"}] },
+      { direction:"in", id:"1", label:"Accendi", types:[{domain:"event",role:"comando"},{domain:"digital",role:"comando"}] },
+      { direction:"in", id:"2", label:"Spegni", types:[{domain:"event",role:"comando"},{domain:"digital",role:"comando"}] },
+      { direction:"in", id:"3", label:"Imposta intensità", types:[{domain:"event",role:"comando"},{domain:"digital",role:"comando"}] },
+      { direction:"in", id:"4", label:"Ricevi intensità (%)", types:[{domain:"analog",role:"comando"}] },
+    ], outputs:[{direction:"out",id:"0",label:"È acceso",types:[{domain:"digital",role:"misura"}]},{direction:"out",id:"1",label:"Intensità attuale (%)",types:[{domain:"analog",role:"misura"}]}] };
     return catalogEntryWithSensorChannels(entry, data.properties);
   }
   return entry;

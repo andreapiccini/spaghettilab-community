@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { Cpu, Plus, Trash2 } from "lucide-react";
 import type { BackboneSensorModule } from "../../lib/backbone-sensor-modules.js";
 import { resolveRecipe } from "../../lib/backbone-sensor-modules.js";
-import { STATUS_LED_GPIO, STATUS_LED_LABEL } from "../../lib/backbone-physical.js";
+import { STATUS_LED_LABEL } from "../../lib/backbone-physical.js";
 import { useLocale } from "../../state/locale-context.js";
 
 /**
@@ -60,20 +60,17 @@ export function BackboneModulesPanel({
           onClick={onUseStatusLed}
           title={
             it
-              ? `${STATUS_LED_LABEL} · pin fisso IO${STATUS_LED_GPIO}`
-              : `${STATUS_LED_LABEL} · fixed pin IO${STATUS_LED_GPIO}`
+              ? STATUS_LED_LABEL
+              : "Internal LED"
           }
           className="flex h-[4.5rem] w-[4.5rem] flex-col items-center justify-center gap-1 rounded-slsm border border-border-strong bg-surface px-1 text-center shadow-e1 hover:border-brand-blue"
           style={{ outline: "1px solid color-mix(in srgb, #22C55E 35%, transparent)" }}
         >
           <span className="h-8 w-8">
-            <ModuleArtwork kind="led" name="STATUS" />
+            <ModuleArtwork kind="led" name="LED interno" />
           </span>
           <span className="line-clamp-2 w-full font-body text-[10px] font-semibold leading-tight text-ink">
-            STATUS
-          </span>
-          <span className="font-mono text-[9px] uppercase text-ink-faint">
-            IO{STATUS_LED_GPIO}
+            {it ? "LED interno" : "Internal LED"}
           </span>
         </button>
 
@@ -135,8 +132,8 @@ export function BackboneModulesPanel({
       {modules.length === 0 && (
         <p className="border-t border-slate-400/20 px-2.5 py-2 font-body text-[11px] text-ink-faint">
           {it
-            ? "STATUS è il LED di scheda. + scegli un sensore: compare il blocco con i canali sul canvas."
-            : "STATUS is the on-board LED. + pick a sensor: its channel block appears on the canvas."}
+            ? "LED interno è il LED della Backbone. + scegli un sensore: compare il blocco con i canali sul canvas."
+            : "Internal LED is the on-board LED. + pick a sensor: its channel block appears on the canvas."}
         </p>
       )}
     </div>

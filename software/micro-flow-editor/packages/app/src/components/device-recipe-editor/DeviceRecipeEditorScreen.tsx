@@ -931,7 +931,7 @@ export function DeviceRecipeEditorScreen({
           <div className="sensor-workbench-identity">
             <BrandMark />
             <span className="sensor-workbench-path">
-              {it ? "Dispositivi" : "Devices"}
+              {it ? "Crea dispositivo" : "Create device"}
               <span aria-hidden>/</span>
               {draft.name}
             </span>

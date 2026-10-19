@@ -137,4 +137,6 @@ int spaghetti_field_update_read_running_image(uint32_t offset, uint8_t *data,
 					      size_t length);
 int spaghetti_field_update_running_image_info(uint32_t *size, uint32_t *crc32);
 
+int spaghetti_field_update_can_notify(uint32_t node_id, const uint8_t *data, uint8_t dlc);
+
 #endif /* SPAGHETTI_FIELD_UPDATE_INTERNAL_H */

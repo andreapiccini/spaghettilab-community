@@ -64,18 +64,17 @@ export function ManualTriggerControl({
     >
       <div className="pointer-events-none flex items-center gap-2 text-xs font-semibold text-brand-blue">
         <MousePointerClick size={16} />
-        <span>Genera trigger</span>
+        <span>Generatore di trigger</span>
       </div>
       <button
         type="button"
-        className="nodrag nopan rounded-lg bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
+        className="nopan rounded-lg bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white disabled:pointer-events-none disabled:opacity-40"
         disabled={continuous || !ready || !deployed || busy}
         onClick={(event) => {
           event.stopPropagation();
           void send();
         }}
         onDoubleClick={(event) => event.stopPropagation()}
-        onPointerDown={(event) => event.stopPropagation()}
       >
         {busy ? "Invio…" : "Invia trigger"}
       </button>
@@ -88,10 +87,10 @@ export function ManualTriggerControl({
             ? "Operazione sulla Backbone in corso…"
             : "Esecuzione continua · premi Stop per i test manuali"
           : !ready
-            ? "Collega la Backbone"
+            ? ""
             : !deployed
-              ? "Carica il Flow con Run Deploy, poi premi Stop"
-              : message || "One-shot · avvia una sola lettura o azione"}
+              ? "Da Run Deploy scegli Carica per test manuali"
+              : message || "Trigger · avvia un’azione una volta"}
       </p>
     </div>
   );

@@ -135,7 +135,7 @@
 &pinctrl {
 	user_uart_default: user_uart_default { group1 { pinmux = <UART2_TX_GPIO38>, <UART2_RX_GPIO37>; }; };
 	user_spi_default: user_spi_default { group1 { pinmux = <SPIM3_SCLK_GPIO38>, <SPIM3_MOSI_GPIO37>, <SPIM3_MISO_GPIO36>; }; };
-	user_pwm_default: user_pwm_default { group1 { pinmux = <LEDC_CH0_GPIO38>, <LEDC_CH1_GPIO37>, <LEDC_CH2_GPIO36>, <LEDC_CH3_GPIO35>; output-enable; }; };
+	user_pwm_default: user_pwm_default { group1 { pinmux = <LEDC_CH0_GPIO38>, <LEDC_CH1_GPIO37>, <LEDC_CH2_GPIO36>, <LEDC_CH3_GPIO35>, <LEDC_CH4_GPIO10>; output-enable; }; };
 	spaghetti_i2c0_default: spaghetti_i2c0_default {
 		group1 {
 			pinmux = <I2C0_SDA_GPIO38>, <I2C0_SCL_GPIO37>;
@@ -205,6 +205,7 @@
 	channel1@1 { reg = <1>; timer = <0>; };
 	channel2@2 { reg = <2>; timer = <0>; };
 	channel3@3 { reg = <3>; timer = <0>; };
+	channel4@4 { reg = <4>; timer = <2>; };
 };
 
 &spi2 {

@@ -1,3 +1,5 @@
+import { BlockInfoButton } from "./BlockInfoButton.js";
+import { SignalGeneratorControl } from "./SignalGeneratorControl.js";
 import { ManualTriggerControl } from "./ManualTriggerControl.js";
 import { DataViewerValue } from "./DataViewerValue.js";
 import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
@@ -125,26 +127,75 @@ export function ProcessingNode({
             ? `${Math.round(data.tempProbe.celsius)}°C`
             : data.subtitle;
 
-  if (data.manualTrigger)
+  if (data.statusLed)
+    return (
+      <div className="signal-node-surface group relative rounded-xl border border-border-strong bg-surface shadow-e1"
+        style={{ width: cardWidth, minHeight: cardHeight, outline: selected ? "2px solid var(--color-brand-blue)" : undefined }}>
+        <BlockInfoButton label={data.label} help={data.help} />
+        <HoverDeleteButton id={id} label={copy.deleteBlock} forceVisible={selected} />
+        <div className="flex items-center gap-2 px-3 py-3 pr-8">
+          <div className="h-8 w-8 shrink-0"><ModuleArtwork kind="led" name="LED interno" lightColor="#FFFFFF" /></div>
+          <div className="min-w-0"><div className="font-body text-xs font-semibold text-ink">LED interno</div><div className="mt-1 font-body text-[10px] text-ink-muted">Intensità PWM · 0–100%</div></div>
+        </div>
+        <div className="border-t border-border py-1">
+          {Array.from({length:Math.max(inputHandles.length,outputHandles.length)},(_,index)=>{
+            const input=inputHandles[index], output=outputHandles[index];
+            return <div key={index} className="relative grid h-8 grid-cols-2 items-center gap-6 px-3 font-body text-[10px] text-ink-muted">
+              <span className="min-w-0 leading-snug">{input?.label}</span>
+              <span className="min-w-0 text-right leading-snug">{output?.label}</span>
+              {input && <PortKindHandle type="target" id={input.id} title={input.label} kind={input.kind} top="50%" hitWidth={148} />}
+              {output && <PortKindHandle type="source" id={output.id} title={output.label} kind={output.kind} top="50%" hitWidth={148} />}
+            </div>;
+          })}
+        </div>
+      </div>
+    );
+
+  if (data.logicIf)
+    return (
+      <div className="signal-node-surface group relative rounded-xl border border-border-strong bg-surface shadow-e1"
+        style={{ width: cardWidth, minHeight: cardHeight, outline: selected ? "2px solid var(--color-brand-blue)" : undefined }}>
+        <BlockInfoButton label={data.label} help={data.help} />
+        <HoverDeleteButton id={id} label={copy.deleteBlock} forceVisible={selected} />
+        <div className="flex items-center gap-2 px-3 pt-2.5 pr-9">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ background: "#F2EBFF", color: "#7C3AED" }}><GitBranch size={19} /></span>
+          <span className="font-body text-sm font-semibold text-ink">{data.label}</span>
+        </div>
+        <div className="px-3 py-2.5 font-body text-xs font-medium leading-relaxed text-ink [overflow-wrap:anywhere]">{data.logicIf.condition}</div>
+        <div className="grid grid-cols-2 gap-2 border-t border-border px-3 py-2">
+          {[{ label: locale === "it" ? "Se vera" : "If true", value: data.logicIf.whenTrue }, { label: locale === "it" ? "Se falsa" : "If false", value: data.logicIf.whenFalse }].map(result => (
+            <div key={result.label} className="flex items-center justify-between gap-2 rounded-md bg-surface-subtle px-2 py-1">
+              <span className="font-body text-[10px] text-ink-muted">{result.label}</span>
+              <span className="font-body text-xs font-semibold text-ink">{result.value}</span>
+            </div>
+          ))}
+        </div>
+        {inputHandles.map(handle => <PortKindHandle key={handle.id} type="target" id={handle.id} title={handle.label} kind={handle.kind} top={64} />)}
+        {outputHandles.map(handle => <PortKindHandle key={handle.id} type="source" id={handle.id} title={handle.label} kind={handle.kind} top={64} />)}
+      </div>
+    );
+
+  if (data.manualTrigger || data.signalGenerator)
     return (
       <div
-        className="group relative rounded-xl border border-border-strong bg-surface shadow-e1"
+        className="signal-node-surface group relative rounded-xl border border-border-strong bg-surface shadow-e1"
         style={{
           width: cardWidth,
           height: cardHeight,
           outline: selected ? "2px solid var(--color-brand-blue)" : undefined,
         }}
       >
+        <BlockInfoButton label={data.label} help={data.help} right={data.sensorSchematic ? 22 : 8} />
         <HoverDeleteButton id={id} label="Elimina generatore" />
-        <ManualTriggerControl
+        {data.signalGenerator ? <SignalGeneratorControl config={data.signalGenerator} /> : <ManualTriggerControl
           nodeId={data.domainId}
-          bindingId={data.manualTrigger.bindingId}
-        />
+          bindingId={data.manualTrigger?.bindingId}
+        />}
 
         <Handle
           type="source"
           position={Position.Right}
-          id="trigger"
+          id={data.signalGenerator ? "0" : "trigger"}
           style={{
             ...SOURCE_HANDLE_STYLE,
             top: "50%",
@@ -157,13 +208,14 @@ export function ProcessingNode({
   if (data.dataViewer)
     return (
       <div
-        className="group relative rounded-xl border border-border-strong bg-surface shadow-e1"
+        className="signal-node-surface group relative rounded-xl border border-border-strong bg-surface shadow-e1"
         style={{
           width: cardWidth,
           height: cardHeight,
           outline: selected ? "2px solid var(--color-brand-blue)" : undefined,
         }}
       >
+        <BlockInfoButton label={data.label} help={data.help} right={data.sensorSchematic ? 22 : 8} />
         <HoverDeleteButton id={id} label="Elimina visualizzatore" />
         <Handle
           type="target"
@@ -189,7 +241,7 @@ export function ProcessingNode({
         style={{ width: FLOW_START_SIZE, height: FLOW_START_SIZE }}
       >
         <div
-          className="relative h-full w-full rounded-full shadow-e1 transition-[box-shadow,outline]"
+          className="signal-node-surface relative h-full w-full rounded-full shadow-e1 transition-[box-shadow,outline]"
           style={{
             backgroundColor: fill,
             outline: selected
@@ -240,6 +292,7 @@ export function ProcessingNode({
         style={{ width: cardWidth, height: cardHeight }}
         data-tour-target={`flow-node-${id}`}
       >
+        <BlockInfoButton label={data.label} help={data.help} right={data.sensorSchematic ? 22 : 8} />
         <HoverDeleteButton
           id={id}
           label={copy.deleteBlock}
@@ -247,7 +300,7 @@ export function ProcessingNode({
           corner="right"
         />
         <div
-          className="absolute inset-x-4 inset-y-0 flex items-start gap-3 rounded-lg border bg-surface px-3 py-3 shadow-e1 transition-colors"
+          className="signal-node-surface absolute inset-x-4 inset-y-0 flex items-start gap-3 rounded-lg border bg-surface px-3 py-3 shadow-e1 transition-colors"
           style={{
             borderColor: selected ? "var(--color-brand-blue)" : "#cbd2dc",
             outline: selected ? "1px solid var(--color-brand-blue)" : undefined,
@@ -333,6 +386,7 @@ export function ProcessingNode({
         style={{ width: cardWidth }}
         data-tour-target={`flow-node-${id}`}
       >
+        <BlockInfoButton label={data.label} help={data.help} right={data.sensorSchematic ? 22 : 8} />
         <HoverDeleteButton
           id={id}
           label={copy.deleteBlock}
@@ -340,7 +394,7 @@ export function ProcessingNode({
           corner="right"
         />
         <div
-          className="relative rounded-lg bg-surface shadow-e1"
+          className="signal-node-surface relative rounded-lg bg-surface shadow-e1"
           style={{
             width: cardWidth,
             height: cardHeight,
@@ -412,7 +466,8 @@ export function ProcessingNode({
       style={{ width: cardWidth }}
       data-tour-target={`flow-node-${id}`}
     >
-      <HoverDeleteButton
+      <BlockInfoButton label={data.label} help={data.help} right={data.sensorSchematic ? 22 : 8} />
+        <HoverDeleteButton
         id={id}
         label={copy.deleteBlock}
         forceVisible={selected}
@@ -433,7 +488,7 @@ export function ProcessingNode({
         </span>
       )}
       <div
-        className={`relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isIf || isRelay ? "w-full flex-col items-stretch p-0" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
+        className={`signal-node-surface relative flex shadow-e1 transition-[outline,box-shadow] group-hover:shadow-e2 ${multiChannel ? "flex-col gap-1 px-2.5 py-2" : isIf || isRelay ? "w-full flex-col items-stretch p-0" : `w-full items-center gap-2 py-2 ${isLed ? "pl-4 pr-2.5" : "px-2.5"}`} ${selected || ledLit ? "" : "group-hover:outline-2"}`}
         style={{
           width: cardWidth,
           minHeight: cardHeight,
@@ -533,10 +588,10 @@ export function ProcessingNode({
               </div>
             )}
           </div>
-          <div className={`min-w-0 flex-1 ${isIf || isRelay ? "" : "overflow-hidden"}`}>
+          <div className="min-w-0 flex-1 pr-5">
             <div className="flex min-w-0 items-center gap-1.5">
               <div
-                className={`${isIf ? "shrink-0" : "min-w-0 truncate"} font-body text-sm font-semibold text-ink`}
+                className="min-w-0 whitespace-normal break-words font-body text-sm font-semibold text-ink"
                 title={data.label}
               >
                 {data.label}
@@ -559,8 +614,8 @@ export function ProcessingNode({
               <div
                 className={
                   isIf || isRelay
-                    ? "whitespace-nowrap font-mono text-[10px] leading-tight text-ink"
-                    : "truncate font-body text-xs text-ink-faint"
+                    ? "whitespace-normal break-words [overflow-wrap:anywhere] font-mono text-[10px] leading-snug text-ink"
+                    : "whitespace-normal break-words [overflow-wrap:anywhere] font-body text-xs leading-snug text-ink-faint"
                 }
                 title={
                   isIf
@@ -757,6 +812,7 @@ function PortKindHandle({
   top,
   live,
   extra,
+  hitWidth = 28,
 }: {
   readonly type: "source" | "target";
   readonly id: string;
@@ -765,18 +821,21 @@ function PortKindHandle({
   readonly top: string | number;
   readonly live?: boolean;
   readonly extra?: CSSProperties;
+  readonly hitWidth?: number;
 }) {
   const color = kind ? PORT_KIND_COLOR[kind] : "var(--color-brand-blue)";
   const filled = live === true && type === "source";
   const kindTitle = kind ? PORT_KIND_TITLE[kind] : undefined;
   return (
     <Handle
+      className="port-handle-hitarea"
       type={type}
       position={type === "target" ? Position.Left : Position.Right}
       id={id}
       title={[title, kindTitle].filter(Boolean).join(" · ") || undefined}
       style={{
         ...SOURCE_HANDLE_STYLE,
+        "--port-hit-width": `${hitWidth}px`,
         top,
         border: `1.5px solid ${color}`,
         background: filled ? color : "var(--color-surface)",
@@ -785,7 +844,7 @@ function PortKindHandle({
         alignItems: "center",
         justifyContent: "center",
         ...extra,
-      }}
+      } as CSSProperties}
     >
       {kind ? (
         <span className="pointer-events-none flex">

@@ -1,3 +1,4 @@
+import { BlockInfoButton } from "./BlockInfoButton.js";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { processingGraphCopy } from "../../lib/processing-graph-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -64,6 +65,7 @@ export function EventContainerNode({
             : `color-mix(in srgb, ${config.colorVar} 4%, transparent)`,
       }}
     >
+      <BlockInfoButton label={data.label} help={{description:"Ripete i blocchi al suo interno all’intervallo configurato durante l’esecuzione continua. Stop interrompe le ripetizioni.",inputs:[],outputs:["Attiva i blocchi contenuti"]}} />
       <HoverDeleteButton id={id} label={copy.deleteContainer} forceVisible={selected} />
       {data.kind === "event-source" && (
         <>
@@ -135,7 +137,7 @@ export function EventContainerNode({
       </div>
       {data.kind === "schedule" && data.empty && (
         <div className="pointer-events-none flex flex-1 items-center justify-center px-10 pb-4 text-center text-xs text-ink-muted">
-          Trascina qui Genera trigger
+          Trascina qui i blocchi da schedulare
         </div>
       )}
     </div>

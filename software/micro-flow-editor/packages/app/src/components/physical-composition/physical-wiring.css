@@ -17,3 +17,16 @@
     transition: none;
   }
 }
+
+.physical-wire { outline: none; transition: opacity 150ms ease; }
+.physical-wire[data-muted="true"] { opacity: .18; }
+.physical-wire-line { transition: stroke-width 150ms ease; }
+.physical-wire[data-active="true"] .physical-wire-line { stroke-width: 3; }
+.physical-wire:focus-visible .physical-wire-line { stroke-width: 3; }
+.physical-wire-tracer { filter: drop-shadow(0 0 3px currentColor); }
+.physical-wire-terminal[data-active="true"] text { font-weight: 700; }
+.physical-wire-terminal[data-active="true"] rect { stroke: white; stroke-width: 2; }
+@media (prefers-reduced-motion: reduce) {
+ .physical-wire-tracer { display: none; }
+ .physical-wire, .physical-wire-line { transition: none; }
+}

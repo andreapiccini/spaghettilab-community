@@ -9,6 +9,9 @@ export type ViewerSource = {
   field: number;
   action?: number;
   schemaId?: string;
+  valueKind?: "digital" | "boolean" | "number" | "text";
+  label?: string;
+  unit?: string;
 };
 export type DataViewerUi = {
   bindingId?: string;
@@ -71,7 +74,7 @@ export function DataViewerValue({ config }: { config: DataViewerUi }) {
   ]);
   const formatted =
     sample && !sample.missing
-      ? formatViewerValue(sample.value, config.decimals)
+      ? formatViewerValue(sample.value, config.decimals, source?.valueKind)
       : undefined;
   const status = !config.connected
     ? "Collega un’uscita a Mostra valore"
@@ -92,9 +95,9 @@ export function DataViewerValue({ config }: { config: DataViewerUi }) {
         <Monitor size={16} />
         <span className="text-xs font-semibold">Visualizza dati</span>
       </div>
-      <div className="text-sm font-semibold text-ink">{config.caption || "Dato"}</div>
+      {config.caption && <div className="text-sm font-semibold text-ink">{config.caption}</div>}
       <div
-        className="nodrag nopan pointer-events-auto min-h-7 max-h-12 overflow-auto break-words whitespace-pre-wrap font-mono text-xl font-semibold leading-tight text-ink"
+        className="nopan nowheel select-none pointer-events-auto min-h-7 max-h-12 overflow-auto break-words whitespace-pre-wrap font-mono text-xl font-semibold leading-tight text-ink"
         title={formatted?.text}
       >
         {formatted ? (formatted.text === "" ? '""' : formatted.text) : "—"}
@@ -107,7 +110,7 @@ export function DataViewerValue({ config }: { config: DataViewerUi }) {
           className={`h-1.5 w-1.5 shrink-0 rounded-full ${formatted && ready ? "bg-green-500" : "bg-slate-300"}`}
         />
         <span>{status}</span>
-        {formatted && <span className="ml-auto">{formatted.type}</span>}
+        {(formatted || source?.valueKind) && <span className="ml-auto" title="Tipo di dato in ingresso">{formatted?.type ?? ({ digital: "Digitale", boolean: "Booleano", number: "Numerico", text: "Testo" }[source!.valueKind!])}</span>}
       </div>
     </div>
   );
