@@ -4,7 +4,7 @@ import type { BlockHelp } from "./BlockInfoButton.js";
 export function blockHelp(data: DeviceProcessingNodeData, label: string, ports: NodePortLayout): BlockHelp {
   const type = data.kind === "block" ? data.blockTypeId : data.kind;
   const descriptions: Record<string,string> = {
-    "ui.manual_trigger":"Avvia una volta le azioni collegate quando premi Invia trigger. Per usarlo, collega la Backbone e carica il programma per test manuali. Durante l’esecuzione continua il pulsante è disabilitato.",
+    "ui.manual_trigger":"Esegue una volta le azioni collegate quando premi Attiva. Inseriscilo in Schedule per eseguirle automaticamente. Non richiede ingressi; l’uscita avvia le azioni collegate. Per le prove manuali carica il programma e premi Stop se è in esecuzione continua.",
     "ui.data_viewer":"Mostra l’ultimo valore ricevuto. Accetta numeri, testi, booleani e altri dati. Etichetta, unità e decimali si personalizzano nella configurazione.",
     "logic_and":"Memorizza l’ultimo valore di A e B. Restituisce vero solo se entrambi sono veri. Accetta booleani, segnali digitali, numeri e stringhe numeriche: zero è falso, ogni altro intero è vero.",
     "logic_or":"Memorizza l’ultimo valore di A e B. Restituisce vero se almeno uno dei due è vero. Accetta booleani, segnali digitali, numeri e stringhe numeriche: zero è falso, ogni altro intero è vero.",
@@ -19,5 +19,5 @@ export function blockHelp(data: DeviceProcessingNodeData, label: string, ports: 
   if (/STATUS|LED di stato|LED interno/i.test(label)) description="Controlla il LED interno della Backbone in PWM. Alto lo accende al 100%, basso lo spegne. I trigger eseguono le azioni; l’ingresso intensità riceve un numero da 0 a 100. Le uscite mostrano stato e intensità. Doppio clic per inizializzazione, azioni e Input/Output.";
   if (/DS18B20|DHT11|DHT22/i.test(label)) description="Legge il sensore quando riceve un trigger e pubblica i valori misurati sulle uscite configurate.";
   const names=(side:"inputs"|"outputs")=>ports[side].map((port,index)=>port.label ?? `${side==="inputs"?"Valore":"Risultato"} ${index+1}`);
-  return {description,inputs:type==="ui.manual_trigger"?[]:names("inputs"),outputs:type==="ui.manual_trigger"?["Trigger: avvia le azioni collegate"]:type==="ui.data_viewer"?[]:names("outputs")};
+  return {description,inputs:type==="ui.manual_trigger"?[]:names("inputs"),outputs:type==="ui.manual_trigger"?["Attiva le azioni collegate"]:type==="ui.data_viewer"?[]:names("outputs")};
 }

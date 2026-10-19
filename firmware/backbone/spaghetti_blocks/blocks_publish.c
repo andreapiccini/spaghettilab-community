@@ -1,6 +1,7 @@
 #include "blocks_common.h"
 
 #include <zephyr/sys/util.h>
+#include <zephyr/kernel.h>
 
 #define SPAGHETTI_BLOCK_PROP_SCHEMA_ID 1U
 #define SPAGHETTI_BLOCK_PROP_SCHEMA_VERSION 2U
@@ -96,7 +97,7 @@ static int publish_process(void *state, void *workspace,
 			   void *publish_user_data)
 {
 	struct publish_field_state *ctx = state;
-	struct spaghetti_record derived;
+	struct spaghetti_record *derived;
 	int err;
 
 	(void)workspace;
@@ -108,26 +109,28 @@ static int publish_process(void *state, void *workspace,
 		return -EINVAL;
 	}
 
-	memset(&derived, 0, sizeof(derived));
-	derived.source_id = source_record->source_id;
-	derived.source_key = (ctx->source_key != 0U) ? ctx->source_key :
+	derived = k_calloc(1U, sizeof(*derived));
+	if (derived == NULL) return -ENOMEM;
+	derived->source_id = source_record->source_id;
+	derived->source_key = (ctx->source_key != 0U) ? ctx->source_key :
 						       source_record->source_key;
-	derived.boot_id = source_record->boot_id;
-	derived.timestamp_ms = source_record->timestamp_ms;
+	derived->boot_id = source_record->boot_id;
+	derived->timestamp_ms = source_record->timestamp_ms;
 	if (ctx->sequence == UINT32_MAX) {
 		ctx->sequence = 0U;
 	}
 	++ctx->sequence;
-	derived.sequence = ctx->sequence;
-	derived.payload.kind = SPAGHETTI_RECORD_SAMPLE;
-	memcpy(derived.payload.schema_id, ctx->schema_id,
-	       sizeof(derived.payload.schema_id));
-	derived.payload.schema_version = ctx->schema_version;
-	derived.payload.values.field_count = 1U;
-	derived.payload.values.fields[0] = inputs[0];
-	derived.payload.values.fields[0].field_id = ctx->field_id;
+	derived->sequence = ctx->sequence;
+	derived->payload.kind = SPAGHETTI_RECORD_SAMPLE;
+	memcpy(derived->payload.schema_id, ctx->schema_id,
+	       sizeof(derived->payload.schema_id));
+	derived->payload.schema_version = ctx->schema_version;
+	derived->payload.values.field_count = 1U;
+	derived->payload.values.fields[0] = inputs[0];
+	derived->payload.values.fields[0].field_id = ctx->field_id;
 
-	err = publish(&derived, publish_user_data);
+	err = publish(derived, publish_user_data);
+	k_free(derived);
 	return err;
 }
 

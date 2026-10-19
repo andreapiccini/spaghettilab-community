@@ -78,6 +78,9 @@ static const struct gpio_dt_spec status_led =
 
 static void status_led_on(void)
 {
+	/* The main Backbone LED is owned exclusively by the PWM module.
+	 * Configuring it as GPIO here disconnects the LEDC output matrix. */
+	if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return;
 #if DT_HAS_ALIAS(led0)
 	if (!gpio_is_ready_dt(&status_led)) {
 		return;

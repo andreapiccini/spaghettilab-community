@@ -949,7 +949,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                   : "No changes sent to the Backbone."
                 : successful.length
                   ? it
-                    ? manualTestMode ? "Backbone pronta: torna al canvas e premi Invia trigger. La logica continua non è stata avviata." : "Il programma sulla Backbone è stato verificato. Usa Stop dal canvas per fermarlo."
+                    ? manualTestMode ? "Backbone pronta: torna al canvas e premi Attiva. La logica continua non è stata avviata." : "Il programma sulla Backbone è stato verificato. Usa Stop dal canvas per fermarlo."
                     : manualTestMode ? "Backbone ready: return to the canvas and send an impulse. Continuous logic has not started." : "The program was verified on the Backbone. Use Stop on the canvas to stop it."
                   : !bindings.length
                     ? it

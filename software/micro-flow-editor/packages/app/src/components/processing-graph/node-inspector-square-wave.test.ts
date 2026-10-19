@@ -54,13 +54,13 @@ describe("NodeInspector square wave", () => {
       existingEdges: [], nodeLabel: (id: string) => id, knownModuleNodeIds: new Set<string>(),
       onSave: () => undefined, onClose: () => undefined,
     })));
-    expect(html).toContain("Invia trigger");
+    expect(html).toContain("Attiva");
     expect(html).not.toContain("Alterna acceso/spento");
     expect(html).not.toContain("Invia impulso");
     expect(html).not.toContain("ni-signal-mode");
     expect(html).toContain("Schedule");
     expect(html).not.toContain("Duty cycle");
-    expect(entry.label).toBe("Generatore di trigger");
+    expect(entry.label).toBe("Attiva azione");
   });
 
   it("shows only Output for the fixed status LED", () => {

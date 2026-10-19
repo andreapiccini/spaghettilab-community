@@ -2515,6 +2515,7 @@ function ProcessingGraphScreenInner() {
       setExecutionMode(selected.bindingId, "one-shot");
       // Stop leaves the current canvas visible; physical setup has its own navigation.
     } catch (cause) {
+      setExecutionMode(selected.bindingId, "continuous");
       setPauseError(formatApplyConfigError(cause, locale === "it"));
     } finally {
       unlockTransport();

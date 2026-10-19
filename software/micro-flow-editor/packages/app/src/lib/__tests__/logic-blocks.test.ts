@@ -67,3 +67,17 @@ it("compiles a decimal comparison from the real DS18B20 output", async () => {
  const result=compileConfig(plan.input,plan.options);
  expect(result.ok?[]:result.error).toEqual([]);
 });
+
+it("publishes IF output to animate a direct internal LED connection, including LOW",async()=>{
+ const {activeEdgesForRecord}=await import("../edge-activity.js");
+ const input={physicalGraph:{layer:"physical-composition" as const,nodes:[],edges:[]},processingGraph:{layer:"device-processing" as const,nodes:[
+ {layer:"device-processing" as const,id:"start",data:{kind:"block" as const,blockTypeId:"ui.manual_trigger",properties:{}}},
+ {layer:"device-processing" as const,id:"if",data:{kind:"block" as const,blockTypeId:"logic_if",catalogEntryId:"logic.if",properties:{condition:"1"}}},
+ {layer:"device-processing" as const,id:"led",data:{kind:"block" as const,blockTypeId:"ab.led",properties:{statusLed:true}}},
+ ],edges:[{layer:"device-processing" as const,id:"check",source:"start",sourceHandle:"trigger",target:"if",targetHandle:"0"},{layer:"device-processing" as const,id:"command",source:"if",sourceHandle:"0",target:"led",targetHandle:"0"}]},mqtt:DISABLED_MQTT,connectivity:0,energy:DEFAULT_ENERGY};
+ const plan=prepareDriverDeployment({authoringMetadata:{}} as ProjectV1,"master",input);
+ const route=plan.activityRoutes?.find(route=>route.edgeId==="command");expect(route).toBeDefined();expect(route?.kind).toBe("data");
+ expect(plan.input.processingGraph.nodes.some(node=>node.id==="driver-publish:command")).toBe(true);
+ const compiled=compileConfig(plan.input,plan.options);expect(compiled.ok?[]:compiled.error).toEqual([]);
+ expect(activeEdgesForRecord([route!],{sourceKey:route!.key,schemaId:route!.schemaId,fields:{[route!.field]:0n}} as Parameters<typeof activeEdgesForRecord>[1])).toHaveLength(1);
+});

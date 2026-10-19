@@ -363,6 +363,17 @@ static const struct spaghetti_field_descriptor logical_fields[] = {
 static const struct spaghetti_schema_descriptor logical_schema = {
  .schema_id="spaghetti.block.logical", .version=1, .fields=logical_fields, .field_count=ARRAY_SIZE(logical_fields),
 };
+static const struct spaghetti_field_descriptor logical_unsigned_fields[] = {
+ { .field_id=7, .type=SPAGHETTI_VALUE_TEXT, .name="numeric_threshold", .description="Finite decimal comparison value", .unit="" },
+ { .field_id=8, .type=SPAGHETTI_VALUE_UINT64, .unsigned_minimum=0, .unsigned_maximum=255, .name="precision", .description="Decimal places; 255 keeps full precision", .unit="" },
+ { .field_id=5, .type=SPAGHETTI_VALUE_UINT64, .unsigned_minimum=0, .unsigned_maximum=1, .name="when_true", .description="Output level when condition is true", .unit="" },
+ { .field_id=6, .type=SPAGHETTI_VALUE_UINT64, .unsigned_minimum=0, .unsigned_maximum=1, .name="when_false", .description="Output level when condition is false", .unit="" },
+ { .field_id=1, .type=SPAGHETTI_VALUE_UINT64, .unsigned_minimum=0, .unsigned_maximum=7, .name="condition", .description="Comparison", .unit="" },
+ { .field_id=2, .type=SPAGHETTI_VALUE_UINT64, .unsigned_minimum=0, .unsigned_maximum=INT64_MAX, .name="value", .description="Integer comparison value", .unit="" },
+};
+static const struct spaghetti_schema_descriptor logical_unsigned_schema = {
+ .schema_id="spaghetti.block.logical", .version=1, .fields=logical_unsigned_fields, .field_count=ARRAY_SIZE(logical_unsigned_fields),
+};
 static int logical_parse_number(const char *text, size_t length, double *out) {
  char buffer[96];
  if (!text || !length || length>=sizeof(buffer))return -EINVAL;
@@ -379,7 +390,10 @@ static int logical_parse_number(const char *text, size_t length, double *out) {
  *out=n;return 0;
 }
 static int logical_validate(const struct spaghetti_property_set *config) {
- int err=spaghetti_property_validate(config,&logical_schema);if(err)return err;
+ /* CBOR encodes every nonnegative integer as UINT64, including zero. */
+ const struct spaghetti_value *threshold=spaghetti_block_prop(config,2);
+ const struct spaghetti_schema_descriptor *schema=threshold && threshold->type==SPAGHETTI_VALUE_UINT64 ? &logical_unsigned_schema : &logical_schema;
+ int err=spaghetti_property_validate(config,schema);if(err)return err;
  const struct spaghetti_value *v=spaghetti_block_prop(config,7);double n;
  if(v && logical_parse_number(v->data.text.text,v->data.text.size,&n))return -EINVAL;
  v=spaghetti_block_prop(config,8);if(v && v->data.unsigned_integer>8 && v->data.unsigned_integer!=255)return -EINVAL;
@@ -388,7 +402,7 @@ static int logical_validate(const struct spaghetti_property_set *config) {
 static int logical_init_kind(const struct spaghetti_property_set *config, void *state, uint8_t kind) {
  struct logical_state *s=state; memset(s,0,sizeof(*s)); s->kind=kind; s->condition=1;s->when_true=true;s->precision=kind<2?255:2;
  const struct spaghetti_value *v=spaghetti_block_prop(config,1); if(v)s->condition=v->data.unsigned_integer;
- v=spaghetti_block_prop(config,2); if(v)s->threshold=v->data.signed_integer;
+ v=spaghetti_block_prop(config,2); if(v)s->threshold=v->type==SPAGHETTI_VALUE_UINT64?(int64_t)v->data.unsigned_integer:v->data.signed_integer;
  v=spaghetti_block_prop(config,5);if(v)s->when_true=v->data.unsigned_integer!=0;
  v=spaghetti_block_prop(config,6);if(v)s->when_false=v->data.unsigned_integer!=0;
  v=spaghetti_block_prop(config,7);if(v){int err=logical_parse_number(v->data.text.text,v->data.text.size,&s->decimal_threshold);if(err)return err;s->has_decimal_threshold=true;}

@@ -67,6 +67,8 @@ struct spaghetti_processing_evaluation {
 };
 
 static K_MUTEX_DEFINE(processing_lock);
+static bool validating_plan;
+bool spaghetti_processing_is_validating(void) { return validating_plan; }
 static bool is_initialized;
 static struct spaghetti_processing_plan live_plan;
 /*
@@ -504,10 +506,12 @@ int spaghetti_processing_validate_graph(
 	int err;
 
 	(void)k_mutex_lock(&processing_lock, K_FOREVER);
+	validating_plan = true;
 	err = build_plan(blocks, block_count, edges, edge_count, modules,
 			 module_count, &work_plan, scratch_arena,
 			 sizeof(scratch_arena), &arena_used);
 	deinit_plan(&work_plan);
+	validating_plan = false;
 	k_mutex_unlock(&processing_lock);
 
 	return err;

@@ -70,7 +70,7 @@ import {
   type CompareOp,
 } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
-import { FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
+import { INTERNAL_LED_FIRST_PORT_Y, INTERNAL_LED_PORT_SPACING, INTERNAL_LED_HEIGHT, FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import {
   handlesForNode,
@@ -304,7 +304,7 @@ export function toProcessingNodes(
     const logicIf = isBlockNodeData(data) && data.blockTypeId === "logic_if"
       ? logicIfPresentation(data, incomingLabel(node.id, graphState, titles, outputNames), locale)
       : undefined;
-    const cardHeight = statusLed ? 225 : logicIf ? 118 : manual || alternating
+    const cardHeight = statusLed ? INTERNAL_LED_HEIGHT : logicIf ? 118 : manual ? 80 : alternating
       ? 118
       : viewer
         ? 140
@@ -345,7 +345,12 @@ export function toProcessingNodes(
       // returns null) — the same bug EventContainer nodes already guard against.
       width: cardWidth,
       height: cardHeight,
-      handles: manual || alternating
+      handles: statusLed || logicIf
+        ? [
+            ...ports.inputs.map((port,index)=>({id:port.id,type:"target" as const,position:Position.Left,x:-8,y:(statusLed ? INTERNAL_LED_FIRST_PORT_Y + index * INTERNAL_LED_PORT_SPACING : 64)-8,width:16,height:16})),
+            ...ports.outputs.map((port,index)=>({id:port.id,type:"source" as const,position:Position.Right,x:cardWidth-8,y:(statusLed ? INTERNAL_LED_FIRST_PORT_Y + index * INTERNAL_LED_PORT_SPACING : 64)-8,width:16,height:16})),
+          ]
+        : manual || alternating
         ? [
             {
               id: manual ? "trigger" : "0",
@@ -710,7 +715,7 @@ function canvasTitle(
   locale: LocaleId,
 ): string {
   if (isBlockNodeData(data) && ["ui.manual_trigger", "ab.square_wave"].includes(data.blockTypeId) &&
-      (!meta?.comment || ["Genera trigger", "Generatore di segnali"].includes(meta.comment.trim())) && data.blockTypeId === "ui.manual_trigger") return locale === "it" ? "Generatore di trigger" : "Trigger generator";
+      (!meta?.comment || ["Genera trigger", "Generatore di segnali", "Generatore di trigger"].includes(meta.comment.trim())) && data.blockTypeId === "ui.manual_trigger") return locale === "it" ? "Attiva azione" : "Activate action";
   if (meta?.comment && meta.comment.trim() !== "") return meta.comment.trim();
   const entry = catalogEntryForNode(data);
   if (entry) return localizeCatalogEntry(entry, locale).label;

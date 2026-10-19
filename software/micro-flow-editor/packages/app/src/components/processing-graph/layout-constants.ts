@@ -25,3 +25,8 @@ export function fixedTickAbsolute(containerOrigin: { readonly x: number; readonl
   const rel = fixedTickRelativePosition();
   return { x: containerOrigin.x + rel.x, y: containerOrigin.y + rel.y };
 }
+
+/** Internal LED ports share these coordinates in both DOM and React Flow metadata. */
+export const INTERNAL_LED_FIRST_PORT_Y = 78;
+export const INTERNAL_LED_PORT_SPACING = 32;
+export const INTERNAL_LED_HEIGHT = 227;

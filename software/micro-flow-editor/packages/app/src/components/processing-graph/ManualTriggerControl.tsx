@@ -44,11 +44,11 @@ export function ManualTriggerControl({
           (item) =>
             item.typeId === "declarative-device" && item.properties[1] === profileId,
         );
-      if (!module) throw new Error("Esegui Run Deploy per caricare questo generatore.");
+      if (!module) throw new Error("Esegui Run Deploy per caricare questo blocco.");
       await sendManualTrigger((commandId) =>
         client.moduleCommand({ key: module.key, commandId }, signal),
       );
-      setMessage("Trigger inviato");
+      setMessage("Azione attivata");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error));
     } finally {
@@ -62,36 +62,24 @@ export function ManualTriggerControl({
     <div
       className={`flex h-full flex-col gap-2 rounded-lg p-3 ${continuous ? "bg-surface-raised opacity-60 grayscale" : ""}`}
     >
-      <div className="pointer-events-none flex items-center gap-2 text-xs font-semibold text-brand-blue">
+      <div className="pointer-events-none flex items-center gap-2 pr-5 text-xs font-semibold text-brand-blue">
         <MousePointerClick size={16} />
-        <span>Generatore di trigger</span>
+        <span>Attiva azione</span>
       </div>
       <button
         type="button"
         className="nopan rounded-lg bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white disabled:pointer-events-none disabled:opacity-40"
         disabled={continuous || !ready || !deployed || busy}
+        title={continuous ? "Premi Stop per usare le prove manuali" : !ready ? "Collega la Backbone" : !deployed ? "Carica il programma per le prove manuali" : message || "Esegue una volta le azioni collegate"}
         onClick={(event) => {
           event.stopPropagation();
           void send();
         }}
         onDoubleClick={(event) => event.stopPropagation()}
       >
-        {busy ? "Invio…" : "Invia trigger"}
+        {busy ? "Attivazione…" : "Attiva"}
       </button>
-      <p
-        role="status"
-        className="pointer-events-none mt-auto line-clamp-2 text-[10px] text-ink-muted"
-      >
-        {continuous
-          ? binding && getExecutionMode(binding.bindingId) === "busy"
-            ? "Operazione sulla Backbone in corso…"
-            : "Esecuzione continua · premi Stop per i test manuali"
-          : !ready
-            ? ""
-            : !deployed
-              ? "Da Run Deploy scegli Carica per test manuali"
-              : message || "Trigger · avvia un’azione una volta"}
-      </p>
+      <span role="status" className="sr-only">{message}</span>
     </div>
   );
 }

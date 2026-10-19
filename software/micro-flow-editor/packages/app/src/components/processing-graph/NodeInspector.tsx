@@ -252,8 +252,8 @@ export function NodeInspector({
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
   const [comment, setComment] = useState(mode.kind === "edit"
-    ? mode.data.kind === "block" && mode.data.blockTypeId === "ui.manual_trigger" && ["Genera trigger", "Generatore di segnali"].includes(mode.comment)
-      ? "Generatore di trigger" : mode.comment
+    ? mode.data.kind === "block" && mode.data.blockTypeId === "ui.manual_trigger" && ["Genera trigger", "Generatore di segnali", "Generatore di trigger"].includes(mode.comment)
+      ? "Attiva azione" : mode.comment
     : "");
   const [data, setData] = useState<DeviceProcessingNodeData>(() =>
     withFieldDefaults(
@@ -706,7 +706,7 @@ export function NodeInspector({
         {data.kind === "schedule" && (
           <div className="mb-4 space-y-3">
             <p className="text-sm text-ink-muted">
-              Trascina «Generatore di trigger» dentro questo riquadro e collega la sua uscita
+              Trascina «Attiva azione» dentro questo riquadro e collega la sua uscita
               alle azioni da ripetere. Run Deploy avvia l’esecuzione continua; Stop
               lascia disponibili i trigger manuali per le prove one-shot.
             </p>
@@ -745,7 +745,7 @@ export function NodeInspector({
         {data.kind === "block" && !statusLedOnly && (
           <>
             {data.blockTypeId === "ui.manual_trigger" && (
-              <p className="mb-4 text-sm text-ink-muted">Collega l’uscita alle azioni da avviare. Premi «Invia trigger» per eseguirle una volta, oppure inserisci il generatore in Schedule per ripeterle automaticamente.</p>
+              <p className="mb-4 text-sm text-ink-muted">Collega l’uscita alle azioni da avviare. Premi «Attiva» per eseguirle una volta, oppure inserisci il blocco in Schedule per ripeterle automaticamente.</p>
             )}
             {data.blockTypeId === "ui.data_viewer" && (
               <p className="mb-4 text-sm text-ink-muted">

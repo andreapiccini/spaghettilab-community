@@ -226,6 +226,21 @@ static void slup_led_set_mode(int mode);
 
 K_MUTEX_DEFINE(status_led_lock);
 static const void *status_led_owner;
+int spaghetti_status_led_init(const void *owner, uint8_t percent)
+{
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+ if (!owner || percent > 100U) return -EINVAL;
+ const struct device *pwm=DEVICE_DT_GET(DT_NODELABEL(ledc0));
+ if (!device_is_ready(pwm)) return -ENODEV;
+ k_mutex_lock(&status_led_lock,K_FOREVER);
+ int err=pwm_set(pwm,4U,1000000U,(uint32_t)percent*10000U,PWM_POLARITY_INVERTED);
+ if (!err) status_led_owner=owner;
+ k_mutex_unlock(&status_led_lock);
+ return err;
+#else
+ ARG_UNUSED(owner);ARG_UNUSED(percent);return -ENOTSUP;
+#endif
+}
 int spaghetti_status_led_set_intensity(const void *owner, uint8_t percent)
 {
 #if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
@@ -397,6 +412,13 @@ void spaghetti_field_update_nfc_changed(uint8_t port_id, uint32_t generation)
 
 static void slup_led_start(void)
 {
+ if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) {
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+  if (!status_led_owner)
+   (void)pwm_set(DEVICE_DT_GET(DT_NODELABEL(ledc0)),4U,1000000U,0U,PWM_POLARITY_INVERTED);
+#endif
+  return;
+ }
 #if DT_HAS_ALIAS(led0)
 	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE) && gpio_is_ready_dt(&slup_led)) {
 		(void)gpio_pin_configure_dt(&slup_led, GPIO_OUTPUT_INACTIVE);

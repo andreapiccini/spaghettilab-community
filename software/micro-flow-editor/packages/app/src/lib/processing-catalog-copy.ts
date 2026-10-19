@@ -57,6 +57,8 @@ const PHRASES: Record<string, string> = {
   "Onda quadra": "Square wave",
   "Generatore di segnali": "Signal generator",
   "Generatore di trigger": "Trigger generator",
+  "Attiva azione": "Activate action",
+  "Esegue le azioni collegate": "Run connected actions",
   "Avvia le azioni collegate": "Start connected actions",
   "Avvia azioni o alterna acceso/spento": "Start actions or alternate on/off",
   "Alterna acceso/spento": "Alternate on/off",

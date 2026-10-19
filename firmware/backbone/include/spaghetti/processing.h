@@ -14,6 +14,9 @@
 #include <spaghetti/config.h>
 #include <spaghetti/schema.h>
 
+/** True only while scratch plans are validated under the processing lock. */
+bool spaghetti_processing_is_validating(void);
+
 /** Maximum fan-out edges from one (source, port) endpoint. */
 #define SPAGHETTI_PROCESSING_FANOUT_MAX 4U
 

@@ -206,11 +206,11 @@ describe("toProcessingNodes", () => {
   });
 });
 
-it("gives both signal generator modes the same card dimensions and correct output handles", () => {
+it("keeps action activation compact with the correct output handle", () => {
   const data = ["appblocks.manual_trigger", "appblocks.square_wave"].map(id => nodeDataFromCatalogEntry(findCatalogEntryById(id)!, undefined)!);
   const graph: GraphState<"device-processing"> = { layer: "device-processing", nodes: data.map((data, index) => ({ layer: "device-processing", id: `generator-${index}`, data })), edges: [] };
   const nodes = toProcessingNodes(graph, {}, new Set(), () => "Module");
-  expect(nodes.map(node => [node.width, node.height])).toEqual([[210,118], [210,118]]);
+  expect(nodes.map(node => [node.width, node.height])).toEqual([[210,80], [210,118]]);
   expect(nodes[0]?.data.manualTrigger).toBeDefined();
   expect(nodes[1]?.data.signalGenerator).toMatchObject({ onMs: 250, offMs: 250 });
   expect(nodes[0]?.handles?.[0]?.id).toBe("trigger");
@@ -230,4 +230,15 @@ it("labels the IF input with the selected output rather than the device name", (
   expect(nodes.find(n=>n.id==="if")?.data.subtitle).not.toContain("DS18B20");
   const humidity=toProcessingNodes({...graph,edges:[{...graph.edges[0]!,sourceHandle:"humidity"}]},{sensor:{comment:"DS18B20"}},new Set(),()=>"Module");
   expect(humidity.find(n=>n.id==="if")?.data.subtitle).toContain("Umidità");
+});
+
+it("anchors internal LED wires to each visible port row",()=>{
+ const graph:GraphState<"device-processing">={layer:"device-processing",nodes:[{layer:"device-processing",id:"led",data:{kind:"block",blockTypeId:"ab.led",catalogEntryId:"appblocks.led",properties:{statusLed:true}}}],edges:[]};
+ const node=toProcessingNodes(graph,{},new Set(),()=>"Module")[0]!;
+ const inputs=node.handles!.filter(handle=>handle.type==="target");
+ const outputs=node.handles!.filter(handle=>handle.type==="source");
+ expect(inputs.map(handle=>handle.y+(handle.height ?? 0)/2)).toEqual([78,110,142,174,206]);
+ expect(outputs.map(handle=>handle.y+(handle.height ?? 0)/2)).toEqual([78,110]);
+ expect(inputs.every(handle=>handle.x+(handle.width ?? 0)/2===0)).toBe(true);
+ expect(outputs.every(handle=>handle.x+(handle.width ?? 0)/2===node.width)).toBe(true);
 });

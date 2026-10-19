@@ -832,8 +832,8 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
   }),
   e({
     id: "appblocks.manual_trigger",
-    label: "Generatore di trigger",
-    subtitle: "Avvia le azioni collegate",
+    label: "Attiva azione",
+    subtitle: "Esegue le azioni collegate",
     category: "logic",
     runtime: "core-block",
     availability: "shipped",
@@ -846,7 +846,7 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     ],
     fields: [],
     notes:
-      "Collega l’uscita alle azioni da avviare. Premi Invia trigger per una prova manuale oppure inserisci il generatore in Schedule per avviarle automaticamente.",
+      "Collega l’uscita alle azioni da eseguire. Premi Attiva per eseguirle una volta, oppure inserisci il blocco in Schedule per ripeterle automaticamente.",
   }),
   e({
     id: "appblocks.data_viewer",

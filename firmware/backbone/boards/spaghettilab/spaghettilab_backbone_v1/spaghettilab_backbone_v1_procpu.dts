@@ -205,7 +205,7 @@
 	channel1@1 { reg = <1>; timer = <0>; };
 	channel2@2 { reg = <2>; timer = <0>; };
 	channel3@3 { reg = <3>; timer = <0>; };
-	channel4@4 { reg = <4>; timer = <2>; };
+	channel4@4 { reg = <4>; timer = <2>; inverted; };
 };
 
 &spi2 {

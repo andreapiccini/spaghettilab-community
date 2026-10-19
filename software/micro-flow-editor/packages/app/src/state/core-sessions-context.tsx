@@ -350,6 +350,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
         next.delete(binding.bindingId);
         return next;
       });
+      executionModes.current.delete(binding.bindingId);
       sessionsRef.current.get(binding.bindingId)?.disconnect();
       sessionsRef.current.get(binding.bindingId)?.dispose();
       sessionsRef.current.delete(binding.bindingId);

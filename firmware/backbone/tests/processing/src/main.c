@@ -689,3 +689,50 @@ ZTEST(processing, test_white_led_pwm_initial_actions_and_numeric_input)
  zassert_equal(driver->ops->process(state,NULL,inputs,valid,5,outputs,output_valid,2,NULL,NULL,NULL),-ERANGE);zassert_equal(test_led_intensity,67U);
  driver->ops->reset(state);zassert_equal(test_led_intensity,0U);driver->ops->deinit(state);
 }
+
+ZTEST(processing, test_if_threshold_accepts_cbor_unsigned_zero_and_positive)
+{
+ const struct spaghetti_block_driver *driver=spaghetti_block_registry_find("logic_if");
+ struct spaghetti_property_set config={0};prop_u64(&config,1U,5U);prop_u64(&config,2U,0U);
+ zassert_ok(driver->ops->validate(&config));
+ struct spaghetti_value *decimal=&config.fields[config.field_count++];decimal->field_id=7U;decimal->type=SPAGHETTI_VALUE_TEXT;decimal->data.text.size=4U;memcpy(decimal->data.text.text,"28.1",5U);
+ zassert_ok(driver->ops->validate(&config));
+ uint64_t state[128]={0};zassert_ok(driver->ops->init(&config,state));
+ struct spaghetti_value value={.type=SPAGHETTI_VALUE_FLOAT,.data.decimal=28.2},out={0};bool valid=true,out_valid=false;
+ zassert_ok(driver->ops->process(state,NULL,&value,&valid,1,&out,&out_valid,1,NULL,NULL,NULL));zassert_true(out_valid);zassert_equal(out.data.unsigned_integer,1U);
+ config.field_count=2;config.fields[1].data.unsigned_integer=28U;zassert_ok(driver->ops->validate(&config));
+ config.fields[1].data.unsigned_integer=UINT64_MAX;zassert_equal(driver->ops->validate(&config),-ERANGE);
+ driver->ops->deinit(state);
+}
+
+ZTEST(processing, test_led_validation_does_not_touch_live_pwm)
+{
+ const struct spaghetti_block_driver *driver=spaghetti_block_registry_find("status_led");
+ struct spaghetti_property_set config={0};prop_u64(&config,1U,1U);
+ config.fields[config.field_count++]=(struct spaghetti_value){.field_id=2U,.type=SPAGHETTI_VALUE_BOOL,.data.boolean=false};
+ prop_u64(&config,3U,60U);
+ uint64_t state[8]={0};zassert_ok(driver->ops->init(&config,state));zassert_equal(test_led_intensity,60U);
+ struct spaghetti_block_config block={.key=100U};strcpy(block.type_id,"status_led");block.properties=config;block.properties.fields[2].data.unsigned_integer=0U;
+ zassert_ok(spaghetti_processing_validate_graph(&block,1U,NULL,0U,NULL,0U));
+ zassert_equal(test_led_intensity,60U);zassert_equal_ptr(test_led_owner,state);zassert_false(spaghetti_processing_is_validating());
+ driver->ops->deinit(state);
+}
+
+K_THREAD_STACK_DEFINE(publishing_worker_stack,3072);
+static void process_publishing_on_worker(void *a,void *b,void *c) {
+ ARG_UNUSED(a);ARG_UNUSED(b);ARG_UNUSED(c);
+ worker_result=spaghetti_processing_on_record(&worker_record,capture_publish,NULL);
+}
+ZTEST(processing, test_observed_logic_fits_runtime_worker_stack)
+{
+ struct spaghetti_block_config *blocks=k_calloc(2,sizeof(*blocks));zassert_not_null(blocks);
+ blocks[0].key=10;strcpy(blocks[0].type_id,"logic_if");prop_u64(&blocks[0].properties,1,1);
+ blocks[1].key=11;strcpy(blocks[1].type_id,"publish_field");
+ struct spaghetti_value *schema=&blocks[1].properties.fields[blocks[1].properties.field_count++];schema->field_id=1;schema->type=SPAGHETTI_VALUE_TEXT;schema->data.text.size=9;memcpy(schema->data.text.text,"flow.test",10);
+ prop_u64(&blocks[1].properties,2,1);prop_u64(&blocks[1].properties,3,1);prop_u64(&blocks[1].properties,4,0x70000000);
+ struct spaghetti_edge_config edges[2]={{.source_key=1,.source_port_or_field=1,.target_key=10,.target_input=0,.source_kind=SPAGHETTI_EDGE_SOURCE_MODULE},{.source_key=10,.source_port_or_field=0,.target_key=11,.target_input=0,.source_kind=SPAGHETTI_EDGE_SOURCE_BLOCK}};
+ zassert_ok(spaghetti_processing_configure(blocks,2,edges,2));k_free(blocks);worker_record=make_record(1,1,0);published_count=0;worker_result=-EINPROGRESS;
+ k_thread_create(&record_worker,publishing_worker_stack,K_THREAD_STACK_SIZEOF(publishing_worker_stack),process_publishing_on_worker,NULL,NULL,NULL,K_PRIO_PREEMPT(5),0,K_NO_WAIT);
+ zassert_ok(k_thread_join(&record_worker,K_SECONDS(2)));zassert_ok(worker_result);zassert_equal(published_count,1);zassert_equal(last_published.payload.values.fields[0].data.unsigned_integer,0U);
+ zassert_ok(spaghetti_processing_configure(NULL,0,NULL,0));
+}

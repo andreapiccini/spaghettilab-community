@@ -3,8 +3,8 @@ import { SignalGeneratorControl } from "./SignalGeneratorControl.js";
 import { ManualTriggerControl } from "./ManualTriggerControl.js";
 import { DataViewerValue } from "./DataViewerValue.js";
 import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
-import type { CSSProperties } from "react";
+import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "@xyflow/react";
+import { useLayoutEffect, type CSSProperties } from "react";
 import {
   ListOrdered,
   Cable,
@@ -26,6 +26,8 @@ import {
 } from "./dry-run-preview.js";
 import { HoverDeleteButton } from "./HoverDeleteButton.js";
 import {
+  INTERNAL_LED_FIRST_PORT_Y,
+  INTERNAL_LED_PORT_SPACING,
   FLOW_START_SIZE,
   IF_FOOTER_HEIGHT,
   NODE_HEIGHT,
@@ -57,6 +59,9 @@ export function ProcessingNode({
   selected,
 }: NodeProps & { readonly data: ProcessingNodeUiData }) {
   const { locale } = useLocale();
+  const updateNodeInternals = useUpdateNodeInternals();
+  const portLayoutKey = JSON.stringify([data.statusLed, data.logicIf, data.cardWidth, data.cardHeight, data.inputHandles, data.outputHandles]);
+  useLayoutEffect(() => { updateNodeInternals(id); }, [id, portLayoutKey, updateNodeInternals]);
   const copy = processingGraphCopy(locale);
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
   const Icon =
@@ -143,11 +148,11 @@ export function ProcessingNode({
             return <div key={index} className="relative grid h-8 grid-cols-2 items-center gap-6 px-3 font-body text-[10px] text-ink-muted">
               <span className="min-w-0 leading-snug">{input?.label}</span>
               <span className="min-w-0 text-right leading-snug">{output?.label}</span>
-              {input && <PortKindHandle type="target" id={input.id} title={input.label} kind={input.kind} top="50%" hitWidth={148} />}
-              {output && <PortKindHandle type="source" id={output.id} title={output.label} kind={output.kind} top="50%" hitWidth={148} />}
             </div>;
           })}
         </div>
+        {inputHandles.map((handle,index)=><PortKindHandle key={handle.id} type="target" id={handle.id} title={handle.label} kind={handle.kind} top={INTERNAL_LED_FIRST_PORT_Y+index*INTERNAL_LED_PORT_SPACING} hitWidth={148} />)}
+        {outputHandles.map((handle,index)=><PortKindHandle key={handle.id} type="source" id={handle.id} title={handle.label} kind={handle.kind} top={INTERNAL_LED_FIRST_PORT_Y+index*INTERNAL_LED_PORT_SPACING} hitWidth={148} />)}
       </div>
     );
 

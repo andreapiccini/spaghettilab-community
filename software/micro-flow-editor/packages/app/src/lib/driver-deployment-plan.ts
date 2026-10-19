@@ -1431,8 +1431,8 @@ export function prepareDriverDeployment(
           (moduleId ? undefined : `flow.${stableDriverHash(edge.id)}`),
       };
     });
-  // Observe already-published source records. This adds no polling, profiles
-  // or instrumentation blocks merely to animate the canvas.
+  // Reuse module records; publish native logic outputs so their wires can
+  // animate too, including LOW/zero values, without polling hardware.
   for (const edge of edges) {
     if (activitySources.has(edge.id)) continue;
     const node = byId.get(edge.source);
@@ -1441,7 +1441,8 @@ export function prepareDriverDeployment(
       (runtime.has(node.id) ||
         sequences.some((item) => item.id === node.id) ||
         node.data.kind === "schedule" ||
-        node.data.kind === "event-source")
+        node.data.kind === "event-source" ||
+        (node.data.kind === "block" && (LOGIC_TYPES.has(node.data.blockTypeId) || node.data.blockTypeId === "status_led")))
     ) {
       try {
         sourceFor(edge);

@@ -1,5 +1,6 @@
 #include "blocks_common.h"
 #include <spaghetti/port.h>
+#include <spaghetti/processing.h>
 #include <zephyr/kernel.h>
 #include <stdlib.h>
 
@@ -85,9 +86,10 @@ IO_DRIVER(physical_spi, "physical_spi", spi_init, 1U)
 #else
 __weak int spaghetti_status_led_set(const void *owner, bool on) { ARG_UNUSED(owner); ARG_UNUSED(on); return -ENOTSUP; }
 __weak int spaghetti_status_led_set_intensity(const void *owner, uint8_t percent) { return spaghetti_status_led_set(owner, percent > 0U); }
+__weak int spaghetti_status_led_init(const void *owner, uint8_t percent) { return spaghetti_status_led_set_intensity(owner, percent); }
 __weak void spaghetti_status_led_release(const void *owner) { ARG_UNUSED(owner); }
 #endif
-struct status_led_state { uint8_t threshold; bool negated; uint8_t intensity; bool levels[3]; uint8_t steps[3][8]; uint8_t lengths[3]; bool level_seen; bool last_level; bool intensity_seen; double last_intensity; };
+struct status_led_state { uint8_t threshold; bool negated; bool validation_only; uint8_t intensity; bool levels[3]; uint8_t steps[3][8]; uint8_t lengths[3]; bool level_seen; bool last_level; bool intensity_seen; double last_intensity; };
 static const struct spaghetti_field_descriptor status_fields[] = {
  { .field_id = 1U, .type = SPAGHETTI_VALUE_UINT64, .flags = SPAGHETTI_FIELD_REQUIRED, .unsigned_maximum = 100U, .name = "threshold", .description = "Board LED PWM", .unit = "" },
  { .field_id = 2U, .type = SPAGHETTI_VALUE_BOOL, .flags = SPAGHETTI_FIELD_REQUIRED, .name = "negated", .description = "Board LED PWM", .unit = "" },
@@ -124,7 +126,8 @@ static int status_init(const struct spaghetti_property_set *config, void *state)
  ctx->threshold=spaghetti_property_find(config,1U)->data.unsigned_integer;ctx->negated=spaghetti_property_find(config,2U)->data.boolean;
  const struct spaghetti_value *initial=spaghetti_property_find(config,3U);ctx->intensity=initial?initial->data.unsigned_integer:0U;
  for(unsigned i=0;i<3;i++){const struct spaghetti_value *v=spaghetti_property_find(config,6U+i);if(v)(void)status_parse_steps(v,ctx->steps[i],&ctx->lengths[i]);else {ctx->lengths[i]=1U;ctx->steps[i][0]=i==0?100U:i==1?0U:50U;}}
- return spaghetti_status_led_set_intensity(ctx,ctx->intensity);
+ ctx->validation_only=spaghetti_processing_is_validating();
+ return ctx->validation_only?0:spaghetti_status_led_init(ctx,ctx->intensity);
 }
 static int status_process(void *state, void *workspace, const struct spaghetti_value *inputs, const bool *valid, size_t count, struct spaghetti_value *outputs, bool *out_valid, size_t out_count, const struct spaghetti_record *record, spaghetti_block_publish_cb_t publish, void *user)
 {
@@ -143,6 +146,6 @@ static int status_process(void *state, void *workspace, const struct spaghetti_v
  return 0;
 }
 static void status_reset(void *state) { struct status_led_state *ctx=state;ctx->intensity=0;ctx->level_seen=false;ctx->intensity_seen=false;memset(ctx->levels,0,sizeof(ctx->levels));(void)spaghetti_status_led_set_intensity(ctx,0U); }
-static void status_deinit(void *state) { spaghetti_status_led_release(state); }
+static void status_deinit(void *state) { if(!((struct status_led_state *)state)->validation_only)spaghetti_status_led_release(state); }
 static const struct spaghetti_block_driver_ops status_ops = { .validate=status_validate,.init=status_init,.process=status_process,.reset=status_reset,.deinit=status_deinit };
 SPAGHETTI_BLOCK_DRIVER_DEFINE(board_status_led) = { .type_id="status_led",.api_version=SPAGHETTI_BLOCK_DRIVER_API_VERSION,.algorithm_version=1U,.config_schema=&status_schema,.inputs=status_in,.input_count=ARRAY_SIZE(status_in),.outputs=status_out,.output_count=ARRAY_SIZE(status_out),.state_size=sizeof(struct status_led_state),.state_align=__alignof__(struct status_led_state),.max_cost_per_record=40U,.ops=&status_ops };
