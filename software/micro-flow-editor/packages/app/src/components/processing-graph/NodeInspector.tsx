@@ -688,103 +688,138 @@ export function NodeInspector({
         )}
 
         {data.kind === "schedule" && (
-          <>
+          <div className="mb-4 space-y-3">
+            <p className="text-sm text-ink-muted">
+              Trascina «Genera trigger» dentro questo riquadro e collega la sua uscita
+              alle azioni da ripetere. Run Deploy avvia l’esecuzione continua; Stop
+              lascia disponibili i trigger manuali per le prove one-shot.
+            </p>
             <label
-              className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+              className="block text-xs font-semibold text-ink-muted"
               htmlFor="ni-period"
             >
-              {copy.periodMs}
+              Ripeti ogni
             </label>
-            <input
-              id="ni-period"
-              type="number"
-              value={data.periodMs}
-              onChange={(e) => patch({ periodMs: Number(e.target.value) })}
-              className="mb-4 w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
-            />
-          </>
+            <div className="flex items-center gap-2">
+              <input
+                id="ni-period"
+                type="number"
+                min={0.001}
+                max={60}
+                step={0.1}
+                value={data.periodMs / 1000}
+                onChange={(event) =>
+                  patch({ periodMs: Math.round(Number(event.target.value) * 1000) })
+                }
+                className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
+              />
+              <span className="text-sm text-ink-muted">secondi</span>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={data.enabled}
+                onChange={(event) => patch({ enabled: event.target.checked })}
+              />
+              Schedule attivo
+            </label>
+          </div>
         )}
 
         {data.kind === "block" && (
           <>
-            {data.blockTypeId === "ui.manual_trigger" && <p className="mb-4 text-sm text-ink-muted">Collega «Avvia azione» a un ingresso trigger. Dopo Run Deploy, usa il pulsante «Invia trigger» nel blocco. Ogni clic avvia una volta le azioni collegate, con il PC connesso.</p>}
-            {data.blockTypeId === "ui.data_viewer" && <p className="mb-4 text-sm text-ink-muted">Collega un’uscita a «Mostra valore». Il blocco mostra l’ultimo dato ricevuto e si aggiorna automaticamente durante l’esecuzione.</p>}
-            {!demoOnly && !driverRecipe && !["ui.data_viewer", "ui.manual_trigger"].includes(data.blockTypeId) && (
-              <>
-                <label
-                  className="mb-1 block font-body text-xs font-semibold text-ink-muted"
-                  htmlFor="ni-blocktype"
-                >
-                  Block
-                </label>
-                <TypeIdSelect
-                  id="ni-blocktype"
-                  kind="block"
-                  value={data.blockTypeId}
-                  catalogEntryId={data.catalogEntryId}
-                  onChange={(blockTypeId, entry) =>
-                    applyCatalogChange(
-                      {
-                        ...data,
-                        blockTypeId,
-                        catalogEntryId: entry?.id,
-                        properties: defaultPropertiesFromFields(entry?.fields ?? []),
-                      } as DeviceProcessingNodeData,
-                      entry,
-                    )
-                  }
-                />
-                <CatalogNotes entry={localizedEntry} />
-                {!authoringType && (
-                  <div className="mb-4 flex gap-2">
-                    <div className="flex-1">
-                      <label
-                        className="mb-1 block font-body text-xs font-semibold text-ink-muted"
-                        htmlFor="ni-minver"
-                      >
-                        {copy.minVersion}
-                      </label>
-                      <input
-                        id="ni-minver"
-                        type="number"
-                        value={data.minVersion ?? ""}
-                        onChange={(e) =>
-                          patch({
-                            minVersion:
-                              e.target.value === ""
-                                ? undefined
-                                : Number(e.target.value),
-                          })
-                        }
-                        className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label
-                        className="mb-1 block font-body text-xs font-semibold text-ink-muted"
-                        htmlFor="ni-exactver"
-                      >
-                        {copy.exactVersion}
-                      </label>
-                      <input
-                        id="ni-exactver"
-                        type="number"
-                        value={data.exactVersion ?? ""}
-                        onChange={(e) =>
-                          patch({
-                            exactVersion:
-                              e.target.value === ""
-                                ? undefined
-                                : Number(e.target.value),
-                          })
-                        }
-                        className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
-                      />
-                    </div>
-                  </div>
-                )}
-              </>
+            {data.blockTypeId === "ui.manual_trigger" && (
+              <p className="mb-4 text-sm text-ink-muted">
+                Collega «Avvia azione» a un ingresso trigger. Dopo Run Deploy, usa il
+                pulsante «Invia trigger» nel blocco. Ogni clic avvia una volta le azioni
+                collegate, con il PC connesso. Usa il pallino dello Schedule per
+                ripeterle automaticamente sulla Backbone.
+              </p>
             )}
+            {data.blockTypeId === "ui.data_viewer" && (
+              <p className="mb-4 text-sm text-ink-muted">
+                Collega un’uscita a «Mostra valore». Il blocco mostra l’ultimo dato
+                ricevuto e si aggiorna automaticamente durante l’esecuzione.
+              </p>
+            )}
+            {!demoOnly &&
+              !driverRecipe &&
+              !["ui.data_viewer", "ui.manual_trigger"].includes(data.blockTypeId) && (
+                <>
+                  <label
+                    className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+                    htmlFor="ni-blocktype"
+                  >
+                    Block
+                  </label>
+                  <TypeIdSelect
+                    id="ni-blocktype"
+                    kind="block"
+                    value={data.blockTypeId}
+                    catalogEntryId={data.catalogEntryId}
+                    onChange={(blockTypeId, entry) =>
+                      applyCatalogChange(
+                        {
+                          ...data,
+                          blockTypeId,
+                          catalogEntryId: entry?.id,
+                          properties: defaultPropertiesFromFields(entry?.fields ?? []),
+                        } as DeviceProcessingNodeData,
+                        entry,
+                      )
+                    }
+                  />
+                  <CatalogNotes entry={localizedEntry} />
+                  {!authoringType && (
+                    <div className="mb-4 flex gap-2">
+                      <div className="flex-1">
+                        <label
+                          className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+                          htmlFor="ni-minver"
+                        >
+                          {copy.minVersion}
+                        </label>
+                        <input
+                          id="ni-minver"
+                          type="number"
+                          value={data.minVersion ?? ""}
+                          onChange={(e) =>
+                            patch({
+                              minVersion:
+                                e.target.value === ""
+                                  ? undefined
+                                  : Number(e.target.value),
+                            })
+                          }
+                          className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label
+                          className="mb-1 block font-body text-xs font-semibold text-ink-muted"
+                          htmlFor="ni-exactver"
+                        >
+                          {copy.exactVersion}
+                        </label>
+                        <input
+                          id="ni-exactver"
+                          type="number"
+                          value={data.exactVersion ?? ""}
+                          onChange={(e) =>
+                            patch({
+                              exactVersion:
+                                e.target.value === ""
+                                  ? undefined
+                                  : Number(e.target.value),
+                            })
+                          }
+                          className="w-full rounded-slsm border border-border-strong px-2 py-1.5 font-mono text-sm outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             {driverRecipe ? (
               <p className="mb-3 font-body text-xs text-ink-muted">
                 {driverRecipe.deviceDraft?.name} ·{" "}
@@ -809,7 +844,8 @@ export function NodeInspector({
               />
             ) : demoTempBlock ? (
               <p className="font-body text-sm text-ink-muted">{copy.tempProbeHint}</p>
-            ) : data.blockTypeId === "ui.manual_trigger" ? null : namedFields.length > 0 ? (
+            ) : data.blockTypeId === "ui.manual_trigger" ? null : namedFields.length >
+              0 ? (
               <CatalogFieldsEditor
                 fields={namedFields}
                 properties={data.properties}
@@ -827,12 +863,27 @@ export function NodeInspector({
                 />
               </>
             )}
-            {data.blockTypeId === SEQUENCE_TYPE && <SequenceEditor
-              properties={data.properties}
-              modules={driverBindingId ? modulesForBinding(parseBackboneSensorModules(session?.stack.current.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment), driverBindingId) : []}
-              onChange={(properties) => patch({ properties })}
-            />}
-            {data.blockTypeId === SEQUENCE_TYPE && mode.kind === "edit" && <SequenceControls nodeId={nodeId} bindingId={driverBindingId} />}
+            {data.blockTypeId === SEQUENCE_TYPE && (
+              <SequenceEditor
+                properties={data.properties}
+                modules={
+                  driverBindingId
+                    ? modulesForBinding(
+                        parseBackboneSensorModules(
+                          session?.stack.current.authoringMetadata[
+                            BACKBONE_SENSOR_MODULES_META_KEY
+                          ]?.comment,
+                        ),
+                        driverBindingId,
+                      )
+                    : []
+                }
+                onChange={(properties) => patch({ properties })}
+              />
+            )}
+            {data.blockTypeId === SEQUENCE_TYPE && mode.kind === "edit" && (
+              <SequenceControls nodeId={nodeId} bindingId={driverBindingId} />
+            )}
             {isRgbLedBlock(data) && (
               <RgbLedSequenceEditor
                 properties={data.properties}

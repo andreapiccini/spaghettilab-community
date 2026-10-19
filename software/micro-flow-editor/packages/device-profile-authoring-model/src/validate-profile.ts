@@ -75,10 +75,17 @@ function tempSlots(instruction: Instruction): number[] {
       return [instruction.srcA, instruction.srcB, instruction.dst];
     case "EMIT_FIELD":
       return [instruction.src];
-    case "EMIT_DECIMAL": return [instruction.src];
-    case "DHT22_READ": return [instruction.dst, instruction.humidityDst];
+    case "EMIT_DECIMAL":
+      return [instruction.src];
+    case "DS18B20_READ":
+      return [instruction.dst];
+    case "DS18B20_SETUP":
+      return [];
+    case "DHT22_READ":
+      return [instruction.dst, instruction.humidityDst];
     case "DHT22_POWER":
-    case "RGB_PROGRAM": return [];
+    case "RGB_PROGRAM":
+      return [];
     case "STEPPER":
       return instruction.command === 2 ? [instruction.src] : [];
     case "GPIO_SET":
@@ -93,8 +100,13 @@ function tempSlots(instruction: Instruction): number[] {
 function transactionsFor(instruction: Instruction): number {
   switch (instruction.op) {
     case "DHT22_READ":
-    case "DHT22_POWER": return 2;
-    case "RGB_PROGRAM": return 3;
+    case "DHT22_POWER":
+      return 2;
+    case "DS18B20_READ":
+    case "DS18B20_SETUP":
+      return 1;
+    case "RGB_PROGRAM":
+      return 3;
     case "STEPPER":
       return 4;
     case "GPIO_PULSE":
@@ -150,7 +162,10 @@ function bytesFor(instruction: Instruction): number {
 
 function timeFor(instruction: Instruction): number {
   switch (instruction.op) {
-    case "DHT22_READ": return 12;
+    case "DHT22_READ":
+      return instruction.model === "dht11" ? 32 : 12;
+    case "DS18B20_READ":
+      return 20;
     case "I2C_MESSAGE_WRITE":
     case "I2C_WRITE":
     case "I2C_READ":
@@ -193,9 +208,54 @@ function structuralError(
   instruction: Instruction,
 ): { target: string; remediation: string } | undefined {
   switch (instruction.op) {
+    case "DS18B20_SETUP":
+    case "DS18B20_READ":
+      return !Number.isInteger(instruction.channel) ||
+        instruction.channel < 0 ||
+        instruction.channel > 3 ||
+        (instruction.op === "DS18B20_SETUP" &&
+          instruction.powerChannel !== undefined &&
+          (!Number.isInteger(instruction.powerChannel) ||
+            instruction.powerChannel < 0 ||
+            instruction.powerChannel > 3 ||
+            instruction.powerChannel === instruction.channel))
+        ? {
+            target: instruction.op,
+            remediation: "Select distinct DATA and power GPIOs",
+          }
+        : undefined;
     case "DHT22_POWER":
-    case "DHT22_READ": return !Number.isInteger(instruction.dataChannel) || !Number.isInteger(instruction.powerChannel) || instruction.dataChannel < 0 || instruction.dataChannel > 3 || instruction.powerChannel < 0 || instruction.powerChannel > 3 || instruction.dataChannel === instruction.powerChannel || (instruction.op === "DHT22_READ" && instruction.dst === instruction.humidityDst) ? { target: instruction.op, remediation: "DHT22 requires distinct DATA and power GPIOs and output slots" } : undefined;
-    case "RGB_PROGRAM": return instruction.offset < 0 || !Number.isInteger(instruction.offset) || instruction.length < 6 || instruction.length > 96 || instruction.length % 6 || !Number.isInteger(instruction.channels) || instruction.channels < 0 || instruction.channels > 63 || new Set([instruction.channels & 3, (instruction.channels >> 2) & 3, (instruction.channels >> 4) & 3]).size !== 3 ? { target: "RGB_PROGRAM", remediation: "Invalid RGB program or channels" } : undefined;
+    case "DHT22_READ":
+      return !Number.isInteger(instruction.dataChannel) ||
+        !Number.isInteger(instruction.powerChannel) ||
+        instruction.dataChannel < 0 ||
+        instruction.dataChannel > 3 ||
+        instruction.powerChannel < 0 ||
+        instruction.powerChannel > 3 ||
+        instruction.dataChannel === instruction.powerChannel ||
+        (instruction.op === "DHT22_READ" && instruction.dst === instruction.humidityDst)
+        ? {
+            target: instruction.op,
+            remediation:
+              "DHT22 requires distinct DATA and power GPIOs and output slots",
+          }
+        : undefined;
+    case "RGB_PROGRAM":
+      return instruction.offset < 0 ||
+        !Number.isInteger(instruction.offset) ||
+        instruction.length < 6 ||
+        instruction.length > 96 ||
+        instruction.length % 6 ||
+        !Number.isInteger(instruction.channels) ||
+        instruction.channels < 0 ||
+        instruction.channels > 63 ||
+        new Set([
+          instruction.channels & 3,
+          (instruction.channels >> 2) & 3,
+          (instruction.channels >> 4) & 3,
+        ]).size !== 3
+        ? { target: "RGB_PROGRAM", remediation: "Invalid RGB program or channels" }
+        : undefined;
     case "STEPPER": {
       const channels = Array.from(
         { length: 4 },
@@ -372,7 +432,9 @@ export function validateDeviceProfile(
       }
       let messageError = false;
       if (instruction.op === "RGB_PROGRAM") {
-        messageError = instruction.offset + instruction.length > (draft.messageData?.length ?? 0) || draft.transport !== 3;
+        messageError =
+          instruction.offset + instruction.length > (draft.messageData?.length ?? 0) ||
+          draft.transport !== 3;
       } else if (instruction.op === "MESSAGE_LOAD") {
         messageLength = instruction.length;
         messageError =
@@ -499,9 +561,18 @@ export function validateDeviceProfile(
         ),
       );
     }
-    if (!emittedFieldIds.has(field.fieldId) && !(((field.fieldId === 65531 || field.fieldId === 65532) && field.type === "uint64" && draft.sampleOps.some((op) => op.op === "RGB_PROGRAM")) || field.fieldId === 65534 &&
-      field.type === "uint64" && field.name === "movement_completed" &&
-      draft.sampleOps.some((op) => op.op === "STEPPER"))) {
+    if (
+      !emittedFieldIds.has(field.fieldId) &&
+      !(
+        ((field.fieldId === 65531 || field.fieldId === 65532) &&
+          field.type === "uint64" &&
+          draft.sampleOps.some((op) => op.op === "RGB_PROGRAM")) ||
+        (field.fieldId === 65534 &&
+          field.type === "uint64" &&
+          field.name === "movement_completed" &&
+          draft.sampleOps.some((op) => op.op === "STEPPER"))
+      )
+    ) {
       errors.push(
         failure(
           DeviceProfileErrorCode.UNEMITTED_FIELD,

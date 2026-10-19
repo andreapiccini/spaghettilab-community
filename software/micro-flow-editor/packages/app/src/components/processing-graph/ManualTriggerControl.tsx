@@ -10,7 +10,7 @@ export function ManualTriggerControl({
   nodeId: string;
   bindingId?: string;
 }) {
-  const { rows, getClient, getSnapshot } = useCoreSessions();
+  const { rows, getClient, getSnapshot, getExecutionMode } = useCoreSessions();
   const row = rows.find((item) => item.binding.bindingId === bindingId);
   const binding = row?.binding;
   const [busy, setBusy] = useState(false);
@@ -25,10 +25,13 @@ export function ManualTriggerControl({
       (module) =>
         module.typeId === "declarative-device" && module.properties[1] === profileId,
     );
+  const continuous = binding
+    ? getExecutionMode(binding.bindingId) !== "one-shot"
+    : false;
   const ready = row?.sessionState === "READY";
   async function send() {
     const client = binding && getClient(binding.bindingId);
-    if (!client || sending.current || !ready) return;
+    if (!client || sending.current || !ready || continuous) return;
     sending.current = true;
     setBusy(true);
     setMessage("");
@@ -56,7 +59,9 @@ export function ManualTriggerControl({
     }
   }
   return (
-    <div className="flex h-full flex-col gap-2 p-3">
+    <div
+      className={`flex h-full flex-col gap-2 rounded-lg p-3 ${continuous ? "bg-surface-raised opacity-60 grayscale" : ""}`}
+    >
       <div className="pointer-events-none flex items-center gap-2 text-xs font-semibold text-brand-blue">
         <MousePointerClick size={16} />
         <span>Genera trigger</span>
@@ -64,7 +69,7 @@ export function ManualTriggerControl({
       <button
         type="button"
         className="nodrag nopan rounded-lg bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
-        disabled={!ready || !deployed || busy}
+        disabled={continuous || !ready || !deployed || busy}
         onClick={(event) => {
           event.stopPropagation();
           void send();
@@ -78,11 +83,15 @@ export function ManualTriggerControl({
         role="status"
         className="pointer-events-none mt-auto line-clamp-2 text-[10px] text-ink-muted"
       >
-        {!ready
-          ? "Collega la Backbone"
-          : !deployed
-            ? "Esegui Run Deploy per attivare il pulsante"
-            : message || "Manuale · PC collegato"}
+        {continuous
+          ? binding && getExecutionMode(binding.bindingId) === "busy"
+            ? "Operazione sulla Backbone in corso…"
+            : "Esecuzione continua · premi Stop per i test manuali"
+          : !ready
+            ? "Collega la Backbone"
+            : !deployed
+              ? "Carica il Flow con Run Deploy, poi premi Stop"
+              : message || "One-shot · avvia una sola lettura o azione"}
       </p>
     </div>
   );

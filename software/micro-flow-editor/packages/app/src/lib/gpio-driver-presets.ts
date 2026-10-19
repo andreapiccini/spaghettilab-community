@@ -967,34 +967,163 @@ export function catalogUln2003Driver(): DeviceRecipeDraft {
   };
 }
 
-/** DHT22 powered from a dedicated GPIO; DATA and power are separate resources. */
+/** DHT11; the legacy preset ID stays stable for saved modules and NFC bindings. */
 export function catalogDht22Driver(): DeviceRecipeDraft {
-  const readStep: DeviceRecipeOp = { id: "dht-read", type: "dht22_read", temperatureInto: "temperatura_raw", humidityInto: "umidita_raw" };
+  const readStep: DeviceRecipeOp = {
+    id: "dht-read",
+    type: "dht22_read",
+    temperatureInto: "temperatura_raw",
+    humidityInto: "umidita_raw",
+  };
   const draft = gpioDraft({
-    name: "DHT22", hardwareKind: "sensor", deviceCategory: "sensor",
-    description: "Temperatura su richiesta: DATA A0, alimentazione A1 HIGH, GND comune. Il fronte di salita o false→true avvia la lettura.",
-    signals: [digitalIn("DATA", "DATA", { activeLow: false, pull: "none" }), digitalOut("POWER", "Alimentazione 3,3 V")],
+    name: "DHT11",
+    hardwareKind: "sensor",
+    deviceCategory: "sensor",
+    description:
+      "Temperatura e umidità su richiesta: DATA A0, alimentazione A1 HIGH, GND comune. Il fronte di salita o false→true avvia la lettura.",
+    signals: [
+      digitalIn("DATA", "DATA", { activeLow: false, pull: "none" }),
+      digitalOut("POWER", "Alimentazione 3,3 V"),
+    ],
     init: [{ id: "dht-init", type: "dht22_power", on: true }],
     commands: [
-      action("leggi", "Leggi temperatura", [
-        { id: "dht-trigger", type: "sample_external", inputMode: "trigger", fromChannelId: "read-trigger", into: "richiesta_lettura", valueType: "bool" },
-        readStep,
-        { id: "dht-convert", type: "dht22_convert", input: "temperatura_raw", into: "temperatura", format: "float" },
-        emit("temperature", "temperatura"),
-      ], { id: "00-read" }),
+      action(
+        "leggi",
+        "Leggi temperatura",
+        [
+          {
+            id: "dht-trigger",
+            type: "sample_external",
+            inputMode: "trigger",
+            fromChannelId: "read-trigger",
+            into: "richiesta_lettura",
+            valueType: "bool",
+          },
+          readStep,
+          {
+            id: "dht-convert",
+            type: "dht22_convert",
+            input: "temperatura_raw",
+            into: "temperatura",
+            format: "float",
+          },
+          emit("temperature", "temperatura"),
+          {
+            id: "dht-humidity",
+            type: "dht22_convert",
+            input: "umidita_raw",
+            into: "umidita",
+            format: "float",
+            quantity: "humidity",
+          },
+          emit("humidity", "umidita"),
+        ],
+        { id: "00-read" },
+      ),
     ],
     channels: [
-      { id: "read-trigger", label: "Leggi temperatura", unit: "", quantity: "digital", direction: "write", dataType: "bool", inputMode: "trigger" },
-      { id: "temperature", label: "Temperatura", unit: "°C", quantity: "temperature", direction: "read", dataType: "number" },
-    ], runtimeUnavailable: [],
+      {
+        id: "read-trigger",
+        label: "Leggi temperatura",
+        unit: "",
+        quantity: "digital",
+        direction: "write",
+        dataType: "bool",
+        inputMode: "trigger",
+      },
+      {
+        id: "temperature",
+        label: "Temperatura",
+        unit: "°C",
+        quantity: "temperature",
+        direction: "read",
+        dataType: "number",
+      },
+      {
+        id: "humidity",
+        label: "Umidità",
+        unit: "%RH",
+        quantity: "humidity",
+        direction: "read",
+        dataType: "number",
+      },
+    ],
+    runtimeUnavailable: [],
   });
-  return { ...draft, id: "gpio-dht22", dht22Module: true, dht22Version: 2, status: "ready", sampleIntervalMs: 0,
-    gpioHardware: { ...draft.gpioHardware!, ground: true }, updatedAt: 1792353600000 };
+  return {
+    ...draft,
+    id: "gpio-dht22",
+    temperatureSensorModel: "dht11",
+    dht22Module: true,
+    dht22Version: 3,
+    status: "ready",
+    sampleIntervalMs: 0,
+    gpioHardware: { ...draft.gpioHardware!, ground: true },
+    updatedAt: 1792353600000,
+  };
 }
 
 /** Upgrade the original unformatted DHT22 template while keeping unit identity. */
 export function upgradeDht22Driver(draft: DeviceRecipeDraft): DeviceRecipeDraft {
-  return draft.dht22Module && !draft.dht22Version
-    ? { ...catalogDht22Driver(), id: draft.id, name: draft.name }
+  return draft.dht22Module &&
+    draft.temperatureSensorModel !== "ds18b20" &&
+    (draft.dht22Version ?? 0) < 3
+    ? {
+        ...catalogDht22Driver(),
+        id: draft.id,
+        name: draft.name === "DHT22" ? "DHT11" : draft.name,
+      }
     : draft;
+}
+
+/** One DS18B20 on DATA; parasite power uses DATA, VDD must be grounded. */
+export function catalogDs18b20Driver(): DeviceRecipeDraft {
+  const dht = catalogDht22Driver();
+  return {
+    ...dht,
+    id: "gpio-ds18b20-parasite",
+    name: "DS18B20",
+    temperatureSensorModel: "ds18b20",
+    ds18b20PowerMode: "parasite",
+    description:
+      "Alimentazione parassita da DATA A0. VDD e GND a massa; pull-up esterno DATA–3,3 V. Un sensore per pin; conversione fino a 750 ms. Verificare la schedina con LED prima del collegamento.",
+    binding: {
+      ...dht.binding,
+      gpioSignals: dht.binding.gpioSignals.filter((s) => s.id === "DATA"),
+    },
+    channels: dht.channels.filter((c) => c.id !== "humidity"),
+    commands: dht.commands.map((a) => ({
+      ...a,
+      steps: a.steps.filter(
+        (s) =>
+          !(s.type === "dht22_convert" && s.quantity === "humidity") &&
+          !(s.type === "emit" && s.channelId === "humidity"),
+      ),
+    })),
+  };
+}
+
+/** Rebuild pin requirements without changing actions, variables or driver identity. */
+export function withDs18b20PowerMode(
+  draft: DeviceRecipeDraft,
+  mode: "parasite" | "gpio",
+): DeviceRecipeDraft {
+  if (draft.temperatureSensorModel !== "ds18b20") return draft;
+  const data = draft.binding.gpioSignals.find((signal) => signal.id === "DATA");
+  if (!data) throw new Error("Il DS18B20 deve dichiarare DATA.");
+  const power =
+    draft.binding.gpioSignals.find((signal) => signal.id === "POWER") ??
+    digitalOut("POWER", "Alimentazione 3,3 V");
+  return {
+    ...draft,
+    ds18b20PowerMode: mode,
+    binding: {
+      ...draft.binding,
+      gpioSignals: mode === "gpio" ? [data, power] : [data],
+    },
+    description:
+      mode === "gpio"
+        ? "DATA A0, VCC A1 HIGH, GND comune. Alimentazione da GPIO durante avvio, conversione e lettura."
+        : catalogDs18b20Driver().description,
+  };
 }

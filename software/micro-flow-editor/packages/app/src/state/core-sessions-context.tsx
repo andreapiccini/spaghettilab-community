@@ -1,16 +1,77 @@
+import { configHasContinuousSchedules } from "../lib/stop-deployed-runtime.js";
+import { decodeConfigCbor } from "@spaghettilab/config-decompiler";
 import type { CompileConfigInput } from "@spaghettilab/config-compiler";
-import type { DeploymentContext, DeploymentResult } from "@spaghettilab/config-deployment";
-import type { CommandOutcome, RunCommandRequest, ScanOutcome } from "@spaghettilab/core-actions";
-import type { DestructiveConfirmation, LeaseOutcome, MaintenanceOutcome, ResetScopeOutcome } from "@spaghettilab/core-admin";
-import { bytesToHex, CatalogCache, CoreSession, type CoreSessionSnapshot, type SessionState, type SyncRelationship } from "@spaghettilab/core-session";
+import type {
+  DeploymentContext,
+  DeploymentResult,
+} from "@spaghettilab/config-deployment";
+import type {
+  CommandOutcome,
+  RunCommandRequest,
+  ScanOutcome,
+} from "@spaghettilab/core-actions";
+import type {
+  DestructiveConfirmation,
+  LeaseOutcome,
+  MaintenanceOutcome,
+  ResetScopeOutcome,
+} from "@spaghettilab/core-admin";
+import {
+  bytesToHex,
+  CatalogCache,
+  CoreSession,
+  type CoreSessionSnapshot,
+  type SessionState,
+  type SyncRelationship,
+} from "@spaghettilab/core-session";
 import type { DeviceProfileDraft } from "@spaghettilab/device-profile-authoring-model";
 import type { InstallProfileResult } from "@spaghettilab/device-profile-install";
-import type { CoreBindingId, CoreBindingRecord, DomainError, PermissionSet, Result } from "@spaghettilab/domain";
-import { EventStream, SpaghettiClient, WebSerialProtocolTransport, WebSocketProtocolTransport, type AcceptDiscoveryRequest, type AcceptDiscoveryResponse, type AuditLogEntry, type DeviceProfileSummary, type DiscoveryCandidate, type DiscoveryEventPayload, type GetConfigResponse, type GetConnectivityStatusResponse, type GetJobStatusResponse, type GetStatusResponse, type GetUpdateStatusResponse, type ProtocolTransport, type RecordEventPayload } from "@spaghettilab/protocol-sdk";
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import type {
+  CoreBindingId,
+  CoreBindingRecord,
+  DomainError,
+  PermissionSet,
+  Result,
+} from "@spaghettilab/domain";
+import {
+  EventStream,
+  SpaghettiClient,
+  WebSerialProtocolTransport,
+  WebSocketProtocolTransport,
+  type AcceptDiscoveryRequest,
+  type AcceptDiscoveryResponse,
+  type AuditLogEntry,
+  type DeviceProfileSummary,
+  type DiscoveryCandidate,
+  type DiscoveryEventPayload,
+  type GetConfigResponse,
+  type GetConnectivityStatusResponse,
+  type GetJobStatusResponse,
+  type GetStatusResponse,
+  type GetUpdateStatusResponse,
+  type ProtocolTransport,
+  type RecordEventPayload,
+} from "@spaghettilab/protocol-sdk";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { connectBrowserWebSocket } from "../lib/browser-websocket-connection.js";
-import { openBrowserSerial, type UsbSerialPort } from "../lib/browser-serial-connection.js";
-import { coreDisplayName, formatDeviceId, macBytesToColon, macToDeviceIdHex } from "../lib/core-identity.js";
+import {
+  openBrowserSerial,
+  type UsbSerialPort,
+} from "../lib/browser-serial-connection.js";
+import {
+  coreDisplayName,
+  formatDeviceId,
+  macBytesToColon,
+  macToDeviceIdHex,
+} from "../lib/core-identity.js";
 import { useSession } from "./session-context.js";
 
 export type CoreLink =
@@ -46,18 +107,23 @@ export function retainAttachedVersions(
   });
 }
 
-export function attachedFromStatus(status: GetStatusResponse | undefined, expectedDeviceId: string): AttachedBackbone[] | null {
+export function attachedFromStatus(
+  status: GetStatusResponse | undefined,
+  expectedDeviceId: string,
+): AttachedBackbone[] | null {
   if (!status?.chainPeers?.length) return null;
   void expectedDeviceId;
   return status.chainPeers.map((peer) => {
     const mac = macBytesToColon(peer.mac);
-    const version = (peer.version?.trim() || (peer.local ? status.version : undefined))?.trim();
+    const version = (
+      peer.version?.trim() || (peer.local ? status.version : undefined)
+    )?.trim();
     return {
       deviceIdHex: macToDeviceIdHex(mac),
       mac,
       nodeId: peer.nodeId,
       local: peer.local,
-      ...((peer.flags & 0x02) !== 0 ? {productKind:"nfc-reader" as const} : {}),
+      ...((peer.flags & 0x02) !== 0 ? { productKind: "nfc-reader" as const } : {}),
       ...(version ? { version } : {}),
     };
   });
@@ -94,32 +160,97 @@ export type CoreRowState = {
 
 type CoreSessionsContextValue = {
   rows: readonly CoreRowState[];
+  getExecutionMode(bindingId: CoreBindingId): "continuous" | "one-shot" | "busy";
+  setExecutionMode(
+    bindingId: CoreBindingId,
+    mode: "continuous" | "one-shot" | "busy",
+  ): void;
   connect(binding: CoreBindingRecord, link: CoreLink): Promise<void>;
-  setAttachedBackbones(bindingId: CoreBindingId, peers: readonly AttachedBackbone[]): void;
+  setAttachedBackbones(
+    bindingId: CoreBindingId,
+    peers: readonly AttachedBackbone[],
+  ): void;
   observeStatus(bindingId: CoreBindingId, status: GetStatusResponse): void;
   observeConfig(bindingId: CoreBindingId, config: GetConfigResponse): void;
   cancel(bindingId: CoreBindingId): void;
   fail(bindingId: CoreBindingId, message: string): void;
   getSnapshot(bindingId: CoreBindingId): CoreSessionSnapshot | undefined;
-  listDeviceProfiles(bindingId: CoreBindingId): Promise<readonly DeviceProfileSummary[]> | undefined;
-  listDiscoveryCandidates(bindingId: CoreBindingId): Promise<readonly DiscoveryCandidate[]> | undefined;
-  acceptDiscovery(bindingId: CoreBindingId, req: AcceptDiscoveryRequest): Promise<AcceptDiscoveryResponse> | undefined;
-  installProfile(bindingId: CoreBindingId, draft: DeviceProfileDraft): Promise<Result<InstallProfileResult, DomainError>> | undefined;
-  removeProfile(bindingId: CoreBindingId, profileId: string, version: number, options: { readonly isReferencedLocally: boolean }): Promise<Result<void, DomainError>> | undefined;
-  deployConfig(bindingId: CoreBindingId, input: CompileConfigInput, context: DeploymentContext): Promise<DeploymentResult> | undefined;
-  onRecordEvent(bindingId: CoreBindingId, listener: (payload: RecordEventPayload) => void): (() => void) | undefined;
-  onDiscoveryEvent(bindingId: CoreBindingId, listener: (payload: DiscoveryEventPayload) => void): (() => void) | undefined;
+  listDeviceProfiles(
+    bindingId: CoreBindingId,
+  ): Promise<readonly DeviceProfileSummary[]> | undefined;
+  listDiscoveryCandidates(
+    bindingId: CoreBindingId,
+  ): Promise<readonly DiscoveryCandidate[]> | undefined;
+  acceptDiscovery(
+    bindingId: CoreBindingId,
+    req: AcceptDiscoveryRequest,
+  ): Promise<AcceptDiscoveryResponse> | undefined;
+  installProfile(
+    bindingId: CoreBindingId,
+    draft: DeviceProfileDraft,
+  ): Promise<Result<InstallProfileResult, DomainError>> | undefined;
+  removeProfile(
+    bindingId: CoreBindingId,
+    profileId: string,
+    version: number,
+    options: { readonly isReferencedLocally: boolean },
+  ): Promise<Result<void, DomainError>> | undefined;
+  deployConfig(
+    bindingId: CoreBindingId,
+    input: CompileConfigInput,
+    context: DeploymentContext,
+  ): Promise<DeploymentResult> | undefined;
+  onRecordEvent(
+    bindingId: CoreBindingId,
+    listener: (payload: RecordEventPayload) => void,
+  ): (() => void) | undefined;
+  onDiscoveryEvent(
+    bindingId: CoreBindingId,
+    listener: (payload: DiscoveryEventPayload) => void,
+  ): (() => void) | undefined;
   getLastBootId(bindingId: CoreBindingId): bigint | null | undefined;
-  runCommand(bindingId: CoreBindingId, req: RunCommandRequest, granted: PermissionSet): Promise<CommandOutcome> | undefined;
-  requestScan(bindingId: CoreBindingId, req: { readonly portId: number; readonly invasive: boolean }, granted: PermissionSet): Promise<ScanOutcome> | undefined;
-  getJobStatus(bindingId: CoreBindingId, jobId: number): Promise<GetJobStatusResponse> | undefined;
-  getConnectivityStatus(bindingId: CoreBindingId): Promise<GetConnectivityStatusResponse> | undefined;
+  runCommand(
+    bindingId: CoreBindingId,
+    req: RunCommandRequest,
+    granted: PermissionSet,
+  ): Promise<CommandOutcome> | undefined;
+  requestScan(
+    bindingId: CoreBindingId,
+    req: { readonly portId: number; readonly invasive: boolean },
+    granted: PermissionSet,
+  ): Promise<ScanOutcome> | undefined;
+  getJobStatus(
+    bindingId: CoreBindingId,
+    jobId: number,
+  ): Promise<GetJobStatusResponse> | undefined;
+  getConnectivityStatus(
+    bindingId: CoreBindingId,
+  ): Promise<GetConnectivityStatusResponse> | undefined;
   getAuditLog(bindingId: CoreBindingId): Promise<readonly AuditLogEntry[]> | undefined;
-  acquireLease(bindingId: CoreBindingId, services: number, durationMs: number, granted: PermissionSet): Promise<LeaseOutcome> | undefined;
-  releaseLease(bindingId: CoreBindingId, granted: PermissionSet): Promise<LeaseOutcome> | undefined;
-  openNetworkMaintenance(bindingId: CoreBindingId, granted: PermissionSet, confirmation: DestructiveConfirmation): Promise<MaintenanceOutcome> | undefined;
-  requestFactoryReset(bindingId: CoreBindingId, scope: number, granted: PermissionSet, confirmation: DestructiveConfirmation): Promise<ResetScopeOutcome> | undefined;
-  getUpdateStatus(bindingId: CoreBindingId): Promise<GetUpdateStatusResponse> | undefined;
+  acquireLease(
+    bindingId: CoreBindingId,
+    services: number,
+    durationMs: number,
+    granted: PermissionSet,
+  ): Promise<LeaseOutcome> | undefined;
+  releaseLease(
+    bindingId: CoreBindingId,
+    granted: PermissionSet,
+  ): Promise<LeaseOutcome> | undefined;
+  openNetworkMaintenance(
+    bindingId: CoreBindingId,
+    granted: PermissionSet,
+    confirmation: DestructiveConfirmation,
+  ): Promise<MaintenanceOutcome> | undefined;
+  requestFactoryReset(
+    bindingId: CoreBindingId,
+    scope: number,
+    granted: PermissionSet,
+    confirmation: DestructiveConfirmation,
+  ): Promise<ResetScopeOutcome> | undefined;
+  getUpdateStatus(
+    bindingId: CoreBindingId,
+  ): Promise<GetUpdateStatusResponse> | undefined;
   getClient(bindingId: CoreBindingId): SpaghettiClient | undefined;
   /**
    * One GET_STATUS per connected host root, shared by Discover and presence.
@@ -128,25 +259,38 @@ type CoreSessionsContextValue = {
    */
   discoverNetwork(options?: {
     readonly fresh?: boolean;
-  }): Promise<readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]>;
+  }): Promise<
+    readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]
+  >;
   /** Blocks GET_STATUS while an exclusive NFC write owns the transport. */
   lockTransport(): void;
   unlockTransport(): void;
 };
 
-const CoreSessionsContext = createContext<CoreSessionsContextValue | undefined>(undefined);
+const CoreSessionsContext = createContext<CoreSessionsContextValue | undefined>(
+  undefined,
+);
 
 const sharedCatalogCache = new CatalogCache();
 
-function usbBridgeClientOptions(link: CoreLink): { defaultTimeoutMs: number; attemptTimeoutMs: number; maxRetries: number } | undefined {
-  if (link.kind === "usb") return { defaultTimeoutMs: 20000, attemptTimeoutMs: 8000, maxRetries: 1 };
+function usbBridgeClientOptions(
+  link: CoreLink,
+):
+  | { defaultTimeoutMs: number; attemptTimeoutMs: number; maxRetries: number }
+  | undefined {
+  if (link.kind === "usb")
+    return { defaultTimeoutMs: 20000, attemptTimeoutMs: 8000, maxRetries: 1 };
   if (link.kind === "websocket" && link.url.includes("/usb-bridge/")) {
     return { defaultTimeoutMs: 20000, attemptTimeoutMs: 8000, maxRetries: 1 };
   }
   return undefined;
 }
 
-async function openLink(link: CoreLink): Promise<{ transport: ProtocolTransport; dispose: () => void; onDisconnected: (cb: () => void) => void }> {
+async function openLink(link: CoreLink): Promise<{
+  transport: ProtocolTransport;
+  dispose: () => void;
+  onDisconnected: (cb: () => void) => void;
+}> {
   if (link.kind === "can") {
     throw new Error("CAN peers are reached through the USB master");
   }
@@ -189,11 +333,15 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
   const canViaRef = useRef(new Map<CoreBindingId, CanVia>());
   const attachedRef = useRef(new Map<CoreBindingId, readonly AttachedBackbone[]>());
   const hostLinkRef = useRef(new Map<CoreBindingId, HostLink>());
-  const discoveryRef = useRef<Promise<readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]> | null>(null);
+  const discoveryRef = useRef<Promise<
+    readonly { readonly bindingId: CoreBindingId; readonly status: GetStatusResponse }[]
+  > | null>(null);
   const transportLockRef = useRef(0);
   const [renderCount, forceRender] = useState(0);
   const rerender = useCallback(() => forceRender((n) => n + 1), []);
-  const [errors, setErrors] = useState<Map<CoreBindingId, DomainError | string>>(new Map());
+  const [errors, setErrors] = useState<Map<CoreBindingId, DomainError | string>>(
+    new Map(),
+  );
 
   const connect = useCallback(
     async (binding: CoreBindingRecord, link: CoreLink) => {
@@ -209,7 +357,10 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
       disposersRef.current.delete(binding.bindingId);
       attachedRef.current.delete(binding.bindingId);
       if (link.kind === "can") {
-        canViaRef.current.set(binding.bindingId, { viaDeviceIdHex: link.viaDeviceIdHex, nodeId: link.nodeId });
+        canViaRef.current.set(binding.bindingId, {
+          viaDeviceIdHex: link.viaDeviceIdHex,
+          nodeId: link.nodeId,
+        });
         rerender();
         return;
       }
@@ -218,10 +369,20 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
       try {
         const opened = await openLink(link);
         disposersRef.current.set(binding.bindingId, opened.dispose);
-        const client = new SpaghettiClient(opened.transport, usbBridgeClientOptions(link));
+        const client = new SpaghettiClient(
+          opened.transport,
+          usbBridgeClientOptions(link),
+        );
         const eventStream = new EventStream(opened.transport);
-        const identityPolicy = hostLinkFromCoreLink(link) === "usb" ? "accept-current" : "strict";
-        const coreSession = new CoreSession(binding, client, eventStream, sharedCatalogCache, identityPolicy);
+        const identityPolicy =
+          hostLinkFromCoreLink(link) === "usb" ? "accept-current" : "strict";
+        const coreSession = new CoreSession(
+          binding,
+          client,
+          eventStream,
+          sharedCatalogCache,
+          identityPolicy,
+        );
         sessionsRef.current.set(binding.bindingId, coreSession);
         opened.onDisconnected(() => {
           // Ignore a stale close from an already-superseded socket (e.g. a
@@ -278,7 +439,12 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
           rerender();
           return;
         }
-        setErrors((prev) => new Map(prev).set(binding.bindingId, cause instanceof Error ? cause.message : String(cause)));
+        setErrors((prev) =>
+          new Map(prev).set(
+            binding.bindingId,
+            cause instanceof Error ? cause.message : String(cause),
+          ),
+        );
         rerender();
       }
     },
@@ -301,36 +467,52 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     [rerender],
   );
 
-  const fail = useCallback((bindingId: CoreBindingId, message: string) => {
-    setErrors((prev) => new Map(prev).set(bindingId, message));
-    rerender();
-  }, [rerender]);
+  const fail = useCallback(
+    (bindingId: CoreBindingId, message: string) => {
+      setErrors((prev) => new Map(prev).set(bindingId, message));
+      rerender();
+    },
+    [rerender],
+  );
 
-  const setAttachedBackbones = useCallback((bindingId: CoreBindingId, peers: readonly AttachedBackbone[]) => {
-    const next = retainAttachedVersions(attachedRef.current.get(bindingId) ?? [], peers);
-    const prev = attachedRef.current.get(bindingId) ?? [];
-    const same =
-      next.length === prev.length &&
-      next.every((peer, index) =>
-        peer.deviceIdHex === prev[index]?.deviceIdHex &&
-        peer.mac === prev[index]?.mac &&
-        peer.nodeId === prev[index]?.nodeId &&
-        peer.version === prev[index]?.version &&
-        peer.local === prev[index]?.local,
+  const setAttachedBackbones = useCallback(
+    (bindingId: CoreBindingId, peers: readonly AttachedBackbone[]) => {
+      const next = retainAttachedVersions(
+        attachedRef.current.get(bindingId) ?? [],
+        peers,
       );
-    if (same) return;
-    attachedRef.current.set(bindingId, next);
-    rerender();
-  }, [rerender]);
+      const prev = attachedRef.current.get(bindingId) ?? [];
+      const same =
+        next.length === prev.length &&
+        next.every(
+          (peer, index) =>
+            peer.deviceIdHex === prev[index]?.deviceIdHex &&
+            peer.mac === prev[index]?.mac &&
+            peer.nodeId === prev[index]?.nodeId &&
+            peer.version === prev[index]?.version &&
+            peer.local === prev[index]?.local,
+        );
+      if (same) return;
+      attachedRef.current.set(bindingId, next);
+      rerender();
+    },
+    [rerender],
+  );
 
-  const observeStatus = useCallback((bindingId: CoreBindingId, status: GetStatusResponse) => {
-    sessionsRef.current.get(bindingId)?.observeStatus(status);
-  }, []);
+  const observeStatus = useCallback(
+    (bindingId: CoreBindingId, status: GetStatusResponse) => {
+      sessionsRef.current.get(bindingId)?.observeStatus(status);
+    },
+    [],
+  );
 
-  const observeConfig = useCallback((bindingId: CoreBindingId, config: GetConfigResponse) => {
-    sessionsRef.current.get(bindingId)?.observeConfig(config);
-    rerender();
-  }, [rerender]);
+  const observeConfig = useCallback(
+    (bindingId: CoreBindingId, config: GetConfigResponse) => {
+      sessionsRef.current.get(bindingId)?.observeConfig(config);
+      rerender();
+    },
+    [rerender],
+  );
 
   const rows = useMemo<readonly CoreRowState[]>(() => {
     const bindings = session?.stack.current.coreBindings ?? [];
@@ -338,7 +520,9 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
       const coreSession = sessionsRef.current.get(binding.bindingId);
       const deviceName = coreSession?.lastKnownSnapshot.status?.deviceName;
       const currentDeviceId = coreSession?.lastKnownSnapshot.status?.deviceId;
-      const displayDeviceId = currentDeviceId?.length ? bytesToHex(currentDeviceId) : binding.expectedDeviceId;
+      const displayDeviceId = currentDeviceId?.length
+        ? bytesToHex(currentDeviceId)
+        : binding.expectedDeviceId;
       return {
         binding,
         displayName: coreDisplayName(deviceName, displayDeviceId),
@@ -353,95 +537,204 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     });
   }, [session, errors, renderCount]);
 
-  const getSnapshot = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.lastKnownSnapshot, []);
-  const listDeviceProfiles = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.listDeviceProfiles(), []);
-  const listDiscoveryCandidates = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.listDiscoveryCandidates(), []);
-  const acceptDiscovery = useCallback((bindingId: CoreBindingId, req: AcceptDiscoveryRequest) => sessionsRef.current.get(bindingId)?.acceptDiscovery(req), []);
-  const installProfile = useCallback((bindingId: CoreBindingId, draft: DeviceProfileDraft) => sessionsRef.current.get(bindingId)?.installProfile(draft), []);
-  const removeProfile = useCallback(
-    (bindingId: CoreBindingId, profileId: string, version: number, options: { readonly isReferencedLocally: boolean }) => sessionsRef.current.get(bindingId)?.removeProfile(profileId, version, options),
+  const getSnapshot = useCallback(
+    (bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.lastKnownSnapshot,
     [],
   );
-  const deployConfig = useCallback((bindingId: CoreBindingId, input: CompileConfigInput, context: DeploymentContext) => sessionsRef.current.get(bindingId)?.deployConfig(input, context), []);
+  const listDeviceProfiles = useCallback(
+    (bindingId: CoreBindingId) =>
+      sessionsRef.current.get(bindingId)?.listDeviceProfiles(),
+    [],
+  );
+  const listDiscoveryCandidates = useCallback(
+    (bindingId: CoreBindingId) =>
+      sessionsRef.current.get(bindingId)?.listDiscoveryCandidates(),
+    [],
+  );
+  const acceptDiscovery = useCallback(
+    (bindingId: CoreBindingId, req: AcceptDiscoveryRequest) =>
+      sessionsRef.current.get(bindingId)?.acceptDiscovery(req),
+    [],
+  );
+  const installProfile = useCallback(
+    (bindingId: CoreBindingId, draft: DeviceProfileDraft) =>
+      sessionsRef.current.get(bindingId)?.installProfile(draft),
+    [],
+  );
+  const removeProfile = useCallback(
+    (
+      bindingId: CoreBindingId,
+      profileId: string,
+      version: number,
+      options: { readonly isReferencedLocally: boolean },
+    ) => sessionsRef.current.get(bindingId)?.removeProfile(profileId, version, options),
+    [],
+  );
+  const deployConfig = useCallback(
+    (bindingId: CoreBindingId, input: CompileConfigInput, context: DeploymentContext) =>
+      sessionsRef.current.get(bindingId)?.deployConfig(input, context),
+    [],
+  );
   const onRecordEvent = useCallback(
-    (bindingId: CoreBindingId, listener: (payload: RecordEventPayload) => void) => sessionsRef.current.get(bindingId)?.onRecordEvent(listener),
+    (bindingId: CoreBindingId, listener: (payload: RecordEventPayload) => void) =>
+      sessionsRef.current.get(bindingId)?.onRecordEvent(listener),
     [],
   );
   const onDiscoveryEvent = useCallback(
-    (bindingId: CoreBindingId, listener: (payload: DiscoveryEventPayload) => void) => sessionsRef.current.get(bindingId)?.onDiscoveryEvent(listener),
+    (bindingId: CoreBindingId, listener: (payload: DiscoveryEventPayload) => void) =>
+      sessionsRef.current.get(bindingId)?.onDiscoveryEvent(listener),
     [],
   );
-  const getLastBootId = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.lastBootId, []);
+  const getLastBootId = useCallback(
+    (bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.lastBootId,
+    [],
+  );
   const runCommand = useCallback(
-    (bindingId: CoreBindingId, req: RunCommandRequest, granted: PermissionSet) => sessionsRef.current.get(bindingId)?.runCommand(req, granted),
+    (bindingId: CoreBindingId, req: RunCommandRequest, granted: PermissionSet) =>
+      sessionsRef.current.get(bindingId)?.runCommand(req, granted),
     [],
   );
   const requestScan = useCallback(
-    (bindingId: CoreBindingId, req: { readonly portId: number; readonly invasive: boolean }, granted: PermissionSet) => sessionsRef.current.get(bindingId)?.requestScan(req, granted),
+    (
+      bindingId: CoreBindingId,
+      req: { readonly portId: number; readonly invasive: boolean },
+      granted: PermissionSet,
+    ) => sessionsRef.current.get(bindingId)?.requestScan(req, granted),
     [],
   );
-  const getJobStatus = useCallback((bindingId: CoreBindingId, jobId: number) => sessionsRef.current.get(bindingId)?.getJobStatus(jobId), []);
-  const getConnectivityStatus = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.getConnectivityStatus(), []);
-  const getAuditLog = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.getAuditLog(), []);
+  const getJobStatus = useCallback(
+    (bindingId: CoreBindingId, jobId: number) =>
+      sessionsRef.current.get(bindingId)?.getJobStatus(jobId),
+    [],
+  );
+  const getConnectivityStatus = useCallback(
+    (bindingId: CoreBindingId) =>
+      sessionsRef.current.get(bindingId)?.getConnectivityStatus(),
+    [],
+  );
+  const getAuditLog = useCallback(
+    (bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.getAuditLog(),
+    [],
+  );
   const acquireLease = useCallback(
-    (bindingId: CoreBindingId, services: number, durationMs: number, granted: PermissionSet) => sessionsRef.current.get(bindingId)?.acquireLease(services, durationMs, granted),
+    (
+      bindingId: CoreBindingId,
+      services: number,
+      durationMs: number,
+      granted: PermissionSet,
+    ) =>
+      sessionsRef.current.get(bindingId)?.acquireLease(services, durationMs, granted),
     [],
   );
-  const releaseLease = useCallback((bindingId: CoreBindingId, granted: PermissionSet) => sessionsRef.current.get(bindingId)?.releaseLease(granted), []);
+  const releaseLease = useCallback(
+    (bindingId: CoreBindingId, granted: PermissionSet) =>
+      sessionsRef.current.get(bindingId)?.releaseLease(granted),
+    [],
+  );
   const openNetworkMaintenance = useCallback(
-    (bindingId: CoreBindingId, granted: PermissionSet, confirmation: DestructiveConfirmation) => sessionsRef.current.get(bindingId)?.openNetworkMaintenance(granted, confirmation),
+    (
+      bindingId: CoreBindingId,
+      granted: PermissionSet,
+      confirmation: DestructiveConfirmation,
+    ) =>
+      sessionsRef.current.get(bindingId)?.openNetworkMaintenance(granted, confirmation),
     [],
   );
   const requestFactoryReset = useCallback(
-    (bindingId: CoreBindingId, scope: number, granted: PermissionSet, confirmation: DestructiveConfirmation) => sessionsRef.current.get(bindingId)?.requestFactoryReset(scope, granted, confirmation),
+    (
+      bindingId: CoreBindingId,
+      scope: number,
+      granted: PermissionSet,
+      confirmation: DestructiveConfirmation,
+    ) =>
+      sessionsRef.current
+        .get(bindingId)
+        ?.requestFactoryReset(scope, granted, confirmation),
     [],
   );
-  const getUpdateStatus = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.getUpdateStatus(), []);
-  const getClient = useCallback((bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.client, []);
+  const getUpdateStatus = useCallback(
+    (bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.getUpdateStatus(),
+    [],
+  );
+  const getClient = useCallback(
+    (bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.client,
+    [],
+  );
   const lockTransport = useCallback(() => {
     transportLockRef.current += 1;
   }, []);
   const unlockTransport = useCallback(() => {
     transportLockRef.current = Math.max(0, transportLockRef.current - 1);
   }, []);
-  const discoverNetwork = useCallback((options?: { readonly fresh?: boolean }) => {
-    if (transportLockRef.current > 0) {
-      return discoveryRef.current ?? Promise.resolve([]);
-    }
-    if (discoveryRef.current && !options?.fresh) return discoveryRef.current;
-    const previous = discoveryRef.current;
-    const request = (async () => {
-      if (previous) await previous.catch(() => {});
-      const discovered: { bindingId: CoreBindingId; status: GetStatusResponse }[] = [];
-      for (const [bindingId, coreSession] of sessionsRef.current) {
-        if (canViaRef.current.has(bindingId)) continue;
-        try {
-          const status = await coreSession.client.getStatus();
-          coreSession.observeStatus(status);
-          const peers = attachedFromStatus(status, coreSession.binding.expectedDeviceId);
-          if (peers) {
-            attachedRef.current.set(
-              bindingId,
-              retainAttachedVersions(attachedRef.current.get(bindingId) ?? [], peers),
-            );
-          }
-          discovered.push({ bindingId, status });
-        } catch {
-          // A failed request must not turn the previous topology into an empty network.
-        }
+  const discoverNetwork = useCallback(
+    (options?: { readonly fresh?: boolean }) => {
+      if (transportLockRef.current > 0) {
+        return discoveryRef.current ?? Promise.resolve([]);
       }
-      rerender();
-      return discovered;
-    })();
-    discoveryRef.current = request;
-    void request.finally(() => {
-      if (discoveryRef.current === request) discoveryRef.current = null;
-    });
-    return request;
-  }, [rerender]);
+      if (discoveryRef.current && !options?.fresh) return discoveryRef.current;
+      const previous = discoveryRef.current;
+      const request = (async () => {
+        if (previous) await previous.catch(() => {});
+        const discovered: { bindingId: CoreBindingId; status: GetStatusResponse }[] =
+          [];
+        for (const [bindingId, coreSession] of sessionsRef.current) {
+          if (canViaRef.current.has(bindingId)) continue;
+          try {
+            const status = await coreSession.client.getStatus();
+            coreSession.observeStatus(status);
+            const peers = attachedFromStatus(
+              status,
+              coreSession.binding.expectedDeviceId,
+            );
+            if (peers) {
+              attachedRef.current.set(
+                bindingId,
+                retainAttachedVersions(attachedRef.current.get(bindingId) ?? [], peers),
+              );
+            }
+            discovered.push({ bindingId, status });
+          } catch {
+            // A failed request must not turn the previous topology into an empty network.
+          }
+        }
+        rerender();
+        return discovered;
+      })();
+      discoveryRef.current = request;
+      void request.finally(() => {
+        if (discoveryRef.current === request) discoveryRef.current = null;
+      });
+      return request;
+    },
+    [rerender],
+  );
+
+  const executionModes = useRef(
+    new Map<CoreBindingId, "continuous" | "one-shot" | "busy">(),
+  );
+  const getExecutionMode = (
+    bindingId: CoreBindingId,
+  ): "continuous" | "one-shot" | "busy" => {
+    const known = executionModes.current.get(bindingId);
+    if (known) return known;
+    const bytes = getSnapshot(bindingId)?.config?.configBytes;
+    const decoded = bytes && decodeConfigCbor(bytes);
+    return decoded && decoded.ok && configHasContinuousSchedules(decoded.value)
+      ? "continuous"
+      : "one-shot";
+  };
+  const setExecutionMode = (
+    bindingId: CoreBindingId,
+    mode: "continuous" | "one-shot" | "busy",
+  ) => {
+    executionModes.current.set(bindingId, mode);
+    rerender();
+  };
 
   const value: CoreSessionsContextValue = {
     rows,
+    getExecutionMode,
+    setExecutionMode,
     connect,
     setAttachedBackbones,
     observeStatus,
@@ -473,7 +766,11 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     lockTransport,
     unlockTransport,
   };
-  return <CoreSessionsContext.Provider value={value}>{children}</CoreSessionsContext.Provider>;
+  return (
+    <CoreSessionsContext.Provider value={value}>
+      {children}
+    </CoreSessionsContext.Provider>
+  );
 }
 
 export function useCoreSessions(): CoreSessionsContextValue {

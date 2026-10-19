@@ -49,7 +49,9 @@ export const STEP_CATEGORIES: readonly StepCategory[] = [
 
 export const OP_LABEL: Record<Instruction["op"], string> = {
   EMIT_DECIMAL: "Pubblica temperatura in gradi",
-  DHT22_POWER: "Alimentazione DHT22",
+  DS18B20_SETUP: "Inizializza DS18B20",
+  DS18B20_READ: "Leggi DS18B20",
+  DHT22_POWER: "Alimentazione DHT",
   DHT22_READ: "Leggi DHT22",
   RGB_PROGRAM: "Programma LED RGB",
   MESSAGE_LOAD: "Load message",
@@ -89,6 +91,8 @@ export const OP_LABEL: Record<Instruction["op"], string> = {
 };
 
 const FIELDS: Record<Instruction["op"], readonly FieldSpec[]> = {
+  DS18B20_SETUP: [{ key: "channel", label: "Canale DATA", kind: "number" }, { key: "on", label: "Attivo", kind: "boolean" }],
+  DS18B20_READ: [{ key: "channel", label: "Canale DATA", kind: "number" }, { key: "dst", label: "Temperatura", kind: "tempSlot" }],
   EMIT_DECIMAL: [{ key: "src", label: "Sorgente", kind: "tempSlot" }, { key: "fieldId", label: "Uscita", kind: "number" }, { key: "text", label: "Testo con unità", kind: "boolean" }],
   DHT22_POWER: [{ key: "dataChannel", label: "Canale DATA", kind: "number" }, { key: "powerChannel", label: "Canale alimentazione", kind: "number" }, { key: "on", label: "Acceso", kind: "boolean" }],
   DHT22_READ: [{ key: "dataChannel", label: "Canale DATA", kind: "number" }, { key: "powerChannel", label: "Canale alimentazione", kind: "number" }, { key: "dst", label: "Temperatura", kind: "tempSlot" }, { key: "humidityDst", label: "Umidità", kind: "tempSlot" }],
@@ -279,6 +283,8 @@ export function fieldsFor(op: Instruction["op"]): readonly FieldSpec[] {
 /** A minimal, valid default instance for each opcode — every numeric field starts at a small, real, executable value (never `NaN`/negative where the firmware would reject it). */
 export function defaultInstruction(op: Instruction["op"]): Instruction {
   switch (op) {
+    case "DS18B20_SETUP": return { op, channel: 0, on: true };
+    case "DS18B20_READ": return { op, channel: 0, dst: 0 };
     case "EMIT_DECIMAL": return { op, src: 0, fieldId: 1, text: false };
     case "DHT22_POWER": return { op, dataChannel: 0, powerChannel: 1, on: true };
     case "DHT22_READ": return { op, dataChannel: 0, powerChannel: 1, dst: 0, humidityDst: 1 };

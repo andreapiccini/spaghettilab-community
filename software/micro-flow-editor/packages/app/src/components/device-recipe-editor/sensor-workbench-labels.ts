@@ -26,7 +26,7 @@ export function workbenchStepDetail(
   signals: readonly { id: string; name: string }[] = [],
 ) {
   if (op.type === "dht22_read") return `$${op.temperatureInto} · $${op.humidityInto}`;
-  if (op.type === "dht22_convert") return `$${op.input} → $${op.into} · ${op.format === "float" ? "float °C" : "testo con °C"}`;
+  if (op.type === "dht22_convert") return `$${op.input} → $${op.into} · ${op.format === "float" ? "float" : "testo"} ${op.quantity === "humidity" ? "%RH" : "°C"}`;
   if (op.type === "dht22_power") return op.on ? "GPIO HIGH · avvio 2 s" : "GPIO LOW · DATA ad alta impedenza";
   if (op.type === "stepper")
     return op.command === "position"
@@ -72,7 +72,7 @@ export function workbenchStepDetail(
 }
 
 export function workbenchStepKind(op: DeviceRecipeOp, it: boolean) {
-  if (op.type === "dht22_read" || op.type === "dht22_power" || op.type === "dht22_convert") return "DHT22";
+  if (op.type === "dht22_read" || op.type === "dht22_power" || op.type === "dht22_convert") return "Sensore";
   if (op.type === "stepper") return "ULN2003";
   const gpio = gpioOperationDefinition(op.type);
   if (gpio)

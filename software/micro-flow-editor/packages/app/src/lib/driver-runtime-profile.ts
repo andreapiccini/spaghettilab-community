@@ -45,6 +45,7 @@ type Value = {
   divide?: number;
   offset?: number;
   decimalFormat?: "float" | "string";
+  humidity?: boolean;
 };
 export function stableDriverHash(text: string): string {
   let hash = 0xcbf29ce484222325n;
@@ -385,24 +386,78 @@ export function compileRuntimeDriver(
           break;
         }
         case "dht22_convert": {
-          values.set(op.into, { ...get(op.input), decimalFormat: op.format });
+          values.set(op.into, {
+            ...get(op.input),
+            decimalFormat: op.format,
+            humidity: op.quantity === "humidity",
+          });
           break;
         }
         case "dht22_power": {
           const data = gpioSignal("DATA").channel;
+          if (draft.temperatureSensorModel === "ds18b20") {
+            target.push({
+              op: "DS18B20_SETUP",
+              channel: data,
+              on: op.on,
+              ...(draft.ds18b20PowerMode === "gpio"
+                ? { powerChannel: gpioSignal("POWER", true).channel }
+                : {}),
+            });
+            break;
+          }
           const power = gpioSignal("POWER", true).channel;
-          if (data === power) throw new Error("DATA e alimentazione richiedono pin distinti.");
-          target.push({ op: "DHT22_POWER", dataChannel: data, powerChannel: power, on: op.on });
+          if (data === power)
+            throw new Error("DATA e alimentazione richiedono pin distinti.");
+          target.push({
+            op: "DHT22_POWER",
+            dataChannel: data,
+            powerChannel: power,
+            on: op.on,
+          });
           break;
         }
         case "dht22_read": {
           const data = gpioSignal("DATA").channel;
+          if (draft.temperatureSensorModel === "ds18b20") {
+            const slot = take();
+            target.push({ op: "DS18B20_READ", channel: data, dst: slot });
+            values.set(op.temperatureInto, {
+              slot,
+              width: 2,
+              byteOrder: "le",
+              signed: true,
+            });
+            break;
+          }
           const power = gpioSignal("POWER", true).channel;
-          if (data === power) throw new Error("DATA e alimentazione richiedono pin distinti.");
-          const temperature = take(), humidity = take();
-          target.push({ op: "DHT22_READ", dst: temperature, humidityDst: humidity, dataChannel: data, powerChannel: power, ...(draft.dht22Version ? { queued: true } : {}) });
-          values.set(op.temperatureInto, { slot: temperature, width: 2, byteOrder: "le", signed: true });
-          values.set(op.humidityInto, { slot: humidity, width: 2, byteOrder: "le", signed: false });
+          if (data === power)
+            throw new Error("DATA e alimentazione richiedono pin distinti.");
+          const temperature = take(),
+            humidity = take();
+          target.push({
+            op: "DHT22_READ",
+            dst: temperature,
+            humidityDst: humidity,
+            dataChannel: data,
+            powerChannel: power,
+            ...(draft.temperatureSensorModel === "dht11"
+              ? { model: "dht11" as const }
+              : {}),
+            ...(draft.dht22Version ? { queued: true } : {}),
+          });
+          values.set(op.temperatureInto, {
+            slot: temperature,
+            width: 2,
+            byteOrder: "le",
+            signed: true,
+          });
+          values.set(op.humidityInto, {
+            slot: humidity,
+            width: 2,
+            byteOrder: "le",
+            signed: false,
+          });
           break;
         }
         case "gpio_read": {
@@ -652,8 +707,18 @@ export function compileRuntimeDriver(
           if (isInit) throw new Error("Pubblica le uscite dentro le azioni.");
           const value = get(op.from);
           if (value.decimalFormat) {
-            fieldTypes.set(op.channelId, value.decimalFormat === "float" ? "float" : "text");
-            target.push({ op: "EMIT_DECIMAL", src: materialize(value), fieldId: fields.get(op.channelId)!, text: value.decimalFormat === "string" });
+            fieldTypes.set(
+              op.channelId,
+              value.decimalFormat === "float" ? "float" : "text",
+            );
+            target.push({
+              op: "EMIT_DECIMAL",
+              src: materialize(value),
+              fieldId: fields.get(op.channelId)!,
+              text: value.decimalFormat === "string",
+              ...(value.humidity ? { humidity: true } : {}),
+              ...(draft.temperatureSensorModel === "ds18b20" ? { divisor: 16 } : {}),
+            });
             break;
           }
           let src = materialize(value),
@@ -795,7 +860,12 @@ export function compileRuntimeDriver(
     unit: draft.channels.find((c) => c.id === id)?.unit || undefined,
   }));
   if (commands.some((command) => command.steps.some((step) => step.type === "stepper")))
-    sampleFields.push({ fieldId: MOVEMENT_COMPLETED_FIELD, type: "uint64", name: "movement_completed", unit: undefined });
+    sampleFields.push({
+      fieldId: MOVEMENT_COMPLETED_FIELD,
+      type: "uint64",
+      name: "movement_completed",
+      unit: undefined,
+    });
   const semantic = {
     initOps,
     sampleOps,
@@ -811,7 +881,8 @@ export function compileRuntimeDriver(
     transport: draft.binding.bus === "gpio" ? PortTransport.GPIO : PortTransport.I2C,
     requiredCapabilities:
       draft.binding.bus === "gpio"
-        ? (draft.binding.gpioSignals.some(
+        ? (draft.temperatureSensorModel === "ds18b20" ||
+          draft.binding.gpioSignals.some(
             (signal) => gpioSignalType(signal) === "digital_output",
           )
             ? PortCapability.DIGITAL_OUTPUT
@@ -822,7 +893,28 @@ export function compileRuntimeDriver(
     maxBytes: messageData.length ? 65535 : 256,
     initOps,
     sampleOps,
-    safeStopOps: draft.dht22Module ? [{ op: "DHT22_POWER", dataChannel: gpioChannels.get("DATA")!, powerChannel: gpioChannels.get("POWER")!, on: false }] : [],
+    safeStopOps:
+      draft.temperatureSensorModel === "ds18b20"
+        ? [
+            {
+              op: "DS18B20_SETUP",
+              channel: gpioChannels.get("DATA")!,
+              on: false,
+              ...(draft.ds18b20PowerMode === "gpio"
+                ? { powerChannel: gpioChannels.get("POWER")! }
+                : {}),
+            },
+          ]
+        : draft.dht22Module
+          ? [
+              {
+                op: "DHT22_POWER",
+                dataChannel: gpioChannels.get("DATA")!,
+                powerChannel: gpioChannels.get("POWER")!,
+                on: false,
+              },
+            ]
+          : [],
     sampleSchemaId: `${profileId}.s`,
     sampleSchemaVersion: 1,
     sampleFields,

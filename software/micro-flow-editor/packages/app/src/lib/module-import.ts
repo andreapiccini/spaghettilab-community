@@ -38,16 +38,31 @@ export function planModuleImport(
   if (!["gpio", "i2c"].includes(driver.binding.bus))
     throw new Error("Importazione rapida disponibile per GPIO e I²C.");
   const multi = driver.binding.bus === "gpio" && driver.binding.gpioSignals.length > 1;
-  if (multi && driver.id !== "uln2003-28byj48" && !driver.rgbModule && !driver.dht22Module)
+  if (
+    multi &&
+    driver.id !== "uln2003-28byj48" &&
+    !driver.rgbModule &&
+    !driver.dht22Module
+  )
     throw new Error("Questo driver multipin richiede una mappatura dedicata.");
   if (driver.binding.bus === "gpio" && !driver.binding.gpioSignals.length)
     throw new Error("Il driver non dichiara segnali GPIO.");
   const requirements =
     driver.binding.bus === "i2c"
       ? [4, 5]
-      : driver.dht22Module ? [1, 2] : Array.from({ length: driver.rgbModule ? 3 : multi ? 4 : 1 }, () =>
-          driver.rgbModule ? 12 : driver.binding.gpioSignals[0]?.direction === "in" ? 1 : 2,
-        );
+      : driver.temperatureSensorModel === "ds18b20"
+        ? driver.ds18b20PowerMode === "gpio"
+          ? [1, 2]
+          : [1]
+        : driver.dht22Module
+          ? [1, 2]
+          : Array.from({ length: driver.rgbModule ? 3 : multi ? 4 : 1 }, () =>
+              driver.rgbModule
+                ? 12
+                : driver.binding.gpioSignals[0]?.direction === "in"
+                  ? 1
+                  : 2,
+            );
   let channels =
     driver.binding.bus === "gpio"
       ? Object.fromEntries(
@@ -59,14 +74,30 @@ export function planModuleImport(
       project.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
     ).byBinding[bindingId] ?? [];
   // Keep a calibrated RGB channel order when replacing the same installed driver.
-  const previousRgb = driver.rgbModule ? modules.find(module =>
-    module.recipe.deviceDraft?.rgbModule &&
-    (module.recipe.deviceDraft.id === driver.id || module.label === driver.name) &&
-    module.gpioAssignments?.boardKey === boardKey)?.gpioAssignments?.channels : undefined;
-  if (previousRgb && ["RED", "GREEN", "BLUE"].every(signal =>
-    Number.isInteger(previousRgb[signal]) && previousRgb[signal]! >= 0 && previousRgb[signal]! < 3) &&
-    new Set([previousRgb.RED, previousRgb.GREEN, previousRgb.BLUE]).size === 3)
-    channels = { RED: previousRgb.RED!, GREEN: previousRgb.GREEN!, BLUE: previousRgb.BLUE! };
+  const previousRgb = driver.rgbModule
+    ? modules.find(
+        (module) =>
+          module.recipe.deviceDraft?.rgbModule &&
+          (module.recipe.deviceDraft.id === driver.id ||
+            module.label === driver.name) &&
+          module.gpioAssignments?.boardKey === boardKey,
+      )?.gpioAssignments?.channels
+    : undefined;
+  if (
+    previousRgb &&
+    ["RED", "GREEN", "BLUE"].every(
+      (signal) =>
+        Number.isInteger(previousRgb[signal]) &&
+        previousRgb[signal]! >= 0 &&
+        previousRgb[signal]! < 3,
+    ) &&
+    new Set([previousRgb.RED, previousRgb.GREEN, previousRgb.BLUE]).size === 3
+  )
+    channels = {
+      RED: previousRgb.RED!,
+      GREEN: previousRgb.GREEN!,
+      BLUE: previousRgb.BLUE!,
+    };
   const touched = new Set(requirements.map((_, i) => i));
   const conflicts = modules
     .filter((module) => {
@@ -101,6 +132,20 @@ export function planModuleImport(
       pinChanges.push(`A${index}: configurazione esistente`);
     modes[index] = mode;
   });
+  // Release pins belonging only to retired modules (e.g. POWER when choosing parasite).
+  const retired = new Set(conflicts.map((item) => item.id));
+  const retained = new Set(
+    modules
+      .filter(
+        (item) => !retired.has(item.id) && item.gpioAssignments?.boardKey === boardKey,
+      )
+      .flatMap((item) => Object.values(item.gpioAssignments!.channels)),
+  );
+  for (const item of modules.filter(
+    (item) => retired.has(item.id) && item.gpioAssignments?.boardKey === boardKey,
+  ))
+    for (const channel of Object.values(item.gpioAssignments!.channels))
+      if (!touched.has(channel) && !retained.has(channel)) modes[channel] = 0;
   // Replacing one pin of a bus retires the whole bus, avoiding invalid half-routes.
   for (const group of [
     [4, 5],
@@ -125,7 +170,22 @@ export function planModuleImport(
     channels,
     conflicts,
     pinChanges,
-    physical: { ...physical, modes, ...(driver.rgbModule ? { settings: { ...DEFAULT_PHYSICAL_SETTINGS, ...physical.settings, pwmHz: 1000, pwmInverted: false } } : {}), applied: false, automatic: false },
+    physical: {
+      ...physical,
+      modes,
+      ...(driver.rgbModule
+        ? {
+            settings: {
+              ...DEFAULT_PHYSICAL_SETTINGS,
+              ...physical.settings,
+              pwmHz: 1000,
+              pwmInverted: false,
+            },
+          }
+        : {}),
+      applied: false,
+      automatic: false,
+    },
   };
 }
 

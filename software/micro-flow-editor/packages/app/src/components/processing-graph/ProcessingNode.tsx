@@ -125,16 +125,60 @@ export function ProcessingNode({
             ? `${Math.round(data.tempProbe.celsius)}°C`
             : data.subtitle;
 
-  if (data.manualTrigger) return <div className="group relative rounded-xl border border-border-strong bg-surface shadow-e1" style={{width:cardWidth,height:cardHeight,outline:selected ? "2px solid var(--color-brand-blue)" : undefined}}>
-    <HoverDeleteButton id={id} label="Elimina generatore" />
-    <ManualTriggerControl nodeId={data.domainId} bindingId={data.manualTrigger.bindingId}/>
-    <Handle type="source" position={Position.Right} id="trigger" style={{...SOURCE_HANDLE_STYLE,top:"50%",background:"var(--color-brand-blue)"}} aria-label="Avvia azione"/>
-  </div>;
-  if (data.dataViewer) return <div className="group relative rounded-xl border border-border-strong bg-surface shadow-e1" style={{ width: cardWidth, height: cardHeight, outline: selected ? "2px solid var(--color-brand-blue)" : undefined }}>
-    <HoverDeleteButton id={id} label="Elimina visualizzatore"/>
-    <Handle type="target" position={Position.Left} id="value" style={{ ...SOURCE_HANDLE_STYLE, top: "50%", background: "var(--color-brand-blue)" }} aria-label="Mostra valore" />
-    <DataViewerValue config={data.dataViewer}/>
-  </div>;
+  if (data.manualTrigger)
+    return (
+      <div
+        className="group relative rounded-xl border border-border-strong bg-surface shadow-e1"
+        style={{
+          width: cardWidth,
+          height: cardHeight,
+          outline: selected ? "2px solid var(--color-brand-blue)" : undefined,
+        }}
+      >
+        <HoverDeleteButton id={id} label="Elimina generatore" />
+        <ManualTriggerControl
+          nodeId={data.domainId}
+          bindingId={data.manualTrigger.bindingId}
+        />
+
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="trigger"
+          style={{
+            ...SOURCE_HANDLE_STYLE,
+            top: "50%",
+            background: "var(--color-brand-blue)",
+          }}
+          aria-label="Avvia azione"
+        />
+      </div>
+    );
+  if (data.dataViewer)
+    return (
+      <div
+        className="group relative rounded-xl border border-border-strong bg-surface shadow-e1"
+        style={{
+          width: cardWidth,
+          height: cardHeight,
+          outline: selected ? "2px solid var(--color-brand-blue)" : undefined,
+        }}
+      >
+        <HoverDeleteButton id={id} label="Elimina visualizzatore" />
+        <Handle
+          type="target"
+          position={Position.Left}
+          id="value"
+          style={{
+            ...SOURCE_HANDLE_STYLE,
+            top: "50%",
+            background: "var(--color-brand-blue)",
+          }}
+          aria-label="Mostra valore"
+        />
+        <DataViewerValue config={data.dataViewer} />
+      </div>
+    );
   if (isTick) {
     const fill = data.hasError
       ? "var(--color-error)"

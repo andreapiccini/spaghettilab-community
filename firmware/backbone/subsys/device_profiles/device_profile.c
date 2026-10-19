@@ -128,7 +128,7 @@ static bool profile_id_is_valid(const char *id)
 static bool opcode_is_known(uint8_t opcode)
 {
 	return (opcode >= SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE) &&
-	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL);
+	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP);
 }
 
 static bool temp_ok(uint8_t slot)
@@ -253,14 +253,19 @@ static int accumulate_op_budget(const struct spaghetti_device_profile_op *op,
 		if (op->imm0 > 1U || op->imm1 > 3U) return -EINVAL;
 		transactions = 1U;
 		break;
+ case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP:
+ case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ:
+   if(op->imm0>3 || (op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ && (!temp_ok(op->dst) || op->imm1 > 1)) ||
+      (op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP && (op->imm1>1 || op->imm2>4 || (op->imm2 && op->imm2-1==op->imm0)))) return -EINVAL;
+   transactions=1; time_ms=op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ?20:0; break;
  case SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER:
  case SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ:
    if (op->imm0 > 3U || op->imm1 > 3U || op->imm0 == op->imm1 ||
        (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER && op->imm2 > 1U) ||
        (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ &&
-        (!temp_ok(op->dst) || !temp_ok(op->src_a) || op->dst == op->src_a))) return -EINVAL;
+        (op->imm3 > 1U || !temp_ok(op->dst) || !temp_ok(op->src_a) || op->dst == op->src_a))) return -EINVAL;
    transactions = 2U;
-   time_ms = op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ ? 12U : 0U;
+   time_ms = op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ ? (op->imm3 ? 32U : 12U) : 0U;
    break;
  case SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM:
    if (!op->imm1 || op->imm1 > 96U || op->imm1 % 6U || op->imm2 > 63U || op->imm3 > 1U ||
@@ -356,7 +361,7 @@ static int accumulate_op_budget(const struct spaghetti_device_profile_op *op,
 		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD:
 	case SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL:
-		if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL && op->imm0 > 1U) return -EINVAL;
+		if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL && (op->imm0 > 1U || (op->imm1 && op->imm1 != 10 && op->imm1 != 16) || op->imm2 > 1U)) return -EINVAL;
 		if (!temp_ok(op->src_a) || (op->dst == 0U)) {
 			return -EINVAL;
 		}
@@ -387,12 +392,12 @@ static int opcode_matches_profile(const struct spaghetti_device_profile_op *op,
 	    (op->opcode <= SPAGHETTI_DEVICE_PROFILE_OP_ADC_READ || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_WAIT_FIELD_MASK ||
 	     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_UART_READ ||
 	     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE ||
-	     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ)) return -EINVAL;
+	     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ)) return -EINVAL;
 
 	if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER && (profile->transport != SPAGHETTI_PORT_TRANSPORT_GPIO || !(profile->required_capabilities & SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT))) return -EINVAL;
  if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM &&
      (profile->transport != SPAGHETTI_PORT_TRANSPORT_GPIO || !(profile->required_capabilities & SPAGHETTI_PORT_CAP_PWM))) return -EINVAL;
- if ((op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) &&
+ if ((op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) &&
      (profile->transport != SPAGHETTI_PORT_TRANSPORT_GPIO ||
       !(profile->required_capabilities & SPAGHETTI_PORT_CAP_DIGITAL_INPUT) ||
       !(profile->required_capabilities & SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT))) return -EINVAL;

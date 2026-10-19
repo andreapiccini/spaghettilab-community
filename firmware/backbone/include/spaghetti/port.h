@@ -482,4 +482,13 @@ int spaghetti_dht22_decode_frame(const uint8_t bytes[5], int16_t *temperature, u
 int spaghetti_port_dht22_power(const struct spaghetti_port *port, uint8_t data, uint8_t power, bool on);
 int spaghetti_port_dht22_read(const struct spaghetti_port *port, uint8_t data, uint8_t power, int16_t *temperature, uint16_t *humidity);
 
+int spaghetti_dht11_decode_frame(const uint8_t bytes[5], int16_t *temperature, uint16_t *humidity);
+int spaghetti_port_dht11_read(const struct spaghetti_port *port, uint8_t data, uint8_t power, int16_t *temperature, uint16_t *humidity);
+int spaghetti_ds18b20_decode_frame(const uint8_t bytes[9], int16_t *temperature);
+int spaghetti_port_ds18b20_setup(const struct spaghetti_port *port, uint8_t channel);
+int spaghetti_port_ds18b20_start(const struct spaghetti_port *port, uint8_t channel, bool parasite);
+/** Diagnostic scratchpad read; normal temperature path still enforces CRC. */
+int spaghetti_port_ds18b20_finish_raw(const struct spaghetti_port *p, uint8_t channel, uint8_t bytes[9]);
+int spaghetti_port_ds18b20_finish(const struct spaghetti_port *port, uint8_t channel, int16_t *temperature);
+
 #endif /* SPAGHETTI_PORT_H */

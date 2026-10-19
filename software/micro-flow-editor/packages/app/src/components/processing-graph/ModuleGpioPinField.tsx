@@ -36,16 +36,33 @@ export function ModuleGpioPinField({
     ? savedPhysical.drafts[module.gpioAssignments.boardKey]
     : undefined;
   const draft = module.recipe.deviceDraft;
-  const stepper = draft?.commands.some(action => action.steps.some(step => step.type === "stepper"));
-  const title = draft?.dht22Module ? "DHT22 · DATA / Alimentazione"
-    : draft?.rgbModule ? "LED RGB · R / G / B"
-    : stepper ? "ULN2003 · IN1–IN4"
-    : `${module.label} · GPIO`;
-  const description = draft?.dht22Module
-    ? "DATA è il segnale del sensore; POWER alimenta il modulo con un GPIO HIGH fisso. Collega anche GND alla massa comune. Il fronte di salita avvia una lettura; il driver rispetta automaticamente i 2 secondi di avvio e tra acquisizioni."
-    : draft?.rgbModule ? "Tre uscite PWM per rosso, verde e blu. Il pin comune deve corrispondere alla polarità scelta nell’inizializzazione."
-    : stepper ? "Posizione 0–360° rispetto allo zero all’avvio. Invia un intero all’ingresso Posizione quando è selezionata «Vai a posizione»."
-    : "Collegamenti GPIO del dispositivo. Puoi modificarli in Module Function.";
+  const stepper = draft?.commands.some((action) =>
+    action.steps.some((step) => step.type === "stepper"),
+  );
+  const title =
+    draft?.temperatureSensorModel === "ds18b20"
+      ? draft.ds18b20PowerMode === "gpio"
+        ? "DS18B20 · DATA / VCC"
+        : "DS18B20 · DATA / alimentazione parassita"
+      : draft?.dht22Module
+        ? `${draft.name} · DATA / Alimentazione`
+        : draft?.rgbModule
+          ? "LED RGB · R / G / B"
+          : stepper
+            ? "ULN2003 · IN1–IN4"
+            : `${module.label} · GPIO`;
+  const description =
+    draft?.temperatureSensorModel === "ds18b20"
+      ? draft.ds18b20PowerMode === "gpio"
+        ? "DATA A0, VCC A1, GND comune. Il driver mantiene A1 HIGH durante la lettura e lo spegne allo Stop generale."
+        : "DATA usa A0 per segnale e alimentazione parassita. VDD e GND vanno a massa; pull-up DATA–3,3 V. Un sensore per pin, conversione 750 ms. Verificare la schedina con LED e R1 prima del cablaggio."
+      : draft?.dht22Module
+        ? "DATA è il segnale del sensore; POWER alimenta il modulo con un GPIO HIGH fisso. Collega anche GND alla massa comune. Il fronte di salita avvia una lettura; il driver rispetta automaticamente i 2 secondi di avvio e tra acquisizioni."
+        : draft?.rgbModule
+          ? "Tre uscite PWM per rosso, verde e blu. Il pin comune deve corrispondere alla polarità scelta nell’inizializzazione."
+          : stepper
+            ? "Posizione 0–360° rispetto allo zero all’avvio. Invia un intero all’ingresso Posizione quando è selezionata «Vai a posizione»."
+            : "Collegamenti GPIO del dispositivo. Puoi modificarli in Module Function.";
   if (module.gpioAssignments)
     return (
       <section className="rounded-xl border border-border p-3 font-body text-sm">
@@ -53,7 +70,10 @@ export function ModuleGpioPinField({
         <dl>
           {Object.entries(module.gpioAssignments.channels).map(([signal, channel]) => (
             <div key={signal} className="flex justify-between py-1">
-              <dt>{draft?.binding.gpioSignals.find(item => item.id === signal)?.name ?? signal}</dt>
+              <dt>
+                {draft?.binding.gpioSignals.find((item) => item.id === signal)?.name ??
+                  signal}
+              </dt>
               <dd className="font-mono text-brand-blue">
                 {multiPhysical
                   ? formatPinLabel(
@@ -65,9 +85,7 @@ export function ModuleGpioPinField({
             </div>
           ))}
         </dl>
-        <p className="mt-2 text-xs text-ink-muted">
-          {description}
-        </p>
+        <p className="mt-2 text-xs text-ink-muted">{description}</p>
         <button
           className="mt-2 text-xs text-brand-blue"
           onClick={() => navigate("physical-composition")}

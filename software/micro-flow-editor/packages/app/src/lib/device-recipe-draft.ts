@@ -268,7 +268,7 @@ export type I2cTransactionPhase =
 export type WaitTimeUnit = "ms" | "us";
 
 export type DeviceRecipeOp = { readonly label?: string } & (
-  | { readonly id: string; readonly type: "dht22_convert"; readonly input: string; readonly into: string; readonly format: "float" | "string" }
+  | { readonly id: string; readonly type: "dht22_convert"; readonly input: string; readonly into: string; readonly format: "float" | "string"; readonly quantity?: "humidity" }
   | { readonly id: string; readonly type: "dht22_power"; readonly on: boolean }
   | { readonly id: string; readonly type: "dht22_read"; readonly temperatureInto: string; readonly humidityInto: string }
 
@@ -707,6 +707,8 @@ export type DeviceRecipeDraft = {
   readonly rgbModule?: RgbModuleConfig;
   readonly dht22Module?: boolean;
   readonly dht22Version?: number;
+  readonly temperatureSensorModel?: "dht11" | "ds18b20";
+  readonly ds18b20PowerMode?: "parasite" | "gpio";
   readonly flowInterfaces?: readonly DeviceRecipeOp[];
   readonly flowInterfaceActions?: Readonly<Record<string, readonly string[]>>;
   readonly display?: DisplayProfile;
@@ -887,7 +889,7 @@ export function validateI2cTransactionPhases(
 export function describeDeviceOp(op: DeviceRecipeOp): string {
   switch (op.type) {
     case "dht22_convert": return "Converti temperatura in gradi";
-    case "dht22_power": return op.on ? "Alimenta DHT22" : "Spegni DHT22";
+    case "dht22_power": return op.on ? "Attiva sensore" : "Disattiva sensore";
     case "dht22_read": return "Leggi temperatura e umidità";
     case "wait":
       return `Attendi ${op.ms} ${op.unit === "us" ? "µs" : "ms"}`;
@@ -1683,8 +1685,8 @@ export function libraryOpsForBus(bus: DeviceRecipeBus): readonly { readonly type
     case "gpio":
       return [
         inputOp,
-        { type: "dht22_power", label: "Alimenta / spegni DHT22" },
-        { type: "dht22_read", label: "Leggi DHT22" },
+        { type: "dht22_power", label: "Attiva / disattiva sensore" },
+        { type: "dht22_read", label: "Leggi sensore" },
         { type: "dht22_convert", label: "Converti temperatura in gradi" },
         ...GPIO_OPERATION_DEFINITIONS.map((definition) => ({
           type: definition.type,
@@ -3026,6 +3028,8 @@ export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?:
     rgbModule: raw.rgbModule,
     dht22Module: raw.dht22Module,
     dht22Version: raw.dht22Version,
+    temperatureSensorModel: raw.temperatureSensorModel,
+    ds18b20PowerMode: raw.ds18b20PowerMode,
     ...(raw.flowInterfaces ? { flowInterfaces: migrateList(raw.flowInterfaces), flowInterfaceActions: raw.flowInterfaceActions } : {}),
     display: raw.display,
     phases: {

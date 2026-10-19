@@ -108,6 +108,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
     getSnapshot,
     getClient,
     observeConfig,
+    setExecutionMode,
     listDeviceProfiles,
     observeStatus,
     lockTransport,
@@ -132,7 +133,10 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
   const deployAbort = useRef<AbortController | null>(null);
   const [deployPhase, setDeployPhase] = useState("");
   const deployPhaseRef = useRef("");
-  const updateDeployPhase = (phase: string) => { deployPhaseRef.current = phase; setDeployPhase(phase); };
+  const updateDeployPhase = (phase: string) => {
+    deployPhaseRef.current = phase;
+    setDeployPhase(phase);
+  };
   useEffect(() => () => deployAbort.current?.abort(), []);
   const [deployError, setDeployError] = useState<string | null>(null);
 
@@ -208,9 +212,21 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           binding.bindingId,
           base,
         );
-        if (plan.profiles.some(profile => profile.sampleOps.some(op => op.op === "RGB_PROGRAM"))) {
+        if (
+          plan.profiles.some((profile) =>
+            profile.sampleOps.some((op) => op.op === "RGB_PROGRAM"),
+          )
+        ) {
           const version = snapshot.status?.version?.match(/^(\d+)\.(\d+)\.(\d+)/);
-          if (!version || (Number(version[1]) === 0 && (Number(version[2]) < 5 || (Number(version[2]) === 5 && Number(version[3]) < 9)))) throw new Error("Aggiorna la Backbone al firmware 0.5.9 o successivo per il modulo LED RGB.");
+          if (
+            !version ||
+            (Number(version[1]) === 0 &&
+              (Number(version[2]) < 5 ||
+                (Number(version[2]) === 5 && Number(version[3]) < 9)))
+          )
+            throw new Error(
+              "Aggiorna la Backbone al firmware 0.5.9 o successivo per il modulo LED RGB.",
+            );
         }
         const needsMotionFirmware =
           plan.input.physicalGraph.nodes.some(
@@ -351,15 +367,27 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
     const controller = new AbortController();
     deployAbort.current = controller;
     let timedOut = false;
-    const timer = window.setTimeout(() => { timedOut = true; controller.abort(); }, 60000);
+    const timer = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 60000);
     pausePolling();
     lockTransport();
     try {
       updateDeployPhase("Attesa delle comunicazioni in corso…");
       await abortableModuleOperation(waitUntilIdle(), controller.signal);
-      await abortableModuleOperation(performDeploy(controller.signal), controller.signal);
+      await abortableModuleOperation(
+        performDeploy(controller.signal),
+        controller.signal,
+      );
     } catch (cause) {
-      setDeployError(controller.signal.aborted ? (timedOut ? `Nessuna conferma durante «${deployPhaseRef.current}» entro 60 secondi. Esito non confermato: premi Ricontrolla prima di riprovare.` : "Attesa interrotta. La Backbone potrebbe aver ricevuto il programma: premi Ricontrolla prima di riprovare.") : formatApplyConfigError(cause, it));
+      setDeployError(
+        controller.signal.aborted
+          ? timedOut
+            ? `Nessuna conferma durante «${deployPhaseRef.current}» entro 60 secondi. Esito non confermato: premi Ricontrolla prima di riprovare.`
+            : "Attesa interrotta. La Backbone potrebbe aver ricevuto il programma: premi Ricontrolla prima di riprovare."
+          : formatApplyConfigError(cause, it),
+      );
     } finally {
       window.clearTimeout(timer);
       deployAbort.current = null;
@@ -387,7 +415,10 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
       return;
     }
     const verified = await verifyDeployConnections(
-      targets.map(candidate => ({ bindingId: candidate.binding.bindingId, label: `Backbone ${candidate.bindingIndex + 1}` })),
+      targets.map((candidate) => ({
+        bindingId: candidate.binding.bindingId,
+        label: `Backbone ${candidate.bindingIndex + 1}`,
+      })),
       wireFor,
     );
     verified.forEach(({ bindingId, status }) => observeStatus(bindingId, status));
@@ -423,7 +454,10 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           candidate.binding.bindingId,
           await installDriverProfiles(candidate.profiles, owned, {
             install: async (profile) => {
-              const result = await installProfileWorkflow(wireFor(candidate.binding.bindingId), profile);
+              const result = await installProfileWorkflow(
+                wireFor(candidate.binding.bindingId),
+                profile,
+              );
               signal.throwIfAborted();
               if (!result || !result.ok)
                 throw new Error(
@@ -434,7 +468,10 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             },
             remove: async (id, version) => {
               try {
-                await wireFor(candidate.binding.bindingId).removeDeviceProfile({ idBytes: new TextEncoder().encode(id), version });
+                await wireFor(candidate.binding.bindingId).removeDeviceProfile({
+                  idBytes: new TextEncoder().encode(id),
+                  version,
+                });
                 return true;
               } catch {
                 return false;
@@ -449,7 +486,9 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             },
           }),
         );
-        const installed = await wireFor(candidate.binding.bindingId).getFullDeviceProfileList();
+        const installed = await wireFor(
+          candidate.binding.bindingId,
+        ).getFullDeviceProfileList();
         const validation = dryRunConfig(candidate.input, {
           ...candidate.options,
           availableProfileIds: new Set(
@@ -472,16 +511,21 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
     try {
       await Promise.all(
         targets.map(async (c) => {
+          setExecutionMode(c.binding.bindingId, "busy");
           const depId = deploymentId(crypto.randomUUID());
           if (!depId.ok || !session) return;
-          const result = await deployConfigWorkflow(wireFor(c.binding.bindingId), c.input, {
-            ...c.options,
-            expectedGeneration: c.expectedGeneration,
-            sourceProjectHash: canonicalProjectHash(session.stack.current),
-            target: c.binding.bindingId,
-            deploymentId: depId.value,
-            timestamp: new Date().toISOString(),
-          });
+          const result = await deployConfigWorkflow(
+            wireFor(c.binding.bindingId),
+            c.input,
+            {
+              ...c.options,
+              expectedGeneration: c.expectedGeneration,
+              sourceProjectHash: canonicalProjectHash(session.stack.current),
+              target: c.binding.bindingId,
+              deploymentId: depId.value,
+              timestamp: new Date().toISOString(),
+            },
+          );
           signal.throwIfAborted();
           if (!result)
             throw new Error(
@@ -491,6 +535,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             setResults((prev) => new Map(prev).set(c.binding.bindingId, result));
             if (result.record) execute?.(appendDeploymentRecord(result.record));
             if (result.outcome === DeploymentOutcomeKind.SUCCESS) {
+              setExecutionMode(c.binding.bindingId, "continuous");
               await cleanupByBinding.get(c.binding.bindingId)?.();
               try {
                 const live = await wireFor(c.binding.bindingId).getConfig();
@@ -533,12 +578,28 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
   );
   const shownProblems = uniqueDeployProblems([
     ...problems,
-    ...(deployError ? [{ technical: deployError, phase: deployPhaseRef.current, ...(/conferma|confermato|Attesa interrotta|timeout|timed out|connection.*closed/i.test(deployError) ? { code: "upload-unconfirmed" } : /Backbone.*(collegamento|risponde|rilevata)/i.test(deployError) ? { code: "offline" } : {}) }] : []),
+    ...(deployError
+      ? [
+          {
+            technical: deployError,
+            phase: deployPhaseRef.current,
+            ...(/conferma|confermato|Attesa interrotta|timeout|timed out|connection.*closed/i.test(
+              deployError,
+            )
+              ? { code: "upload-unconfirmed" }
+              : /Backbone.*(collegamento|risponde|rilevata)/i.test(deployError)
+                ? { code: "offline" }
+                : {}),
+          },
+        ]
+      : []),
     ...failed.flatMap(([bindingId, result]) =>
       result.issues.length
         ? result.issues.map((issue) => ({
             bindingId,
-            technical: issue.cause ? formatApplyConfigError(issue.cause, it) : issue.remediation,
+            technical: issue.cause
+              ? formatApplyConfigError(issue.cause, it)
+              : issue.remediation,
             code: issue.code,
           }))
         : [
@@ -615,7 +676,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
               : "Checking Backbones…"
             : busy
               ? it
-                ? (deployPhase || "Caricamento e verifica in corso…")
+                ? deployPhase || "Caricamento e verifica in corso…"
                 : "Uploading and verifying…"
               : blocked
                 ? it
@@ -882,7 +943,15 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
         >
           {it ? "Torna al canvas" : "Back to canvas"}
         </button>
-        {busy && <button type="button" className="rounded-xl border border-border-strong px-4 py-2 text-sm text-ink" onClick={() => deployAbort.current?.abort()}>Interrompi attesa</button>}
+        {busy && (
+          <button
+            type="button"
+            className="rounded-xl border border-border-strong px-4 py-2 text-sm text-ink"
+            onClick={() => deployAbort.current?.abort()}
+          >
+            Interrompi attesa
+          </button>
+        )}
         {blocked && shownProblems[0] ? (
           <button
             disabled={busy || checking}

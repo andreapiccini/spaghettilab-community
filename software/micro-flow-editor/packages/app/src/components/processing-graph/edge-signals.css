@@ -1,0 +1,10 @@
+/* Packets follow the exact routed SVG path, including its rounded corners. */
+.edge-signal-highlight,
+.edge-signal-packet {
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .edge-signal-packet {
+    display: none;
+  }
+}

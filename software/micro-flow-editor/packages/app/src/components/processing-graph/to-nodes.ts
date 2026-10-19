@@ -8,7 +8,10 @@ import {
   BACKBONE_SENSOR_MODULES_META_KEY,
   parseBackboneSensorModules,
 } from "../../lib/backbone-sensor-modules.js";
-import { SENSOR_MODULE_ID_PROP } from "../../lib/backbone-sensor-block.js";
+import {
+  propertiesForSensorModule,
+  SENSOR_MODULE_ID_PROP,
+} from "../../lib/backbone-sensor-block.js";
 import {
   SENSOR_INSTANCE_PROP,
   SENSOR_ACTION_LABEL_PROP,
@@ -211,7 +214,7 @@ export function toProcessingNodes(
 
   return graphState.nodes.map((node) => {
     const meta = authoringMetadata[node.id];
-    const data = node.data as DeviceProcessingNodeData;
+    let data = node.data as DeviceProcessingNodeData;
     const accent = blockAccentFields(data);
     const isTick =
       accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
@@ -219,21 +222,55 @@ export function toProcessingNodes(
     const ifLane = isBlockNodeData(data) && isCompareIf(data);
     const relayCard = isBlockNodeData(data) && isRelayBlock(data);
     const schematic =
-      isBlockNodeData(data) && (data.properties[SENSOR_INSTANCE_PROP] === true || data.properties.sensorDht22 === true);
+      isBlockNodeData(data) &&
+      (data.properties[SENSOR_INSTANCE_PROP] === true ||
+        data.properties.sensorDht22 === true);
     const hardwareDraft = isBlockNodeData(data)
       ? devices.get(String(data.properties[SENSOR_MODULE_ID_PROP]))?.recipe.deviceDraft
       : undefined;
+    if (hardwareDraft?.temperatureSensorModel === "dht11" && isBlockNodeData(data)) {
+      const module = devices.get(String(data.properties[SENSOR_MODULE_ID_PROP]))!;
+      data = {
+        ...data,
+        properties: {
+          ...data.properties,
+          ...propertiesForSensorModule(module, module.recipe),
+        },
+      };
+      ports = portsForNode(data);
+      if (titles.get(node.id) === "DHT22") titles.set(node.id, "DHT11");
+    }
     if (hardwareDraft?.rgbModule) {
       const config = hardwareDraft.rgbModule;
-      ports = { ...ports, inputs: ports.inputs.map(port => ({ ...port, label: config.inputs.some(input => input.id === port.id) ? rgbInputLabel(config.inputs.find(input => input.id === port.id)!) : port.label })), outputs: ports.outputs.map(port => ({ ...port, label: port.id === "state" ? "È acceso" : port.id === "color" ? "Colore emesso" : port.label })) };
+      ports = {
+        ...ports,
+        inputs: ports.inputs.map((port) => ({
+          ...port,
+          label: config.inputs.some((input) => input.id === port.id)
+            ? rgbInputLabel(config.inputs.find((input) => input.id === port.id)!)
+            : port.label,
+        })),
+        outputs: ports.outputs.map((port) => ({
+          ...port,
+          label:
+            port.id === "state"
+              ? "È acceso"
+              : port.id === "color"
+                ? "Colore emesso"
+                : port.label,
+        })),
+      };
     }
     const hardwareKind = hardwareDraft?.gpioHardware?.kind;
     const signalCount = hardwareDraft?.binding.gpioSignals.length ?? 0;
     const outputsOnly = hardwareDraft?.binding.gpioSignals.every(
       (signal) => gpioSignalType(signal) === "digital_output",
     );
-    const hardwareSummary = hardwareDraft?.rgbModule ? (locale === "it" ? "3 canali PWM · LED RGB" : "3 PWM channels · RGB LED") :
-      hardwareDraft?.binding.bus === "gpio" && outputsOnly && signalCount
+    const hardwareSummary = hardwareDraft?.rgbModule
+      ? locale === "it"
+        ? "3 canali PWM · LED RGB"
+        : "3 PWM channels · RGB LED"
+      : hardwareDraft?.binding.bus === "gpio" && outputsOnly && signalCount
         ? `${signalCount} ${locale === "it" ? (signalCount === 1 ? "uscita digitale" : "uscite digitali") : signalCount === 1 ? "digital output" : "digital outputs"}`
         : hardwareDraft
           ? `${locale === "it" ? "Dispositivo" : "Device"} ${hardwareDraft.binding.bus.toUpperCase()}`
@@ -241,20 +278,29 @@ export function toProcessingNodes(
     const manual = isBlockNodeData(data) && data.blockTypeId === MANUAL_TRIGGER_TYPE;
     const viewer = isBlockNodeData(data) && data.blockTypeId === "ui.data_viewer";
     const sequence = isBlockNodeData(data) && data.blockTypeId === SEQUENCE_TYPE;
-    const cardHeight = manual ? 118 : viewer ? 140 : sequence
-      ? 132
-      : schematic
-        ? 64 + Math.max(ports.inputs.length, ports.outputs.length, 1) * 22
-        : isTick
-          ? FLOW_START_SIZE
-          : nodeHeightForPorts(ports) + (ifLane || relayCard ? IF_FOOTER_HEIGHT : 0);
-    const cardWidth = manual ? 210 : viewer ? 240 : sequence
-      ? 260
-      : schematic
-        ? 320
-        : isTick
-          ? FLOW_START_SIZE
-          : nodeWidthForPorts(ports);
+    const cardHeight = manual
+      ? 118
+      : viewer
+        ? 140
+        : sequence
+          ? 132
+          : schematic
+            ? 64 + Math.max(ports.inputs.length, ports.outputs.length, 1) * 22
+            : isTick
+              ? FLOW_START_SIZE
+              : nodeHeightForPorts(ports) +
+                (ifLane || relayCard ? IF_FOOTER_HEIGHT : 0);
+    const cardWidth = manual
+      ? 210
+      : viewer
+        ? 240
+        : sequence
+          ? 260
+          : schematic
+            ? 320
+            : isTick
+              ? FLOW_START_SIZE
+              : nodeWidthForPorts(ports);
     return {
       id: node.id,
       type: "processing",
@@ -273,61 +319,83 @@ export function toProcessingNodes(
       // returns null) — the same bug EventContainer nodes already guard against.
       width: cardWidth,
       height: cardHeight,
-      handles: sequence
+      handles: manual
         ? [
-            ...ports.inputs.map((port, index) => ({
-              id: port.id,
-              type: "target" as const,
-              position: Position.Left,
-              x: -8,
-              y: 57 + index * 22,
-              width: 16,
-              height: 16,
-            })),
-            ...ports.outputs.map((port, index) => ({
-              id: port.id,
+            {
+              id: "trigger",
               type: "source" as const,
               position: Position.Right,
-              x: cardWidth - 16,
-              y: 57 + index * 22,
-              width: 16,
-              height: 16,
-            })),
+              x: cardWidth - 4,
+              y: cardHeight / 2 - 6,
+              width: 8,
+              height: 12,
+            },
           ]
-        : schematic
+        : sequence
           ? [
               ...ports.inputs.map((port, index) => ({
                 id: port.id,
                 type: "target" as const,
                 position: Position.Left,
-                x: 14,
-                y: 65 + index * 22,
-                width: 8,
-                height: 12,
+                x: -8,
+                y: 57 + index * 22,
+                width: 16,
+                height: 16,
               })),
               ...ports.outputs.map((port, index) => ({
                 id: port.id,
                 type: "source" as const,
                 position: Position.Right,
-                x: cardWidth - 22,
-                y: 65 + index * 22,
-                width: 8,
-                height: 12,
+                x: cardWidth - 16,
+                y: 57 + index * 22,
+                width: 16,
+                height: 16,
               })),
             ]
-          : handlesForNode(ports, {
-              width: cardWidth,
-              height: cardHeight,
-              circular: isTick,
-              bandHeight: ifLane || relayCard ? NODE_HEIGHT : undefined,
-            }),
+          : schematic
+            ? [
+                ...ports.inputs.map((port, index) => ({
+                  id: port.id,
+                  type: "target" as const,
+                  position: Position.Left,
+                  x: 14,
+                  y: 65 + index * 22,
+                  width: 8,
+                  height: 12,
+                })),
+                ...ports.outputs.map((port, index) => ({
+                  id: port.id,
+                  type: "source" as const,
+                  position: Position.Right,
+                  x: cardWidth - 22,
+                  y: 65 + index * 22,
+                  width: 8,
+                  height: 12,
+                })),
+              ]
+            : handlesForNode(ports, {
+                width: cardWidth,
+                height: cardHeight,
+                circular: isTick,
+                bandHeight: ifLane || relayCard ? NODE_HEIGHT : undefined,
+              }),
       data: {
         domainId: node.id,
-        ...(manual ? { manualTrigger: {} } : {}),
-        ...(viewer && isBlockNodeData(data) ? { dataViewer: {
-          connected: graphState.edges.some(edge => edge.target === node.id),
-          caption: String(data.properties.caption ?? "Dato"), unit: String(data.properties.unit ?? ""), decimals: Number(data.properties.decimals ?? 2),
-        }} : {}),
+        ...(manual
+          ? {
+              manualTrigger: {},
+            }
+          : {}),
+        ...(viewer && isBlockNodeData(data)
+          ? {
+              dataViewer: {
+                connected: graphState.edges.some((edge) => edge.target === node.id),
+                caption: String(data.properties.caption ?? "Dato"),
+                unit: String(data.properties.unit ?? ""),
+                decimals: Number(data.properties.decimals ?? 2),
+              },
+            }
+          : {}),
         sensorSchematic: schematic,
         hardwareKind,
         hardwareSummary,

@@ -9,7 +9,7 @@ it("builds a rising-trigger input and a read/convert/publish action without peri
   const draft = organizeDriverInterfaces(catalogDht22Driver());
   expect(draft.sampleIntervalMs).toBe(0);
   expect(draft.channels.filter(channel => channel.direction === "write")).toMatchObject([{ inputMode: "trigger", dataType: "bool" }]);
-  expect(effectiveActionSteps(draft, draft.commands[0]!).map(step => step.type)).toEqual(["dht22_read", "dht22_convert", "emit"]);
+  expect(effectiveActionSteps(draft, draft.commands[0]!).map(step => step.type)).toEqual(["dht22_read", "dht22_convert", "dht22_convert", "emit", "emit"]);
   expect(validateDraftForCreate(draft)).toEqual([]);
   const compiled = compileRuntimeDriver(draft, new Map(), pins).profile;
   expect(compiled.sampleOps.find(op => op.op === "DHT22_READ")).toMatchObject({ queued: true });
@@ -24,15 +24,15 @@ it("changes the published variable format to text with degrees without changing 
   expect(dht22OutputFormat(text)).toBe("string");
   expect(text.channels.find(channel => channel.id === "temperature")?.dataType).toBe("string");
   const profile = compileRuntimeDriver(text, new Map(), pins).profile;
-  expect(profile.sampleOps).toContainEqual({ op: "EMIT_DECIMAL", src: 0, fieldId: 1, text: true });
-  expect(profile.sampleFields[0]?.type).toBe("text");
+  expect(profile.sampleOps).toContainEqual({ op: "EMIT_DECIMAL", src: 0, fieldId: 2, text: true });
+  expect(profile.sampleFields.find(field => field.fieldId === 2)?.type).toBe("text");
 });
 it("upgrades the initial DHT22 snapshot without changing its physical-unit identity", () => {
   const legacy = { ...catalogDht22Driver(), id: "nfc-my-unit", name: "Sensore stanza", dht22Version: undefined };
   const upgraded = upgradeDht22Driver(legacy);
   expect(upgraded.id).toBe(legacy.id);
   expect(upgraded.name).toBe(legacy.name);
-  expect(upgraded.dht22Version).toBe(2);
+  expect(upgraded.dht22Version).toBe(3);
 });
 
 it("compiles the DHT22 trigger as a rising-edge rule and its timer only monitors pending requests", async () => {
@@ -62,7 +62,7 @@ it("keeps both the trigger and converted output on the canvas after organizing a
   const recipe = draftToCanvasSensorRecipes(organizeDriverInterfaces(catalogDht22Driver()))[0]!;
   const module = createModuleFromRecipe(recipe);
   const props = propertiesForSensorModule(module, recipe);
-  expect(channelsFromNodeProperties(props).map(channel => channel.id)).toEqual(["read-trigger", "temperature"]);
+  expect(channelsFromNodeProperties(props).map(channel => channel.id)).toEqual(["read-trigger", "temperature", "humidity"]);
   expect(props.sensorDht22).toBe(true);
   const entry = findCatalogEntryById("appblocks.backbone_sensor");
   expect(entry).toBeDefined();
@@ -86,7 +86,7 @@ it("publishes the converted DHT22 field to a host viewer without sending the vie
   expect(result.input.physicalGraph.nodes.some(node => node.id === physicalPin.id)).toBe(false);
   expect(input.physicalGraph.nodes).toContain(physicalPin);
   expect(() => prepareDriverDeployment(installed, "master", { ...input, processingGraph: { ...input.processingGraph, nodes: [...input.processingGraph.nodes, { id: "duplicate-input", layer: "device-processing", data: { kind: "event-source", moduleNodeId: physicalPin.id } }] } })).toThrow("ingresso GPIO");
-  expect(result.observations).toEqual([{ viewerId: "viewer", key: 1, field: 1, action: 1, schemaId: result.profiles[0]!.sampleSchemaId }]);
+  expect(result.observations).toEqual([{ viewerId: "viewer", key: 1, field: 2, action: 1, schemaId: result.profiles[0]!.sampleSchemaId }]);
   expect(result.input.processingGraph.nodes.some(node => node.id === "viewer")).toBe(false);
   expect(result.input.processingGraph.edges.some(edge => edge.target === "viewer")).toBe(false);
   const compiled = compileConfig(result.input, result.options);
@@ -107,7 +107,7 @@ it("deploys a manual trigger wired to DHT22 and forwards the converted output to
   const result=prepareDriverDeployment(installed,"master",input);
   expect(result.profiles).toHaveLength(2);
   expect(result.input.processingGraph.nodes.find(node=>node.id==="dht22-trigger:trigger-read")?.data).toMatchObject({kind:"rule",properties:{"1":1n,"3":2n,"5":1n,"8":1n}});
-  expect(result.observations).toMatchObject([{viewerId:"viewer",key:2,field:1}]);
+  expect(result.observations).toMatchObject([{viewerId:"viewer",key:2,field:2}]);
   expect(result.input.processingGraph.nodes.find(node=>node.id==="driver-manual:manual:armed")?.data).toMatchObject({kind:"schedule",enabled:false});
   const compiled=compileConfig(result.input,result.options);
   expect(compiled.ok,JSON.stringify(compiled,(_,v)=>typeof v==="bigint"?String(v):v)).toBe(true);

@@ -201,9 +201,9 @@ it("imports DHT22 DATA as input on A0 and a separate HIGH supply output on A1", 
   expect(compiled.profile.initOps).toContainEqual({ op: "DHT22_POWER", dataChannel: 0, powerChannel: 1, on: true });
   expect(compiled.profile.sampleOps.find(op => op.op === "DHT22_READ")).toMatchObject({ dataChannel: 0, powerChannel: 1 });
   expect(compiled.profile.safeStopOps).toEqual([{ op: "DHT22_POWER", dataChannel: 0, powerChannel: 1, on: false }]);
-  expect(compiled.profile.sampleFields).toHaveLength(1);
+  expect(compiled.profile.sampleFields).toHaveLength(2);
   expect(validateDraftForCreate(driver)).toEqual([]);
-  expect(compiled.profile.sampleFields).toEqual([{ fieldId: 1, type: "float", name: "value_1", unit: "°C" }]);
+  expect(compiled.profile.sampleFields).toEqual([{ fieldId: 1, type: "float", name: "value_1", unit: "%RH" }, { fieldId: 2, type: "float", name: "value_2", unit: "°C" }]);
   const installed = commitModuleImport(p, plan, "dht-unit", false, true);
   expect(parseBackboneSensorModules(installed.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master?.[0]?.gpioAssignments?.channels).toEqual({ DATA: 0, POWER: 1 });
 });

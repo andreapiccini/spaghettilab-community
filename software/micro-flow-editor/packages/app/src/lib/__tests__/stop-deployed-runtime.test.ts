@@ -3,6 +3,9 @@ import { encodeConfigCbor } from "@spaghettilab/config-compiler";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../default-config-policy.js";
 import {
   applyStoppedRuntime,
+  oneShotRuntimeConfig,
+  configHasContinuousSchedules,
+  pauseContinuousRuntime,
   clearedRuntimeConfig,
   configBytesHaveLiveRuntime,
   configHasLiveRuntime,
@@ -103,4 +106,44 @@ describe("stop-deployed-runtime", () => {
     expect(result.changed).toBe(false);
     expect(result.generation).toBe(1);
   });
+});
+
+it("Stop retains manual drivers and routes while disabling all repeating schedules", async () => {
+  const paused = oneShotRuntimeConfig(live);
+  expect(paused.modules).toEqual(live.modules);
+  expect(paused.rules).toEqual(live.rules);
+  expect(paused.schedules).toEqual([{ ...live.schedules[0], enabled: false }]);
+  expect(live.schedules[0]!.enabled).toBe(true);
+  let bytes = encodeConfigCbor(live);
+  let generation = 7;
+  const client = {
+    getConfig: async () => ({
+      generation,
+      sha256: new Uint8Array(32),
+      configBytes: bytes,
+    }),
+    applyConfig: async (request: { configBytes: Uint8Array }) => {
+      bytes = request.configBytes;
+      generation++;
+    },
+  };
+  const result = await pauseContinuousRuntime(client);
+  expect(result.generation).toBe(9);
+  expect(result.configBytes).toEqual(encodeConfigCbor(paused));
+});
+
+it("keeps conversion-completion polling, but disables the clock that starts new reads", () => {
+  const config = {
+    ...live,
+    modules: [
+      { ...live.modules[0]!, properties: { "1": "flow.clock" } },
+      { ...live.modules[0]!, key: 2, properties: { "1": "sensor.ds18b20" } },
+    ],
+    schedules: [...live.schedules, { sourceKey: 2, periodMs: 100, enabled: true }],
+    rules: [{ key: 1, typeId: "device-action", properties: { "1": 1n, "3": 2n } }],
+  };
+  const paused = oneShotRuntimeConfig(config, ["sensor.ds18b20"]);
+  expect(paused.schedules.map((item) => item.enabled)).toEqual([false, true]);
+  expect(configHasContinuousSchedules(config)).toBe(true);
+  expect(configHasContinuousSchedules(paused)).toBe(false);
 });

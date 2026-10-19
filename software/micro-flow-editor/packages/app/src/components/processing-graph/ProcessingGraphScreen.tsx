@@ -1,3 +1,4 @@
+import { activeEdgesForRecord } from "../../lib/edge-activity.js";
 import { upgradeDht22Driver } from "../../lib/gpio-driver-presets.js";
 import {
   SENSOR_INSTANCE_PROP,
@@ -67,11 +68,9 @@ import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useNfcPresence } from "../../state/nfc-presence-context.js";
 import { useSession } from "../../state/session-context.js";
 import {
-  applyStoppedRuntime,
+  pauseContinuousRuntime,
   configBytesHaveLiveRuntime,
-  forgetOwnedDriverProfiles,
   formatApplyConfigError,
-  waitConfigWriteGap,
 } from "../../lib/stop-deployed-runtime.js";
 import { portCardId } from "../physical-composition/ConfiguredPortNode.js";
 import { DEFAULT_ENERGY, DISABLED_MQTT } from "../../lib/default-config-policy.js";
@@ -283,8 +282,10 @@ function ProcessingGraphScreenInner() {
   const {
     getClient,
     getSnapshot,
+    onRecordEvent,
+    getExecutionMode,
+    setExecutionMode,
     observeConfig,
-    removeProfile,
     lockTransport,
     unlockTransport,
   } = useCoreSessions();
@@ -610,11 +611,14 @@ function ProcessingGraphScreenInner() {
       if (target) {
         attachEdgeCommand = addGraphEdgeCommand(deviceGraphLens(bindingIndex), {
           id: `dpe-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
-          source: chainTailId(
-            target,
-            graphState.edges,
-            new Set(containerByTriggerId.keys()),
-          ),
+          source:
+            data.kind === "block" && data.blockTypeId === "ui.manual_trigger"
+              ? target.triggerId
+              : chainTailId(
+                  target,
+                  graphState.edges,
+                  new Set(containerByTriggerId.keys()),
+                ),
           target: id,
           sourceHandle: "0",
           targetHandle: "0",
@@ -1140,11 +1144,59 @@ function ProcessingGraphScreenInner() {
     dryRun?.issues.filter((i) => i.severity === "warning").length ?? 0;
 
   const viewerPlan = useMemo(() => {
-    if (!session || !selected || !domainNodes.some(node => node.data.kind === "block" && node.data.blockTypeId === "ui.data_viewer")) return { observations: [] };
+    if (!session || !selected) return { observations: [] };
     try {
-      return prepareDriverDeployment(session.stack.current, selected.bindingId, { physicalGraph: physicalGraphState, processingGraph: graphState, mqtt: DISABLED_MQTT, connectivity: 0, energy: DEFAULT_ENERGY });
-    } catch (error) { return { observations: [], error: error instanceof Error ? error.message : String(error) }; }
-  }, [session?.stack.current, selected?.bindingId, graphState, physicalGraphState, domainNodes]);
+      return prepareDriverDeployment(session.stack.current, selected.bindingId, {
+        physicalGraph: physicalGraphState,
+        processingGraph: graphState,
+        mqtt: DISABLED_MQTT,
+        connectivity: 0,
+        energy: DEFAULT_ENERGY,
+      });
+    } catch (error) {
+      return {
+        observations: [],
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }, [
+    session?.stack.current,
+    selected?.bindingId,
+    graphState,
+    physicalGraphState,
+    domainNodes,
+  ]);
+  const [wirePulses, setWirePulses] = useState<
+    ReadonlyMap<string, { token: number; kind: "trigger" | "data" }>
+  >(new Map());
+  const wireToken = useRef(0);
+  useEffect(() => {
+    setWirePulses(new Map());
+    if (!selected || !("activityRoutes" in viewerPlan)) return;
+    const routes = viewerPlan.activityRoutes ?? [];
+    const seen = new Map<string, number>();
+    let clearTimer: ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe = onRecordEvent(selected.bindingId, (record) => {
+      const key = `${record.sourceKey}:${record.schemaId}:${record.actionId ?? 0}`;
+      if (seen.get(key) === record.sequence) return;
+      seen.set(key, record.sequence);
+      const active = activeEdgesForRecord(routes, record);
+      if (!active.length) return;
+      setWirePulses((previous) => {
+        const next = new Map(previous);
+        for (const route of active)
+          next.set(route.edgeId, { token: ++wireToken.current, kind: route.kind });
+        return next;
+      });
+      clearTimeout(clearTimer);
+      clearTimer = setTimeout(() => setWirePulses(new Map()), 1000);
+    });
+    return () => {
+      unsubscribe?.();
+      clearTimeout(clearTimer);
+    };
+  }, [selected?.bindingId, viewerPlan, onRecordEvent]);
+
   const domainRfNodes = useMemo(
     () =>
       toProcessingNodes(
@@ -1155,12 +1207,45 @@ function ProcessingGraphScreenInner() {
         fieldLabel,
         new Set(),
         locale,
-      ).map(node => node.data.manualTrigger ? { ...node, data: { ...node.data, manualTrigger: { bindingId: selected?.bindingId } }} : node.data.dataViewer ? { ...node, data: { ...node.data, dataViewer: { ...node.data.dataViewer,
-        bindingId: selected?.bindingId,
-        source: viewerPlan.observations?.find(item => item.viewerId === node.id),
-        error: "error" in viewerPlan ? viewerPlan.error : undefined,
-      }}} : node),
-    [graphState, authoringMetadata, errorsByNode, moduleLabel, fieldLabel, locale, selected?.bindingId, viewerPlan],
+      ).map((node) =>
+        node.data.manualTrigger
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                manualTrigger: {
+                  ...node.data.manualTrigger,
+                  bindingId: selected?.bindingId,
+                },
+              },
+            }
+          : node.data.dataViewer
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  dataViewer: {
+                    ...node.data.dataViewer,
+                    bindingId: selected?.bindingId,
+                    source: viewerPlan.observations?.find(
+                      (item) => item.viewerId === node.id,
+                    ),
+                    error: "error" in viewerPlan ? viewerPlan.error : undefined,
+                  },
+                },
+              }
+            : node,
+      ),
+    [
+      graphState,
+      authoringMetadata,
+      errorsByNode,
+      moduleLabel,
+      fieldLabel,
+      locale,
+      selected?.bindingId,
+      viewerPlan,
+    ],
   );
   // "deletable" (DeletableEdge.tsx) routes around other blocks on H/V
   // segments with rounded corners, plus a hover trash control.
@@ -1342,6 +1427,12 @@ function ProcessingGraphScreenInner() {
               containerHint?.kind === "accepting" &&
               containerHint.triggerId === container.triggerId,
             previewActive: previewTriggerIds.has(container.triggerId),
+            enabled: triggerData?.kind === "schedule" ? triggerData.enabled : true,
+            empty: !graphState.edges.some(
+              (edge) =>
+                container.memberIds.includes(edge.source) &&
+                !container.memberIds.includes(edge.target),
+            ),
           },
         };
       });
@@ -1352,6 +1443,8 @@ function ProcessingGraphScreenInner() {
     containerHint,
     containerByTriggerId,
     previewTriggerIds,
+    localNodes,
+    graphState.edges,
   ]);
   // Real React Flow children: relative-to-container position + parentId, so
   // dragging the container (or a sibling member) behaves natively instead of
@@ -1377,7 +1470,14 @@ function ProcessingGraphScreenInner() {
     }
     const tickRel = fixedTickRelativePosition();
     const rest = localNodes
-      .filter((n) => !containerByTriggerId.has(n.id))
+      .filter((n) => {
+        if (containerByTriggerId.has(n.id)) return false;
+        if (!n.data.circular) return true;
+        const owner = containerByMemberId.get(n.id);
+        return !owner?.memberIds.some(
+          (id) => localNodes.find((node) => node.id === id)?.data.manualTrigger,
+        );
+      })
       .map((n) => {
         const container = containerByMemberId.get(n.id);
         const previewing = previewActuatorIds.has(n.id) || previewRgbVisual.has(n.id);
@@ -1536,12 +1636,41 @@ function ProcessingGraphScreenInner() {
   }
   const visibleEdges = useMemo(
     () =>
-      localEdges.filter((edge) => {
-        if (!containerByTriggerId.has(edge.source)) return true;
-        const memberOf = containerByMemberId.get(edge.target);
-        return !memberOf || memberOf.triggerId !== edge.source;
-      }),
-    [localEdges, containerByTriggerId, containerByMemberId],
+      localEdges
+        .filter((edge) => {
+          if (
+            containerByMemberId.has(edge.target) &&
+            localNodes.find((node) => node.id === edge.target)?.data.manualTrigger
+          )
+            return false;
+          if (!containerByTriggerId.has(edge.source)) return true;
+          const memberOf = containerByMemberId.get(edge.target);
+          return !memberOf || memberOf.triggerId !== edge.source;
+        })
+        .map((edge) => {
+          const live = wirePulses.get(edge.id);
+          const preview =
+            simulating &&
+            (previewActiveIds.has(edge.source) ||
+              previewTriggerIds.has(edge.source) ||
+              previewTriggerIds.has(
+                containerByMemberId.get(edge.source)?.triggerId ?? "",
+              ));
+          return {
+            ...edge,
+            data: { ...edge.data, signalPulse: live, previewSignal: preview },
+          };
+        }),
+    [
+      localEdges,
+      localNodes,
+      containerByTriggerId,
+      containerByMemberId,
+      wirePulses,
+      simulating,
+      previewActiveIds,
+      previewTriggerIds,
+    ],
   );
 
   useEffect(() => {
@@ -1686,6 +1815,20 @@ function ProcessingGraphScreenInner() {
     // (parentId); localNodes/authoringMetadata always store absolute canvas
     // positions, so translate back before either touches them.
     const absoluteChanges = gatedChanges.map((change) => {
+      // A drag-stop can contain only `dragging: false`. Settle membership from
+      // its last live position too, rather than requiring a final motion event.
+      if (change.type === "position" && !change.position && change.dragging === false) {
+        const changedId = change.id;
+        const local = localNodes.find((node) => node.id === changedId);
+        const parent = containerByMemberId.get(changedId);
+        if (local)
+          change = {
+            ...change,
+            position: parent
+              ? { x: local.position.x - parent.x, y: local.position.y - parent.y }
+              : local.position,
+          };
+      }
       if (change.type !== "position" || !change.position) return change;
       const isContainer = containerByTriggerId.has(change.id);
       const container = containerByMemberId.get(change.id);
@@ -1854,9 +1997,8 @@ function ProcessingGraphScreenInner() {
 
       const escaping =
         container !== undefined && memberEscapesContainer(position, container);
-      const isChainableBlock = canChainIntoEventContainer(
-        domainNodes.find((n) => n.id === change.id)?.data,
-      );
+      const draggedData = domainNodes.find((n) => n.id === change.id)?.data;
+      const isChainableBlock = canChainIntoEventContainer(draggedData);
       const hovered = isChainableBlock
         ? containerAtPosition(
             position,
@@ -1893,7 +2035,7 @@ function ProcessingGraphScreenInner() {
       let attachLowerBound: { x: number; y: number } | undefined;
       // Attachment/detachment only settle on drop. Overlap is resolved every
       // frame so two cards never stack, including while the pointer is down.
-      if (change.dragging === false) {
+      if (change.dragging !== true) {
         setContainerHint(null);
         if (isChainableBlock) {
           const plan = planMembershipDrop({
@@ -1921,11 +2063,41 @@ function ProcessingGraphScreenInner() {
           if (plan.attachTo) {
             const target = eventContainers.find((c) => c.triggerId === plan.attachTo);
             if (target) {
-              const source = chainTailId(
-                target,
-                graphState.edges,
-                new Set(containerByTriggerId.keys()),
-              );
+              const source =
+                draggedData?.kind === "block" &&
+                draggedData.blockTypeId === "ui.manual_trigger"
+                  ? target.triggerId
+                  : chainTailId(
+                      target,
+                      graphState.edges,
+                      new Set(containerByTriggerId.keys()),
+                    );
+              if (
+                draggedData?.kind === "block" &&
+                draggedData.blockTypeId === "ui.manual_trigger"
+              ) {
+                const destinations = graphState.edges.filter(
+                  (edge) => edge.source === change.id,
+                );
+                for (const edge of graphState.edges) {
+                  const from = domainNodes.find(
+                    (node) => node.id === edge.source,
+                  )?.data;
+                  const sourceContainer = containerByMemberId.get(edge.source);
+                  if (
+                    (edge.source === target.triggerId ||
+                      (from &&
+                        isFlowStartBlock(from) &&
+                        sourceContainer?.triggerId === target.triggerId)) &&
+                    destinations.some(
+                      (out) =>
+                        out.target === edge.target &&
+                        out.targetHandle === edge.targetHandle,
+                    )
+                  )
+                    removeEdgeCommands.push(removeGraphEdgeCommand(lens, edge.id));
+                }
+              }
               const alreadyLinked = graphState.edges.some(
                 (e) => e.source === source && e.target === change.id,
               );
@@ -2063,9 +2235,24 @@ function ProcessingGraphScreenInner() {
   }
 
   function openRgbModule(module: BackboneSensorModule): boolean {
-    const draft = module.recipe.deviceDraft && upgradeDht22Driver(module.recipe.deviceDraft);
+    const draft =
+      module.recipe.deviceDraft && upgradeDht22Driver(module.recipe.deviceDraft);
     if (!draft || !execute) return false;
-    execute({ kind: "EditRgbModule", apply: project => ({ ok: true, value: { ...project, authoringMetadata: { ...project.authoringMetadata, [DEVICE_RECIPE_DRAFT_META_KEY]: { comment: serializeDeviceRecipeDraft(draft) } } } }) });
+    execute({
+      kind: "EditRgbModule",
+      apply: (project) => ({
+        ok: true,
+        value: {
+          ...project,
+          authoringMetadata: {
+            ...project.authoringMetadata,
+            [DEVICE_RECIPE_DRAFT_META_KEY]: {
+              comment: serializeDeviceRecipeDraft(draft),
+            },
+          },
+        },
+      }),
+    });
     navigate("device-recipe-editor");
     return true;
   }
@@ -2085,10 +2272,10 @@ function ProcessingGraphScreenInner() {
   }
 
   function onNodeDoubleClick(_: unknown, node: Node<ProcessingNodeUiData>) {
-    const domain = domainNodes.find(item => item.id === node.id);
+    const domain = domainNodes.find((item) => item.id === node.id);
     if (!domain || domain.data.kind !== "block") return;
     const moduleId = domain.data.properties[SENSOR_MODULE_ID_PROP];
-    const module = backboneSensorModules.find(item => item.id === moduleId);
+    const module = backboneSensorModules.find((item) => item.id === moduleId);
     if (module) {
       setInspector(null);
       openRgbModule(module);
@@ -2251,6 +2438,8 @@ function ProcessingGraphScreenInner() {
     placeFromCatalog(entry, position, payload.baySide, payload.physicalPinId);
   }
 
+  const executionMode = selected ? getExecutionMode(selected.bindingId) : "one-shot";
+
   const liveRuntime = configBytesHaveLiveRuntime(
     selected ? getSnapshot(selected.bindingId)?.config?.configBytes : undefined,
   );
@@ -2273,18 +2462,26 @@ function ProcessingGraphScreenInner() {
     lockTransport();
     try {
       await waitUntilIdle();
-      const stopped = await applyStoppedRuntime(client);
-      observeConfig(selected.bindingId, stopped.config);
-      await waitConfigWriteGap();
-      await forgetOwnedDriverProfiles(
-        selected.expectedDeviceId,
-        async (profileId, version) => {
-          const removed = await removeProfile(selected.bindingId, profileId, version, {
-            isReferencedLocally: false,
-          });
-          return removed?.ok === true;
-        },
+      setExecutionMode(selected.bindingId, "busy");
+      const completionProfiles =
+        "profiles" in viewerPlan
+          ? viewerPlan.profiles
+              .filter((profile) =>
+                profile.sampleOps.some((op) =>
+                  ["DS18B20_READ", "DHT22_READ", "STEPPER", "RGB_PROGRAM"].includes(
+                    op.op,
+                  ),
+                ),
+              )
+              .map((profile) => profile.profileId)
+          : [];
+      const stopped = await pauseContinuousRuntime(
+        client,
+        AbortSignal.timeout(20000),
+        completionProfiles,
       );
+      observeConfig(selected.bindingId, stopped);
+      setExecutionMode(selected.bindingId, "one-shot");
       // Stop leaves the current canvas visible; physical setup has its own navigation.
     } catch (cause) {
       setPauseError(formatApplyConfigError(cause, locale === "it"));
@@ -2425,6 +2622,18 @@ function ProcessingGraphScreenInner() {
           )}
         </div>
         <div className="min-w-0 flex-1" />
+        {!demoOnly && (
+          <span
+            role="status"
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${executionMode === "continuous" ? "bg-success/10 text-success" : "bg-brand-blue/5 text-brand-blue"}`}
+          >
+            {executionMode === "continuous"
+              ? "● Logica in esecuzione continua"
+              : executionMode === "busy"
+                ? "Operazione sulla Backbone…"
+                : "One-shot · test manuali"}
+          </span>
+        )}
         <button
           type="button"
           data-tour-target="demo-tour-run"
@@ -2508,6 +2717,10 @@ function ProcessingGraphScreenInner() {
             <ProcessingBlockPalette
               bindingId={selected?.bindingId}
               onCreateRecipe={() => navigate("device-recipe-editor")}
+              onAddSchedule={() => {
+                const entry = findCatalogEntryById("native.schedule");
+                if (entry) placeFromCatalog(entry);
+              }}
               onAddTrigger={() => {
                 const entry = findCatalogEntryById("appblocks.manual_trigger");
                 if (entry) placeFromCatalog(entry);
@@ -2533,7 +2746,10 @@ function ProcessingGraphScreenInner() {
                 modules={backboneSensorModules}
                 onAdd={() => navigate("device-recipe-editor")}
                 onSelect={setSensorDetail}
-                onEdit={(module) => { setSensorDetail(null); openRgbModule(module); }}
+                onEdit={(module) => {
+                  setSensorDetail(null);
+                  openRgbModule(module);
+                }}
                 onRemove={handleSensorModuleRemove}
                 onUseStatusLed={handleUseStatusLed}
               />
@@ -2626,7 +2842,9 @@ function ProcessingGraphScreenInner() {
               }}
               fitView
               fitViewOptions={
-                demoOnly ? { padding: 0.22, minZoom: 0.18, maxZoom: 1.15 } : { padding: 0.2, maxZoom: 0.8 }
+                demoOnly
+                  ? { padding: 0.22, minZoom: 0.18, maxZoom: 1.15 }
+                  : { padding: 0.2, maxZoom: 0.8 }
               }
               minZoom={demoOnly ? 0.15 : undefined}
               maxZoom={demoOnly ? 1.5 : undefined}
@@ -2635,7 +2853,11 @@ function ProcessingGraphScreenInner() {
               preventScrolling={demoOnly}
             >
               <Background gap={20} color="#E1E4EB" />
-              <Controls position="bottom-left" showInteractive={!demoOnly} fitViewOptions={{ padding: 0.2, maxZoom: demoOnly ? 1.15 : 0.8 }} />
+              <Controls
+                position="bottom-left"
+                showInteractive={!demoOnly}
+                fitViewOptions={{ padding: 0.2, maxZoom: demoOnly ? 1.15 : 0.8 }}
+              />
               {!demoOnly && domainNodes.length > 0 && (
                 <MiniMap
                   position="bottom-right"

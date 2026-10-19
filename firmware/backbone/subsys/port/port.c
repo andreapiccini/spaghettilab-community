@@ -1217,8 +1217,8 @@ static int dht22_wait_level(const struct gpio_dt_spec *pin, int level, unsigned 
  }
 }
 
-int spaghetti_port_dht22_read(const struct spaghetti_port *port, uint8_t data, uint8_t power,
-                             int16_t *temperature, uint16_t *humidity)
+static int dht_read(const struct spaghetti_port *port, uint8_t data, uint8_t power,
+                    int16_t *temperature, uint16_t *humidity, bool dht11)
 {
  int err = dht22_pins(port, data, power);
  if (err || !temperature || !humidity) return err ? err : -EINVAL;
@@ -1226,7 +1226,7 @@ int spaghetti_port_dht22_read(const struct spaghetti_port *port, uint8_t data, u
  uint8_t bytes[5] = {0};
  err = gpio_pin_configure(pin->port, pin->pin, GPIO_OUTPUT_LOW);
  if (err) return err;
- k_busy_wait(1100);
+ if (dht11) k_sleep(K_MSEC(20)); else k_busy_wait(1100);
  /* Only the bounded response capture masks interrupts (about 4 ms normally). */
  unsigned key = irq_lock();
  err = gpio_pin_configure(pin->port, pin->pin, GPIO_INPUT);
@@ -1245,5 +1245,56 @@ int spaghetti_port_dht22_read(const struct spaghetti_port *port, uint8_t data, u
  }
  irq_unlock(key);
  if (err < 0) return err;
- return spaghetti_dht22_decode_frame(bytes, temperature, humidity);
+ return dht11 ? spaghetti_dht11_decode_frame(bytes, temperature, humidity) :
+        spaghetti_dht22_decode_frame(bytes, temperature, humidity);
+}
+
+int spaghetti_port_dht22_read(const struct spaghetti_port *p, uint8_t d, uint8_t v, int16_t *t, uint16_t *h)
+{ return dht_read(p,d,v,t,h,false); }
+int spaghetti_port_dht11_read(const struct spaghetti_port *p, uint8_t d, uint8_t v, int16_t *t, uint16_t *h)
+{ return dht_read(p,d,v,t,h,true); }
+
+/* One parasite-powered device per GPIO. Never hold HIGH outside conversion. */
+static const struct gpio_dt_spec *ds_pin(const struct spaghetti_port *p, uint8_t c)
+{
+ if(!p || c>=4 || c>=p->digital_input_count || !p->digital_inputs ||
+    p->user_config[0]!=1 || (p->user_modes[c]&15)!=1) return NULL;
+ return &p->digital_inputs[c];
+}
+int spaghetti_port_ds18b20_setup(const struct spaghetti_port *p, uint8_t c)
+{
+ const struct gpio_dt_spec *pin=ds_pin(p,c);
+ return pin ? gpio_pin_configure(pin->port,pin->pin,GPIO_INPUT|GPIO_PULL_UP) : -EINVAL;
+}
+#include "ds18b20_wire.h"
+
+int spaghetti_port_ds18b20_start(const struct spaghetti_port *p, uint8_t c, bool parasite)
+{
+ const struct gpio_dt_spec *pin=ds_pin(p,c); if(!pin)return -EINVAL;
+ int err=ds_reset(pin);
+ if(!err)err=ds_write(pin,0xcc,false);
+ if(!err)err=ds_write(pin,0x44,parasite);
+ if(err) (void)spaghetti_port_ds18b20_setup(p,c);
+ return err;
+}
+int spaghetti_port_ds18b20_finish_raw(const struct spaghetti_port *p, uint8_t c, uint8_t bytes[9])
+{
+ const struct gpio_dt_spec *pin=ds_pin(p,c); if(!pin||!bytes)return -EINVAL;
+ int err=spaghetti_port_ds18b20_setup(p,c);
+ if(!err)err=ds_reset(pin);
+ if(!err)err=ds_write(pin,0xcc,false);
+ if(!err)err=ds_write(pin,0xbe,false);
+ for(unsigned i=0;i<9 && !err;i++) { int b=ds_read_byte(pin);if(b<0)err=b;else bytes[i]=b; }
+ (void)spaghetti_port_ds18b20_setup(p,c);
+ return err;
+}
+int spaghetti_port_ds18b20_finish(const struct spaghetti_port *p, uint8_t c, int16_t *t)
+{
+ if (!t) return -EINVAL;
+ uint8_t bytes[9];
+ int err = spaghetti_port_ds18b20_finish_raw(p, c, bytes);
+ if (err) return err;
+ int decoded = spaghetti_ds18b20_decode_frame(bytes, t);
+ if (decoded) LOG_HEXDUMP_WRN(bytes, sizeof(bytes), "DS18B20 invalid scratchpad");
+ return decoded;
 }

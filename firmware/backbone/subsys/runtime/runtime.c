@@ -297,9 +297,15 @@ int spaghetti_runtime_post_command_result(spaghetti_module_key_t source_key,
     return err;
 }
 
+/* Only runtime_worker_entry accesses these buffers. Publication may enqueue
+ * another event, but never recursively executes process_event/process_due_jobs.
+ * Keep record-sized objects off the 3 KiB worker stack. */
+static struct spaghetti_record *runtime_record_scratch;
+static struct spaghetti_runtime_event *runtime_event_scratch;
+
 static void process_event(struct spaghetti_runtime_event *event)
 {
-	struct spaghetti_record record;
+	struct spaghetti_record *record = runtime_record_scratch;
 	size_t job_idx = SIZE_MAX;
 
 	(void)k_mutex_lock(&runtime_lock, K_FOREVER);
@@ -319,24 +325,24 @@ static void process_event(struct spaghetti_runtime_event *event)
 		return;
 	}
 
-	memset(&record, 0, sizeof(record));
-	record.source_id = event->source_id;
-	record.source_key = event->source_key;
-	record.timestamp_ms = k_uptime_get();
+	memset(record, 0, sizeof(*record));
+	record->source_id = event->source_id;
+	record->source_key = event->source_key;
+	record->timestamp_ms = k_uptime_get();
 	if (job_idx != SIZE_MAX) {
 		if (jobs[job_idx].sequence == UINT32_MAX) {
 			jobs[job_idx].sequence = 0U;
 		}
-		record.sequence = ++jobs[job_idx].sequence;
+		record->sequence = ++jobs[job_idx].sequence;
 	} else {
 		static uint32_t command_sequence;
-		record.sequence = ++command_sequence;
+		record->sequence = ++command_sequence;
 	}
-	record.payload = event->payload;
+	record->payload = event->payload;
 	++active_operations;
 	k_mutex_unlock(&runtime_lock);
 
-	(void)publish_record(&record, event->command_depth);
+	(void)publish_record(record, event->command_depth);
 	complete_operation();
 }
 
@@ -344,7 +350,7 @@ static void process_due_jobs(int64_t now_ms)
 {
 	for (size_t idx = 0U; idx < SPAGHETTI_CONFIG_MAX_SCHEDULES; ++idx) {
 		struct spaghetti_runtime_job job;
-		struct spaghetti_record record;
+		struct spaghetti_record *record = runtime_record_scratch;
 		int err;
 
 		(void)k_mutex_lock(&runtime_lock, K_FOREVER);
@@ -358,7 +364,7 @@ static void process_due_jobs(int64_t now_ms)
 		++active_operations;
 		k_mutex_unlock(&runtime_lock);
 
-		err = spaghetti_module_manager_read(job.source_id, &record);
+		err = spaghetti_module_manager_read(job.source_id, record);
 		(void)k_mutex_lock(&runtime_lock, K_FOREVER);
 		if ((runtime_state == SPAGHETTI_RUNTIME_RUNNING) && (idx < job_count) &&
 		    (jobs[idx].source_key == job.source_key)) {
@@ -372,10 +378,10 @@ static void process_due_jobs(int64_t now_ms)
 					jobs[idx].sequence = 0U;
 				}
 				++jobs[idx].sequence;
-				record.sequence = jobs[idx].sequence;
-				record.source_id = jobs[idx].source_id;
-				record.source_key = jobs[idx].source_key;
-				record.timestamp_ms = k_uptime_get();
+				record->sequence = jobs[idx].sequence;
+				record->source_id = jobs[idx].source_id;
+				record->source_key = jobs[idx].source_key;
+				record->timestamp_ms = k_uptime_get();
 			}
 		}
 		k_mutex_unlock(&runtime_lock);
@@ -385,7 +391,7 @@ static void process_due_jobs(int64_t now_ms)
 		} else if (err < 0) {
 			LOG_WRN("sample read failed: key=%u err=%d", job.source_key, err);
 		} else {
-			(void)publish_record(&record, 0U);
+			(void)publish_record(record, 0U);
 		}
 
 		complete_operation();
@@ -412,8 +418,17 @@ static void runtime_worker_entry(void *first, void *second, void *third)
 	ARG_UNUSED(second);
 	ARG_UNUSED(third);
 
+ /* Lifetime-owned worker buffers come from the existing heap, not extra static
+  * DRAM (the ESP32-S3 image has a tight static RAM budget). Retry allocation
+  * before accepting work; no per-record allocation or shared-workspace races. */
+ while (!runtime_record_scratch || !runtime_event_scratch) {
+   if (!runtime_record_scratch) runtime_record_scratch = k_malloc(sizeof(*runtime_record_scratch));
+   if (!runtime_event_scratch) runtime_event_scratch = k_malloc(sizeof(*runtime_event_scratch));
+   if (!runtime_record_scratch || !runtime_event_scratch) k_sleep(K_MSEC(100));
+ }
+
 	while (true) {
-		struct spaghetti_runtime_event event;
+		struct spaghetti_runtime_event *event = runtime_event_scratch;
 		int64_t now_ms;
 		int64_t nearest;
 		k_timeout_t wait;
@@ -447,15 +462,15 @@ static void runtime_worker_entry(void *first, void *second, void *third)
 		}
 		k_mutex_unlock(&runtime_lock);
 
-		if (k_msgq_get(&runtime_event_queue, &event, K_NO_WAIT) == 0) {
-			process_event(&event);
+		if (k_msgq_get(&runtime_event_queue, event, K_NO_WAIT) == 0) {
+			process_event(event);
 			continue;
 		}
 
 		(void)k_sem_take(&runtime_wake_sem, wait);
 
-		while (k_msgq_get(&runtime_event_queue, &event, K_NO_WAIT) == 0) {
-			process_event(&event);
+		while (k_msgq_get(&runtime_event_queue, event, K_NO_WAIT) == 0) {
+			process_event(event);
 		}
 
 		now_ms = k_uptime_get();

@@ -273,14 +273,16 @@ export function DeviceRecipeEditorScreen({
   const selected = flowEditing
     ? (draft.flowInterfaces?.find((op) => op.id === selectedInterfaceId) ?? null)
     : (ops.find((op) => op.id === selectedOpId) ?? ops[0] ?? null);
-  const library = libraryOpsForBus(draft.binding.bus).filter(
-    (entry) =>
-      draft.dht22Module ? ["dht22_read", "dht22_convert", "dht22_power", "wait", "emit"].includes(entry.type) :
-      draft.binding.bus !== "gpio" ||
-      draft.binding.gpioSignals.length > 1 ||
-      ["gpio_read", "gpio_write", "wait", "sample_external", "emit"].includes(
-        entry.type,
-      ),
+  const library = libraryOpsForBus(draft.binding.bus).filter((entry) =>
+    draft.dht22Module
+      ? ["dht22_read", "dht22_convert", "dht22_power", "wait", "emit"].includes(
+          entry.type,
+        )
+      : draft.binding.bus !== "gpio" ||
+        draft.binding.gpioSignals.length > 1 ||
+        ["gpio_read", "gpio_write", "wait", "sample_external", "emit"].includes(
+          entry.type,
+        ),
   );
   const calibOk = isAnalogCalibrationComplete(draft);
   const createBlocked = validateDraftForCreate(draft).length > 0;
@@ -1152,9 +1154,10 @@ export function DeviceRecipeEditorScreen({
                       BACKBONE_SENSOR_MODULES_META_KEY
                     ]?.comment,
                   );
-                  const module = (physicalBindingId
-                    ? modulesForBinding(stored, physicalBindingId)
-                    : Object.values(stored.byBinding).flat()
+                  const module = (
+                    physicalBindingId
+                      ? modulesForBinding(stored, physicalBindingId)
+                      : Object.values(stored.byBinding).flat()
                   ).find((item) => item.recipe.deviceDraft?.id === draft.id);
                   return module?.gpioAssignment
                     ? `${module.gpioAssignment.boardKey}:${module.gpioAssignment.channel}`
@@ -1210,11 +1213,7 @@ export function DeviceRecipeEditorScreen({
                 }}
               >
                 <option value="">
-                  {gpioOutputPins.length
-                    ? it
-                      ? "Scegli pin"
-                      : "Choose pin"
-                    : "—"}
+                  {gpioOutputPins.length ? (it ? "Scegli pin" : "Choose pin") : "—"}
                 </option>
                 {gpioOutputPins.map((pin) => (
                   <option
@@ -1572,7 +1571,11 @@ export function DeviceRecipeEditorScreen({
                         isWorkbench ? "sensor-workbench-flow-preview" : undefined
                       }
                     >
-                      {draft.dht22Module ? <Dht22FlowPanel draft={draft} onChange={setDraft} /> : flowPreview}
+                      {draft.dht22Module ? (
+                        <Dht22FlowPanel draft={draft} onChange={setDraft} />
+                      ) : (
+                        flowPreview
+                      )}
                     </div>
                   </>
                 ) : (
@@ -1747,7 +1750,8 @@ export function DeviceRecipeEditorScreen({
               <div
                 className={`mt-3 space-y-3 ${isWorkbench && flowEditing ? "sensor-workbench-inspector" : ""}`}
               >
-                {(!isWorkbench || (flowEditing && selected && !draft.dht22Module)) && selectedInspector}
+                {(!isWorkbench || (flowEditing && selected && !draft.dht22Module)) &&
+                  selectedInspector}
                 {draft.binding.bus === "adc" && draft.binding.adc ? (
                   <section className="rounded-slmd border border-border-strong p-3">
                     <h2 className="mb-2 font-body text-[10px] font-bold uppercase tracking-widest text-ink-faint">
@@ -1836,33 +1840,35 @@ export function DeviceRecipeEditorScreen({
                 {tryMessage}
               </p>
             ) : null}
-            {draft.binding.bus === "gpio" && draft.binding.gpioSignals.length > 1 && !draft.dht22Module && (
-              <div className="gpio-context-panels">
-                {flowEditing ? (
-                  <>
-                    <GpioOutputsPanel draft={draft} it={it} onChange={setDraft} />
-                    <GpioEventsPanel draft={draft} it={it} onChange={setDraft} />
-                  </>
-                ) : (
-                  <>
-                    {editorPane === "actions" && (
-                      <GpioActionParametersPanel
-                        draft={draft}
-                        actionId={activeActionId}
-                        it={it}
-                        onChange={setDraft}
-                      />
-                    )}
-                    <details>
-                      <summary>
-                        {it ? "Compatibilità del test" : "Test compatibility"}
-                      </summary>
-                      <GpioTestingPanel draft={draft} it={it} />
-                    </details>
-                  </>
-                )}
-              </div>
-            )}
+            {draft.binding.bus === "gpio" &&
+              draft.binding.gpioSignals.length > 1 &&
+              !draft.dht22Module && (
+                <div className="gpio-context-panels">
+                  {flowEditing ? (
+                    <>
+                      <GpioOutputsPanel draft={draft} it={it} onChange={setDraft} />
+                      <GpioEventsPanel draft={draft} it={it} onChange={setDraft} />
+                    </>
+                  ) : (
+                    <>
+                      {editorPane === "actions" && (
+                        <GpioActionParametersPanel
+                          draft={draft}
+                          actionId={activeActionId}
+                          it={it}
+                          onChange={setDraft}
+                        />
+                      )}
+                      <details>
+                        <summary>
+                          {it ? "Compatibilità del test" : "Test compatibility"}
+                        </summary>
+                        <GpioTestingPanel draft={draft} it={it} />
+                      </details>
+                    </>
+                  )}
+                </div>
+              )}
           </>
         </main>
 
@@ -1923,7 +1929,13 @@ export function DeviceRecipeEditorScreen({
             className="inline-flex items-center gap-1.5 rounded-slpill border border-border-strong px-3 py-1.5 font-body text-sm text-ink hover:border-brand-blue"
           >
             <Save size={14} />
-            {draft.dht22Module ? (it ? "Salva modulo" : "Save module") : (it ? "Salva bozza" : "Save draft")}
+            {draft.dht22Module
+              ? it
+                ? "Salva modulo"
+                : "Save module"
+              : it
+                ? "Salva bozza"
+                : "Save draft"}
           </button>
           <button
             type="button"
@@ -2681,13 +2693,73 @@ function StepInspector({
     <div className="sensor-step-fields space-y-2">
       {op.type !== "i2c_write" && op.type !== "i2c_write_read" && heading}
 
-      {op.type === "stepper" && <div className="space-y-3 rounded-xl border border-border bg-surface-sunken/40 p-3">
-        <p className="font-body text-xs text-ink-muted">ULN2003 · IN1–IN4. Movimento in background; lo zero è la posizione all’avvio.</p>
-        <Field label="Comando"><select value={op.command} className={inputClass} onChange={event => onChange({ ...op, command: event.target.value as "start" | "stop" | "position" })}><option value="start">Start</option><option value="stop">Stop · mantieni posizione</option><option value="position">Vai a posizione · 0–360°</option></select></Field>
-        {op.command === "position" && <Field label="Variabile posizione"><select className={inputClass} value={op.positionVariable ?? ""} onChange={event => onChange({ ...op, positionVariable: event.target.value })}>{draft.variables.filter(variable => variable.valueType === "number").map(variable => <option key={variable.id} value={variable.name}>{variable.name}</option>)}</select></Field>}
-        <Field label="Intervallo tra mezzi passi (ms)"><input type="number" min={2} max={100} value={op.intervalMs} className={inputClass} onChange={event => onChange({ ...op, intervalMs: Number(event.target.value) })} /></Field>
-        <Field label="Mezzi passi per giro"><input type="number" min={8} max={16384} value={op.stepsPerRevolution} className={inputClass} onChange={event => onChange({ ...op, stepsPerRevolution: Number(event.target.value) })} /></Field>
-      </div>}
+      {op.type === "stepper" && (
+        <div className="space-y-3 rounded-xl border border-border bg-surface-sunken/40 p-3">
+          <p className="font-body text-xs text-ink-muted">
+            ULN2003 · IN1–IN4. Movimento in background; lo zero è la posizione
+            all’avvio.
+          </p>
+          <Field label="Comando">
+            <select
+              value={op.command}
+              className={inputClass}
+              onChange={(event) =>
+                onChange({
+                  ...op,
+                  command: event.target.value as "start" | "stop" | "position",
+                })
+              }
+            >
+              <option value="start">Start</option>
+              <option value="stop">Stop · mantieni posizione</option>
+              <option value="position">Vai a posizione · 0–360°</option>
+            </select>
+          </Field>
+          {op.command === "position" && (
+            <Field label="Variabile posizione">
+              <select
+                className={inputClass}
+                value={op.positionVariable ?? ""}
+                onChange={(event) =>
+                  onChange({ ...op, positionVariable: event.target.value })
+                }
+              >
+                {draft.variables
+                  .filter((variable) => variable.valueType === "number")
+                  .map((variable) => (
+                    <option key={variable.id} value={variable.name}>
+                      {variable.name}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+          )}
+          <Field label="Intervallo tra mezzi passi (ms)">
+            <input
+              type="number"
+              min={2}
+              max={100}
+              value={op.intervalMs}
+              className={inputClass}
+              onChange={(event) =>
+                onChange({ ...op, intervalMs: Number(event.target.value) })
+              }
+            />
+          </Field>
+          <Field label="Mezzi passi per giro">
+            <input
+              type="number"
+              min={8}
+              max={16384}
+              value={op.stepsPerRevolution}
+              className={inputClass}
+              onChange={(event) =>
+                onChange({ ...op, stepsPerRevolution: Number(event.target.value) })
+              }
+            />
+          </Field>
+        </div>
+      )}
       {op.type === "sample_external" ? (
         <SampleExternalFields
           op={op}
@@ -2870,17 +2942,92 @@ function StepInspector({
         </>
       ) : null}
 
-      {op.type === "dht22_power" && <Field label="Alimentazione del sensore"><select className={inputClass} value={op.on ? "on" : "off"} onChange={event => onChange({ ...op, on: event.target.value === "on" })}><option value="on">Accesa · GPIO HIGH</option><option value="off">Spenta · GPIO LOW</option></select><p className="mt-2 text-xs text-ink-muted">Dopo l’accensione il firmware attende 2 secondi prima di acquisire dati.</p></Field>}
-      {op.type === "dht22_convert" && <>
-        <Field label="Variabile letta"><input className={inputClass} value={op.input} onChange={event => onChange({ ...op, input: event.target.value })} /></Field>
-        <Field label="Salva temperatura in gradi nella variabile"><input className={inputClass} value={op.into} onChange={event => onChange({ ...op, into: event.target.value })} /></Field>
-        <Field label="Formato"><select className={inputClass} value={op.format} onChange={event => onChange({ ...op, format: event.target.value as "float" | "string" })}><option value="float">Numero decimale · 23.4</option><option value="string">Testo con unità · 23.4 °C</option></select></Field>
-      </>}
-      {op.type === "dht22_read" && <>
-        <Field label="Salva temperatura nella variabile"><input className={inputClass} value={op.temperatureInto} onChange={event => onChange({ ...op, temperatureInto: event.target.value })} /></Field>
-        <Field label="Salva umidità nella variabile"><input className={inputClass} value={op.humidityInto} onChange={event => onChange({ ...op, humidityInto: event.target.value })} /></Field>
-        <p className="text-xs text-ink-muted">Il driver verifica la risposta e il checksum. Tra due acquisizioni trascorrono almeno 2 secondi; le richieste ravvicinate restano in attesa dell’acquisizione successiva. Le variabili contengono decimi di °C e di %; ad esempio 234 significa 23,4 °C.</p>
-      </>}
+      {op.type === "dht22_power" && (
+        <Field label="Alimentazione del sensore">
+          <select
+            className={inputClass}
+            value={op.on ? "on" : "off"}
+            onChange={(event) => onChange({ ...op, on: event.target.value === "on" })}
+          >
+            <option value="on">
+              {draft.temperatureSensorModel === "ds18b20" &&
+              draft.ds18b20PowerMode !== "gpio"
+                ? "Attivo · alimentazione da DATA"
+                : "Accesa · GPIO HIGH"}
+            </option>
+            <option value="off">
+              {draft.temperatureSensorModel === "ds18b20" &&
+              draft.ds18b20PowerMode !== "gpio"
+                ? "Disattivo · rilascia DATA"
+                : "Spenta · GPIO LOW"}
+            </option>
+          </select>
+          <p className="mt-2 text-xs text-ink-muted">
+            {draft.temperatureSensorModel === "ds18b20"
+              ? "La conversione viene avviata solo dal trigger e attende 750 ms senza bloccare il collegamento."
+              : "Dopo l’accensione il firmware attende 2 secondi prima di acquisire dati."}
+          </p>
+        </Field>
+      )}
+      {op.type === "dht22_convert" && (
+        <>
+          <Field label="Variabile letta">
+            <input
+              className={inputClass}
+              value={op.input}
+              onChange={(event) => onChange({ ...op, input: event.target.value })}
+            />
+          </Field>
+          <Field label="Salva temperatura in gradi nella variabile">
+            <input
+              className={inputClass}
+              value={op.into}
+              onChange={(event) => onChange({ ...op, into: event.target.value })}
+            />
+          </Field>
+          <Field label="Formato">
+            <select
+              className={inputClass}
+              value={op.format}
+              onChange={(event) =>
+                onChange({ ...op, format: event.target.value as "float" | "string" })
+              }
+            >
+              <option value="float">Numero decimale · 23.4</option>
+              <option value="string">Testo con unità · 23.4 °C</option>
+            </select>
+          </Field>
+        </>
+      )}
+      {op.type === "dht22_read" && (
+        <>
+          <Field label="Salva temperatura nella variabile">
+            <input
+              className={inputClass}
+              value={op.temperatureInto}
+              onChange={(event) =>
+                onChange({ ...op, temperatureInto: event.target.value })
+              }
+            />
+          </Field>
+          {draft.temperatureSensorModel !== "ds18b20" && (
+            <Field label="Salva umidità nella variabile">
+              <input
+                className={inputClass}
+                value={op.humidityInto}
+                onChange={(event) =>
+                  onChange({ ...op, humidityInto: event.target.value })
+                }
+              />
+            </Field>
+          )}
+          <p className="text-xs text-ink-muted">
+            {draft.temperatureSensorModel === "ds18b20"
+              ? "Avvia conversione, mantiene DATA alto per 750 ms, legge e verifica il CRC. Il passo Converti produce la temperatura in °C con risoluzione fino a 1/16 di grado."
+              : "Il driver verifica la risposta e il checksum. Tra due acquisizioni trascorrono almeno 2 secondi; le richieste ravvicinate restano in attesa dell’acquisizione successiva. Le variabili contengono decimi di °C e di %."}
+          </p>
+        </>
+      )}
       {op.type === "gpio_read" || op.type === "gpio_debounce" ? (
         <>
           <Field label={it ? "Segnale" : "Signal"}>
@@ -4704,7 +4851,8 @@ function SampleExternalFields({
                   ...op,
                   inputMode: "trigger",
                   triggerHighAction: event.target.value,
-                  triggerLowAction: op.triggerLowAction ?? digitalActions[1]?.name ?? "off",
+                  triggerLowAction:
+                    op.triggerLowAction ?? digitalActions[1]?.name ?? "off",
                 })
               }
             >
@@ -4724,7 +4872,8 @@ function SampleExternalFields({
                 onChange({
                   ...op,
                   inputMode: "trigger",
-                  triggerHighAction: op.triggerHighAction ?? digitalActions[0]?.name ?? "on",
+                  triggerHighAction:
+                    op.triggerHighAction ?? digitalActions[0]?.name ?? "on",
                   triggerLowAction: event.target.value,
                 })
               }

@@ -160,3 +160,77 @@ export async function forgetOwnedDriverProfiles(
     /* Ownership tracking is optional. */
   }
 }
+
+/** Retain the graph for one-shot commands; repeating jobs are disabled. */
+export function oneShotRuntimeConfig(
+  config: CanonicalConfig,
+  completionProfiles: readonly string[] = [],
+): CanonicalConfig {
+  return {
+    ...config,
+    schedules: config.schedules.map((item) => ({
+      ...item,
+      enabled: config.modules.some(
+        (module) =>
+          module.key === item.sourceKey &&
+          completionProfiles.includes(String(module.properties[1])),
+      ),
+    })),
+  };
+}
+
+export async function pauseContinuousRuntime(
+  client: RuntimeStopClient,
+  signal?: AbortSignal,
+  completionProfiles: readonly string[] = [],
+): Promise<GetConfigResponse> {
+  const original = await client.getConfig(signal);
+  const decoded = decodeConfigCbor(original.configBytes);
+  if (!decoded.ok)
+    throw new Error(
+      "Configurazione della Backbone non leggibile: Stop non confermato.",
+    );
+  if (!configHasLiveRuntime(decoded.value)) return original;
+  const pausedBytes = encodeConfigCbor(
+    oneShotRuntimeConfig(decoded.value, completionProfiles),
+  );
+  // Stopping safe-stops unchanged drivers too (e.g. sensor power goes LOW).
+  // Remove then reload to run initialization again before accepting manual
+  // commands. Keep installed profiles; only configuration is replaced.
+  const cleared = await applyStoppedRuntime(client, signal);
+  if (cleared.changed) await waitConfigWriteGap(signal);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const live = await client.getConfig(signal);
+    try {
+      await client.applyConfig(
+        { expectedGeneration: live.generation, configBytes: pausedBytes },
+        signal,
+      );
+      const next = await client.getConfig(signal);
+      if (
+        next.configBytes.length !== pausedBytes.length ||
+        !next.configBytes.every((byte, index) => byte === pausedBytes[index])
+      )
+        throw new Error(
+          "Stop eseguito, ma la configurazione per i test manuali non è confermata. Ricarica il Flow prima di riprovare.",
+        );
+      return next;
+    } catch (error) {
+      if (!isRetryableConfigApply(error) || attempt === 2) throw error;
+      await waitConfigWriteGap(signal);
+    }
+  }
+  throw new Error("Stop non confermato.");
+}
+
+/** Enabled completion monitors do not imply that repeating user logic is active. */
+export function configHasContinuousSchedules(config: CanonicalConfig): boolean {
+  const actionTargets = new Set(
+    config.rules
+      .filter((rule) => rule.typeId === "device-action")
+      .map((rule) => Number(rule.properties[3])),
+  );
+  return config.schedules.some(
+    (schedule) => schedule.enabled && !actionTargets.has(schedule.sourceKey),
+  );
+}

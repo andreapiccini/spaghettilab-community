@@ -1,6 +1,33 @@
-export type Dht22PowerInstruction = Op<"DHT22_POWER"> & { readonly dataChannel: number; readonly powerChannel: number; readonly on: boolean };
-export type Dht22ReadInstruction = Op<"DHT22_READ"> & { readonly dst: TempSlot; readonly humidityDst: TempSlot; readonly dataChannel: number; readonly powerChannel: number; readonly queued?: boolean };
-export type RgbProgramInstruction = Op<"RGB_PROGRAM"> & { readonly offset: number; readonly length: number; readonly channels: number; readonly inverted: boolean };
+export type Ds18Instruction =
+  | (Op<"DS18B20_SETUP"> & {
+      readonly channel: number;
+      readonly on: boolean;
+      readonly powerChannel?: number;
+    })
+  | (Op<"DS18B20_READ"> & {
+      readonly dst: TempSlot;
+      readonly channel: number;
+      readonly rawScratchpad?: boolean;
+    });
+export type Dht22PowerInstruction = Op<"DHT22_POWER"> & {
+  readonly dataChannel: number;
+  readonly powerChannel: number;
+  readonly on: boolean;
+};
+export type Dht22ReadInstruction = Op<"DHT22_READ"> & {
+  readonly dst: TempSlot;
+  readonly humidityDst: TempSlot;
+  readonly dataChannel: number;
+  readonly powerChannel: number;
+  readonly model?: "dht11";
+  readonly queued?: boolean;
+};
+export type RgbProgramInstruction = Op<"RGB_PROGRAM"> & {
+  readonly offset: number;
+  readonly length: number;
+  readonly channels: number;
+  readonly inverted: boolean;
+};
 /**
  * Typed, ergonomic instructions for authoring an acquisition plan — one
  * variant per opcode in `opcodes.ts`, with named fields instead of raw
@@ -241,7 +268,14 @@ export type I2cMessageWriteInstruction = Op<"I2C_MESSAGE_WRITE"> & {
 };
 
 export type Instruction =
-  | (Op<"EMIT_DECIMAL"> & { readonly src: TempSlot; readonly fieldId: number; readonly text: boolean })
+  | Ds18Instruction
+  | (Op<"EMIT_DECIMAL"> & {
+      readonly src: TempSlot;
+      readonly fieldId: number;
+      readonly text: boolean;
+      readonly divisor?: number;
+      readonly humidity?: boolean;
+    })
   | Dht22PowerInstruction
   | Dht22ReadInstruction
   | RgbProgramInstruction

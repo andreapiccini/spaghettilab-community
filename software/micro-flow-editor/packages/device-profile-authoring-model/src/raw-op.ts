@@ -120,10 +120,60 @@ export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
         imm0: instruction.value ? 1 : 0,
         imm1: instruction.channel ?? 0,
       };
-    case "EMIT_DECIMAL": return { ...base, opcode: DeviceProfileOpcode.EMIT_DECIMAL, srcA: instruction.src, dst: instruction.fieldId, imm0: instruction.text ? 1 : 0 };
-    case "DHT22_POWER": return { ...base, opcode: DeviceProfileOpcode.DHT22_POWER, imm0: instruction.dataChannel, imm1: instruction.powerChannel, imm2: instruction.on ? 1 : 0 };
-    case "DHT22_READ": return { ...base, opcode: DeviceProfileOpcode.DHT22_READ, dst: instruction.dst, srcA: instruction.humidityDst, imm0: instruction.dataChannel, imm1: instruction.powerChannel, imm2: instruction.queued ? 1 : 0 };
-    case "RGB_PROGRAM": return { ...base, opcode: DeviceProfileOpcode.RGB_PROGRAM, imm0: instruction.offset, imm1: instruction.length, imm2: instruction.channels, imm3: instruction.inverted ? 1 : 0 };
+    case "EMIT_DECIMAL":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.EMIT_DECIMAL,
+        srcA: instruction.src,
+        dst: instruction.fieldId,
+        imm0: instruction.text ? 1 : 0,
+        imm1: instruction.divisor ?? 0,
+        imm2: instruction.humidity ? 1 : 0,
+      };
+    case "DHT22_POWER":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.DHT22_POWER,
+        imm0: instruction.dataChannel,
+        imm1: instruction.powerChannel,
+        imm2: instruction.on ? 1 : 0,
+      };
+    case "DHT22_READ":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.DHT22_READ,
+        dst: instruction.dst,
+        srcA: instruction.humidityDst,
+        imm0: instruction.dataChannel,
+        imm1: instruction.powerChannel,
+        imm2: instruction.queued ? 1 : 0,
+        imm3: instruction.model === "dht11" ? 1 : 0,
+      };
+    case "DS18B20_READ":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.DS18B20_READ,
+        dst: instruction.dst,
+        imm0: instruction.channel,
+        imm1: instruction.rawScratchpad ? 1 : 0,
+      };
+    case "DS18B20_SETUP":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.DS18B20_SETUP,
+        imm0: instruction.channel,
+        imm1: instruction.on ? 1 : 0,
+        imm2: instruction.powerChannel === undefined ? 0 : instruction.powerChannel + 1,
+      };
+    case "RGB_PROGRAM":
+      return {
+        ...base,
+        opcode: DeviceProfileOpcode.RGB_PROGRAM,
+        imm0: instruction.offset,
+        imm1: instruction.length,
+        imm2: instruction.channels,
+        imm3: instruction.inverted ? 1 : 0,
+      };
     case "STEPPER":
       return {
         ...base,
@@ -422,10 +472,54 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
         value: raw.imm0 !== 0,
         ...(raw.imm1 ? { channel: raw.imm1 } : {}),
       });
-    case DeviceProfileOpcode.EMIT_DECIMAL: return ok({ op: "EMIT_DECIMAL", src: raw.srcA, fieldId: raw.dst, text: raw.imm0 !== 0 });
-    case DeviceProfileOpcode.DHT22_POWER: return ok({ op: "DHT22_POWER", dataChannel: raw.imm0, powerChannel: raw.imm1, on: raw.imm2 !== 0 });
-    case DeviceProfileOpcode.DHT22_READ: return ok({ op: "DHT22_READ", dst: raw.dst, humidityDst: raw.srcA, dataChannel: raw.imm0, powerChannel: raw.imm1, ...(raw.imm2 ? { queued: true } : {}) });
-    case DeviceProfileOpcode.RGB_PROGRAM: return ok({ op: "RGB_PROGRAM", offset: raw.imm0, length: raw.imm1, channels: raw.imm2, inverted: raw.imm3 !== 0 });
+    case DeviceProfileOpcode.EMIT_DECIMAL:
+      return ok({
+        op: "EMIT_DECIMAL",
+        src: raw.srcA,
+        fieldId: raw.dst,
+        text: raw.imm0 !== 0,
+        ...(raw.imm1 ? { divisor: raw.imm1 } : {}),
+        ...(raw.imm2 ? { humidity: true } : {}),
+      });
+    case DeviceProfileOpcode.DHT22_POWER:
+      return ok({
+        op: "DHT22_POWER",
+        dataChannel: raw.imm0,
+        powerChannel: raw.imm1,
+        on: raw.imm2 !== 0,
+      });
+    case DeviceProfileOpcode.DS18B20_READ:
+      return ok({
+        op: "DS18B20_READ",
+        dst: raw.dst,
+        channel: raw.imm0,
+        ...(raw.imm1 ? { rawScratchpad: true } : {}),
+      });
+    case DeviceProfileOpcode.DS18B20_SETUP:
+      return ok({
+        op: "DS18B20_SETUP",
+        channel: raw.imm0,
+        on: !!raw.imm1,
+        ...(raw.imm2 ? { powerChannel: raw.imm2 - 1 } : {}),
+      });
+    case DeviceProfileOpcode.DHT22_READ:
+      return ok({
+        op: "DHT22_READ",
+        dst: raw.dst,
+        humidityDst: raw.srcA,
+        dataChannel: raw.imm0,
+        powerChannel: raw.imm1,
+        ...(raw.imm3 ? { model: "dht11" as const } : {}),
+        ...(raw.imm2 ? { queued: true } : {}),
+      });
+    case DeviceProfileOpcode.RGB_PROGRAM:
+      return ok({
+        op: "RGB_PROGRAM",
+        offset: raw.imm0,
+        length: raw.imm1,
+        channels: raw.imm2,
+        inverted: raw.imm3 !== 0,
+      });
     case DeviceProfileOpcode.STEPPER:
       return ok({
         op: "STEPPER",

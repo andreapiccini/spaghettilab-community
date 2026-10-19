@@ -74,10 +74,12 @@ export function ProcessingBlockPalette({
   onCreateRecipe,
   onAddViewer,
   onAddTrigger,
+  onAddSchedule,
 }: {
   readonly bindingId?: string;
   readonly onAddViewer?: () => void;
   readonly onAddTrigger?: () => void;
+  readonly onAddSchedule?: () => void;
   /** Opens the sensor-recipe wizard on the create form. */
   readonly onCreateRecipe?: () => void;
 }) {
@@ -149,8 +151,11 @@ export function ProcessingBlockPalette({
                   entry: driverEntry,
                   rowKey: module.id,
                   label: module.label,
-                  subtitle: recipe.deviceDraft?.rgbModule ? (locale === "it" ? "Comandi colore e stato del LED" : "Color commands and LED status") :
-                    locale === "it"
+                  subtitle: recipe.deviceDraft?.rgbModule
+                    ? locale === "it"
+                      ? "Comandi colore e stato del LED"
+                      : "Color commands and LED status"
+                    : locale === "it"
                       ? "Dispositivo · scegli azione, ingresso e uscita"
                       : "Sensor · choose action and pins in the block",
                   sensorRecipeId: recipe.id,
@@ -290,7 +295,17 @@ export function ProcessingBlockPalette({
                             circular={isCircular}
                             delay={index * 0 + entryIndex * motionTokens.stagger.list}
                             portsConfigured={portsConfigured}
-                            onClickRemind={() => row.entry.id === "appblocks.data_viewer" && onAddViewer ? onAddViewer() : row.entry.id === "appblocks.manual_trigger" && onAddTrigger ? onAddTrigger() : setDragReminder(true)}
+                            onClickRemind={() =>
+                              row.entry.id === "native.schedule" && onAddSchedule
+                                ? onAddSchedule()
+                                : row.entry.id === "appblocks.data_viewer" &&
+                                    onAddViewer
+                                  ? onAddViewer()
+                                  : row.entry.id === "appblocks.manual_trigger" &&
+                                      onAddTrigger
+                                    ? onAddTrigger()
+                                    : setDragReminder(true)
+                            }
                             onDragBegan={() => setDragReminder(false)}
                           />
                         );

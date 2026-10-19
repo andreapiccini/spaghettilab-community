@@ -1948,3 +1948,161 @@ ZTEST(device_profiles, test_dht22_complete_module_command_and_record)
     zassert_ok(spaghetti_module_manager_remove(id, 1));
     zassert_ok(spaghetti_device_profile_remove("dht-command", 1));
 }
+
+int spaghetti_port_dht11_read(const struct spaghetti_port *p, uint8_t d, uint8_t v, int16_t *t, uint16_t *h)
+{ return spaghetti_port_dht22_read(p,d,v,t,h); }
+static unsigned ds_starts, ds_finishes, ds_releases;
+static bool ds_last_parasite;
+int spaghetti_port_ds18b20_setup(const struct spaghetti_port *p, uint8_t c)
+{ if(p!=&fake_port||c>3)return -EINVAL;ds_releases++;return 0; }
+int spaghetti_port_ds18b20_start(const struct spaghetti_port *p, uint8_t c, bool parasite)
+{ if(p!=&fake_port||c>3)return -EINVAL;ds_last_parasite=parasite;ds_starts++;return 0; }
+int spaghetti_port_ds18b20_finish(const struct spaghetti_port *p, uint8_t c, int16_t *t)
+{ if(p!=&fake_port||c>3)return -EINVAL;ds_finishes++;*t=-162;return 0; }
+
+int spaghetti_port_ds18b20_finish_raw(const struct spaghetti_port *p, uint8_t c, uint8_t bytes[9])
+{ if(p!=&fake_port||c>3)return -EINVAL; const uint8_t frame[9]={0x50,0x05,0x4b,0x46,0x7f,0xff,0x0c,0x10,0x1c};memcpy(bytes,frame,9);ds_finishes++;return 0; }
+
+ZTEST(device_profiles, test_dht11_decodes_both_values_and_checksum)
+{
+ int16_t t; uint16_t h;
+ uint8_t frame[5]={53,0,24,4,81};
+ zassert_ok(spaghetti_dht11_decode_frame(frame,&t,&h));
+ zassert_equal(t,244); zassert_equal(h,530);
+ frame[4]^=1;
+ zassert_equal(spaghetti_dht11_decode_frame(frame,&t,&h),-EBADMSG);
+ frame[0]=101;frame[4]=frame[0]+frame[1]+frame[2]+frame[3];
+ zassert_equal(spaghetti_dht11_decode_frame(frame,&t,&h),-ERANGE);
+}
+ZTEST(device_profiles, test_ds18b20_conversion_is_queued_and_stop_releases_data)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"ds-parasite",SPAGHETTI_PORT_TRANSPORT_GPIO,
+   SPAGHETTI_PORT_CAP_DIGITAL_INPUT|SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT);
+ profile.sample_fields[0].type=SPAGHETTI_VALUE_FLOAT;
+ struct spaghetti_dht22_state state={0};
+ struct spaghetti_device_profile_binding binding={.dht22=&state};
+ struct spaghetti_device_profile_op setup=make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP,0,0,0,0,1,0,0);
+ struct spaghetti_device_profile_op read[]={
+   make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ,0,0,0,0,0,0,0),
+   make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL,1,0,0,0,16,0,0),
+   make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0)};
+ struct spaghetti_record_payload result;
+ ds_starts=ds_finishes=ds_releases=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&setup,1,&fake_port,&binding,NULL));
+ zassert_equal(spaghetti_device_profile_exec(&profile,read,3,&fake_port,&binding,&result),-EAGAIN);
+ zassert_equal(ds_starts,1);zassert_equal(ds_finishes,0);zassert_true(state.pending);
+ zassert_equal(spaghetti_device_profile_exec(&profile,read,3,&fake_port,&binding,&result),-EAGAIN);
+ zassert_equal(ds_starts,1);
+ state.ready_at=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,read,3,&fake_port,&binding,&result));
+ zassert_within(result.values.fields[0].data.decimal,-10.125,0.0001);
+ zassert_equal(ds_finishes,1);zassert_false(state.pending);
+ zassert_equal(spaghetti_device_profile_exec(&profile,read,3,&fake_port,&binding,&result),-EAGAIN);
+ setup.imm1=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&setup,1,&fake_port,&binding,NULL));
+ zassert_false(state.pending);zassert_false(state.powered);zassert_equal(ds_releases,2);
+ zassert_equal(spaghetti_device_profile_exec(&profile,read,3,&fake_port,&binding,&result),-EINVAL);
+ uint8_t scratch[9]={0x50,0x05,0x4b,0x46,0x7f,0xff,0x0c,0x10,0x1c};
+ int16_t temperature;
+ zassert_ok(spaghetti_ds18b20_decode_frame(scratch,&temperature));zassert_equal(temperature,85*16);
+ scratch[0]^=1;zassert_equal(spaghetti_ds18b20_decode_frame(scratch,&temperature),-EBADMSG);
+}
+ZTEST(device_profiles, test_ds18b20_module_monitors_conversion_without_restarting_it)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"ds-module",SPAGHETTI_PORT_TRANSPORT_GPIO,
+   SPAGHETTI_PORT_CAP_DIGITAL_INPUT|SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT);
+ profile.sample_fields[0].type=SPAGHETTI_VALUE_FLOAT;
+ profile.init_count=profile.safe_stop_count=1;
+ profile.init_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP,0,0,0,0,1,0,0);
+ profile.safe_stop_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP,0,0,0,0,0,0,0);
+ profile.sample_count=3;
+ profile.sample_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ,0,0,0,0,0,0,0);
+ profile.sample_ops[1]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_DECIMAL,1,0,0,0,16,0,0);
+ profile.sample_ops[2]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0);
+ profile.action_count=1;profile.actions[0]=(struct spaghetti_device_profile_action){1,0,3};
+ zassert_ok(spaghetti_device_profile_install_decoded(&profile));
+ spaghetti_module_id_t id;
+ zassert_ok(configure_module(84U,"ds-module",0,0xff,0xff,&id));
+ struct spaghetti_record record;
+ unsigned before=ds_starts;
+ zassert_equal(spaghetti_module_manager_read(id,&record),-EAGAIN);
+ zassert_equal(ds_starts,before);
+ struct spaghetti_record_payload out;
+ struct spaghetti_module_command command={.command_id=1,.result=&out};
+ zassert_equal(spaghetti_module_manager_command(id,&command),-EAGAIN);
+ zassert_equal(ds_starts,before+1);
+ k_sleep(K_MSEC(751));
+ zassert_ok(spaghetti_module_manager_read(id,&record));
+ zassert_equal(record.payload.action_id,1);
+ zassert_within(record.payload.values.fields[0].data.decimal,-10.125,0.0001);
+ zassert_equal(spaghetti_module_manager_read(id,&record),-EAGAIN);
+ zassert_equal(ds_starts,before+1);
+ zassert_ok(spaghetti_module_manager_remove(id,1));
+ zassert_ok(spaghetti_device_profile_remove("ds-module",1));
+}
+
+ZTEST(device_profiles, test_ds18b20_gpio_supply_warmup_and_stop)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"ds-powered",SPAGHETTI_PORT_TRANSPORT_GPIO,
+   SPAGHETTI_PORT_CAP_DIGITAL_INPUT|SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT);
+ struct spaghetti_dht22_state state={0};
+ struct spaghetti_device_profile_binding binding={.dht22=&state};
+ struct spaghetti_device_profile_op setup=make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP,0,0,0,0,1,2,0);
+ struct spaghetti_device_profile_op read=make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ,0,0,0,0,0,0,0);
+ struct spaghetti_record_payload out;
+ ds_starts=ds_finishes=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&setup,1,&fake_port,&binding,NULL));
+ zassert_true(dht22_powered);zassert_equal(state.power_channel,1);
+ zassert_equal(spaghetti_device_profile_exec(&profile,&read,1,&fake_port,&binding,&out),-EAGAIN);
+ zassert_equal(ds_starts,0);zassert_true(state.pending);
+ state.ready_at=0;
+ zassert_equal(spaghetti_device_profile_exec(&profile,&read,1,&fake_port,&binding,&out),-EAGAIN);
+ zassert_equal(ds_starts,1);zassert_false(ds_last_parasite);zassert_true(dht22_powered);
+ state.ready_at=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&read,1,&fake_port,&binding,&out));
+ zassert_true(dht22_powered);zassert_equal(ds_finishes,1);
+ setup.imm1=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&setup,1,&fake_port,&binding,NULL));
+ zassert_false(dht22_powered);zassert_false(state.powered);zassert_false(state.pending);
+}
+
+ZTEST(device_profiles, test_ds18b20_diagnostic_returns_raw_scratchpad)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"ds-raw",SPAGHETTI_PORT_TRANSPORT_GPIO,SPAGHETTI_PORT_CAP_DIGITAL_INPUT|SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT);
+ struct spaghetti_dht22_state state={.powered=true,.data_channel=0,.power_channel=UINT8_MAX};
+ struct spaghetti_device_profile_binding binding={.dht22=&state};
+ struct spaghetti_device_profile_op ops[]={
+  make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ,0,0,0,0,1,0,0),
+  make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_FIELD,1,0,0,8,0,0,0),
+  make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0)};
+ struct spaghetti_record_payload result;
+ zassert_equal(spaghetti_device_profile_exec(&profile,ops,3,&fake_port,&binding,&result),-EAGAIN);
+ state.ready_at=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,ops,3,&fake_port,&binding,&result));
+ zassert_equal(result.values.fields[0].data.unsigned_integer,UINT64_C(0x100cff7f464b0550));
+ zassert_false(state.pending);
+ ops[0].imm1=2;
+ profile.sample_count=3;memcpy(profile.sample_ops,ops,sizeof(ops));
+ zassert_not_equal(spaghetti_device_profile_validate(&profile,NULL),0);
+}
+
+ZTEST(device_profiles, test_ds18b20_accepts_crc_valid_vendor_reserved_bytes)
+{
+ int16_t temperature;
+ uint8_t frame[9]={0x74,0x01,0x00,0x00,0x7f,0xe1,0x3c,0xaa,0x72};
+ zassert_ok(spaghetti_ds18b20_decode_frame(frame,&temperature));
+ zassert_equal(temperature,372); /* 23.25 C; captured from the connected sensor. */
+ frame[0]=0x73;frame[8]=0xa2;
+ zassert_ok(spaghetti_ds18b20_decode_frame(frame,&temperature));
+ zassert_equal(temperature,371);
+ frame[5]^=1;
+ zassert_equal(spaghetti_ds18b20_decode_frame(frame,&temperature),-EBADMSG);
+ memset(frame,0,sizeof(frame));
+ zassert_equal(spaghetti_ds18b20_decode_frame(frame,&temperature),-EBADMSG);
+ memset(frame,0xff,sizeof(frame));
+ zassert_equal(spaghetti_ds18b20_decode_frame(frame,&temperature),-EBADMSG);
+}

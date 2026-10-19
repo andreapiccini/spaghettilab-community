@@ -1,3 +1,5 @@
+import type { EdgeActivityRoute } from "./edge-activity.js";
+import { scheduleForTrigger } from "./scheduled-triggers.js";
 import { MANUAL_TRIGGER_TYPE, manualTriggerProfile } from "./flow-trigger.js";
 import { rgbInputCommand } from "./rgb-runtime.js";
 import {
@@ -113,25 +115,49 @@ function squareWavePulseSteps(
 type Node = GraphNode<"device-processing", string, DeviceProcessingNodeData>;
 type Edge = CompileConfigInput["processingGraph"]["edges"][number];
 export type DriverDeploymentPlan = {
+  activityRoutes?: readonly EdgeActivityRoute[];
   input: CompileConfigInput;
   profiles: readonly DeviceProfileDraft[];
   options: CompileConfigOptions;
-  observations?: readonly { viewerId: string; key: number; field: number; action?: number; schemaId?: string }[];
+  observations?: readonly {
+    viewerId: string;
+    key: number;
+    field: number;
+    action?: number;
+    schemaId?: string;
+  }[];
 };
 export function prepareDriverDeployment(
   project: ProjectV1,
   bindingId: string,
   input: CompileConfigInput,
 ): DriverDeploymentPlan {
-  const viewerIds = new Set((input.processingGraph.nodes as readonly Node[]).filter(node => node.data.kind === "block" && node.data.blockTypeId === "ui.data_viewer").map(node => node.id));
-  const viewerEdges = input.processingGraph.edges.filter(edge => viewerIds.has(edge.target));
+  const viewerIds = new Set(
+    (input.processingGraph.nodes as readonly Node[])
+      .filter(
+        (node) =>
+          node.data.kind === "block" && node.data.blockTypeId === "ui.data_viewer",
+      )
+      .map((node) => node.id),
+  );
+  const viewerEdges = input.processingGraph.edges.filter((edge) =>
+    viewerIds.has(edge.target),
+  );
   for (const id of viewerIds)
-    if (viewerEdges.filter(edge => edge.target === id).length > 1)
-      throw new Error("Visualizza dati: collega una sola uscita a ciascun visualizzatore.");
-  input = { ...input, processingGraph: { ...input.processingGraph,
-    nodes: input.processingGraph.nodes.filter(node => !viewerIds.has(node.id)),
-    edges: input.processingGraph.edges.filter(edge => !viewerIds.has(edge.target) && !viewerIds.has(edge.source)),
-  }};
+    if (viewerEdges.filter((edge) => edge.target === id).length > 1)
+      throw new Error(
+        "Visualizza dati: collega una sola uscita a ciascun visualizzatore.",
+      );
+  input = {
+    ...input,
+    processingGraph: {
+      ...input.processingGraph,
+      nodes: input.processingGraph.nodes.filter((node) => !viewerIds.has(node.id)),
+      edges: input.processingGraph.edges.filter(
+        (edge) => !viewerIds.has(edge.target) && !viewerIds.has(edge.source),
+      ),
+    },
+  };
   input = {
     ...input,
     processingGraph: {
@@ -174,7 +200,10 @@ export function prepareDriverDeployment(
     },
   };
   const originalNodes = input.processingGraph.nodes as readonly Node[];
-  const manualTriggers = originalNodes.filter(node => node.data.kind === "block" && node.data.blockTypeId === MANUAL_TRIGGER_TYPE);
+  const manualTriggers = originalNodes.filter(
+    (node) =>
+      node.data.kind === "block" && node.data.blockTypeId === MANUAL_TRIGGER_TYPE,
+  );
   const sequences = originalNodes.filter(
     (node) => node.data.kind === "block" && node.data.blockTypeId === SEQUENCE_TYPE,
   );
@@ -205,7 +234,12 @@ export function prepareDriverDeployment(
       node.data.kind === "block" &&
       node.data.blockTypeId === BACKBONE_SENSOR_BLOCK_TYPE_ID,
   );
-  if (!sensorNodes.length && !sequences.length && !viewerEdges.length && !manualTriggers.length)
+  if (
+    !sensorNodes.length &&
+    !sequences.length &&
+    !viewerEdges.length &&
+    !manualTriggers.length
+  )
     return { input, profiles: [], options: {} };
   const stored = modulesForBinding(
     parseBackboneSensorModules(
@@ -249,9 +283,33 @@ export function prepareDriverDeployment(
     }
     return id;
   };
+  const scheduledTriggers = new Map<string, string>();
+  for (const node of manualTriggers) {
+    const owner = scheduleForTrigger(input.processingGraph, node.id);
+    if (owner) scheduledTriggers.set(node.id, owner.id);
+  }
   const edges = originalEdges
-    .filter((edge) => !aliases.has(edge.target))
-    .map((edge) => ({ ...edge, source: resolveAlias(edge.source) }));
+    .filter((edge) => !aliases.has(edge.target) && !scheduledTriggers.has(edge.target))
+    .flatMap((edge) => {
+      const resolved = { ...edge, source: resolveAlias(edge.source) };
+      const schedule = scheduledTriggers.get(edge.source);
+      // Keep the independent manual command path for one-shot mode. A clock
+      // record fires the same action in continuous mode; no UI block is polled.
+      return schedule
+        ? [resolved, { ...edge, id: `${edge.id}:scheduled`, source: schedule }]
+        : [resolved];
+    });
+  // A legacy direct clock wire and a contained trigger can describe the same
+  // activation while a user rearranges the canvas. Emit that activation once.
+  const scheduledSources = new Set(scheduledTriggers.values());
+  const scheduledRoutes = new Set<string>();
+  for (let i = edges.length - 1; i >= 0; i--) {
+    const edge = edges[i]!;
+    if (!scheduledSources.has(edge.source)) continue;
+    const route = `${edge.source}:${edge.target}:${edge.targetHandle ?? ""}`;
+    if (scheduledRoutes.has(route)) edges.splice(i, 1);
+    else scheduledRoutes.add(route);
+  }
   const graphIds = new Set(nodes.map((node) => node.id));
   const adjacency = new Map<string, string[]>();
   for (const edge of originalEdges) {
@@ -314,7 +372,13 @@ export function prepareDriverDeployment(
             channel! < 0 ||
             channel! > 3 ||
             used.has(channel!) ||
-            !(draft.rgbModule ? [12] : draft.dht22Module && signal.id === "DATA" ? [1] : [2, 3]).includes((config.modes[channel!] ?? 0) & 15)
+            !(
+              draft.rgbModule
+                ? [12]
+                : draft.dht22Module && signal.id === "DATA"
+                  ? [1]
+                  : [2, 3]
+            ).includes((config.modes[channel!] ?? 0) & 15)
           )
             throw new Error(
               `${draft.name}: i segnali richiedono pin distinti, configurati con la funzione corretta.`,
@@ -398,15 +462,38 @@ export function prepareDriverDeployment(
       const compiled = compileRuntimeDriver(draft, new Map(), gpioChannels);
       profiles.push(compiled.profile);
       const moduleId = `driver:${groupId}`;
-      module(moduleId, { kind: "module", driverTypeId: "declarative-device", profileId: compiled.profile.profileId, portId: driverPortId, bayId: 255, railId: 255, electricalMode: "input-output", properties: { "1": compiled.profile.profileId, "2": 1n } });
-      generated.set(`driver-rgb:${groupId}`, { layer: "device-processing", id: `driver-rgb:${groupId}`, data: { kind: "schedule", moduleNodeId: moduleId, periodMs: 100, enabled: true } });
+      module(moduleId, {
+        kind: "module",
+        driverTypeId: "declarative-device",
+        profileId: compiled.profile.profileId,
+        portId: driverPortId,
+        bayId: 255,
+        railId: 255,
+        electricalMode: "input-output",
+        properties: { "1": compiled.profile.profileId, "2": 1n },
+      });
+      generated.set(`driver-rgb:${groupId}`, {
+        layer: "device-processing",
+        id: `driver-rgb:${groupId}`,
+        data: {
+          kind: "schedule",
+          moduleNodeId: moduleId,
+          periodMs: 100,
+          enabled: true,
+        },
+      });
       for (const node of instances) {
-        const actionId = String(node.data.properties[SENSOR_ACTION_ID_PROP] ?? draft.commands[0]!.id);
+        const actionId = String(
+          node.data.properties[SENSOR_ACTION_ID_PROP] ?? draft.commands[0]!.id,
+        );
         const action = compiled.actions.get(actionId);
         if (!action) throw new Error("L’azione RGB non esiste più.");
         runtime.set(node.id, { moduleId, action });
         rgbTargets.set(node.id, draft);
-        generated.set(node.id, { ...node, data: { kind: "event-source", moduleNodeId: moduleId } });
+        generated.set(node.id, {
+          ...node,
+          data: { kind: "event-source", moduleNodeId: moduleId },
+        });
       }
       continue;
     }
@@ -508,7 +595,12 @@ export function prepareDriverDeployment(
             `Ingresso «${edge.targetHandle}» non disponibile nel blocco «${node.id}».`,
           );
       for (const id of inIds)
-        if (incoming.filter((edge) => edge.targetHandle === id).length > 1)
+        if (
+          incoming.filter((edge) => edge.targetHandle === id).length > 1 &&
+          !interfaces.some(
+            (input) => input.fromChannelId === id && input.inputMode === "trigger",
+          )
+        )
           throw new Error(`Ingresso «${id}»: collega una sola sorgente.`);
       const sharedWiredInputs = instances.flatMap((instance) =>
         edges
@@ -617,9 +709,16 @@ export function prepareDriverDeployment(
     }
     if (draft.dht22Module) {
       const id = `driver-dht22:${groupId}`;
-      generated.set(id, { layer: "device-processing", id, data: {
-        kind: "schedule", moduleNodeId: moduleId, periodMs: 100, enabled: true,
-      } });
+      generated.set(id, {
+        layer: "device-processing",
+        id,
+        data: {
+          kind: "schedule",
+          moduleNodeId: moduleId,
+          periodMs: 100,
+          enabled: true,
+        },
+      });
     }
     const address = Number.parseInt(
       draft.binding.i2c?.address.replace(/^0x/i, "") ?? "",
@@ -807,12 +906,23 @@ export function prepareDriverDeployment(
     const profile = manualTriggerProfile(node.id);
     profiles.push(profile);
     const id = `driver-manual:${node.id}`;
-    module(id, { kind: "module", driverTypeId: "declarative-device", profileId: profile.profileId,
-      portId, bayId: 255, railId: 255, electricalMode: "input-only",
+    module(id, {
+      kind: "module",
+      driverTypeId: "declarative-device",
+      profileId: profile.profileId,
+      portId,
+      bayId: 255,
+      railId: 255,
+      electricalMode: "input-only",
       properties: { "1": profile.profileId, "2": 1n },
     });
-    generated.set(node.id, { ...node, data: { kind: "event-source", moduleNodeId: id } });
-    generated.set(`${id}:armed`, { layer: "device-processing", id: `${id}:armed`,
+    generated.set(node.id, {
+      ...node,
+      data: { kind: "event-source", moduleNodeId: id },
+    });
+    generated.set(`${id}:armed`, {
+      layer: "device-processing",
+      id: `${id}:armed`,
       data: { kind: "schedule", moduleNodeId: id, periodMs: 1000, enabled: false },
     });
   }
@@ -845,10 +955,23 @@ export function prepareDriverDeployment(
   for (let index = physical.length - 1; index >= 0; index--) {
     const node = physical[index]!;
     const data = node.data as ModuleNodeData;
-    if (!node.id.startsWith("physical-pin:") || data.driverTypeId !== "digital_input_trigger") continue;
+    if (
+      !node.id.startsWith("physical-pin:") ||
+      data.driverTypeId !== "digital_input_trigger"
+    )
+      continue;
     if (!gpioOwners.has(`${data.portId}:${Number(data.properties["1"])}`)) continue;
-    if (nodes.some(item => "moduleNodeId" in item.data && item.data.moduleNodeId === node.id))
-      throw new Error("Un pin del dispositivo è usato anche da un ingresso GPIO nel canvas. Rimuovi l’ingresso duplicato o scegli un altro pin.");
+    if (
+      nodes.some(
+        (item) =>
+          item.data.kind !== "schedule" &&
+          "moduleNodeId" in item.data &&
+          item.data.moduleNodeId === node.id,
+      )
+    )
+      throw new Error(
+        "Un pin del dispositivo è usato anche da un ingresso GPIO nel canvas. Rimuovi l’ingresso duplicato o scegli un altro pin.",
+      );
     physical.splice(index, 1);
   }
   const ids = physical
@@ -998,7 +1121,22 @@ export function prepareDriverDeployment(
   const byId = new Map(processing.map((node) => [node.id, node]));
   const compiledEdges: Edge[] = [];
   let nextDerivedKey = 0x70000000;
+  const activitySources = new Map<
+    string,
+    { key: number; field: number; action?: number }
+  >();
   function sourceFor(edge: Edge): { key: number; field: number; action?: number } {
+    const cached = activitySources.get(edge.id);
+    if (cached) return cached;
+    const source = resolveActivitySource(edge);
+    activitySources.set(edge.id, source);
+    return source;
+  }
+  function resolveActivitySource(edge: Edge): {
+    key: number;
+    field: number;
+    action?: number;
+  } {
     const node = byId.get(edge.source);
     if (!node) throw new Error(`Sorgente del filo «${edge.id}» non disponibile.`);
     const sequence = sequences.find((item) => item.id === node.id);
@@ -1036,7 +1174,7 @@ export function prepareDriverDeployment(
         key,
         field:
           node.data.kind === "schedule" ||
-          manualTriggers.some(item => item.id === node.id) ||
+          manualTriggers.some((item) => item.id === node.id) ||
           moduleData?.driverTypeId === "digital_input_trigger"
             ? 1
             : Number(edge.sourceHandle ?? 0),
@@ -1091,22 +1229,66 @@ export function prepareDriverDeployment(
     const source = sourceFor(edge);
     const rgb = rgbTargets.get(edge.target);
     if (rgb) {
-      if (edges.filter((item) => item.target === edge.target && item.targetHandle === edge.targetHandle).length > 1) throw new Error("Collega una sola sorgente a ciascun ingresso RGB.");
       const input = rgbInputCommand(rgb, edge.targetHandle ?? "");
-      processing.push({ layer: "device-processing", id: `rgb-input:${edge.id}`, data: { kind: "rule", ruleTypeId: "device-action", properties: { "1": BigInt(source.key), "3": BigInt(keyOf.get(target.moduleId)!), "4": BigInt(input.commandId), "5": BigInt(source.field), ...(source.action ? { "2": BigInt(source.action) } : {}), ...(input.argument ? { "6": BigInt(input.argument) } : {}), "8": BigInt(input.mode) } } });
+      if (
+        input.mode !== 1 &&
+        edges.filter(
+          (item) =>
+            item.target === edge.target && item.targetHandle === edge.targetHandle,
+        ).length > 1
+      )
+        throw new Error("Collega una sola sorgente a ciascun ingresso RGB.");
+      processing.push({
+        layer: "device-processing",
+        id: `rgb-input:${edge.id}`,
+        data: {
+          kind: "rule",
+          ruleTypeId: "device-action",
+          properties: {
+            "1": BigInt(source.key),
+            "3": BigInt(keyOf.get(target.moduleId)!),
+            "4": BigInt(input.commandId),
+            "5": BigInt(source.field),
+            ...(source.action ? { "2": BigInt(source.action) } : {}),
+            ...(input.argument ? { "6": BigInt(input.argument) } : {}),
+            "8": BigInt(
+              input.mode === 1 && originalSource?.data.kind === "schedule"
+                ? 0
+                : input.mode,
+            ),
+          },
+        },
+      });
       continue;
     }
-    const targetSensorNode = sensorNodes.find(item => item.id === edge.target);
-    const targetSensor = targetSensorNode && stored.find(item => item.id === targetSensorNode.data.properties[SENSOR_MODULE_ID_PROP]);
-    if (targetSensor?.recipe.deviceDraft?.dht22Module && ["read-trigger", "execute"].includes(edge.targetHandle ?? "")) {
-      if (!source.field) throw new Error("DHT22: collega al trigger un segnale digitale o booleano.");
-      processing.push({ layer: "device-processing", id: `dht22-trigger:${edge.id}`, data: {
-        kind: "rule", ruleTypeId: "device-action", properties: {
-          "1": BigInt(source.key), "3": BigInt(keyOf.get(target.moduleId)!),
-          "4": BigInt(target.action.commandId), "5": BigInt(source.field), "8": 1n,
-          ...(source.action ? { "2": BigInt(source.action) } : {}),
+    const targetSensorNode = sensorNodes.find((item) => item.id === edge.target);
+    const targetSensor =
+      targetSensorNode &&
+      stored.find(
+        (item) => item.id === targetSensorNode.data.properties[SENSOR_MODULE_ID_PROP],
+      );
+    if (
+      targetSensor?.recipe.deviceDraft?.dht22Module &&
+      ["read-trigger", "execute"].includes(edge.targetHandle ?? "")
+    ) {
+      if (!source.field)
+        throw new Error("DHT22: collega al trigger un segnale digitale o booleano.");
+      processing.push({
+        layer: "device-processing",
+        id: `dht22-trigger:${edge.id}`,
+        data: {
+          kind: "rule",
+          ruleTypeId: "device-action",
+          properties: {
+            "1": BigInt(source.key),
+            "3": BigInt(keyOf.get(target.moduleId)!),
+            "4": BigInt(target.action.commandId),
+            "5": BigInt(source.field),
+            "8": originalSource?.data.kind === "schedule" ? 0n : 1n,
+            ...(source.action ? { "2": BigInt(source.action) } : {}),
+          },
         },
-      } });
+      });
       continue;
     }
     const execute =
@@ -1141,7 +1323,8 @@ export function prepareDriverDeployment(
             : {}),
           "8": BigInt(
             execute
-              ? sourceNode.data.kind === "block" || manualTriggers.some(node => node.id === edge.source)
+              ? sourceNode.data.kind === "block" ||
+                manualTriggers.some((node) => node.id === edge.source)
                 ? 1
                 : 0
               : explicit ||
@@ -1157,13 +1340,66 @@ export function prepareDriverDeployment(
       },
     });
   }
-  const observations = [...viewerEdges].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0).map(edge => {
-    const source = sourceFor(edge);
-    const moduleId = [...keyOf].find(([, key]) => key === source.key)?.[0];
-    const moduleData = physical.find(node => node.id === moduleId)?.data as ModuleNodeData | undefined;
-    const profile = profiles.find(item => item.profileId === moduleData?.profileId);
-    return { viewerId: edge.target, ...source, schemaId: profile?.sampleSchemaId ?? (moduleId ? undefined : `flow.${stableDriverHash(edge.id)}`) };
-  });
+  const observations = [...viewerEdges]
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+    .map((edge) => {
+      const source = sourceFor(edge);
+      const moduleId = [...keyOf].find(([, key]) => key === source.key)?.[0];
+      const moduleData = physical.find((node) => node.id === moduleId)?.data as
+        ModuleNodeData | undefined;
+      const profile = profiles.find((item) => item.profileId === moduleData?.profileId);
+      return {
+        viewerId: edge.target,
+        ...source,
+        schemaId:
+          profile?.sampleSchemaId ??
+          (moduleId ? undefined : `flow.${stableDriverHash(edge.id)}`),
+      };
+    });
+  // Observe already-published source records. This adds no polling, profiles
+  // or instrumentation blocks merely to animate the canvas.
+  for (const edge of edges) {
+    if (activitySources.has(edge.id)) continue;
+    const node = byId.get(edge.source);
+    if (
+      node &&
+      (runtime.has(node.id) ||
+        sequences.some((item) => item.id === node.id) ||
+        node.data.kind === "schedule" ||
+        node.data.kind === "event-source")
+    ) {
+      try {
+        sourceFor(edge);
+      } catch {
+        /* Unobserved legacy output: no animation. */
+      }
+    }
+  }
+  const activityRoutes: EdgeActivityRoute[] = [...edges, ...viewerEdges].flatMap(
+    (edge) => {
+      const source = activitySources.get(edge.id);
+      if (!source) return [];
+      const moduleId = [...keyOf].find(([, key]) => key === source.key)?.[0];
+      const moduleData = physical.find((node) => node.id === moduleId)?.data as
+        ModuleNodeData | undefined;
+      const profile = profiles.find((item) => item.profileId === moduleData?.profileId);
+      const original = originalNodes.find((node) => node.id === edge.source);
+      return [
+        {
+          ...source,
+          edgeId: edge.id.replace(/:scheduled$/, ""),
+          schemaId:
+            profile?.sampleSchemaId ??
+            (moduleId ? undefined : `flow.${stableDriverHash(edge.id)}`),
+          kind:
+            original?.data.kind === "schedule" ||
+            manualTriggers.some((node) => node.id === edge.source)
+              ? ("trigger" as const)
+              : ("data" as const),
+        },
+      ];
+    },
+  );
   const outputField = ({
     node,
     handle,
@@ -1182,6 +1418,7 @@ export function prepareDriverDeployment(
   return {
     profiles,
     observations,
+    activityRoutes,
     input: {
       ...input,
       physicalGraph: { ...input.physicalGraph, nodes: physical },

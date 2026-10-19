@@ -173,10 +173,12 @@ export function ModuleArtwork({
             <ellipse cx="49" cy="42" rx="14" ry="9" fill={active ? "#c4d8d1" : face} />
             <ellipse cx="49" cy="42" rx="10" ry="6" fill="#f8fafc" />
           </>
+        ) : !glyph && kind === "sensor" && name.toUpperCase().includes("DS18B20") ? (
+          <><path d="M29 39c0-21 39-24 39-3v24c0 14-39 18-39 3Z" fill="#647080"/><path d="M29 39c0-14 39-17 39-3v24c0 14-39 18-39 3Z" fill={face}/><path d="m35 73-1 25m15-23v25m13-27 2 23" fill="none"/><path d="m38 51 19-3m-19 9 19-3" stroke="#8395aa"/></>
         ) : !glyph && kind === "sensor" ? (
           <>
             <path d="m28 29 26-14 15 9-26 14Z" fill="#f7f9fc" />
-            <path d="m43 38 26-14v49L43 88Z" fill="#d1dce8" />
+            <path d="m43 38 26-14v49L43 88Z" fill={name.toUpperCase().includes("DHT11") ? "#a9c6e6" : "#d1dce8"} />
             <path d="m28 29 15 9v50l-15-9Z" fill={face} />
             {[0, 1, 2, 3, 4, 5].map((n) => (
               <path

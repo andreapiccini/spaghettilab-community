@@ -874,6 +874,39 @@ static int exec_with_message(uint8_t *message, const struct spaghetti_device_pro
 			spaghetti_device_profile_cancel_pulses(binding->pulse_owner);
 			err = spaghetti_port_digital_output_set(port, (uint8_t)op->imm1, op->imm0 != 0U);
 			break;
+    case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP: {
+      struct spaghetti_dht22_state *s=binding->dht22;
+      if(!s || op->imm2>4 || (op->imm2 && op->imm2-1==op->imm0))return -EINVAL;
+      if(op->imm2) {
+        err=spaghetti_port_dht22_power(port,op->imm0,op->imm2-1,op->imm1!=0);
+        if(err)return err;
+      }
+      err=spaghetti_port_ds18b20_setup(port,op->imm0);
+      if(!err) {
+        memset(s,0,sizeof(*s));s->powered=op->imm1!=0;s->data_channel=op->imm0;
+        s->power_channel=op->imm2?op->imm2-1:UINT8_MAX;
+        s->ready_at=op->imm2 && s->powered?k_uptime_get()+1000:0;
+      }
+      break;
+    }
+    case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ: {
+      struct spaghetti_dht22_state *s=binding->dht22;
+      if(!s || !s->powered || s->data_channel!=op->imm0 || temp_get(temps,op->dst,&dst))return -EINVAL;
+      if(!s->pending) { s->pending=true;s->attempted=false; }
+      if(k_uptime_get()<s->ready_at)return -EAGAIN;
+      if(!s->attempted) {
+        err=spaghetti_port_ds18b20_start(port,op->imm0,s->power_channel==UINT8_MAX);
+        if(err) { s->pending=false;return err; }
+        s->attempted=true;s->ready_at=k_uptime_get()+750;return -EAGAIN;
+      }
+      err = op->imm1 ? spaghetti_port_ds18b20_finish_raw(port, op->imm0, dst->bytes)
+                      : spaghetti_port_ds18b20_finish(port, op->imm0, &s->temperature);
+      s->pending=false;s->attempted=false;s->ready_at=0;s->valid=err==0;
+      if(err)return err;
+      if (op->imm1) dst->size = 9;
+      else { sys_put_le16((uint16_t)s->temperature,dst->bytes);dst->size=2; }
+      break;
+    }
     case SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER: {
       struct spaghetti_dht22_state *state = binding->dht22;
       if (!state || op->imm0 > 3 || op->imm1 > 3 || op->imm0 == op->imm1 || op->imm2 > 1) return -EINVAL;
@@ -899,7 +932,7 @@ static int exec_with_message(uint8_t *message, const struct spaghetti_device_pro
         if (!state->valid) return -EAGAIN;
       } else {
         state->sampled_at = now; state->attempted = true;
-        err = spaghetti_port_dht22_read(port, op->imm0, op->imm1, &state->temperature, &state->humidity);
+        err = op->imm3 ? spaghetti_port_dht11_read(port, op->imm0, op->imm1, &state->temperature, &state->humidity) : spaghetti_port_dht22_read(port, op->imm0, op->imm1, &state->temperature, &state->humidity);
         state->pending = false;
         state->valid = err == 0;
         if (err) break;
@@ -1191,13 +1224,14 @@ static int exec_with_message(uint8_t *message, const struct spaghetti_device_pro
             for (size_t f = 0; f < profile->sample_field_count; f++)
                 if (profile->sample_fields[f].field_id == op->dst) field = &profile->sample_fields[f];
             if (!field || field->type != (op->imm0 ? SPAGHETTI_VALUE_TEXT : SPAGHETTI_VALUE_FLOAT)) return -EINVAL;
-            int16_t raw = (int16_t)sys_get_le16(src_a->bytes);
+            int32_t raw = op->imm2 ? sys_get_le16(src_a->bytes) : (int16_t)sys_get_le16(src_a->bytes);
+            unsigned divisor=op->imm1?op->imm1:10;
             struct spaghetti_value *value = &out_record->values.fields[out_record->values.field_count++];
             memset(value, 0, sizeof(*value)); value->field_id = op->dst; value->type = field->type;
-            if (!op->imm0) value->data.decimal = (double)raw / 10.0;
+            if (!op->imm0) value->data.decimal = (double)raw / divisor;
             else {
                 int magnitude = raw < 0 ? -(int)raw : raw;
-                int length = snprintf(value->data.text.text, sizeof(value->data.text.text), "%s%d.%d °C", raw < 0 ? "-" : "", magnitude / 10, magnitude % 10);
+                int length = snprintf(value->data.text.text, sizeof(value->data.text.text), "%s%d.%0*u %s", raw < 0 ? "-" : "", magnitude / divisor, divisor==16?4:1, (unsigned)(magnitude % divisor)*(divisor==16?10000:10)/divisor, op->imm2?"%RH":"°C");
                 if (length < 0 || length >= sizeof(value->data.text.text)) return -EMSGSIZE;
                 value->data.text.size = length;
             }

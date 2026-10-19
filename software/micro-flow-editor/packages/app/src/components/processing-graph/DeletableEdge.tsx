@@ -1,6 +1,14 @@
-import { BaseEdge, EdgeLabelRenderer, Position, useNodes, useReactFlow, type EdgeProps } from "@xyflow/react";
+import "./edge-signals.css";
+import {
+  BaseEdge,
+  EdgeLabelRenderer,
+  Position,
+  useNodes,
+  useReactFlow,
+  type EdgeProps,
+} from "@xyflow/react";
 import { Unlink } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   leadFromHandle,
   obstacleRectsForEdge,
@@ -28,7 +36,12 @@ function handleSide(position: Position): "left" | "right" | "top" | "bottom" {
  * only at 90° joins — never a grid staircase or a free diagonal.
  */
 function edgeMarkedInvalid(data: unknown): boolean {
-  return !!data && typeof data === "object" && "invalid" in data && (data as { invalid?: unknown }).invalid === true;
+  return (
+    !!data &&
+    typeof data === "object" &&
+    "invalid" in data &&
+    (data as { invalid?: unknown }).invalid === true
+  );
 }
 
 export function DeletableEdge({
@@ -49,6 +62,15 @@ export function DeletableEdge({
   const { deleteElements } = useReactFlow();
   const nodes = useNodes();
   const invalid = edgeMarkedInvalid(data);
+  const activity = data as
+    | {
+        signalPulse?: { token: number; kind: "trigger" | "data" };
+        previewSignal?: boolean;
+      }
+    | undefined;
+  const pulse = activity?.signalPulse;
+  const preview = activity?.previewSignal === true;
+  const signalColor = pulse?.kind === "data" ? "#4CA5A6" : "var(--color-brand-blue)";
 
   const { edgePath, labelX, labelY } = useMemo(() => {
     if (![sourceX, sourceY, targetX, targetY].every(Number.isFinite)) {
@@ -64,7 +86,26 @@ export function DeletableEdge({
     const path = roundedOrthogonalPath(points);
     const label = pathMidpoint(points);
     return { edgePath: path, labelX: label.x, labelY: label.y };
-  }, [nodes, source, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition]);
+  }, [
+    nodes,
+    source,
+    target,
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+  ]);
+
+  const signalRef = useRef<SVGGElement>(null);
+  useEffect(() => {
+    // Start relative to the received packet, not to the SVG document's age.
+    for (const element of signalRef.current?.querySelectorAll<SVGAnimationElement>(
+      "animate, animateMotion",
+    ) ?? [])
+      element.beginElementAt(Number(element.getAttribute("data-delay") ?? 0));
+  }, [pulse?.token, preview, edgePath]);
 
   const showDelete = hovered || selected || invalid;
   const stroke = invalid
@@ -79,7 +120,15 @@ export function DeletableEdge({
   return (
     <>
       <defs>
-        <marker id={markerId} viewBox="0 0 8 8" markerWidth={7} markerHeight={7} refX={7} refY={4} orient="auto">
+        <marker
+          id={markerId}
+          viewBox="0 0 8 8"
+          markerWidth={7}
+          markerHeight={7}
+          refX={7}
+          refY={4}
+          orient="auto"
+        >
           <path d="M 0 0 L 8 4 L 0 8 z" fill={stroke} />
         </marker>
       </defs>
@@ -93,6 +142,63 @@ export function DeletableEdge({
           strokeDasharray: invalid ? "6 4" : style?.strokeDasharray,
         }}
       />
+      {!invalid && edgePath && (pulse || preview) && (
+        <g
+          ref={signalRef}
+          key={pulse?.token ?? "preview"}
+          aria-hidden="true"
+          pointerEvents="none"
+          data-signal-kind={pulse?.kind ?? "trigger"}
+        >
+          <path
+            d={edgePath}
+            fill="none"
+            stroke={signalColor}
+            strokeWidth={3}
+            className="edge-signal-highlight"
+          >
+            <animate
+              begin="indefinite"
+              attributeName="opacity"
+              values="0.7;0.3;0"
+              dur="0.85s"
+              repeatCount={preview ? "indefinite" : 1}
+              fill="freeze"
+            />
+          </path>
+          {[0, 0.09, 0.18].map((delay, index) => (
+            <circle
+              key={index}
+              r={index === 0 ? 3.5 : 2.5}
+              fill={signalColor}
+              stroke="var(--color-surface)"
+              strokeWidth={1}
+              opacity={0}
+              className="edge-signal-packet"
+            >
+              <animateMotion
+                path={edgePath}
+                dur="0.6s"
+                begin="indefinite"
+                data-delay={delay}
+                calcMode="paced"
+                repeatCount={preview ? "indefinite" : 1}
+                fill="freeze"
+              />
+              <animate
+                attributeName="opacity"
+                values="0;1;1;0"
+                keyTimes="0;0.08;0.85;1"
+                dur="0.6s"
+                begin="indefinite"
+                data-delay={delay}
+                repeatCount={preview ? "indefinite" : 1}
+                fill="freeze"
+              />
+            </circle>
+          ))}
+        </g>
+      )}
       <path
         d={edgePath}
         fill="none"

@@ -280,7 +280,7 @@ static bool profile_uses_physical_port(const struct spaghetti_device_profile *pr
 			if (code <= SPAGHETTI_DEVICE_PROFILE_OP_ADC_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_WAIT_FIELD_MASK ||
 			    code == SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_UART_READ ||
 			    code == SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO || code == SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE ||
-			    code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE || code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || code == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER || code == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) return true;
+			    code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE || code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || code == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER || code == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || code == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || code == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) return true;
 		}
 	return false;
 }
@@ -321,6 +321,11 @@ static int declarative_describe_endpoint(const struct spaghetti_property_set *co
 		for (size_t i = 0; i < profile->init_count + profile->sample_count; ++i) {
 			const struct spaghetti_device_profile_op *op = i < profile->init_count ? &profile->init_ops[i] : &profile->sample_ops[i - profile->init_count];
 			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER) { out->kind = SPAGHETTI_ENDPOINT_PORT_EXCLUSIVE; return 0; }
+      if(op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ) {
+        out->kind=SPAGHETTI_ENDPOINT_GPIO_LINE;out->value_size=1;out->value[0]=op->imm0;
+        if(op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP && op->imm2) { out->value_size=2;out->value[1]=op->imm2-1; }
+        return 0;
+      }
       if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) {
         out->kind = SPAGHETTI_ENDPOINT_GPIO_LINE; out->value_size = 2;
         out->value[0] = op->imm0; out->value[1] = op->imm1; return 0;
@@ -678,7 +683,7 @@ static int declarative_read(struct spaghetti_module *module, struct spaghetti_re
  /* Stepper schedules monitor completion; they must never replay action 1 (Stop). */
  bool motion = false;
  for (size_t i = 0; i < context->profile->sample_count; i++)
-   if (context->profile->sample_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ && context->profile->sample_ops[i].imm2 == 1U && !context->dht22.pending)
+   if ((context->profile->sample_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ || (context->profile->sample_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ && context->profile->sample_ops[i].imm2 == 1U)) && !context->dht22.pending)
      return -EAGAIN;
  for (size_t i = 0; i < context->profile->sample_count; i++)
    if (context->profile->sample_ops[i].opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER) motion = true;

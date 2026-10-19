@@ -11,6 +11,8 @@ export const DeviceProfileOpcode = {
   DHT22_POWER: 36,
   EMIT_DECIMAL: 38,
   DHT22_READ: 37,
+  DS18B20_READ: 39,
+  DS18B20_SETUP: 40,
   RGB_PROGRAM: 35,
   STEPPER: 34,
   MESSAGE_LOAD: 29,

@@ -9,7 +9,12 @@ import type { BaySide } from "@spaghettilab/processing-block-catalog";
 import { withThresholdFirmwareFields } from "./threshold-rule-fields.js";
 import { bayPropertiesForPlace } from "./palette-placeables.js";
 
-export { PROCESSING_BLOCK_MIME, decodePaletteDrag, encodePaletteDrag, type PaletteDragPayload } from "./palette-placeables.js";
+export {
+  PROCESSING_BLOCK_MIME,
+  decodePaletteDrag,
+  encodePaletteDrag,
+  type PaletteDragPayload,
+} from "./palette-placeables.js";
 
 let paletteDragNodeKind: DeviceProcessingNodeData["kind"] | undefined;
 let paletteDragBaySide: BaySide | undefined;
@@ -51,7 +56,7 @@ export function nodeDataFromCatalogEntry(
   if (!isPlaceableOnDeviceGraph(entry) || entry.nodeKind === undefined) return null;
   switch (entry.nodeKind) {
     case "schedule":
-      return { kind: "schedule", moduleNodeId: firstModuleId ?? "", periodMs: 1000, enabled: true };
+      return { kind: "schedule", moduleNodeId: "", periodMs: 1000, enabled: true };
     case "event-source":
       return {
         kind: "event-source",
@@ -61,7 +66,10 @@ export function nodeDataFromCatalogEntry(
       };
     case "block": {
       const base = defaultPropertiesFromFields(entry.fields ?? []);
-      const bayProps = bayPropertiesForPlace(entry, baySide ?? (isBayEntry(entry) ? "output" : undefined));
+      const bayProps = bayPropertiesForPlace(
+        entry,
+        baySide ?? (isBayEntry(entry) ? "output" : undefined),
+      );
       return {
         kind: "block",
         blockTypeId: entry.typeId ?? "",
@@ -75,7 +83,9 @@ export function nodeDataFromCatalogEntry(
         ruleTypeId: entry.typeId ?? "",
         properties:
           entry.typeId === "threshold"
-            ? withThresholdFirmwareFields(defaultPropertiesFromFields(entry.fields ?? []))
+            ? withThresholdFirmwareFields(
+                defaultPropertiesFromFields(entry.fields ?? []),
+              )
             : defaultPropertiesFromFields(entry.fields ?? []),
       };
   }
@@ -104,7 +114,12 @@ export function snapToGrid(value: number, grid = 20): number {
  * at the same fixed point, which reads as a single overlapping mess and
  * makes it look like earlier blocks vanished.
  */
-export function nextSpawnPosition(existingNodeCount: number, perRow = 4, colStep = 260, rowStep = 80): { x: number; y: number } {
+export function nextSpawnPosition(
+  existingNodeCount: number,
+  perRow = 4,
+  colStep = 260,
+  rowStep = 80,
+): { x: number; y: number } {
   const col = existingNodeCount % perRow;
   const row = Math.floor(existingNodeCount / perRow);
   return { x: 80 + col * colStep, y: 80 + row * rowStep };

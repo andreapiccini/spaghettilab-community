@@ -1,3 +1,5 @@
+import { upgradeDht22Driver } from "./gpio-driver-presets.js";
+import { draftToCanvasSensorRecipes } from "./device-recipe-draft.js";
 import type { SensorBus, SensorRecipe } from "./sensor-recipe.js";
 import { SENSOR_RECIPE_CATALOG, findSensorRecipeById } from "./sensor-recipe.js";
 
@@ -34,7 +36,14 @@ export function parseBackboneSensorModules(raw: string | undefined | null): Back
   try {
     const parsed = JSON.parse(raw) as Partial<BackboneSensorModulesProject>;
     if (parsed?.version !== 1 || !parsed.byBinding || typeof parsed.byBinding !== "object") return EMPTY;
-    return { version: 1, byBinding: parsed.byBinding };
+    return { version: 1, byBinding: Object.fromEntries(Object.entries(parsed.byBinding).map(([id, modules]) => [id, modules.map(module => {
+      const draft=module.recipe.deviceDraft;
+      const upgraded=draft && upgradeDht22Driver(draft);
+      if(!draft || upgraded===draft)return module;
+      const recipes=draftToCanvasSensorRecipes(upgraded!);
+      const recipe={...recipes[0]!,id:module.recipe.id};
+      return {...module, label:module.label==="DHT22"?"DHT11":module.label,recipe,actions:recipes};
+    })])) };
   } catch {
     return EMPTY;
   }

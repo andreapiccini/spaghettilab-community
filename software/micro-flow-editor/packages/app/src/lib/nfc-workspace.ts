@@ -6,6 +6,7 @@ import {
 } from "./device-recipe-draft.js";
 import {
   catalogDht22Driver,
+  catalogDs18b20Driver,
   upgradeDht22Driver,
   catalogUln2003Driver,
   catalogGpioBuzzerDriver,
@@ -165,6 +166,7 @@ export function builtinNfcDrivers(): LibraryDriver[] {
     driverRevision(catalogUln2003Driver()),
     driverRevision(rgbModuleDraft()),
     driverRevision(catalogDht22Driver()),
+    driverRevision(catalogDs18b20Driver()),
   ];
 }
 
@@ -278,8 +280,8 @@ export function applyLibraryToScan(scan: TagScan, library: NfcLibrary): TagScan 
 }
 
 export function mergeBuiltinNfcDrivers(library: NfcLibrary): NfcLibrary {
-  if (library.drivers.some(driver => driver.draft.dht22Module && !driver.draft.dht22Version))
-    library = { ...library, drivers: library.drivers.map(driver => driver.draft.dht22Module && !driver.draft.dht22Version ? driverRevision(upgradeDht22Driver(driver.draft)) : driver) };
+  if (library.drivers.some(driver => driver.draft.dht22Module && driver.draft.temperatureSensorModel !== "ds18b20" && (driver.draft.dht22Version ?? 0) < 3))
+    library = { ...library, drivers: library.drivers.map(driver => driver.draft.dht22Module && driver.draft.temperatureSensorModel !== "ds18b20" && (driver.draft.dht22Version ?? 0) < 3 ? driverRevision(upgradeDht22Driver(driver.draft)) : driver) };
   const extras = builtinNfcDrivers().filter(
     (driver) => !library.drivers.some((item) => item.id === driver.id),
   );

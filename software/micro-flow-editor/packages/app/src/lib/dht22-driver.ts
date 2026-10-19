@@ -6,7 +6,7 @@ export function dht22OutputFormat(draft: DeviceRecipeDraft): "float" | "string" 
 }
 
 export function setDht22OutputFormat(draft: DeviceRecipeDraft, format: "float" | "string"): DeviceRecipeDraft {
-  const update = (op: DeviceRecipeOp): DeviceRecipeOp => op.type === "dht22_convert" ? { ...op, format } : op;
+  const update = (op: DeviceRecipeOp): DeviceRecipeOp => op.type === "dht22_convert" && op.quantity !== "humidity" ? { ...op, format } : op;
   return { ...draft, updatedAt: Date.now(),
     commands: draft.commands.map(action => ({ ...action, steps: action.steps.map(update) })),
     flowInterfaces: draft.flowInterfaces?.map(update),

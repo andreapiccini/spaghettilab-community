@@ -524,3 +524,35 @@ For DHT22, connect **Avvia azione â†’ Leggi temperatura**, then **Temperatura â†
 Mostra valore** on **Visualizza dati**. A successful triggered read publishes the
 measured field and action ID to the PC. The viewer displays the last received
 value; it does not synthesize readings or start additional sensor reads.
+
+## DHT11 and parasite-powered DS18B20 (0.5.16)
+
+The legacy DHT22 module template is migrated to DHT11, keeping unit identity,
+DATA/POWER assignments and existing wires. DHT11 uses a 20 ms start pulse and
+separate integer/fractional bytes. A successful read publishes both temperature
+and relative humidity; the trigger remains rising-edge only with a 2 s interval.
+The old DHT22 wire opcode remains backward compatible (model flag defaults to 0).
+
+DS18B20 is a separate GPIO module. DATA defaults to A0 and no POWER GPIO is
+reserved. One device per DATA is supported via SKIP ROM. Conversion drives DATA
+HIGH as a software strong pull-up, then an armed runtime monitor reads the
+scratchpad after 750 ms. CRC, reserved bytes and temperature range are validated.
+Stop releases DATA; pending conversions never restart themselves. Values retain
+1/16 degree resolution and flow to the same typed USB viewer pipeline.
+
+Parasite mode requires VDD tied to GND and an external DATA pull-up to 3.3 V.
+This wiring applies to a bare sensor or a suitable board. A board with R1 tied to
+VCC and a power LED is not automatically compatible: grounding its VCC can turn
+its onboard pull-up into a pull-down. Verify/adapt the board circuit first.
+The GPIO must provide >=3.0 V under the sensor's conversion load (up to 1.5 mA).
+Hardware signal timing and voltage require bench qualification; native_sim tests
+cover state/CRC/conversion, not the actual GPIO waveform or a particular board.
+
+
+DS18B20 power mode (0.5.17): `DS18B20_SETUP` imm2=0 uses parasite power; imm2=powerChannel+1 reserves a dedicated GPIO supply, with 1 s warm-up. The conversion remains asynchronous (750 ms), driving DATA high only in parasite mode. Safe-stop releases DATA and switches the dedicated supply off when present. Parasite hardware requires VDD grounded and an external DATA pull-up to 3.3 V; verify breakout-board resistor/LED wiring before use. Physical parasite operation is not yet qualified on the connected breakout.
+
+
+0.5.18 hardens DS18B20 bit-banging: GPIO open-drain is configured once per transaction; bit slots use raw level writes rather than pad reconfiguration. Six native wire-sequencing tests cover timing and failure cleanup. Timing on the physical pin is not scope-qualified. The connected A0/A1-powered breakout still fails final data validation; no valid temperature has been qualified on the bench.
+
+
+0.5.21 resolves the connected DS18B20-compatible sensor: accept CRC-valid vendor-specific reserved scratchpad bytes while retaining CRC/config/range checks. `DS18B20_READ` imm1=1 optionally returns a nine-byte diagnostic scratchpad; imm1=0 remains the validated temperature path. Runtime worker record/event scratch is now lifetime-owned heap storage to keep nested trigger/driver execution off the 3 KiB stack. Bench qualification with DATA A0 and VCC powered by A1: eight consecutive triggers delivered eight valid temperature records to USB; the app viewer also displayed the temperature. Parasite wiring is not qualified by this test.

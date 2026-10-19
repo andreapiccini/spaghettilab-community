@@ -6,6 +6,8 @@ import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import { SOURCE_HANDLE_STYLE, TARGET_HANDLE_STYLE } from "./node-ports.js";
 
 export type EventContainerNodeData = {
+  readonly enabled?: boolean;
+  readonly empty?: boolean;
   readonly label: string;
   readonly kind: "schedule" | "event-source";
   /** Visitor demo: e.g. "Firmware function" under the Schedule title. */
@@ -26,7 +28,11 @@ export type EventContainerNodeData = {
  * children (`parentId`, set in ProcessingGraphScreen). Schedule has no canvas
  * handles — activation goes via the fixed violet tick disc; event-source keeps ports.
  */
-export function EventContainerNode({ id, data, selected }: NodeProps & { readonly data: EventContainerNodeData }) {
+export function EventContainerNode({
+  id,
+  data,
+  selected,
+}: NodeProps & { readonly data: EventContainerNodeData }) {
   const { locale } = useLocale();
   const copy = processingGraphCopy(locale);
   const config = PROCESSING_NODE_KIND_CONFIG[data.kind];
@@ -35,9 +41,16 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
   const rejecting = data.rejecting === true;
   const accepting = data.accepting === true;
   const tickPulse = data.previewActive === true;
-  const highlight = rejecting ? "var(--color-error)" : accepting ? "var(--color-success)" : undefined;
+  const highlight = rejecting
+    ? "var(--color-error)"
+    : accepting
+      ? "var(--color-success)"
+      : undefined;
   const idle = highlight === undefined && !selected;
-  const periodLabel = data.kind === "schedule" && data.periodMs !== undefined ? copy.everyMs(data.periodMs) : undefined;
+  const periodLabel =
+    data.kind === "schedule" && data.periodMs !== undefined
+      ? copy.everyMs(data.periodMs)
+      : undefined;
   return (
     <div
       data-tour-target={`flow-node-${id}`}
@@ -54,54 +67,77 @@ export function EventContainerNode({ id, data, selected }: NodeProps & { readonl
       <HoverDeleteButton id={id} label={copy.deleteContainer} forceVisible={selected} />
       {data.kind === "event-source" && (
         <>
-          <Handle type="target" position={Position.Left} id="0" style={{ ...TARGET_HANDLE_STYLE, top: 16 }} />
-          <Handle type="source" position={Position.Right} id="0" style={{ ...SOURCE_HANDLE_STYLE, top: 16 }} />
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="0"
+            style={{ ...TARGET_HANDLE_STYLE, top: 16 }}
+          />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="0"
+            style={{ ...SOURCE_HANDLE_STYLE, top: 16 }}
+          />
         </>
       )}
       <div className="flex h-8 shrink-0 items-center gap-1.5 px-2">
-        <div data-inspector-anchor={`flow-node-${id}`} className="inline-flex min-w-0 items-center gap-1.5">
+        <div
+          data-inspector-anchor={`flow-node-${id}`}
+          className="inline-flex min-w-0 items-center gap-1.5"
+        >
           <Icon size={13} className="shrink-0" style={{ color: config.colorVar }} />
-        <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted group-hover:text-brand-blue">
-          {data.label}
-        </span>
-        {data.roleLabel && (
-          <span
-            className="shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide"
-            style={{
-              color: config.colorVar,
-              backgroundColor: `color-mix(in srgb, ${config.colorVar} 12%, transparent)`,
-            }}
-          >
-            {data.roleLabel}
+          <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted group-hover:text-brand-blue">
+            {data.label}
           </span>
-        )}
-        {periodLabel && (
-          <span
-            className={`shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums${data.roleLabel ? "" : " ml-auto"}`}
-            style={{
-              color: config.colorVar,
-              backgroundColor: `color-mix(in srgb, ${config.colorVar} 12%, transparent)`,
-              marginLeft: data.roleLabel ? 4 : undefined,
-            }}
-          >
-            {periodLabel}
-          </span>
-        )}
-        {data.kind === "schedule" && (
-          <span
-            className="h-1.5 w-1.5 shrink-0 rounded-full transition-[opacity,box-shadow,background-color] duration-75"
-            style={{
-              marginLeft: periodLabel ? 4 : "auto",
-              backgroundColor: tickPulse ? config.colorVar : "color-mix(in srgb, var(--color-ink-faint) 35%, transparent)",
-              opacity: tickPulse ? 1 : 0.45,
-              boxShadow: tickPulse ? `0 0 0 3px color-mix(in srgb, ${config.colorVar} 35%, transparent)` : undefined,
-            }}
-            title="Tick Schedule"
-            aria-hidden
-          />
-        )}
+          {data.roleLabel && (
+            <span
+              className="shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide"
+              style={{
+                color: config.colorVar,
+                backgroundColor: `color-mix(in srgb, ${config.colorVar} 12%, transparent)`,
+              }}
+            >
+              {data.roleLabel}
+            </span>
+          )}
+          {periodLabel && (
+            <span
+              className={`shrink-0 rounded-slsm px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums${data.roleLabel ? "" : " ml-auto"}`}
+              style={{
+                color: config.colorVar,
+                backgroundColor: `color-mix(in srgb, ${config.colorVar} 12%, transparent)`,
+                marginLeft: data.roleLabel ? 4 : undefined,
+              }}
+            >
+              {periodLabel}
+              {data.enabled === false ? " · in pausa" : ""}
+            </span>
+          )}
+          {data.kind === "schedule" && (
+            <span
+              className="h-1.5 w-1.5 shrink-0 rounded-full transition-[opacity,box-shadow,background-color] duration-75"
+              style={{
+                marginLeft: periodLabel ? 4 : "auto",
+                backgroundColor: tickPulse
+                  ? config.colorVar
+                  : "color-mix(in srgb, var(--color-ink-faint) 35%, transparent)",
+                opacity: tickPulse ? 1 : 0.45,
+                boxShadow: tickPulse
+                  ? `0 0 0 3px color-mix(in srgb, ${config.colorVar} 35%, transparent)`
+                  : undefined,
+              }}
+              title="Tick Schedule"
+              aria-hidden
+            />
+          )}
         </div>
       </div>
+      {data.kind === "schedule" && data.empty && (
+        <div className="pointer-events-none flex flex-1 items-center justify-center px-10 pb-4 text-center text-xs text-ink-muted">
+          Trascina qui Genera trigger
+        </div>
+      )}
     </div>
   );
 }
