@@ -1,3 +1,5 @@
+import { deploymentIsCurrent } from "../../lib/manual-deployment-current.js";
+import { useSession } from "../../state/session-context.js";
 import { useState } from "react";
 import { Play, Pause, Square } from "lucide-react";
 import { decodeConfigCbor } from "@spaghettilab/config-decompiler";
@@ -12,6 +14,7 @@ export function SequenceControls({
   nodeId: string;
   bindingId?: string;
 }) {
+  const { session } = useSession();
   const { rows, getClient } = useCoreSessions();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -29,6 +32,8 @@ export function SequenceControls({
       const current = await client.getConfig(signal);
       const decoded = decodeConfigCbor(current.configBytes);
       if (!decoded.ok) throw new Error("Configurazione della Backbone non leggibile.");
+      if (commandId === 1 && (!session || !binding || !deploymentIsCurrent(session.stack.current, binding.bindingId, decoded.value)))
+        throw new Error("Versioni diverse: carica di nuovo il programma con Deploy & Run prima di avviare la sequenza.");
       const module = decoded.value.modules.find(
         (item) =>
           item.typeId === "sequence" && item.properties[7] === stableDriverHash(nodeId),

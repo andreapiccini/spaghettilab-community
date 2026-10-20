@@ -675,7 +675,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           </h1>
           <p className="mt-1 text-xs leading-relaxed text-ink-muted">
             {manualDeployTarget
-              ? (it ? "La configurazione di questa azione non è ancora stata caricata. Vuoi caricarla ed eseguire l’azione una volta? Il programma resterà in modalità manuale, con l’esecuzione automatica ferma." : "This action’s configuration has not been uploaded yet. Upload it and run the action once? The program will stay in manual mode with automatic execution stopped.")
+              ? (it ? "La configurazione non è ancora caricata oppure è stata modificata. Vuoi caricarla ed eseguire l’azione una volta? Il programma resterà in modalità manuale, con l’esecuzione automatica ferma." : "The configuration has not been uploaded yet or has changed. Upload it and run the action once? The program will stay in manual mode with automatic execution stopped.")
               : (it ? "Scegli se avviare il Flow oppure preparare la Backbone per le prove manuali." : "Choose whether to start the Flow or prepare your Backbone for manual tests.")}
           </p>
         </div>

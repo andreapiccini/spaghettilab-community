@@ -302,7 +302,16 @@ export function prepareDriverDeployment(
   const gpioOwners = new Set<string>();
   const motionModules = new Set<string>();
   const rgbTargets = new Map<string, DeviceRecipeDraft>();
-  const originalEdges = [...input.processingGraph.edges];
+  const originalEdges = input.processingGraph.edges.map(edge => {
+    const source = originalNodes.find(node => node.id === edge.source);
+    const target = originalNodes.find(node => node.id === edge.target);
+    const impulse = source?.data.kind === "schedule" ||
+      (source?.data.kind === "block" && [MANUAL_TRIGGER_TYPE, "ab.flow_start"].includes(source.data.blockTypeId));
+    // LOW/HIGH/LOW is one action, not an instruction to immediately turn the LED off.
+    return impulse && target?.data.kind === "block" && target.data.blockTypeId === "status_led" &&
+      (edge.targetHandle === undefined || edge.targetHandle === "0")
+      ? { ...edge, targetHandle: "1" } : edge;
+  });
   const aliases = new Map<string, string>();
   // The violet activation disc is authoring-only: its source is the real schedule.
   for (const node of nodes)

@@ -736,3 +736,32 @@ ZTEST(processing, test_observed_logic_fits_runtime_worker_stack)
  zassert_ok(k_thread_join(&record_worker,K_SECONDS(2)));zassert_ok(worker_result);zassert_equal(published_count,1);zassert_equal(last_published.payload.values.fields[0].data.unsigned_integer,0U);
  zassert_ok(spaghetti_processing_configure(NULL,0,NULL,0));
 }
+
+/* Match the hardware driver's ownership transfer when installing a new plan. */
+int spaghetti_status_led_init(const void *owner, uint8_t percent)
+{
+ test_led_owner=owner;test_led_intensity=percent;test_led_on=percent>0U;return 0;
+}
+ZTEST(processing, test_deployed_if_drives_led_after_plan_install_and_reload)
+{
+ struct spaghetti_block_config *blocks=k_calloc(2,sizeof(*blocks));zassert_not_null(blocks);
+ blocks[0].key=10;strcpy(blocks[0].type_id,"logic_if");
+ prop_u64(&blocks[0].properties,1,5);prop_u64(&blocks[0].properties,2,28);
+ blocks[1].key=11;strcpy(blocks[1].type_id,"status_led");
+ prop_u64(&blocks[1].properties,1,1);
+ blocks[1].properties.fields[blocks[1].properties.field_count++]=(struct spaghetti_value){.field_id=2,.type=SPAGHETTI_VALUE_BOOL,.data.boolean=false};
+ struct spaghetti_edge_config edges[2]={
+ {.source_key=1,.source_port_or_field=1,.target_key=10,.target_input=0,.source_kind=SPAGHETTI_EDGE_SOURCE_MODULE},
+ {.source_key=10,.source_port_or_field=0,.target_key=11,.target_input=0,.source_kind=SPAGHETTI_EDGE_SOURCE_BLOCK}};
+ for(int reload=0;reload<3;reload++) {
+  zassert_ok(spaghetti_processing_configure(blocks,2,edges,2));
+  const void *owner=test_led_owner;zassert_not_null(owner);
+  struct spaghetti_record record=make_record(1,1,39);
+  zassert_ok(spaghetti_processing_on_record(&record,NULL,NULL));zassert_true(test_led_on,"39 >= 28 must turn on the deployed LED");
+  zassert_ok(spaghetti_processing_validate_graph(blocks,2,edges,2,NULL,0));
+  zassert_equal_ptr(test_led_owner,owner);zassert_true(test_led_on);
+  record=make_record(1,1,27);
+  zassert_ok(spaghetti_processing_on_record(&record,NULL,NULL));zassert_false(test_led_on);
+ }
+ zassert_ok(spaghetti_processing_configure(NULL,0,NULL,0));zassert_is_null(test_led_owner);k_free(blocks);
+}

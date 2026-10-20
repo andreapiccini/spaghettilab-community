@@ -1,3 +1,4 @@
+import { manualDeploymentIsCurrent } from "../../lib/manual-deployment-current.js";
 import { useSession } from "../../state/session-context.js";
 import { useRef, useState } from "react";
 import { MousePointerClick } from "lucide-react";
@@ -11,7 +12,7 @@ export function ManualTriggerControl({
   nodeId: string;
   bindingId?: string;
 }) {
-  const { requestDeploy } = useSession();
+  const { session, requestDeploy } = useSession();
   const { rows, getClient, getSnapshot, getExecutionMode } = useCoreSessions();
   const row = rows.find((item) => item.binding.bindingId === bindingId);
   const binding = row?.binding;
@@ -45,7 +46,7 @@ export function ManualTriggerControl({
           (item) =>
             item.typeId === "declarative-device" && item.properties[1] === profileId,
         );
-      if (!module) {
+      if (!module || !live.ok || !session || !manualDeploymentIsCurrent(session.stack.current, binding.bindingId, live.value)) {
         requestDeploy({ bindingId: binding.bindingId, nodeId });
         return;
       }

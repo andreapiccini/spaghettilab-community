@@ -76,11 +76,13 @@ static struct spaghetti_processing_plan live_plan;
  * keep it off small thread stacks (main is 8 KiB on Core V1).
  */
 static struct spaghetti_processing_plan work_plan;
-static uint8_t state_arena[SPAGHETTI_PROCESSING_STATE_ARENA_SIZE]
-	__aligned(8);
+/* Keep initialized driver contexts at stable addresses: hardware ownership
+ * can refer to a context pointer. Promote the scratch arena without copying. */
+static uint8_t state_storage[SPAGHETTI_PROCESSING_STATE_ARENA_SIZE] __aligned(8);
+static uint8_t scratch_storage[SPAGHETTI_PROCESSING_STATE_ARENA_SIZE] __aligned(8);
+static uint8_t *state_arena = state_storage;
+static uint8_t *scratch_arena = scratch_storage;
 static size_t state_arena_used;
-static uint8_t scratch_arena[SPAGHETTI_PROCESSING_STATE_ARENA_SIZE]
-	__aligned(8);
 static uint8_t workspace_buf[SPAGHETTI_BLOCK_WORKSPACE_MAX] __aligned(8);
 static struct spaghetti_module_value_cache module_cache[SPAGHETTI_PROCESSING_MODULE_CACHE_MAX];
 static size_t module_cache_count;
@@ -183,21 +185,6 @@ static void *arena_alloc(uint8_t *arena, size_t arena_size, size_t size,
 
 	*used = offset + size;
 	return &arena[offset];
-}
-
-static void relocate_plan_states(struct spaghetti_processing_plan *plan,
-				 const uint8_t *from_arena, uint8_t *to_arena)
-{
-	for (size_t idx = 0U; idx < plan->block_count; ++idx) {
-		struct spaghetti_processing_block *block = &plan->blocks[idx];
-
-		if (block->state != NULL) {
-			ptrdiff_t offset =
-				(const uint8_t *)block->state - from_arena;
-
-			block->state = &to_arena[offset];
-		}
-	}
 }
 
 static int compile_topo(struct spaghetti_processing_plan *plan)
@@ -509,7 +496,7 @@ int spaghetti_processing_validate_graph(
 	validating_plan = true;
 	err = build_plan(blocks, block_count, edges, edge_count, modules,
 			 module_count, &work_plan, scratch_arena,
-			 sizeof(scratch_arena), &arena_used);
+			 SPAGHETTI_PROCESSING_STATE_ARENA_SIZE, &arena_used);
 	deinit_plan(&work_plan);
 	validating_plan = false;
 	k_mutex_unlock(&processing_lock);
@@ -526,7 +513,7 @@ int spaghetti_processing_init(void)
 	}
 
 	memset(&live_plan, 0, sizeof(live_plan));
-	memset(state_arena, 0, sizeof(state_arena));
+	memset(state_arena, 0, SPAGHETTI_PROCESSING_STATE_ARENA_SIZE);
 	memset(module_cache, 0, sizeof(module_cache));
 	memset(&stats, 0, sizeof(stats));
 	state_arena_used = 0U;
@@ -552,7 +539,7 @@ int spaghetti_processing_configure(
 	}
 
 	err = build_plan(blocks, block_count, edges, edge_count, NULL, 0U,
-			 &work_plan, scratch_arena, sizeof(scratch_arena),
+			 &work_plan, scratch_arena, SPAGHETTI_PROCESSING_STATE_ARENA_SIZE,
 			 &next_arena_used);
 	if (err < 0) {
 		k_mutex_unlock(&processing_lock);
@@ -560,8 +547,9 @@ int spaghetti_processing_configure(
 	}
 
 	deinit_plan(&live_plan);
-	memcpy(state_arena, scratch_arena, sizeof(state_arena));
-	relocate_plan_states(&work_plan, scratch_arena, state_arena);
+	uint8_t *previous_arena = state_arena;
+	state_arena = scratch_arena;
+	scratch_arena = previous_arena;
 	live_plan = work_plan;
 	memset(&work_plan, 0, sizeof(work_plan));
 	state_arena_used = next_arena_used;

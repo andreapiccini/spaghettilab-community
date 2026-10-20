@@ -1,7 +1,10 @@
+import { SIGNAL_STYLES, wireSignalType, type WireSignalType } from "./signal-colors.js";
+import { decodeConfigCbor as decodeDeploymentConfig } from "@spaghettilab/config-decompiler";
+import { deploymentIsCurrent } from "../../lib/manual-deployment-current.js";
 import { savedCanvasViewport, saveCanvasViewport } from "./canvas-viewport.js";
 import { WhiteLedModuleEditor } from "../device-recipe-editor/WhiteLedModuleEditor.js";
 import { useSignalNodeGlow } from "./use-signal-node-glow.js";
-import { activeEdgesForRecord, SIGNAL_ACTIVITY_MS } from "../../lib/edge-activity.js";
+import { activeEdgesForRecord, SignalWavePlanner, SIGNAL_ACTIVITY_MS } from "../../lib/edge-activity.js";
 import { upgradeDht22Driver } from "../../lib/gpio-driver-presets.js";
 import {
   SENSOR_INSTANCE_PROP,
@@ -279,7 +282,7 @@ export function ProcessingGraphScreen() {
 }
 
 function ProcessingGraphScreenInner() {
-  const { session, execute, navigate, requestDeploy, canvasFocus } = useSession();
+  const { session, revision, deployOpen, execute, navigate, requestDeploy, canvasFocus } = useSession();
   const {
     rows,
     getClient,
@@ -1187,7 +1190,27 @@ function ProcessingGraphScreenInner() {
     const routes = viewerPlan.activityRoutes ?? [];
     const seen = new Map<string, number>();
     const gpioLevels = new Map<string, string>();
-    let clearTimer: ReturnType<typeof setTimeout> | undefined;
+    const planner = new SignalWavePlanner(graphState.edges);
+    const pending = new Map<string, (typeof routes)[number]>();
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+    let batchTimer: ReturnType<typeof setTimeout> | undefined;
+    function later(callback: () => void, delay: number) {
+      const timer = setTimeout(() => { timers.delete(timer); callback(); }, delay);
+      timers.add(timer);
+    }
+    function flush() {
+      batchTimer = undefined;
+      const wave = planner.plan([...pending.values()], performance.now());
+      pending.clear();
+      for (const { route, delay } of wave) later(() => {
+        const pulse = { token: ++wireToken.current, kind: route.kind };
+        setWirePulses(previous => new Map(previous).set(route.edgeId, pulse));
+        later(() => setWirePulses(previous => {
+          if (previous.get(route.edgeId)?.token !== pulse.token) return previous;
+          const next = new Map(previous); next.delete(route.edgeId); return next;
+        }), SIGNAL_ACTIVITY_MS);
+      }, delay);
+    }
     const unsubscribe = onRecordEvent(selected.bindingId, (record) => {
       const key = `${record.sourceKey}:${record.schemaId}:${record.actionId ?? 0}`;
       if (seen.get(key) === record.sequence) return;
@@ -1199,20 +1222,16 @@ function ProcessingGraphScreenInner() {
       }
       const active = activeEdgesForRecord(routes, record);
       if (!active.length) return;
-      setWirePulses((previous) => {
-        const next = new Map(previous);
-        for (const route of active)
-          next.set(route.edgeId, { token: ++wireToken.current, kind: route.kind });
-        return next;
-      });
-      clearTimeout(clearTimer);
-      clearTimer = setTimeout(() => setWirePulses(new Map()), SIGNAL_ACTIVITY_MS);
+      for (const route of active) pending.set(route.edgeId, route);
+      // A short collection window also orders packets delivered in the same burst.
+      if (!batchTimer) batchTimer = setTimeout(flush, 35);
     });
     return () => {
       unsubscribe?.();
-      clearTimeout(clearTimer);
+      clearTimeout(batchTimer);
+      for (const timer of timers) clearTimeout(timer);
     };
-  }, [selected?.bindingId, viewerPlan, onRecordEvent]);
+  }, [selected?.bindingId, viewerPlan, graphState.edges, onRecordEvent]);
 
   const domainRfNodes = useMemo(
     () =>
@@ -1273,10 +1292,11 @@ function ProcessingGraphScreenInner() {
     const ctx = { nodes: domainNodes, edges: graphState.edges };
     return toReactFlowEdges(graphState).map((edge) => {
       const invalid = demoOnly && isIncompatibleDemoEdge(edge, ctx);
+      const signalType = wireSignalType(domainNodes.find(node => node.id === edge.source)?.data, edge.sourceHandle);
       return {
         ...edge,
         type: "deletable",
-        data: { invalid },
+        data: { invalid, signalType },
         style: invalid
           ? { stroke: "var(--color-error)", strokeWidth: 2, strokeDasharray: "6 4" }
           : undefined,
@@ -2498,6 +2518,21 @@ function ProcessingGraphScreenInner() {
     selected ? getSnapshot(selected.bindingId)?.config?.configBytes : undefined,
   );
 
+  const deploymentBytes = selected ? getSnapshot(selected.bindingId)?.config?.configBytes : undefined;
+  const deploymentCurrent = useMemo(() => {
+    if (!session || !selected || !deploymentBytes) return undefined;
+    const decoded = decodeDeploymentConfig(deploymentBytes);
+    return decoded.ok && deploymentIsCurrent(session.stack.current, selected.bindingId, decoded.value);
+  }, [session, revision, selected?.bindingId, deploymentBytes]);
+  const staleStopAttempt = useRef("");
+  useEffect(() => {
+    if (demoOnly || deployOpen || !backboneConnected || deploymentCurrent !== false || executionMode !== "continuous" || pausing) return;
+    const attempt = `${selected?.bindingId}:${revision}`;
+    if (staleStopAttempt.current === attempt) return;
+    staleStopAttempt.current = attempt;
+    void handlePauseRuntime();
+  }, [demoOnly, deployOpen, backboneConnected, deploymentCurrent, executionMode, pausing, selected?.bindingId, revision]);
+
   async function handlePauseRuntime() {
     stopPreview();
     if (!selected || bindingIndex < 0) return;
@@ -2763,6 +2798,21 @@ function ProcessingGraphScreenInner() {
             Deploy & Run
           </button>
         )}
+      </div>
+      {!demoOnly && deploymentCurrent === false && (
+        <div role="status" className="flex items-center justify-between gap-3 border-b border-warning/30 bg-warning/10 px-4 py-2 text-sm">
+          <span>Versioni diverse: il canvas contiene modifiche non caricate sulla Backbone. Carica di nuovo il programma prima di avviarlo.</span>
+          <button type="button" disabled={pausing || executionMode === "busy" || executionMode === "continuous"} onClick={() => requestDeploy()} className="shrink-0 font-semibold text-brand-blue disabled:opacity-40">Carica configurazione</button>
+        </div>
+      )}
+      <div aria-label="Tipi di segnale sui fili" className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-border bg-surface px-4 py-1.5 text-[11px] text-ink-muted">
+        <span className="font-semibold">Segnali</span>
+        {[...new Set(edges.map(edge => (edge.data?.signalType ?? "any") as WireSignalType))].map(type => (
+          <span key={type} className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="h-0.5 w-4 rounded-full" style={{backgroundColor:SIGNAL_STYLES[type].color}} />
+            {SIGNAL_STYLES[type].label}
+          </span>
+        ))}
       </div>
       {pauseError && (
         <div

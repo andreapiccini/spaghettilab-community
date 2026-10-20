@@ -1,3 +1,4 @@
+import { SIGNAL_STYLES, type WireSignalType } from "./signal-colors.js";
 import { SIGNAL_TRAVEL_MS } from "../../lib/edge-activity.js";
 import "./edge-signals.css";
 import {
@@ -67,11 +68,13 @@ export function DeletableEdge({
     | {
         signalPulse?: { token: number; kind: "trigger" | "data" };
         previewSignal?: boolean;
+        signalType?: WireSignalType;
       }
     | undefined;
   const pulse = activity?.signalPulse;
   const preview = activity?.previewSignal === true;
-  const signalColor = pulse?.kind === "data" ? "#4CA5A6" : "var(--color-brand-blue)";
+  const signalStyle = SIGNAL_STYLES[activity?.signalType ?? "any"];
+  const signalColor = signalStyle.color;
 
   const { edgePath, labelX, labelY } = useMemo(() => {
     if (![sourceX, sourceY, targetX, targetY].every(Number.isFinite)) {
@@ -101,7 +104,8 @@ export function DeletableEdge({
 
   const signalRef = useRef<SVGGElement>(null);
   useEffect(() => {
-    // Start relative to the received packet, not to the SVG document's age.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Start relative to the visual departure, not the SVG document's age.
     for (const element of signalRef.current?.querySelectorAll<SVGAnimationElement>(
       "animate, animateMotion",
     ) ?? [])
@@ -109,13 +113,7 @@ export function DeletableEdge({
   }, [pulse?.token, preview, edgePath]);
 
   const showDelete = hovered || selected || invalid;
-  const stroke = invalid
-    ? "var(--color-error)"
-    : showDelete
-      ? "var(--color-brand-blue)"
-      : typeof style?.stroke === "string"
-        ? style.stroke
-        : "var(--color-ink-faint)";
+  const stroke = invalid ? "var(--color-error)" : signalColor;
   const markerId = `edge-arrow-${id}`;
 
   return (
@@ -140,6 +138,7 @@ export function DeletableEdge({
         style={{
           ...style,
           stroke,
+          strokeWidth: showDelete ? 2.5 : 1.6,
           strokeDasharray: invalid ? "6 4" : style?.strokeDasharray,
         }}
       />
@@ -150,28 +149,29 @@ export function DeletableEdge({
           aria-hidden="true"
           pointerEvents="none"
           data-signal-kind={pulse?.kind ?? "trigger"}
+          style={{ color: signalColor }}
         >
           <path
             d={edgePath}
             fill="none"
             stroke={signalColor}
-            strokeWidth={5}
+            strokeWidth={2.5}
             className="edge-signal-highlight"
           >
             <animate
               begin="indefinite"
               attributeName="opacity"
-              values="0;0.8;0.35;0"
+              values="0;0.32;0.12;0"
               keyTimes="0;0.22;0.55;1"
-              dur="0.85s"
+              dur="0.48s"
               repeatCount={preview ? "indefinite" : 1}
               fill="freeze"
             />
           </path>
-          {Array.from({ length: 14 }, (_, index) => index * 0.016).map((delay, index) => (
+          {Array.from({ length: 6 }, (_, index) => index * 0.009).map((delay, index) => (
             <circle
               key={index}
-              r={index === 0 ? 4 : Math.max(1.1, 3.4 - index * 0.19)}
+              r={index === 0 ? 3 : Math.max(0.8, 2.4 - index * 0.32)}
               fill={index === 0 ? "white" : signalColor}
               style={{ color: signalColor }}
               stroke={signalColor}
@@ -211,7 +211,7 @@ export function DeletableEdge({
         style={{ pointerEvents: "stroke" }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-      />
+      ><title>{signalStyle.label}</title></path>
       <EdgeLabelRenderer>
         <div
           className="nodrag nopan"

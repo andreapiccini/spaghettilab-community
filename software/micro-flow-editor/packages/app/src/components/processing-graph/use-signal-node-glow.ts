@@ -42,7 +42,7 @@ export function useSignalNodeGlow(
         const next = new Map(previous);
         next.delete(id);
         return next;
-      }), 1000);
+      }), 460);
     }
     for (const edge of edges) {
       const pulse = pulses.get(edge.id);
