@@ -1,3 +1,4 @@
+import { useSession } from "../../state/session-context.js";
 import { useRef, useState } from "react";
 import { MousePointerClick } from "lucide-react";
 import { decodeConfigCbor } from "@spaghettilab/config-decompiler";
@@ -10,6 +11,7 @@ export function ManualTriggerControl({
   nodeId: string;
   bindingId?: string;
 }) {
+  const { requestDeploy } = useSession();
   const { rows, getClient, getSnapshot, getExecutionMode } = useCoreSessions();
   const row = rows.find((item) => item.binding.bindingId === bindingId);
   const binding = row?.binding;
@@ -25,9 +27,8 @@ export function ManualTriggerControl({
       (module) =>
         module.typeId === "declarative-device" && module.properties[1] === profileId,
     );
-  const continuous = binding
-    ? getExecutionMode(binding.bindingId) !== "one-shot"
-    : false;
+  const mode = binding ? getExecutionMode(binding.bindingId) : "one-shot";
+  const continuous = mode === "continuous";
   const ready = row?.sessionState === "READY";
   async function send() {
     const client = binding && getClient(binding.bindingId);
@@ -44,7 +45,10 @@ export function ManualTriggerControl({
           (item) =>
             item.typeId === "declarative-device" && item.properties[1] === profileId,
         );
-      if (!module) throw new Error("Esegui Run Deploy per caricare questo blocco.");
+      if (!module) {
+        requestDeploy({ bindingId: binding.bindingId, nodeId });
+        return;
+      }
       await sendManualTrigger((commandId) =>
         client.moduleCommand({ key: module.key, commandId }, signal),
       );
@@ -69,17 +73,17 @@ export function ManualTriggerControl({
       <button
         type="button"
         className="nopan rounded-lg bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white disabled:pointer-events-none disabled:opacity-40"
-        disabled={continuous || !ready || !deployed || busy}
+        disabled={continuous || mode === "busy" || !ready || busy}
         title={continuous ? "Premi Stop per usare le prove manuali" : !ready ? "Collega la Backbone" : !deployed ? "Carica il programma per le prove manuali" : message || "Esegue una volta le azioni collegate"}
         onClick={(event) => {
           event.stopPropagation();
-          void send();
+          if (!deployed && binding) requestDeploy({ bindingId: binding.bindingId, nodeId });
+          else void send();
         }}
         onDoubleClick={(event) => event.stopPropagation()}
       >
         {busy ? "Attivazione…" : "Attiva"}
       </button>
-      <span role="status" className="sr-only">{message}</span>
     </div>
   );
 }

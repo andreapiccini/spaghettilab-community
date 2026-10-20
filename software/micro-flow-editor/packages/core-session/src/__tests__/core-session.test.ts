@@ -624,3 +624,36 @@ describe("CoreSession — deployConfig()", () => {
     expect(result?.record?.configGeneration).toBe(6);
   });
 });
+
+
+describe("latest viewer records", () => {
+  it("retains the latest sample without replaying events and clears it for a new configuration", async () => {
+    const { session, responder, transport } = makeSession();
+    await runToCompletion(() => session.connect(), responder);
+    transport.deliverEvent(fakeRecordEvent(42, 7, "sensor.temperature", 1));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    transport.deliverEvent(fakeRecordEvent(43, 7, "sensor.temperature", 1));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    expect(session.getRecentRecords()).toHaveLength(1);
+    expect(session.getRecentRecords()[0]?.payload.sequence).toBe(43);
+    expect(session.getRecentRecords()[0]?.at).toBeGreaterThan(0);
+    const events: unknown[] = [];
+    session.onRecordEvent(event => events.push(event));
+    expect(events).toEqual([]);
+    const config = session.lastKnownSnapshot.config!;
+    session.observeConfig(config);
+    expect(session.getRecentRecords()).toHaveLength(1);
+    session.observeConfig({ ...config, generation: config.generation + 1 });
+    expect(session.getRecentRecords()).toEqual([]);
+  });
+
+  it("discards samples when disconnected", async () => {
+    const { session, responder, transport } = makeSession();
+    await runToCompletion(() => session.connect(), responder);
+    transport.deliverEvent(fakeRecordEvent(1, 7, "sensor.temperature", 1));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    expect(session.getRecentRecords()).toHaveLength(1);
+    session.disconnect();
+    expect(session.getRecentRecords()).toEqual([]);
+  });
+});

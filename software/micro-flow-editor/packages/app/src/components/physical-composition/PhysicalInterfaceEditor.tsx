@@ -217,9 +217,16 @@ export function PhysicalInterfaceEditor({
   const commitGpioSettings = (nextIn: number, nextOut: number) => {
     setGpioInMode(nextIn);
     setGpioOutMode(nextOut);
-    commitModes(
-      applyGpioSettingsToModes(draft.modes, { inMode: nextIn, outMode: nextOut }),
-    );
+    // Settings describe the next assignment unless a specific pin is selected.
+    // Never rewrite GPIOs belonging to other devices on the same connector.
+    if (selectedPin === null) return;
+    const updated = applyGpioSettingsToModes(draft.modes, {
+      inMode: nextIn,
+      outMode: nextOut,
+    });
+    commitModes(draft.modes.map((mode, index) =>
+      index === selectedPin ? updated[index]! : mode,
+    ));
   };
 
   const updateSettings = (patch: Partial<PhysicalInterfaceSettings>) =>

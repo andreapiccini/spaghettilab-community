@@ -34,7 +34,7 @@ export function SequenceControls({
           item.typeId === "sequence" && item.properties[7] === stableDriverHash(nodeId),
       );
       if (!module)
-        throw new Error("Esegui prima Run Deploy per caricare questa sequenza.");
+        throw new Error("Esegui prima Deploy & Run per caricare questa sequenza.");
       await client.moduleCommand({ key: module.key, commandId }, signal);
       setMessage(
         commandId === 1
@@ -53,7 +53,7 @@ export function SequenceControls({
     <section className="mb-4 rounded-xl border border-border p-3">
       <h3 className="mb-2 text-sm font-semibold">Controlla sulla Backbone</h3>
       <p className="mb-3 text-xs text-ink-muted">
-        Comanda la versione già caricata con Run Deploy.
+        Comanda la versione già caricata con Deploy & Run.
       </p>
       <div className="flex gap-2">
         {[
@@ -73,11 +73,6 @@ export function SequenceControls({
           </button>
         ))}
       </div>
-      {!connected && (
-        <p className="mt-2 text-xs text-ink-muted">
-          Collega la Backbone per usare i comandi.
-        </p>
-      )}
       {message && (
         <p role="status" className="mt-2 text-xs text-ink-muted">
           {message}

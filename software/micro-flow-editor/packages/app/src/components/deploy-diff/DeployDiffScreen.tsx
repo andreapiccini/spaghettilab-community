@@ -1,3 +1,4 @@
+import { manualTriggerProfileId, sendManualTrigger } from "../../lib/flow-trigger.js";
 import { canRecheckDeployProblem } from "../../lib/deploy-feedback.js";
 import { oneShotDeploymentInput } from "../../lib/one-shot-deployment.js";
 import { deployWire } from "../../lib/deploy-wire.js";
@@ -100,7 +101,7 @@ type CoreCandidate = {
 export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
   const { locale } = useLocale();
   const it = locale === "it";
-  const { session, execute, navigate, closeDeploy, focusCanvas } = useSession();
+  const { session, execute, navigate, closeDeploy, focusCanvas, manualDeployTarget } = useSession();
   const close =
     onClose ??
     (() => {
@@ -120,7 +121,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
   const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
   const bindings = session?.stack.current.coreBindings ?? EMPTY_BINDINGS;
 
-  const [selected, setSelected] = useState<ReadonlySet<CoreBindingId> | null>(null);
+  const [selected, setSelected] = useState<ReadonlySet<CoreBindingId> | null>(() => manualDeployTarget ? new Set([manualDeployTarget.bindingId as CoreBindingId]) : null);
   const [profilesByBinding, setProfilesByBinding] = useState<
     Map<CoreBindingId, ReadonlySet<string>>
   >(new Map());
@@ -141,7 +142,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
     setDeployPhase(phase);
   };
   useEffect(() => () => deployAbort.current?.abort(), []);
-  const [manualTestMode, setManualTestMode] = useState(false);
+  const [manualTestMode, setManualTestMode] = useState(Boolean(manualDeployTarget));
   const [deployError, setDeployError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -553,6 +554,19 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
               } catch {
                 /* Pause still works from the next GET_CONFIG. */
               }
+              if (manualDeployTarget && c.binding.bindingId === manualDeployTarget.bindingId) {
+                const client = getClient(c.binding.bindingId);
+                if (!client) throw new Error(it ? "Backbone scollegata." : "Backbone disconnected.");
+                const live = await client.getConfig(signal);
+                observeConfig(c.binding.bindingId, live);
+                const decoded = decodeConfigCbor(live.configBytes);
+                const profile = manualTriggerProfileId(manualDeployTarget.nodeId);
+                const trigger = decoded.ok && decoded.value.modules.find(module => module.typeId === "declarative-device" && module.properties[1] === profile);
+                if (!trigger) throw new Error(it ? "Azione non trovata nella configurazione caricata." : "Action not found in the uploaded configuration.");
+                await sendManualTrigger(commandId => client.moduleCommand({ key: trigger.key, commandId }, signal));
+                // Uploading an action must not select nodes or recenter the canvas.
+                close();
+              }
             }
           }
           if (![DeploymentOutcomeKind.SUCCESS, DeploymentOutcomeKind.NO_OP, DeploymentOutcomeKind.AMBIGUOUS_RESOLVED_APPLIED].some(outcome => outcome === result.outcome)) {
@@ -660,9 +674,9 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             {it ? "Carica il programma" : "Upload the program"}
           </h1>
           <p className="mt-1 text-xs leading-relaxed text-ink-muted">
-            {it
-              ? "Scegli se avviare il Flow oppure preparare la Backbone per le prove manuali."
-              : "Choose whether to start the Flow or prepare your Backbone for manual tests."}
+            {manualDeployTarget
+              ? (it ? "La configurazione di questa azione non è ancora stata caricata. Vuoi caricarla ed eseguire l’azione una volta? Il programma resterà in modalità manuale, con l’esecuzione automatica ferma." : "This action’s configuration has not been uploaded yet. Upload it and run the action once? The program will stay in manual mode with automatic execution stopped.")
+              : (it ? "Scegli se avviare il Flow oppure preparare la Backbone per le prove manuali." : "Choose whether to start the Flow or prepare your Backbone for manual tests.")}
           </p>
         </div>
         <button
@@ -677,7 +691,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
         </button>
       </header>
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-5">
-        {!successful.length && (
+        {!successful.length && !manualDeployTarget && (
           <fieldset disabled={busy || checking} className="space-y-2 disabled:opacity-60">
             <legend className="mb-2 text-sm font-semibold">{it ? "Come vuoi usare il programma?" : "How do you want to use the program?"}</legend>
             {[{ manual: false, title: it ? "Carica e avvia" : "Upload and start", text: it ? "Avvia subito la logica continua e i segnali automatici." : "Start continuous logic and automatic signals immediately." },
@@ -750,7 +764,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                   <input
                     type="checkbox"
                     checked={selected === null || selected.has(binding.bindingId)}
-                    disabled={busy}
+                    disabled={busy || Boolean(manualDeployTarget)}
                     onChange={() => toggle(binding.bindingId)}
                     aria-label={`${it ? "Carica su" : "Upload to"} Backbone ${index + 1}`}
                   />
@@ -1010,7 +1024,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             className="inline-flex items-center gap-2 rounded-lg bg-brand-blue px-5 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
           >
             <Play size={15} />
-            {manualTestMode ? (it ? "Carica per test manuali" : "Upload for manual tests") : (it ? "Carica e avvia" : "Upload and start")}
+            {manualDeployTarget ? (it ? "Carica e attiva" : "Upload and trigger") : manualTestMode ? (it ? "Carica per test manuali" : "Upload for manual tests") : (it ? "Carica e avvia" : "Upload and start")}
           </button>
         ) : successful.length && !busy ? (
           <button

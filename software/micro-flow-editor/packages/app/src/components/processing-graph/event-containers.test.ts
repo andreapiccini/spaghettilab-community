@@ -289,3 +289,28 @@ describe("formatSchedulePeriod", () => {
     expect(formatSchedulePeriod(250, "ogni")).toBe("ogni 250ms");
   });
 });
+
+
+describe("measured member bounds", () => {
+  it("keeps padding around a card larger than the default and shrinks when it shrinks", () => {
+    const graph: GraphState<"device-processing"> = {
+      layer: "device-processing",
+      nodes: [
+        { layer: "device-processing", id: "sched", data: { kind: "schedule", moduleNodeId: "m1", periodMs: 1000, enabled: true } },
+        { layer: "device-processing", id: "card", data: { kind: "block", blockTypeId: "threshold", properties: {} } },
+      ],
+      edges: [{ layer: "device-processing", id: "link", source: "sched", target: "card" }],
+    };
+    const meta = {
+      sched: { position: { x: 100, y: 100 } },
+      card: { position: { x: 100, y: 100 } },
+    };
+    for (const size of [{ w: 310, h: 180 }, { w: 210, h: 82 }]) {
+      const [box] = computeEventContainers(graph, meta, undefined, undefined, new Map([["card", size]]));
+      expect(box!.width).toBe(size.w + 2 * NODE_PADDING);
+      expect(box!.height).toBe(size.h + 2 * NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT);
+      expect(box!.x + box!.width - (100 + size.w)).toBe(NODE_PADDING);
+      expect(box!.y + box!.height - (100 + size.h)).toBe(NODE_PADDING);
+    }
+  });
+});

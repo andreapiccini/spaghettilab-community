@@ -48,6 +48,6 @@ export function SignalGeneratorControl({ config }: { config: NonNullable<Process
       <path d={`M0,5 H${width} M0,27 H${width}`} fill="none" stroke="currentColor" opacity=".12" />
       {last && <><path d={path} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /><circle cx={width - 2} cy={y(last.high)} r="2.5" fill="currentColor" /></>}
     </svg>
-    <p className="truncate text-[9px] text-ink-muted">{!ready ? "Collega la Backbone" : !source ? "Collega un modulo e ricarica il Flow" : !last ? "In attesa dello stato dalla Backbone" : running ? "Segnale in esecuzione · stato reale" : "In pausa · stato reale"}</p>
+    <p className="truncate text-[9px] text-ink-muted">{!ready ? "" : !source ? "Collega un modulo e ricarica il Flow" : !last ? "In attesa dello stato dalla Backbone" : running ? "Segnale in esecuzione · stato reale" : "In pausa · stato reale"}</p>
   </div>;
 }

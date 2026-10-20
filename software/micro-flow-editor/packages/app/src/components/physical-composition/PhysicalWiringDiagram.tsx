@@ -77,7 +77,6 @@ export function PhysicalWiringDiagram({
   } catch {
     /* Legacy projects may omit installation metadata. */
   }
-  const used = new Set<number>();
   const devices: Device[] = [];
   for (const module of modules) {
     const installation = Object.values(installations).find(
@@ -122,7 +121,6 @@ export function PhysicalWiringDiagram({
           });
     }
     if (!lines.length) continue;
-    for (const line of lines) if (line.channel !== undefined) used.add(line.channel);
     const hardware = recipe?.gpioHardware;
     if (hardware?.ground || installation?.voltage)
       lines.push({ signal: "GND", rail: "GND" });
@@ -130,20 +128,8 @@ export function PhysicalWiringDiagram({
       lines.push({ signal: "VCC", rail: hardware.power === "3.3" ? "3.3V" : "5V" });
     devices.push({ id: module.id, name: module.label, lines });
   }
-  for (const bus of interfaces) {
-    const lines = bus.signals
-      .filter((signal) => !used.has(pinIdToModeIndex(signal.pin, variant)))
-      .map((signal) => ({
-        signal: signal.label,
-        channel: pinIdToModeIndex(signal.pin, variant),
-      }));
-    if (lines.length)
-      devices.push({
-        id: bus.id,
-        name: `${bus.kind.toUpperCase()} ${bus.ordinal}`,
-        lines,
-      });
-  }
+  // Only installed external modules are wiring destinations. A configured
+  // GPIO/PWM channel alone is not an external device.
   const grid = functionPinGrid(modes, variant);
   const contacts = grid.flatMap((row, r) =>
     row.map((cell, c) => ({ ...cell, x: 62 + c * 40, y: 100 + r * 48 })),

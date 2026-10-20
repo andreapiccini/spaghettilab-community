@@ -1,5 +1,5 @@
 import { newDeviceDriverMetadata } from "../../lib/new-device-driver.js";
-import { Blocks, Nfc, Cable, CircuitBoard, Layers, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
+import { Blocks, Cable, CircuitBoard, Layers, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
 import { useState } from "react";
 import { chromeCopy } from "../../lib/chrome-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -14,7 +14,7 @@ type RailItem = {
   readonly icon: typeof Cable;
 };
 
-/** MVP rail: Discover, Physical Composition, Run Deploy, Settings. */
+/** MVP rail: Discover, Physical Composition, Deploy & Run, Settings. */
 export function LeftRail() {
   const { activeScreen, navigate, execute } = useSession();
   const { openSettings } = useSettingsModal();
@@ -25,8 +25,7 @@ export function LeftRail() {
     { id: "core-connections", icon: Cable, label: "Discover" },
     { id: "physical-composition", icon: Layers, label: copy.screens.physicalComposition },
     { id: "modules", icon: Blocks, label: locale === "it" ? "Moduli" : "Modules" },
-    { id: "nfc-tags", icon: Nfc, label: "Tag NFC" },
-    { id: "processing-graph", icon: Workflow, label: "Run Deploy" },
+    { id: "processing-graph", icon: Workflow, label: locale === "it" ? "Flussi e automazioni" : "Flows and automation" },
     { id: "device-recipe-editor", icon: CircuitBoard, label: locale === "it" ? "Crea dispositivo" : "Create device" },
   ];
 

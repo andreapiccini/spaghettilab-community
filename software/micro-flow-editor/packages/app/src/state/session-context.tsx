@@ -42,7 +42,8 @@ type SessionContextValue = {
   readonly dirty: boolean;
   markSaved(): void;
   readonly deployRequestId: number;
-  requestDeploy(): void;
+  readonly manualDeployTarget: { bindingId: string; nodeId: string } | null;
+  requestDeploy(target?: { bindingId: string; nodeId: string }): void;
   readonly deployOpen: boolean;
   closeDeploy(): void;
   readonly canvasFocus: { bindingId: string; nodeId?: string; request: number } | null;
@@ -58,6 +59,7 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
   const [dirty, setDirty] = useState(false);
   const [deployRequestId, setDeployRequestId] = useState(0);
   const [deployOpen, setDeployOpen] = useState(false);
+  const [manualDeployTarget, setManualDeployTarget] = useState<SessionContextValue["manualDeployTarget"]>(null);
   const [canvasFocus, setCanvasFocus] =
     useState<SessionContextValue["canvasFocus"]>(null);
   const closeDeploy = useCallback(() => setDeployOpen(false), []);
@@ -133,14 +135,19 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
   }, [dirty]);
 
   const navigate = useCallback((screen: ScreenId) => {
-    if (screen === "deploy-diff") setDeployOpen(true);
-    else setActiveScreen(screen);
+    if (screen === "deploy-diff") { setManualDeployTarget(null); setDeployOpen(true); }
+    else {
+      setCanvasFocus(null);
+      setActiveScreen(screen);
+    }
   }, []);
   const openBackbonePhysical = useCallback((bindingId: string, deviceIdHex: string) => {
     setPhysicalTarget({ bindingId, deviceIdHex });
+    setCanvasFocus(null);
     setActiveScreen("physical-composition");
   }, []);
-  const requestDeploy = useCallback(() => {
+  const requestDeploy = useCallback((target?: { bindingId: string; nodeId: string }) => {
+    setManualDeployTarget(target ?? null);
     setDeployRequestId((value) => value + 1);
     setDeployOpen(true);
   }, []);
@@ -160,6 +167,7 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
     dirty,
     markSaved,
     deployRequestId,
+    manualDeployTarget,
     requestDeploy,
     deployOpen,
     closeDeploy,

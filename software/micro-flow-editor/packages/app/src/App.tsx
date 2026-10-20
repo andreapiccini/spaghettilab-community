@@ -3,7 +3,6 @@ import { dht22OutputFormat, setDht22OutputFormat } from "./lib/dht22-driver.js";
 import { ModulesScreen } from "./components/modules/ModulesScreen.js";
 import { NFC_CONTEXT_META } from "./lib/nfc-workspace.js";
 import { NfcWorkspaceProvider, useNfcWorkspace } from "./state/nfc-workspace-context.js";
-import { NfcScreen } from "./components/nfc/NfcScreen.js";
 import { NfcToast } from "./components/nfc/NfcBell.js";
 import { NfcModuleDialog } from "./components/nfc/NfcModuleDialog.js";
 import { ToolsScreen } from "./components/tools/ToolsScreen.js";
@@ -201,11 +200,10 @@ function AppContent() {
     );
   }
 
-  if (activeScreen === "modules") return <AppShell><ModulesScreen /></AppShell>;
+  if (activeScreen === "modules" || activeScreen === "nfc-tags") return <AppShell><ModulesScreen /></AppShell>;
 
   if (activeScreen === "tools") return <AppShell><ToolsScreen /></AppShell>;
 
-  if (activeScreen === "nfc-tags") return <AppShell><NfcScreen /></AppShell>;
 
   if (activeScreen === "device-profile-studio") {
     return (

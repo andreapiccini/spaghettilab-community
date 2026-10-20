@@ -71,6 +71,11 @@ export class CoreSession {
   private snapshot: CoreSessionSnapshot = {};
   private _syncRelationship: SyncRelationship | null = null;
   private readonly eventLoop: Promise<void>;
+  private readonly latestRecords = new Map<string, { payload: RecordEventPayload; at: number }>();
+  getRecentRecords(): readonly { payload: RecordEventPayload; at: number }[] {
+    return [...this.latestRecords.values()];
+  }
+
   private readonly recordListeners = new Set<(payload: RecordEventPayload) => void>();
   private readonly discoveryListeners = new Set<(payload: DiscoveryEventPayload) => void>();
 
@@ -114,6 +119,7 @@ export class CoreSession {
 
   /** Keep the latest GET_CONFIG after an explicit apply (pause / deploy). */
   observeConfig(config: GetConfigResponse): void {
+    if (this.snapshot.config?.generation !== config.generation) this.latestRecords.clear();
     this.snapshot = { ...this.snapshot, config };
   }
 
@@ -159,6 +165,10 @@ export class CoreSession {
       for await (const event of this.eventStream) {
         if (this.disposed) return;
         if (event.kind === "record") {
+          const key = `${event.payload.sourceKey}:${event.payload.schemaId}:${event.payload.actionId ?? 0}`;
+          this.latestRecords.delete(key);
+          this.latestRecords.set(key, { payload: event.payload, at: Date.now() });
+          if (this.latestRecords.size > 128) this.latestRecords.delete(this.latestRecords.keys().next().value!);
           for (const listener of this.recordListeners) listener(event.payload);
           continue;
         }
@@ -169,6 +179,7 @@ export class CoreSession {
         if (event.kind !== "status") continue;
         this.deviceId = event.payload.deviceId;
         const rebooted = this.bootId !== null && event.payload.bootId !== this.bootId;
+        if (rebooted) this.latestRecords.clear();
         this.bootId = event.payload.bootId;
         if (rebooted && this._state === "READY") {
           // A changed boot ID invalidates only the ephemeral "we know this is
@@ -239,6 +250,7 @@ export class CoreSession {
       const config = await this.client.getConfig();
       const resources = await this.client.getResources();
 
+      this.observeConfig(config);
       this.snapshot = { status, capabilities, features, catalog, topology, config, resources };
       this._state = "READY";
       this._stale = false;
@@ -307,6 +319,7 @@ export class CoreSession {
 
   /** Marks the session offline. The last known snapshot is deliberately never cleared — it stays editable while stale (S030 § Verifiche). */
   disconnect(): void {
+    this.latestRecords.clear();
     if (this._state === "READY" || this._state === "SYNCHRONIZING") {
       this._stale = true;
     }
@@ -433,6 +446,7 @@ export class CoreSession {
   }
 
   dispose(): void {
+    this.latestRecords.clear();
     this.disposed = true;
     this.eventStream.dispose();
     void this.eventLoop;

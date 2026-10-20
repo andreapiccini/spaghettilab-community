@@ -1,3 +1,4 @@
+import { savedCanvasViewport, saveCanvasViewport } from "./canvas-viewport.js";
 import { WhiteLedModuleEditor } from "../device-recipe-editor/WhiteLedModuleEditor.js";
 import { useSignalNodeGlow } from "./use-signal-node-glow.js";
 import { activeEdgesForRecord, SIGNAL_ACTIVITY_MS } from "../../lib/edge-activity.js";
@@ -228,8 +229,8 @@ function layoutSizeForUiNode(node: Node<ProcessingNodeUiData>): {
 } {
   if (node.data.circular) return { w: FLOW_START_SIZE, h: FLOW_START_SIZE };
   return {
-    w: node.data.cardWidth ?? NODE_WIDTH,
-    h:
+    w: node.measured?.width ?? node.data.cardWidth ?? NODE_WIDTH,
+    h: node.measured?.height ??
       (node.data.cardHeight ?? NODE_HEIGHT) +
       (node.data.tempProbe ? TEMP_PROBE_EXTRA_H : 0),
   };
@@ -280,6 +281,7 @@ export function ProcessingGraphScreen() {
 function ProcessingGraphScreenInner() {
   const { session, execute, navigate, requestDeploy, canvasFocus } = useSession();
   const {
+    rows,
     getClient,
     getSnapshot,
     onRecordEvent,
@@ -341,6 +343,15 @@ function ProcessingGraphScreenInner() {
   const [rf, setRf] = useState<ReactFlowInstance<Node<ProcessingNodeUiData>> | null>(
     null,
   );
+  const savedViewport = session && selected
+    ? savedCanvasViewport(session.stack, selected.bindingId)
+    : undefined;
+  useEffect(() => {
+    if (!rf || !session || !selected) return;
+    const project = session.stack;
+    const bindingId = selected.bindingId;
+    return () => saveCanvasViewport(project, bindingId, rf.getViewport());
+  }, [rf, session?.stack, selected?.bindingId]);
   const [dropPreview, setDropPreview] = useState<{ x: number; y: number } | null>(null);
   const [overlapWarning, setOverlapWarning] = useState<string | null>(null);
   const [containerHint, setContainerHint] = useState<{
@@ -626,7 +637,7 @@ function ProcessingGraphScreenInner() {
         });
         setOverlapWarning(copy.connectedTo(target.label));
         attachLowerBound = {
-          x: target.x + NODE_PADDING + ENTRY_FEED_INSET,
+          x: target.x + NODE_PADDING,
           y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
         };
         position = {
@@ -648,7 +659,7 @@ function ProcessingGraphScreenInner() {
         });
         setOverlapWarning(copy.insertedInto(target.label));
         attachLowerBound = {
-          x: target.x + NODE_PADDING + ENTRY_FEED_INSET,
+          x: target.x + NODE_PADDING,
           y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
         };
         position = {
@@ -1323,6 +1334,10 @@ function ProcessingGraphScreenInner() {
     () => new Map(localNodes.map((n) => [n.id, n.position])),
     [localNodes],
   );
+  const memberSizes = useMemo(
+    () => new Map(localNodes.filter((n) => !n.data.circular).map((n) => [n.id, layoutSizeForUiNode(n)])),
+    [localNodes],
+  );
   const eventContainers = useMemo(
     () =>
       computeEventContainers(
@@ -1337,8 +1352,9 @@ function ProcessingGraphScreenInner() {
               height: containerHint.previewHeight,
             }
           : undefined,
+        memberSizes,
       ),
-    [graphState, authoringMetadata, livePositions, containerHint],
+    [graphState, authoringMetadata, livePositions, containerHint, memberSizes],
   );
   const containerByTriggerId = useMemo(
     () => new Map(eventContainers.map((c) => [c.triggerId, c])),
@@ -1437,10 +1453,8 @@ function ProcessingGraphScreenInner() {
               containerHint.triggerId === container.triggerId,
             previewActive: previewTriggerIds.has(container.triggerId),
             enabled: triggerData?.kind === "schedule" ? triggerData.enabled : true,
-            empty: !graphState.edges.some(
-              (edge) =>
-                container.memberIds.includes(edge.source) &&
-                !container.memberIds.includes(edge.target),
+            empty: !container.memberIds.some((id) =>
+              localNodes.some((node) => node.id === id && !node.data.circular),
             ),
           },
         };
@@ -2048,9 +2062,9 @@ function ProcessingGraphScreenInner() {
       }
 
       let attachLowerBound: { x: number; y: number } | undefined;
-      // Attachment/detachment only settle on drop. Overlap is resolved every
-      // frame so two cards never stack, including while the pointer is down.
-      if (change.dragging !== true) {
+      // Keep the card under the pointer; settle membership and spacing on drop.
+      if (change.dragging === true) return { ...change, position };
+      {
         setContainerHint(null);
         if (isChainableBlock) {
           const plan = planMembershipDrop({
@@ -2133,7 +2147,7 @@ function ProcessingGraphScreenInner() {
                 );
               }
               attachLowerBound = {
-                x: target.x + NODE_PADDING + ENTRY_FEED_INSET,
+                x: target.x + NODE_PADDING,
                 y: target.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
               };
               position = {
@@ -2146,6 +2160,12 @@ function ProcessingGraphScreenInner() {
           }
         }
       }
+      if (container && !escaping && !attachLowerBound) {
+        attachLowerBound = {
+          x: container.x + NODE_PADDING,
+          y: container.y + NODE_PADDING + EVENT_CONTAINER_HEADER_HEIGHT,
+        };
+      }
       const insideIds =
         container && escaping
           ? new Set([container.triggerId, ...container.memberIds])
@@ -2155,7 +2175,7 @@ function ProcessingGraphScreenInner() {
         ? layoutSizeForUiNode(draggedNode)
         : { w: NODE_WIDTH, h: NODE_HEIGHT };
       const siblings = localNodes
-        .filter((n) => !containerByTriggerId.has(n.id) && !insideIds?.has(n.id))
+        .filter((n) => !n.data.circular && !containerByTriggerId.has(n.id) && !insideIds?.has(n.id))
         .map((n) => {
           const size = layoutSizeForUiNode(n);
           return {
@@ -2470,6 +2490,9 @@ function ProcessingGraphScreenInner() {
   }
 
   const executionMode = selected ? getExecutionMode(selected.bindingId) : "one-shot";
+  const backboneConnected = rows.some(
+    (row) => row.binding.bindingId === selected?.bindingId && row.sessionState === "READY",
+  );
 
   const liveRuntime = configBytesHaveLiveRuntime(
     selected ? getSnapshot(selected.bindingId)?.config?.configBytes : undefined,
@@ -2670,6 +2693,11 @@ function ProcessingGraphScreenInner() {
                 : "One-shot · test manuali"}
           </span>
         )}
+        {!demoOnly && !backboneConnected && (
+          <span role="status" className="shrink-0 text-xs text-ink-muted">
+            {locale === "it" ? "Collega la Backbone" : "Connect the Backbone"}
+          </span>
+        )}
         <button
           type="button"
           data-tour-target="demo-tour-run"
@@ -2727,12 +2755,12 @@ function ProcessingGraphScreenInner() {
         {!demoOnly && (
           <button
             type="button"
-            onClick={requestDeploy}
+            onClick={() => requestDeploy()}
             disabled={executionMode !== "one-shot" || pausing}
             title={executionMode === "continuous" ? "Premi Stop prima di caricare un nuovo programma" : undefined}
             className="shrink-0 rounded-slpill bg-brand-blue px-4 py-1.5 font-body-strong text-sm text-white hover:enabled:bg-brand-blue-dark disabled:cursor-not-allowed disabled:bg-surface-raised disabled:text-ink-muted"
           >
-            Run Deploy
+            Deploy & Run
           </button>
         )}
       </div>
@@ -2851,6 +2879,11 @@ function ProcessingGraphScreenInner() {
               </div>
             )}
             <ReactFlow
+              key={`${session?.projectId}:${selected?.bindingId}`}
+              defaultViewport={savedViewport}
+              onMoveEnd={(_, viewport) => {
+                if (session && selected) saveCanvasViewport(session.stack, selected.bindingId, viewport);
+              }}
               className="processing-canvas"
               nodesDraggable
               selectNodesOnDrag
@@ -2884,7 +2917,7 @@ function ProcessingGraphScreenInner() {
                 interactionWidth: 24,
                 style: { stroke: "var(--color-ink-faint)", strokeWidth: 1.75 },
               }}
-              fitView
+              fitView={!savedViewport}
               fitViewOptions={
                 demoOnly
                   ? { padding: 0.22, minZoom: 0.18, maxZoom: 1.15 }

@@ -489,7 +489,7 @@ export function prepareDriverDeployment(
       ];
       if (ports.length !== 1)
         throw new Error(
-          "Applica una porta I²C univoca (SDA e SCL) nel Module Function prima di Run Deploy.",
+          "Applica una porta I²C univoca (SDA e SCL) nel Module Function prima di Deploy & Run.",
         );
       driverPortId = ports[0]!;
     }

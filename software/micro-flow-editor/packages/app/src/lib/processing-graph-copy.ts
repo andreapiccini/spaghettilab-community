@@ -125,7 +125,7 @@ export function compactSchedulePeriod(periodMs: number): string {
 
 const IT: ProcessingGraphCopy = {
   title: "Processing Graph",
-  dryRun: "Dry-run",
+  dryRun: "Simulazione locale",
   run: "Esegui",
   running: "In corso…",
   stopPreview: "Ferma anteprima",
@@ -237,7 +237,7 @@ const IT: ProcessingGraphCopy = {
 
 const EN: ProcessingGraphCopy = {
   title: "Processing Graph",
-  dryRun: "Dry-run",
+  dryRun: "Local simulation",
   run: "Run",
   running: "Running…",
   stopPreview: "Stop preview",

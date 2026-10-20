@@ -1,3 +1,4 @@
+import type { RecordEventPayload } from "@spaghettilab/protocol-sdk";
 import { decodeConfigCbor } from "@spaghettilab/config-decompiler";
 import type { CoreBindingId } from "@spaghettilab/domain";
 import { useEffect, useState } from "react";
@@ -24,7 +25,7 @@ export type DataViewerUi = {
 };
 /** Event driven: displaying never runs a sensor command or creates another polling loop. */
 export function DataViewerValue({ config }: { config: DataViewerUi }) {
-  const { onRecordEvent, rows, getLastBootId, getSnapshot } = useCoreSessions();
+  const { onRecordEvent, getRecentRecords, rows, getLastBootId, getSnapshot } = useCoreSessions();
   const ready =
     rows.find((row) => row.binding.bindingId === config.bindingId)?.sessionState ===
     "READY";
@@ -46,7 +47,7 @@ export function DataViewerValue({ config }: { config: DataViewerUi }) {
   useEffect(() => {
     setSample(undefined);
     if (!config.bindingId || !source || !ready || !deployed) return;
-    return onRecordEvent(config.bindingId as CoreBindingId, (event) => {
+    const receive = (event: RecordEventPayload, at = Date.now()) => {
       if (
         event.sourceKey !== source.key ||
         (source.schemaId && source.schemaId !== event.schemaId)
@@ -54,12 +55,15 @@ export function DataViewerValue({ config }: { config: DataViewerUi }) {
         return;
       if (source.action && event.actionId && source.action !== event.actionId) return;
       if (!event.fields) {
-        setSample({ value: "", at: Date.now(), missing: true });
+        setSample({ value: "", at, missing: true });
         return;
       }
       const value = event.fields[source.field];
-      if (value !== undefined) setSample({ value, at: Date.now(), missing: false });
-    });
+      if (value !== undefined) setSample({ value, at, missing: false });
+    };
+    for (const record of getRecentRecords(config.bindingId as CoreBindingId))
+      receive(record.payload, record.at);
+    return onRecordEvent(config.bindingId as CoreBindingId, receive);
   }, [
     config.bindingId,
     source?.key,
@@ -67,14 +71,17 @@ export function DataViewerValue({ config }: { config: DataViewerUi }) {
     source?.action,
     source?.schemaId,
     onRecordEvent,
+    getRecentRecords,
     ready,
     bootId,
     deployed,
     live?.generation,
   ]);
+  const displaySample = sample && !sample.missing ? sample : undefined;
+  const unit = config.unit || source?.unit;
   const formatted =
-    sample && !sample.missing
-      ? formatViewerValue(sample.value, config.decimals, source?.valueKind)
+    displaySample
+      ? formatViewerValue(displaySample.value, config.decimals, source?.valueKind)
       : undefined;
   const status = !config.connected
     ? "Collega un’uscita a Mostra valore"
@@ -85,9 +92,9 @@ export function DataViewerValue({ config }: { config: DataViewerUi }) {
         : sample?.missing
           ? "Aggiorna il firmware per ricevere i valori"
           : !source || !deployed
-            ? "Esegui Run Deploy per collegare la sorgente"
+            ? "Esegui Deploy & Run per collegare la sorgente"
             : !sample
-              ? "In attesa del primo dato"
+              ? "In attesa del dato: avvia il programma o premi Attiva"
               : `Aggiornato alle ${new Date(sample.at).toLocaleTimeString("it-IT")}`;
   return (
     <div className="pointer-events-none flex h-full flex-col gap-1.5 p-3">
@@ -101,8 +108,8 @@ export function DataViewerValue({ config }: { config: DataViewerUi }) {
         title={formatted?.text}
       >
         {formatted ? (formatted.text === "" ? '""' : formatted.text) : "—"}
-        {formatted && config.unit ? (
-          <span className="ml-2 text-sm font-normal text-ink-muted">{config.unit}</span>
+        {formatted && unit ? (
+          <span className="ml-2 text-sm font-normal text-ink-muted">{unit}</span>
         ) : null}
       </div>
       <div className="mt-auto flex items-center gap-2 text-[10px] text-ink-muted">

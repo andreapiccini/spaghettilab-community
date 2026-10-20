@@ -1,3 +1,4 @@
+import { Ds18b20Configuration } from "./Ds18b20Configuration.js";
 import {
   functionVariantOf,
   formatPinLabel,
@@ -28,6 +29,9 @@ export function ModuleGpioPinField({
 }) {
   const { session, execute, navigate } = useSession();
   if (!isGpioModule(module)) return null;
+
+  if (module.recipe.deviceDraft?.temperatureSensorModel === "ds18b20")
+    return <Ds18b20Configuration key={module.id} module={module} bindingId={bindingId} />;
 
   const savedPhysical = parsePhysicalProject(
     session?.stack.current.authoringMetadata[PHYSICAL_META_KEY]?.comment,

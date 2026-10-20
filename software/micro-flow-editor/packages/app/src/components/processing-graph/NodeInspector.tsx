@@ -707,7 +707,7 @@ export function NodeInspector({
           <div className="mb-4 space-y-3">
             <p className="text-sm text-ink-muted">
               Trascina «Attiva azione» dentro questo riquadro e collega la sua uscita
-              alle azioni da ripetere. Run Deploy avvia l’esecuzione continua; Stop
+              alle azioni da ripetere. Deploy & Run avvia l’esecuzione continua; Stop
               lascia disponibili i trigger manuali per le prove one-shot.
             </p>
             <label

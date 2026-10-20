@@ -284,7 +284,7 @@ describe("library association without chip write", () => {
       "04AABBCCDDEEFF",
       builtinRelayModule(),
     );
-    expect(library.units.map((unit) => unit.uid)).toEqual(["04AABBCCDDEEFF"]);
+    expect(library.units.map((unit) => unit.uid)).toEqual(["0468C102A02190", "04AABBCCDDEEFF"]);
   });
 });
 describe("global versioned driver library", () => {
@@ -424,4 +424,18 @@ it("does not treat the same UID on a different Master as this reader's tag", () 
       ]),
     ),
   ).toBe(false);
+});
+
+
+it("registers the temperature UID without reading tag memory and keeps other associations", () => {
+  const existing = associateTagInLibrary(emptyNfcLibrary(), RELAY_MODULE_TAG_UID, builtinRelayModule());
+  const library = mergeBuiltinNfcDrivers(existing);
+  expect(library.units).toContainEqual(existing.units[0]);
+  const scan = { uid: "04:68:C1:02:A0:21:90", decoded: { kind: "unknown" }, name: "Tag rilevato" } as TagScan;
+  const recognized = recognizedLibraryModule(scan, library);
+  expect(recognized?.scan.name).toBe("DS18B20");
+  expect(recognized?.scan.recognition).toBe("library");
+  expect(recognized?.driver.draft.temperatureSensorModel).toBe("ds18b20");
+  expect(recognized?.driver.ready).toBe(true);
+  expect(mergeBuiltinNfcDrivers(library)).toBe(library);
 });

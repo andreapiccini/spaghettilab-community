@@ -247,7 +247,7 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
           recognized ? (
             <>
               <p className="text-sm text-ink-muted">
-                Rilevato <strong>{name}</strong>. Vuoi caricarlo nel canvas Run Deploy
+                Rilevato <strong>{name}</strong>. Vuoi caricarlo nel canvas Flussi e automazioni
                 sulla Backbone per poterlo usare?
               </p>
               {targets.length > 1 && (
@@ -518,7 +518,7 @@ function ModuleDialog({ scan }: { scan: TagScan }) {
                 </table>
                 <p className="nfc-muted mt-4">
                   La porta I²C risulta già applicata. L’inserimento prepara il Flow;
-                  l’esecuzione si avvia da Run Deploy.
+                  l’esecuzione si avvia da Deploy & Run.
                 </p>
               </>
             ) : (

@@ -166,6 +166,7 @@ export function computeEventContainers(
   authoringMetadata: Readonly<Record<string, AuthoringMetadata>>,
   livePositions?: ReadonlyMap<string, { readonly x: number; readonly y: number }>,
   sizePreview?: ContainerSizePreview,
+  memberSizes?: ReadonlyMap<string, { readonly w: number; readonly h: number }>,
 ): readonly EventContainer[] {
   const nodesById = new Map(graphState.nodes.map((n) => [n.id, n]));
   const outgoing = new Map<string, string[]>();
@@ -213,13 +214,14 @@ export function computeEventContainers(
       const manual =
         (child.data as DeviceProcessingNodeData).kind === "block" &&
         (child.data as { blockTypeId?: string }).blockTypeId === "ui.manual_trigger";
+      const size = memberSizes?.get(id);
       maxRelX = Math.max(
         maxRelX,
-        pos.x - triggerPos.x + (manual ? 210 - NODE_WIDTH : 0),
+        pos.x - triggerPos.x + (size ? size.w - NODE_WIDTH : manual ? 210 - NODE_WIDTH : 0),
       );
       maxRelY = Math.max(
         maxRelY,
-        pos.y - triggerPos.y + (manual ? 118 - NODE_HEIGHT : 0),
+        pos.y - triggerPos.y + (size ? size.h - NODE_HEIGHT : manual ? 118 - NODE_HEIGHT : 0),
       );
     }
     if (sizePreview?.triggerId === node.id && sizePreview.width === undefined) {
@@ -263,11 +265,11 @@ export function computeEventContainers(
     }
     return d;
   };
-  for (const c of [...containers].sort((a, b) => depthOf(a) - depthOf(b))) {
+  for (const c of [...containers].sort((a, b) => depthOf(b) - depthOf(a))) {
     for (const id of c.memberIds) {
       const nested = byTrigger.get(id);
       if (!nested) continue;
-      growRightDown(c, nested);
+      growRightDown(c, { ...nested, width: nested.width + NODE_PADDING, height: nested.height + NODE_PADDING });
     }
     if (
       sizePreview?.triggerId === c.triggerId &&

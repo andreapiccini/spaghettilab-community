@@ -200,6 +200,7 @@ type CoreSessionsContextValue = {
     input: CompileConfigInput,
     context: DeploymentContext,
   ): Promise<DeploymentResult> | undefined;
+  getRecentRecords(bindingId: CoreBindingId): readonly { payload: RecordEventPayload; at: number }[];
   onRecordEvent(
     bindingId: CoreBindingId,
     listener: (payload: RecordEventPayload) => void,
@@ -576,6 +577,10 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
       sessionsRef.current.get(bindingId)?.deployConfig(input, context),
     [],
   );
+  const getRecentRecords = useCallback(
+    (bindingId: CoreBindingId) => sessionsRef.current.get(bindingId)?.getRecentRecords() ?? [],
+    [],
+  );
   const onRecordEvent = useCallback(
     (bindingId: CoreBindingId, listener: (payload: RecordEventPayload) => void) =>
       sessionsRef.current.get(bindingId)?.onRecordEvent(listener),
@@ -750,6 +755,7 @@ export function CoreSessionsProvider({ children }: { readonly children: ReactNod
     removeProfile,
     deployConfig,
     onRecordEvent,
+    getRecentRecords,
     onDiscoveryEvent,
     getLastBootId,
     runCommand,

@@ -154,6 +154,7 @@ export const remoteDriverCatalog = {
 
 export const GPIO_RELAY_MODEL_ID = "model-gpio-relay";
 export const RELAY_MODULE_TAG_UID = "0474C102A02190";
+export const DS18B20_MODULE_TAG_UID = "0468C102A02190";
 
 export function normalizeTagUid(uid: string): string {
   return uid.replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
@@ -288,12 +289,25 @@ export function mergeBuiltinNfcDrivers(library: NfcLibrary): NfcLibrary {
   const withDrivers = extras.length
     ? { ...library, drivers: [...library.drivers, ...extras] }
     : library;
-  return withDrivers.models.some((model) => model.id === GPIO_RELAY_MODEL_ID)
+  const withModels = withDrivers.models.some((model) => model.id === GPIO_RELAY_MODEL_ID)
     ? withDrivers
     : {
         ...withDrivers,
         models: [...withDrivers.models, builtinRelayModule()],
       };
+  const temperature = resolveLibraryDriver(withModels, catalogDs18b20Driver().id)!;
+  const model = withModels.models.find((item) =>
+    item.driverId === temperature.id && item.driverVersion === temperature.version,
+  ) ?? {
+    id: "model-gpio-ds18b20",
+    name: temperature.draft.name,
+    driverId: temperature.id,
+    driverVersion: temperature.version,
+    origin: "local" as const,
+  };
+  const unit = withModels.units.find((item) => normalizeTagUid(item.uid) === DS18B20_MODULE_TAG_UID);
+  if (unit?.modelId === model.id) return withModels;
+  return associateTagInLibrary(withModels, DS18B20_MODULE_TAG_UID, model);
 }
 
 export function checksum(bytes: Uint8Array): number {
