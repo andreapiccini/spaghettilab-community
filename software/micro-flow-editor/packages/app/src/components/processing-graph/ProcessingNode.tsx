@@ -1,10 +1,11 @@
+import { SIGNAL_STYLES } from "./signal-colors.js";
 import { BlockInfoButton } from "./BlockInfoButton.js";
 import { SignalGeneratorControl } from "./SignalGeneratorControl.js";
 import { ManualTriggerControl } from "./ManualTriggerControl.js";
 import { DataViewerValue } from "./DataViewerValue.js";
 import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
-import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "@xyflow/react";
-import { useLayoutEffect, type CSSProperties } from "react";
+import { Handle as FlowHandle, useNodeId, useStore, Position, useUpdateNodeInternals, type NodeProps } from "@xyflow/react";
+import { useLayoutEffect, type ComponentProps, type CSSProperties } from "react";
 import {
   ListOrdered,
   Cable,
@@ -1128,3 +1129,14 @@ function parseCssHex(hex: string): { r: number; g: number; b: number } | undefin
 }
 
 export const PROCESSING_NODE_TYPES = { processing: ProcessingNode };
+
+/** Every visual handle shares the wire palette, including compact hardware cards. */
+function Handle(props: ComponentProps<typeof FlowHandle>) {
+ const nodeId=useNodeId();
+ const types=useStore(state => state.nodeLookup.get(nodeId ?? "")?.data.signalPortTypes) as ProcessingNodeUiData["signalPortTypes"];
+ const matches=Object.entries(types ?? {}).filter(([key])=>key.startsWith(`${props.type}:`));
+ const type=types?.[`${props.type}:${props.id ?? "0"}`] ?? (matches.length===1?matches[0]![1]:"any");
+ const signal=SIGNAL_STYLES[type];
+ const filled=props.style?.background!==undefined && props.style.background!=="var(--color-surface)";
+ return <FlowHandle {...props} title={[props.title,signal.label].filter(Boolean).join(" · ")} style={{...props.style,borderColor:signal.color,background:filled?signal.color:"var(--color-surface)",color:filled?"#fff":signal.color,boxShadow:undefined}} />;
+}

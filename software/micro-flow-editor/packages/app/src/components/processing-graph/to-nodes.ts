@@ -89,6 +89,7 @@ export type ToggleWaveUi = {
 };
 
 export type ProcessingNodeUiData = {
+  readonly signalPortTypes?: Readonly<Record<string, import("./signal-colors.js").WireSignalType>>;
   readonly statusLed?: boolean;
   readonly logicIf?: { condition: string; whenTrue: string; whenFalse: string };
   readonly dataViewer?: DataViewerUi;

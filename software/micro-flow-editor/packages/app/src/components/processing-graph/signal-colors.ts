@@ -24,3 +24,16 @@ export function wireSignalType(data: DeviceProcessingNodeData | undefined, handl
  const domains = [...new Set(port?.types.map(type => type.domain) ?? [])];
  return domains.length === 1 ? domains[0]! : "any";
 }
+
+export function nodeSignalTypes(node: {id:string;data:DeviceProcessingNodeData}, nodes: readonly {id:string;data:DeviceProcessingNodeData}[], edges: readonly {source:string;target:string;sourceHandle?:string|null;targetHandle?:string|null}[]): Record<string,WireSignalType> {
+ const entry=catalogEntryForNode(node.data);
+ const result: Record<string,WireSignalType>={};
+ for (const port of entry?.outputs ?? []) result[`source:${port.id}`]=wireSignalType(node.data,port.id);
+ for (const port of entry?.inputs ?? []) {
+  const incoming=edges.filter(edge=>edge.target===node.id && (edge.targetHandle===port.id || ((edge.targetHandle==null || edge.targetHandle==="0") && entry?.inputs?.length===1)));
+  const domains=[...new Set(incoming.length ? incoming.map(edge=>wireSignalType(nodes.find(source=>source.id===edge.source)?.data,edge.sourceHandle)) : port.types.map(type=>type.domain))];
+  result[`target:${port.id}`]=domains.length===1?domains[0]!:"any";
+ }
+ if(node.data.kind==="schedule") result["source:0"]="activation";
+ return result;
+}

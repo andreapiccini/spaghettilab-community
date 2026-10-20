@@ -1,4 +1,4 @@
-import { SIGNAL_STYLES, wireSignalType, type WireSignalType } from "./signal-colors.js";
+import { SIGNAL_STYLES, nodeSignalTypes, wireSignalType, type WireSignalType } from "./signal-colors.js";
 import { decodeConfigCbor as decodeDeploymentConfig } from "@spaghettilab/config-decompiler";
 import { deploymentIsCurrent } from "../../lib/manual-deployment-current.js";
 import { savedCanvasViewport, saveCanvasViewport } from "./canvas-viewport.js";
@@ -1274,7 +1274,10 @@ function ProcessingGraphScreenInner() {
                 },
               }
             : node,
-      ),
+      ).map(node => {
+        const original = domainNodes.find(item => item.id === node.id);
+        return original ? {...node, data:{...node.data, signalPortTypes:nodeSignalTypes(original, domainNodes, graphState.edges)}} : node;
+      }),
     [
       graphState,
       authoringMetadata,
