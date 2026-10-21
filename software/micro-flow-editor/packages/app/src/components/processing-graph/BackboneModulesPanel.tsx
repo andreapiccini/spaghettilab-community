@@ -1,5 +1,10 @@
+import { topologyNeedsReconfiguration } from "../../lib/backbone-topology-change.js";
+import { logicalBackboneKey } from "../../lib/logical-backbone-slots.js";
+import { BackboneTargetPicker } from "../backbone/BackboneTargetPicker.js";
+import { useSession } from "../../state/session-context.js";
+import { useCoreSessions } from "../../state/core-sessions-context.js";
+import { NFC_INSTALL_META } from "../../lib/nfc-workspace.js";
 import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
-import { useEffect, useRef } from "react";
 import { Cpu, Plus, Trash2 } from "lucide-react";
 import type { BackboneSensorModule } from "../../lib/backbone-sensor-modules.js";
 import { resolveRecipe } from "../../lib/backbone-sensor-modules.js";
@@ -12,23 +17,33 @@ import { useLocale } from "../../state/locale-context.js";
  */
 export function BackboneModulesPanel({
   modules,
+  bindingId,
   onAdd,
   onSelect,
-  onEdit,
   onRemove,
   onUseStatusLed,
 }: {
+  readonly bindingId?: string;
   readonly modules: readonly BackboneSensorModule[];
   readonly onAdd: () => void;
   readonly onSelect: (module: BackboneSensorModule) => void;
-  readonly onEdit: (module: BackboneSensorModule) => void;
   readonly onRemove: (moduleId: string) => void;
   readonly onUseStatusLed: () => void;
 }) {
   const { locale } = useLocale();
-  const clickTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(clickTimer.current), []);
   const it = locale === "it";
+  const { session, moduleTarget } = useSession();
+  const { rows, getSnapshot } = useCoreSessions();
+  const choices = rows.filter(row => !bindingId || row.binding.bindingId === bindingId).flatMap(row => row.attachedBackbones.filter(board => board.productKind !== "nfc-reader").map(board => ({ ...board, bindingId: row.binding.bindingId })));
+  const board = choices.find(item => item.bindingId === moduleTarget?.bindingId && item.deviceIdHex === moduleTarget.deviceIdHex) ?? choices[0];
+  const boardKey = board ? logicalBackboneKey(session?.stack.current, board.bindingId, getSnapshot(board.bindingId)?.status, board.nodeId) ?? `${board.bindingId}:${board.deviceIdHex}` : undefined;
+  let installations: Record<string, { moduleId?: string; boardKey?: string }> = {};
+  try { installations = JSON.parse(session?.stack.current.authoringMetadata[NFC_INSTALL_META]?.comment ?? "{}"); } catch { /* No installations yet. */ }
+  const topologyPending = !!(session && board && topologyNeedsReconfiguration(session.stack.current, board.bindingId, getSnapshot(board.bindingId)?.status));
+  const visibleModules = topologyPending ? [] : modules.filter(module => {
+    const key = module.gpioAssignments?.boardKey ?? module.gpioAssignment?.boardKey ?? Object.values(installations).find(item => item?.moduleId === module.id)?.boardKey;
+    return key ? key === boardKey : board?.local === true;
+  });
 
   return (
     <div
@@ -54,10 +69,14 @@ export function BackboneModulesPanel({
         </span>
       </div>
 
+      <div className="border-b border-border px-2 py-2"><BackboneTargetPicker bindingId={bindingId} /></div>
+      {topologyPending && <p className="p-3 text-sm text-ink-muted">Assegnazioni da riconfigurare. Controlla la nuova disposizione delle Backbone nell’avviso in alto.</p>}
       <div className="flex flex-wrap gap-2 p-2">
         <button
           type="button"
           onClick={onUseStatusLed}
+          disabled={board?.local === false}
+          data-tooltip={board?.local === false ? (it ? "Il blocco LED interno è disponibile per il master" : "The internal LED block is available for the master") : undefined}
           title={
             it
               ? STATUS_LED_LABEL
@@ -74,18 +93,14 @@ export function BackboneModulesPanel({
           </span>
         </button>
 
-        {modules.map((module) => {
+        {visibleModules.map((module) => {
           const recipe = resolveRecipe(module);
           return (
             <div key={module.id} className="group relative">
               <button
                 type="button"
-                onClick={() => {
-                  clearTimeout(clickTimer.current);
-                  clickTimer.current = setTimeout(() => onSelect(module), 400);
-                }}
-                onDoubleClick={() => { clearTimeout(clickTimer.current); onEdit(module); }}
-                title={recipe.oneLiner}
+                onClick={() => onSelect(module)}
+                title={it ? `Aggiungi ${module.label} al canvas` : `Add ${module.label} to canvas`}
                 className="flex h-[4.5rem] w-[4.5rem] flex-col items-center justify-center gap-1 rounded-slsm border border-border-strong bg-surface px-1 text-center shadow-e1 hover:border-brand-blue"
               >
                 <span className="h-8 w-8">
@@ -129,7 +144,7 @@ export function BackboneModulesPanel({
         </button>
       </div>
 
-      {modules.length === 0 && (
+      {visibleModules.length === 0 && (
         <p className="border-t border-slate-400/20 px-2.5 py-2 font-body text-[11px] text-ink-faint">
           {it
             ? "LED interno è il LED della Backbone. + scegli un sensore: compare il blocco con i canali sul canvas."

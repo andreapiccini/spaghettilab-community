@@ -81,6 +81,7 @@ describe("physical wiring", () => {
     const svg = render("v1", [4, 5, 0, 0]);
     expect(svg).toContain("SDA");
     expect(svg).toContain("SCL");
-    expect(svg).toContain("I2C 1");
+    expect(svg).toContain("Pin 2 · SDA");
+    expect(svg).toContain("Pin 3 · SCL");
   });
 });

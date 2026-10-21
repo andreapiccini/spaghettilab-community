@@ -16,16 +16,33 @@
 LOG_MODULE_REGISTER(spaghetti_port_backend,
 		    CONFIG_SPAGHETTI_PORT_LOG_LEVEL);
 
-static uint8_t user_modes[4];
+static uint8_t user_modes[8];
 static uint8_t user_config[20];
-int spaghetti_port_backend_user_map(spaghetti_port_id_t id, const uint8_t modes[4], const uint8_t config[20])
+static uint8_t user_count = 4;
+int spaghetti_port_backend_user_map(spaghetti_port_id_t id, const uint8_t modes[4], const uint8_t config[20], uint8_t count)
 {
+ if (count != 4U && count != 8U) return -EINVAL;
 #if defined(CONFIG_SOC_ESP32S3) && DT_HAS_COMPAT_STATUS_OKAY(spaghettilab_physical_backbone)
 	const uint8_t user_id = DT_REG_ADDR(DT_PHANDLE(DT_COMPAT_GET_ANY_STATUS_OKAY(spaghettilab_physical_backbone), user_port));
 	if (id != user_id) return -ENOTSUP;
-	const struct device *gpio = DEVICE_DT_GET(DT_NODELABEL(gpio1));
-	for (uint8_t i = 0; i < 4; ++i) {
-		const uint32_t pin = 38U - i;
+#define USER_PORT_NODE DT_PHANDLE(DT_COMPAT_GET_ANY_STATUS_OKAY(spaghettilab_physical_backbone), user_port)
+	static const struct gpio_dt_spec pins[] = {
+		GPIO_DT_SPEC_GET_BY_IDX(USER_PORT_NODE, output_gpios, 0),
+		GPIO_DT_SPEC_GET_BY_IDX(USER_PORT_NODE, output_gpios, 1),
+		GPIO_DT_SPEC_GET_BY_IDX(USER_PORT_NODE, output_gpios, 2),
+		GPIO_DT_SPEC_GET_BY_IDX(USER_PORT_NODE, output_gpios, 3),
+#if DT_PROP_LEN(USER_PORT_NODE, output_gpios) == 8
+        GPIO_DT_SPEC_GET_BY_IDX(USER_PORT_NODE, output_gpios, 4),
+        GPIO_DT_SPEC_GET_BY_IDX(USER_PORT_NODE, output_gpios, 5),
+        GPIO_DT_SPEC_GET_BY_IDX(USER_PORT_NODE, output_gpios, 6),
+        GPIO_DT_SPEC_GET_BY_IDX(USER_PORT_NODE, output_gpios, 7),
+#endif
+	};
+#undef USER_PORT_NODE
+ if (count > ARRAY_SIZE(pins)) return -EINVAL;
+	for (uint8_t i = 0; i < count; ++i) {
+		const struct gpio_dt_spec *gpio = &pins[i];
+		const uint32_t pin = gpio->pin + (gpio->port == DEVICE_DT_GET(DT_NODELABEL(gpio1)) ? 32U : 0U);
 		uint32_t input = UINT32_MAX, output = UINT32_MAX;
 		gpio_flags_t flags = GPIO_INPUT;
 		switch (modes[i] & 15U) {
@@ -40,16 +57,16 @@ int spaghetti_port_backend_user_map(spaghetti_port_id_t id, const uint8_t modes[
 		case 12: output = LEDC_LS_SIG_OUT0_IDX + i; flags = GPIO_OUTPUT_LOW; break;
 		default: continue;
 		}
-		int err = gpio_pin_configure(gpio, pin - 32U, flags);
+		int err = gpio_pin_configure(gpio->port, gpio->pin, flags);
 		if (err) return err;
 		if (input != UINT32_MAX) esp_rom_gpio_connect_in_signal(pin, input, false);
 		if (output != UINT32_MAX) esp_rom_gpio_connect_out_signal(pin, output, false, false);
 	}
-	memcpy(user_modes, modes, 4U); memcpy(user_config, config, 20U);
+	memcpy(user_modes, modes, count); user_count = count; memcpy(user_config, config, 20U);
 	return 0;
 #else
 	ARG_UNUSED(config);
-	for (uint8_t i = 0; i < 4; ++i) if ((modes[i] & 15U) > 5U) return -ENOTSUP;
+	for (uint8_t i = 0; i < count; ++i) if ((modes[i] & 15U) > 5U) return -ENOTSUP;
 	return spaghetti_port_backend_select(id, SPAGHETTI_PORT_TRANSPORT_GPIO);
 #endif
 }
@@ -73,8 +90,8 @@ int spaghetti_port_backend_select(
 	enum spaghetti_port_transport transport)
 {
 	if (port_id == 0U && user_config[0] == 1U && transport != SPAGHETTI_PORT_TRANSPORT_GPIO) {
-		uint8_t modes[4], config[20]; memcpy(modes, user_modes, 4U); memcpy(config, user_config, 20U);
-		return spaghetti_port_backend_user_map(port_id, modes, config);
+		uint8_t modes[8], config[20]; memcpy(modes, user_modes, user_count); memcpy(config, user_config, 20U);
+		return spaghetti_port_backend_user_map(port_id, modes, config, user_count);
 	}
 	if (transport == SPAGHETTI_PORT_TRANSPORT_I2C) {
 		DT_FOREACH_STATUS_OKAY(spaghettilab_port, SPAGHETTI_PORT_RESTORE_I2C)

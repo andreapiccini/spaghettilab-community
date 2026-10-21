@@ -38,9 +38,13 @@ type SessionContextValue = {
     readonly deviceIdHex: string;
   } | null;
   openBackbonePhysical(bindingId: string, deviceIdHex: string): void;
+  readonly moduleTarget: { readonly bindingId: string; readonly deviceIdHex: string } | null;
+  setModuleTarget(target: { readonly bindingId: string; readonly deviceIdHex: string } | null): void;
   /** Set on every execute()/undo()/redo() since the project was opened or last saved — drives the `beforeunload` warning below. */
   readonly dirty: boolean;
   markSaved(): void;
+  readonly topologyReviewRequestId: number;
+  requestTopologyReview(): void;
   readonly deployRequestId: number;
   readonly manualDeployTarget: { bindingId: string; nodeId: string } | null;
   requestDeploy(target?: { bindingId: string; nodeId: string }): void;
@@ -58,6 +62,8 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
   const [revision, setRevision] = useState(0);
   const [dirty, setDirty] = useState(false);
   const [deployRequestId, setDeployRequestId] = useState(0);
+  const [topologyReviewRequestId, setTopologyReviewRequestId] = useState(0);
+  const requestTopologyReview = useCallback(() => setTopologyReviewRequestId(value => value + 1), []);
   const [deployOpen, setDeployOpen] = useState(false);
   const [manualDeployTarget, setManualDeployTarget] = useState<SessionContextValue["manualDeployTarget"]>(null);
   const [canvasFocus, setCanvasFocus] =
@@ -68,6 +74,7 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
     setDeployOpen(false);
     setActiveScreen("processing-graph");
   }, []);
+  const [moduleTarget, setModuleTarget] = useState<SessionContextValue["moduleTarget"]>(null);
   const [physicalTarget, setPhysicalTarget] =
     useState<SessionContextValue["physicalTarget"]>(null);
 
@@ -84,6 +91,7 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
       setRevision((r) => r + 1);
       setDirty(false);
       setPhysicalTarget(null);
+      setModuleTarget(null);
     },
     [],
   );
@@ -163,9 +171,13 @@ export function SessionProvider({ children }: { readonly children: ReactNode }) 
     redo,
     navigate,
     physicalTarget,
+    moduleTarget,
+    setModuleTarget,
     openBackbonePhysical,
     dirty,
     markSaved,
+    topologyReviewRequestId,
+    requestTopologyReview,
     deployRequestId,
     manualDeployTarget,
     requestDeploy,

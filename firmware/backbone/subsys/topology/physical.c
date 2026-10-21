@@ -17,7 +17,8 @@ extern int spaghetti_usb_protocol_send_event(const uint8_t *, size_t);
 #define SPAGHETTI_PHYSICAL_CATALOG_MAX 16U
 #define SPAGHETTI_PHYSICAL_ENTRY_SIZE 33U
 #define SPAGHETTI_PHYSICAL_RECORD_SIZE \
-	(26U + SPAGHETTI_PHYSICAL_CATALOG_MAX * SPAGHETTI_PHYSICAL_ENTRY_SIZE + 4U)
+	(26U + SPAGHETTI_PHYSICAL_CATALOG_MAX * SPAGHETTI_PHYSICAL_ENTRY_SIZE + 68U + 4U)
+#define UPPER_OFFSET (26U + SPAGHETTI_PHYSICAL_CATALOG_MAX * SPAGHETTI_PHYSICAL_ENTRY_SIZE)
 #define SPAGHETTI_PHYSICAL_SETTINGS_KEY "physical/layout"
 
 #if DT_HAS_COMPAT_STATUS_OKAY(spaghettilab_physical_backbone)
@@ -29,6 +30,15 @@ K_MUTEX_DEFINE(physical_lock);
 static spaghetti_port_id_t physical_user_port(void)
 {
 	return DT_REG_ADDR(DT_PHANDLE(SPAGHETTI_PHYSICAL_NODE, user_port));
+}
+
+static uint8_t physical_mode_count(void) { return DT_PROP(SPAGHETTI_PHYSICAL_NODE, layout_version) == 2U ? 8U : 4U; }
+static int apply_record(const uint8_t *record, int index) {
+ uint8_t modes[8] = {0};
+ const uint8_t *entry = index < 0 ? record : &record[26U + index * SPAGHETTI_PHYSICAL_ENTRY_SIZE];
+ memcpy(modes, &entry[index < 0 ? 1 : 8], 4U);
+ memcpy(&modes[4], &record[UPPER_OFFSET + (index + 1) * 4U], 4U);
+ return spaghetti_port_apply_user_config_extended(physical_user_port(), modes, physical_mode_count(), entry[index < 0 ? 5 : 12], entry[index < 0 ? 6 : 13] ? &entry[index < 0 ? 6 : 13] : NULL);
 }
 
 static bool physical_function_tag(struct spaghetti_nfc_tag *out, uint8_t identity[8])
@@ -70,7 +80,7 @@ static int physical_settings_set(const char *name, size_t length,
 	if ((name == NULL) || strcmp(name, "layout") != 0) {
 		return -ENOENT;
 	}
-	if ((length != sizeof(candidate) && length != 218U) || read_cb == NULL) return -EINVAL;
+	if ((length != sizeof(candidate) && length != 218U && length != 558U) || read_cb == NULL) return -EINVAL;
 	memset(candidate, 0, sizeof(candidate));
 	if (read_cb(argument, candidate, length) != (ssize_t)length) return -EINVAL;
 	if (crc32_ieee(candidate, length - 4U) != sys_get_le32(&candidate[length - 4U])) return -EBADMSG;
@@ -79,7 +89,8 @@ static int physical_settings_set(const char *name, size_t length,
 		memcpy(&candidate[1], &legacy[1], 5U);
 		for (uint8_t i = 0; i < SPAGHETTI_PHYSICAL_CATALOG_MAX; ++i) memcpy(&candidate[26U + i * 33U], &legacy[6U + i * 13U], 13U);
 	} else if (candidate[0] != 2U) return -EBADMSG;
-	memcpy(physical_record, candidate, sizeof(candidate));
+	if (length == 558U) memset(&candidate[UPPER_OFFSET], 0, 68U);
+ memcpy(physical_record, candidate, sizeof(candidate));
 	return 0;
 }
 
@@ -101,11 +112,10 @@ int spaghetti_physical_init(void)
 	if (err != 0) {
 		return err;
 	}
-	err = spaghetti_port_apply_user_config(physical_user_port(), &physical_record[1],
-		physical_record[5], physical_record[6] ? &physical_record[6] : NULL);
+	err = apply_record(physical_record, -1);
 	if (err == 0) {
 		physical_source = (physical_record[1] || physical_record[2] ||
-			physical_record[3] || physical_record[4]) ? 1U : 0U;
+			physical_record[3] || physical_record[4] || physical_record[UPPER_OFFSET] || physical_record[UPPER_OFFSET+1] || physical_record[UPPER_OFFSET+2] || physical_record[UPPER_OFFSET+3]) ? 1U : 0U;
 	}
 	return err;
 #else
@@ -130,9 +140,7 @@ int spaghetti_physical_refresh(void)
 		? physical_catalog_index(identity) : -ENOENT;
 	if ((index >= 0) && ((physical_source != 2U) ||
 	    (memcmp(identity, physical_identity, 8U) != 0))) {
-		const uint8_t *entry = &physical_record[26U + index * SPAGHETTI_PHYSICAL_ENTRY_SIZE];
-
-		err = spaghetti_port_apply_user_config(physical_user_port(), &entry[8], entry[12], entry[13] ? &entry[13] : NULL);
+		err = apply_record(physical_record, index);
 		if (err == 0) {
 			physical_source = 2U;
 			memcpy(physical_identity, identity, 8U);
@@ -164,7 +172,7 @@ int spaghetti_physical_describe(uint8_t out[SPAGHETTI_PHYSICAL_SIZE])
 #if DT_HAS_COMPAT_STATUS_OKAY(spaghettilab_physical_backbone)
 	const uint8_t port_id = DT_REG_ADDR(DT_PHANDLE(SPAGHETTI_PHYSICAL_NODE, user_port));
 	const uint32_t caps = spaghetti_port_capabilities(spaghetti_port_get(port_id));
-	out[0] = 2U;
+	out[0] = 3U;
 	out[1] = DT_PROP(SPAGHETTI_PHYSICAL_NODE, mcu_id);
 	out[2] = DT_PROP(SPAGHETTI_PHYSICAL_NODE, nfc_antennas);
 	out[3] = DT_PROP(SPAGHETTI_PHYSICAL_NODE, layout_version);
@@ -174,7 +182,9 @@ int spaghetti_physical_describe(uint8_t out[SPAGHETTI_PHYSICAL_SIZE])
 	if (k_mutex_lock(&physical_lock, K_MSEC(100)) != 0) {
 		return -EBUSY;
 	}
-	const int err = spaghetti_port_copy_user_map(port_id, &out[7], &out[11]);
+	uint8_t modes[8];
+ const int err = spaghetti_port_copy_user_map_extended(port_id, modes, &out[11]);
+ memcpy(&out[7], modes, 4U); memcpy(&out[33], &modes[4], 4U);
 	out[12] = physical_source;
 	(void)spaghetti_port_copy_user_config(port_id, &out[13]);
 	k_mutex_unlock(&physical_lock);
@@ -200,7 +210,11 @@ int spaghetti_physical_apply_checked(const uint8_t modes[4], uint8_t speed, cons
 	return spaghetti_physical_apply_config(modes, speed, expected, NULL);
 }
 
-int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
+int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed, const uint8_t expected[20], const uint8_t config[20]) {
+ return spaghetti_physical_apply_config_extended(modes, 4U, speed, expected, config);
+}
+
+int spaghetti_physical_apply_config_extended(const uint8_t *modes, uint8_t mode_count, uint8_t speed,
 		const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE], const uint8_t config[20])
 {
 	if (IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return -ENOTSUP;
@@ -209,17 +223,19 @@ int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
 	struct spaghetti_nfc_tag tag;
 	uint8_t identity[8];
 	uint8_t candidate[SPAGHETTI_PHYSICAL_RECORD_SIZE];
-	uint8_t old_modes[4];
+	uint8_t old_modes[8];
+ uint8_t next_modes[8] = {0};
 	uint8_t old_speed;
 	uint8_t old_config[20];
 	uint8_t next_config[20];
 	int err;
 
-	if ((modes == NULL) || (expected == NULL) || (expected[8] > 10U) ||
+	if ((mode_count != 4U && mode_count != 8U) || mode_count > physical_mode_count() || (modes == NULL) || (expected == NULL) || (expected[8] > 10U) ||
 	    (expected[19] > 1U) || (speed > 1U)) {
 		return -EINVAL;
 	}
-	PHYSICAL_TRACE("physical:start");
+	memcpy(next_modes, modes, mode_count);
+ PHYSICAL_TRACE("physical:start");
 	if (k_mutex_lock(&physical_lock, K_MSEC(100)) != 0) {
 		return -EBUSY;
 	}
@@ -242,6 +258,12 @@ int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
 		goto unlock_physical;
 	}
 	PHYSICAL_TRACE("physical:tag");
+ if (mode_count == 4U && physical_mode_count() == 8U) {
+   uint8_t current[8], ignored_speed;
+   err = spaghetti_port_copy_user_map_extended(physical_user_port(), current, &ignored_speed);
+   if (err) goto unlock_physical;
+   memcpy(&next_modes[4], &current[4], 4U);
+ }
 	memcpy(candidate, physical_record, sizeof(candidate));
 	if (automatic) {
 		int index = physical_catalog_index(identity);
@@ -260,21 +282,23 @@ int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
 		memcpy(entry, identity, 8U);
 		memcpy(&entry[8], modes, 4U);
 		entry[12] = speed;
+ memcpy(&candidate[UPPER_OFFSET + (index + 1) * 4U], &next_modes[4], 4U);
 	} else {
 		memcpy(&candidate[1], modes, 4U);
 		candidate[5] = speed;
+ memcpy(&candidate[UPPER_OFFSET], &next_modes[4], 4U);
 	}
 	err = spaghetti_port_copy_user_config(physical_user_port(), old_config);
 	if (err) goto unlock_physical;
-	err = spaghetti_port_copy_user_map(physical_user_port(), old_modes, &old_speed);
+	err = spaghetti_port_copy_user_map_extended(physical_user_port(), old_modes, &old_speed);
 	if (err != 0) {
 		goto unlock_physical;
 	}
 	PHYSICAL_TRACE("physical:hardware");
-	err = spaghetti_port_apply_user_config(physical_user_port(), modes, speed, config);
+	err = spaghetti_port_apply_user_config_extended(physical_user_port(), next_modes, physical_mode_count(), speed, config);
 	PHYSICAL_TRACE("physical:hardware-done");
 	if (err != 0) {
-		if (err != -EBUSY) (void)spaghetti_port_apply_user_config(physical_user_port(), old_modes, old_speed, old_config[0] ? old_config : NULL);
+		if (err != -EBUSY) (void)spaghetti_port_apply_user_config_extended(physical_user_port(), old_modes, physical_mode_count(), old_speed, old_config[0] ? old_config : NULL);
 		goto unlock_physical;
 	}
 	(void)spaghetti_port_copy_user_config(physical_user_port(), next_config);
@@ -287,7 +311,7 @@ int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
 		err = settings_save_one(SPAGHETTI_PHYSICAL_SETTINGS_KEY, candidate,
 			sizeof(candidate));
 		if (err != 0) {
-			(void)spaghetti_port_apply_user_config(physical_user_port(), old_modes,
+			(void)spaghetti_port_apply_user_config_extended(physical_user_port(), old_modes, physical_mode_count(),
 				old_speed, old_config[0] ? old_config : NULL);
 			goto unlock_physical;
 		}
@@ -300,7 +324,7 @@ unlock_physical:
 	k_mutex_unlock(&physical_lock);
 	return err;
 #else
-	ARG_UNUSED(modes);
+	ARG_UNUSED(modes); ARG_UNUSED(mode_count);
 	ARG_UNUSED(speed);
 	ARG_UNUSED(expected);
 	ARG_UNUSED(config);

@@ -1,7 +1,6 @@
 import {
   Activity,
   BookOpen,
-  Boxes,
   Cable,
   CircuitBoard,
   FileCode,
@@ -104,7 +103,7 @@ export function CommandPalette() {
       [
         ["core-connections", copy.screens.coreConnections, Cable],
         ["catalog-topology", copy.palette.catalogTopology, Network],
-        ["physical-composition", copy.palette.physicalComposition, Boxes],
+        ["physical-composition", locale === "it" ? "Schede e collegamenti" : "Boards and connections", CircuitBoard],
         ["device-profile-studio", copy.palette.deviceProfileStudio, FileCode],
         ["processing-graph", copy.palette.processingGraph, Workflow],
         ["deploy-diff", copy.screens.deployDiff, GitCompareArrows],

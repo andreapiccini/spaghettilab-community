@@ -15,7 +15,11 @@
 #include <spaghetti/physical.h>
 #include <spaghetti/update.h>
 
-/** Runtime ownership of the board STATUS LED; release leaves the LED off. */
+/** Apply a color on a CAN Backbone, acknowledged after PWM updates. */
+int spaghetti_field_update_rgb(uint32_t node,uint8_t channels,uint32_t color,bool inverted,uint8_t port);
+/** Runtime lifecycle notification; idle indication never owns the application LED. */
+void spaghetti_status_led_application_active(bool active);
+/** Runtime ownership of the board STATUS LED. */
 int spaghetti_status_led_set(const void *owner, bool on);
 int spaghetti_status_led_init(const void *owner, uint8_t percent);
 int spaghetti_status_led_set_intensity(const void *owner, uint8_t percent);
@@ -66,6 +70,7 @@ struct spaghetti_slup_peer {
  * -ETIMEDOUT no matching acknowledgment; other target hardware errno.
  * @note Thread-only, bounded 100ms serialization plus 800ms acknowledgment.
  */
+int spaghetti_field_update_apply_physical_config_extended(uint32_t node_id, const uint8_t *modes, uint8_t count, uint8_t speed, const uint8_t expected[20], const uint8_t config[20]);
 int spaghetti_field_update_apply_physical_config(uint32_t node_id,
 					 const uint8_t modes[4], uint8_t speed,
 					 const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE], const uint8_t config[20]);
@@ -250,17 +255,21 @@ int spaghetti_field_update_enter_update(uint32_t dest_node_id);
  * how the current position is observed.
  *
  * @param[in] dest_node_id Local node or a peer from Discover.
- * @param[in] flashes Pulse count, or zero for the default of five.
+ * @param[in] flashes NFC reader pulse count. Backbone identification always lasts 10 seconds.
  *
- * @retval 0 The LED sequence finished, or the peer ACKed after blinking.
+ * @retval 0 Backbone identification started, or the NFC LED sequence finished.
  * @retval -EINVAL @p dest_node_id or @p flashes is invalid.
  * @retval -ENOTSUP The CAN adapter is not compiled and the target is remote.
  * @retval -ETIMEDOUT The peer did not finish the blink.
  * @retval -errno The CAN adapter failed to send.
  *
- * @note Thread context only. Blocks for the blink duration.
+ * @note Thread context only. Backbone identification is asynchronous (500 ms on/off),
+ *       keeps the user LED value, and restores its latest value after 10 seconds.
+ *       Remote calls wait only for the acknowledgement. NFC reader pulses block.
  */
 int spaghetti_field_update_blink(uint32_t dest_node_id, uint8_t flashes);
+/** Run identification timing on the otherwise idle application main thread. Never returns. */
+void spaghetti_field_update_identify_service(void);
 
 /**
  * @brief Write a chain slot onto one addressed Backbone.

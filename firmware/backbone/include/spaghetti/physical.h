@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #define SPAGHETTI_PHYSICAL_CONFIG_SIZE 20U
-#define SPAGHETTI_PHYSICAL_SIZE 33U
+#define SPAGHETTI_PHYSICAL_SIZE 37U
 #define SPAGHETTI_PHYSICAL_EXPECTED_SIZE 20U
 
 /** @brief Load persisted pins and NFC catalog after Port init, before NFC init.
@@ -27,6 +27,9 @@ int spaghetti_physical_refresh(void);
  * @note Thread-only, 100ms lock; flash writes synchronous, bounded by backend. */
 int spaghetti_physical_apply_checked(const uint8_t modes[4], uint8_t speed,
 		const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE]);
+/** Apply a checked four- or eight-pin map. Eight pins require layout V2.
+ * Existing four-pin callers preserve the upper bank; storage errors restore both banks. */
+int spaghetti_physical_apply_config_extended(const uint8_t *modes, uint8_t count, uint8_t speed, const uint8_t expected[20], const uint8_t config[20]);
 int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
 	const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE], const uint8_t config[20]);
 

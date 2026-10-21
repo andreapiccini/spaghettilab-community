@@ -1,3 +1,4 @@
+import { replacementUsbBinding, replaceUsbBackbone } from "../../lib/replace-usb-backbone.js";
 import { proposeBindingFromDiscovery } from "@spaghettilab/core-session";
 import { addCoreBinding, connectionProfileId, coreBindingId, createConnectionProfile, type CoreBindingRecord } from "@spaghettilab/domain";
 import { SpaghettiClient, WebSocketProtocolTransport } from "@spaghettilab/protocol-sdk";
@@ -28,7 +29,7 @@ export function ConnectCoreDialog({
   readonly onConnect: (binding: CoreBindingRecord, link: CoreLink) => void;
 }) {
   const { session, execute } = useSession();
-  const { setAttachedBackbones } = useCoreSessions();
+  const { setAttachedBackbones, rows, cancel } = useCoreSessions();
   const { locale } = useLocale();
   const copy = coreConnectionsCopy(locale);
   const [method, setMethod] = useState<Method>("auto");
@@ -101,7 +102,12 @@ export function ConnectCoreDialog({
   }): Promise<CoreBindingRecord | undefined> {
     if (!execute || !session) return undefined;
     const existing = session.stack.current.coreBindings.find((b) => b.expectedDeviceId === bindingInput.deviceIdHex);
-    if (existing) {
+    const singleUsb = bindingInput.transport === "usb" && selectedUsb.filter(core => core.source !== "can").length === 1;
+    const offline = new Set(rows.filter(row => row.sessionState === "DISCONNECTED" || row.sessionState === "ERROR").map(row => row.binding.bindingId));
+    for (const binding of session.stack.current.coreBindings)
+      if (!rows.some(row => row.binding.bindingId === binding.bindingId)) offline.add(binding.bindingId);
+    const replacement = singleUsb ? replacementUsbBinding(session.stack.current, bindingInput.deviceIdHex, offline) : undefined;
+    if (existing && !replacement) {
       onConnect(existing, bindingInput.link);
       return existing;
     }
@@ -122,6 +128,16 @@ export function ConnectCoreDialog({
       return undefined;
     }
     await saveConnectionProfile(profileResult.value);
+
+    if (replacement) {
+      const rebound = { ...replacement, expectedDeviceId: bindingInput.deviceIdHex, connectionProfileId: profileResult.value.connectionProfileId };
+      const result = execute({ kind: "ReplaceUsbBackbone", apply: project => ({ ok: true, value: replaceUsbBackbone(project, replacement.bindingId, rebound,
+        usbCores.some(core => core.source === "can" && core.viaDeviceIdHex === bindingInput.deviceIdHex && core.deviceIdHex === replacement.expectedDeviceId)) }) });
+      if (!result.ok) return undefined;
+      if (existing) cancel(existing.bindingId);
+      onConnect(rebound, bindingInput.link);
+      return rebound;
+    }
 
     const proposed = proposeBindingFromDiscovery(
       session.stack.current.coreBindings,

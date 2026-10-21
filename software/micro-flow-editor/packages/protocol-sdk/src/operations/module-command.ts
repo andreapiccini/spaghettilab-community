@@ -10,7 +10,7 @@ import {
 } from "../cbor.js";
 import { encodeMap, requireMap, requireU32, u32Field, boolField } from "../fields.js";
 
-export type ModuleCommandValue = bigint | boolean | Uint8Array;
+export type ModuleCommandValue = bigint | boolean | string | Uint8Array;
 export type ModuleCommandRequest = {
   readonly key: number;
   readonly commandId: number;
@@ -26,7 +26,9 @@ function encodeValue(value: ModuleCommandValue): Uint8Array {
     ? encodeInt(value)
     : typeof value === "boolean"
       ? encodeBool(value)
-      : encodeBytes(value);
+      : typeof value === "string"
+        ? encodeText(value)
+        : encodeBytes(value);
 }
 export function encodeModuleCommandRequest(r: ModuleCommandRequest): Uint8Array {
   return encodeMap([
@@ -57,6 +59,11 @@ export function decodeModuleCommandRequest(bytes: Uint8Array): ModuleCommandRequ
       if (id < 1 || id > 65535) throw new ProtocolCodecError("Invalid argument ID");
       if (value.kind === "uint" || value.kind === "int") args[id] = value.value;
       else if (value.kind === "bool") args[id] = value.value;
+      else if (
+        value.kind === "text" &&
+        new TextEncoder().encode(value.value).length <= 32
+      )
+        args[id] = value.value;
       else if (value.kind === "bytes" && value.value.length <= 8)
         args[id] = value.value;
       else throw new ProtocolCodecError("Invalid command argument");
@@ -75,7 +82,15 @@ export function encodeModuleCommandResponse(r: ModuleCommandResponse = {}): Uint
       0,
       encodeMap(
         Object.entries(r.fields).map(
-          ([id, value]) => [Number(id), typeof value === "number" ? encodeFloat(value) : typeof value === "string" ? encodeText(value) : encodeInt(value)] as const,
+          ([id, value]) =>
+            [
+              Number(id),
+              typeof value === "number"
+                ? encodeFloat(value)
+                : typeof value === "string"
+                  ? encodeText(value)
+                  : encodeInt(value),
+            ] as const,
         ),
       ),
     ],
@@ -90,7 +105,12 @@ export function decodeModuleCommandResponse(bytes: Uint8Array): ModuleCommandRes
   const values = requireMap(map.get(0)!, "Command fields");
   if (values.size > 8) throw new ProtocolCodecError("Too many result fields");
   for (const [id, value] of values) {
-    if (value.kind !== "uint" && value.kind !== "int" && value.kind !== "float" && value.kind !== "text")
+    if (
+      value.kind !== "uint" &&
+      value.kind !== "int" &&
+      value.kind !== "float" &&
+      value.kind !== "text"
+    )
       throw new ProtocolCodecError("Invalid result field");
     fields[id] = value.value;
   }

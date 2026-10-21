@@ -1,4 +1,17 @@
-import { encodeNfcPageRequest, decodeNfcPageResponse, type NfcPageRequest } from "../operations/nfc.js";
+import { decodeOne } from "../cbor.js";
+import {
+  encodeMap,
+  bytesField,
+  u32Field,
+  requireMap,
+  requireBytes,
+} from "../fields.js";
+import { encodeConfigChunk } from "../operations/config.js";
+import {
+  encodeNfcPageRequest,
+  decodeNfcPageResponse,
+  type NfcPageRequest,
+} from "../operations/nfc.js";
 import {
   decodeEvent,
   decodeResponse,
@@ -12,6 +25,7 @@ import { decodeConfigApplyFailure, SpaghettiClientError } from "./errors.js";
 import type { ProtocolTransport } from "./transport.js";
 import {
   encodeApplyPhysicalRequest,
+  encodeIdentifyBackboneRequest,
   decodeApplyPhysicalResponse,
   type ApplyPhysicalRequest,
 } from "../operations/physical.js";
@@ -282,10 +296,12 @@ export class SpaghettiClient {
       throw new SpaghettiClientError({ code: "CANCELLED", operation });
     }
     const correlationId = this.allocateCorrelationId();
-    const timeoutMs = overrides?.defaultTimeoutMs ?? this.options.defaultTimeoutMs ?? 5000;
+    const timeoutMs =
+      overrides?.defaultTimeoutMs ?? this.options.defaultTimeoutMs ?? 5000;
     const maxRetries = overrides?.maxRetries ?? this.options.maxRetries ?? 2;
     const retryDelayMs = overrides?.retryDelayMs ?? this.options.retryDelayMs ?? 200;
-    const attemptTimeoutMs = overrides?.attemptTimeoutMs ?? this.options.attemptTimeoutMs ?? 2000;
+    const attemptTimeoutMs =
+      overrides?.attemptTimeoutMs ?? this.options.attemptTimeoutMs ?? 2000;
     const deadline = Date.now() + timeoutMs;
 
     for (let attempt = 0; ; attempt++) {
@@ -302,13 +318,26 @@ export class SpaghettiClient {
         await Promise.race([
           this.transport.send(encodeRequest({ correlationId, operation, payload })),
           new Promise<never>((_, reject) => {
-            sendTimer = setTimeout(() => reject(new SpaghettiClientError({
-              code: "TIMEOUT", operation, correlationId,
-            })), Math.max(0, deadline - Date.now()));
+            sendTimer = setTimeout(
+              () =>
+                reject(
+                  new SpaghettiClientError({
+                    code: "TIMEOUT",
+                    operation,
+                    correlationId,
+                  }),
+                ),
+              Math.max(0, deadline - Date.now()),
+            );
             if (signal) {
-              abortSend = () => reject(new SpaghettiClientError({
-                code: "CANCELLED", operation, correlationId,
-              }));
+              abortSend = () =>
+                reject(
+                  new SpaghettiClientError({
+                    code: "CANCELLED",
+                    operation,
+                    correlationId,
+                  }),
+                );
               signal.addEventListener("abort", abortSend, { once: true });
               if (signal.aborted) abortSend();
             }
@@ -462,6 +491,16 @@ export class SpaghettiClient {
     return decodeNfcPageResponse(bytes, request.page);
   }
 
+  /** Starts a firmware-timed 10-second LED override, without changing Config. */
+  async identifyBackbone(nodeId: number, signal?: AbortSignal): Promise<void> {
+    await this.request(
+      Operation.IDENTIFY_BACKBONE,
+      encodeIdentifyBackboneRequest(nodeId),
+      signal,
+      { maxRetries: 0 },
+    );
+  }
+
   async applyPhysical(
     request: ApplyPhysicalRequest,
     signal?: AbortSignal,
@@ -496,37 +535,137 @@ export class SpaghettiClient {
     });
   }
 
+  /** A temporary client for a specific physical Backbone, through this USB gateway.
+   * Deployment uses request/response only; runtime signals travel directly on CAN. */
+  forCanNode(nodeId: number): SpaghettiClient {
+    if (!Number.isInteger(nodeId) || nodeId <= 0 || nodeId > 0xffffff)
+      throw new Error("Invalid CAN node identity");
+    const handlers = new Set<(bytes: Uint8Array) => void>();
+    const transport: ProtocolTransport = {
+      send: async (bytes) => {
+        const reply = await this.request(
+          Operation.CAN_REQUEST,
+          encodeMap([u32Field(0, nodeId), bytesField(1, bytes)]),
+          undefined,
+          { defaultTimeoutMs: 10000, attemptTimeoutMs: 4500, maxRetries: 1 },
+        );
+        const inner = requireBytes(
+          requireMap(decodeOne(reply), "CAN response"),
+          0,
+          "CAN response",
+        );
+        for (const handler of handlers) handler(inner);
+      },
+      onResponse: (handler) => {
+        handlers.add(handler);
+        return () => {
+          handlers.delete(handler);
+        };
+      },
+      onEvent: () => () => {},
+    };
+    return new SpaghettiClient(transport, {
+      defaultTimeoutMs: 15000,
+      attemptTimeoutMs: 12000,
+      maxRetries: 0,
+    });
+  }
+
   async getConfig(signal?: AbortSignal): Promise<GetConfigResponse> {
-    const bytes = await this.request(
-      Operation.GET_CONFIG,
-      encodeGetConfigRequest(),
-      signal,
+    const first = decodeGetConfigResponse(
+      await this.request(Operation.GET_CONFIG, encodeGetConfigRequest(), signal),
     );
-    return decodeGetConfigResponse(bytes);
+    if (first.totalSize === undefined) return first;
+    if (
+      first.offset !== 0 ||
+      first.totalSize > 65536 ||
+      first.totalSize < first.configBytes.length
+    )
+      throw new Error("Invalid configuration chunk size");
+    const configBytes = new Uint8Array(first.totalSize);
+    configBytes.set(first.configBytes);
+    let offset = first.configBytes.length;
+    while (offset < configBytes.length) {
+      const next = decodeGetConfigResponse(
+        await this.request(
+          Operation.GET_CONFIG,
+          encodeGetConfigRequest(offset),
+          signal,
+        ),
+      );
+      if (
+        next.generation !== first.generation ||
+        next.totalSize !== configBytes.length ||
+        next.offset !== offset ||
+        next.sha256.length !== first.sha256.length ||
+        !next.sha256.every((v, i) => v === first.sha256[i]) ||
+        next.configBytes.length === 0 ||
+        next.configBytes.length > configBytes.length - offset
+      )
+        throw new Error("Configuration changed during download");
+      configBytes.set(next.configBytes, offset);
+      offset += next.configBytes.length;
+    }
+    return { generation: first.generation, sha256: first.sha256, configBytes };
+  }
+
+  private configUploadToken = Math.floor(Math.random() * 0xfffffffe) + 1;
+  private async transferConfig(
+    operation: "validate" | "apply",
+    configBytes: Uint8Array,
+    generation: number,
+    signal?: AbortSignal,
+  ): Promise<Uint8Array> {
+    const op =
+      operation === "apply" ? Operation.APPLY_CONFIG : Operation.VALIDATE_CONFIG;
+    if (configBytes.length <= 576)
+      return this.request(
+        op,
+        operation === "apply"
+          ? encodeApplyConfigRequest({ configBytes, expectedGeneration: generation })
+          : encodeValidateConfigRequest({ configBytes }),
+        signal,
+      );
+    const token = (this.configUploadToken = (this.configUploadToken + 1) >>> 0 || 1);
+    let result: Uint8Array = new Uint8Array();
+    for (let offset = 0; offset < configBytes.length; offset += 400) {
+      result = await this.request(
+        op,
+        encodeConfigChunk(
+          operation,
+          configBytes.subarray(offset, offset + 400),
+          token,
+          offset,
+          configBytes.length,
+          generation,
+        ),
+        signal,
+      );
+    }
+    return result;
   }
 
   async validateConfig(
     req: ValidateConfigRequest,
     signal?: AbortSignal,
   ): Promise<ValidateConfigResponse> {
-    const bytes = await this.request(
-      Operation.VALIDATE_CONFIG,
-      encodeValidateConfigRequest(req),
-      signal,
+    return decodeValidateConfigResponse(
+      await this.transferConfig("validate", req.configBytes, 0, signal),
     );
-    return decodeValidateConfigResponse(bytes);
   }
 
   async applyConfig(
     req: ApplyConfigRequest,
     signal?: AbortSignal,
   ): Promise<ApplyConfigResponse> {
-    const bytes = await this.request(
-      Operation.APPLY_CONFIG,
-      encodeApplyConfigRequest(req),
-      signal,
+    return decodeApplyConfigResponse(
+      await this.transferConfig(
+        "apply",
+        req.configBytes,
+        req.expectedGeneration,
+        signal,
+      ),
     );
-    return decodeApplyConfigResponse(bytes);
   }
 
   // --- discovery ------------------------------------------------------------

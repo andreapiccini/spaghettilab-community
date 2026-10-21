@@ -169,41 +169,273 @@ it("includes a saved project driver and does not turn an installed unit into a d
   ).toEqual(["my-relay"]);
 });
 
-
 it("installs an NFC RGB unit with three PWM channels and preserves its calibrated order on replacement", async () => {
   const { rgbModuleDraft } = await import("../rgb-module.js");
   const driver = rgbModuleDraft();
   const p = project();
-  const first = planModuleImport(p, p.coreBindings[0]!.bindingId, "master:board", driver, physical);
+  const first = planModuleImport(
+    p,
+    p.coreBindings[0]!.bindingId,
+    "master:board",
+    driver,
+    physical,
+  );
   expect(first.physical.modes).toEqual([12, 12, 12, 0]);
   expect(first.physical.settings?.pwmHz).toBe(1000);
   const installed = commitModuleImport(p, first, "0471C102A02190", false, true);
-  const stored = parseBackboneSensorModules(installed.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment);
+  const stored = parseBackboneSensorModules(
+    installed.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
+  );
   const module = stored.byBinding.master![0]!;
   expect(module.id).toBe("nfc-module-0471C102A02190");
   expect(module.gpioAssignments?.channels).toEqual({ RED: 0, GREEN: 1, BLUE: 2 });
-  const calibrated = { ...installed, authoringMetadata: { ...installed.authoringMetadata,
-    [BACKBONE_SENSOR_MODULES_META_KEY]: { comment: JSON.stringify({ ...stored, byBinding: { master: [{ ...module, gpioAssignments: { boardKey: "master:board", channels: { RED: 1, GREEN: 0, BLUE: 2 } } }] } }) } } };
-  const replacement = planModuleImport(calibrated, p.coreBindings[0]!.bindingId, "master:board", driver, first.physical);
+  const calibrated = {
+    ...installed,
+    authoringMetadata: {
+      ...installed.authoringMetadata,
+      [BACKBONE_SENSOR_MODULES_META_KEY]: {
+        comment: JSON.stringify({
+          ...stored,
+          byBinding: {
+            master: [
+              {
+                ...module,
+                gpioAssignments: {
+                  boardKey: "master:board",
+                  channels: { RED: 1, GREEN: 0, BLUE: 2 },
+                },
+              },
+            ],
+          },
+        }),
+      },
+    },
+  };
+  const replacement = planModuleImport(
+    calibrated,
+    p.coreBindings[0]!.bindingId,
+    "master:board",
+    driver,
+    first.physical,
+  );
   expect(replacement.channels).toEqual({ RED: 1, GREEN: 0, BLUE: 2 });
   expect(replacement.conflicts).toHaveLength(1);
-  expect(() => commitModuleImport(calibrated, replacement, "0471C102A02190", false, true)).toThrow();
+  expect(() =>
+    commitModuleImport(calibrated, replacement, "0471C102A02190", false, true),
+  ).toThrow();
 });
 
 it("imports DHT22 DATA as input on A0 and a separate HIGH supply output on A1", async () => {
   const { catalogDht22Driver } = await import("../gpio-driver-presets.js");
   const driver = catalogDht22Driver();
   const p = project();
-  const plan = planModuleImport(p, p.coreBindings[0]!.bindingId, "master:board", driver, physical);
+  const plan = planModuleImport(
+    p,
+    p.coreBindings[0]!.bindingId,
+    "master:board",
+    driver,
+    physical,
+  );
   expect(plan.physical.modes).toEqual([1, 2, 0, 0]);
   expect(plan.channels).toEqual({ DATA: 0, POWER: 1 });
-  const compiled = compileRuntimeDriver(driver, new Map(), new Map(Object.entries(plan.channels)));
-  expect(compiled.profile.initOps).toContainEqual({ op: "DHT22_POWER", dataChannel: 0, powerChannel: 1, on: true });
-  expect(compiled.profile.sampleOps.find(op => op.op === "DHT22_READ")).toMatchObject({ dataChannel: 0, powerChannel: 1 });
-  expect(compiled.profile.safeStopOps).toEqual([{ op: "DHT22_POWER", dataChannel: 0, powerChannel: 1, on: false }]);
+  const compiled = compileRuntimeDriver(
+    driver,
+    new Map(),
+    new Map(Object.entries(plan.channels)),
+  );
+  expect(compiled.profile.initOps).toContainEqual({
+    op: "DHT22_POWER",
+    dataChannel: 0,
+    powerChannel: 1,
+    on: true,
+  });
+  expect(compiled.profile.sampleOps.find((op) => op.op === "DHT22_READ")).toMatchObject(
+    { dataChannel: 0, powerChannel: 1 },
+  );
+  expect(compiled.profile.safeStopOps).toEqual([
+    { op: "DHT22_POWER", dataChannel: 0, powerChannel: 1, on: false },
+  ]);
   expect(compiled.profile.sampleFields).toHaveLength(2);
   expect(validateDraftForCreate(driver)).toEqual([]);
-  expect(compiled.profile.sampleFields).toEqual([{ fieldId: 1, type: "float", name: "value_1", unit: "%RH" }, { fieldId: 2, type: "float", name: "value_2", unit: "°C" }]);
+  expect(compiled.profile.sampleFields).toEqual([
+    { fieldId: 1, type: "float", name: "value_1", unit: "%RH" },
+    { fieldId: 2, type: "float", name: "value_2", unit: "°C" },
+  ]);
   const installed = commitModuleImport(p, plan, "dht-unit", false, true);
-  expect(parseBackboneSensorModules(installed.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master?.[0]?.gpioAssignments?.channels).toEqual({ DATA: 0, POWER: 1 });
+  expect(
+    parseBackboneSensorModules(
+      installed.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
+    ).byBinding.master?.[0]?.gpioAssignments?.channels,
+  ).toEqual({ DATA: 0, POWER: 1 });
+});
+
+it("keeps a module on the selected CAN Backbone without changing the master's pin draft", () => {
+  const first = commitModuleImport(
+    project(),
+    planModuleImport(
+      project(),
+      "master",
+      "master:board",
+      catalogGpioRelayDriver(),
+      physical,
+    ),
+    "local-relay",
+    false,
+    true,
+  );
+  const remotePlan = planModuleImport(
+    first,
+    "master",
+    "master:remote",
+    catalogGpioRelayDriver(),
+    {
+      ...physical,
+      variant: "v2",
+      modes: Array(8).fill(0),
+      local: false,
+      nodeId: 0x123456,
+    },
+  );
+  const next = commitModuleImport(first, remotePlan, "remote-relay", false, true);
+  const drafts = parsePhysicalProject(
+    next.authoringMetadata[PHYSICAL_META_KEY]?.comment,
+  ).drafts;
+  expect(drafts["master:board"]).toEqual(
+    parsePhysicalProject(first.authoringMetadata[PHYSICAL_META_KEY]?.comment).drafts[
+      "master:board"
+    ],
+  );
+  expect(drafts["master:remote"]).toMatchObject({
+    local: false,
+    nodeId: 0x123456,
+    variant: "v2",
+  });
+  const modules = parseBackboneSensorModules(
+    next.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
+  ).byBinding.master!;
+  expect(
+    modules.some((module) => module.gpioAssignment?.boardKey === "master:board"),
+  ).toBe(true);
+  expect(
+    modules.some((module) => module.gpioAssignment?.boardKey === "master:remote"),
+  ).toBe(true);
+});
+
+it("keeps modules on free pins and retires the whole overlapping RGB module including extra canvas copies", async () => {
+  const { rgbModuleDraft } = await import("../rgb-module.js");
+  const { SENSOR_MODULE_ID_PROP } = await import("../backbone-sensor-block.js");
+  const p = project();
+  const rgbPlan = planModuleImport(
+    p,
+    "master",
+    "master:board",
+    rgbModuleDraft(),
+    physical,
+  );
+  let current = commitModuleImport(p, rgbPlan, "rgb", false, false);
+  const freePlan = planModuleImport(
+    current,
+    "master",
+    "master:board",
+    catalogGpioRelayDriver(),
+    rgbPlan.physical,
+    { RELAY_CONTROL: 3 },
+  );
+  expect(freePlan.conflicts).toEqual([]);
+  current = commitModuleImport(current, freePlan, "relay", false, false);
+  const graph = current.deviceGraphs[0]!;
+  const rgbNode = graph.nodes[0]!;
+  current = {
+    ...current,
+    deviceGraphs: [
+      {
+        ...graph,
+        nodes: [
+          ...graph.nodes,
+          {
+            ...rgbNode,
+            id: "extra-rgb",
+            data: {
+              ...rgbNode.data,
+              properties: { [SENSOR_MODULE_ID_PROP]: "nfc-module-rgb" },
+            },
+          },
+        ],
+        edges: [{ id: "extra-wire", source: "extra-rgb", target: graph.nodes[1]!.id }],
+      },
+    ],
+  } as ProjectV1;
+  const replacement = planModuleImport(
+    current,
+    "master",
+    "master:board",
+    catalogGpioRelayDriver(),
+    freePlan.physical,
+    { RELAY_CONTROL: 1 },
+  );
+  expect(replacement.conflicts.map((item) => item.id)).toEqual(["nfc-module-rgb"]);
+  expect(replacement.physical.modes).toEqual([0, 2, 0, 2]);
+  const next = commitModuleImport(current, replacement, "new-relay", true, false);
+  expect(next.deviceGraphs[0]!.nodes.map((node) => node.id)).toEqual([
+    "nfc-block-relay",
+    "nfc-block-new-relay",
+  ]);
+  expect(next.deviceGraphs[0]!.edges).toEqual([]);
+  expect(
+    Object.values(JSON.parse(next.authoringMetadata.__nfcInstallations!.comment!)),
+  ).not.toContainEqual(expect.objectContaining({ moduleId: "nfc-module-rgb" }));
+});
+
+it("persists explicit RGB signal mapping and rejects duplicate assignments", async () => {
+  const { rgbModuleDraft } = await import("../rgb-module.js");
+  const plan = planModuleImport(
+    project(),
+    "master",
+    "master:board",
+    rgbModuleDraft(),
+    physical,
+    { RED: 2, GREEN: 0, BLUE: 3 },
+  );
+  expect(plan.channels).toEqual({ RED: 2, GREEN: 0, BLUE: 3 });
+  expect(plan.physical.modes).toEqual([12, 0, 12, 12]);
+  expect(() =>
+    planModuleImport(project(), "master", "master:board", rgbModuleDraft(), physical, {
+      RED: 0,
+      GREEN: 0,
+      BLUE: 2,
+    }),
+  ).toThrow(/distinto/);
+});
+
+it("maps I²C to selected pins and prevents relocating a bus still used by another module", async () => {
+  const { createModuleProgramDraft } = await import("../new-module-program.js");
+  const driver = { ...createModuleProgramDraft("i2c"), status: "ready" as const };
+  const p = project();
+  const plan = planModuleImport(p, "master", "master:board", driver, physical, {
+    SDA: 3,
+    SCL: 2,
+  });
+  expect(plan.physical.modes).toEqual([0, 0, 5, 4]);
+  const installed = commitModuleImport(p, plan, "i2c", false, false);
+  expect(
+    parseBackboneSensorModules(
+      installed.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
+    ).byBinding.master![0]!.gpioAssignments?.channels,
+  ).toEqual({ SDA: 3, SCL: 2 });
+  expect(() =>
+    planModuleImport(installed, "master", "master:board", driver, plan.physical, {
+      SDA: 0,
+      SCL: 1,
+    }),
+  ).toThrow(/bus è già assegnato/);
+  const overlap = planModuleImport(
+    installed,
+    "master",
+    "master:board",
+    catalogGpioRelayDriver(),
+    plan.physical,
+    { RELAY_CONTROL: 3 },
+  );
+  expect(overlap.conflicts).toHaveLength(1);
+  expect(overlap.physical.modes).toEqual([0, 0, 0, 2]);
 });

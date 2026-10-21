@@ -11,7 +11,15 @@ import {
   type ProcessingCatalogEntry,
 } from "@spaghettilab/processing-block-catalog";
 import { AnimatePresence, motion } from "motion/react";
-import { Boxes, ChefHat, Cpu, Search, Zap, GitBranch, type LucideIcon } from "lucide-react";
+import {
+  Boxes,
+  ChefHat,
+  Cpu,
+  Search,
+  Zap,
+  GitBranch,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { motionTokens } from "../../lib/motion-tokens.js";
 import { DEMO_PALETTE_IDS, isDemoOnlyEnabled } from "../../lib/demo-only.js";
@@ -65,7 +73,11 @@ const FAMILY_ICONS: Record<FamilySectionId, LucideIcon> = {
   bay: Boxes,
 };
 
-const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set(["functionality", "logic", "bay"]);
+const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set([
+  "functionality",
+  "logic",
+  "bay",
+]);
 
 export function ProcessingBlockPalette({
   bindingId,
@@ -73,11 +85,13 @@ export function ProcessingBlockPalette({
   onAddViewer,
   onAddTrigger,
   onAddSchedule,
+  onAddLedDriver,
 }: {
   readonly bindingId?: string;
   readonly onAddViewer?: () => void;
   readonly onAddTrigger?: () => void;
   readonly onAddSchedule?: () => void;
+  readonly onAddLedDriver?: () => void;
   /** Opens the sensor-recipe wizard on the create form. */
   readonly onCreateRecipe?: () => void;
 }) {
@@ -104,7 +118,8 @@ export function ProcessingBlockPalette({
         (e) =>
           (demoOnly
             ? (DEMO_PALETTE_IDS as readonly string[]).includes(e.id)
-            : PALETTE_ALLOWED_IDS.has(e.id) || e.id.startsWith("logic.") ||
+            : PALETTE_ALLOWED_IDS.has(e.id) ||
+              e.id.startsWith("logic.") ||
               (e.id.startsWith("native.") &&
                 e.runtime === "core-block" &&
                 !e.id.startsWith("native.physical_"))) &&
@@ -178,8 +193,14 @@ export function ProcessingBlockPalette({
   }
 
   const sections: { id: FamilySectionId; rows: readonly PalettePlaceable[] }[] = [
-    { id: "functionality", rows: groups.functionality.filter(row => !row.entry.id.startsWith("logic.")) },
-    { id: "logic", rows: groups.functionality.filter(row => row.entry.id.startsWith("logic.")) },
+    {
+      id: "functionality",
+      rows: groups.functionality.filter((row) => !row.entry.id.startsWith("logic.")),
+    },
+    {
+      id: "logic",
+      rows: groups.functionality.filter((row) => row.entry.id.startsWith("logic.")),
+    },
   ];
 
   return (
@@ -204,8 +225,22 @@ export function ProcessingBlockPalette({
           sections.map(({ id, rows }, index) => {
             if (rows.length === 0 && searching) return null;
             const Icon = FAMILY_ICONS[id];
-            const label = id === "logic" ? (locale === "it" ? "Logica" : "Logic") : id === "functionality" ? copy.functionality : copy.bay;
-            const hint = id === "logic" ? (locale === "it" ? "Condizioni e decisioni" : "Conditions and decisions") : id === "functionality" ? copy.functionalityHint : copy.bayHint;
+            const label =
+              id === "logic"
+                ? locale === "it"
+                  ? "Logica"
+                  : "Logic"
+                : id === "functionality"
+                  ? copy.functionality
+                  : copy.bay;
+            const hint =
+              id === "logic"
+                ? locale === "it"
+                  ? "Condizioni e decisioni"
+                  : "Conditions and decisions"
+                : id === "functionality"
+                  ? copy.functionalityHint
+                  : copy.bayHint;
             const open = searching || openIds.has(id);
             return (
               <div key={id} className="mb-1">
@@ -295,15 +330,17 @@ export function ProcessingBlockPalette({
                             delay={index * 0 + entryIndex * motionTokens.stagger.list}
                             portsConfigured={portsConfigured}
                             onClickRemind={() =>
-                              row.entry.id === "native.schedule" && onAddSchedule
-                                ? onAddSchedule()
-                                : row.entry.id === "appblocks.data_viewer" &&
-                                    onAddViewer
-                                  ? onAddViewer()
-                                  : row.entry.id === "appblocks.manual_trigger" &&
-                                      onAddTrigger
-                                    ? onAddTrigger()
-                                    : setDragReminder(true)
+                              row.entry.id === "native.led_driver" && onAddLedDriver
+                                ? onAddLedDriver()
+                                : row.entry.id === "native.schedule" && onAddSchedule
+                                  ? onAddSchedule()
+                                  : row.entry.id === "appblocks.data_viewer" &&
+                                      onAddViewer
+                                    ? onAddViewer()
+                                    : row.entry.id === "appblocks.manual_trigger" &&
+                                        onAddTrigger
+                                      ? onAddTrigger()
+                                      : setDragReminder(true)
                             }
                             onDragBegan={() => setDragReminder(false)}
                           />

@@ -57,10 +57,15 @@ export function formatApplyConfigError(error: unknown, it = true): string {
       ? (error as { status?: unknown; message?: unknown })
       : undefined;
   const message = error instanceof Error ? error.message : String(error);
+  if (/TIMEOUT/i.test(message)) {
+    return it
+      ? "La Backbone non ha risposto in tempo. Lo Stop non è confermato: il programma potrebbe essere ancora in esecuzione. Riprova Stop."
+      : "The Backbone did not respond in time. Stop is not confirmed: the program may still be running. Retry Stop.";
+  }
   if (record?.status === 8 || /RESOURCE_EXHAUSTED/i.test(message)) {
     return it
-      ? "Core saturo (coda o slot pieni). Riprovo da solo; se resta così stacca e riallaccia l’USB, poi Stop."
-      : "Core is full (queue or slots). Retrying; if it stays, unplug USB, then Stop.";
+      ? "La Backbone non dispone delle risorse necessarie per questa operazione. Verifica la dimensione del programma e i limiti del firmware."
+      : "The Backbone has insufficient resources for this operation. Check program size and firmware limits.";
   }
   if (record?.status === 5 || /BUSY/i.test(message)) {
     return it
@@ -70,9 +75,30 @@ export function formatApplyConfigError(error: unknown, it = true): string {
   return message;
 }
 
+/** Retry only read timeouts; never repeat an ambiguous configuration write. */
+export async function readConfigForStop(
+  client: RuntimeStopClient,
+  signal?: AbortSignal,
+): Promise<GetConfigResponse> {
+  try {
+    return await client.getConfig(signal);
+  } catch (error) {
+    signal?.throwIfAborted();
+    if (!(
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "TIMEOUT"
+    ))
+      throw error;
+    return client.getConfig(signal);
+  }
+}
+
 export async function applyStoppedRuntime(
   client: RuntimeStopClient,
   signal?: AbortSignal,
+  initial?: GetConfigResponse,
 ): Promise<{
   readonly generation: number;
   readonly config: GetConfigResponse;
@@ -80,7 +106,8 @@ export async function applyStoppedRuntime(
 }> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt++) {
-    const live = await client.getConfig(signal);
+    const live =
+      attempt === 0 && initial ? initial : await readConfigForStop(client, signal);
     const decoded = decodeConfigCbor(live.configBytes);
     if (!decoded.ok)
       throw new Error(
@@ -97,7 +124,7 @@ export async function applyStoppedRuntime(
         },
         signal,
       );
-      const next = await client.getConfig(signal);
+      const next = await readConfigForStop(client, signal);
       return { generation: next.generation, config: next, changed: true };
     } catch (error) {
       lastError = error;
@@ -184,7 +211,7 @@ export async function pauseContinuousRuntime(
   signal?: AbortSignal,
   completionProfiles: readonly string[] = [],
 ): Promise<GetConfigResponse> {
-  const original = await client.getConfig(signal);
+  const original = await readConfigForStop(client, signal);
   const decoded = decodeConfigCbor(original.configBytes);
   if (!decoded.ok)
     throw new Error(
@@ -197,16 +224,17 @@ export async function pauseContinuousRuntime(
   // Stopping safe-stops unchanged drivers too (e.g. sensor power goes LOW).
   // Remove then reload to run initialization again before accepting manual
   // commands. Keep installed profiles; only configuration is replaced.
-  const cleared = await applyStoppedRuntime(client, signal);
+  const cleared = await applyStoppedRuntime(client, signal, original);
   if (cleared.changed) await waitConfigWriteGap(signal);
   for (let attempt = 0; attempt < 3; attempt++) {
-    const live = await client.getConfig(signal);
+    const live =
+      attempt === 0 ? cleared.config : await readConfigForStop(client, signal);
     try {
       await client.applyConfig(
         { expectedGeneration: live.generation, configBytes: pausedBytes },
         signal,
       );
-      const next = await client.getConfig(signal);
+      const next = await readConfigForStop(client, signal);
       if (
         next.configBytes.length !== pausedBytes.length ||
         !next.configBytes.every((byte, index) => byte === pausedBytes[index])
@@ -231,7 +259,13 @@ export function configHasContinuousSchedules(config: CanonicalConfig): boolean {
       .map((rule) => Number(rule.properties[3])),
   );
   return config.schedules.some(
-    (schedule) => schedule.enabled && !actionTargets.has(schedule.sourceKey) &&
-      !config.modules.some(module => module.key === schedule.sourceKey && String(module.properties[1]).startsWith("flow.gpio-state.")),
+    (schedule) =>
+      schedule.enabled &&
+      !actionTargets.has(schedule.sourceKey) &&
+      !config.modules.some(
+        (module) =>
+          module.key === schedule.sourceKey &&
+          String(module.properties[1]).startsWith("flow.gpio-state."),
+      ),
   );
 }

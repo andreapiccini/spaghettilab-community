@@ -25,7 +25,7 @@ it("reads the actual relay GPIO for a viewer without executing relay commands", 
   expect(observer!.initOps).toEqual([]);
   expect(observer!.sampleOps.map(op => op.op)).toContain("GPIO_GET");
   expect(observer!.sampleOps.every(op => !["GPIO_SET", "GPIO_SET_VALUE", "GPIO_PULSE"].includes(op.op))).toBe(true);
-  expect(deployment.observations?.[0]).toMatchObject({ valueKind: "digital", label: "Stato", unit: "" });
+  expect(deployment.observations?.[0]).toMatchObject({ valueKind: "boolean", label: "Stato", unit: "" });
   expect(deployment.observations?.[0]?.action).toBeUndefined();
   const compiled = compileConfig(oneShotDeploymentInput(deployment.input, [observer!.profileId]), deployment.options);
   if (!compiled.ok) throw new Error(JSON.stringify(compiled));

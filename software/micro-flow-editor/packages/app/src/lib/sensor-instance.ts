@@ -11,6 +11,13 @@ export function sensorInterfaces(draft: DeviceRecipeDraft) {
     ...(draft.flowInterfaces ?? []),
     ...draft.commands.flatMap((action) => action.steps),
   ];
+  if (draft.moduleProgram) {
+    const contracts=Object.values(draft.moduleProgram.actions);
+    const inputs: Extract<DeviceRecipeOp,{type:"sample_external"}>[] = [...new Set(contracts.flatMap(action => Object.keys(action.inputIds)))].map(id => ({id:`program-input:${id}`,type:"sample_external",fromChannelId:id,into:id,inputMode:"data",valueType:"number"}));
+    const outputs: Extract<DeviceRecipeOp,{type:"emit"}>[] = [...new Set(contracts.flatMap(action => Object.keys(action.outputIds)))].map(id => ({id:`program-output:${id}`,type:"emit",channelId:id,from:id}));
+    inputs.push(...ops.filter((op): op is Extract<DeviceRecipeOp,{type:"sample_external"}> => op.type==="sample_external" && op.inputMode==="trigger" && !op.triggerHighAction && !op.triggerLowAction));
+    return {inputs,outputs};
+  }
   const inputs = ops.filter(
     (op): op is Extract<DeviceRecipeOp, { type: "sample_external" }> =>
       op.type === "sample_external",

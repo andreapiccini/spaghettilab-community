@@ -1,3 +1,7 @@
+import { SENSOR_MODULE_ID_PROP } from "./backbone-sensor-block.js";
+import { modulePinOwners } from "./module-pin-ownership.js";
+import { gpioSignalType } from "./gpio-operation-registry.js";
+import { configureDs18b20 } from "./ds18b20-configuration.js";
 import { DEFAULT_PHYSICAL_SETTINGS } from "@spaghettilab/protocol-sdk";
 import type { CoreBindingId } from "@spaghettilab/domain";
 import type { ProjectV1 } from "@spaghettilab/domain";
@@ -34,15 +38,17 @@ export function planModuleImport(
   boardKey: string,
   driver: DeviceRecipeDraft,
   physical: BackbonePhysicalDraft,
+  selectedChannels?: Readonly<Record<string, number>>,
 ): ModuleImportPlan {
-  if (!["gpio", "i2c"].includes(driver.binding.bus))
+  if (!["gpio", "i2c"].includes(driver.binding.bus) && !driver.moduleProgram)
     throw new Error("Importazione rapida disponibile per GPIO e I²C.");
   const multi = driver.binding.bus === "gpio" && driver.binding.gpioSignals.length > 1;
   if (
     multi &&
     driver.id !== "uln2003-28byj48" &&
     !driver.rgbModule &&
-    !driver.dht22Module
+    !driver.dht22Module &&
+    !driver.moduleProgram
   )
     throw new Error("Questo driver multipin richiede una mappatura dedicata.");
   if (driver.binding.bus === "gpio" && !driver.binding.gpioSignals.length)
@@ -50,25 +56,42 @@ export function planModuleImport(
   const requirements =
     driver.binding.bus === "i2c"
       ? [4, 5]
-      : driver.temperatureSensorModel === "ds18b20"
-        ? driver.ds18b20PowerMode === "gpio"
-          ? [1, 2]
-          : [1]
-        : driver.dht22Module
-          ? [1, 2]
-          : Array.from({ length: driver.rgbModule ? 3 : multi ? 4 : 1 }, () =>
-              driver.rgbModule
-                ? 12
-                : driver.binding.gpioSignals[0]?.direction === "in"
-                  ? 1
-                  : 2,
-            );
+      : driver.binding.bus === "spi"
+        ? [8, 9, 10, 11]
+        : driver.binding.bus === "uart"
+          ? [6, 7]
+          : driver.binding.bus === "adc"
+            ? [14]
+            : driver.binding.bus === "w1"
+              ? [13]
+              : driver.temperatureSensorModel === "ds18b20"
+                ? driver.ds18b20PowerMode === "gpio"
+                  ? [1, 2]
+                  : [1]
+                : driver.dht22Module
+                  ? [1, 2]
+                  : driver.binding.gpioSignals.map((signal) =>
+                      gpioSignalType(signal) === "pwm_output"
+                        ? 12
+                        : signal.direction === "in"
+                          ? 1
+                          : 2,
+                    );
   let channels =
     driver.binding.bus === "gpio"
       ? Object.fromEntries(
           driver.binding.gpioSignals.map((signal, i) => [signal.id, i]),
         )
-      : {};
+      : Object.fromEntries(
+          (driver.binding.bus === "i2c"
+            ? ["SDA", "SCL"]
+            : driver.binding.bus === "spi"
+              ? ["SCK", "MOSI", "MISO", "CS"]
+              : driver.binding.bus === "uart"
+                ? ["TX", "RX"]
+                : ["DATA"]
+          ).map((signal, index) => [signal, index]),
+        );
   const modules =
     parseBackboneSensorModules(
       project.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
@@ -98,35 +121,60 @@ export function planModuleImport(
       GREEN: previousRgb.GREEN!,
       BLUE: previousRgb.BLUE!,
     };
-  const touched = new Set(requirements.map((_, i) => i));
-  const conflicts = modules
-    .filter((module) => {
-      if (module.gpioAssignments)
-        return (
-          module.gpioAssignments.boardKey === boardKey &&
-          Object.values(module.gpioAssignments.channels).some((channel) =>
-            touched.has(channel),
-          )
-        );
-      if (module.gpioAssignment)
-        return (
-          module.gpioAssignment.boardKey === boardKey &&
-          touched.has(module.gpioAssignment.channel)
-        );
-      if (module.bus === "i2c" && driver.binding.bus === "i2c")
-        return (
-          Number.parseInt(module.recipe.address ?? "", 16) ===
-          Number.parseInt(driver.binding.i2c?.address ?? "", 16)
-        );
-      return true; // Legacy unassigned modules cannot safely be assumed to use another pin.
-    })
-    .map((module) => ({
-      id: module.id,
-      label: module.recipe.deviceDraft?.name ?? module.label,
+  if (selectedChannels)
+    channels = Object.fromEntries(
+      Object.entries(channels).map(([signal, channel]) => [
+        signal,
+        selectedChannels[signal] ?? channel,
+      ]),
+    );
+  const values = Object.values(channels);
+  const limit =
+    driver.binding.bus === "gpio"
+      ? Math.min(4, physical.modes.length)
+      : physical.modes.length;
+  if (
+    values.some(
+      (channel) => !Number.isInteger(channel) || channel < 0 || channel >= limit,
+    ) ||
+    new Set(values).size !== values.length
+  )
+    throw new Error(
+      "Scegli un pin supportato e distinto per ciascun segnale del modulo.",
+    );
+  const assignments = Object.entries(channels).map(([signal, channel], index) => ({
+    signal,
+    channel,
+    mode: requirements[index]!,
+  }));
+  const touched = new Set(values);
+  const owners = modulePinOwners(project, bindingId, boardKey, physical);
+  const conflicts = owners
+    .filter((owner) =>
+      Object.values(owner.channels).some((channel) => touched.has(channel)),
+    )
+    .map((owner) => ({
+      id: owner.module.id,
+      label: owner.module.recipe.deviceDraft?.name ?? owner.module.label,
     }));
+  const conflictedIds = new Set(conflicts.map((item) => item.id));
+  if (
+    ["i2c", "spi", "uart"].includes(driver.binding.bus) &&
+    owners.some(
+      (owner) =>
+        !conflictedIds.has(owner.module.id) &&
+        owner.module.bus === driver.binding.bus &&
+        Object.entries(channels).some(
+          ([signal, channel]) => owner.channels[signal] !== channel,
+        ),
+    )
+  )
+    throw new Error(
+      "Questo bus è già assegnato su altri pin. Usa gli stessi segnali oppure scegli un’altra Backbone.",
+    );
   const modes = [...physical.modes];
   const pinChanges: string[] = [];
-  requirements.forEach((mode, index) => {
+  assignments.forEach(({ mode, channel: index }) => {
     const old = modes[index] ?? 0;
     if (old !== 0 && (old & 15) !== mode)
       pinChanges.push(`A${index}: configurazione esistente`);
@@ -135,16 +183,12 @@ export function planModuleImport(
   // Release pins belonging only to retired modules (e.g. POWER when choosing parasite).
   const retired = new Set(conflicts.map((item) => item.id));
   const retained = new Set(
-    modules
-      .filter(
-        (item) => !retired.has(item.id) && item.gpioAssignments?.boardKey === boardKey,
-      )
-      .flatMap((item) => Object.values(item.gpioAssignments!.channels)),
+    owners
+      .filter((owner) => !retired.has(owner.module.id))
+      .flatMap((owner) => Object.values(owner.channels)),
   );
-  for (const item of modules.filter(
-    (item) => retired.has(item.id) && item.gpioAssignments?.boardKey === boardKey,
-  ))
-    for (const channel of Object.values(item.gpioAssignments!.channels))
+  for (const owner of owners.filter((owner) => retired.has(owner.module.id)))
+    for (const channel of Object.values(owner.channels))
       if (!touched.has(channel) && !retained.has(channel)) modes[channel] = 0;
   // Replacing one pin of a bus retires the whole bus, avoiding invalid half-routes.
   for (const group of [
@@ -153,15 +197,25 @@ export function planModuleImport(
     [8, 9, 10, 11],
   ]) {
     if (
-      !requirements.some(
-        (mode, i) =>
-          group.includes((physical.modes[i] ?? 0) & 15) && !group.includes(mode),
+      !assignments.some(
+        ({ mode, channel }) =>
+          group.includes((physical.modes[channel] ?? 0) & 15) && !group.includes(mode),
       )
     )
       continue;
     modes.forEach((mode, i) => {
       if (!touched.has(i) && group.includes(mode & 15)) modes[i] = 0;
     });
+  }
+  for (const group of [
+    [4, 5],
+    [6, 7],
+    [8, 9, 10, 11],
+  ]) {
+    if (assignments.some((item) => group.includes(item.mode)))
+      modes.forEach((mode, index) => {
+        if (!touched.has(index) && group.includes(mode & 15)) modes[index] = 0;
+      });
   }
   return {
     bindingId,
@@ -214,6 +268,12 @@ export function commitModuleImport(
     (binding) => binding.bindingId === plan.bindingId,
   );
   if (index < 0) throw new Error("Backbone non presente.");
+  for (const node of project.deviceGraphs[index]?.nodes ?? []) {
+    const data = node.data as { properties?: Record<string, unknown> };
+    if (retired.has(String(data.properties?.[SENSOR_MODULE_ID_PROP] ?? "")))
+      nodesToRemove.add(node.id);
+  }
+
   const graphs = project.deviceGraphs.map((graph, i) =>
     i !== index
       ? graph
@@ -230,11 +290,25 @@ export function commitModuleImport(
   const physicalProject = parsePhysicalProject(
     project.authoringMetadata[PHYSICAL_META_KEY]?.comment,
   );
+  let installations: Record<string, { moduleId?: string }> = {};
+  try {
+    installations = JSON.parse(
+      project.authoringMetadata.__nfcInstallations?.comment ?? "{}",
+    );
+  } catch {
+    /* Legacy project. */
+  }
+  const retainedInstallations = Object.fromEntries(
+    Object.entries(installations).filter(
+      ([, entry]) => !retired.has(entry?.moduleId ?? ""),
+    ),
+  );
   let next: ProjectV1 = {
     ...project,
     deviceGraphs: graphs,
     authoringMetadata: {
       ...project.authoringMetadata,
+      __nfcInstallations: { comment: JSON.stringify(retainedInstallations) },
       [BACKBONE_SENSOR_MODULES_META_KEY]: {
         comment: JSON.stringify({
           ...stored,
@@ -272,8 +346,8 @@ export function commitModuleImport(
       boardKey: plan.boardKey,
       lines:
         plan.driver.binding.bus === "i2c"
-          ? [0, 1].map((channel, index) => ({
-              signal: index === 0 ? "SDA" : "SCL",
+          ? Object.entries(plan.channels).map(([signal, channel]) => ({
+              signal,
               pin: formatPinLabel(
                 modeIndexToPinId(channel, functionVariantOf(physical)),
                 functionVariantOf(physical),
@@ -323,4 +397,42 @@ export function commitModuleImport(
   if (confirmed)
     next = addConfirmedPinModules(next, plan.bindingId, plan.boardKey, physical);
   return next;
+}
+
+/** Change an installed sensor in place; never delete its canvas nodes or wires. */
+export function commitDs18b20Configuration(
+  project: ProjectV1,
+  plan: ModuleImportPlan,
+  moduleId: string,
+  confirmed: boolean,
+): ProjectV1 {
+  const next = configureDs18b20(
+    project,
+    plan.bindingId,
+    moduleId,
+    plan.driver.ds18b20PowerMode === "parasite" ? "parasite" : "vcc",
+    plan.channels.DATA ?? 0,
+    1,
+    confirmed,
+    plan.driver.gpioHardware?.power === "5" ? "5" : "3.3",
+  );
+  const physical = parsePhysicalProject(
+    next.authoringMetadata[PHYSICAL_META_KEY]?.comment,
+  );
+  return {
+    ...next,
+    authoringMetadata: {
+      ...next.authoringMetadata,
+      [PHYSICAL_META_KEY]: {
+        ...next.authoringMetadata[PHYSICAL_META_KEY],
+        comment: JSON.stringify({
+          ...physical,
+          drafts: {
+            ...physical.drafts,
+            [plan.boardKey]: { ...plan.physical, applied: confirmed },
+          },
+        }),
+      },
+    },
+  };
 }

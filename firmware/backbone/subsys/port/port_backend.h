@@ -3,7 +3,7 @@
 
 #include <spaghetti/port.h>
 int spaghetti_port_backend_user_map(spaghetti_port_id_t id, const uint8_t modes[4],
-	const uint8_t config[20]);
+	const uint8_t config[20], uint8_t count);
 
 /**
  * @brief Apply the board-default pinctrl/backend for one transport.

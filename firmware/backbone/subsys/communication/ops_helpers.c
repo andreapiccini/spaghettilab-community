@@ -318,7 +318,12 @@ int spaghetti_ops_decode_arguments(const struct spaghetti_protocol_payload *payl
 				struct zcbor_string bytes;
 				if (!zcbor_bstr_decode(state, &bytes) || bytes.len > SPAGHETTI_VALUE_BYTES_MAX) return -EMSGSIZE;
 				value->type = SPAGHETTI_VALUE_BYTES; value->data.bytes.size = bytes.len; memcpy(value->data.bytes.bytes, bytes.value, bytes.len);
-			} else return -ENOTSUP;
+			} else if(major==ZCBOR_MAJOR_TYPE_TSTR){
+                struct zcbor_string text;
+                if(!zcbor_tstr_decode(state,&text) || text.len>SPAGHETTI_VALUE_TEXT_MAX)return -EMSGSIZE;
+                value->type=SPAGHETTI_VALUE_TEXT;value->data.text.size=text.len;
+                memcpy(value->data.text.text,text.value,text.len);value->data.text.text[text.len]='\0';
+            } else return -ENOTSUP;
 		}
 		if (!zcbor_map_end_decode(state)) return -EBADMSG;
 	}

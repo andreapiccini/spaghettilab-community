@@ -427,7 +427,8 @@ static int build_plan(
 				++fanout;
 			}
 			if ((other->target_key == edge->target_key) &&
-			    (other->target_input == edge->target_input)) {
+			    (other->target_input == edge->target_input) &&
+			    !plan->blocks[target_idx].driver->inputs[port_idx].allow_multiple_sources) {
 				deinit_plan(plan);
 				return -EEXIST;
 			}
@@ -726,9 +727,21 @@ int spaghetti_processing_on_record(
 			}
 
 			if (edge->source_kind == SPAGHETTI_EDGE_SOURCE_MODULE) {
-				have = lookup_module_field(
-					edge->source_key,
-					edge->source_port_or_field, &value);
+				if (driver->inputs[edge->target_input_idx].allow_multiple_sources) {
+					/* Activation ports consume this event only, never a cached
+					 * level from another manual button or periodic clock. */
+					const struct spaghetti_value *fresh =
+						edge->source_key == record->source_key ?
+						spaghetti_property_find(&record->payload.values,
+							edge->source_port_or_field) : NULL;
+					if (fresh != NULL) {
+						value = *fresh;
+						have = true;
+					}
+				} else {
+					have = lookup_module_field(edge->source_key,
+						edge->source_port_or_field, &value);
+				}
 			} else {
 				int source_idx = -1;
 

@@ -29,6 +29,8 @@ enum {
 	FAKE_COMMAND_FIELD = 3U,
 };
 
+static bool led_application_active;
+void spaghetti_status_led_application_active(bool active){led_application_active=active;}
 static bool block_read;
 static int command_error;
 static int read_error_for_id_4;
@@ -376,9 +378,11 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	zassert_equal(spaghetti_runtime_configure(NULL, 1U, NULL, 0U), -EINVAL);
 	zassert_equal(spaghetti_runtime_configure(missing, 1U, NULL, 0U), 0);
 	zassert_equal(spaghetti_runtime_start(), -ENOENT);
+    zassert_false(led_application_active);
 
 	zassert_ok(spaghetti_runtime_configure(two_schedules, 2U, NULL, 0U));
 	zassert_ok(spaghetti_runtime_start());
+    zassert_true(led_application_active);
 	zassert_equal(spaghetti_runtime_start(), -EALREADY);
 	zassert_equal(spaghetti_runtime_configure(two_schedules, 2U, NULL, 0U), -EBUSY);
 
@@ -402,6 +406,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	read_error_for_id_4 = 0;
 
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
+    zassert_false(led_application_active);
 	stopped_a = read_count_a;
 	stopped_b = read_count_b;
 	k_sleep(K_MSEC(60));
@@ -411,6 +416,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 
 	zassert_ok(spaghetti_runtime_configure(event_schedule, 1U, NULL, 0U));
 	zassert_ok(spaghetti_runtime_start());
+    zassert_true(led_application_active);
 	zassert_true(events_armed);
 	zassert_not_null(armed_emit);
 	zassert_ok(armed_emit(&event_payload, armed_user_data));
@@ -427,6 +433,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
     zassert_equal(spaghetti_runtime_post_command_result(0U, &event_payload), -EINVAL);
     zassert_ok(spaghetti_runtime_post_command_result(999U, &event_payload));
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
+    zassert_false(led_application_active);
 	zassert_true(stop_events_count >= 1U);
     zassert_ok(spaghetti_runtime_post_command_result(30U, &event_payload));
 
@@ -441,6 +448,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 		block_read = true;
 		zassert_ok(spaghetti_runtime_configure(blocked, 2U, NULL, 0U));
 		zassert_ok(spaghetti_runtime_start());
+    zassert_true(led_application_active);
 		zassert_ok(k_sem_take(&read_entered_sem, K_MSEC(200)));
 		zassert_not_null(armed_emit);
 		for (size_t idx = 0U; idx < CONFIG_SPAGHETTI_MAX_RECORD_QUEUE; ++idx) {
@@ -449,6 +457,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 		zassert_equal(armed_emit(&event_payload, armed_user_data), -ENOSPC);
 		k_sem_give(&read_release_sem);
 		zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
+    zassert_false(led_application_active);
 		block_read = false;
 	}
 
@@ -456,6 +465,7 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	return_command_result = true;
 	zassert_ok(spaghetti_runtime_configure(sampling, 1U, &threshold, 1U));
 	zassert_ok(spaghetti_runtime_start());
+    zassert_true(led_application_active);
 	/* Force threshold transitions through published samples. */
 	{
 		struct spaghetti_record forced = {0};
@@ -489,23 +499,29 @@ ZTEST(runtime, test_multi_schedule_events_rules_and_stop)
 	zassert_true(received_result, "Command result must enter the runtime record stream");
 	return_command_result = false;
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
+    zassert_false(led_application_active);
 
 	command_error = -ENODEV;
 	zassert_ok(spaghetti_runtime_configure(sampling, 1U, &threshold, 1U));
 	zassert_ok(spaghetti_runtime_start());
+    zassert_true(led_application_active);
 	zassert_ok(k_sem_take(&command_sem, K_MSEC(200)));
 	zassert_true(command_count >= 1U);
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
+    zassert_false(led_application_active);
 	command_error = 0;
 
 	zassert_ok(spaghetti_runtime_configure(sampling, 1U, &missing_target, 1U));
 	zassert_ok(spaghetti_runtime_start());
+    zassert_true(led_application_active);
 	k_sleep(K_MSEC(50));
 	zassert_ok(spaghetti_runtime_stop(K_MSEC(200)));
+    zassert_false(led_application_active);
 
 	block_read = true;
 	zassert_ok(spaghetti_runtime_configure(sampling, 1U, NULL, 0U));
 	zassert_ok(spaghetti_runtime_start());
+    zassert_true(led_application_active);
 	zassert_ok(k_sem_take(&read_entered_sem, K_MSEC(200)));
 	zassert_equal(spaghetti_runtime_stop(K_MSEC(5)), -ETIMEDOUT);
 	k_sem_give(&read_release_sem);

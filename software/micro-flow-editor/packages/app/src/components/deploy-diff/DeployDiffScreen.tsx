@@ -1,3 +1,7 @@
+import { topologyBoards, topologyNeedsReconfiguration, topologyReviewAccepted, withTopologyCheckpoint } from "../../lib/backbone-topology-change.js";
+import { prepareDeploymentPhysical } from "../../lib/deployment-physical.js";
+import type { ApplyPhysicalRequest } from "@spaghettilab/protocol-sdk";
+import { backboneConfigLimit } from "../../lib/backbone-config-limit.js";
 import { manualTriggerProfileId, sendManualTrigger } from "../../lib/flow-trigger.js";
 import { canRecheckDeployProblem } from "../../lib/deploy-feedback.js";
 import { oneShotDeploymentInput } from "../../lib/one-shot-deployment.js";
@@ -18,6 +22,7 @@ import {
   type ConfigDiff,
   type DeploymentResult,
 } from "@spaghettilab/config-deployment";
+import { encodeConfigCbor } from "@spaghettilab/config-compiler";
 import { decodeConfigCbor, dryRunConfig } from "@spaghettilab/config-decompiler";
 import {
   appendDeploymentRecord,
@@ -40,7 +45,15 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { installDriverProfiles } from "../../lib/driver-profile-deployment.js";
-import { prepareDriverDeployment } from "../../lib/driver-deployment-plan.js";
+import { prepareDistributedDeployment as prepareDriverDeployment } from "../../lib/distributed-deployment-plan.js";
+import {
+  requireProgramFirmware,
+  prepareRemoteDeployment,
+  rememberDistributedDeployment,
+  completionProfileIds,
+  supportsDistributedFirmware,
+  type RemotePlan,
+} from "../../lib/distributed-deployment.js";
 import {
   describeDeployProblem,
   uniqueDeployProblems,
@@ -86,6 +99,10 @@ type CoreCandidate = {
   readonly profiles: readonly DeviceProfileDraft[];
   readonly options: CompileConfigOptions;
   readonly diff: ConfigDiff;
+  readonly encodedSize: number;
+  readonly remotePlans: readonly RemotePlan[];
+  readonly hostNodeId?: number;
+  readonly physicalRequests?: readonly ApplyPhysicalRequest[];
   readonly expectedGeneration: number;
   readonly missingProfiles: readonly string[];
 };
@@ -101,7 +118,8 @@ type CoreCandidate = {
 export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
   const { locale } = useLocale();
   const it = locale === "it";
-  const { session, execute, navigate, closeDeploy, focusCanvas, manualDeployTarget } = useSession();
+  const { session, execute, navigate, closeDeploy, focusCanvas, manualDeployTarget } =
+    useSession();
   const close =
     onClose ??
     (() => {
@@ -121,7 +139,11 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
   const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
   const bindings = session?.stack.current.coreBindings ?? EMPTY_BINDINGS;
 
-  const [selected, setSelected] = useState<ReadonlySet<CoreBindingId> | null>(() => manualDeployTarget ? new Set([manualDeployTarget.bindingId as CoreBindingId]) : null);
+  const [selected, setSelected] = useState<ReadonlySet<CoreBindingId> | null>(() =>
+    manualDeployTarget
+      ? new Set([manualDeployTarget.bindingId as CoreBindingId])
+      : null,
+  );
   const [profilesByBinding, setProfilesByBinding] = useState<
     Map<CoreBindingId, ReadonlySet<string>>
   >(new Map());
@@ -142,7 +164,8 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
     setDeployPhase(phase);
   };
   useEffect(() => () => deployAbort.current?.abort(), []);
-  const [manualTestMode, setManualTestMode] = useState(Boolean(manualDeployTarget));
+  const topologyReconfiguration = bindings.some(binding => !!session && topologyNeedsReconfiguration(session.stack.current, binding.bindingId, getSnapshot(binding.bindingId)?.status));
+  const [manualTestMode, setManualTestMode] = useState(Boolean(manualDeployTarget) || topologyReconfiguration);
   const [deployError, setDeployError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -164,7 +187,11 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           const config = await client.getConfig();
           observeConfig(binding.bindingId, config);
           const decoded = decodeConfigCbor(config.configBytes);
-          if (decoded.ok) setExecutionMode(binding.bindingId, configHasContinuousSchedules(decoded.value) ? "continuous" : "one-shot");
+          if (decoded.ok)
+            setExecutionMode(
+              binding.bindingId,
+              configHasContinuousSchedules(decoded.value) ? "continuous" : "one-shot",
+            );
         } catch (cause) {
           errors.push({
             bindingId: binding.bindingId,
@@ -218,7 +245,26 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           session.stack.current,
           binding.bindingId,
           base,
+          snapshot.status,
         );
+        requireProgramFirmware(plan, snapshot.status?.version, "Backbone USB");
+        if (plan.remotePlans.length) {
+          if (!supportsDistributedFirmware(snapshot.status?.version))
+            throw new Error(
+              "Aggiorna la Backbone USB al firmware 0.5.49 per distribuire il programma sulle schede assegnate.",
+            );
+          for (const remote of plan.remotePlans) {
+            const peer = snapshot.status?.chainPeers?.find(
+              (peer) => peer.nodeId === remote.nodeId,
+            );
+            if (!peer) throw new Error(`${remote.label}: non è connessa.`);
+            requireProgramFirmware(remote.plan, peer.version, remote.label);
+            if (!supportsDistributedFirmware(peer.version))
+              throw new Error(
+                `${remote.label}: aggiorna anche questa scheda al firmware 0.5.49.`,
+              );
+          }
+        }
         if (
           plan.profiles.some((profile) =>
             profile.sampleOps.some((op) => op.op === "RGB_PROGRAM"),
@@ -255,10 +301,22 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
               "Aggiorna la Backbone al firmware 0.5.8 o successivo per Sequenza e Movimento terminato dello stepper.",
             );
         }
-        const deploymentInput = manualTestMode ? oneShotDeploymentInput(plan.input,
-          plan.profiles.filter(profile => profile.profileId.startsWith("flow.gpio-state.") || profile.sampleOps.some(op =>
-            ["DS18B20_READ", "DHT22_READ", "STEPPER", "RGB_PROGRAM"].includes(op.op)
-          )).map(profile => profile.profileId)) : plan.input;
+        const deploymentInput = manualTestMode
+          ? oneShotDeploymentInput(
+              plan.input,
+              plan.profiles
+                .filter(
+                  (profile) =>
+                    profile.profileId.startsWith("flow.gpio-state.") ||
+                    profile.sampleOps.some((op) =>
+                      ["DS18B20_READ", "DHT22_READ", "STEPPER", "RGB_PROGRAM"].includes(
+                        op.op,
+                      ),
+                    ),
+                )
+                .map((profile) => profile.profileId),
+            )
+          : plan.input;
         const available = profilesByBinding.get(binding.bindingId);
         const known = new Set([
           ...(available ?? []),
@@ -284,8 +342,26 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           );
           return;
         }
+        const encodedSize = encodeConfigCbor(dryRun.compiled).length;
+        const limit = backboneConfigLimit(
+          snapshot.capabilities?.coreVariant,
+          snapshot.status?.version,
+        );
+        if (limit !== undefined && encodedSize > limit) {
+          errors.push({
+            bindingId: binding.bindingId,
+            code: "config_size",
+            technical: `Il programma occupa ${encodedSize} byte; il firmware collegato ne accetta ${limit}. Aggiorna il firmware oppure riduci il programma.`,
+          });
+          return;
+        }
         const diff = diffConfigs(liveDecoded.value, dryRun.compiled);
-        if (isConfigDiffEmpty(diff)) return;
+        if (
+          isConfigDiffEmpty(diff) &&
+          !plan.remotePlans.length &&
+          !plan.physicalRequests?.length
+        )
+          return;
         const missingProfiles = dryRun.issues
           .filter((issue) => issue.code === "config-decompiler.missing_profile")
           .map((issue) => issue.target);
@@ -296,6 +372,10 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           profiles: plan.profiles,
           options: plan.options,
           diff,
+          encodedSize,
+          remotePlans: plan.remotePlans,
+          hostNodeId: plan.hostNodeId,
+          physicalRequests: plan.physicalRequests,
           expectedGeneration: snapshot.config.generation,
           missingProfiles,
         });
@@ -435,7 +515,28 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
     verified.forEach(({ bindingId, status }) => observeStatus(bindingId, status));
     setRunning(new Set(targets.map((candidate) => candidate.binding.bindingId)));
     const cleanupByBinding = new Map<CoreBindingId, () => Promise<void>>();
+    const physicalTransactions = new Map<
+      CoreBindingId,
+      Awaited<ReturnType<typeof prepareDeploymentPhysical>>
+    >();
+    const remoteTransactions = new Map<
+      CoreBindingId,
+      Awaited<ReturnType<typeof prepareRemoteDeployment>>
+    >();
     try {
+      for (const candidate of targets) {
+        const gateway = getClient(candidate.binding.bindingId);
+        if (!gateway) throw new Error("Backbone USB scollegata.");
+        physicalTransactions.set(
+          candidate.binding.bindingId,
+          await prepareDeploymentPhysical(
+            gateway,
+            candidate.physicalRequests ?? [],
+            signal,
+            updateDeployPhase,
+          ),
+        );
+      }
       for (const candidate of targets) {
         if (candidate.profiles.length) {
           const version = getSnapshot(candidate.binding.bindingId)?.status?.version;
@@ -468,6 +569,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
               const result = await installProfileWorkflow(
                 wireFor(candidate.binding.bindingId),
                 profile,
+                { reuseInstalled: true },
               );
               signal.throwIfAborted();
               if (!result || !result.ok)
@@ -513,7 +615,31 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
         )
           throw new Error("Un profilo necessario non risulta installato sul Core.");
       }
+      for (const candidate of targets) {
+        if (!candidate.remotePlans.length) continue;
+        const gateway = getClient(candidate.binding.bindingId);
+        if (!gateway) throw new Error("Backbone USB scollegata.");
+        remoteTransactions.set(
+          candidate.binding.bindingId,
+          await prepareRemoteDeployment(
+            gateway,
+            candidate.remotePlans,
+            signal,
+            updateDeployPhase,
+            manualTestMode,
+          ),
+        );
+      }
     } catch (cause) {
+      for (const transaction of remoteTransactions.values()) transaction.dispose();
+      for (const transaction of physicalTransactions.values()) {
+        try {
+          await transaction.rollback();
+        } catch (restore) {
+          cause = new Error(`${String(cause)} · ${String(restore)}`);
+        }
+        transaction.dispose();
+      }
       if (signal.aborted) throw cause;
       setDeployError(cause instanceof Error ? cause.message : String(cause));
       setRunning(new Set());
@@ -525,12 +651,16 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           setExecutionMode(c.binding.bindingId, "busy");
           const depId = deploymentId(crypto.randomUUID());
           if (!depId.ok || !session) return;
+          const remote = remoteTransactions.get(c.binding.bindingId);
+          await remote?.apply();
           const result = await deployConfigWorkflow(
             wireFor(c.binding.bindingId),
             c.input,
             {
               ...c.options,
-              expectedGeneration: c.expectedGeneration,
+              expectedGeneration:
+                physicalTransactions.get(c.binding.bindingId)?.gatewayGeneration ??
+                c.expectedGeneration,
               sourceProjectHash: canonicalProjectHash(session.stack.current),
               target: c.binding.bindingId,
               deploymentId: depId.value,
@@ -545,8 +675,40 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           if (result) {
             setResults((prev) => new Map(prev).set(c.binding.bindingId, result));
             if (result.record) execute?.(appendDeploymentRecord(result.record));
-            if ([DeploymentOutcomeKind.SUCCESS, DeploymentOutcomeKind.NO_OP, DeploymentOutcomeKind.AMBIGUOUS_RESOLVED_APPLIED].some(outcome => outcome === result.outcome)) {
-              setExecutionMode(c.binding.bindingId, manualTestMode ? "one-shot" : "continuous");
+            if (
+              [
+                DeploymentOutcomeKind.SUCCESS,
+                DeploymentOutcomeKind.NO_OP,
+                DeploymentOutcomeKind.AMBIGUOUS_RESOLVED_APPLIED,
+              ].some((outcome) => outcome === result.outcome)
+            ) {
+              if (remote)
+                await remote.commit(
+                  String(session.stack.current.projectId),
+                  c.hostNodeId,
+                  c,
+                );
+              else
+                rememberDistributedDeployment(
+                  String(session.stack.current.projectId),
+                  c.hostNodeId
+                    ? [
+                        {
+                          nodeId: c.hostNodeId,
+                          completionProfiles: completionProfileIds(c),
+                        },
+                      ]
+                    : [],
+                  manualTestMode,
+                );
+              physicalTransactions.get(c.binding.bindingId)?.commit();
+              const topologyStatus = getSnapshot(c.binding.bindingId)?.status;
+              if (topologyStatus && topologyReviewAccepted(session.stack.current, c.binding.bindingId, topologyStatus))
+                execute?.({kind:"ConfirmBackboneTopology",apply:current=>({ok:true,value:withTopologyCheckpoint(current,c.binding.bindingId,{boards:topologyBoards(topologyStatus),pending:false})})});
+              setExecutionMode(
+                c.binding.bindingId,
+                manualTestMode ? "one-shot" : "continuous",
+              );
               await cleanupByBinding.get(c.binding.bindingId)?.();
               try {
                 const live = await wireFor(c.binding.bindingId).getConfig();
@@ -554,29 +716,62 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
               } catch {
                 /* Pause still works from the next GET_CONFIG. */
               }
-              if (manualDeployTarget && c.binding.bindingId === manualDeployTarget.bindingId) {
+              if (
+                manualDeployTarget &&
+                c.binding.bindingId === manualDeployTarget.bindingId
+              ) {
                 const client = getClient(c.binding.bindingId);
-                if (!client) throw new Error(it ? "Backbone scollegata." : "Backbone disconnected.");
+                if (!client)
+                  throw new Error(
+                    it ? "Backbone scollegata." : "Backbone disconnected.",
+                  );
                 const live = await client.getConfig(signal);
                 observeConfig(c.binding.bindingId, live);
                 const decoded = decodeConfigCbor(live.configBytes);
                 const profile = manualTriggerProfileId(manualDeployTarget.nodeId);
-                const trigger = decoded.ok && decoded.value.modules.find(module => module.typeId === "declarative-device" && module.properties[1] === profile);
-                if (!trigger) throw new Error(it ? "Azione non trovata nella configurazione caricata." : "Action not found in the uploaded configuration.");
-                await sendManualTrigger(commandId => client.moduleCommand({ key: trigger.key, commandId }, signal));
+                const trigger =
+                  decoded.ok &&
+                  decoded.value.modules.find(
+                    (module) =>
+                      module.typeId === "declarative-device" &&
+                      module.properties[1] === profile,
+                  );
+                if (!trigger)
+                  throw new Error(
+                    it
+                      ? "Azione non trovata nella configurazione caricata."
+                      : "Action not found in the uploaded configuration.",
+                  );
+                await sendManualTrigger((commandId) =>
+                  client.moduleCommand({ key: trigger.key, commandId }, signal),
+                );
                 // Uploading an action must not select nodes or recenter the canvas.
                 close();
               }
             }
           }
-          if (![DeploymentOutcomeKind.SUCCESS, DeploymentOutcomeKind.NO_OP, DeploymentOutcomeKind.AMBIGUOUS_RESOLVED_APPLIED].some(outcome => outcome === result.outcome)) {
+          if (
+            ![
+              DeploymentOutcomeKind.SUCCESS,
+              DeploymentOutcomeKind.NO_OP,
+              DeploymentOutcomeKind.AMBIGUOUS_RESOLVED_APPLIED,
+            ].some((outcome) => outcome === result.outcome)
+          ) {
             // Read back execution state after a rejected upload; never leave the UI stuck busy.
             try {
               const live = await wireFor(c.binding.bindingId).getConfig();
               observeConfig(c.binding.bindingId, live);
               const decoded = decodeConfigCbor(live.configBytes);
-              if (decoded.ok) setExecutionMode(c.binding.bindingId, configHasContinuousSchedules(decoded.value) ? "continuous" : "one-shot");
-            } catch { /* Ricontrolla will recover the state once the link responds. */ }
+              if (decoded.ok)
+                setExecutionMode(
+                  c.binding.bindingId,
+                  configHasContinuousSchedules(decoded.value)
+                    ? "continuous"
+                    : "one-shot",
+                );
+            } catch {
+              /* Ricontrolla will recover the state once the link responds. */
+            }
           }
           setRunning((prev) => {
             const next = new Set(prev);
@@ -602,6 +797,25 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
       }
       setDeployError(formatApplyConfigError(cause, locale === "it"));
     } finally {
+      const errors: string[] = [];
+      for (const transaction of remoteTransactions.values()) {
+        try {
+          await transaction.rollback();
+        } catch (error) {
+          errors.push(error instanceof Error ? error.message : String(error));
+        }
+        transaction.dispose();
+      }
+      for (const transaction of physicalTransactions.values()) {
+        try {
+          await transaction.rollback();
+        } catch (error) {
+          errors.push(error instanceof Error ? error.message : String(error));
+        }
+        transaction.dispose();
+      }
+      if (errors.length)
+        setDeployError((previous) => [previous, ...errors].filter(Boolean).join(" · "));
       setRunning(new Set());
     }
   }
@@ -632,7 +846,7 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             bindingId,
             technical: issue.cause
               ? formatApplyConfigError(issue.cause, it)
-              : issue.remediation,
+              : [issue.remediation, issue.target].filter(Boolean).join(" · "),
             code: issue.code,
           }))
         : [
@@ -675,8 +889,12 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
           </h1>
           <p className="mt-1 text-xs leading-relaxed text-ink-muted">
             {manualDeployTarget
-              ? (it ? "La configurazione non è ancora caricata oppure è stata modificata. Vuoi caricarla ed eseguire l’azione una volta? Il programma resterà in modalità manuale, con l’esecuzione automatica ferma." : "The configuration has not been uploaded yet or has changed. Upload it and run the action once? The program will stay in manual mode with automatic execution stopped.")
-              : (it ? "Scegli se avviare il Flow oppure preparare la Backbone per le prove manuali." : "Choose whether to start the Flow or prepare your Backbone for manual tests.")}
+              ? it
+                ? "La configurazione non è ancora caricata oppure è stata modificata. Vuoi caricarla ed eseguire l’azione una volta? Il programma resterà in modalità manuale, con l’esecuzione automatica ferma."
+                : "The configuration has not been uploaded yet or has changed. Upload it and run the action once? The program will stay in manual mode with automatic execution stopped."
+              : it
+                ? "Scegli se avviare il Flow oppure preparare la Backbone per le prove manuali."
+                : "Choose whether to start the Flow or prepare your Backbone for manual tests."}
           </p>
         </div>
         <button
@@ -692,13 +910,49 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
       </header>
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-5">
         {!successful.length && !manualDeployTarget && (
-          <fieldset disabled={busy || checking} className="space-y-2 disabled:opacity-60">
-            <legend className="mb-2 text-sm font-semibold">{it ? "Come vuoi usare il programma?" : "How do you want to use the program?"}</legend>
-            {[{ manual: false, title: it ? "Carica e avvia" : "Upload and start", text: it ? "Avvia subito la logica continua e i segnali automatici." : "Start continuous logic and automatic signals immediately." },
-              { manual: true, title: it ? "Carica per test manuali" : "Upload for manual tests", text: it ? "Prepara moduli e comandi, senza avviare l’esecuzione automatica. Poi invia i trigger dal canvas." : "Prepare modules and commands without starting schedules or alternation. Then send impulses from the canvas." }].map(option => (
-              <label key={String(option.manual)} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${manualTestMode === option.manual ? "border-brand-blue bg-brand-blue/5" : "border-border"}`}>
-                <input type="radio" name="deployment-mode" checked={manualTestMode === option.manual} onChange={() => setManualTestMode(option.manual)} className="mt-1" />
-                <span><span className="block text-sm font-semibold">{option.title}</span><span className="mt-1 block text-xs text-ink-muted">{option.text}</span></span>
+          <fieldset
+            disabled={busy || checking}
+            className="space-y-2 disabled:opacity-60"
+          >
+            <legend className="mb-2 text-sm font-semibold">
+              {it
+                ? "Come vuoi usare il programma?"
+                : "How do you want to use the program?"}
+            </legend>
+            {[
+              {
+                manual: false,
+                title: it ? "Carica e avvia" : "Upload and start",
+                text: it
+                  ? "Avvia subito la logica continua e i segnali automatici."
+                  : "Start continuous logic and automatic signals immediately.",
+              },
+              {
+                manual: true,
+                title: it ? "Carica per test manuali" : "Upload for manual tests",
+                text: it
+                  ? "Prepara moduli e comandi, senza avviare l’esecuzione automatica. Poi invia i trigger dal canvas."
+                  : "Prepare modules and commands without starting schedules or alternation. Then send impulses from the canvas.",
+              },
+            ].map((option) => (
+              <label
+                key={String(option.manual)}
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${manualTestMode === option.manual ? "border-brand-blue bg-brand-blue/5" : "border-border"}`}
+              >
+                <input
+                  type="radio"
+                  name="deployment-mode"
+                  checked={manualTestMode === option.manual}
+                  onChange={() => setManualTestMode(option.manual)}
+                  disabled={busy || (topologyReconfiguration && !option.manual)}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="block text-sm font-semibold">{option.title}</span>
+                  <span className="mt-1 block text-xs text-ink-muted">
+                    {option.text}
+                  </span>
+                </span>
               </label>
             ))}
           </fieldset>
@@ -730,8 +984,12 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                   : `${shownProblems.length} issues to resolve`
                 : successful.length
                   ? it
-                    ? manualTestMode ? "Pronto per i test manuali" : "Programma caricato e verificato"
-                    : manualTestMode ? "Ready for manual tests" : "Program uploaded and verified"
+                    ? manualTestMode
+                      ? "Pronto per i test manuali"
+                      : "Programma caricato e verificato"
+                    : manualTestMode
+                      ? "Ready for manual tests"
+                      : "Program uploaded and verified"
                   : !bindings.length
                     ? it
                       ? "Collega una Backbone per iniziare"
@@ -774,6 +1032,17 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                   <h2 className="text-sm font-semibold text-ink">
                     Backbone {index + 1}
                   </h2>
+                  {candidate && (
+                    <p className="text-[10px] text-ink-muted">
+                      Programma USB: {candidate.encodedSize} byte
+                    </p>
+                  )}
+                  {candidate?.remotePlans.map((remote) => (
+                    <p key={remote.nodeId} className="mt-1 text-[10px] text-ink-muted">
+                      {remote.label} · {remote.plan.profiles.length} driver ·
+                      collegamento CAN
+                    </p>
+                  ))}
                   <p className="mt-1 flex items-center gap-1.5 text-[11px] text-ink-muted">
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${online ? "bg-success" : "bg-ink-faint"}`}
@@ -943,6 +1212,49 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                 <pre className="mt-2 whitespace-pre-wrap break-all font-mono">
                   {problem.technical}
                 </pre>
+                <button
+                  type="button"
+                  className="mt-2 text-brand-blue underline"
+                  onClick={() => {
+                    const report = {
+                      errors: shownProblems.map((item) => item.technical),
+                      targets: candidates.map((candidate) => ({
+                        bindingId: candidate.binding.bindingId,
+                        config: dryRunConfig(candidate.input, candidate.options)
+                          .compiled,
+                        input: candidate.input,
+                        profiles: candidate.profiles,
+                        remote: candidate.remotePlans.map((remote) => ({
+                          nodeId: remote.nodeId,
+                          config: dryRunConfig(remote.plan.input, remote.plan.options)
+                            .compiled,
+                        })),
+                      })),
+                    };
+                    const url = URL.createObjectURL(
+                      new Blob(
+                        [
+                          JSON.stringify(
+                            report,
+                            (_, value) =>
+                              typeof value === "bigint" ? value.toString() : value,
+                            2,
+                          ),
+                        ],
+                        { type: "application/json" },
+                      ),
+                    );
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = "spaghettilab-diagnosi-caricamento.json";
+                    link.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                  }}
+                >
+                  {it
+                    ? "Scarica diagnosi del caricamento"
+                    : "Download upload diagnostics"}
+                </button>
               </details>
             </section>
           );
@@ -963,8 +1275,12 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                   : "No changes sent to the Backbone."
                 : successful.length
                   ? it
-                    ? manualTestMode ? "Backbone pronta: torna al canvas e premi Attiva. La logica continua non è stata avviata." : "Il programma sulla Backbone è stato verificato. Usa Stop dal canvas per fermarlo."
-                    : manualTestMode ? "Backbone ready: return to the canvas and send an impulse. Continuous logic has not started." : "The program was verified on the Backbone. Use Stop on the canvas to stop it."
+                    ? manualTestMode
+                      ? "Backbone pronta: torna al canvas e premi Attiva. La logica continua non è stata avviata."
+                      : "Il programma sulla Backbone è stato verificato. Usa Stop dal canvas per fermarlo."
+                    : manualTestMode
+                      ? "Backbone ready: return to the canvas and send an impulse. Continuous logic has not started."
+                      : "The program was verified on the Backbone. Use Stop on the canvas to stop it."
                   : !bindings.length
                     ? it
                       ? "Aggiungi e collega una Backbone dalla sezione Discover."
@@ -1024,7 +1340,17 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             className="inline-flex items-center gap-2 rounded-lg bg-brand-blue px-5 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
           >
             <Play size={15} />
-            {manualDeployTarget ? (it ? "Carica e attiva" : "Upload and trigger") : manualTestMode ? (it ? "Carica per test manuali" : "Upload for manual tests") : (it ? "Carica e avvia" : "Upload and start")}
+            {manualDeployTarget
+              ? it
+                ? "Carica e attiva"
+                : "Upload and trigger"
+              : manualTestMode
+                ? it
+                  ? "Carica per test manuali"
+                  : "Upload for manual tests"
+                : it
+                  ? "Carica e avvia"
+                  : "Upload and start"}
           </button>
         ) : successful.length && !busy ? (
           <button

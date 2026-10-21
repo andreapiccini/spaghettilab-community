@@ -7,7 +7,7 @@ export function logicProperties(type: string, p: Readonly<Record<string, unknown
   if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(raw)) throw new Error("Logica: inserisci un valore numerico valido.");
   const value = Number(raw);
   const decimal = ["number", "float", "string"].includes(inputType);
-  if (!Number.isInteger(operation) || operation < 0 || operation > 7)
+  if (!Number.isInteger(operation) || operation < 0 || operation > (type === "logic_if" ? 9 : 7))
     throw new Error("Logica: scegli una condizione valida.");
   if (!Number.isFinite(value)) throw new Error("Logica: il confronto richiede un numero finito.");
   if (["number", "float"].includes(inputType) && Math.abs(value * 100 - Math.round(value * 100)) > 1e-6) throw new Error("Logica: questo ingresso usa due decimali; inserisci al massimo due cifre decimali.");
@@ -15,7 +15,17 @@ export function logicProperties(type: string, p: Readonly<Record<string, unknown
   if (["bool", "digital"].includes(inputType) && value !== 0 && value !== 1) throw new Error("Logica: scegli vero/alto o falso/basso.");
   if (type === "logic_if" && [p.whenTrue ?? "high", p.whenFalse ?? "low"].some(level => level !== "high" && level !== "low"))
     throw new Error("IF: scegli Alto o Basso per il risultato della condizione.");
+  let upper: number | undefined;
+  if (operation >= 8) {
+    const upperRaw = String(p.valueMax ?? 0).trim().replace(",", ".");
+    if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(upperRaw)) throw new Error("IF: inserisci un valore massimo numerico valido.");
+    upper = Number(upperRaw);
+    if (!Number.isFinite(upper) || (!decimal && !Number.isSafeInteger(upper))) throw new Error("IF: valore massimo non valido per questo ingresso.");
+    if (["number", "float"].includes(inputType) && Math.abs(upper * 100 - Math.round(upper * 100)) > 1e-6) throw new Error("IF: usa al massimo due decimali.");
+    if (upper < value) throw new Error("IF: il valore massimo deve essere maggiore o uguale al minimo.");
+  }
   return type === "logic_and" || type === "logic_or" ? {} : {
+    ...(upper !== undefined ? { "9": String(upper) } : {}),
     "1": BigInt(operation), "2": decimal ? 0n : BigInt(value),
     ...(decimal ? { "7": String(value), "8": inputType === "string" ? 255n : 2n } : {}),
     ...(type === "logic_if" ? { "5": p.whenTrue === "low" ? 0n : 1n, "6": p.whenFalse === "high" ? 1n : 0n } : {}),

@@ -314,3 +314,19 @@ describe("measured member bounds", () => {
     }
   });
 });
+
+it("keeps color generators outside Schedule without treating their connections as membership", () => {
+  const generator = { kind: "block" as const, blockTypeId: "led_driver", properties: {} };
+  expect(canChainIntoEventContainer(generator)).toBe(false);
+  const graph: GraphState<"device-processing"> = {
+    layer: "device-processing",
+    nodes: [
+      { layer: "device-processing", id: "schedule", data: { kind: "schedule", moduleNodeId: "clock", periodMs: 2000, enabled: true } },
+      { layer: "device-processing", id: "colors", data: generator },
+    ],
+    edges: [{ layer: "device-processing", id: "activation", source: "schedule", target: "colors", targetHandle: "0" }],
+  };
+  const boxes = computeEventContainers(graph, { schedule: { position: { x: 40, y: 100 } }, colors: { position: { x: 80, y: 300 } } });
+  expect(boxes[0]!.memberIds).not.toContain("colors");
+  expect(graph.edges).toHaveLength(1);
+});

@@ -36,6 +36,7 @@ export type SensorChannelTransform =
   | { readonly kind: "clamp"; readonly min: number; readonly max: number };
 
 export type SensorChannel = {
+  readonly colorKind?: import("./data-viewer.js").ViewerColorKind;
   readonly inputMode?: "data" | "trigger";
   readonly outputMode?: "data" | "event";
   readonly id: string;
@@ -51,8 +52,19 @@ export type SensorChannel = {
 
 export type SensorRecipeStep =
   | { readonly type: "wait"; readonly ms: number }
-  | { readonly type: "i2c_write"; readonly addr: string; readonly reg?: string; readonly bytes: readonly string[] }
-  | { readonly type: "i2c_read"; readonly addr: string; readonly reg?: string; readonly len: number; readonly into: string }
+  | {
+      readonly type: "i2c_write";
+      readonly addr: string;
+      readonly reg?: string;
+      readonly bytes: readonly string[];
+    }
+  | {
+      readonly type: "i2c_read";
+      readonly addr: string;
+      readonly reg?: string;
+      readonly len: number;
+      readonly into: string;
+    }
   | { readonly type: "adc_read"; readonly into: string }
   | { readonly type: "gpio_write"; readonly level: 0 | 1; readonly signalId?: string }
   | { readonly type: "gpio_read"; readonly into: string; readonly signalId?: string }
@@ -82,13 +94,18 @@ export type SensorCommand = {
   readonly steps?: readonly SensorRecipeStep[];
 };
 
-export type SensorTransformOp = "u16_be" | "u16_le" | "s16_be" | "s16_le" | "u8" | "scale";
+export type SensorTransformOp =
+  "u16_be" | "u16_le" | "s16_be" | "s16_le" | "u8" | "scale";
 
 export type SensorTransform = {
   readonly id: string;
   readonly op: SensorTransformOp;
   readonly input: string;
-  readonly args?: { readonly multiply?: number; readonly divide?: number; readonly offset?: number };
+  readonly args?: {
+    readonly multiply?: number;
+    readonly divide?: number;
+    readonly offset?: number;
+  };
 };
 
 export type SensorRecipe = {
@@ -105,7 +122,12 @@ export type SensorRecipe = {
   readonly address?: string;
   readonly addressAlt?: string;
   readonly voltage: string;
-  readonly pins: readonly { readonly role: string; readonly label: string; readonly signal?: "power" | "gnd" | "i2c" | "spi" | "uart" | "adc" | "digital_in" | "digital_out" }[];
+  readonly pins: readonly {
+    readonly role: string;
+    readonly label: string;
+    readonly signal?:
+      "power" | "gnd" | "i2c" | "spi" | "uart" | "adc" | "digital_in" | "digital_out";
+  }[];
   /**
    * Channels the Flow blocks see (grandezze read/write).
    * Source of truth for graph ports; `outputs` mirrors read channels for emit/tryNow.
@@ -147,7 +169,9 @@ export type SensorRecipe = {
   readonly unknown?: readonly string[];
 };
 
-export function outputsFromChannels(channels: readonly SensorChannel[]): SensorRecipe["outputs"] {
+export function outputsFromChannels(
+  channels: readonly SensorChannel[],
+): SensorRecipe["outputs"] {
   return channels
     .filter((channel) => channel.direction === "read")
     .map((channel) => ({
@@ -172,12 +196,17 @@ export function channelsFromOutputs(
 }
 
 /** Prefer `channels`; fall back to legacy `outputs` as read channels. */
-export function recipeChannels(recipe: Pick<SensorRecipe, "channels" | "outputs">): readonly SensorChannel[] {
+export function recipeChannels(
+  recipe: Pick<SensorRecipe, "channels" | "outputs">,
+): readonly SensorChannel[] {
   if (recipe.channels && recipe.channels.length > 0) return recipe.channels;
   return channelsFromOutputs(recipe.outputs ?? []);
 }
 
-export function withChannels(recipe: SensorRecipe, channels: readonly SensorChannel[]): SensorRecipe {
+export function withChannels(
+  recipe: SensorRecipe,
+  channels: readonly SensorChannel[],
+): SensorRecipe {
   const outputs = outputsFromChannels(channels);
   const tryId = outputs.some((o) => o.id === recipe.tryNow.outputId)
     ? recipe.tryNow.outputId
@@ -190,11 +219,15 @@ export function withChannels(recipe: SensorRecipe, channels: readonly SensorChan
   };
 }
 
-export function readChannels(recipe: Pick<SensorRecipe, "channels" | "outputs">): readonly SensorChannel[] {
+export function readChannels(
+  recipe: Pick<SensorRecipe, "channels" | "outputs">,
+): readonly SensorChannel[] {
   return recipeChannels(recipe).filter((channel) => channel.direction === "read");
 }
 
-export function writeChannels(recipe: Pick<SensorRecipe, "channels" | "outputs">): readonly SensorChannel[] {
+export function writeChannels(
+  recipe: Pick<SensorRecipe, "channels" | "outputs">,
+): readonly SensorChannel[] {
   return recipeChannels(recipe).filter((channel) => channel.direction === "write");
 }
 
@@ -221,9 +254,27 @@ export const SENSOR_RECIPE_SEED_CATALOG: readonly SensorRecipe[] = [
       { role: "SCL", label: "I2C clock", signal: "i2c" },
     ],
     channels: [
-      { id: "temp_c", label: "Temperatura", unit: "°C", quantity: "temperature", direction: "read" },
-      { id: "hum_pct", label: "Umidità", unit: "%", quantity: "humidity", direction: "read" },
-      { id: "press_hpa", label: "Pressione", unit: "hPa", quantity: "pressure", direction: "read" },
+      {
+        id: "temp_c",
+        label: "Temperatura",
+        unit: "°C",
+        quantity: "temperature",
+        direction: "read",
+      },
+      {
+        id: "hum_pct",
+        label: "Umidità",
+        unit: "%",
+        quantity: "humidity",
+        direction: "read",
+      },
+      {
+        id: "press_hpa",
+        label: "Pressione",
+        unit: "hPa",
+        quantity: "pressure",
+        direction: "read",
+      },
     ],
     outputs: [
       { id: "temp_c", label: "Temperatura", unit: "°C", kind: "temperature" },
@@ -243,13 +294,21 @@ export const SENSOR_RECIPE_SEED_CATALOG: readonly SensorRecipe[] = [
     },
     transforms: [
       { id: "temp_u16", op: "u16_be", input: "temp_raw" },
-      { id: "temp_scaled", op: "scale", input: "temp_u16", args: { divide: 100, offset: 0 } },
+      {
+        id: "temp_scaled",
+        op: "scale",
+        input: "temp_u16",
+        args: { divide: 100, offset: 0 },
+      },
     ],
     registers: [
       { id: "0xF4", name: "CTRL_MEAS", role: "config", note: "Avvia misura" },
       { id: "0xFA", name: "TEMP_MSB", role: "data", note: "Byte alto temperatura" },
     ],
-    tryNow: { outputId: "temp_c", hint: "Tocca il sensore con un dito: la temperatura sale" },
+    tryNow: {
+      outputId: "temp_c",
+      hint: "Tocca il sensore con un dito: la temperatura sale",
+    },
     source: { kind: "catalog", label: "BME280 datasheet (scheda curata)" },
     confidence: "high",
   },
@@ -269,8 +328,20 @@ export const SENSOR_RECIPE_SEED_CATALOG: readonly SensorRecipe[] = [
       { role: "SCL", label: "I2C clock", signal: "i2c" },
     ],
     channels: [
-      { id: "temp_c", label: "Temperatura", unit: "°C", quantity: "temperature", direction: "read" },
-      { id: "hum_pct", label: "Umidità", unit: "%", quantity: "humidity", direction: "read" },
+      {
+        id: "temp_c",
+        label: "Temperatura",
+        unit: "°C",
+        quantity: "temperature",
+        direction: "read",
+      },
+      {
+        id: "hum_pct",
+        label: "Umidità",
+        unit: "%",
+        quantity: "humidity",
+        direction: "read",
+      },
     ],
     outputs: [
       { id: "temp_c", label: "Temperatura", unit: "°C", kind: "temperature" },
@@ -290,13 +361,21 @@ export const SENSOR_RECIPE_SEED_CATALOG: readonly SensorRecipe[] = [
     },
     transforms: [
       { id: "temp_u16", op: "u16_be", input: "frame" },
-      { id: "temp_scaled", op: "scale", input: "temp_u16", args: { divide: 100, offset: -50 } },
+      {
+        id: "temp_scaled",
+        op: "scale",
+        input: "temp_u16",
+        args: { divide: 100, offset: -50 },
+      },
     ],
     registers: [
       { id: "0xBE", name: "INIT", role: "config" },
       { id: "0xAC", name: "TRIGGER", role: "config", note: "Avvia misura" },
     ],
-    tryNow: { outputId: "temp_c", hint: "Soffia sul sensore: umidità e temperatura cambiano" },
+    tryNow: {
+      outputId: "temp_c",
+      hint: "Soffia sul sensore: umidità e temperatura cambiano",
+    },
     source: { kind: "catalog", label: "AHT20 datasheet (scheda curata)" },
     confidence: "high",
   },
@@ -313,7 +392,15 @@ export const SENSOR_RECIPE_SEED_CATALOG: readonly SensorRecipe[] = [
       { role: "GND", label: "GND", signal: "gnd" },
       { role: "OUT", label: "ADC", signal: "adc" },
     ],
-    channels: [{ id: "level", label: "Livello", unit: "%", quantity: "analog", direction: "read" }],
+    channels: [
+      {
+        id: "level",
+        label: "Livello",
+        unit: "%",
+        quantity: "analog",
+        direction: "read",
+      },
+    ],
     outputs: [{ id: "level", label: "Livello", unit: "%", kind: "analog" }],
     recipe: {
       init: [],
@@ -322,7 +409,9 @@ export const SENSOR_RECIPE_SEED_CATALOG: readonly SensorRecipe[] = [
         { type: "emit", outputId: "level", from: "pct" },
       ],
     },
-    transforms: [{ id: "pct", op: "scale", input: "raw", args: { multiply: 100, divide: 4095 } }],
+    transforms: [
+      { id: "pct", op: "scale", input: "raw", args: { multiply: 100, divide: 4095 } },
+    ],
     registers: [],
     tryNow: { outputId: "level", hint: "Gira la manopola e guarda il valore" },
     source: { kind: "catalog", label: "ADC generico" },
@@ -340,7 +429,15 @@ export const SENSOR_RECIPE_SEED_CATALOG: readonly SensorRecipe[] = [
       { role: "SIG", label: "GPIO", signal: "digital_in" },
       { role: "GND", label: "GND", signal: "gnd" },
     ],
-    channels: [{ id: "pressed", label: "Premuto", unit: "on/off", quantity: "digital", direction: "read" }],
+    channels: [
+      {
+        id: "pressed",
+        label: "Premuto",
+        unit: "on/off",
+        quantity: "digital",
+        direction: "read",
+      },
+    ],
     outputs: [{ id: "pressed", label: "Premuto", unit: "on/off", kind: "digital" }],
     recipe: {
       init: [],
@@ -369,7 +466,15 @@ export const SENSOR_RECIPE_SEED_CATALOG: readonly SensorRecipe[] = [
       { role: "TRIG", label: "Trigger", signal: "digital_out" },
       { role: "ECHO", label: "Echo", signal: "digital_in" },
     ],
-    channels: [{ id: "distance_cm", label: "Distanza", unit: "cm", quantity: "distance", direction: "read" }],
+    channels: [
+      {
+        id: "distance_cm",
+        label: "Distanza",
+        unit: "cm",
+        quantity: "distance",
+        direction: "read",
+      },
+    ],
     outputs: [{ id: "distance_cm", label: "Distanza", unit: "cm", kind: "distance" }],
     recipe: {
       init: [],
@@ -400,7 +505,12 @@ export function searchSensorRecipes(query: string): readonly SensorRecipe[] {
   const q = query.trim().toLowerCase();
   if (!q) return SENSOR_RECIPE_CATALOG;
   return SENSOR_RECIPE_CATALOG.filter((recipe) => {
-    const hay = [recipe.chip, recipe.vendor ?? "", recipe.oneLiner, ...(recipe.aliases ?? [])]
+    const hay = [
+      recipe.chip,
+      recipe.vendor ?? "",
+      recipe.oneLiner,
+      ...(recipe.aliases ?? []),
+    ]
       .join(" ")
       .toLowerCase();
     return hay.includes(q) || recipe.id.includes(q);
@@ -478,7 +588,10 @@ export function stepBadge(step: SensorRecipeStep): string {
   }
 }
 
-export function defaultStep(type: SensorRecipeStepType, address = "0x00"): SensorRecipeStep {
+export function defaultStep(
+  type: SensorRecipeStepType,
+  address = "0x00",
+): SensorRecipeStep {
   switch (type) {
     case "wait":
       return { type: "wait", ms: 10 };
@@ -517,7 +630,15 @@ export function paletteStepTypes(bus: SensorBus): readonly SensorRecipeStepType[
     case "adc":
       return ["wait", "adc_read", "emit"];
     case "w1":
-      return ["wait", "w1_reset", "w1_match_rom", "w1_write", "w1_read", "w1_crc", "emit"];
+      return [
+        "wait",
+        "w1_reset",
+        "w1_match_rom",
+        "w1_write",
+        "w1_read",
+        "w1_crc",
+        "emit",
+      ];
     case "gpio":
       return ["wait", "gpio_write", "gpio_read", "emit"];
     default:
@@ -537,7 +658,8 @@ export function withRecipePhase(
       [phase]: steps,
     },
     confidence: recipe.source.kind === "manual" ? "medium" : recipe.confidence,
-    unknown: recipe.source.kind === "manual" && steps.length > 0 ? undefined : recipe.unknown,
+    unknown:
+      recipe.source.kind === "manual" && steps.length > 0 ? undefined : recipe.unknown,
   };
 }
 
@@ -549,7 +671,10 @@ export function insertRecipeStep(
 ): SensorRecipe {
   const current = [...recipe.recipe[phase]];
   const step = defaultStep(type, recipe.address ?? "0x00");
-  const index = atIndex === undefined ? current.length : Math.max(0, Math.min(atIndex, current.length));
+  const index =
+    atIndex === undefined
+      ? current.length
+      : Math.max(0, Math.min(atIndex, current.length));
   current.splice(index, 0, step);
   return withRecipePhase(recipe, phase, current);
 }
@@ -566,7 +691,11 @@ export function updateRecipeStep(
   return withRecipePhase(recipe, phase, current);
 }
 
-export function removeRecipeStep(recipe: SensorRecipe, phase: SensorRecipePhase, index: number): SensorRecipe {
+export function removeRecipeStep(
+  recipe: SensorRecipe,
+  phase: SensorRecipePhase,
+  index: number,
+): SensorRecipe {
   const current = recipe.recipe[phase].filter((_, i) => i !== index);
   return withRecipePhase(recipe, phase, current);
 }
@@ -578,7 +707,14 @@ export function moveRecipeStep(
   to: number,
 ): SensorRecipe {
   const current = [...recipe.recipe[phase]];
-  if (from < 0 || from >= current.length || to < 0 || to >= current.length || from === to) return recipe;
+  if (
+    from < 0 ||
+    from >= current.length ||
+    to < 0 ||
+    to >= current.length ||
+    from === to
+  )
+    return recipe;
   const [item] = current.splice(from, 1);
   current.splice(to, 0, item!);
   return withRecipePhase(recipe, phase, current);
@@ -586,7 +722,12 @@ export function moveRecipeStep(
 
 /** Blank manual draft when the chip is not in the catalog. */
 export function blankSensorRecipe(chip: string, bus: SensorBus = "i2c"): SensorRecipe {
-  const id = `manual-${chip.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") || "sensor"}`;
+  const id = `manual-${
+    chip
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-") || "sensor"
+  }`;
   const address = bus === "i2c" ? "0x00" : undefined;
   const sampleDefaults: SensorRecipeStep[] =
     bus === "adc"
@@ -601,7 +742,13 @@ export function blankSensorRecipe(chip: string, bus: SensorBus = "i2c"): SensorR
           ]
         : bus === "i2c"
           ? [
-              { type: "i2c_read", addr: address ?? "0x00", reg: "0x00", len: 2, into: "raw" },
+              {
+                type: "i2c_read",
+                addr: address ?? "0x00",
+                reg: "0x00",
+                len: 2,
+                into: "raw",
+              },
               { type: "emit", outputId: "value", from: "raw" },
             ]
           : [
@@ -634,7 +781,11 @@ export function blankSensorRecipe(chip: string, bus: SensorBus = "i2c"): SensorR
             { role: "SCL", label: "I2C clock", signal: "i2c" },
           ]
         : [
-            { role: "SIG", label: bus.toUpperCase(), signal: bus === "adc" ? "adc" : "digital_in" },
+            {
+              role: "SIG",
+              label: bus.toUpperCase(),
+              signal: bus === "adc" ? "adc" : "digital_in",
+            },
             { role: "GND", label: "GND", signal: "gnd" },
           ],
     channels,

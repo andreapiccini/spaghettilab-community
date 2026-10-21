@@ -10,8 +10,9 @@
 
 extern const struct settings_handler_static settings_handler_spaghetti_physical;
 
-static uint8_t stored[558];
-static uint8_t applied[4];
+static uint8_t stored[626];
+static size_t stored_length = sizeof(stored);
+static uint8_t applied[8];
 static uint8_t applied_config[20];
 static uint8_t applied_speed;
 static int hardware_error;
@@ -35,7 +36,7 @@ int spaghetti_test_settings_subsys_init(void)
 int spaghetti_test_settings_load_subtree(const char *subtree)
 {
 	zassert_equal(strcmp(subtree, "physical"), 0);
-	return settings_handler_spaghetti_physical.h_set("layout", sizeof(stored), test_read, NULL);
+	return settings_handler_spaghetti_physical.h_set("layout", stored_length, test_read, NULL);
 }
 
 int spaghetti_test_settings_save_one(const char *name, const void *value, size_t length)
@@ -105,7 +106,8 @@ static void expected_tag(uint8_t expected[20], bool automatic)
 static void before(void *fixture)
 {
 	ARG_UNUSED(fixture);
-	memset(stored, 0, sizeof(stored));
+	stored_length = sizeof(stored);
+ memset(stored, 0, sizeof(stored));
 	stored[0] = 2U;
 	sys_put_le32(crc32_ieee(stored, sizeof(stored) - 4U), &stored[sizeof(stored) - 4U]);
 	memset(applied, 0, sizeof(applied));
@@ -133,7 +135,7 @@ ZTEST(physical, test_descriptor_and_manual_persistence)
 	zassert_ok(spaghetti_physical_describe(descriptor));
 	zassert_equal(descriptor[1], 1U);
 	zassert_equal(descriptor[2], 2U);
-	zassert_equal(descriptor[3], 1U);
+	zassert_equal(descriptor[3], 2U);
 	zassert_equal(descriptor[5], 25U);
 	zassert_ok(spaghetti_physical_apply(modes, 0U));
 	zassert_equal(save_count, 1);
@@ -240,7 +242,7 @@ ZTEST(physical, test_extended_settings_survive_reboot)
 	memset(applied_config, 0, sizeof(applied_config));
 	zassert_ok(spaghetti_physical_init());
 	zassert_ok(spaghetti_physical_describe(descriptor));
-	zassert_equal(descriptor[0], 2U);
+	zassert_equal(descriptor[0], 3U);
 	zassert_mem_equal(&descriptor[7], modes, 4U);
 	zassert_mem_equal(&descriptor[13], config, 20U);
 }
@@ -249,3 +251,30 @@ ZTEST_SUITE(physical, NULL, NULL, before, NULL, NULL);
 
 int spaghetti_port_copy_user_config(spaghetti_port_id_t id, uint8_t config[20]) { ARG_UNUSED(id); memcpy(config, applied_config, 20U); return 0; }
 int spaghetti_port_apply_user_config(spaghetti_port_id_t id, const uint8_t modes[4], uint8_t speed, const uint8_t config[20]) { int err = spaghetti_port_apply_user_map(id, modes, speed); if (!err) { if (config) memcpy(applied_config, config, 20U); else memset(applied_config, 0, 20U); } return err; }
+
+int spaghetti_port_copy_user_map_extended(spaghetti_port_id_t id, uint8_t modes[8], uint8_t *speed) { ARG_UNUSED(id); memcpy(modes, applied, 8U); *speed = applied_speed; return 0; }
+int spaghetti_port_apply_user_config_extended(spaghetti_port_id_t id, const uint8_t *modes, uint8_t count, uint8_t speed, const uint8_t config[20]) { int err = spaghetti_port_apply_user_config(id, modes, speed, config); if (!err && count == 8U) memcpy(&applied[4], &modes[4], 4U); return err; }
+ZTEST(physical, test_eight_pin_reboot_and_legacy_update) {
+ const uint8_t modes[8] = {4,0,0,0,0,5,1,3}; uint8_t descriptor[SPAGHETTI_PHYSICAL_SIZE];
+ zassert_ok(spaghetti_physical_apply_config_extended(modes, 8U, 0U, (uint8_t[20]){0}, NULL));
+ memset(applied, 0, sizeof(applied)); zassert_ok(spaghetti_physical_init());
+ zassert_mem_equal(applied, modes, 8U);
+ zassert_ok(spaghetti_physical_describe(descriptor)); zassert_mem_equal(&descriptor[33], &modes[4], 4U);
+ const uint8_t lower[4] = {1,0,0,0};
+ zassert_ok(spaghetti_physical_apply(lower, 0)); zassert_mem_equal(&applied[4], &modes[4], 4U);
+}
+ZTEST(physical, test_eight_pin_storage_failure_rolls_back) {
+ const uint8_t modes[8] = {1,0,0,0,1,2,3,1}; save_error = -EIO;
+ zassert_equal(spaghetti_physical_apply_config_extended(modes, 8U, 0, (uint8_t[20]){0}, NULL), -EIO);
+ zassert_mem_equal(applied, (uint8_t[8]){0}, 8U);
+}
+ZTEST(physical, test_migrate_four_pin_record) {
+ memset(stored, 0, sizeof(stored)); stored[0] = 2; stored[1] = 1;
+ sys_put_le32(crc32_ieee(stored, 554), &stored[554]);
+ zassert_ok(settings_handler_spaghetti_physical.h_set("layout", 558, test_read, NULL));
+ stored_length = 558U;
+ zassert_ok(spaghetti_physical_init());
+ zassert_equal(applied[0], 1); zassert_mem_equal(&applied[4], (uint8_t[4]){0}, 4U);
+}
+
+int spaghetti_usb_protocol_send_event(const uint8_t *data, size_t size) { ARG_UNUSED(data); ARG_UNUSED(size); return 0; }

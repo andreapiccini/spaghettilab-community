@@ -1,3 +1,5 @@
+import { compileModuleProgram } from "./module-program.js";
+import type { ModuleProgram } from "./module-program.js";
 import type { RgbModuleConfig } from "./rgb-module.js";
 /**
  * Device recipe authoring draft (editor UI).
@@ -44,7 +46,7 @@ export type DeviceRecipePhase = "init" | "sample" | "command";
 /** Sensor editor panes — Task removed; interval lives on the canvas. */
 export type DeviceRecipeEditorPane = "init" | "actions";
 
-export type DeviceRecipeBus = "i2c" | "spi" | "gpio" | "adc" | "w1";
+export type DeviceRecipeBus = "i2c" | "spi" | "uart" | "gpio" | "adc" | "w1";
 /** Editor mode pill: buses + display category (display is not a bus). */
 export type DeviceRecipeMode = DeviceRecipeBus | "display";
 export type DeviceRecipeCategory = "sensor" | "display";
@@ -585,6 +587,7 @@ export type DeviceRecipeOp = { readonly label?: string } & (
  * Each action is a canvas-schedulable unit; Init stays in `phases.init`.
  */
 export type DeviceRecipeCommand = {
+  readonly programActionId?: string;
   readonly exposeOnCanvas?: boolean;
   readonly id: string;
   readonly name: string;
@@ -625,6 +628,7 @@ export type DeviceRecipeBinding = {
     readonly sdaLabel: string;
     readonly sclLabel: string;
   };
+  readonly uart?: { readonly baudRate: number };
   readonly spi?: {
     readonly mode: 0 | 1 | 2 | 3;
     readonly freqHz: number;
@@ -675,6 +679,7 @@ export type DeviceRecipeVerification = {
 };
 
 export type DeviceRecipeDraft = {
+  readonly moduleProgram?: ModuleProgram;
   readonly schemaVersion: typeof DEVICE_RECIPE_DRAFT_VERSION;
   readonly id: string;
   readonly name: string;
@@ -708,7 +713,7 @@ export type DeviceRecipeDraft = {
   readonly dht22Module?: boolean;
   readonly dht22Version?: number;
   readonly temperatureSensorModel?: "dht11" | "ds18b20";
-  readonly ds18b20PowerMode?: "parasite" | "gpio";
+  readonly ds18b20PowerMode?: "parasite" | "vcc" | "gpio";
   readonly flowInterfaces?: readonly DeviceRecipeOp[];
   readonly flowInterfaceActions?: Readonly<Record<string, readonly string[]>>;
   readonly display?: DisplayProfile;
@@ -1066,6 +1071,7 @@ function blankBindingSeed(bus: DeviceRecipeBus): {
           auxGpio: [],
         },
       };
+    case "uart": return { name: "Modulo UART", binding: {bus:"uart",uart:{baudRate:115200},gpioSignals:[],auxGpio:[]} };
     case "spi":
       return {
         name: "Sensore SPI",
@@ -1674,6 +1680,7 @@ export function libraryOpsForBus(bus: DeviceRecipeBus): readonly { readonly type
         { type: "decode", label: "Decodifica" },
         { type: "emit", label: "Pubblica risultato" },
       ];
+    case "uart": return [inputOp, {type:"wait",label:"Attendi"}, ...dataOps];
     case "spi":
       return [
         inputOp,
@@ -2331,6 +2338,12 @@ function touch(draft: DeviceRecipeDraft): DeviceRecipeDraft {
 export function validateDraftForCreate(draft: DeviceRecipeDraft): readonly { readonly field: string; readonly message: string }[] {
   const errors: { field: string; message: string }[] = [];
   if (!draft.name.trim()) errors.push({ field: "name", message: "Nome obbligatorio" });
+  if (draft.moduleProgram) {
+    try { compileModuleProgram(draft,new Map(draft.moduleProgram.signals.map((signal,index) => [signal,index])),new Map()); }
+    catch (error) { errors.push({field:"moduleProgram",message:error instanceof Error ? error.message : String(error)}); }
+    return errors;
+  }
+
 
   if (draft.category === "display") {
     if (!draft.display) errors.push({ field: "display", message: "Profilo display mancante" });
@@ -2604,9 +2617,11 @@ export function draftToCanvasSensorRecipes(draft: DeviceRecipeDraft): readonly S
   return actions.filter(c => c.exposeOnCanvas !== false).map((cmd) => {
     const used = new Set<string>();
     for (const op of effectiveActionSteps(draft, cmd)) {
-      if (op.type === "emit") used.add(op.channelId);
-      if (op.type === "sample_external") used.add(op.fromChannelId);
+      if (!draft.moduleProgram && op.type === "emit") used.add(op.channelId);
+      if (op.type === "sample_external" && (!draft.moduleProgram || (op.inputMode==="trigger" && !op.triggerHighAction && !op.triggerLowAction))) used.add(op.fromChannelId);
     }
+    const contract = draft.moduleProgram?.actions[cmd.id];
+    if (contract) [...Object.keys(contract.inputIds), ...Object.keys(contract.outputIds)].forEach(id => used.add(id));
     const channels = draft.channels.filter((c) => used.has(c.id));
     const slice: DeviceRecipeDraft = {
       ...draft,
@@ -2625,6 +2640,7 @@ export function draftToCanvasSensorRecipes(draft: DeviceRecipeDraft): readonly S
 /** Map draft → SensorRecipe v1 (+ additive commands[]). Lossy for extended ops. */
 export function draftToSensorRecipe(draft: DeviceRecipeDraft): SensorRecipe {
   const sensorBus: SensorBus =
+    draft.binding.bus === "uart" ? "uart" :
     draft.binding.bus === "gpio"
       ? "gpio"
       : draft.binding.bus === "spi"
@@ -3008,6 +3024,7 @@ export function migrateDraft(raw: Partial<DeviceRecipeDraft> & { schemaVersion?:
   };
   return {
     schemaVersion: DEVICE_RECIPE_DRAFT_VERSION,
+    moduleProgram: raw.moduleProgram,
     id: raw.id!,
     name: raw.name ?? "Ricetta",
     description: raw.description ?? "",

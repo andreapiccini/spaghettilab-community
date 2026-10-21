@@ -1,7 +1,7 @@
 / {
 	physical-backbone {
 		compatible = "spaghettilab,physical-backbone";
-		layout-version = <1>;
+		layout-version = <2>;
 		mcu-id = <1>;
 		nfc-antennas = <2>;
 		user-port = <&test_user_port>;

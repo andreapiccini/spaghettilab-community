@@ -65,6 +65,7 @@ export function canChainIntoEventContainer(
   data: DeviceProcessingNodeData | undefined,
 ): boolean {
   if (!data || data.kind !== "block") return false;
+  if (data.blockTypeId === "led_driver") return false;
   const entry = catalogEntryForNode(data);
   if (!entry) return true;
   if (entry.id === "appblocks.manual_trigger") return true;
@@ -192,6 +193,8 @@ export function computeEventContainers(
       const child = nodesById.get(id);
       const childData = child ? (child.data as DeviceProcessingNodeData) : undefined;
       const childEntry = childData ? catalogEntryForNode(childData) : undefined;
+      // Color generators remain independent even when triggered by a Schedule member.
+      if (childData?.kind === "block" && childData.blockTypeId === "led_driver") continue;
       // Bay hardware endpoints sit outside the dashed box (left in / right out).
       if (childEntry && isBayEntry(childEntry)) continue;
       memberIds.add(id);

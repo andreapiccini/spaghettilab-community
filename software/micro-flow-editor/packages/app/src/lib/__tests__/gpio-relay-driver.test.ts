@@ -134,7 +134,7 @@ describe("relay NFC catalog", () => {
       1,
     );
     expect(library.models.some((model) => model.id === "model-gpio-relay")).toBe(true);
-    expect(library.units).toEqual([]);
+    expect(library.units.filter((unit) => unit.modelId === "model-gpio-relay")).toEqual([]);
   });
 });
 

@@ -1,3 +1,11 @@
+import { topologyNeedsReconfiguration } from "../../lib/backbone-topology-change.js";
+import { modulePinOwners } from "../../lib/module-pin-ownership.js";
+import { logicalBackboneKey } from "../../lib/logical-backbone-slots.js";
+import {
+  newDeviceDriverMetadata,
+  editModuleMetadata,
+} from "../../lib/new-device-driver.js";
+import { BackboneTargetPicker } from "../backbone/BackboneTargetPicker.js";
 import { withDs18b20PowerMode } from "../../lib/gpio-driver-presets.js";
 import {
   abortableModuleOperation,
@@ -5,7 +13,16 @@ import {
 } from "../../lib/module-operation.js";
 import { availableModuleDrivers } from "../../lib/module-catalog.js";
 import { useEffect, useRef, useState } from "react";
-import { Blocks, Plus, X, LoaderCircle, AlertCircle } from "lucide-react";
+import {
+  Blocks,
+  Plus,
+  X,
+  LoaderCircle,
+  AlertCircle,
+  ScanLine,
+  Info,
+  Users,
+} from "lucide-react";
 import { DEFAULT_PHYSICAL_SETTINGS } from "@spaghettilab/protocol-sdk";
 import { useSession } from "../../state/session-context.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
@@ -47,7 +64,7 @@ export function ModulesScreen({
     onClose: () => void;
   };
 } = {}) {
-  const { session, execute, navigate } = useSession();
+  const { session, execute, navigate, moduleTarget, requestTopologyReview } = useSession();
   const { library, busy: nfcBusy, writeSession } = useNfcWorkspace();
   const {
     rows,
@@ -58,7 +75,9 @@ export function ModulesScreen({
     unlockTransport,
   } = useCoreSessions();
   const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
-  const [bindingId, setBindingId] = useState(nfcImport?.bindingId ?? "");
+  const [bindingId, setBindingId] = useState(
+    nfcImport?.bindingId ?? moduleTarget?.bindingId ?? "",
+  );
   const [plan, setPlan] = useState<ModuleImportPlan | null>(null);
   const [busy, setBusy] = useState(false);
   const [stage, setStage] = useState("");
@@ -70,21 +89,63 @@ export function ModulesScreen({
     project?.coreBindings.find((binding) => binding.bindingId === bindingId) ??
     project?.coreBindings[0];
   const drivers = availableModuleDrivers(project, library);
-  function propose(driver: DeviceRecipeDraft) {
+  function edit(driver: DeviceRecipeDraft, duplicate = false) {
+    if (!execute) return;
+    execute({
+      kind: "EditModuleRecipe",
+      apply: (current) => ({
+        ok: true,
+        value: {
+          ...current,
+          authoringMetadata: editModuleMetadata(
+            current.authoringMetadata,
+            driver,
+            duplicate,
+          ),
+        },
+      }),
+    });
+    navigate("device-recipe-editor");
+  }
+  function propose(driver: DeviceRecipeDraft, pins?: Readonly<Record<string, number>>) {
+    if (driver.temperatureSensorModel === "ds18b20")
+      driver = withDs18b20PowerMode(
+        driver,
+        driver.ds18b20PowerMode === "gpio"
+          ? "vcc"
+          : (driver.ds18b20PowerMode ?? "parasite"),
+      );
     if (!project || !selected) {
       setMessage("Aggiungi una Backbone al progetto prima di importare un modulo.");
       return;
     }
     try {
+      if (topologyNeedsReconfiguration(project, selected.bindingId, getSnapshot(selected.bindingId)?.status)) {
+        setMessage("");
+        requestTopologyReview();
+        return;
+      }
       const row = rows.find((item) => item.binding.bindingId === selected.bindingId);
-      const board = row?.attachedBackbones.find((item) => item.local);
-      const boardKey = `${selected.bindingId}:${board?.deviceIdHex ?? selected.expectedDeviceId}`;
+      const board =
+        row?.attachedBackbones.find(
+          (item) => item.deviceIdHex === moduleTarget?.deviceIdHex,
+        ) ?? row?.attachedBackbones.find((item) => item.local);
+      const boardKey =
+        (board
+          ? logicalBackboneKey(
+              project,
+              selected.bindingId,
+              getSnapshot(selected.bindingId)?.status,
+              board.nodeId,
+            )
+          : undefined) ??
+        `${selected.bindingId}:${board?.deviceIdHex ?? selected.expectedDeviceId}`;
       const saved = parsePhysicalProject(
         project.authoringMetadata[PHYSICAL_META_KEY]?.comment,
       ).drafts[boardKey];
       const topology = topologyForBoard(getSnapshot(selected.bindingId)?.status, {
-        local: true,
-        nodeId: 0,
+        local: board?.local ?? true,
+        nodeId: board?.nodeId ?? 0,
       });
       const physical = saved ?? {
         name: "Module Function",
@@ -92,15 +153,30 @@ export function ModulesScreen({
           ? [...topology.modes]
           : defaultModesForVariant(DEFAULT_FUNCTION_VARIANT),
         i2cSpeed: topology?.i2cSpeed ?? 0,
-        local: true,
-        nodeId: 0,
+        local: board?.local ?? true,
+        nodeId: board?.nodeId ?? 0,
         backendPortId: topology?.backendPortId ?? 0,
         settings: topology?.settings,
       };
-      const next = planModuleImport(project, selected.bindingId, boardKey, driver, {
-        ...physical,
-        variant: functionVariantOf(physical),
-      });
+      const next = planModuleImport(
+        project,
+        selected.bindingId,
+        boardKey,
+        driver,
+        {
+          ...physical,
+          logicalSlot:
+            board && row
+              ? row.attachedBackbones
+                  .filter((item) => item.productKind !== "nfc-reader")
+                  .findIndex((item) => item.deviceIdHex === board.deviceIdHex) + 1
+              : physical.logicalSlot,
+          local: board?.local ?? true,
+          nodeId: board?.local === false ? board.nodeId : 0,
+          variant: topology?.layout === 2 ? "v2" : functionVariantOf(physical),
+        },
+        pins ?? (plan?.driver.id === driver.id ? plan.channels : undefined),
+      );
       setMessage("");
       setPlan(next);
     } catch (error) {
@@ -108,6 +184,7 @@ export function ModulesScreen({
     }
   }
   useEffect(() => {
+    if (!nfcImport && plan && !busy) propose(plan.driver);
     if (nfcImport)
       propose(
         nfcImport.driver.temperatureSensorModel === "ds18b20"
@@ -121,9 +198,10 @@ export function ModulesScreen({
       );
     // Rebuild the proposal when the user chooses a different Backbone.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nfcImport?.uid, bindingId]);
+  }, [nfcImport?.uid, bindingId, moduleTarget?.deviceIdHex]);
   async function add(replace: boolean) {
     if (!project || !plan || !execute || busy) return;
+    let activePlan = plan;
     if (nfcBusy || writeSession) {
       setMessage(
         "Attendi il completamento dell’operazione NFC prima di configurare i pin.",
@@ -142,15 +220,15 @@ export function ModulesScreen({
     }, 20000);
     const guarded = <T,>(promise: Promise<T>) =>
       abortableModuleOperation(promise, signal);
-    const client = getClient(plan.bindingId);
+    const client = getClient(activePlan.bindingId);
     let confirmed = false;
     let locked = false;
     try {
       // Offline import prepares the pin map; it never claims a hardware ACK.
       if (
         client &&
-        rows.find((row) => row.binding.bindingId === plan.bindingId)?.sessionState ===
-          "READY"
+        rows.find((row) => row.binding.bindingId === activePlan.bindingId)
+          ?.sessionState === "READY"
       ) {
         pausePolling();
         lockTransport();
@@ -159,68 +237,69 @@ export function ModulesScreen({
         await guarded(waitUntilIdle());
         signal.throwIfAborted();
         const status = await guarded(client.getStatus(signal));
-        const actual = topologyForBoard(status, { local: true, nodeId: 0 });
+        const target = {
+          local: activePlan.physical.local !== false,
+          nodeId: activePlan.physical.nodeId ?? 0,
+        };
+        const actual = topologyForBoard(status, target);
+        if (!actual)
+          throw new Error(
+            "La Backbone selezionata non è disponibile: aggiorna la connessione e riprova.",
+          );
         if (actual?.modes) {
           const fresh = planModuleImport(
             session!.stack.current,
-            plan.bindingId,
-            plan.boardKey,
-            plan.driver,
+            activePlan.bindingId,
+            activePlan.boardKey,
+            activePlan.driver,
             {
-              ...plan.physical,
+              ...activePlan.physical,
               modes: [...actual.modes],
-              variant: actual.modes.length === 8 ? "v2" : "v1",
-              settings: actual.settings ?? plan.physical.settings,
+              variant:
+                actual.layout === 2 ? "v2" : actual.modes.length === 8 ? "v2" : "v1",
+              settings: actual.settings ?? activePlan.physical.settings,
               i2cSpeed: actual.i2cSpeed,
-              backendPortId: actual.backendPortId ?? plan.physical.backendPortId,
+              backendPortId: actual.backendPortId ?? activePlan.physical.backendPortId,
             },
+            activePlan.channels,
           );
-          if (
-            JSON.stringify(fresh.physical.modes) !==
-              JSON.stringify(plan.physical.modes) ||
-            JSON.stringify(fresh.physical.settings) !==
-              JSON.stringify(plan.physical.settings) ||
-            fresh.physical.backendPortId !== plan.physical.backendPortId ||
-            fresh.physical.variant !== plan.physical.variant ||
-            fresh.physical.i2cSpeed !== plan.physical.i2cSpeed ||
-            JSON.stringify(fresh.conflicts) !== JSON.stringify(plan.conflicts) ||
-            JSON.stringify(fresh.pinChanges) !== JSON.stringify(plan.pinChanges)
-          ) {
-            setPlan(fresh);
-            setMessage(
-              "La configurazione dei pin è cambiata: controlla di nuovo i collegamenti proposti.",
-            );
-            return;
-          }
+          activePlan = fresh;
+          setPlan(fresh);
         }
-        setStage("Arresto del Flow prima di configurare i pin…");
-        const stopped = await guarded(applyStoppedRuntime(client, signal));
-        observeConfig(plan.bindingId, stopped.config);
-        if (stopped.changed) await guarded(waitConfigWriteGap(signal));
-        setStage(
-          modulePinsAlreadyConfigured(actual, plan.physical)
-            ? "Pin già configurati. Aggiunta del modulo…"
-            : "Configurazione dei pin…",
-        );
-        if (!modulePinsAlreadyConfigured(actual, plan.physical))
+        if (!modulePinsAlreadyConfigured(actual, activePlan.physical)) {
+          setStage("Arresto del Flow sulla Backbone USB…");
+          const stopped = await guarded(applyStoppedRuntime(client, signal));
+          observeConfig(activePlan.bindingId, stopped.config);
+          if (stopped.changed) await guarded(waitConfigWriteGap(signal));
+          if (!target.local) {
+            setStage("Arresto del Flow sulla Backbone CAN selezionata…");
+            const remote = client.forCanNode(target.nodeId);
+            try {
+              const remoteStopped = await guarded(applyStoppedRuntime(remote, signal));
+              if (remoteStopped.changed) await guarded(waitConfigWriteGap(signal));
+            } finally {
+              remote.dispose();
+            }
+          }
+          setStage("Configurazione dei pin sulla Backbone selezionata…");
           await guarded(
             client.applyPhysical(
               {
-                nodeId: 0,
-                modes: new Uint8Array(plan.physical.modes),
-                i2cSpeed: plan.physical.i2cSpeed,
+                nodeId: target.local ? 0 : target.nodeId,
+                modes: new Uint8Array(activePlan.physical.modes),
+                i2cSpeed: activePlan.physical.i2cSpeed,
                 settings:
-                  topologyForBoard(status, { local: true, nodeId: 0 })?.version === 2
-                    ? (plan.physical.settings ?? DEFAULT_PHYSICAL_SETTINGS)
+                  (actual?.version ?? 0) >= 2
+                    ? (activePlan.physical.settings ?? DEFAULT_PHYSICAL_SETTINGS)
                     : undefined,
-                expectedTag: expectedFunctionTag(
-                  tagForSlot(status, { local: true, nodeId: 0 }, 2),
-                  false,
-                ),
+                expectedTag: expectedFunctionTag(tagForSlot(status, target, 2), false),
               },
               signal,
             ),
           );
+        } else {
+          setStage("Pin già configurati. Aggiunta del modulo…");
+        }
         confirmed = true;
       }
       signal.throwIfAborted();
@@ -229,7 +308,7 @@ export function ModulesScreen({
         kind: "ImportModule",
         apply: (current) => ({
           ok: true,
-          value: commitModuleImport(current, plan, id, replace, confirmed),
+          value: commitModuleImport(current, activePlan, id, replace, confirmed),
         }),
       });
       if (!result.ok)
@@ -268,25 +347,66 @@ export function ModulesScreen({
               Moduli
             </h1>
             <p className="mt-2 text-sm text-ink-muted">
-              Driver pronti e dispositivi creati da te. Aggiungili al canvas con i pin
+              Moduli pronti e moduli creati da te. Aggiungili al canvas con i pin
               preconfigurati.
             </p>
           </div>
-          <label className="text-xs text-ink-muted">
-            Backbone master
-            <select
-              aria-label="Backbone per il modulo"
-              className={`${button} ml-2`}
-              value={selected?.bindingId ?? ""}
-              onChange={(event) => setBindingId(event.target.value)}
+          <div className="flex flex-wrap items-center gap-3">
+            <BackboneTargetPicker
+              onChange={(target) => setBindingId(target.bindingId)}
+            />
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                disabled
+                className="inline-flex items-center gap-2 rounded-xl border border-border-strong px-3 py-2 text-sm text-ink-muted opacity-50"
+              >
+                <ScanLine size={16} />
+                Rileva modulo
+              </button>
+              <span className="group relative">
+                <button
+                  type="button"
+                  aria-label="Informazioni sul rilevamento"
+                  className="rounded-full p-2 text-ink-muted"
+                >
+                  <Info size={16} />
+                </button>
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute right-0 top-full z-50 hidden w-64 rounded-xl border border-border bg-surface p-3 text-xs leading-relaxed shadow-lg group-hover:block group-focus-within:block"
+                >
+                  I moduli ufficiali SpaghettiLAB verranno rilevati e configurati
+                  automaticamente: non sarà necessario il cablaggio manuale. Disponibile
+                  prossimamente.
+                </span>
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled={!project || !execute}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-blue px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue/90 disabled:opacity-40"
+              onClick={() => {
+                if (!project || !execute) return;
+                execute({
+                  kind: "StartNewDeviceDriver",
+                  apply: (current) => ({
+                    ok: true,
+                    value: {
+                      ...current,
+                      authoringMetadata: newDeviceDriverMetadata(
+                        current.authoringMetadata,
+                      ),
+                    },
+                  }),
+                });
+                navigate("device-recipe-editor");
+              }}
             >
-              {project?.coreBindings.map((binding) => (
-                <option key={binding.bindingId} value={binding.bindingId}>
-                  {binding.expectedDeviceId.slice(0, 12)}
-                </option>
-              ))}
-            </select>
-          </label>
+              <Plus size={16} />
+              Crea modulo
+            </button>
+          </div>
         </header>
       )}
       {message && (
@@ -304,7 +424,12 @@ export function ModulesScreen({
               key={driver.id}
               className="flex flex-col rounded-2xl border border-border-strong bg-surface p-5 shadow-sm"
             >
-              <div className="mb-3 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => edit(driver.draft)}
+                className="mb-3 flex items-center gap-3 text-left"
+                aria-label={`Modifica ${driver.draft.name}`}
+              >
                 <div className="h-16 w-16 shrink-0">
                   <ModuleArtwork
                     kind={driver.draft.gpioHardware?.kind ?? "generic"}
@@ -312,7 +437,7 @@ export function ModulesScreen({
                   />
                 </div>
                 <h2 className="text-lg font-semibold">{driver.draft.name}</h2>
-              </div>
+              </button>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-muted">
                 {driver.draft.temperatureSensorModel === "dht11"
                   ? "Temperatura e umidità su richiesta. DATA A0, alimentazione A1, GND comune. Trigger sul fronte di salita; uscite °C e %RH."
@@ -328,6 +453,14 @@ export function ModulesScreen({
                   </span>
                 ))}
               </div>
+              <div className="mb-3 flex gap-3 text-sm text-brand-blue">
+                <button type="button" onClick={() => edit(driver.draft)}>
+                  Modifica modulo
+                </button>
+                <button type="button" onClick={() => edit(driver.draft, true)}>
+                  Duplica
+                </button>
+              </div>
               <button
                 className={`${button} flex items-center justify-center gap-2`}
                 onClick={() => propose(driver.draft)}
@@ -338,6 +471,20 @@ export function ModulesScreen({
             </article>
           ))}
         </div>
+      )}
+      {!nfcImport && (
+        <aside className="mt-6 flex items-start gap-3 text-sm text-ink-muted">
+          <Users size={20} className="shrink-0 text-brand-blue" />
+          <div>
+            <p className="font-semibold text-ink">
+              Il prossimo modulo ufficiale potrebbe essere il tuo.
+            </p>
+            <p className="mt-1">
+              Realizza un modulo e mostralo alla community. I più votati diventeranno
+              moduli ufficiali SpaghettiLAB.
+            </p>
+          </div>
+        </aside>
       )}
       {plan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-5">
@@ -358,36 +505,15 @@ export function ModulesScreen({
                 <X size={18} />
               </button>
             </div>
-            {nfcImport && (
-              <label className="mt-4 block text-sm">
-                Backbone di destinazione
-                <select
-                  aria-label="Backbone per il modulo"
-                  className={`${button} mt-2 w-full`}
-                  disabled={busy}
-                  value={selected?.bindingId ?? ""}
-                  onChange={(event) => setBindingId(event.target.value)}
-                >
-                  {project?.coreBindings
-                    .filter(
-                      (binding) =>
-                        !rows.some((row) =>
-                          row.attachedBackbones.some(
-                            (peer) =>
-                              peer.deviceIdHex === binding.expectedDeviceId &&
-                              peer.productKind === "nfc-reader",
-                          ),
-                        ),
-                    )
-                    .map((binding) => (
-                      <option key={binding.bindingId} value={binding.bindingId}>
-                        {rows.find((row) => row.binding.bindingId === binding.bindingId)
-                          ?.displayName ?? binding.expectedDeviceId.slice(0, 12)}
-                      </option>
-                    ))}
-                </select>
-              </label>
-            )}
+            <div className="mt-4">
+              <p className="mb-2 text-xs text-ink-muted">Backbone di destinazione</p>
+              <BackboneTargetPicker
+                disabled={busy}
+                onChange={(target) => {
+                  setBindingId(target.bindingId);
+                }}
+              />
+            </div>
             {plan.driver.temperatureSensorModel === "ds18b20" && (
               <label className="mt-4 block text-sm font-medium">
                 Alimentazione DS18B20
@@ -395,18 +521,23 @@ export function ModulesScreen({
                   aria-label="Alimentazione DS18B20"
                   className={`${button} mt-2 w-full`}
                   disabled={busy}
-                  value={plan.driver.ds18b20PowerMode ?? "parasite"}
+                  value={
+                    (plan.driver.ds18b20PowerMode ?? "parasite") === "parasite"
+                      ? "parasite"
+                      : "vcc"
+                  }
                   onChange={(event) =>
                     propose(
                       withDs18b20PowerMode(
                         plan.driver,
-                        event.target.value as "parasite" | "gpio",
+                        event.target.value === "parasite" ? "parasite" : "vcc",
+                        "3.3",
                       ),
                     )
                   }
                 >
-                  <option value="parasite">Parassita · solo DATA A0</option>
-                  <option value="gpio">Da GPIO · DATA A0 e VCC A1</option>
+                  <option value="parasite">Parassita · solo DATA</option>
+                  <option value="vcc">VCC · 3,3 V</option>
                 </select>
                 <p className="mt-2 text-xs font-normal text-ink-muted">
                   La scelta configura i pin e il driver della singola istanza.
@@ -414,41 +545,95 @@ export function ModulesScreen({
               </label>
             )}
             <p className="mt-3 text-sm text-ink-muted">
-              Collegamenti predefiniti · Module Function{" "}
+              Scegli i pin · Module Function{" "}
               {functionVariantOf(plan.physical).toUpperCase()}
             </p>
             <dl className="my-4 divide-y divide-border rounded-xl border border-border px-4">
-              {(Object.keys(plan.channels).length
-                ? Object.entries(plan.channels)
-                : [
-                    ["SDA", 0],
-                    ["SCL", 1],
-                  ]
-              ).map(([signal, channel]) => (
+              {Object.entries(plan.channels).map(([signal, channel]) => (
                 <div key={signal} className="flex justify-between py-2 text-sm">
                   <dt>
                     {plan.driver.binding.gpioSignals.find((item) => item.id === signal)
                       ?.name ?? signal}
                   </dt>
-                  <dd className="font-mono text-brand-blue">
-                    {formatPinLabel(
-                      modeIndexToPinId(
-                        Number(channel),
-                        functionVariantOf(plan.physical),
-                      ),
-                      functionVariantOf(plan.physical),
-                    )}
+                  <dd>
+                    <select
+                      aria-label={`Pin ${signal}`}
+                      disabled={busy}
+                      className={`${button} !py-1 font-mono text-brand-blue`}
+                      value={Number(channel)}
+                      onChange={(event) => {
+                        const next = Number(event.target.value);
+                        const pins = { ...plan.channels };
+                        const previous = pins[signal];
+                        const occupied = Object.keys(pins).find(
+                          (key) => key !== signal && pins[key] === next,
+                        );
+                        if (occupied && previous !== undefined)
+                          pins[occupied] = previous;
+                        pins[signal] = next;
+                        propose(plan.driver, pins);
+                      }}
+                    >
+                      {Array.from(
+                        {
+                          length:
+                            plan.driver.binding.bus === "gpio"
+                              ? Math.min(4, plan.physical.modes.length)
+                              : plan.physical.modes.length,
+                        },
+                        (_, pin) => {
+                          const owner = modulePinOwners(
+                            project,
+                            plan.bindingId,
+                            plan.boardKey,
+                            plan.physical,
+                          ).find((item) => Object.values(item.channels).includes(pin));
+                          return (
+                            <option key={pin} value={pin}>
+                              {formatPinLabel(
+                                modeIndexToPinId(pin, functionVariantOf(plan.physical)),
+                                functionVariantOf(plan.physical),
+                              )}{" "}
+                              ·{" "}
+                              {owner?.module.recipe.deviceDraft?.name ??
+                                owner?.module.label ??
+                                "Libero"}
+                            </option>
+                          );
+                        },
+                      )}
+                    </select>
                   </dd>
                 </div>
               ))}
+              {plan.driver.temperatureSensorModel === "ds18b20" &&
+                plan.driver.ds18b20PowerMode === "vcc" && (
+                  <div className="flex justify-between py-2 text-sm">
+                    <dt>VCC</dt>
+                    <dd className="font-mono text-brand-blue">3,3 V</dd>
+                  </div>
+                )}
+              {plan.driver.temperatureSensorModel === "ds18b20" && (
+                <div className="flex justify-between py-2 text-sm">
+                  <dt>GND</dt>
+                  <dd className="font-mono text-brand-blue">GND</dd>
+                </div>
+              )}
             </dl>
             {plan.driver.temperatureSensorModel === "ds18b20" &&
-              plan.driver.ds18b20PowerMode !== "gpio" && (
+              (plan.driver.ds18b20PowerMode ?? "parasite") === "parasite" && (
                 <p className="mb-4 text-sm text-ink-muted">
-                  Alimentazione parassita: DATA su A0, VDD e GND a massa. Pull-up
-                  esterno DATA–3,3 V; il driver mantiene DATA alto durante la
+                  Alimentazione parassita: DATA sul pin scelto, VDD e GND a massa.
+                  Pull-up esterno DATA–3,3 V; il driver mantiene DATA alto durante la
                   conversione (750 ms). Un sensore per pin. Verifica il circuito della
                   schedina con R1 e LED prima del cablaggio.
+                </p>
+              )}
+            {plan.driver.temperatureSensorModel === "ds18b20" &&
+              plan.driver.ds18b20PowerMode === "vcc" && (
+                <p className="mb-4 text-sm text-ink-muted">
+                  VCC alla linea 3,3 V, GND comune. Solo DATA usa un GPIO. Non usare 5
+                  V: il pull-up della schedina porterebbe DATA a 5 V.
                 </p>
               )}
             {plan.driver.temperatureSensorModel === "ds18b20" &&
@@ -488,26 +673,27 @@ export function ModulesScreen({
             {message && (
               <p
                 role="alert"
-                className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                className={`mb-4 rounded-xl border p-3 text-sm ${message.startsWith("Collegamenti aggiornati") ? "border-border bg-surface-sunken text-ink-muted" : "border-red-200 bg-red-50 text-red-700"}`}
               >
                 {message}
               </p>
             )}
             {!getClient(plan.bindingId) && (
               <p className="mb-4 text-sm text-ink-muted">
-                Backbone scollegata: i pin vengono preparati nel progetto. Applica la
-                configurazione in Module Function dopo il collegamento.
+                Backbone scollegata: il modulo e i pin vengono preparati nel progetto.
+                Verranno configurati quando carichi il programma sulla scheda.
               </p>
             )}
             {!!(plan.conflicts.length || plan.pinChanges.length) && (
               <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
                 <strong className="flex items-center gap-2">
                   <AlertCircle size={16} />
-                  Pin già utilizzati
+                  Moduli da sostituire
                 </strong>
                 <p className="mt-2">
-                  Scegli cosa mantenere. Sostituendo, i moduli in conflitto e i loro
-                  collegamenti vengono rimossi dal canvas; i driver restano in libreria.
+                  Aggiungendo il nuovo modulo, questi moduli vengono rimossi interamente
+                  insieme ai loro collegamenti nel canvas. I pin che non servono più
+                  vengono liberati.
                 </p>
                 <ul className="mt-2 list-inside list-disc">
                   {plan.conflicts.map((conflict) => (
@@ -518,11 +704,6 @@ export function ModulesScreen({
                   ))}
                 </ul>
               </div>
-            )}
-            {message && (
-              <p role="alert" className="mb-3 text-sm text-red-600">
-                {message}
-              </p>
             )}
             {busy && (
               <p role="status" className="mb-3 text-sm text-ink-muted">
@@ -540,11 +721,7 @@ export function ModulesScreen({
                       : setPlan(null)
                 }
               >
-                {busy
-                  ? "Interrompi attesa"
-                  : plan.conflicts.length || plan.pinChanges.length
-                    ? "Mantieni esistenti"
-                    : "Annulla"}
+                {busy ? "Interrompi attesa" : "Annulla"}
               </button>
               <button
                 className={`${button} flex items-center gap-2 !bg-brand-blue !text-white`}
@@ -553,7 +730,7 @@ export function ModulesScreen({
               >
                 {busy && <LoaderCircle size={16} className="animate-spin" />}
                 {plan.conflicts.length || plan.pinChanges.length
-                  ? "Usa il nuovo modulo"
+                  ? "Sostituisci e aggiungi"
                   : "Configura e aggiungi"}
               </button>
             </footer>

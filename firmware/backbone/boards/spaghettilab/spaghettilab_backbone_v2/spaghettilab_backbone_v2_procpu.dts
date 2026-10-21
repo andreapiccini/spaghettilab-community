@@ -1,0 +1,271 @@
+/*
+ * Spaghetti LAB Backbone V2, ESP32-S3-MINI-1 (U19) PROCPU.
+ * Pins from hardware/backbone/backbone.kicad_sch.
+ */
+
+/dts-v1/;
+
+#include <espressif/esp32s3/esp32s3_mini_n8.dtsi>
+#include <espressif/partitions_0x0_default.dtsi>
+#include <zephyr/dt-bindings/pinctrl/esp-pinctrl-common.h>
+#include <zephyr/dt-bindings/pinctrl/esp32s3-pinctrl.h>
+#include <zephyr/dt-bindings/pinctrl/esp32s3-gpio-sigmap.h>
+
+/ {
+	physical_backbone: physical-backbone {
+		compatible = "spaghettilab,physical-backbone";
+		layout-version = <2>;
+		mcu-id = <1>;
+		nfc-antennas = <2>;
+		user-port = <&port0>;
+	};
+	model = "Spaghetti LAB Backbone V2";
+	compatible = "spaghettilab,backbone-v2", "espressif,esp32s3";
+
+	chosen {
+		zephyr,sram = &sram1;
+		zephyr,console = &usb_serial;
+		zephyr,shell-uart = &usb_serial;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,uart-mcumgr = &uart1;
+		zephyr,bt-hci = &esp32_bt_hci;
+	};
+
+	aliases {
+		i2c-0 = &i2c0;
+		led0 = &status_led;
+		watchdog0 = &wdt0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		/*
+		 * D5 white status LED, cathode on GPIO11, active low.
+		 * Driven by LEDC channel 4; there is no RGB / SK6812.
+		 */
+		status_led: status_led {
+			gpios = <&gpio0 11 GPIO_ACTIVE_LOW>;
+			label = "STATUS";
+		};
+	};
+
+	/*
+	 * ST25R100 U15 control lines. SPI wires live on spi2 / nfc_spi_default.
+	 * RST GPIO1, IRQ GPIO5, CS GPIO2 (cs-gpios on spi2).
+	 */
+	spaghetti_nfc: spaghetti_nfc {
+		compatible = "spaghettilab,nfc";
+		nfc-reset-gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>;
+		nfc-irq-gpios = <&gpio0 5 GPIO_ACTIVE_HIGH>;
+		nfc-sck-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+		nfc-mosi-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
+		nfc-miso-gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
+	};
+
+	spaghetti_ports {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* V2 A0-A3: GPIO7-10. I2C/maintenance on A0/A1. */
+		port0: port@0 {
+			compatible = "spaghettilab,port";
+			reg = <0>;
+			i2c = <&i2c0>;
+			uart = <&uart2>;
+			spi = <&spi3>;
+			pwm = <&ledc0>;
+			input-gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>,
+				      <&gpio0 8 GPIO_ACTIVE_HIGH>,
+				      <&gpio0 9 GPIO_ACTIVE_HIGH>,
+				      <&gpio0 10 GPIO_ACTIVE_HIGH>, <&gpio0 12 GPIO_ACTIVE_HIGH>,
+                       <&gpio0 13 GPIO_ACTIVE_HIGH>, <&gpio0 14 GPIO_ACTIVE_HIGH>, <&gpio0 15 GPIO_ACTIVE_HIGH>;
+			output-gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>,
+				       <&gpio0 8 GPIO_ACTIVE_HIGH>,
+				       <&gpio0 9 GPIO_ACTIVE_HIGH>,
+				       <&gpio0 10 GPIO_ACTIVE_HIGH>, <&gpio0 12 GPIO_ACTIVE_HIGH>,
+                       <&gpio0 13 GPIO_ACTIVE_HIGH>, <&gpio0 14 GPIO_ACTIVE_HIGH>, <&gpio0 15 GPIO_ACTIVE_HIGH>;
+			status = "okay";
+		};
+
+		/* V2 A4-A7: GPIO12-15, exposed as GPIO channels 0-3 on port 2. */
+		port2: port@2 {
+			compatible = "spaghettilab,port";
+			reg = <2>;
+			input-gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>, <&gpio0 13 GPIO_ACTIVE_HIGH>,
+			              <&gpio0 14 GPIO_ACTIVE_HIGH>, <&gpio0 15 GPIO_ACTIVE_HIGH>;
+			output-gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>, <&gpio0 13 GPIO_ACTIVE_HIGH>,
+			               <&gpio0 14 GPIO_ACTIVE_HIGH>, <&gpio0 15 GPIO_ACTIVE_HIGH>;
+			status = "okay";
+		};
+
+		/* SN65HVD230 U2: TX GPIO48, RX GPIO34. */
+		port1: port@1 {
+			compatible = "spaghettilab,port";
+			reg = <1>;
+			can = <&twai>;
+			status = "okay";
+		};
+	};
+
+	spaghetti_flows {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		flow0: flow@0 {
+			compatible = "spaghettilab,flow";
+			reg = <0>;
+			port = <&port0>;
+			direction = "bidirectional";
+			signal-count = <5>;
+			function-bay-count = <0>;
+			status = "okay";
+		};
+
+		flow2: flow@2 {
+			compatible = "spaghettilab,flow";
+			reg = <2>;
+			port = <&port2>;
+			direction = "bidirectional";
+			signal-count = <5>;
+			function-bay-count = <0>;
+			status = "okay";
+		};
+
+		flow1: flow@1 {
+			compatible = "spaghettilab,flow";
+			reg = <1>;
+			port = <&port1>;
+			direction = "bidirectional";
+			signal-count = <5>;
+			function-bay-count = <0>;
+			status = "okay";
+		};
+	};
+
+	maintenance_link0: maintenance-link {
+		compatible = "spaghettilab,maintenance-link";
+		normal-bus = <&i2c0>;
+		maintenance-uart = <&uart1>;
+		bootstrap-window-ms = <500>;
+		status = "okay";
+	};
+};
+
+&pinctrl {
+	user_uart_default: user_uart_default { group1 { pinmux = <UART2_TX_GPIO7>, <UART2_RX_GPIO8>; }; };
+	user_spi_default: user_spi_default { group1 { pinmux = <SPIM3_SCLK_GPIO7>, <SPIM3_MOSI_GPIO8>, <SPIM3_MISO_GPIO9>; }; };
+	user_pwm_default: user_pwm_default { group1 { pinmux = <LEDC_CH0_GPIO7>, <LEDC_CH1_GPIO8>, <LEDC_CH2_GPIO9>, <LEDC_CH3_GPIO10>, <LEDC_CH4_GPIO11>; output-enable; }; };
+	spaghetti_i2c0_default: spaghetti_i2c0_default {
+		group1 {
+			pinmux = <I2C0_SDA_GPIO7>, <I2C0_SCL_GPIO8>;
+			bias-pull-up;
+			drive-open-drain;
+			output-high;
+		};
+	};
+
+	spaghetti_uart1_maintenance: spaghetti_uart1_maintenance {
+		group1 {
+			pinmux = <UART1_RX_GPIO7>, <UART1_TX_GPIO8>;
+		};
+	};
+
+	spaghetti_uart1_probe: spaghetti_uart1_probe {
+		group1 {
+			pinmux = <UART1_RX_GPIO7>;
+			bias-pull-up;
+		};
+	};
+
+	/* ST25R100 U15: SCK GPIO4, MOSI GPIO3, MISO GPIO6. CS GPIO2 is cs-gpios. */
+	nfc_spi_default: nfc_spi_default {
+		group1 {
+			pinmux = <SPIM2_SCLK_GPIO4>, <SPIM2_MISO_GPIO6>;
+		};
+
+		group2 {
+			pinmux = <SPIM2_MOSI_GPIO3>;
+			output-low;
+		};
+	};
+
+	spaghetti_twai_default: spaghetti_twai_default {
+		group1 {
+			pinmux = <TWAI_TX_GPIO48>, <TWAI_RX_GPIO34>;
+		};
+	};
+};
+
+&usb_serial {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&spaghetti_i2c0_default>;
+	pinctrl-names = "default";
+};
+
+&uart1 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&spaghetti_uart1_probe>;
+	pinctrl-1 = <&spaghetti_uart1_maintenance>;
+	pinctrl-names = "default", "sleep";
+};
+
+&uart2 { status = "okay"; current-speed = <115200>; pinctrl-0 = <&user_uart_default>; pinctrl-names = "default"; };
+&spi3 { #address-cells = <1>; #size-cells = <0>; status = "okay"; pinctrl-0 = <&user_spi_default>; pinctrl-names = "default"; cs-gpios = <&gpio0 10 GPIO_ACTIVE_LOW>; };
+&ledc0 {
+	status = "okay"; pinctrl-0 = <&user_pwm_default>; pinctrl-names = "default";
+	#address-cells = <1>; #size-cells = <0>;
+	channel0@0 { reg = <0>; timer = <0>; };
+	channel1@1 { reg = <1>; timer = <0>; };
+	channel2@2 { reg = <2>; timer = <0>; };
+	channel3@3 { reg = <3>; timer = <0>; };
+	channel4@4 { reg = <4>; timer = <2>; inverted; };
+};
+
+&spi2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	pinctrl-0 = <&nfc_spi_default>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;
+};
+
+&twai {
+	status = "okay";
+	pinctrl-0 = <&spaghetti_twai_default>;
+	pinctrl-names = "default";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&wdt0 {
+	status = "okay";
+};
+
+&trng0 {
+	status = "okay";
+};
+
+&wifi {
+	status = "okay";
+};
+
+&esp32_bt_hci {
+	status = "okay";
+};

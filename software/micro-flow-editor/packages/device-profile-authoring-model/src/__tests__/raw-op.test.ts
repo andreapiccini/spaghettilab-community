@@ -18,7 +18,16 @@ describe("toRawOp — fixed per-opcode compile, S061 point 3", () => {
   });
 
   it("compiles I2C_WRITE_READ with imm0=readLength, imm1=writeLength, imm2=timeoutMs — easy to get backwards, verified against exec_i2c_write_read's call site", () => {
-    expect(toRawOp({ op: "I2C_WRITE_READ", src: 0, dst: 1, readLength: 4, writeLength: 1, timeoutMs: 20 })).toEqual({
+    expect(
+      toRawOp({
+        op: "I2C_WRITE_READ",
+        src: 0,
+        dst: 1,
+        readLength: 4,
+        writeLength: 1,
+        timeoutMs: 20,
+      }),
+    ).toEqual({
       opcode: DeviceProfileOpcode.I2C_WRITE_READ,
       dst: 1,
       srcA: 0,
@@ -31,7 +40,15 @@ describe("toRawOp — fixed per-opcode compile, S061 point 3", () => {
   });
 
   it("compiles UART_READ_UNTIL with imm0=maxLength, imm1=timeoutMs, imm2=stopByte", () => {
-    expect(toRawOp({ op: "UART_READ_UNTIL", dst: 2, maxLength: 16, timeoutMs: 100, stopByte: 0x0a })).toEqual({
+    expect(
+      toRawOp({
+        op: "UART_READ_UNTIL",
+        dst: 2,
+        maxLength: 16,
+        timeoutMs: 100,
+        stopByte: 0x0a,
+      }),
+    ).toEqual({
       opcode: DeviceProfileOpcode.UART_READ_UNTIL,
       dst: 2,
       srcA: 0,
@@ -57,7 +74,17 @@ describe("toRawOp — fixed per-opcode compile, S061 point 3", () => {
   });
 
   it("compiles WAIT_FIELD_MASK with dst as the result slot, src as the optional write-command slot, and attempts/intervalMs/mask/expected in imm0-imm3", () => {
-    expect(toRawOp({ op: "WAIT_FIELD_MASK", dst: 1, src: 3, mask: 0xff, expected: 0x01, attempts: 5, intervalMs: 10 })).toEqual({
+    expect(
+      toRawOp({
+        op: "WAIT_FIELD_MASK",
+        dst: 1,
+        src: 3,
+        mask: 0xff,
+        expected: 0x01,
+        attempts: 5,
+        intervalMs: 10,
+      }),
+    ).toEqual({
       opcode: DeviceProfileOpcode.WAIT_FIELD_MASK,
       dst: 1,
       srcA: 3,
@@ -70,25 +97,56 @@ describe("toRawOp — fixed per-opcode compile, S061 point 3", () => {
   });
 
   it("compiles LOAD_CONST using imm0 for length and imm2/imm3 for the value, per 'Load imm2/imm3 bytes'", () => {
-    expect(toRawOp({ op: "LOAD_CONST", dst: 0, length: 4, low: 100, high: 0 })).toEqual({
-      opcode: DeviceProfileOpcode.LOAD_CONST,
-      dst: 0,
-      srcA: 0,
-      srcB: 0,
-      imm0: 4,
-      imm1: 0,
-      imm2: 100,
-      imm3: 0,
-    });
+    expect(toRawOp({ op: "LOAD_CONST", dst: 0, length: 4, low: 100, high: 0 })).toEqual(
+      {
+        opcode: DeviceProfileOpcode.LOAD_CONST,
+        dst: 0,
+        srcA: 0,
+        srcB: 0,
+        imm0: 4,
+        imm1: 0,
+        imm2: 100,
+        imm3: 0,
+      },
+    );
   });
 
   it("compiles SPI_TRANSCEIVE mode 3 into imm3, leaving Mode 0 as imm3=0", () => {
-    expect(toRawOp({ op: "SPI_TRANSCEIVE", src: 0, dst: 1, length: 2, timeoutMs: 10, frequencyHz: 1_000_000, mode: 3 }).imm3).toBe(3);
-    expect(toRawOp({ op: "SPI_TRANSCEIVE", src: 0, dst: 1, length: 2, timeoutMs: 10, frequencyHz: 1_000_000, mode: 0 }).imm3).toBe(0);
+    expect(
+      toRawOp({
+        op: "SPI_TRANSCEIVE",
+        src: 0,
+        dst: 1,
+        length: 2,
+        timeoutMs: 10,
+        frequencyHz: 1_000_000,
+        mode: 3,
+      }).imm3,
+    ).toBe(3);
+    expect(
+      toRawOp({
+        op: "SPI_TRANSCEIVE",
+        src: 0,
+        dst: 1,
+        length: 2,
+        timeoutMs: 10,
+        frequencyHz: 1_000_000,
+        mode: 0,
+      }).imm3,
+    ).toBe(0);
   });
 
   it("compiles W1_WRITE_READ with imm0=readLength, imm1=writeLength, imm2=timeoutMs — ROM is binding, not this op", () => {
-    expect(toRawOp({ op: "W1_WRITE_READ", src: 0, dst: 1, readLength: 2, writeLength: 1, timeoutMs: 20 })).toEqual({
+    expect(
+      toRawOp({
+        op: "W1_WRITE_READ",
+        src: 0,
+        dst: 1,
+        readLength: 2,
+        writeLength: 1,
+        timeoutMs: 20,
+      }),
+    ).toEqual({
       opcode: DeviceProfileOpcode.W1_WRITE_READ,
       dst: 1,
       srcA: 0,
@@ -114,7 +172,15 @@ describe("toRawOp — fixed per-opcode compile, S061 point 3", () => {
   });
 
   it("compiles WAIT_GPIO with attempts/intervalMs/expectedLevel in imm0-imm2", () => {
-    expect(toRawOp({ op: "WAIT_GPIO", dst: 0, attempts: 5, intervalMs: 10, expectedLevel: 1 })).toEqual({
+    expect(
+      toRawOp({
+        op: "WAIT_GPIO",
+        dst: 0,
+        attempts: 5,
+        intervalMs: 10,
+        expectedLevel: 1,
+      }),
+    ).toEqual({
       opcode: DeviceProfileOpcode.WAIT_GPIO,
       dst: 0,
       srcA: 0,
@@ -152,17 +218,47 @@ describe("fromRawOp — the inverse of toRawOp, used by device-profile-install's
   const samples: Instruction[] = [
     { op: "I2C_WRITE", src: 0, length: 2, timeoutMs: 10 },
     { op: "I2C_READ", dst: 1, length: 4, timeoutMs: 10 },
-    { op: "I2C_WRITE_READ", src: 0, dst: 1, readLength: 4, writeLength: 1, timeoutMs: 20 },
-    { op: "SPI_TRANSCEIVE", src: 0, dst: 1, length: 3, timeoutMs: 5, frequencyHz: 1_000_000, mode: 0 },
+    {
+      op: "I2C_WRITE_READ",
+      src: 0,
+      dst: 1,
+      readLength: 4,
+      writeLength: 1,
+      timeoutMs: 20,
+    },
+    {
+      op: "SPI_TRANSCEIVE",
+      src: 0,
+      dst: 1,
+      length: 3,
+      timeoutMs: 5,
+      frequencyHz: 1_000_000,
+      mode: 0,
+    },
     { op: "UART_WRITE", src: 0, length: 2, timeoutMs: 10 },
     { op: "UART_READ_UNTIL", dst: 1, maxLength: 16, timeoutMs: 100, stopByte: 0x0a },
     { op: "UART_READ", dst: 1, length: 4, timeoutMs: 50 },
-    { op: "W1_WRITE_READ", src: 0, dst: 1, readLength: 2, writeLength: 1, timeoutMs: 20 },
+    {
+      op: "W1_WRITE_READ",
+      src: 0,
+      dst: 1,
+      readLength: 2,
+      writeLength: 1,
+      timeoutMs: 20,
+    },
     { op: "GPIO_GET", dst: 0 },
     { op: "GPIO_SET", value: true },
     { op: "ADC_READ", dst: 0, timeoutMs: 5 },
     { op: "DELAY_BOUNDED", milliseconds: 15 },
-    { op: "WAIT_FIELD_MASK", dst: 0, src: 1, mask: 0xff, expected: 0x01, attempts: 3, intervalMs: 10 },
+    {
+      op: "WAIT_FIELD_MASK",
+      dst: 0,
+      src: 1,
+      mask: 0xff,
+      expected: 0x01,
+      attempts: 3,
+      intervalMs: 10,
+    },
     { op: "WAIT_GPIO", dst: 0, attempts: 5, intervalMs: 10, expectedLevel: 1 },
     { op: "LOAD_CONST", dst: 0, length: 4, low: 100, high: 0 },
     { op: "COPY_BYTES", src: 0, dst: 1, length: 2 },
@@ -184,32 +280,82 @@ describe("fromRawOp — the inverse of toRawOp, used by device-profile-install's
   });
 
   it("rejects an opcode outside the known vocabulary rather than guessing", () => {
-    const result = fromRawOp({ opcode: 999, dst: 0, srcA: 0, srcB: 0, imm0: 0, imm1: 0, imm2: 0, imm3: 0 });
+    const result = fromRawOp({
+      opcode: 999,
+      dst: 0,
+      srcA: 0,
+      srcB: 0,
+      imm0: 0,
+      imm1: 0,
+      imm2: 0,
+      imm3: 0,
+    });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe("device-profile.unknown_opcode");
   });
 
   it("rejects a BYTE_SWAP width that isn't 2 or 4", () => {
-    const result = fromRawOp({ opcode: DeviceProfileOpcode.BYTE_SWAP, dst: 1, srcA: 0, srcB: 0, imm0: 3, imm1: 0, imm2: 0, imm3: 0 });
+    const result = fromRawOp({
+      opcode: DeviceProfileOpcode.BYTE_SWAP,
+      dst: 1,
+      srcA: 0,
+      srcB: 0,
+      imm0: 3,
+      imm1: 0,
+      imm2: 0,
+      imm3: 0,
+    });
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error.code).toBe("device-profile.invalid_raw_operand");
+    if (!result.ok)
+      expect(result.error.code).toBe("device-profile.invalid_raw_operand");
   });
 
   it("rejects an SPI_TRANSCEIVE mode outside 0-3", () => {
-    const result = fromRawOp({ opcode: DeviceProfileOpcode.SPI_TRANSCEIVE, dst: 1, srcA: 0, srcB: 0, imm0: 2, imm1: 10, imm2: 1000000, imm3: 4 });
+    const result = fromRawOp({
+      opcode: DeviceProfileOpcode.SPI_TRANSCEIVE,
+      dst: 1,
+      srcA: 0,
+      srcB: 0,
+      imm0: 2,
+      imm1: 10,
+      imm2: 1000000,
+      imm3: 4,
+    });
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error.code).toBe("device-profile.invalid_raw_operand");
+    if (!result.ok)
+      expect(result.error.code).toBe("device-profile.invalid_raw_operand");
   });
 });
 
 describe("runtime variable and encoder operations", () => {
   it.each<Instruction>([
-    { op: "SCALE_PACK", dst: 2, src: 1, flags: 7, width: 2, divisor: 10, multiplier: -3, offset: -12 },
-    { op: "LOAD_VALUE", dst: 1, argumentId: 2, required: false, length: 2, littleEndian: false, low: 0x1234, high: 0 },
+    {
+      op: "SCALE_PACK",
+      dst: 2,
+      src: 1,
+      flags: 7,
+      width: 2,
+      divisor: 10,
+      multiplier: -3,
+      offset: -12,
+    },
+    {
+      op: "LOAD_VALUE",
+      dst: 1,
+      argumentId: 2,
+      required: false,
+      length: 2,
+      littleEndian: false,
+      low: 0x1234,
+      high: 0,
+    },
     { op: "COPY_BYTES", src: 0, dst: 1, length: 2, offset: 3 },
-  ])("preserves signed coefficients, cached field IDs and byte offsets: $op", instruction => {
-    expect(fromRawOp(toRawOp(instruction))).toEqual({ ok: true, value: instruction });
-  });
+  ])(
+    "preserves signed coefficients, cached field IDs and byte offsets: $op",
+    (instruction) => {
+      expect(fromRawOp(toRawOp(instruction))).toEqual({ ok: true, value: instruction });
+    },
+  );
 });
 
 describe("indexed digital GPIO", () => {
@@ -218,14 +364,52 @@ describe("indexed digital GPIO", () => {
       { op: "GPIO_GET", dst: 3, channel: 2 },
       { op: "GPIO_SET", value: false, channel: 3 },
       { op: "GPIO_SET_VALUE", src: 4, channel: 1, invert: true },
-    ] as const) expect(fromRawOp(toRawOp(op))).toEqual({ ok: true, value: op });
+    ] as const)
+      expect(fromRawOp(toRawOp(op))).toEqual({ ok: true, value: op });
   });
 });
 
 it("round trips an asynchronous active-low pulse without a blocking delay", () => {
-  const pulse: Instruction = { op: "GPIO_PULSE", channel: 2, milliseconds: 125, activeHigh: false, restoreHigh: true };
+  const pulse: Instruction = {
+    op: "GPIO_PULSE",
+    channel: 2,
+    milliseconds: 125,
+    activeHigh: false,
+    restoreHigh: true,
+  };
   const raw = toRawOp(pulse);
   expect(raw.opcode).toBe(33);
   expect(raw.imm2).toBe(2);
   expect(fromRawOp(raw)).toEqual({ ok: true, value: pulse });
+});
+
+it("round-trips DS18B20 external VCC separately from parasite and GPIO supply", () => {
+  const vcc = {
+    op: "DS18B20_SETUP",
+    channel: 0,
+    on: true,
+    externalPower: true,
+  } as const;
+  const raw = toRawOp(vcc);
+  expect(raw.imm2).toBe(5);
+  expect(fromRawOp(raw)).toEqual({ ok: true, value: vcc });
+  expect(toRawOp({ op: "DS18B20_SETUP", channel: 0, on: true }).imm2).toBe(0);
+  expect(
+    toRawOp({ op: "DS18B20_SETUP", channel: 0, on: true, powerChannel: 1 }).imm2,
+  ).toBe(2);
+});
+
+it("preserves remote RGB destination and polarity without changing local channels", () => {
+  const op = {
+    op: "RGB_PROGRAM",
+    offset: 0,
+    length: 12,
+    channels: 36,
+    inverted: true,
+    nodeId: 0xe17fd0,
+  } as const;
+  const raw = toRawOp(op);
+  expect(raw.imm2).toBe(36);
+  expect(raw.imm3).toBe(0xe17fd0 * 2 + 1);
+  expect(fromRawOp(raw)).toEqual({ ok: true, value: op });
 });

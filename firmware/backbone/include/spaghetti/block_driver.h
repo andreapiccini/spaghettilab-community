@@ -74,10 +74,12 @@
  * @brief Firmware-lifetime description of one block input or output port.
  */
 struct spaghetti_block_port_descriptor {
-	uint16_t port_id; /**< Stable port identifier within the driver. */
-	const char *name; /**< Stable machine name borrowed for firmware life. */
-	uint32_t accepted_types; /**< Bitmask of @ref spaghetti_value_type. */
-	bool required; /**< True when an input must be connected. */
+	uint16_t port_id;            /**< Stable port identifier within the driver. */
+	const char *name;            /**< Stable machine name borrowed for firmware life. */
+	uint32_t accepted_types;     /**< Bitmask of @ref spaghetti_value_type. */
+	bool required;               /**< True when an input must be connected. */
+	bool allow_multiple_sources; /**< Activation input accepts independent event sources; data
+	                                inputs remain exclusive. */
 };
 
 /**

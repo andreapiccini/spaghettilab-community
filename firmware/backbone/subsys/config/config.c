@@ -181,16 +181,13 @@ static int compute_sha256(const uint8_t *data, size_t size, uint8_t out[32])
 static int compute_config_hash(const struct spaghetti_config *config,
 			       uint8_t out_hash[SPAGHETTI_CONFIG_HASH_SIZE])
 {
-	uint8_t encoded[SPAGHETTI_CONFIG_CBOR_MAX_SIZE];
-	size_t written = 0U;
-	int err = spaghetti_config_encode_cbor(config, encoded, sizeof(encoded),
-					       &written);
-
-	if (err < 0) {
-		return err;
-	}
-
-	return compute_sha256(encoded, written, out_hash);
+	uint8_t *encoded = k_malloc(SPAGHETTI_CONFIG_CBOR_MAX_SIZE);
+ if (!encoded) return -ENOMEM;
+ size_t written=0;
+ int err=spaghetti_config_encode_cbor(config, encoded, SPAGHETTI_CONFIG_CBOR_MAX_SIZE, &written);
+ if (!err) err=compute_sha256(encoded,written,out_hash);
+ k_free(encoded);
+ return err;
 }
 
 static bool type_id_is_valid(const char *type_id)

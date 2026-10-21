@@ -111,9 +111,12 @@ size_t spaghetti_port_count(void);
  */
 int spaghetti_port_apply_user_map(spaghetti_port_id_t id,
 				  const uint8_t modes[4], uint8_t speed);
+int spaghetti_port_copy_user_map_extended(spaghetti_port_id_t id, uint8_t modes[8], uint8_t *speed);
+int spaghetti_port_apply_user_config_extended(spaghetti_port_id_t id, const uint8_t *modes, uint8_t count, uint8_t speed, const uint8_t config[20]);
 int spaghetti_port_apply_user_config(spaghetti_port_id_t id, const uint8_t modes[4],
 	uint8_t speed, const uint8_t config[20]);
 int spaghetti_port_copy_user_config(spaghetti_port_id_t id, uint8_t config[20]);
+int spaghetti_port_pwm_write(const struct spaghetti_port *port, uint8_t channel, uint32_t frequency, uint16_t duty);
 int spaghetti_port_pwm_set(const struct spaghetti_port *port, uint8_t channel, uint16_t duty);
 
 /**

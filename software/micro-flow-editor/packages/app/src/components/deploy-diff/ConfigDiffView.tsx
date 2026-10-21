@@ -6,7 +6,7 @@ import { changedConfigFields, formatConfigDiffValue } from "../../lib/config-dif
 import { motionTokens } from "../../lib/motion-tokens.js";
 
 const SECTIONS: readonly { readonly key: keyof Pick<ConfigDiff, "modules" | "schedules" | "rules" | "blocks" | "edges">; readonly label: string; readonly nameOf: (item: unknown) => string }[] = [
-  { key: "modules", label: "Module", nameOf: (m) => `Module #${(m as { key: number }).key}` },
+  { key: "modules", label: "Module", nameOf: (m) => `Module #${(m as { key: number }).key} (${(m as { typeId: string }).typeId})` },
   { key: "schedules", label: "Schedule", nameOf: (s) => `Schedule (source #${(s as { sourceKey: number }).sourceKey})` },
   { key: "rules", label: "Rule", nameOf: (r) => `Rule #${(r as { key: number }).key} (${(r as { typeId: string }).typeId})` },
   { key: "blocks", label: "Block", nameOf: (b) => `Block #${(b as { key: number }).key} (${(b as { typeId: string }).typeId})` },

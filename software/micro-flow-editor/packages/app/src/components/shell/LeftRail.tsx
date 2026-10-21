@@ -1,5 +1,4 @@
-import { newDeviceDriverMetadata } from "../../lib/new-device-driver.js";
-import { Blocks, Cable, CircuitBoard, Layers, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
+import { Blocks, Cable, PanelLeftClose, PanelLeftOpen, Settings, Workflow } from "lucide-react";
 import { useState } from "react";
 import { chromeCopy } from "../../lib/chrome-copy.js";
 import { useLocale } from "../../state/locale-context.js";
@@ -16,17 +15,15 @@ type RailItem = {
 
 /** MVP rail: Discover, Physical Composition, Deploy & Run, Settings. */
 export function LeftRail() {
-  const { activeScreen, navigate, execute } = useSession();
+  const { activeScreen, navigate } = useSession();
   const { openSettings } = useSettingsModal();
   const { locale } = useLocale();
   const copy = chromeCopy(locale);
   const [expanded, setExpanded] = useState(false);
   const items: readonly RailItem[] = [
     { id: "core-connections", icon: Cable, label: "Discover" },
-    { id: "physical-composition", icon: Layers, label: copy.screens.physicalComposition },
     { id: "modules", icon: Blocks, label: locale === "it" ? "Moduli" : "Modules" },
     { id: "processing-graph", icon: Workflow, label: locale === "it" ? "Flussi e automazioni" : "Flows and automation" },
-    { id: "device-recipe-editor", icon: CircuitBoard, label: locale === "it" ? "Crea dispositivo" : "Create device" },
   ];
 
   return (
@@ -36,21 +33,14 @@ export function LeftRail() {
           const Icon = item.icon;
           const active =
             activeScreen === item.id ||
-            (item.id === "processing-graph" && activeScreen === "deploy-diff");
+            (item.id === "processing-graph" && activeScreen === "deploy-diff") ||
+            (item.id === "modules" && activeScreen === "device-recipe-editor");
           return (
             <button
               key={item.id}
               type="button"
               data-tour-target={`rail-${item.id}`}
-              onClick={() => {
-                if (item.id === "device-recipe-editor") execute?.({
-                  kind: "StartNewDeviceDriver",
-                  apply: project => ({ ok: true, value: {
-                    ...project, authoringMetadata: newDeviceDriverMetadata(project.authoringMetadata),
-                  } }),
-                });
-                navigate(item.id);
-              }}
+              onClick={() => navigate(item.id)}
               title={expanded ? undefined : item.label}
               className={`group relative flex h-10 w-full items-center gap-3 rounded-slsm px-3 font-body text-sm ${active ? "bg-brand-blue/10 text-brand-blue" : "text-ink-muted hover:bg-surface-raised"}`}
             >

@@ -1,4 +1,16 @@
 #include <spaghetti/runtime.h>
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+#include <spaghetti/field_update.h>
+#endif
+static void notify_led_application(bool active)
+{
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+ if(!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE))spaghetti_status_led_application_active(active);
+#else
+ (void)active;
+#endif
+}
+
 
 #include <errno.h>
 #include <limits.h>
@@ -92,6 +104,7 @@ static void finish_stop_if_quiescent(void)
 {
 	if ((runtime_state == SPAGHETTI_RUNTIME_STOPPING) && (active_operations == 0U)) {
 		runtime_state = SPAGHETTI_RUNTIME_STOPPED;
+        notify_led_application(false);
 		k_sem_give(&runtime_stopped_sem);
 	}
 }
@@ -252,22 +265,25 @@ static int publish_record(struct spaghetti_record *record, uint8_t depth)
 
 static int runtime_event_emit(const struct spaghetti_record_payload *payload, void *user_data)
 {
-	struct spaghetti_runtime_event event;
 	const struct spaghetti_runtime_job *job = user_data;
 
 	if ((payload == NULL) || (job == NULL)) {
 		return -EINVAL;
 	}
-
-	memset(&event, 0, sizeof(event));
-	event.source_id = job->source_id;
-	event.source_key = job->source_key;
-	event.payload = *payload;
-
-	if (k_msgq_put(&runtime_event_queue, &event, K_NO_WAIT) < 0) {
+	/* CAN and GPIO callbacks run on small driver stacks. Keep the owned
+	 * record copy on the transient heap until the queue has copied it. */
+	struct spaghetti_runtime_event *event = k_calloc(1, sizeof(*event));
+	if (event == NULL) {
+		return -ENOMEM;
+	}
+	event->source_id = job->source_id;
+	event->source_key = job->source_key;
+	event->payload = *payload;
+	int err = k_msgq_put(&runtime_event_queue, event, K_NO_WAIT);
+	k_free(event);
+	if (err < 0) {
 		return -ENOSPC;
 	}
-
 	k_sem_give(&runtime_wake_sem);
 	return 0;
 }
@@ -719,6 +735,7 @@ int spaghetti_runtime_start(void)
 	}
 
 	runtime_state = SPAGHETTI_RUNTIME_RUNNING;
+    notify_led_application(true);
 	k_sem_give(&runtime_wake_sem);
 	err = 0;
 

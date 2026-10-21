@@ -147,3 +147,40 @@ it("keeps conversion-completion polling, but disables the clock that starts new 
   expect(configHasContinuousSchedules(config)).toBe(true);
   expect(configHasContinuousSchedules(paused)).toBe(false);
 });
+
+it("Stop reuses confirmed snapshots instead of downloading the same configuration again", async () => {
+  let bytes = encodeConfigCbor(live),
+    generation = 1,
+    reads = 0;
+  const result = await pauseContinuousRuntime({
+    getConfig: async () => {
+      reads++;
+      return { generation, configBytes: bytes, sha256: new Uint8Array(32) };
+    },
+    applyConfig: async (request) => {
+      expect(request.expectedGeneration).toBe(generation);
+      bytes = request.configBytes;
+      generation++;
+    },
+  });
+  expect(reads).toBe(3);
+  expect(result.configBytes).toEqual(encodeConfigCbor(oneShotRuntimeConfig(live)));
+});
+it("retries a transient GET_CONFIG timeout before performing Stop", async () => {
+  let reads = 0;
+  const result = await applyStoppedRuntime({
+    getConfig: async () => {
+      if (++reads === 1) throw { code: "TIMEOUT" };
+      return {
+        generation: 1,
+        configBytes: encodeConfigCbor(empty),
+        sha256: new Uint8Array(32),
+      };
+    },
+    applyConfig: async () => {
+      throw new Error("already stopped");
+    },
+  });
+  expect(reads).toBe(2);
+  expect(result.changed).toBe(false);
+});

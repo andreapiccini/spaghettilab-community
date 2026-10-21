@@ -325,7 +325,8 @@ export function NodeInspector({
     data.kind === "block" && data.properties.statusLed === true
       ? []
       : inspectorVisibleFields(catalogEntry, catalogFields);
-  const namedFields: readonly CatalogField[] = baseNamedFields.map(field => {
+  const namedFields: readonly CatalogField[] = baseNamedFields.filter(field => field.id !== "valueMax" || (data.kind === "block" && ["8", "9"].includes(String(data.properties.condition)))).map(field => {
+    if (data.kind === "block" && ["8", "9"].includes(String(data.properties.condition)) && ["value", "valueMax"].includes(field.id)) return { ...field, type: "text", label: field.id === "value" ? "Valore minimo (incluso)" : "Valore massimo (incluso)", placeholder: "es. 28,50" };
     if (field.id !== "value" || data.kind !== "block" || !["logic_if", "logic_while"].includes(data.blockTypeId)) return field;
     if (comparisonType === "bool" || comparisonType === "digital") return { ...field, type: "select", label: "Valore di confronto", options: comparisonType === "bool" ? [{value:"1",label:"Vero"},{value:"0",label:"Falso"}] : [{value:"1",label:"Alto (1)"},{value:"0",label:"Basso (0)"}] };
     return { ...field, type:"text", label: comparisonType === "number" ? "Valore di confronto (2 decimali)" : comparisonType === "string" ? "Valore numerico di confronto" : "Valore intero di confronto", placeholder: comparisonType === "number" ? "es. 28,50" : "es. 28" };

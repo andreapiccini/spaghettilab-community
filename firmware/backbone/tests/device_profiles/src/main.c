@@ -76,6 +76,11 @@ static struct spaghetti_port fake_port = {
 };
 
 static uint16_t rgb_duties[4];
+int spaghetti_port_pwm_write(const struct spaghetti_port *port, uint8_t channel, uint32_t frequency, uint16_t duty)
+{
+ ARG_UNUSED(frequency);
+ return spaghetti_port_pwm_set(port,channel,duty);
+}
 int spaghetti_port_pwm_set(const struct spaghetti_port *port, uint8_t channel, uint16_t duty)
 {
  if (port != &fake_port || channel > 3 || duty > 10000) return -EINVAL;
@@ -2105,4 +2110,145 @@ ZTEST(device_profiles, test_ds18b20_accepts_crc_valid_vendor_reserved_bytes)
  zassert_equal(spaghetti_ds18b20_decode_frame(frame,&temperature),-EBADMSG);
  memset(frame,0xff,sizeof(frame));
  zassert_equal(spaghetti_ds18b20_decode_frame(frame,&temperature),-EBADMSG);
+}
+
+ZTEST(device_profiles, test_ds18b20_external_vcc_never_drives_power_gpio)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"ds-vcc",SPAGHETTI_PORT_TRANSPORT_GPIO,
+   SPAGHETTI_PORT_CAP_DIGITAL_INPUT|SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT);
+ struct spaghetti_dht22_state state={0};
+ struct spaghetti_device_profile_binding binding={.dht22=&state};
+ struct spaghetti_device_profile_op setup=make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP,0,0,0,0,1,5,0);
+ struct spaghetti_device_profile_op read=make_op(SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ,0,0,0,0,0,0,0);
+ struct spaghetti_record_payload out;
+ dht22_powered=false;ds_starts=ds_finishes=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&setup,1,&fake_port,&binding,NULL));
+ zassert_false(dht22_powered);zassert_true(state.powered);
+ state.ready_at=0;
+ zassert_equal(spaghetti_device_profile_exec(&profile,&read,1,&fake_port,&binding,&out),-EAGAIN);
+ zassert_equal(ds_starts,1);zassert_false(ds_last_parasite);zassert_false(dht22_powered);
+ state.ready_at=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&read,1,&fake_port,&binding,&out));
+ zassert_equal(ds_finishes,1);
+ setup.imm1=0;
+ zassert_ok(spaghetti_device_profile_exec(&profile,&setup,1,&fake_port,&binding,NULL));
+ zassert_false(state.powered);zassert_false(dht22_powered);
+}
+
+ZTEST(device_profiles, test_rgb_independent_percent_levels_preserve_other_channels)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"rgb-levels",SPAGHETTI_PORT_TRANSPORT_GPIO,SPAGHETTI_PORT_CAP_PWM);
+ uint8_t program[]={6,0,0,0,0,0};profile.message_data=program;profile.message_data_size=sizeof(program);
+ profile.sample_count=3;
+ profile.sample_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT,0,1,1,4,1,0,0);
+ profile.sample_ops[1]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM,0,0,0,0,6,36,0);
+ profile.sample_ops[2]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0);
+ profile.action_count=1;profile.actions[0]=(struct spaghetti_device_profile_action){.id=1,.first=0,.count=3};
+ profile.sample_field_count=2;
+ profile.sample_fields[0]=(struct spaghetti_device_profile_field){.field_id=65531,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_on"};
+ profile.sample_fields[1]=(struct spaghetti_device_profile_field){.field_id=65532,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_color"};
+ profile.max_transactions=3;zassert_ok(spaghetti_device_profile_validate(&profile,NULL));
+ struct spaghetti_property_set args={.field_count=1,.fields={{.field_id=1,.type=SPAGHETTI_VALUE_UINT64,.data.unsigned_integer=0}}};
+ struct spaghetti_rgb_state state={.color=0x112233};
+ struct spaghetti_device_profile_binding binding={.rgb=&state,.arguments=&args};struct spaghetti_record_payload out;
+ const uint32_t levels[]={0,100,50};const uint32_t colors[]={0x002233,0x00ff33,0x00ff80};
+ for(uint8_t i=0;i<3;i++){program[1]=i;args.fields[0].data.unsigned_integer=levels[i];zassert_ok(spaghetti_device_profile_exec(&profile,profile.sample_ops,3,&fake_port,&binding,&out));zassert_equal(state.color,colors[i]);zassert_equal(out.values.fields[1].data.unsigned_integer,colors[i]);}
+ args.fields[0].data.unsigned_integer=101;zassert_equal(spaghetti_device_profile_exec(&profile,profile.sample_ops,3,&fake_port,&binding,&out),-ERANGE);zassert_equal(state.color,0x00ff80);
+}
+
+ZTEST(device_profiles, test_rgb_hex_argument_applies_once_and_rejects_invalid_text)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"rgb-levels",SPAGHETTI_PORT_TRANSPORT_GPIO,SPAGHETTI_PORT_CAP_PWM);
+ uint8_t program[]={7,0,1,0,0,0,3,0,0,0,0,0};profile.message_data=program;profile.message_data_size=sizeof(program);
+ profile.sample_count=2;
+ profile.sample_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM,0,0,0,0,12,36,0);
+ profile.sample_ops[1]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0);
+ profile.action_count=1;profile.actions[0]=(struct spaghetti_device_profile_action){.id=1,.first=0,.count=2};
+ profile.sample_field_count=2;
+ profile.sample_fields[0]=(struct spaghetti_device_profile_field){.field_id=65531,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_on"};
+ profile.sample_fields[1]=(struct spaghetti_device_profile_field){.field_id=65532,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_color"};
+ profile.max_transactions=3;zassert_ok(spaghetti_device_profile_validate(&profile,NULL));
+ struct spaghetti_property_set args={.field_count=1,.fields={{.field_id=1,.type=SPAGHETTI_VALUE_UINT64,.data.unsigned_integer=0}}};
+ struct spaghetti_rgb_state state={.color=0x112233};
+ struct spaghetti_device_profile_binding binding={.rgb=&state,.arguments=&args};struct spaghetti_record_payload out;
+ args.fields[0].type=SPAGHETTI_VALUE_TEXT;args.fields[0].data.text.size=7;memcpy(args.fields[0].data.text.text,"#fF8000",7);
+ zassert_ok(spaghetti_device_profile_exec(&profile,profile.sample_ops,2,&fake_port,&binding,&out));zassert_equal(state.color,0xff8000);zassert_true(state.on);
+ args.fields[0].data.text.text[2]='Z';zassert_equal(spaghetti_device_profile_exec(&profile,profile.sample_ops,2,&fake_port,&binding,&out),-EINVAL);zassert_equal(state.color,0xff8000);
+}
+
+ZTEST(device_profiles, test_remote_rgb_never_falls_back_to_local_pwm)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"rgb-levels",SPAGHETTI_PORT_TRANSPORT_GPIO,SPAGHETTI_PORT_CAP_PWM);
+ uint8_t program[]={7,0,1,0,0,0,3,0,0,0,0,0};profile.message_data=program;profile.message_data_size=sizeof(program);
+ profile.sample_count=2;
+ profile.sample_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM,0,0,0,0,12,36,0);
+ profile.sample_ops[1]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0);
+ profile.action_count=1;profile.actions[0]=(struct spaghetti_device_profile_action){.id=1,.first=0,.count=2};
+ profile.sample_field_count=2;
+ profile.sample_fields[0]=(struct spaghetti_device_profile_field){.field_id=65531,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_on"};
+ profile.sample_fields[1]=(struct spaghetti_device_profile_field){.field_id=65532,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_color"};
+ profile.max_transactions=3;zassert_ok(spaghetti_device_profile_validate(&profile,NULL));
+ struct spaghetti_property_set args={.field_count=1,.fields={{.field_id=1,.type=SPAGHETTI_VALUE_UINT64,.data.unsigned_integer=0}}};
+ struct spaghetti_rgb_state state={.color=0x112233};
+ struct spaghetti_device_profile_binding binding={.rgb=&state,.arguments=&args};struct spaghetti_record_payload out;
+
+ profile.sample_ops[0].imm3=0xe17fd0U*2U;
+ zassert_ok(spaghetti_device_profile_validate(&profile,NULL));
+ uint16_t before[4];memcpy(before,rgb_duties,sizeof(before));
+ zassert_equal(spaghetti_device_profile_exec(&profile,profile.sample_ops,2,&fake_port,&binding,&out),-ENOTSUP);
+ zassert_mem_equal(before,rgb_duties,sizeof(before));
+ zassert_equal(state.color,0x112233);
+}
+
+ZTEST(device_profiles, test_rgb_text_command_preflight_and_execution)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"rgb-levels",SPAGHETTI_PORT_TRANSPORT_GPIO,SPAGHETTI_PORT_CAP_PWM);
+ uint8_t program[]={7,0,1,0,0,0,3,0,0,0,0,0};profile.message_data=program;profile.message_data_size=sizeof(program);
+ profile.sample_count=2;
+ profile.sample_ops[0]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM,0,0,0,0,12,36,0);
+ profile.sample_ops[1]=make_op(SPAGHETTI_DEVICE_PROFILE_OP_EMIT_RECORD,0,0,0,0,0,0,0);
+ profile.action_count=1;profile.actions[0]=(struct spaghetti_device_profile_action){.id=1,.first=0,.count=2};
+ profile.sample_field_count=2;
+ profile.sample_fields[0]=(struct spaghetti_device_profile_field){.field_id=65531,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_on"};
+ profile.sample_fields[1]=(struct spaghetti_device_profile_field){.field_id=65532,.type=SPAGHETTI_VALUE_UINT64,.name="rgb_color"};
+ profile.max_transactions=3;zassert_ok(spaghetti_device_profile_validate(&profile,NULL));
+ struct spaghetti_property_set args={.field_count=1,.fields={{.field_id=1,.type=SPAGHETTI_VALUE_UINT64,.data.unsigned_integer=0}}};
+
+ fake_port.capabilities |= SPAGHETTI_PORT_CAP_PWM;
+ zassert_ok(spaghetti_device_profile_install_decoded(&profile));
+ spaghetti_module_id_t module;zassert_ok(configure_module(609,"rgb-levels",0,0xff,0xff,&module));
+ struct spaghetti_record_payload out;
+ struct spaghetti_module_command command={.command_id=1,.result=&out};
+ command.arguments=args;command.arguments.fields[0].type=SPAGHETTI_VALUE_TEXT;command.arguments.fields[0].data.text.size=7;memcpy(command.arguments.fields[0].data.text.text,"#204060",7);
+ zassert_ok(spaghetti_module_manager_command(module,&command));
+ zassert_equal(out.values.fields[1].data.unsigned_integer,0x204060);
+ command.arguments.fields[0].data.text.text[1]='Z';
+ zassert_equal(spaghetti_module_manager_command(module,&command),-EINVAL);
+ zassert_ok(spaghetti_module_manager_remove(module,1));zassert_ok(spaghetti_device_profile_remove("rgb-levels",1));
+}
+
+ZTEST(device_profiles, test_generic_pwm_primitive_enforces_duty_and_preserves_other_channels)
+{
+ struct spaghetti_device_profile profile;
+ fill_base(&profile,"pwm-common",SPAGHETTI_PORT_TRANSPORT_GPIO,SPAGHETTI_PORT_CAP_PWM);
+ struct spaghetti_device_profile_binding binding={0};
+ struct spaghetti_record_payload out;
+ struct spaghetti_device_profile_op ops[]={
+  make_op(SPAGHETTI_DEVICE_PROFILE_OP_LOAD_CONST,0,0,0,2,0,2500,0),
+  make_op(SPAGHETTI_DEVICE_PROFILE_OP_PWM_SET,0,0,0,1,0,1000,0)};
+ rgb_duties[0]=1234;
+ zassert_ok(spaghetti_device_profile_exec(&profile,ops,2,&fake_port,&binding,&out));
+ zassert_equal(rgb_duties[1],2500);
+ zassert_equal(rgb_duties[0],1234);
+ ops[0].imm2=10001;
+ zassert_equal(spaghetti_device_profile_exec(&profile,ops,2,&fake_port,&binding,&out),-ERANGE);
+ zassert_equal(rgb_duties[1],2500);
+ profile.sample_count=2;memcpy(profile.sample_ops,ops,sizeof(ops));
+ profile.sample_ops[1].imm0=4;
+ zassert_not_equal(spaghetti_device_profile_validate(&profile,NULL),0);
 }

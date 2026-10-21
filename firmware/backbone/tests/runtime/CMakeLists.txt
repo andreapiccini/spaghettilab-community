@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20.0)
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(spaghetti_runtime_test)
+# Exercise the real lifecycle notifications against a fake status LED.
+target_compile_definitions(app PRIVATE CONFIG_SPAGHETTI_FIELD_UPDATE=1)
 
 target_sources(app PRIVATE
   src/main.c

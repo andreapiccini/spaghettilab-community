@@ -36,8 +36,12 @@ struct spaghetti_storage_record_v2 {
 
 static enum spaghetti_storage_state storage_state =
 	SPAGHETTI_STORAGE_UNINITIALIZED;
-static struct spaghetti_storage_record_v2 loaded_record;
-static struct spaghetti_storage_legacy_record legacy_record;
+static union {
+ struct spaghetti_storage_record_v2 current;
+ struct spaghetti_storage_legacy_record legacy;
+} stored_record;
+#define loaded_record stored_record.current
+#define legacy_record stored_record.legacy
 static bool record_present;
 static bool legacy_pending;
 static int record_load_error;
@@ -134,12 +138,17 @@ static int storage_settings_set(const char *name, size_t len,
 
 		memcpy(&magic, raw, sizeof(magic));
 		if (magic == SPAGHETTI_STORAGE_RECORD_MAGIC_V2) {
-			if (len != sizeof(loaded_record)) {
+			if (len < offsetof(struct spaghetti_storage_record_v2, payload) || len > sizeof(loaded_record)) {
 				record_load_error = -EBADMSG;
 				k_mutex_unlock(&storage_lock);
 				return 0;
 			}
-			memcpy(&loaded_record, raw, sizeof(loaded_record));
+			memcpy(&loaded_record, raw, len);
+			if (loaded_record.payload_size > len - offsetof(struct spaghetti_storage_record_v2, payload)) {
+				record_load_error = -EBADMSG;
+				k_mutex_unlock(&storage_lock);
+				return 0;
+			}
 			record_present = true;
 			k_mutex_unlock(&storage_lock);
 			return 0;
@@ -342,43 +351,24 @@ unlock:
 
 int spaghetti_storage_write_config(const struct spaghetti_config *config)
 {
-	struct spaghetti_storage_record_v2 record;
-	int err;
-
-	if (config == NULL) {
-		return -EINVAL;
-	}
-
-	err = encode_v2_record(config, &record);
-	if (err < 0) {
-		return err;
-	}
-
-	err = k_mutex_lock(&storage_lock, K_FOREVER);
-	if (err < 0) {
-		return err;
-	}
-
-	if (storage_state != SPAGHETTI_STORAGE_READY) {
-		k_mutex_unlock(&storage_lock);
-		return -EACCES;
-	}
-
-	err = settings_save_one(SPAGHETTI_STORAGE_CONFIG_KEY, &record,
-				sizeof(record));
-	if (err == 0) {
-		loaded_record = record;
-		legacy_pending = false;
-		record_present = true;
-		record_load_error = 0;
-	}
-	k_mutex_unlock(&storage_lock);
-
-	if (err == 0) {
-		LOG_INF("Config persisted: modules=%u",
-			(uint32_t)config->module_count);
-	}
-	return err;
+ if (!config) return -EINVAL;
+ /* Config encoding validates profiles too; keep this temporary record off the
+  * mutation worker stack. It is released before returning on every path. */
+ struct spaghetti_storage_record_v2 *record=k_malloc(sizeof(*record));
+ if (!record) return -ENOMEM;
+ int err=encode_v2_record(config,record);
+ if (err) goto out;
+ err=k_mutex_lock(&storage_lock,K_FOREVER);
+ if (err) goto out;
+ if (storage_state!=SPAGHETTI_STORAGE_READY) { err=-EACCES; goto unlock; }
+ err=settings_save_one(SPAGHETTI_STORAGE_CONFIG_KEY,record,sizeof(*record));
+ if (!err) { loaded_record=*record; legacy_pending=false; record_present=true; record_load_error=0; }
+unlock:
+ k_mutex_unlock(&storage_lock);
+out:
+ k_free(record);
+ if (!err) LOG_INF("Config persisted: modules=%u",(uint32_t)config->module_count);
+ return err;
 }
 
 int spaghetti_storage_delete_config(void)

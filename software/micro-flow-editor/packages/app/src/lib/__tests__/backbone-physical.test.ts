@@ -31,6 +31,7 @@ import {
   STATUS_LED_GPIO,
   tagForSlot,
   topologyForBoard,
+  reportedFunctionVariant,
   validatePhysicalModes,
 } from "../backbone-physical.js";
 import type { GetStatusResponse, NfcTagStatus } from "@spaghettilab/protocol-sdk";
@@ -286,5 +287,16 @@ describe("physical composition", () => {
     expect(draftModesForBinding({ drafts: {}, catalog: [] }, "missing")).toBeUndefined();
     expect(silkPinLabels("v2")).toEqual(["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"]);
     expect(physicalLabelForSignalMode([4, 5, 0, 0], 4, "v1")).toBe("Pin 2 · SDA");
+  });
+});
+
+ describe("reported connector layout", () => {
+  it("uses the V2 layout even though the protocol carries only four modes", () => {
+    const topology = { layout: 2, modes: [13, 0, 0, 0] } as import("@spaghettilab/protocol-sdk").PhysicalBackbone;
+    const variant = reportedFunctionVariant(topology)!;
+    expect(variant).toBe("v2");
+    expect(functionPinGrid(modesForVariant(topology.modes, variant), variant).flat()).toHaveLength(12);
+    expect(reportedFunctionVariant({ ...topology, layout: 1 })).toBe("v1");
+    expect(reportedFunctionVariant(undefined)).toBeUndefined();
   });
 });

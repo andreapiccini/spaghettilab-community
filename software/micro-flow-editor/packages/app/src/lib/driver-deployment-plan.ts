@@ -1,3 +1,5 @@
+import { generatorColorKind, type ViewerColorKind } from "./data-viewer.js";
+import { ledDriverProperties, readLedDriver } from "./led-driver.js";
 import { whiteLedProperties } from "./white-led-module.js";
 import { LOGIC_TYPES, logicProperties, requireLogicInputType } from "./logic-blocks.js";
 import { signalDurations } from "./signal-timing.js";
@@ -70,6 +72,25 @@ import {
   triggerActionNames,
 } from "./gpio-trigger-map.js";
 
+function sourceKind(data: DeviceProcessingNodeData | undefined): string | undefined {
+  return data?.kind === "event-source" &&
+    typeof data.properties?.canSourceKind === "string"
+    ? data.properties.canSourceKind
+    : data?.kind;
+}
+function sourceBlockType(
+  data: DeviceProcessingNodeData | undefined,
+): string | undefined {
+  return data?.kind === "event-source" &&
+    typeof data.properties?.canSourceBlockType === "string"
+    ? data.properties.canSourceBlockType
+    : data?.kind === "block"
+      ? data.blockTypeId
+      : undefined;
+}
+function repeatedTrigger(data: DeviceProcessingNodeData | undefined): boolean {
+  return sourceKind(data) === "schedule" || sourceBlockType(data) === "logic_while";
+}
 const SQUARE_WAVE_IDS = new Set(["appblocks.square_wave", "ab.square_wave"]);
 
 function isSquareWaveNode(data: DeviceProcessingNodeData): boolean {
@@ -83,14 +104,18 @@ function isSquareWaveNode(data: DeviceProcessingNodeData): boolean {
 function squareWavePeriodMs(properties: Readonly<Record<string, unknown>>): number {
   const value = signalDurations(properties).periodMs;
   if (!Number.isInteger(value) || value < 20 || value > 60000)
-    throw new Error("Generatore di segnali: la durata totale deve essere tra 20 millisecondi e 60 secondi.");
+    throw new Error(
+      "Generatore di segnali: la durata totale deve essere tra 20 millisecondi e 60 secondi.",
+    );
   return value;
 }
 function squareWavePulseMs(properties: Readonly<Record<string, unknown>>): number {
   const period = squareWavePeriodMs(properties);
   const { onMs, offMs } = signalDurations(properties);
   if (!Number.isInteger(onMs) || !Number.isInteger(offMs) || onMs < 1 || offMs < 1)
-    throw new Error("Generatore di segnali: acceso e spento devono durare almeno 1 millisecondo.");
+    throw new Error(
+      "Generatore di segnali: acceso e spento devono durare almeno 1 millisecondo.",
+    );
   return Math.min(period - 1, onMs);
 }
 
@@ -119,19 +144,26 @@ type Node = GraphNode<"device-processing", string, DeviceProcessingNodeData>;
 type Edge = CompileConfigInput["processingGraph"]["edges"][number];
 export type DriverDeploymentPlan = {
   activityRoutes?: readonly EdgeActivityRoute[];
-  signalObservations?: readonly { generatorId: string; key: number; field: number; schemaId?: string }[];
+  signalObservations?: readonly {
+    generatorId: string;
+    key: number;
+    field: number;
+    schemaId?: string;
+  }[];
   input: CompileConfigInput;
   profiles: readonly DeviceProfileDraft[];
   options: CompileConfigOptions;
   observations?: readonly {
     viewerId: string;
     valueKind?: "digital" | "boolean" | "number" | "text";
+    colorKind?: ViewerColorKind;
     label?: string;
     unit?: string;
     key: number;
     field: number;
     action?: number;
     schemaId?: string;
+    profileId?: string;
   }[];
 };
 export function prepareDriverDeployment(
@@ -165,11 +197,67 @@ export function prepareDriverDeployment(
       ),
     },
   };
+  // Palette entries are potential inputs, not runtime modules until used.
+  input = {
+    ...input,
+    physicalGraph: {
+      ...input.physicalGraph,
+      nodes: input.physicalGraph.nodes.flatMap((node) => {
+        const data = node.data as ModuleNodeData;
+        if (
+          !node.id.startsWith("physical-pin:") ||
+          data.driverTypeId !== "digital_input_trigger"
+        )
+          return [node];
+        const used = (input.processingGraph.nodes as readonly Node[]).some(
+          (item) => "moduleNodeId" in item.data && item.data.moduleNodeId === node.id,
+        );
+        return used ? [{ ...node, data: { ...data, bayId: 255, railId: 255 } }] : [];
+      }),
+    },
+  };
   input = {
     ...input,
     processingGraph: {
       ...input.processingGraph,
       nodes: (input.processingGraph.nodes as readonly Node[]).map((node) => {
+        if (node.data.kind === "block" && node.data.blockTypeId === "led_driver") {
+          const config = readLedDriver(node.data.properties);
+          const outputs = config.outputMode === "rgb" ? ["1", "2", "3"] : ["0"];
+          if (
+            input.processingGraph.edges.some(
+              (edge) =>
+                edge.source === node.id && !outputs.includes(edge.sourceHandle ?? "0"),
+            )
+          )
+            throw new Error(
+              "Generatore colori: ricollega le uscite della modalità selezionata (RGB oppure Colore).",
+            );
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              properties: {
+                ...ledDriverProperties(node.data.properties),
+                "10": input.processingGraph.edges
+                  .filter((edge) => edge.target === node.id)
+                  .reduce((mask, edge) => {
+                    const source = (
+                      input.processingGraph.nodes as readonly Node[]
+                    ).find((item) => item.id === edge.source)?.data;
+                    return source &&
+                      (sourceKind(source) === "schedule" ||
+                        sourceKind(source) === "event-source" ||
+                        [MANUAL_TRIGGER_TYPE, "logic_while"].includes(
+                          sourceBlockType(source) ?? "",
+                        ))
+                      ? mask | (1n << BigInt(Number(edge.targetHandle ?? 0)))
+                      : mask;
+                  }, 0n),
+              },
+            },
+          };
+        }
         if (
           node.data.kind !== "block" ||
           !node.data.properties.statusLed ||
@@ -236,11 +324,16 @@ export function prepareDriverDeployment(
       node.data.blockTypeId === BACKBONE_SENSOR_BLOCK_TYPE_ID,
   );
   if (
+    !originalNodes.some(
+      (node) => node.data.kind === "block" && node.data.blockTypeId === "app.can_send",
+    ) &&
     !sensorNodes.length &&
     !sequences.length &&
     !viewerEdges.length &&
     !manualTriggers.length &&
-    !originalNodes.some(node => node.data.kind === "block" && LOGIC_TYPES.has(node.data.blockTypeId))
+    !originalNodes.some(
+      (node) => node.data.kind === "block" && LOGIC_TYPES.has(node.data.blockTypeId),
+    )
   )
     return { input, profiles: [], options: {} };
   const stored = modulesForBinding(
@@ -254,22 +347,76 @@ export function prepareDriverDeployment(
     if (node.data.kind !== "block" || !LOGIC_TYPES.has(node.data.blockTypeId)) continue;
     const count = ["logic_and", "logic_or"].includes(node.data.blockTypeId) ? 2 : 1;
     for (let port = 0; port < count; port++) {
-      const wires = input.processingGraph.edges.filter(edge => edge.target === node.id && (edge.targetHandle ?? "0") === String(port));
-      if (wires.length !== 1) throw new Error(`${node.data.blockTypeId.replace("logic_", "").toUpperCase()}: collega una sola sorgente all’ingresso ${port + 1}.`);
+      const wires = input.processingGraph.edges.filter(
+        (edge) =>
+          edge.target === node.id && (edge.targetHandle ?? "0") === String(port),
+      );
+      if (wires.length !== 1)
+        throw new Error(
+          `${node.data.blockTypeId.replace("logic_", "").toUpperCase()}: collega una sola sorgente all’ingresso ${port + 1}.`,
+        );
       const edge = wires[0]!;
-      const source = originalNodes.find(source => source.id === edge.source);
+      const source = originalNodes.find((source) => source.id === edge.source);
       if (!source) throw new Error("Logica: sorgente non disponibile.");
       const sd = source.data;
-      if (sd.kind === "block" && sd.blockTypeId === BACKBONE_SENSOR_BLOCK_TYPE_ID) {
-        const metadata = stored.find(module => module.id === sd.properties[SENSOR_MODULE_ID_PROP]);
-        const channel = metadata?.recipe.deviceDraft?.channels.find(channel => channel.id === edge.sourceHandle);
-        requireLogicInputType(node.data.blockTypeId.replace("logic_", "").toUpperCase(), channel?.quantity === "digital" ? "digital" : channel?.dataType);
-        logicInputTypes.set(node.id, channel?.quantity === "digital" ? "digital" : channel?.dataType ?? "int");
-      } else if (sd.kind === "block" && !LOGIC_TYPES.has(sd.blockTypeId) && sd.blockTypeId !== MANUAL_TRIGGER_TYPE) {
-        const entry = findCatalogEntryById(sd.catalogEntryId ?? "") ?? findCatalogEntriesByTypeId(sd.blockTypeId)[0];
-        const output = entry?.outputs?.find(port => port.id === (edge.sourceHandle ?? "0"));
-        const type = sd.blockTypeId === "status_led" ? (edge.sourceHandle === "1" ? "number" : "digital") : output?.types.every(type => ["digital", "event", "activation"].includes(type.domain)) ? "digital" : output?.types.every(type => type.domain === "analog" || type.domain === "quantity") ? "number" : output?.types.every(type => type.domain === "text") ? "string" : undefined;
-        requireLogicInputType(node.data.blockTypeId.replace("logic_", "").toUpperCase(), type);
+      if (
+        sd.kind === "event-source" &&
+        typeof sd.properties?.canDataType === "string"
+      ) {
+        requireLogicInputType(
+          node.data.blockTypeId.replace("logic_", "").toUpperCase(),
+          sd.properties.canDataType,
+        );
+        logicInputTypes.set(node.id, sd.properties.canDataType);
+      } else if (
+        sd.kind === "block" &&
+        sd.blockTypeId === BACKBONE_SENSOR_BLOCK_TYPE_ID
+      ) {
+        const metadata = stored.find(
+          (module) => module.id === sd.properties[SENSOR_MODULE_ID_PROP],
+        );
+        const channel = metadata?.recipe.deviceDraft?.channels.find(
+          (channel) => channel.id === edge.sourceHandle,
+        );
+        requireLogicInputType(
+          node.data.blockTypeId.replace("logic_", "").toUpperCase(),
+          channel?.quantity === "digital" ? "digital" : channel?.dataType,
+        );
+        logicInputTypes.set(
+          node.id,
+          channel?.quantity === "digital" ? "digital" : (channel?.dataType ?? "int"),
+        );
+      } else if (
+        sd.kind === "block" &&
+        !LOGIC_TYPES.has(sd.blockTypeId) &&
+        sd.blockTypeId !== MANUAL_TRIGGER_TYPE
+      ) {
+        const entry =
+          findCatalogEntryById(sd.catalogEntryId ?? "") ??
+          findCatalogEntriesByTypeId(sd.blockTypeId)[0];
+        const output = entry?.outputs?.find(
+          (port) => port.id === (edge.sourceHandle ?? "0"),
+        );
+        const type =
+          sd.blockTypeId === "status_led"
+            ? edge.sourceHandle === "1"
+              ? "number"
+              : "digital"
+            : output?.types.every((type) =>
+                  ["digital", "event", "activation"].includes(type.domain),
+                )
+              ? "digital"
+              : output?.types.every(
+                    (type) => type.domain === "analog" || type.domain === "quantity",
+                  )
+                ? "number"
+                : output?.types.every((type) => type.domain === "text")
+                  ? "string"
+                  : undefined;
+        requireLogicInputType(
+          node.data.blockTypeId.replace("logic_", "").toUpperCase(),
+          type,
+        );
         if (type) logicInputTypes.set(node.id, type);
       }
     }
@@ -281,36 +428,88 @@ export function prepareDriverDeployment(
   const physical = [...input.physicalGraph.nodes];
   const profiles: DeviceProfileDraft[] = [];
   const viewerGpioSources = new Map<string, { moduleId: string; field: number }>();
-  const viewerPresentation = new Map<string, { valueKind: "digital" | "boolean" | "number" | "text"; label: string; unit: string }>();
+  const viewerPresentation = new Map<
+    string,
+    {
+      valueKind: "digital" | "boolean" | "number" | "text";
+      colorKind?: ViewerColorKind;
+      label: string;
+      unit: string;
+    }
+  >();
   for (const edge of viewerEdges) {
-    const source = originalNodes.find(node => node.id === edge.source);
+    const source = originalNodes.find((node) => node.id === edge.source);
+    if (
+      source?.data.kind === "event-source" &&
+      source.data.properties?.canPresentation
+    ) {
+      viewerPresentation.set(
+        edge.id,
+        JSON.parse(String(source.data.properties.canPresentation)) as Parameters<
+          typeof viewerPresentation.set
+        >[1],
+      );
+    }
+    if (source?.data.kind === "block" && ["led_driver", "color_split"].includes(source.data.blockTypeId)) {
+      const colorKind = generatorColorKind(
+        source.data.blockTypeId,
+        edge.sourceHandle ?? "0",
+      );
+      viewerPresentation.set(edge.id, {
+        valueKind: colorKind === "hex" ? "text" : "number",
+        colorKind,
+        label: colorKind === "hex" ? "Colore" : "Canale RGB",
+        unit: "",
+      });
+    }
     if (source?.data.kind === "block" && source.data.blockTypeId === "logic_if")
       viewerPresentation.set(edge.id, { valueKind: "digital", label: "", unit: "" });
     if (source?.data.kind === "block" && source.data.blockTypeId === "status_led")
-      viewerPresentation.set(edge.id, { valueKind: edge.sourceHandle === "1" ? "number" : "boolean", label: "", unit: "" });
+      viewerPresentation.set(edge.id, {
+        valueKind: edge.sourceHandle === "1" ? "number" : "boolean",
+        label: "",
+        unit: "",
+      });
   }
   const runtime = new Map<
     string,
     { moduleId: string; action: RuntimeAction; triggerHandle?: string }
   >();
   const generated = new Map<string, Node>();
-  for (const node of originalNodes) if (node.data.kind === "block" && LOGIC_TYPES.has(node.data.blockTypeId))
-    generated.set(node.id, { ...node, data: { ...node.data, properties: logicProperties(node.data.blockTypeId, node.data.properties, logicInputTypes.get(node.id)) } });
+  for (const node of originalNodes)
+    if (node.data.kind === "block" && LOGIC_TYPES.has(node.data.blockTypeId))
+      generated.set(node.id, {
+        ...node,
+        data: {
+          ...node.data,
+          properties: logicProperties(
+            node.data.blockTypeId,
+            node.data.properties,
+            logicInputTypes.get(node.id),
+          ),
+        },
+      });
   const squareDriven = new Set<string>();
   const scheduledActions = new Map<string, string>();
   const squareWaveModules = new Map<string, { moduleId: string; periodMs: number }[]>();
   const gpioOwners = new Set<string>();
   const motionModules = new Set<string>();
   const rgbTargets = new Map<string, DeviceRecipeDraft>();
-  const originalEdges = input.processingGraph.edges.map(edge => {
-    const source = originalNodes.find(node => node.id === edge.source);
-    const target = originalNodes.find(node => node.id === edge.target);
-    const impulse = source?.data.kind === "schedule" ||
-      (source?.data.kind === "block" && [MANUAL_TRIGGER_TYPE, "ab.flow_start"].includes(source.data.blockTypeId));
+  const originalEdges = input.processingGraph.edges.map((edge) => {
+    const source = originalNodes.find((node) => node.id === edge.source);
+    const target = originalNodes.find((node) => node.id === edge.target);
+    const impulse =
+      sourceKind(source?.data) === "schedule" ||
+      [MANUAL_TRIGGER_TYPE, "ab.flow_start"].includes(
+        sourceBlockType(source?.data) ?? "",
+      );
     // LOW/HIGH/LOW is one action, not an instruction to immediately turn the LED off.
-    return impulse && target?.data.kind === "block" && target.data.blockTypeId === "status_led" &&
+    return impulse &&
+      target?.data.kind === "block" &&
+      target.data.blockTypeId === "status_led" &&
       (edge.targetHandle === undefined || edge.targetHandle === "0")
-      ? { ...edge, targetHandle: "1" } : edge;
+      ? { ...edge, targetHandle: "1" }
+      : edge;
   });
   const aliases = new Map<string, string>();
   // The violet activation disc is authoring-only: its source is the real schedule.
@@ -400,16 +599,54 @@ export function prepareDriverDeployment(
       throw new Error(
         `Il sensore «${groupId}» non contiene il driver completo: rigenera i blocchi da Dispositivi.`,
       );
+    if (draft.rgbModule) {
+      const ids = new Set(
+        sensorNodes
+          .filter(
+            (node) =>
+              String(node.data.properties[SENSOR_MODULE_ID_PROP] ?? "") === groupId,
+          )
+          .map((node) => node.id),
+      );
+      const modes = new Set(
+        input.processingGraph.edges
+          .filter((edge) => ids.has(edge.target))
+          .map(
+            (edge) =>
+              draft.rgbModule!.inputs.find((port) => port.id === edge.targetHandle)
+                ?.mode,
+          )
+          .filter((mode) => mode && mode !== "trigger"),
+      );
+      if (modes.has("component") && modes.has("variable"))
+        throw new Error(
+          "LED RGB: collega Colore oppure i canali Rosso, Verde e Blu; scollega l’altra tipologia.",
+        );
+    }
     const gpioChannels = new Map<string, number>();
     let driverPortId: number;
+    let remoteRgbNode: number | undefined;
     if (draft.binding.bus === "gpio") {
       const multi = metadata?.gpioAssignments;
       if (draft.binding.gpioSignals.length > 1) {
         if (!multi)
           throw new Error(`${draft.name}: assegna i segnali dalla sezione Moduli.`);
         const config = applied.find(([key]) => key === multi.boardKey)?.[1];
-        if (!config || config.local === false)
-          throw new Error(`${draft.name}: applica i pin richiesti sul master.`);
+        if (!config)
+          throw new Error(`${draft.name}: applica i pin sulla Backbone assegnata.`);
+        if (config.local === false) {
+          if (!draft.rgbModule)
+            throw new Error(
+              `${draft.name}: questo driver richiede ancora una Backbone locale.`,
+            );
+          if ((config.backendPortId ?? 0) !== 0)
+            throw new Error(
+              "LED RGB CAN: usa il connettore Function della Backbone V2.",
+            );
+          if (!config.nodeId)
+            throw new Error("LED RGB: identità della Backbone CAN mancante.");
+          remoteRgbNode = config.nodeId;
+        }
         driverPortId = config.backendPortId ?? 0;
         const used = new Set<number>();
         for (const signal of draft.binding.gpioSignals) {
@@ -420,7 +657,7 @@ export function prepareDriverDeployment(
             channel! > 3 ||
             used.has(channel!) ||
             !(
-              draft.rgbModule
+              draft.rgbModule || gpioSignalType(signal) === "pwm_output"
                 ? [12]
                 : draft.dht22Module && signal.id === "DATA"
                   ? [1]
@@ -432,7 +669,9 @@ export function prepareDriverDeployment(
             );
           used.add(channel!);
           gpioChannels.set(signal.id, channel!);
-          const ownerKey = `${driverPortId}:${channel}`;
+          const ownerKey = remoteRgbNode
+            ? `${remoteRgbNode}:${driverPortId}:${channel}`
+            : `${driverPortId}:${channel}`;
           if (gpioOwners.has(ownerKey))
             throw new Error(`${draft.name}: pin già assegnato a un altro dispositivo.`);
           gpioOwners.add(ownerKey);
@@ -441,7 +680,8 @@ export function prepareDriverDeployment(
         if (draft.binding.gpioSignals.length !== 1)
           throw new Error(`${draft.name}: usa un segnale digitale per dispositivo.`);
         const signal = draft.binding.gpioSignals[0]!;
-        const output = gpioSignalType(signal) === "digital_output";
+        const pwm = gpioSignalType(signal) === "pwm_output";
+        const output = gpioSignalType(signal) === "digital_output" || pwm;
         const candidates = applied
           .filter(
             ([key, config]) =>
@@ -452,7 +692,11 @@ export function prepareDriverDeployment(
             config.modes
               .slice(0, 4)
               .flatMap((mode, channel) =>
-                (output ? [2, 3].includes(mode & 15) : (mode & 15) === 1) &&
+                (pwm
+                  ? (mode & 15) === 12
+                  : output
+                    ? [2, 3].includes(mode & 15)
+                    : (mode & 15) === 1) &&
                 (!metadata?.gpioAssignment ||
                   channel === metadata.gpioAssignment.channel)
                   ? [{ portId: config.backendPortId ?? 0, channel }]
@@ -485,62 +729,175 @@ export function prepareDriverDeployment(
         gpioOwners.add(ownerKey);
       }
     } else {
+      const requirements = {
+        i2c: [4, 5],
+        spi: [8, 9, 10, 11],
+        uart: [6, 7],
+        adc: [14],
+        w1: [13],
+      }[draft.binding.bus];
+      const assignedBoard =
+        metadata?.gpioAssignments?.boardKey ?? metadata?.gpioAssignment?.boardKey;
       const ports = [
         ...new Set(
           applied
             .filter(
-              ([, config]) =>
-                config.modes.some((mode) => (mode & 15) === 4) &&
-                config.modes.some((mode) => (mode & 15) === 5),
+              ([key, config]) =>
+                (!assignedBoard || key === assignedBoard) &&
+                requirements.every((required) =>
+                  config.modes.some((mode) => (mode & 15) === required),
+                ),
             )
             .map(([, config]) => config.backendPortId ?? 0),
         ),
       ];
       if (ports.length !== 1)
         throw new Error(
-          "Applica una porta I²C univoca (SDA e SCL) nel Module Function prima di Deploy & Run.",
+          `Applica una porta ${draft.binding.bus.toUpperCase()} univoca sulla Backbone assegnata prima di caricare il programma.`,
         );
       driverPortId = ports[0]!;
     }
     const instances = sensorNodes
       .filter((node) => node.data.properties[SENSOR_MODULE_ID_PROP] === groupId)
       .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-    for (const instance of instances) for (const edge of [
-      ...viewerEdges.filter(edge => edge.source === instance.id),
-      ...edges.filter(edge => edge.target === instance.id && isSquareWaveNode(nodes.find(node => node.id === edge.source)?.data ?? { kind: "block", blockTypeId: "", properties: {} })).map(edge => ({ ...edge, id: `signal-preview:${edge.id}`, source: instance.id, sourceHandle: String(instance.data.properties[SENSOR_OUTPUT_PROP] ?? sensorInterfaces(draft).outputs[0]?.channelId ?? "") })),
-    ]) {
-      const channel = draft.channels.find(channel => channel.id === edge.sourceHandle);
-      if (!channel) continue;
-      const digital = channel.quantity === "digital";
-      viewerPresentation.set(edge.id, { label: channel.label, unit: channel.unit ?? "",
-        valueKind: digital ? "digital" : channel.dataType === "bool" ? "boolean" : channel.dataType === "string" ? "text" : "number" });
-      if (!digital || draft.binding.bus !== "gpio") continue;
-      const published = sensorInterfaces(draft).outputs.find(output => output.channelId === channel.id);
-      const read = draft.commands.flatMap(command => command.steps).find(step => step.type === "gpio_read" && step.into === published?.from);
-      if (!read || read.type !== "gpio_read") continue;
-      const observerId = `gpio-state:${groupId}:${read.signalId}`;
-      if (!physical.some(node => node.id === observerId)) {
-        const observerDraft: DeviceRecipeDraft = { ...draft,
-          binding: { ...draft.binding, gpioSignals: draft.binding.gpioSignals.map(signal => ({ ...signal, activeLow: false })) },
-          phases: { ...draft.phases, init: [] }, flowInterfaces: [], flowInterfaceActions: {},
-          commands: [{ ...draft.commands[0]!, id: "observe", steps: [
-            { id: "state-read", type: "gpio_read", signalId: read.signalId, into: "pinState" },
-            { id: "state-emit", type: "emit", channelId: channel.id, from: "pinState" },
-          ] }],
-        };
-        const observed = compileRuntimeDriver(observerDraft, new Map(), gpioChannels).profile;
-        const profileId = `flow.gpio-state.${observed.profileId}`;
-        profiles.push({ ...observed, profileId, sampleSchemaId: `${profileId}.s` });
-        module(observerId, { kind: "module", driverTypeId: "declarative-device", profileId,
-          portId: driverPortId, bayId: 255, railId: 255, electricalMode: "input-output",
-          properties: { "1": profileId, "2": 1n } });
-        generated.set(observerId, { layer: "device-processing", id: observerId,
-          data: { kind: "schedule", moduleNodeId: observerId, periodMs: 100, enabled: true } });
+    for (const instance of instances)
+      for (const edge of [
+        ...viewerEdges.filter((edge) => edge.source === instance.id),
+        ...edges
+          .filter(
+            (edge) =>
+              edge.target === instance.id &&
+              isSquareWaveNode(
+                nodes.find((node) => node.id === edge.source)?.data ?? {
+                  kind: "block",
+                  blockTypeId: "",
+                  properties: {},
+                },
+              ),
+          )
+          .map((edge) => ({
+            ...edge,
+            id: `signal-preview:${edge.id}`,
+            source: instance.id,
+            sourceHandle: String(
+              instance.data.properties[SENSOR_OUTPUT_PROP] ??
+                sensorInterfaces(draft).outputs[0]?.channelId ??
+                "",
+            ),
+          })),
+      ]) {
+        const channel = draft.channels.find(
+          (channel) => channel.id === edge.sourceHandle,
+        );
+        if (!channel) continue;
+        const digital = channel.quantity === "digital";
+        viewerPresentation.set(edge.id, {
+          label: channel.label,
+          colorKind:
+            channel.colorKind ??
+            (draft.rgbModule && channel.id === "color" ? "rgb" : undefined),
+          unit: channel.unit ?? "",
+          valueKind:
+            channel.dataType === "bool"
+              ? "boolean"
+              : digital
+                ? "digital"
+                : channel.dataType === "string"
+                  ? "text"
+                  : "number",
+        });
+        if (!digital || draft.binding.bus !== "gpio" || draft.moduleProgram) continue;
+        const published = sensorInterfaces(draft).outputs.find(
+          (output) => output.channelId === channel.id,
+        );
+        const read = draft.commands
+          .flatMap((command) => command.steps)
+          .find((step) => step.type === "gpio_read" && step.into === published?.from);
+        if (!read || read.type !== "gpio_read") continue;
+        const observerId = `gpio-state:${groupId}:${read.signalId}`;
+        if (!physical.some((node) => node.id === observerId)) {
+          const observerDraft: DeviceRecipeDraft = {
+            ...draft,
+            binding: {
+              ...draft.binding,
+              gpioSignals: draft.binding.gpioSignals.map((signal) => ({
+                ...signal,
+                activeLow: false,
+              })),
+            },
+            phases: { ...draft.phases, init: [] },
+            flowInterfaces: [],
+            flowInterfaceActions: {},
+            commands: [
+              {
+                ...draft.commands[0]!,
+                id: "observe",
+                steps: [
+                  {
+                    id: "state-read",
+                    type: "gpio_read",
+                    signalId: read.signalId,
+                    into: "pinState",
+                  },
+                  {
+                    id: "state-emit",
+                    type: "emit",
+                    channelId: channel.id,
+                    from: "pinState",
+                  },
+                ],
+              },
+            ],
+          };
+          const observed = compileRuntimeDriver(
+            observerDraft,
+            new Map(),
+            gpioChannels,
+          ).profile;
+          const profileId = `flow.gpio-state.${observed.profileId}`;
+          profiles.push({ ...observed, profileId, sampleSchemaId: `${profileId}.s` });
+          module(observerId, {
+            kind: "module",
+            driverTypeId: "declarative-device",
+            profileId,
+            portId: driverPortId,
+            bayId: 255,
+            railId: 255,
+            electricalMode: "input-output",
+            properties: { "1": profileId, "2": 1n },
+          });
+          generated.set(observerId, {
+            layer: "device-processing",
+            id: observerId,
+            data: {
+              kind: "schedule",
+              moduleNodeId: observerId,
+              periodMs: 100,
+              enabled: true,
+            },
+          });
+        }
+        viewerGpioSources.set(edge.id, { moduleId: observerId, field: 1 });
       }
-      viewerGpioSources.set(edge.id, { moduleId: observerId, field: 1 });
-    }
     if (draft.rgbModule) {
-      const compiled = compileRuntimeDriver(draft, new Map(), gpioChannels);
+      const localCompiled = compileRuntimeDriver(draft, new Map(), gpioChannels);
+      const compiled = remoteRgbNode
+        ? {
+            ...localCompiled,
+            profile: {
+              ...localCompiled.profile,
+              profileId:
+                localCompiled.profile.profileId + ".n" + remoteRgbNode.toString(16),
+              maxTotalTimeMs: 1000,
+              initOps: localCompiled.profile.initOps.map((op) =>
+                op.op === "RGB_PROGRAM" ? { ...op, nodeId: remoteRgbNode } : op,
+              ),
+              sampleOps: localCompiled.profile.sampleOps.map((op) =>
+                op.op === "RGB_PROGRAM" ? { ...op, nodeId: remoteRgbNode } : op,
+              ),
+            },
+          }
+        : localCompiled;
       profiles.push(compiled.profile);
       const moduleId = `driver:${groupId}`;
       module(moduleId, {
@@ -564,11 +921,11 @@ export function prepareDriverDeployment(
         },
       });
       for (const node of instances) {
-        const actionId = String(
-          node.data.properties[SENSOR_ACTION_ID_PROP] ?? draft.commands[0]!.id,
-        );
-        const action = compiled.actions.get(actionId);
-        if (!action) throw new Error("L’azione RGB non esiste più.");
+        // RGB is one module exposing all its inputs, not one action per canvas node.
+        // Old saved cards may still name a removed built-in action (e.g. "on").
+        // Incoming ports select their own commands below via rgbInputCommand.
+        const action = compiled.actions.get(draft.commands[0]!.id);
+        if (!action) throw new Error("Il modulo RGB non contiene azioni valide.");
         runtime.set(node.id, { moduleId, action });
         rgbTargets.set(node.id, draft);
         generated.set(node.id, {
@@ -618,6 +975,10 @@ export function prepareDriverDeployment(
               step.type === "sample_external" ? [step.fromChannelId] : [],
             ),
           );
+      if (draft.moduleProgram && !single)
+        Object.keys(draft.moduleProgram.actions[action.id]?.inputIds ?? {}).forEach(
+          (id) => inIds.add(id),
+        );
       const incoming = edges.filter((edge) => edge.target === node.id);
       if (draft.dht22Module) inIds.add("read-trigger");
       const squareSource = incoming
@@ -753,7 +1114,7 @@ export function prepareDriverDeployment(
         if (!channels.some((item) => item.id === id)) channels.push({ ...channel, id });
         return { ...step, channelId: id };
       });
-      return { ...action, id: node.id, steps };
+      return { ...action, id: node.id, programActionId: action.id, steps };
     });
     const driverDraft: DeviceRecipeDraft = {
       ...draft,
@@ -770,11 +1131,7 @@ export function prepareDriverDeployment(
     );
     profiles.push(compiled.profile);
     const moduleId = `driver:${groupId}`;
-    if (
-      draft.commands.some((command) =>
-        command.steps.some((op) => op.type === "stepper"),
-      )
-    ) {
+    if (compiled.profile.sampleOps.some((op) => op.op === "STEPPER")) {
       motionModules.add(moduleId);
       const id = `driver-motion:${groupId}`;
       generated.set(id, {
@@ -788,7 +1145,11 @@ export function prepareDriverDeployment(
         },
       });
     }
-    if (draft.dht22Module) {
+    if (
+      compiled.profile.sampleOps.some(
+        (op) => op.op === "DHT22_READ" || op.op === "DS18B20_READ",
+      )
+    ) {
       const id = `driver-dht22:${groupId}`;
       generated.set(id, {
         layer: "device-processing",
@@ -841,6 +1202,21 @@ export function prepareDriverDeployment(
         "1": compiled.profile.profileId,
         "2": 1n,
         ...(draft.binding.bus === "i2c" ? { "4": BigInt(address) } : {}),
+        ...(draft.binding.bus === "spi"
+          ? { "5": 0n, "7": BigInt(draft.binding.spi?.freqHz ?? 1000000) }
+          : {}),
+        ...(draft.binding.bus === "adc"
+          ? { "6": BigInt(metadata?.gpioAssignment?.channel ?? 0) }
+          : {}),
+        ...(draft.binding.bus === "w1"
+          ? {
+              "8": Uint8Array.from(
+                (draft.binding.w1?.rom.replace(/[^0-9a-f]/gi, "") ?? "")
+                  .match(/.{2}/g)
+                  ?.map((byte) => parseInt(byte, 16)) ?? [],
+              ),
+            }
+          : {}),
       },
     });
     for (const node of instances) {
@@ -1041,15 +1417,18 @@ export function prepareDriverDeployment(
       data.driverTypeId !== "digital_input_trigger"
     )
       continue;
-    if (!gpioOwners.has(`${data.portId}:${Number(data.properties["1"])}`)) continue;
-    if (
-      nodes.some(
-        (item) =>
-          item.data.kind !== "schedule" &&
-          "moduleNodeId" in item.data &&
-          item.data.moduleNodeId === node.id,
-      )
-    )
+    const used = nodes.some(
+      (item) =>
+        item.data.kind !== "schedule" &&
+        "moduleNodeId" in item.data &&
+        item.data.moduleNodeId === node.id,
+    );
+    if (used && !gpioOwners.has(`${data.portId}:${Number(data.properties["1"])}`)) {
+      // Existing projects may still carry the former virtual bay zero.
+      physical[index] = { ...node, data: { ...data, bayId: 255, railId: 255 } };
+      continue;
+    }
+    if (used)
       throw new Error(
         "Un pin del dispositivo è usato anche da un ingresso GPIO nel canvas. Rimuovi l’ingresso duplicato o scegli un altro pin.",
       );
@@ -1144,7 +1523,11 @@ export function prepareDriverDeployment(
     };
   }
   const processing: Node[] = originalNodes
-    .filter((node) => !aliases.has(node.id))
+    .filter(
+      (node) =>
+        !aliases.has(node.id) &&
+        !(node.data.kind === "block" && node.data.blockTypeId === "app.can_send"),
+    )
     .map((node) => generated.get(node.id) ?? node);
   for (const [id, node] of generated)
     if (!processing.some((item) => item.id === id) && !synthetic.has(id))
@@ -1184,6 +1567,7 @@ export function prepareDriverDeployment(
       ModuleNodeData | undefined;
     if (
       data?.driverTypeId !== "on_boot" &&
+      data?.driverTypeId !== "can-link" &&
       data?.driverTypeId !== "digital_input_trigger"
     )
       continue;
@@ -1206,6 +1590,8 @@ export function prepareDriverDeployment(
     string,
     { key: number; field: number; action?: number }
   >();
+  const nativeSources = new Map<string, { key: number; field: number }>();
+  const publishedSchemas = new Map<number, string>();
   function sourceFor(edge: Edge): { key: number; field: number; action?: number } {
     const cached = activitySources.get(edge.id);
     if (cached) return cached;
@@ -1219,7 +1605,11 @@ export function prepareDriverDeployment(
     action?: number;
   } {
     const gpioObservation = viewerGpioSources.get(edge.id);
-    if (gpioObservation) return { key: keyOf.get(gpioObservation.moduleId)!, field: gpioObservation.field };
+    if (gpioObservation)
+      return {
+        key: keyOf.get(gpioObservation.moduleId)!,
+        field: gpioObservation.field,
+      };
     const node = byId.get(edge.source);
     if (!node) throw new Error(`Sorgente del filo «${edge.id}» non disponibile.`);
     const sequence = sequences.find((item) => item.id === node.id);
@@ -1265,6 +1655,10 @@ export function prepareDriverDeployment(
     }
     if (node.data.kind !== "block")
       throw new Error("Una regola non può alimentare un’azione.");
+    const outputIdentity = JSON.stringify([node.id, edge.sourceHandle ?? "0"]);
+    const existingPublication = nativeSources.get(outputIdentity);
+    if (existingPublication) return existingPublication;
+    const schemaId = `flow.${stableDriverHash(edge.id)}`;
     const bridgeId = `driver-publish:${edge.id}`;
     const key = nextDerivedKey++;
     processing.push({
@@ -1274,7 +1668,7 @@ export function prepareDriverDeployment(
         kind: "block",
         blockTypeId: "publish_field",
         properties: {
-          "1": `flow.${stableDriverHash(edge.id)}`,
+          "1": schemaId,
           "2": 1n,
           "3": 1n,
           "4": BigInt(key),
@@ -1282,11 +1676,43 @@ export function prepareDriverDeployment(
       },
     });
     compiledEdges.push({ ...edge, target: bridgeId, targetHandle: "0" });
-    return { key, field: 1 };
+    const publication = { key, field: 1 };
+    nativeSources.set(outputIdentity, publication);
+    publishedSchemas.set(key, schemaId);
+    return publication;
   }
   for (const edge of [...edges].sort((a, b) =>
     a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
   )) {
+    const canTarget = originalNodes.find(
+      (node) =>
+        node.id === edge.target &&
+        node.data.kind === "block" &&
+        node.data.blockTypeId === "app.can_send",
+    );
+    if (canTarget?.data.kind === "block") {
+      const source = sourceFor(edge);
+      const target = keyOf.get(String(canTarget.data.properties.moduleNodeId));
+      if (!target) throw new Error("Collegamento CAN senza modulo di trasporto.");
+      processing.push({
+        layer: "device-processing",
+        id: `can-send:${edge.id}`,
+        data: {
+          kind: "rule",
+          ruleTypeId: "device-action",
+          properties: {
+            "1": BigInt(source.key),
+            "3": BigInt(target),
+            "4": 1n,
+            "5": BigInt(source.field || 1),
+            "6": 1n,
+            "8": 0n,
+            ...(source.action ? { "2": BigInt(source.action) } : {}),
+          },
+        },
+      });
+      continue;
+    }
     const sequenceTarget = sequences.find((node) => node.id === edge.target);
     const sequenceCommand = { start: 1, pause: 2, stop: 3 }[edge.targetHandle ?? ""];
     if (sequenceTarget && !sequenceCommand)
@@ -1335,9 +1761,11 @@ export function prepareDriverDeployment(
             ...(source.action ? { "2": BigInt(source.action) } : {}),
             ...(input.argument ? { "6": BigInt(input.argument) } : {}),
             "8": BigInt(
-              input.mode === 1 && (originalSource?.data.kind === "schedule" || (originalSource?.data.kind === "block" && originalSource.data.blockTypeId === "logic_while"))
+              input.mode === 5 && sourceBlockType(originalSource?.data) === "led_driver"
                 ? 0
-                : input.mode,
+                : input.mode === 1 && repeatedTrigger(originalSource?.data)
+                  ? 0
+                  : input.mode,
             ),
           },
         },
@@ -1367,7 +1795,7 @@ export function prepareDriverDeployment(
             "3": BigInt(keyOf.get(target.moduleId)!),
             "4": BigInt(target.action.commandId),
             "5": BigInt(source.field),
-            "8": originalSource?.data.kind === "schedule" || (originalSource?.data.kind === "block" && originalSource.data.blockTypeId === "logic_while") ? 0n : 1n,
+            "8": repeatedTrigger(originalSource?.data) ? 0n : 1n,
             ...(source.action ? { "2": BigInt(source.action) } : {}),
           },
         },
@@ -1406,7 +1834,8 @@ export function prepareDriverDeployment(
             : {}),
           "8": BigInt(
             execute
-              ? (sourceNode.data.kind === "block" && sourceNode.data.blockTypeId !== "logic_while") ||
+              ? (sourceKind(sourceNode.data) === "block" &&
+                  sourceBlockType(sourceNode.data) !== "logic_while") ||
                 manualTriggers.some((node) => node.id === edge.source)
                 ? 1
                 : 0
@@ -1435,9 +1864,13 @@ export function prepareDriverDeployment(
         viewerId: edge.target,
         ...viewerPresentation.get(edge.id),
         ...source,
+        profileId: profile?.profileId,
         schemaId:
           profile?.sampleSchemaId ??
-          (moduleId ? undefined : `flow.${stableDriverHash(edge.id)}`),
+          (moduleId
+            ? undefined
+            : (publishedSchemas.get(source.key) ??
+              `flow.${stableDriverHash(edge.id)}`)),
       };
     });
   // Reuse module records; publish native logic outputs so their wires can
@@ -1451,7 +1884,9 @@ export function prepareDriverDeployment(
         sequences.some((item) => item.id === node.id) ||
         node.data.kind === "schedule" ||
         node.data.kind === "event-source" ||
-        (node.data.kind === "block" && (LOGIC_TYPES.has(node.data.blockTypeId) || node.data.blockTypeId === "status_led")))
+        (node.data.kind === "block" &&
+          (LOGIC_TYPES.has(node.data.blockTypeId) ||
+            node.data.blockTypeId === "status_led")))
     ) {
       try {
         sourceFor(edge);
@@ -1475,7 +1910,10 @@ export function prepareDriverDeployment(
           edgeId: edge.id.replace(/:scheduled$/, ""),
           schemaId:
             profile?.sampleSchemaId ??
-            (moduleId ? undefined : `flow.${stableDriverHash(edge.id)}`),
+            (moduleId
+              ? undefined
+              : (publishedSchemas.get(source.key) ??
+                `flow.${stableDriverHash(edge.id)}`)),
           kind:
             original?.data.kind === "schedule" ||
             manualTriggers.some((node) => node.id === edge.source)
@@ -1485,12 +1923,20 @@ export function prepareDriverDeployment(
       ];
     },
   );
-  const signalObservations = edges.flatMap(edge => {
+  const signalObservations = edges.flatMap((edge) => {
     const observed = viewerGpioSources.get(`signal-preview:${edge.id}`);
     if (!observed) return [];
-    const data = physical.find(node => node.id === observed.moduleId)?.data as ModuleNodeData | undefined;
-    const profile = profiles.find(profile => profile.profileId === data?.profileId);
-    return [{ generatorId: edge.source, key: keyOf.get(observed.moduleId)!, field: observed.field, schemaId: profile?.sampleSchemaId }];
+    const data = physical.find((node) => node.id === observed.moduleId)?.data as
+      ModuleNodeData | undefined;
+    const profile = profiles.find((profile) => profile.profileId === data?.profileId);
+    return [
+      {
+        generatorId: edge.source,
+        key: keyOf.get(observed.moduleId)!,
+        field: observed.field,
+        schemaId: profile?.sampleSchemaId,
+      },
+    ];
   });
   const outputField = ({
     node,
@@ -1504,7 +1950,11 @@ export function prepareDriverDeployment(
     if (sensor) return sensor.action.outputIds[handle ?? ""];
     if (sequences.some((item) => item.id === node.id))
       return handle === "completed" ? 1 : 2;
-    if (node.data.kind === "schedule" || manualTriggers.some(trigger => trigger.id === node.id)) return 1;
+    if (
+      node.data.kind === "schedule" ||
+      manualTriggers.some((trigger) => trigger.id === node.id)
+    )
+      return 1;
     return numericPort(node, handle, "outputs");
   };
   return {

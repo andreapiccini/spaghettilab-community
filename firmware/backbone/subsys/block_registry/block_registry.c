@@ -114,6 +114,7 @@ int spaghetti_block_registry_validate(
 		int err = validate_one_driver(driver);
 
 		if (err < 0) {
+			LOG_ERR("Invalid block driver %s: %d", driver->type_id, err);
 			return err;
 		}
 
@@ -140,6 +141,7 @@ int spaghetti_block_registry_init(void)
 		int err = validate_one_driver(driver);
 
 		if (err < 0) {
+			LOG_ERR("Invalid block driver %s: %d", driver->type_id, err);
 			return err;
 		}
 

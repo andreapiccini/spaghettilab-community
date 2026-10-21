@@ -931,7 +931,7 @@ export function DeviceRecipeEditorScreen({
           <div className="sensor-workbench-identity">
             <BrandMark />
             <span className="sensor-workbench-path">
-              {it ? "Crea dispositivo" : "Create device"}
+              {it ? "Crea modulo" : "Create module"}
               <span aria-hidden>/</span>
               {draft.name}
             </span>
@@ -966,7 +966,7 @@ export function DeviceRecipeEditorScreen({
             {it ? "Dispositivo · nome sul canvas" : "Device · canvas name"}
           </span>
           <input
-            aria-label={it ? "Nome dispositivo" : "Device name"}
+            aria-label={it ? "Nome modulo" : "Module name"}
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             className="w-full rounded-slsm border border-border-strong px-2 py-1 font-heading text-base font-semibold text-ink"
@@ -1055,7 +1055,7 @@ export function DeviceRecipeEditorScreen({
                   <span>{mode === 4 ? "SDA" : "SCL"}</span>
                   <button
                     type="button"
-                    onClick={() => navigate("physical-composition")}
+                    onClick={() => navigate("modules")}
                     aria-label={
                       it
                         ? `Configura ${mode === 4 ? "SDA" : "SCL"}`
@@ -1064,7 +1064,7 @@ export function DeviceRecipeEditorScreen({
                     title={
                       physicalDraft?.applied === false
                         ? it
-                          ? "Da applicare in Module Function"
+                          ? "Da configurare in Moduli"
                           : "Apply in Module Function"
                         : undefined
                     }
@@ -1081,7 +1081,7 @@ export function DeviceRecipeEditorScreen({
               ))}
               <button
                 type="button"
-                onClick={() => navigate("physical-composition")}
+                onClick={() => navigate("modules")}
                 aria-label={it ? "Configura pin I²C" : "Configure I²C pins"}
               >
                 <SlidersHorizontal size={16} />
@@ -1227,12 +1227,12 @@ export function DeviceRecipeEditorScreen({
             </div>
             <button
               type="button"
-              onClick={() => navigate("physical-composition")}
+              onClick={() => navigate("modules")}
               aria-label={it ? "Configura pin digitali" : "Configure digital pins"}
               title={
                 physicalDraft?.applied === false
                   ? it
-                    ? "Da applicare in Module Function"
+                    ? "Da configurare in Moduli"
                     : "Apply in Module Function"
                   : undefined
               }
@@ -1453,7 +1453,7 @@ export function DeviceRecipeEditorScreen({
                       it={it}
                       physical={physicalDraft}
                       onChange={setDraft}
-                      onOpenPhysical={() => navigate("physical-composition")}
+                      onOpenPhysical={() => navigate("modules")}
                     />
                   </section>
                 </>
@@ -2952,7 +2952,7 @@ function StepInspector({
             <option value="on">
               {draft.temperatureSensorModel === "ds18b20" &&
               draft.ds18b20PowerMode !== "gpio"
-                ? "Attivo · alimentazione da DATA"
+                ? draft.ds18b20PowerMode === "vcc" ? "Attivo · VCC 3,3 V" : "Attivo · alimentazione da DATA"
                 : "Accesa · GPIO HIGH"}
             </option>
             <option value="off">
@@ -3691,7 +3691,7 @@ function W1BindingPanel({
       </Field>
       <button
         type="button"
-        onClick={() => navigate("physical-composition")}
+        onClick={() => navigate("modules")}
         className="w-full rounded-slsm border border-border-strong px-2 py-1.5 text-left font-body text-[11px] text-brand-blue hover:border-brand-blue"
       >
         {it ? "Modifica pin DQ nel Cablaggio →" : "Edit DQ pin in Wiring →"}

@@ -60,6 +60,8 @@ export enum Operation {
   CANCEL_BLE_UPDATE = 31,
   APPLY_PHYSICAL = 32,
   NFC_PAGE = 33,
+  IDENTIFY_BACKBONE = 34,
+  CAN_REQUEST = 35,
 }
 
 /** `enum spaghetti_protocol_status`, `protocol.h` — 0..10. */
@@ -86,7 +88,7 @@ export enum EventType {
 }
 
 const OPERATION_MIN = Operation.GET_CATALOG;
-const OPERATION_MAX = Operation.NFC_PAGE;
+const OPERATION_MAX = Operation.CAN_REQUEST;
 
 export type RequestEnvelope = {
   readonly correlationId: number;

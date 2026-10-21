@@ -97,10 +97,11 @@ export async function probeUsbBridgeCores(): Promise<readonly FoundUsbCore[]> {
   }
 }
 
-/** Web Serial ports plus localhost USB bridge, Web Serial first if both see the same Core. */
+/** Prefer the running USB bridge: opening its serial port again steals bytes from the active session. */
 export async function probeUsbCores(): Promise<readonly FoundUsbCore[]> {
-  const [granted, bridged] = await Promise.all([probeGrantedUsbCores(), probeUsbBridgeCores()]);
-  return mergeUsbCores(granted, bridged);
+  const bridged = await probeUsbBridgeCores();
+  if (bridged.length) return bridged;
+  return mergeUsbCores(await probeGrantedUsbCores());
 }
 
 /** Probe every already-granted Web Serial port with Protocol V1 `GET_STATUS`. */

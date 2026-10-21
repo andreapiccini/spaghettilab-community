@@ -1,3 +1,4 @@
+import { BackboneTopologyNotice } from "./BackboneTopologyNotice.js";
 import { CommandPalette } from "./CommandPalette.js";
 import { DeployDiffScreen } from "../deploy-diff/DeployDiffScreen.js";
 import { useSession } from "../../state/session-context.js";
@@ -13,6 +14,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   return (
     <div data-app-shell className="flex h-dvh flex-col bg-surface-sunken">
       <TopBar />
+      <BackboneTopologyNotice />
       <div className="flex min-h-0 flex-1 overflow-hidden">
         {!demoOnly && <LeftRail />}
         <main

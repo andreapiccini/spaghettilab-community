@@ -119,6 +119,8 @@ class Operation(IntEnum):
     CANCEL_BLE_UPDATE = 31
     APPLY_PHYSICAL = 32
     NFC_PAGE = 33
+    IDENTIFY_BACKBONE = 34
+    CAN_REQUEST = 35
 
 
 PROTOCOL_STATUS_CODES = {
@@ -345,7 +347,7 @@ def decode_envelope(data: bytes) -> tuple[int, int, bytes]:
 def encode_request(correlation_id: int, operation: int, payload: bytes = b"") -> bytes:
     if correlation_id == 0:
         raise ProtocolCodecError("correlation_id must be nonzero")
-    if not 1 <= operation <= 31:
+    if not 1 <= operation <= int(Operation.CAN_REQUEST):
         raise ProtocolCodecError(f"invalid operation {operation}")
     return encode_envelope(correlation_id, operation, payload)
 
@@ -368,7 +370,7 @@ def encode_response(
 
 def decode_request(data: bytes) -> tuple[int, int, bytes]:
     field1, field2, payload = decode_envelope(data)
-    if not 1 <= field2 <= 33:
+    if not 1 <= field2 <= int(Operation.CAN_REQUEST):
         raise ProtocolCodecError(f"unsupported operation {field2}")
     return field1, field2, payload
 

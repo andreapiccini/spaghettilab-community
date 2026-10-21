@@ -28,3 +28,6 @@ describe("driver action commands", () => {
     expect(decodeModuleCommandResponse(encodeModuleCommandResponse())).toEqual({});
   });
 });
+
+it("preserves a complete color argument as text",()=>{const req={key:1,commandId:3,arguments:{1:"#204060"}};expect(decodeModuleCommandRequest(encodeModuleCommandRequest(req))).toEqual(req);});
+it("rejects oversized UTF-8 command text",()=>{expect(()=>decodeModuleCommandRequest(encodeModuleCommandRequest({key:1,commandId:3,arguments:{1:"è".repeat(17)}}))).toThrow();});

@@ -72,12 +72,14 @@ export function Dht22FlowPanel({
           <h3 className="text-base font-semibold text-ink">
             {draft.ds18b20PowerMode === "gpio"
               ? "Alimentazione da GPIO"
-              : "Alimentazione parassita"}
+              : draft.ds18b20PowerMode === "vcc" ? `VCC · ${draft.gpioHardware?.power === "5" ? "5" : "3,3"} V Backbone V2` : "Alimentazione parassita"}
           </h3>
           <p className="mt-3 text-sm text-ink">
             {draft.ds18b20PowerMode === "gpio"
               ? "DATA A0, VCC A1, GND comune. A1 resta HIGH durante avvio e lettura; Stop generale lo spegne. Un sensore per pin DATA."
-              : "Un DS18B20 per pin DATA. VDD e GND vanno a massa; DATA richiede un pull-up esterno a 3,3 V. Il driver mantiene DATA alto durante i 750 ms di conversione e lo rilascia prima di leggere. La schedina con LED e R1 deve essere verificata per questo cablaggio."}
+              : draft.ds18b20PowerMode === "vcc"
+                ? `VCC alla linea ${draft.gpioHardware?.power === "5" ? "5" : "3,3"} V e GND comune. DATA deve restare a 3,3 V. Lo Stop interrompe le letture senza togliere alimentazione al sensore.`
+                : "Un DS18B20 per pin DATA. VDD e GND vanno a massa; DATA richiede un pull-up esterno a 3,3 V. Il driver mantiene DATA alto durante i 750 ms di conversione e lo rilascia prima di leggere. La schedina con LED e R1 deve essere verificata per questo cablaggio."}
           </p>
         </section>
       )}

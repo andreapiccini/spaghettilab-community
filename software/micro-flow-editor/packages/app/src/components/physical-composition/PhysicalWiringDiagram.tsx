@@ -1,3 +1,4 @@
+import { physicalWirePoints } from "./physical-wire-route.js";
 import { roundedOrthogonalPath } from "../processing-graph/orthogonal-route.js";
 import "./physical-wiring.css";
 import { useId, useState } from "react";
@@ -144,11 +145,13 @@ export function PhysicalWiringDiagram({
   const wireCount = boxes.reduce((count, box) => count + box.lines.length, 0);
   const laneSpacing = Math.min(16, 200 / Math.max(1, wireCount));
   const routeBaseY = variant === "v2" ? 220 : 175;
-  const height = Math.max(240, nextY, routeBaseY + wireCount * 12 + 24);
+  const hasUpperWire = variant === "v2" && boxes.some(box => box.lines.some(line => line.rail === "3.3V" || (line.channel !== undefined && line.channel >= 4)));
+  const topPadding = hasUpperWire ? wireCount * 12 + 12 : 0;
+  const height = topPadding + Math.max(240, nextY, routeBaseY + wireCount * 12 + 24);
   const pinLabel = (channel: number) =>
     formatPinLabel(modeIndexToPinId(channel, variant), variant);
   const origin = (line: Line) =>
-    contacts.find((pin) =>
+    (line.rail === "GND" ? [...contacts].reverse() : contacts).find((pin) =>
       line.channel !== undefined
         ? pin.modeIndex === line.channel
         : pin.modeIndex === undefined && pin.label === line.rail,
@@ -168,7 +171,8 @@ export function PhysicalWiringDiagram({
               <stop offset="1" stopColor="#e9ecf1" />
             </linearGradient>
           </defs>
-          <text x="30" y="35" fontSize="15" fontWeight="650" fill="#252e3d">
+          <g transform={`translate(0 ${topPadding})`}>
+          <text x="30" y={topPadding ? 20 - topPadding : 35} fontSize="15" fontWeight="650" fill="#252e3d">
             Module Function {variant.toUpperCase()}
           </text>
           <rect
@@ -201,12 +205,11 @@ export function PhysicalWiringDiagram({
             .sort((a, b) => b.start!.x - a.start!.x || a.box.y - b.box.y || a.i - b.i)
             .map(({ box, line, i, start }, index) => {
               const endY = box.y + 48 + i * 28;
-              const laneY = routeBaseY + index * 12;
               const laneX = 330 + index * laneSpacing;
-              const path = roundedOrthogonalPath([
-                { x: start!.x, y: start!.y }, { x: start!.x, y: laneY },
-                { x: laneX, y: laneY }, { x: laneX, y: endY }, { x: 574, y: endY },
-              ], 9);
+              const path = roundedOrthogonalPath(physicalWirePoints(
+                start!, { x: 574, y: endY }, laneX, index,
+                variant === "v2" && start!.y === 100,
+              ), 9);
               return <g key={`${box.id}-${i}`} className="physical-wire" data-muted={activeWire !== null && activeWire !== wireKey(line)} data-active={activeWire === wireKey(line)}
                 onMouseEnter={() => setHoveredWire(wireKey(line))} onMouseLeave={() => setHoveredWire(null)}
                 onFocus={() => setHoveredWire(wireKey(line))} onBlur={() => setHoveredWire(null)}
@@ -305,7 +308,7 @@ export function PhysicalWiringDiagram({
             <g key={box.id}>
               <text
                 x="574"
-                y={box.y - 10}
+                y={box.y === 48 && topPadding ? 20 - topPadding : box.y - 10}
                 fontSize="14"
                 fontWeight="650"
                 fill="#252e3d"
@@ -340,6 +343,7 @@ export function PhysicalWiringDiagram({
               ))}
             </g>
           ))}
+          </g>
         </svg>
       </div>
       {selected !== null && !disabled && (

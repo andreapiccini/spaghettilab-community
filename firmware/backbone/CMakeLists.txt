@@ -44,6 +44,7 @@ target_sources(app PRIVATE
   spaghetti_modules/digital_line_set/digital_line_set.c
   spaghetti_modules/on_boot/on_boot.c
   spaghetti_modules/sequence/sequence.c
+  spaghetti_modules/can_link/can_link.c
   spaghetti_rules/threshold/threshold.c
   spaghetti_rules/device_action/device_action.c
   spaghetti_blocks/blocks_math.c
@@ -114,6 +115,7 @@ target_sources(app PRIVATE
   subsys/communication/operations/catalog.c
   subsys/communication/operations/status.c
   subsys/communication/operations/config_ops.c
+  subsys/communication/operations/can_ops.c
   subsys/communication/operations/discovery_ops.c
   subsys/communication/operations/module_command.c
   subsys/communication/operations/update_ops.c
@@ -154,6 +156,7 @@ endif()
 if(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
   target_sources(app PRIVATE
     subsys/services/ota/field_update_can.c
+    subsys/services/ota/can_rpc.c
   )
 endif()
 

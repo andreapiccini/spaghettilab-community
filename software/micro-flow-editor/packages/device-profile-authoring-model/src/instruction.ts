@@ -1,8 +1,10 @@
+export type PwmSetInstruction = Op<"PWM_SET"> & { readonly src: TempSlot; readonly channel: number; readonly frequencyHz: number };
 export type Ds18Instruction =
   | (Op<"DS18B20_SETUP"> & {
       readonly channel: number;
       readonly on: boolean;
       readonly powerChannel?: number;
+      readonly externalPower?: boolean;
     })
   | (Op<"DS18B20_READ"> & {
       readonly dst: TempSlot;
@@ -23,6 +25,7 @@ export type Dht22ReadInstruction = Op<"DHT22_READ"> & {
   readonly queued?: boolean;
 };
 export type RgbProgramInstruction = Op<"RGB_PROGRAM"> & {
+  readonly nodeId?: number;
   readonly offset: number;
   readonly length: number;
   readonly channels: number;
@@ -268,6 +271,7 @@ export type I2cMessageWriteInstruction = Op<"I2C_MESSAGE_WRITE"> & {
 };
 
 export type Instruction =
+  | PwmSetInstruction
   | Ds18Instruction
   | (Op<"EMIT_DECIMAL"> & {
       readonly src: TempSlot;

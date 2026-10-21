@@ -1,4 +1,5 @@
-import { upgradeDht22Driver } from "./gpio-driver-presets.js";
+import { upgradeRgbModule } from "./rgb-module.js";
+import { withDs18b20PowerMode, upgradeDht22Driver } from "./gpio-driver-presets.js";
 import { draftToCanvasSensorRecipes } from "./device-recipe-draft.js";
 import type { SensorBus, SensorRecipe } from "./sensor-recipe.js";
 import { SENSOR_RECIPE_CATALOG, findSensorRecipeById } from "./sensor-recipe.js";
@@ -15,7 +16,10 @@ export type BackboneSensorModule = {
   readonly label: string;
   readonly createdAt: number;
   /** Logical DATA assignment chosen on the module popup or in Module Function. */
-  readonly gpioAssignments?: { readonly boardKey: string; readonly channels: Readonly<Record<string, number>> };
+  readonly gpioAssignments?: {
+    readonly boardKey: string;
+    readonly channels: Readonly<Record<string, number>>;
+  };
   readonly gpioAssignment?: { readonly boardKey: string; readonly channel: number };
   /** Flow canvas node created for this module's channels (if any). */
   readonly graphNodeId?: string;
@@ -31,19 +35,57 @@ export type BackboneSensorModulesProject = {
 
 const EMPTY: BackboneSensorModulesProject = { version: 1, byBinding: {} };
 
-export function parseBackboneSensorModules(raw: string | undefined | null): BackboneSensorModulesProject {
+export function parseBackboneSensorModules(
+  raw: string | undefined | null,
+): BackboneSensorModulesProject {
   if (!raw || raw.trim() === "") return EMPTY;
   try {
     const parsed = JSON.parse(raw) as Partial<BackboneSensorModulesProject>;
-    if (parsed?.version !== 1 || !parsed.byBinding || typeof parsed.byBinding !== "object") return EMPTY;
-    return { version: 1, byBinding: Object.fromEntries(Object.entries(parsed.byBinding).map(([id, modules]) => [id, modules.map(module => {
-      const draft=module.recipe.deviceDraft;
-      const upgraded=draft && upgradeDht22Driver(draft);
-      if(!draft || upgraded===draft)return module;
-      const recipes=draftToCanvasSensorRecipes(upgraded!);
-      const recipe={...recipes[0]!,id:module.recipe.id};
-      return {...module, label:module.label==="DHT22"?"DHT11":module.label,recipe,actions:recipes};
-    })])) };
+    if (
+      parsed?.version !== 1 ||
+      !parsed.byBinding ||
+      typeof parsed.byBinding !== "object"
+    )
+      return EMPTY;
+    return {
+      version: 1,
+      byBinding: Object.fromEntries(
+        Object.entries(parsed.byBinding).map(([id, modules]) => [
+          id,
+          modules.map((module) => {
+            const draft = module.recipe.deviceDraft;
+            if (
+              draft?.temperatureSensorModel === "ds18b20" &&
+              draft.ds18b20PowerMode === "vcc" &&
+              draft.gpioHardware?.power === "5"
+            ) {
+              const recipe = (item: SensorRecipe): SensorRecipe =>
+                item.deviceDraft
+                  ? {
+                      ...item,
+                      deviceDraft: withDs18b20PowerMode(item.deviceDraft, "vcc", "3.3"),
+                    }
+                  : item;
+              return {
+                ...module,
+                recipe: recipe(module.recipe),
+                actions: module.actions?.map(recipe),
+              };
+            }
+            const upgraded = draft && upgradeRgbModule(upgradeDht22Driver(draft));
+            if (!draft || upgraded === draft) return module;
+            const recipes = draftToCanvasSensorRecipes(upgraded!);
+            const recipe = { ...recipes[0]!, id: module.recipe.id };
+            return {
+              ...module,
+              label: module.label === "DHT22" ? "DHT11" : module.label,
+              recipe,
+              actions: recipes,
+            };
+          }),
+        ]),
+      ),
+    };
   } catch {
     return EMPTY;
   }
@@ -74,7 +116,9 @@ export function removeModule(
   bindingId: string,
   moduleId: string,
 ): BackboneSensorModulesProject {
-  const list = (project.byBinding[bindingId] ?? []).filter((item) => item.id !== moduleId);
+  const list = (project.byBinding[bindingId] ?? []).filter(
+    (item) => item.id !== moduleId,
+  );
   return { version: 1, byBinding: { ...project.byBinding, [bindingId]: list } };
 }
 
@@ -120,7 +164,10 @@ export function assignModuleGpioPin(
   };
 }
 
-export function createModuleFromRecipe(recipe: SensorRecipe, bus?: SensorBus): BackboneSensorModule {
+export function createModuleFromRecipe(
+  recipe: SensorRecipe,
+  bus?: SensorBus,
+): BackboneSensorModule {
   return {
     id: `bsm-${Date.now().toString(36)}-${Math.round(Math.random() * 1e6).toString(36)}`,
     recipeId: recipe.id,
@@ -142,10 +189,19 @@ export function reassignGpioSignal(
   channel: number,
 ): Readonly<Record<string, number>> {
   const previous = channels[signal];
-  if (previous === undefined || !Number.isInteger(channel) || channel < 0 || channel > 3)
+  if (
+    previous === undefined ||
+    !Number.isInteger(channel) ||
+    channel < 0 ||
+    channel > 3
+  )
     throw new Error("Assegnazione del segnale GPIO non valida.");
   const sibling = Object.keys(channels).find(
     (other) => other !== signal && channels[other] === channel,
   );
-  return { ...channels, ...(sibling ? { [sibling]: previous } : {}), [signal]: channel };
+  return {
+    ...channels,
+    ...(sibling ? { [sibling]: previous } : {}),
+    [signal]: channel,
+  };
 }

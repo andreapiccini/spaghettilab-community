@@ -128,7 +128,7 @@ static bool profile_id_is_valid(const char *id)
 static bool opcode_is_known(uint8_t opcode)
 {
 	return (opcode >= SPAGHETTI_DEVICE_PROFILE_OP_I2C_WRITE) &&
-	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP);
+	       (opcode <= SPAGHETTI_DEVICE_PROFILE_OP_PWM_SET);
 }
 
 static bool temp_ok(uint8_t slot)
@@ -243,6 +243,10 @@ static int accumulate_op_budget(const struct spaghetti_device_profile_op *op,
 		bytes = (uint32_t)op->imm0 + ((op->imm1 != 0U) ? (uint32_t)op->imm1 : 1U);
 		time_ms = (op->imm2 > UINT16_MAX) ? UINT16_MAX : (uint16_t)op->imm2;
 		break;
+	case SPAGHETTI_DEVICE_PROFILE_OP_PWM_SET:
+		if (!temp_ok(op->src_a) || op->imm0 > 3U || op->imm2 > 1000000U) return -EINVAL;
+		transactions = 1U;
+		break;
 	case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET:
 		if (!temp_ok(op->dst) || op->imm0 > 3U) {
 			return -EINVAL;
@@ -256,7 +260,7 @@ static int accumulate_op_budget(const struct spaghetti_device_profile_op *op,
  case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP:
  case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ:
    if(op->imm0>3 || (op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ && (!temp_ok(op->dst) || op->imm1 > 1)) ||
-      (op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP && (op->imm1>1 || op->imm2>4 || (op->imm2 && op->imm2-1==op->imm0)))) return -EINVAL;
+      (op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP && (op->imm1>1 || op->imm2>5 || (op->imm2 && op->imm2<5 && op->imm2-1==op->imm0)))) return -EINVAL;
    transactions=1; time_ms=op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ?20:0; break;
  case SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER:
  case SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ:
@@ -268,7 +272,7 @@ static int accumulate_op_budget(const struct spaghetti_device_profile_op *op,
    time_ms = op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ ? (op->imm3 ? 32U : 12U) : 0U;
    break;
  case SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM:
-   if (!op->imm1 || op->imm1 > 96U || op->imm1 % 6U || op->imm2 > 63U || op->imm3 > 1U ||
+   if (!op->imm1 || op->imm1 > 96U || op->imm1 % 6U || op->imm2 > 63U || op->imm3 > 0x1ffffffU ||
        ((op->imm2 & 3U) == ((op->imm2 >> 2) & 3U)) ||
        ((op->imm2 & 3U) == ((op->imm2 >> 4) & 3U)) ||
        (((op->imm2 >> 2) & 3U) == ((op->imm2 >> 4) & 3U))) return -EINVAL;
@@ -395,7 +399,7 @@ static int opcode_matches_profile(const struct spaghetti_device_profile_op *op,
 	     op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ)) return -EINVAL;
 
 	if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER && (profile->transport != SPAGHETTI_PORT_TRANSPORT_GPIO || !(profile->required_capabilities & SPAGHETTI_PORT_CAP_DIGITAL_OUTPUT))) return -EINVAL;
- if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM &&
+ if ((op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_PWM_SET) &&
      (profile->transport != SPAGHETTI_PORT_TRANSPORT_GPIO || !(profile->required_capabilities & SPAGHETTI_PORT_CAP_PWM))) return -EINVAL;
  if ((op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) &&
      (profile->transport != SPAGHETTI_PORT_TRANSPORT_GPIO ||
@@ -448,7 +452,7 @@ static int validate_plan(const struct spaghetti_device_profile_op *ops, size_t c
           (uint64_t)op->imm0 + op->imm1 > profile->message_data_size) return -EINVAL;
       for (unsigned offset = op->imm0; offset < op->imm0 + op->imm1; offset += 6) {
         const uint8_t *row = profile->message_data + offset;
-        if (row[0] > 5U || row[1] >= 8U || ((row[0] == 2U || row[0] == 5U) && row[5]) || (row[0] == 4U &&
+        if (row[0] > 7U || row[1] >= 8U || (row[0] == 7U && (row[2] < 1U || row[2] > 8U || row[3] || row[4] || row[5])) || (row[0] == 6U && row[1] > 2U) || ((row[0] == 2U || row[0] == 5U) && row[5]) || ((row[0] == 4U || row[0] == 6U) &&
             (row[2] >= SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS || row[3] || row[4] || row[5]))) return -EINVAL;
       }
     }
@@ -497,6 +501,20 @@ static int validate_plan(const struct spaghetti_device_profile_op *ops, size_t c
 	return 0;
 }
 
+/* Validation does not need a second array of field descriptors on the caller's
+ * small communication stack. Schema construction shares these checks. */
+static int validate_sample_fields(const struct spaghetti_device_profile *profile)
+{
+ if (profile->sample_field_count > SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS) return -E2BIG;
+ for (size_t idx=0; idx<profile->sample_field_count; idx++) {
+  const struct spaghetti_device_profile_field *field=&profile->sample_fields[idx];
+  if (!field->field_id || !field->name[0] ||
+      (field->type!=SPAGHETTI_VALUE_INT64 && field->type!=SPAGHETTI_VALUE_UINT64 &&
+       field->type!=SPAGHETTI_VALUE_FLOAT && field->type!=SPAGHETTI_VALUE_TEXT)) return -EINVAL;
+ }
+ return 0;
+}
+
 int spaghetti_device_profile_make_schema(const struct spaghetti_device_profile *profile,
 	struct spaghetti_field_descriptor *fields,
 	struct spaghetti_schema_descriptor *out_schema)
@@ -504,19 +522,11 @@ int spaghetti_device_profile_make_schema(const struct spaghetti_device_profile *
 	if ((profile == NULL) || (fields == NULL) || (out_schema == NULL)) {
 		return -EINVAL;
 	}
-	if (profile->sample_field_count > SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS) {
-		return -E2BIG;
-	}
+	int err=validate_sample_fields(profile);
+	if(err) return err;
 
 	for (size_t idx = 0U; idx < profile->sample_field_count; ++idx) {
 		const struct spaghetti_device_profile_field *src = &profile->sample_fields[idx];
-
-		if ((src->field_id == 0U) ||
-		    ((src->type != SPAGHETTI_VALUE_INT64) &&
-		     (src->type != SPAGHETTI_VALUE_UINT64) && (src->type != SPAGHETTI_VALUE_FLOAT) && (src->type != SPAGHETTI_VALUE_TEXT)) ||
-		    (src->name[0] == '\0')) {
-			return -EINVAL;
-		}
 
 		memset(&fields[idx], 0, sizeof(fields[idx]));
 		fields[idx].field_id = src->field_id;
@@ -544,8 +554,6 @@ int spaghetti_device_profile_validate(const struct spaghetti_device_profile *pro
 	struct spaghetti_device_profile_budget *out_budget)
 {
 	struct spaghetti_device_profile_budget budget = { 0 };
-	struct spaghetti_field_descriptor fields[SPAGHETTI_DEVICE_PROFILE_MAX_FIELDS];
-	struct spaghetti_schema_descriptor schema;
 	bool saw_emit_field = false;
 	int err;
 
@@ -563,7 +571,7 @@ int spaghetti_device_profile_validate(const struct spaghetti_device_profile *pro
 		return -EINVAL;
 	}
 
-	err = spaghetti_device_profile_make_schema(profile, fields, &schema);
+	err = validate_sample_fields(profile);
 	if (err < 0) {
 		return err;
 	}

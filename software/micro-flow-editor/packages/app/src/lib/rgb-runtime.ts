@@ -10,6 +10,7 @@ import {
   RGB_COLOR_FIELD,
   RGB_STATE_FIELD,
   rgbColor,
+  rgbActiveInputs,
   validateRgbModule,
   type RgbStep,
 } from "./rgb-module.js";
@@ -20,13 +21,27 @@ export function rgbInputCommand(
   draft: DeviceRecipeDraft,
   inputId: string,
 ): { commandId: number; argument?: number; mode: number } {
+  const saved=draft.moduleProgram?.rgbInputs?.[inputId];
+  if (saved) return saved;
   const config = draft.rgbModule!;
-  const input = config.inputs.find((item) => item.id === inputId);
+  const input = rgbActiveInputs(config).find((item) => item.id === inputId);
   if (!input) throw new Error("Ingresso RGB non disponibile.");
   if (input.mode === "trigger")
     return {
       commandId: config.actions.findIndex((action) => action.id === input.actionId) + 1,
       mode: input.edge === "falling" ? 2 : 1,
+    };
+  if (input.mode === "component")
+    return {
+      commandId:
+        config.actions.length +
+        config.inputs.filter((item) => item.mode === "variable").length +
+        config.inputs
+          .filter((item) => item.mode === "component")
+          .findIndex((item) => item.id === input.id) +
+        1,
+      argument: 1,
+      mode: 5,
     };
   return {
     commandId:
@@ -36,7 +51,7 @@ export function rgbInputCommand(
         .findIndex((item) => item.id === input.id) +
       1,
     argument: 1,
-    mode: 5,
+    mode: 0,
   };
 }
 export function compileRgbRuntime(
@@ -109,6 +124,24 @@ export function compileRgbRuntime(
       const first = sampleOps.length;
       const action = config.actions.find((action) => action.id === input.actionId)!;
       sampleOps.push(
+        program([
+          ...row(7, variableIndex(input.variableId), 1),
+          ...steps(action.steps),
+        ]),
+        { op: "EMIT_RECORD" },
+      );
+      actions.push({
+        id: config.actions.length + index + 1,
+        first,
+        count: sampleOps.length - first,
+      });
+    });
+  config.inputs
+    .filter((input) => input.mode === "component")
+    .forEach((input, index) => {
+      if (input.mode !== "component") return;
+      const first = sampleOps.length;
+      sampleOps.push(
         {
           op: "LOAD_ARGUMENT",
           dst: 0,
@@ -119,14 +152,15 @@ export function compileRgbRuntime(
           low: 0,
           high: 0,
         },
-        program([
-          ...row(4, variableIndex(input.variableId), 0),
-          ...steps(action.steps),
-        ]),
+        program(row(6, ["red", "green", "blue"].indexOf(input.component), 0)),
         { op: "EMIT_RECORD" },
       );
       actions.push({
-        id: config.actions.length + index + 1,
+        id:
+          config.actions.length +
+          config.inputs.filter((item) => item.mode === "variable").length +
+          index +
+          1,
         first,
         count: sampleOps.length - first,
       });

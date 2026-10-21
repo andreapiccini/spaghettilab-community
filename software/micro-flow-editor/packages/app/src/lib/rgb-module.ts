@@ -12,8 +12,10 @@ export type RgbVariable = { id: string; name: string; color: string };
 export type RgbInput = { id: string; name: string } & (
   | { mode: "trigger"; actionId: string; edge: "rising" | "falling" }
   | { mode: "variable"; variableId: string; actionId: string }
+  | { mode: "component"; component: "red" | "green" | "blue"; actionId: string }
 );
 export type RgbModuleConfig = {
+  inputMode?: "hex" | "rgb";
   initialOn: boolean;
   initialColor: string;
   common: "cathode" | "anode";
@@ -28,12 +30,12 @@ export function rgbColor(value: string): number {
 }
 export function defaultRgbModule(): RgbModuleConfig {
   return {
+    inputMode: "hex",
     initialOn: false,
     initialColor: "#FF3366",
     common: "cathode",
     variables: [{ id: "color", name: "Colore", color: "#FF3366" }],
     actions: [
-      { id: "on", name: "Accendi", steps: [{ id: "on-step", kind: "on" }] },
       { id: "off", name: "Spegni", steps: [{ id: "off-step", kind: "off" }] },
       {
         id: "color",
@@ -41,21 +43,6 @@ export function defaultRgbModule(): RgbModuleConfig {
         steps: [
           { id: "color-step", kind: "color", color: "#FF3366", variableId: "color" },
         ],
-      },
-      {
-        id: "red",
-        name: "Imposta rosso",
-        steps: [{ id: "red-step", kind: "color", color: "#FF0000" }],
-      },
-      {
-        id: "orange",
-        name: "Imposta arancione",
-        steps: [{ id: "orange-step", kind: "color", color: "#FF8000" }],
-      },
-      {
-        id: "blue",
-        name: "Imposta blu",
-        steps: [{ id: "blue-step", kind: "color", color: "#0000FF" }],
       },
     ],
     inputs: [
@@ -66,35 +53,60 @@ export function defaultRgbModule(): RgbModuleConfig {
         variableId: "color",
         actionId: "color",
       },
-      {
-        id: "red-trigger",
-        name: "Imposta rosso",
-        mode: "trigger",
-        actionId: "red",
-        edge: "rising",
-      },
-      {
-        id: "orange-trigger",
-        name: "Imposta arancione",
-        mode: "trigger",
-        actionId: "orange",
-        edge: "rising",
-      },
-      {
-        id: "blue-trigger",
-        name: "Imposta blu",
-        mode: "trigger",
-        actionId: "blue",
-        edge: "rising",
-      },
+      ...(["red", "green", "blue"] as const).map((component, index) => ({
+        id: `${component}-level`,
+        name: ["Rosso (%)", "Verde (%)", "Blu (%)"][index]!,
+        mode: "component" as const,
+        component,
+        actionId: "color",
+      })),
     ],
   };
 }
+/** Replace only the original built-in fixed-color inputs; keep custom programs. */
+export function upgradeRgbModule(draft: DeviceRecipeDraft): DeviceRecipeDraft {
+  if (draft.moduleProgram) return draft;
+  const config = draft.rgbModule;
+  if (config?.inputs.some((input) => input.mode === "component")) {
+    const upgraded = rgbModuleDraft(
+      { ...config, inputMode: config.inputMode ?? "hex" },
+      draft,
+    );
+    return JSON.stringify(upgraded.channels) === JSON.stringify(draft.channels) &&
+      config.inputMode
+      ? draft
+      : { ...upgraded, updatedAt: draft.updatedAt };
+  }
+  if (
+    !config ||
+    config.inputs.some((input) => input.mode === "component") ||
+    config.actions.length !== 6 ||
+    !["on", "off", "color", "red", "orange", "blue"].every((id) =>
+      config.actions.some((action) => action.id === id),
+    )
+  )
+    return draft;
+  return rgbModuleDraft(
+    {
+      ...defaultRgbModule(),
+      initialOn: config.initialOn,
+      initialColor: config.initialColor,
+      common: config.common,
+    },
+    draft,
+  );
+}
+/** Both command families remain visible; the connected wires select the active one. */
+export function rgbActiveInputs(config: RgbModuleConfig) {
+  return config.inputs;
+}
 export function validateRgbModule(config: RgbModuleConfig): void {
+  if (config.inputMode && !["hex", "rgb"].includes(config.inputMode))
+    throw new Error("Scegli RGB oppure Colore.");
   rgbColor(config.initialColor);
   if (
     config.actions.length * 2 +
-      config.inputs.filter((input) => input.mode === "variable").length * 3 >
+      config.inputs.filter((input) => input.mode !== "trigger").length * 3 >
     16
   )
     throw new Error(
@@ -103,7 +115,7 @@ export function validateRgbModule(config: RgbModuleConfig): void {
   if (
     !config.actions.length ||
     config.actions.length +
-      config.inputs.filter((input) => input.mode === "variable").length >
+      config.inputs.filter((input) => input.mode !== "trigger").length >
       8
   )
     throw new Error(
@@ -132,6 +144,11 @@ export function validateRgbModule(config: RgbModuleConfig): void {
       }
   }
   for (const input of config.inputs) {
+    if (
+      input.mode === "component" &&
+      !["red", "green", "blue"].includes(input.component)
+    )
+      throw new Error("Canale RGB non valido.");
     if (!config.actions.some((action) => action.id === input.actionId))
       throw new Error(`${input.name}: scegli un’azione esistente.`);
     if (
@@ -203,13 +220,18 @@ export function rgbModuleDraft(
       command: [],
     },
     channels: [
-      ...config.inputs.map((input) => ({
+      ...rgbActiveInputs(config).map((input) => ({
         id: input.id,
         label: rgbInputLabel(input),
         unit: "",
-        quantity: input.mode === "trigger" ? ("digital" as const) : ("analog" as const),
+        quantity:
+          input.mode === "trigger"
+            ? ("digital" as const)
+            : input.mode === "variable"
+              ? ("other" as const)
+              : ("analog" as const),
         direction: "write" as const,
-        dataType: "number" as const,
+        dataType: input.mode === "variable" ? ("string" as const) : ("number" as const),
         inputMode: input.mode === "trigger" ? ("trigger" as const) : ("data" as const),
       })),
       {
@@ -223,6 +245,7 @@ export function rgbModuleDraft(
       {
         id: "color",
         label: "Colore emesso",
+        colorKind: "rgb",
         direction: "read",
         quantity: "analog",
         dataType: "number",

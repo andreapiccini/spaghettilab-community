@@ -142,8 +142,8 @@ export async function ensureRecipeTestI2cPhysical(
       i2cSpeed: opts.preferredI2cSpeed ?? topology?.i2cSpeed ?? 0,
       expectedTag: expectedFunctionTag(tag, automatic),
       settings:
-        topology?.version === 2
-          ? (opts.preferredSettings ?? topology.settings ?? DEFAULT_PHYSICAL_SETTINGS)
+        (topology?.version ?? 0) >= 2
+          ? (opts.preferredSettings ?? topology?.settings ?? DEFAULT_PHYSICAL_SETTINGS)
           : undefined,
     },
     opts.signal,

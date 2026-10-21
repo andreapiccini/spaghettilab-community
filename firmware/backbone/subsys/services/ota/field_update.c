@@ -1,4 +1,10 @@
 #include <spaghetti/field_update.h>
+#include "status_led_policy.h"
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
+#include "can_rpc.h"
+#endif
+#include <spaghetti/port.h>
+#include <spaghetti/can_link.h>
 
 #include <errno.h>
 #include <stdbool.h>
@@ -226,6 +232,70 @@ static void slup_led_set_mode(int mode);
 
 K_MUTEX_DEFINE(status_led_lock);
 static const void *status_led_owner;
+static uint8_t status_led_percent;
+static int64_t identify_started;
+static bool identify_active;
+K_SEM_DEFINE(identify_wake, 0, 1);
+
+static atomic_t status_led_application_running;
+void spaghetti_status_led_application_active(bool active)
+{
+ atomic_set(&status_led_application_running,active);
+ k_sem_give(&identify_wake);
+}
+
+/* Reuse the main thread. Idle PWM updates are local only; while an application
+ * runs this thread sleeps until a lifecycle or identify event wakes it. */
+void spaghetti_field_update_service_wake(void) { k_sem_give(&identify_wake); }
+void spaghetti_field_update_identify_service(void)
+{
+ bool restore_application=true;
+ int previous_percent=-1;
+ for (;;) {
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
+  spaghetti_can_rpc_service();
+#endif
+  k_mutex_lock(&status_led_lock,K_FOREVER);
+  int64_t now=k_uptime_get();
+  bool application=atomic_get(&status_led_application_running)!=0;
+  bool identifying=identify_active && now-identify_started<10000;
+  if(identify_active && !identifying)identify_active=false;
+  int percent=-1;
+  if(identifying){
+   percent=((now-identify_started)/500)%2==0?100:0;
+   restore_application=true;
+  }else if(!application){
+   percent=spaghetti_status_led_idle_percent((uint32_t)now);
+   restore_application=true;
+  }else if(restore_application){
+   percent=status_led_owner?status_led_percent:0;
+   restore_application=false;
+  }
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+  if(percent>=0 && (percent!=previous_percent || application))
+   (void)pwm_set(DEVICE_DT_GET(DT_NODELABEL(ledc0)),4U,1000000U,(uint32_t)percent*10000U,PWM_POLARITY_INVERTED);
+#endif
+  previous_percent=percent;
+  ARG_UNUSED(previous_percent);
+  k_mutex_unlock(&status_led_lock);
+  (void)k_sem_take(&identify_wake,identifying?K_MSEC(500-((now-identify_started)%500)):!application?K_MSEC(40):K_FOREVER);
+ }
+}
+static int identify_backbone(void)
+{
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+ if (!device_is_ready(DEVICE_DT_GET(DT_NODELABEL(ledc0)))) return -ENODEV;
+ k_mutex_lock(&status_led_lock, K_FOREVER);
+ if (identify_active) { k_mutex_unlock(&status_led_lock); return -EBUSY; }
+ identify_started = k_uptime_get();
+ identify_active = true;
+ k_sem_give(&identify_wake);
+ k_mutex_unlock(&status_led_lock);
+ return 0;
+#else
+ return -ENOTSUP;
+#endif
+}
 int spaghetti_status_led_init(const void *owner, uint8_t percent)
 {
 #if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
@@ -233,8 +303,8 @@ int spaghetti_status_led_init(const void *owner, uint8_t percent)
  const struct device *pwm=DEVICE_DT_GET(DT_NODELABEL(ledc0));
  if (!device_is_ready(pwm)) return -ENODEV;
  k_mutex_lock(&status_led_lock,K_FOREVER);
- int err=pwm_set(pwm,4U,1000000U,(uint32_t)percent*10000U,PWM_POLARITY_INVERTED);
- if (!err) status_led_owner=owner;
+ int err=identify_active ? 0 : pwm_set(pwm,4U,1000000U,(uint32_t)percent*10000U,PWM_POLARITY_INVERTED);
+ if (!err) { status_led_owner=owner; status_led_percent=percent; }
  k_mutex_unlock(&status_led_lock);
  return err;
 #else
@@ -249,8 +319,8 @@ int spaghetti_status_led_set_intensity(const void *owner, uint8_t percent)
  if (!device_is_ready(pwm)) return -ENODEV;
  k_mutex_lock(&status_led_lock, K_FOREVER);
  int err = status_led_owner && status_led_owner != owner ? -EBUSY : 0;
- if (!err) err = pwm_set(pwm, 4U, 1000000U, (uint32_t)percent * 10000U, PWM_POLARITY_INVERTED);
- if (!err) status_led_owner = owner;
+ if (!err && !identify_active) err = pwm_set(pwm, 4U, 1000000U, (uint32_t)percent * 10000U, PWM_POLARITY_INVERTED);
+ if (!err) { status_led_owner = owner; status_led_percent = percent; }
  k_mutex_unlock(&status_led_lock);
  return err;
 #else
@@ -266,8 +336,9 @@ void spaghetti_status_led_release(const void *owner)
 	k_mutex_lock(&status_led_lock, K_FOREVER);
 	if (status_led_owner == owner) {
 #if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
-  (void)pwm_set(DEVICE_DT_GET(DT_NODELABEL(ledc0)), 4U, 1000000U, 0U, PWM_POLARITY_INVERTED);
+  if (!identify_active) (void)pwm_set(DEVICE_DT_GET(DT_NODELABEL(ledc0)), 4U, 1000000U, 0U, PWM_POLARITY_INVERTED);
 #endif
+  status_led_percent = 0U;
   status_led_owner = NULL;
  }
 	k_mutex_unlock(&status_led_lock);
@@ -480,18 +551,22 @@ static uint32_t physical_pending_node;
 static uint8_t physical_transaction;
 static int physical_ack_error;
 static bool physical_pending;
-static uint8_t physical_staged_identity[40];
+static uint8_t physical_staged_identity[45];
 static uint8_t physical_staged_token;
 static uint8_t physical_staged_parts;
 static int64_t physical_staged_until;
 
-int spaghetti_field_update_apply_physical_config(uint32_t node_id,
-					 const uint8_t modes[4], uint8_t speed,
+int spaghetti_field_update_apply_physical_config(uint32_t node_id, const uint8_t modes[4], uint8_t speed, const uint8_t expected[20], const uint8_t config[20]) {
+ return spaghetti_field_update_apply_physical_config_extended(node_id, modes, 4U, speed, expected, config);
+}
+
+int spaghetti_field_update_apply_physical_config_extended(uint32_t node_id,
+					 const uint8_t *modes, uint8_t mode_count, uint8_t speed,
 					 const uint8_t expected[SPAGHETTI_PHYSICAL_EXPECTED_SIZE], const uint8_t config[20])
 {
 	int err;
 
-	if ((modes == NULL) || (expected == NULL) || (speed > 1U) ||
+	if ((mode_count != 4U && mode_count != 8U) || (modes == NULL) || (expected == NULL) || (speed > 1U) ||
 	    ((node_id & ~SPAGHETTI_SLUP_NODE_MASK) != 0U)) {
 		return -EINVAL;
 	}
@@ -501,7 +576,7 @@ int spaghetti_field_update_apply_physical_config(uint32_t node_id,
 	/* Local pin changes are serialized by Physical; a CAN discovery sweep
 	 * must not prevent configuring the directly connected board. */
 	if ((node_id == 0U) || (node_id == session.node_id)) {
-		return spaghetti_physical_apply_config(modes, speed, expected, config);
+		return spaghetti_physical_apply_config_extended(modes, mode_count, speed, expected, config);
 	}
 	if (k_mutex_lock(&slup_discovery_lock, K_MSEC(100)) != 0) {
 		return -EBUSY;
@@ -509,7 +584,8 @@ int spaghetti_field_update_apply_physical_config(uint32_t node_id,
 	{
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
 		uint8_t payload[6];
-		uint8_t staged[40] = {0}; memcpy(staged, expected, 20U); if (config) memcpy(&staged[20], config, 20U);
+		uint8_t staged[45] = {0}; memcpy(staged, expected, 20U); if (config) memcpy(&staged[20], config, 20U);
+ if (mode_count == 8U) { memcpy(&staged[40], &modes[4], 4U); staged[44] = 8U; }
 
 		k_sem_reset(&physical_ack_sem);
 		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
@@ -522,7 +598,7 @@ int spaghetti_field_update_apply_physical_config(uint32_t node_id,
 		memcpy(&payload[1], modes, 4U);
 		payload[5] = speed;
 		err = 0;
-		for (uint8_t part = 0U; (part < (config ? 8U : 4U)) && (err == 0); ++part) {
+		for (uint8_t part = 0U; (part < (mode_count == 8U ? 9U : config ? 8U : 4U)) && (err == 0); ++part) {
 			uint8_t identity_part[7] = {payload[0], part};
 
 			memcpy(&identity_part[2], &staged[part * 5U], 5U);
@@ -541,8 +617,9 @@ int spaghetti_field_update_apply_physical_config(uint32_t node_id,
 		physical_pending = false;
 		if (err == 0) {
 			for (size_t i = 0U; i < slup_peer_count; ++i) {
-				if (slup_peers[i].node_id == node_id && slup_peers[i].physical_parts == 63U) {
+				if (slup_peers[i].node_id == node_id && (slup_peers[i].physical_parts == 63U || slup_peers[i].physical_parts == 127U)) {
 					memcpy(&slup_peers[i].physical[7], modes, 4U);
+ if (mode_count == 8U) memcpy(&slup_peers[i].physical[33], &modes[4], 4U);
 					slup_peers[i].physical[11] = speed;
 					slup_peers[i].physical[12] = expected[19] ? 2U : 1U;
 					if (config) memcpy(&slup_peers[i].physical[13], config, 20U);
@@ -828,7 +905,7 @@ static void slup_fill_self(struct spaghetti_slup_peer *peer)
 	peer->chain_index = session.chain_index;
 	slup_copy_local_version(peer->version);
 	(void)spaghetti_physical_describe(peer->physical);
-	peer->physical_parts = peer->physical[0] ? 63U : 0U;
+	peer->physical_parts = peer->physical[0] == 3U ? 127U : peer->physical[0] ? 63U : 0U;
 }
 
 #if defined(CONFIG_SHELL) || defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN) || \
@@ -1211,6 +1288,23 @@ static void slup_blink_led(uint8_t flashes)
 #endif
 }
 
+K_MUTEX_DEFINE(remote_rgb_lock);
+K_SEM_DEFINE(remote_rgb_ack,0,1);
+static atomic_t remote_rgb_expected;
+static uint8_t remote_rgb_result;
+int spaghetti_field_update_rgb(uint32_t node,uint8_t channels,uint32_t color,bool inverted,uint8_t port)
+{
+ if(!node || node>SPAGHETTI_SLUP_NODE_MASK || channels>63 || color>0xffffffU)return -EINVAL;
+ uint8_t payload[]={channels,(uint8_t)(color>>16),(uint8_t)(color>>8),(uint8_t)color,inverted?1:0,port};
+ uint8_t status=0;
+ k_mutex_lock(&remote_rgb_lock,K_FOREVER);
+ k_sem_reset(&remote_rgb_ack);atomic_set(&remote_rgb_expected,node);
+ int err=spaghetti_field_update_can_ctrl(node,SPAGHETTI_SLUP_CMD_RGB,payload,sizeof(payload));
+ if(!err)err=k_sem_take(&remote_rgb_ack,K_MSEC(500));
+ status=remote_rgb_result;atomic_set(&remote_rgb_expected,0);
+ k_mutex_unlock(&remote_rgb_lock);
+ return err?err:status?-EIO:0;
+}
 int spaghetti_field_update_blink(uint32_t dest_node_id, uint8_t flashes)
 {
 	uint8_t extra[1];
@@ -1223,6 +1317,7 @@ int spaghetti_field_update_blink(uint32_t dest_node_id, uint8_t flashes)
 		return -EINVAL;
 	}
 	if (dest_node_id == session.node_id) {
+        if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) return identify_backbone();
 		slup_blink_led(flashes);
 		return 0;
 	}
@@ -1320,7 +1415,7 @@ static int slup_usb_read_cb(uint32_t offset, uint8_t *data, size_t length,
 		if (credited != NULL) {
 			*credited += 1U;
 			if (*credited >= SLUP_USB_CREDIT) {
-				printk(".\n");
+				spaghetti_field_update_ui_text(".");
 				*credited = 0U;
 			}
 		}
@@ -1367,7 +1462,7 @@ int spaghetti_field_update_recv_usb(uint32_t dest_node_id)
 	slup_led_set_mode(SPAGHETTI_SLUP_LED_LOAD);
 	slup_usb_reset_ring();
 	atomic_set(&slup_usb_active, 1);
-	printk("SLUP_RECV\n");
+	spaghetti_field_update_ui_text("SLUP_RECV");
 
 	for (i = 0U; i < sizeof(header); ++i) {
 		const int byte = slup_usb_get_byte(K_MSEC(SLUP_USB_BYTE_MS));
@@ -1420,9 +1515,9 @@ int spaghetti_field_update_recv_usb(uint32_t dest_node_id)
 		return err;
 	}
 	if (credited > 0U) {
-		printk(".\n");
+		spaghetti_field_update_ui_text(".");
 	}
-	printk("SLUP_OK\n");
+	spaghetti_field_update_ui_text("SLUP_OK");
 	return 0;
 }
 
@@ -2267,6 +2362,14 @@ static void handle_slup_command(const struct field_update_rx *msg)
 	}
 
 	switch (cmd) {
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
+ case SPAGHETTI_CAN_LINK_COMMAND:
+  if (msg->can_id != SPAGHETTI_SLUP_TWAI_CMD_ID) spaghetti_can_link_receive(msg->u.can, msg->dlc);
+  break;
+ case SPAGHETTI_CAN_RPC_REQUEST:
+  if (msg->can_id != SPAGHETTI_SLUP_TWAI_CMD_ID) spaghetti_can_rpc_receive(0, msg->u.can, msg->dlc, false);
+  break;
+#endif
 	case SPAGHETTI_SLUP_CMD_PING:
 		slup_reply(SPAGHETTI_SLUP_RSP_PONG, NULL, 0U);
 		break;
@@ -2274,7 +2377,7 @@ static void handle_slup_command(const struct field_update_rx *msg)
 		uint8_t descriptor[SPAGHETTI_PHYSICAL_SIZE];
 
 		if (spaghetti_physical_describe(descriptor) == 0) {
-			for (uint8_t part = 0U; part < 6U; ++part) {
+			for (uint8_t part = 0U; part < (SPAGHETTI_PHYSICAL_SIZE + 5U) / 6U; ++part) {
 				uint8_t payload[7] = {part};
 				const size_t offset = part * 6U;
 				const size_t length = MIN(6U, sizeof(descriptor) - offset);
@@ -2295,7 +2398,7 @@ static void handle_slup_command(const struct field_update_rx *msg)
 				physical_staged_token = token;
 				physical_staged_until = k_uptime_get() + 2000;
 			}
-			if ((part < 8U) && (token == physical_staged_token) &&
+			if ((part < 9U) && (token == physical_staged_token) &&
 			    (physical_staged_parts == part) && (k_uptime_get() < physical_staged_until)) {
 				memcpy(&physical_staged_identity[part * 5U], &msg->u.can[3], 5U);
 				physical_staged_parts++;
@@ -2307,11 +2410,12 @@ static void handle_slup_command(const struct field_update_rx *msg)
 		if ((msg->dlc == 7U) && (msg->can_id != SPAGHETTI_SLUP_TWAI_CMD_ID)) {
 			int err = -ESTALE;
 
-			if (((physical_staged_parts == 4U) || (physical_staged_parts == 8U)) &&
+			if (((physical_staged_parts == 4U) || (physical_staged_parts == 8U) || (physical_staged_parts == 9U)) &&
 			    (msg->u.can[1] == physical_staged_token) &&
 			    (k_uptime_get() < physical_staged_until)) {
-				err = slup_xfer_is_active() ? -EBUSY :
-					spaghetti_physical_apply_config(&msg->u.can[2], msg->u.can[6], physical_staged_identity, physical_staged_parts == 8U ? &physical_staged_identity[20] : NULL);
+				uint8_t modes[8] = {0}; memcpy(modes, &msg->u.can[2], 4U);
+                if (physical_staged_parts == 9U) memcpy(&modes[4], &physical_staged_identity[40], 4U);
+                err = slup_xfer_is_active() ? -EBUSY : spaghetti_physical_apply_config_extended(modes, physical_staged_parts == 9U ? 8U : 4U, msg->u.can[6], physical_staged_identity, physical_staged_parts >= 8U && physical_staged_identity[20] ? &physical_staged_identity[20] : NULL);
 			}
 			physical_staged_parts = 0U;
 			uint8_t payload[2] = {msg->u.can[1], (uint8_t)(-err)};
@@ -2457,7 +2561,31 @@ static void handle_slup_command(const struct field_update_rx *msg)
 			slup_reply(SPAGHETTI_SLUP_RSP_SET_CHAIN, extra, 1U);
 		}
 		break;
+    case SPAGHETTI_SLUP_CMD_RGB: {
+      uint8_t status=1;
+#if defined(CONFIG_PWM) && DT_NODE_HAS_STATUS(DT_NODELABEL(ledc0), okay)
+      if(msg->dlc==7 && !IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)){
+        const uint8_t *v=&msg->u.can[1];
+        const struct spaghetti_port *port=spaghetti_port_get(v[5]);
+        uint8_t channels[3]={v[0]&3U,(v[0]>>2)&3U,(v[0]>>4)&3U};
+        uint8_t modes[8],speed;
+        bool valid=port && !spaghetti_port_copy_user_map_extended(v[5],modes,&speed) && v[0]<=63 && v[4]<=1 && channels[0]!=channels[1] && channels[0]!=channels[2] && channels[1]!=channels[2];
+        for(unsigned i=0;valid && i<3;i++)valid=modes[channels[i]]==12U;
+        if(valid){status=0;for(unsigned i=0;i<3;i++){
+          uint16_t duty=((uint32_t)v[i+1]*10000U+127U)/255U;
+          if(v[4])duty=10000U-duty;
+          if(spaghetti_port_pwm_set(port,channels[i],duty))status=1;
+        }}
+      }
+#endif
+      slup_reply(SPAGHETTI_SLUP_RSP_RGB,&status,1);break;
+    }
 	case SPAGHETTI_SLUP_CMD_BLINK:
+        if (!IS_ENABLED(CONFIG_SPAGHETTI_NFC_MODULE)) {
+            int identify_err = identify_backbone();
+            if (identify_err == 0) slup_reply(SPAGHETTI_SLUP_RSP_BLINK, NULL, 0U);
+            break;
+        }
 		slup_blink_led((msg->dlc >= 2U) ? msg->u.can[1] : 0U);
 		slup_reply(SPAGHETTI_SLUP_RSP_BLINK, NULL, 0U);
 		break;
@@ -2573,6 +2701,9 @@ static void handle_slup_response(const struct field_update_rx *msg)
 				      0U;
 	const uint8_t cmd = msg->u.can[0];
 
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE_CAN)
+ if (cmd == SPAGHETTI_CAN_RPC_RESPONSE) { spaghetti_can_rpc_receive(node, msg->u.can, msg->dlc, true); return; }
+#endif
 	if ((cmd == SPAGHETTI_SLUP_RSP_NFC_READ_PAGE || cmd == SPAGHETTI_SLUP_RSP_NFC_WRITE_PAGE) && msg->dlc == 8U) {
 		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
 		if (node == nfc_page_node && node != 0U && cmd == nfc_page_command && msg->u.can[1] == nfc_page_token && msg->u.can[3] == nfc_page_expected) {
@@ -2604,7 +2735,7 @@ static void handle_slup_response(const struct field_update_rx *msg)
 	if ((cmd == SPAGHETTI_SLUP_RSP_PHYSICAL) && (msg->dlc == 8U)) {
 		const uint8_t part = msg->u.can[1];
 
-		if (part >= 6U) {
+		if (part >= (SPAGHETTI_PHYSICAL_SIZE + 5U) / 6U) {
 			return;
 		}
 		(void)k_mutex_lock(&field_update_lock, K_FOREVER);
@@ -2776,6 +2907,7 @@ static void handle_slup_response(const struct field_update_rx *msg)
 						0U, 0U);
 		return;
 	}
+    if(cmd==SPAGHETTI_SLUP_RSP_RGB){if(node==(uint32_t)atomic_get(&remote_rgb_expected)){remote_rgb_result=msg->dlc>=2?msg->u.can[1]:1;k_sem_give(&remote_rgb_ack);}return;}
 	if (cmd == SPAGHETTI_SLUP_RSP_BLINK) {
 		spaghetti_field_update_note_ack(SPAGHETTI_SLUP_CMD_BLINK, node,
 						0U, 0U);

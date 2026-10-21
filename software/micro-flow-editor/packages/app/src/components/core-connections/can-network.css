@@ -4,20 +4,8 @@
   font-family: var(--font-body);
   color: var(--color-ink);
 }
-.can-network-heading {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 0 0 24px 7px;
-  font-family: var(--font-heading);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-}
-.can-network-heading svg {
-  color: var(--color-ink-muted);
-}
 .can-network-list {
+  position: relative;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -35,8 +23,7 @@
 .can-network-line {
   position: absolute;
   left: 8px;
-  top: 25px;
-  bottom: -25px;
+  top: 28px;
   width: 1px;
   background: var(--color-border);
   overflow: visible;

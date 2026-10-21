@@ -1100,7 +1100,7 @@ static int decode_array_edges(zcbor_state_t *state,
 }
 
 static int decode_wire_v2(const uint8_t *bytes, size_t length,
-			  struct spaghetti_config *out)
+			  struct spaghetti_config *out, struct spaghetti_config_failure *failure)
 {
 	uint32_t wire_version;
 	uint32_t connectivity;
@@ -1182,11 +1182,11 @@ static int decode_wire_v2(const uint8_t *bytes, size_t length,
 		return -EBADMSG;
 	}
 
-	return spaghetti_config_validate(out, NULL);
+	return spaghetti_config_validate(out, failure);
 }
 
 static int decode_wire_v3(const uint8_t *bytes, size_t length,
-			  struct spaghetti_config *out)
+			  struct spaghetti_config *out, struct spaghetti_config_failure *failure)
 {
 	uint32_t wire_version;
 	uint32_t connectivity;
@@ -1282,15 +1282,16 @@ static int decode_wire_v3(const uint8_t *bytes, size_t length,
 		return -EBADMSG;
 	}
 
-	return spaghetti_config_validate(out, NULL);
+	return spaghetti_config_validate(out, failure);
 }
 
-int spaghetti_config_decode_cbor(const uint8_t *bytes, size_t length,
-				 struct spaghetti_config *out)
+int spaghetti_config_decode_cbor_checked(const uint8_t *bytes, size_t length,
+				 struct spaghetti_config *out, struct spaghetti_config_failure *failure)
 {
 	uint32_t wire_version;
 	int err;
 
+	if (failure != NULL) failure->field = (enum spaghetti_config_failure_field)-1;
 	if ((bytes == NULL) || (out == NULL) || (length == 0U)) {
 		return -EINVAL;
 	}
@@ -1308,13 +1309,18 @@ int spaghetti_config_decode_cbor(const uint8_t *bytes, size_t length,
 							   wire_version, out);
 	}
 	if (wire_version == SPAGHETTI_CONFIG_CBOR_WIRE_VERSION_V2) {
-		return decode_wire_v2(bytes, length, out);
+		return decode_wire_v2(bytes, length, out, failure);
 	}
 	if (wire_version != SPAGHETTI_CONFIG_CBOR_WIRE_VERSION_V3) {
 		return -ENOTSUP;
 	}
 
-	return decode_wire_v3(bytes, length, out);
+	return decode_wire_v3(bytes, length, out, failure);
+}
+
+int spaghetti_config_decode_cbor(const uint8_t *bytes, size_t length, struct spaghetti_config *out)
+{
+ return spaghetti_config_decode_cbor_checked(bytes, length, out, NULL);
 }
 
 int spaghetti_config_encode_cbor(

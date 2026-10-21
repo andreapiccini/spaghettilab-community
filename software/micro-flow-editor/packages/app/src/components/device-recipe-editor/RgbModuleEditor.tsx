@@ -12,6 +12,7 @@ import {
 import type { DeviceRecipeDraft } from "../../lib/device-recipe-draft.js";
 import {
   rgbModuleDraft,
+  rgbActiveInputs,
   validateRgbModule,
   type RgbModuleConfig,
   type RgbAction,
@@ -342,6 +343,12 @@ export function RgbModuleEditor({
             {page === "io" && (
               <>
                 <h2 className="text-xl font-semibold">Input / Output</h2>
+                <p className="rounded-xl border border-border p-4 text-sm text-ink-muted">
+                  Colore e i tre canali RGB sono sempre visibili sul canvas. Il primo
+                  collegamento sceglie la modalità: gli ingressi dell’altra diventano
+                  grigi e non collegabili. Scollega tutti gli ingressi per cambiare
+                  modalità.
+                </p>
                 <h3 className="font-semibold">Variabili colore</h3>
                 {config.variables.map((v) => (
                   <div
@@ -445,121 +452,134 @@ export function RgbModuleEditor({
                     + Ingresso
                   </button>
                 </div>
-                {config.inputs.map((input) => (
-                  <section
-                    key={input.id}
-                    className="space-y-3 rounded-xl border border-border p-4"
-                  >
-                    <div className="flex flex-wrap items-center gap-3">
-                      <input
-                        aria-label="Nome ingresso"
-                        className={`${field} flex-1`}
-                        value={input.name}
-                        onChange={(e) =>
-                          changeInput({ ...input, name: e.target.value })
-                        }
-                      />
-                      <select
-                        aria-label={`Modalità ${input.name}`}
-                        className={field}
-                        value={input.mode}
-                        onChange={(e) => {
-                          if (
-                            e.target.value === "variable" &&
-                            !config.variables.length
-                          ) {
-                            setError("Crea prima una variabile colore.");
-                            return;
-                          }
-                          changeInput(
-                            e.target.value === "trigger"
-                              ? {
-                                  id: input.id,
-                                  name: input.name,
-                                  mode: "trigger",
-                                  actionId: input.actionId,
-                                  edge: "rising",
-                                }
-                              : {
-                                  id: input.id,
-                                  name: input.name,
-                                  mode: "variable",
-                                  actionId: input.actionId,
-                                  variableId: config.variables[0]!.id,
-                                },
-                          );
-                        }}
-                      >
-                        <option value="trigger">Trigger → azione</option>
-                        <option value="variable">Dato → variabile</option>
-                      </select>
-                      <button
-                        aria-label={`Elimina ingresso ${input.name}`}
-                        className="p-2 text-ink-muted"
-                        onClick={() =>
-                          update({
-                            inputs: config.inputs.filter((i) => i.id !== input.id),
-                          })
-                        }
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      {input.mode === "variable" ? (
-                        <select
-                          aria-label={`Variabile ${input.name}`}
-                          className={field}
-                          value={input.variableId}
+                {rgbActiveInputs(config).map((input) =>
+                  input.mode === "component" ? (
+                    <section
+                      key={input.id}
+                      className="rounded-xl border border-border p-4"
+                    >
+                      <h3 className="font-semibold">{input.name}</h3>
+                      <p className="mt-1 text-sm text-ink-muted">
+                        Entrata numerica da 0 a 100%. Aggiorna soltanto questo canale e
+                        mantiene gli altri due.
+                      </p>
+                    </section>
+                  ) : (
+                    <section
+                      key={input.id}
+                      className="space-y-3 rounded-xl border border-border p-4"
+                    >
+                      <div className="flex flex-wrap items-center gap-3">
+                        <input
+                          aria-label="Nome ingresso"
+                          className={`${field} flex-1`}
+                          value={input.name}
                           onChange={(e) =>
-                            changeInput({ ...input, variableId: e.target.value })
+                            changeInput({ ...input, name: e.target.value })
                           }
+                        />
+                        <select
+                          aria-label={`Modalità ${input.name}`}
+                          className={field}
+                          value={input.mode}
+                          onChange={(e) => {
+                            if (
+                              e.target.value === "variable" &&
+                              !config.variables.length
+                            ) {
+                              setError("Crea prima una variabile colore.");
+                              return;
+                            }
+                            changeInput(
+                              e.target.value === "trigger"
+                                ? {
+                                    id: input.id,
+                                    name: input.name,
+                                    mode: "trigger",
+                                    actionId: input.actionId,
+                                    edge: "rising",
+                                  }
+                                : {
+                                    id: input.id,
+                                    name: input.name,
+                                    mode: "variable",
+                                    actionId: input.actionId,
+                                    variableId: config.variables[0]!.id,
+                                  },
+                            );
+                          }}
                         >
-                          {config.variables.map((v) => (
-                            <option key={v.id} value={v.id}>
-                              {v.name}
-                            </option>
-                          ))}
+                          <option value="trigger">Trigger → azione</option>
+                          <option value="variable">Dato → variabile</option>
                         </select>
-                      ) : (
-                        <select
-                          aria-label={`Fronte ${input.name}`}
-                          className={field}
-                          value={input.edge}
-                          onChange={(e) =>
-                            changeInput({
-                              ...input,
-                              edge: e.target.value as "rising" | "falling",
+                        <button
+                          aria-label={`Elimina ingresso ${input.name}`}
+                          className="p-2 text-ink-muted"
+                          onClick={() =>
+                            update({
+                              inputs: config.inputs.filter((i) => i.id !== input.id),
                             })
                           }
                         >
-                          <option value="rising">Quando passa a HIGH</option>
-                          <option value="falling">Quando passa a LOW</option>
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        {input.mode === "variable" ? (
+                          <select
+                            aria-label={`Variabile ${input.name}`}
+                            className={field}
+                            value={input.variableId}
+                            onChange={(e) =>
+                              changeInput({ ...input, variableId: e.target.value })
+                            }
+                          >
+                            {config.variables.map((v) => (
+                              <option key={v.id} value={v.id}>
+                                {v.name}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <select
+                            aria-label={`Fronte ${input.name}`}
+                            className={field}
+                            value={input.edge}
+                            onChange={(e) =>
+                              changeInput({
+                                ...input,
+                                edge: e.target.value as "rising" | "falling",
+                              })
+                            }
+                          >
+                            <option value="rising">Quando passa a HIGH</option>
+                            <option value="falling">Quando passa a LOW</option>
+                          </select>
+                        )}
+                        <ArrowRight size={17} className="text-brand-blue" />
+                        <select
+                          aria-label={`Azione ${input.name}`}
+                          className={field}
+                          value={input.actionId}
+                          onChange={(e) =>
+                            changeInput({ ...input, actionId: e.target.value })
+                          }
+                        >
+                          {config.actions.map((a) => (
+                            <option key={a.id} value={a.id}>
+                              {a.name}
+                            </option>
+                          ))}
                         </select>
-                      )}
-                      <ArrowRight size={17} className="text-brand-blue" />
-                      <select
-                        aria-label={`Azione ${input.name}`}
-                        className={field}
-                        value={input.actionId}
-                        onChange={(e) =>
-                          changeInput({ ...input, actionId: e.target.value })
-                        }
-                      >
-                        {config.actions.map((a) => (
-                          <option key={a.id} value={a.id}>
-                            {a.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <p className="text-xs text-ink-muted">
-                      {input.mode === "variable"
-                        ? "Aggiorna la variabile ed esegue l’azione solo quando cambia il valore in ingresso."
-                        : "Esegue una volta l’azione sul fronte selezionato."}
-                    </p>
-                  </section>
-                ))}
+                      </div>
+                      <p className="text-xs text-ink-muted">
+                        {input.mode === "variable"
+                          ? "Aggiorna la variabile ed esegue l’azione solo quando cambia il valore in ingresso."
+                          : "Esegue una volta l’azione sul fronte selezionato."}
+                      </p>
+                    </section>
+                  ),
+                )}
                 <h3 className="font-semibold">Uscite · stato attuale</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-xl border border-border p-4 text-sm">

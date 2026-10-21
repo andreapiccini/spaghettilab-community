@@ -1,4 +1,7 @@
 #include <spaghetti/device_profile.h>
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+#include <spaghetti/field_update.h>
+#endif
 
 #include <errno.h>
 #include <string.h>
@@ -633,6 +636,13 @@ static int exec_emit_field(const struct spaghetti_device_profile *profile,
 
 static int rgb_apply(const struct spaghetti_rgb_state *state, const struct spaghetti_port *port)
 {
+ if(state->remote_node){
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+ return spaghetti_field_update_rgb(state->remote_node,state->channels,state->on?state->color:0,state->inverted,0U);
+#else
+ return -ENOTSUP;
+#endif
+ }
  int err = 0;
  for (unsigned i = 0; i < 3; i++) {
    uint8_t component = state->on ? (state->color >> (16U - 8U * i)) & 255U : 0;
@@ -667,11 +677,11 @@ static int rgb_program(const struct spaghetti_device_profile *profile,
  if (!binding->rgb || !profile->message_data || !op->imm1 || op->imm1 > 96U ||
      op->imm1 % 6U || (uint64_t)op->imm0 + op->imm1 > profile->message_data_size) return -EINVAL;
  struct spaghetti_rgb_state next = *binding->rgb;
- next.channels = op->imm2; next.inverted = op->imm3 != 0;
+ next.channels = op->imm2; next.inverted = (op->imm3 & 1U) != 0; next.remote_node=op->imm3>>1;
  for (unsigned offset = op->imm0; offset < op->imm0 + op->imm1; offset += 6) {
    const uint8_t *row = profile->message_data + offset;
    uint32_t value = sys_get_le32(row + 2);
-   if (row[0] > 5U || row[1] >= 8U) return -EINVAL;
+   if (row[0] > 7U || row[1] >= 8U || (row[0] == 6U && row[1] > 2U)) return -EINVAL;
    switch (row[0]) {
    case 0: next.on = false; break;
    case 1: next.on = true; break;
@@ -686,6 +696,30 @@ static int rgb_program(const struct spaghetti_device_profile *profile,
      break;
    }
    case 5: if (value > 0xffffffU) return -ERANGE; next.variables[row[1]] = value; break;
+   case 7: {
+     const struct spaghetti_value *arg=binding->arguments?spaghetti_property_find(binding->arguments,value):NULL;
+     if(!arg)return -EINVAL;
+     uint32_t color=0;
+     if(arg->type==SPAGHETTI_VALUE_TEXT){
+       if(arg->data.text.size!=7 || arg->data.text.text[0]!='#')return -EINVAL;
+       for(unsigned i=1;i<7;i++){char c=arg->data.text.text[i];unsigned n;
+         if(c>='0'&&c<='9')n=c-'0';else if(c>='a'&&c<='f')n=c-'a'+10;else if(c>='A'&&c<='F')n=c-'A'+10;else return -EINVAL;
+         color=(color<<4)|n;
+       }
+     }else if(arg->type==SPAGHETTI_VALUE_UINT64 && arg->data.unsigned_integer<=0xffffffU)color=arg->data.unsigned_integer;
+     else return -EINVAL;
+     next.variables[row[1]]=color;break;
+   }
+   case 6: {
+     struct spaghetti_device_profile_temp *src;
+     if (value >= SPAGHETTI_DEVICE_PROFILE_TEMP_SLOTS || temp_get(temps,value,&src) || !src->size || src->size>8) return -EINVAL;
+     uint64_t percent=load_unsigned_le(src->bytes,src->size);
+     if(percent>100U)return -ERANGE;
+     uint32_t shift=(2U-row[1])*8U;
+     next.color=(next.color&~(0xffU<<shift))|((uint32_t)((percent*255U+50U)/100U)<<shift);
+     next.on=next.color!=0U;
+     break;
+   }
    }
  }
  int err = rgb_apply(&next, port);
@@ -876,15 +910,16 @@ static int exec_with_message(uint8_t *message, const struct spaghetti_device_pro
 			break;
     case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP: {
       struct spaghetti_dht22_state *s=binding->dht22;
-      if(!s || op->imm2>4 || (op->imm2 && op->imm2-1==op->imm0))return -EINVAL;
-      if(op->imm2) {
+      if(!s || op->imm2>5 || (op->imm2 && op->imm2<5 && op->imm2-1==op->imm0))return -EINVAL;
+      if(op->imm2 && op->imm2<5) {
         err=spaghetti_port_dht22_power(port,op->imm0,op->imm2-1,op->imm1!=0);
         if(err)return err;
       }
       err=spaghetti_port_ds18b20_setup(port,op->imm0);
       if(!err) {
         memset(s,0,sizeof(*s));s->powered=op->imm1!=0;s->data_channel=op->imm0;
-        s->power_channel=op->imm2?op->imm2-1:UINT8_MAX;
+        /* 255: parasite; 254: external 3.3 V; 0-3: legacy GPIO supply. */
+        s->power_channel=op->imm2==5?UINT8_MAX-1:op->imm2?op->imm2-1:UINT8_MAX;
         s->ready_at=op->imm2 && s->powered?k_uptime_get()+1000:0;
       }
       break;
@@ -939,6 +974,14 @@ static int exec_with_message(uint8_t *message, const struct spaghetti_device_pro
       }
       sys_put_le16((uint16_t)state->temperature, dst->bytes); dst->size = 2;
       sys_put_le16(state->humidity, src_a->bytes); src_a->size = 2;
+      break;
+    }
+    case SPAGHETTI_DEVICE_PROFILE_OP_PWM_SET: {
+      err = temp_get(temps,op->src_a,&src_a);
+      if (err || !src_a->size || src_a->size>8U) return -EINVAL;
+      uint64_t duty=load_unsigned_le(src_a->bytes,src_a->size);
+      if (duty>10000U) return -ERANGE;
+      err=spaghetti_port_pwm_write(port,op->imm0,op->imm2,(uint16_t)duty);
       break;
     }
     case SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM:

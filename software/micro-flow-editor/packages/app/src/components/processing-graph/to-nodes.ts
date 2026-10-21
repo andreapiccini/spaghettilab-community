@@ -1,3 +1,6 @@
+import { disabledRgbInputs, rgbInputFamilies } from "../../lib/rgb-input-mode.js";
+import { generatorColorKind } from "../../lib/data-viewer.js";
+import { readLedDriver, type LedDriverConfig } from "../../lib/led-driver.js";
 import { blockHelp } from "./block-help.js";
 import type { BlockHelp } from "./BlockInfoButton.js";
 import { signalDurations } from "../../lib/signal-timing.js";
@@ -70,7 +73,14 @@ import {
   type CompareOp,
 } from "./dry-run-preview.js";
 import { parseRgbLedConfig, rgbLedSubtitle, rgbLedVisualAt } from "./rgb-led-model.js";
-import { INTERNAL_LED_FIRST_PORT_Y, INTERNAL_LED_PORT_SPACING, INTERNAL_LED_HEIGHT, FLOW_START_SIZE, IF_FOOTER_HEIGHT, NODE_HEIGHT } from "./layout-constants.js";
+import {
+  INTERNAL_LED_FIRST_PORT_Y,
+  INTERNAL_LED_PORT_SPACING,
+  INTERNAL_LED_HEIGHT,
+  FLOW_START_SIZE,
+  IF_FOOTER_HEIGHT,
+  NODE_HEIGHT,
+} from "./layout-constants.js";
 import { PROCESSING_NODE_KIND_CONFIG } from "./node-kinds.js";
 import {
   handlesForNode,
@@ -89,15 +99,25 @@ export type ToggleWaveUi = {
 };
 
 export type ProcessingNodeUiData = {
-  readonly signalPortTypes?: Readonly<Record<string, import("./signal-colors.js").WireSignalType>>;
+  readonly disabledInputIds?: readonly string[];
+  readonly signalPortTypes?: Readonly<
+    Record<string, import("./signal-colors.js").WireSignalType>
+  >;
+  readonly ledDriver?: LedDriverConfig;
   readonly statusLed?: boolean;
   readonly logicIf?: { condition: string; whenTrue: string; whenFalse: string };
   readonly dataViewer?: DataViewerUi;
-  readonly signalGenerator?: { bindingId?: string; source?: ViewerSource; onMs: number; offMs: number };
+  readonly signalGenerator?: {
+    bindingId?: string;
+    source?: ViewerSource;
+    onMs: number;
+    offMs: number;
+  };
   readonly manualTrigger?: { bindingId?: string };
   readonly sensorSchematic?: boolean;
   readonly hardwareKind?: GpioHardwareAppearance["kind"];
   readonly hardwareSummary?: string;
+  readonly backboneLabel?: string;
   readonly domainId: string;
   readonly kind: DeviceProcessingNodeData["kind"];
   readonly label: string;
@@ -198,6 +218,7 @@ export function toProcessingNodes(
   ) => String(fieldId),
   previewActiveIds: ReadonlySet<string> = new Set(),
   locale: LocaleId = "it",
+  backboneLabels: ReadonlyMap<string, string> = new Map(),
 ): Node<ProcessingNodeUiData>[] {
   const devices = new Map(
     Object.values(
@@ -225,10 +246,12 @@ export function toProcessingNodes(
     const data = node.data as DeviceProcessingNodeData;
     const names = new Map<string, string>();
     if (isBlockNodeData(data)) {
-      const draft = devices.get(String(data.properties[SENSOR_MODULE_ID_PROP]))?.recipe.deviceDraft;
+      const draft = devices.get(String(data.properties[SENSOR_MODULE_ID_PROP]))?.recipe
+        .deviceDraft;
       for (const channel of draft?.channels ?? []) names.set(channel.id, channel.label);
     }
-    for (const port of portsForNode(data).outputs) if (port.label) names.set(port.id, localizeCatalogText(port.label, locale));
+    for (const port of portsForNode(data).outputs)
+      if (port.label) names.set(port.id, localizeCatalogText(port.label, locale));
     outputNames.set(node.id, names);
   }
 
@@ -240,7 +263,8 @@ export function toProcessingNodes(
       accent.circular === true || (isBlockNodeData(data) && isFlowStartBlock(data));
     let ports = portsForNode(data);
     const statusLed = isBlockNodeData(data) && data.properties.statusLed === true;
-    if (statusLed) titles.set(node.id, locale === "it" ? "LED interno" : "Internal LED");
+    if (statusLed)
+      titles.set(node.id, locale === "it" ? "LED interno" : "Internal LED");
 
     const ifLane = isBlockNodeData(data) && isCompareIf(data);
     const relayCard = isBlockNodeData(data) && isRelayBlock(data);
@@ -302,32 +326,55 @@ export function toProcessingNodes(
     const manual = isBlockNodeData(data) && data.blockTypeId === MANUAL_TRIGGER_TYPE;
     const viewer = isBlockNodeData(data) && data.blockTypeId === "ui.data_viewer";
     const sequence = isBlockNodeData(data) && data.blockTypeId === SEQUENCE_TYPE;
-    const logicIf = isBlockNodeData(data) && data.blockTypeId === "logic_if"
-      ? logicIfPresentation(data, incomingLabel(node.id, graphState, titles, outputNames), locale)
-      : undefined;
-    const cardHeight = statusLed ? INTERNAL_LED_HEIGHT : logicIf ? 118 : manual ? 80 : alternating
-      ? 118
-      : viewer
-        ? 140
-        : sequence
-          ? 132
-          : schematic
-            ? 64 + Math.max(ports.inputs.length, ports.outputs.length, 1) * 22
-            : isTick
-              ? FLOW_START_SIZE
-              : nodeHeightForPorts(ports) +
-                (ifLane || relayCard ? IF_FOOTER_HEIGHT : 0);
-    const cardWidth = statusLed ? 320 : logicIf ? 250 : manual || alternating
-      ? 210
-      : viewer
-        ? 240
-        : sequence
-          ? 260
-          : schematic
-            ? 320
-            : isTick
-              ? FLOW_START_SIZE
-              : nodeWidthForPorts(ports);
+    const ledDriver =
+      isBlockNodeData(data) && data.blockTypeId === "led_driver"
+        ? readLedDriver(data.properties)
+        : undefined;
+    const logicIf =
+      isBlockNodeData(data) && data.blockTypeId === "logic_if"
+        ? logicIfPresentation(
+            data,
+            incomingLabel(node.id, graphState, titles, outputNames),
+            locale,
+          )
+        : undefined;
+    const cardHeight = ledDriver
+      ? 74 + Math.max(ledDriver.presets.length, ports.outputs.length) * 40
+      : statusLed
+        ? INTERNAL_LED_HEIGHT
+        : logicIf
+          ? 118
+          : manual
+            ? 80
+            : alternating
+              ? 118
+              : viewer
+                ? 140
+                : sequence
+                  ? 132
+                  : schematic
+                    ? 64 + Math.max(ports.inputs.length, ports.outputs.length, 1) * 22
+                    : isTick
+                      ? FLOW_START_SIZE
+                      : nodeHeightForPorts(ports) +
+                        (ifLane || relayCard ? IF_FOOTER_HEIGHT : 0);
+    const cardWidth = ledDriver
+      ? 300
+      : statusLed
+        ? 320
+        : logicIf
+          ? 250
+          : manual || alternating
+            ? 210
+            : viewer
+              ? 240
+              : sequence
+                ? 260
+                : schematic
+                  ? 320
+                  : isTick
+                    ? FLOW_START_SIZE
+                    : nodeWidthForPorts(ports);
     return {
       id: node.id,
       type: "processing",
@@ -346,31 +393,38 @@ export function toProcessingNodes(
       // returns null) — the same bug EventContainer nodes already guard against.
       width: cardWidth,
       height: cardHeight,
-      handles: statusLed || logicIf
+      handles: ledDriver
         ? [
-            ...ports.inputs.map((port,index)=>({id:port.id,type:"target" as const,position:Position.Left,x:-8,y:(statusLed ? INTERNAL_LED_FIRST_PORT_Y + index * INTERNAL_LED_PORT_SPACING : 64)-8,width:16,height:16})),
-            ...ports.outputs.map((port,index)=>({id:port.id,type:"source" as const,position:Position.Right,x:cardWidth-8,y:(statusLed ? INTERNAL_LED_FIRST_PORT_Y + index * INTERNAL_LED_PORT_SPACING : 64)-8,width:16,height:16})),
-          ]
-        : manual || alternating
-        ? [
-            {
-              id: manual ? "trigger" : "0",
+            ...ports.inputs.map((port, index) => ({
+              id: port.id,
+              type: "target" as const,
+              position: Position.Left,
+              x: -8,
+              y: 62 + index * 40,
+              width: 16,
+              height: 16,
+            })),
+            ...ports.outputs.map((port, index) => ({
+              id: port.id,
               type: "source" as const,
               position: Position.Right,
-              x: cardWidth - 4,
-              y: cardHeight / 2 - 6,
-              width: 8,
-              height: 12,
-            },
+              x: cardWidth - 8,
+              y: 62 + index * 40,
+              width: 16,
+              height: 16,
+            })),
           ]
-        : sequence
+        : statusLed || logicIf
           ? [
               ...ports.inputs.map((port, index) => ({
                 id: port.id,
                 type: "target" as const,
                 position: Position.Left,
                 x: -8,
-                y: 57 + index * 22,
+                y:
+                  (statusLed
+                    ? INTERNAL_LED_FIRST_PORT_Y + index * INTERNAL_LED_PORT_SPACING
+                    : 64) - 8,
                 width: 16,
                 height: 16,
               })),
@@ -378,42 +432,88 @@ export function toProcessingNodes(
                 id: port.id,
                 type: "source" as const,
                 position: Position.Right,
-                x: cardWidth - 16,
-                y: 57 + index * 22,
+                x: cardWidth - 8,
+                y:
+                  (statusLed
+                    ? INTERNAL_LED_FIRST_PORT_Y + index * INTERNAL_LED_PORT_SPACING
+                    : 64) - 8,
                 width: 16,
                 height: 16,
               })),
             ]
-          : schematic
+          : manual || alternating
             ? [
-                ...ports.inputs.map((port, index) => ({
-                  id: port.id,
-                  type: "target" as const,
-                  position: Position.Left,
-                  x: 14,
-                  y: 65 + index * 22,
-                  width: 8,
-                  height: 12,
-                })),
-                ...ports.outputs.map((port, index) => ({
-                  id: port.id,
+                {
+                  id: manual ? "trigger" : "0",
                   type: "source" as const,
                   position: Position.Right,
-                  x: cardWidth - 22,
-                  y: 65 + index * 22,
+                  x: cardWidth - 4,
+                  y: cardHeight / 2 - 6,
                   width: 8,
                   height: 12,
-                })),
+                },
               ]
-            : handlesForNode(ports, {
-                width: cardWidth,
-                height: cardHeight,
-                circular: isTick,
-                bandHeight: ifLane || relayCard ? NODE_HEIGHT : undefined,
-              }),
+            : sequence
+              ? [
+                  ...ports.inputs.map((port, index) => ({
+                    id: port.id,
+                    type: "target" as const,
+                    position: Position.Left,
+                    x: -8,
+                    y: 57 + index * 22,
+                    width: 16,
+                    height: 16,
+                  })),
+                  ...ports.outputs.map((port, index) => ({
+                    id: port.id,
+                    type: "source" as const,
+                    position: Position.Right,
+                    x: cardWidth - 16,
+                    y: 57 + index * 22,
+                    width: 16,
+                    height: 16,
+                  })),
+                ]
+              : schematic
+                ? [
+                    ...ports.inputs.map((port, index) => ({
+                      id: port.id,
+                      type: "target" as const,
+                      position: Position.Left,
+                      x: 14,
+                      y: 65 + index * 22,
+                      width: 8,
+                      height: 12,
+                    })),
+                    ...ports.outputs.map((port, index) => ({
+                      id: port.id,
+                      type: "source" as const,
+                      position: Position.Right,
+                      x: cardWidth - 22,
+                      y: 65 + index * 22,
+                      width: 8,
+                      height: 12,
+                    })),
+                  ]
+                : handlesForNode(ports, {
+                    width: cardWidth,
+                    height: cardHeight,
+                    circular: isTick,
+                    bandHeight: ifLane || relayCard ? NODE_HEIGHT : undefined,
+                  }),
       data: {
         domainId: node.id,
-        ...(alternating && isBlockNodeData(data) ? { signalGenerator: signalDurations(data.properties) } : {}),
+        disabledInputIds: isBlockNodeData(data)
+          ? disabledRgbInputs(
+              rgbInputFamilies(data.properties),
+              graphState.edges
+                .filter((edge) => edge.target === node.id)
+                .map((edge) => edge.targetHandle ?? ""),
+            )
+          : [],
+        ...(alternating && isBlockNodeData(data)
+          ? { signalGenerator: signalDurations(data.properties) }
+          : {}),
         ...(manual
           ? {
               manualTrigger: {},
@@ -422,6 +522,19 @@ export function toProcessingNodes(
         ...(viewer && isBlockNodeData(data)
           ? {
               dataViewer: {
+                colorKind: (() => {
+                  const edge = graphState.edges.find((edge) => edge.target === node.id);
+                  const source = graphState.nodes.find(
+                    (source) => source.id === edge?.source,
+                  )?.data as DeviceProcessingNodeData | undefined;
+                  if (!edge || !source || !isBlockNodeData(source)) return undefined;
+                  return (
+                    generatorColorKind(source.blockTypeId, edge.sourceHandle ?? "0") ??
+                    channelsFromNodeProperties(source.properties).find(
+                      (channel) => channel.id === edge.sourceHandle,
+                    )?.colorKind
+                  );
+                })(),
                 connected: graphState.edges.some((edge) => edge.target === node.id),
                 caption: String(data.properties.caption ?? "Dato"),
                 unit: String(data.properties.unit ?? ""),
@@ -432,6 +545,10 @@ export function toProcessingNodes(
         sensorSchematic: schematic,
         hardwareKind,
         hardwareSummary,
+        backboneLabel: isBlockNodeData(data)
+          ? backboneLabels.get(String(data.properties[SENSOR_MODULE_ID_PROP]))
+          : undefined,
+        ledDriver,
         logicIf,
         statusLed,
         kind: data.kind,
@@ -715,8 +832,16 @@ function canvasTitle(
   meta: AuthoringMetadata | undefined,
   locale: LocaleId,
 ): string {
-  if (isBlockNodeData(data) && ["ui.manual_trigger", "ab.square_wave"].includes(data.blockTypeId) &&
-      (!meta?.comment || ["Genera trigger", "Generatore di segnali", "Generatore di trigger"].includes(meta.comment.trim())) && data.blockTypeId === "ui.manual_trigger") return locale === "it" ? "Attiva azione" : "Activate action";
+  if (
+    isBlockNodeData(data) &&
+    ["ui.manual_trigger", "ab.square_wave"].includes(data.blockTypeId) &&
+    (!meta?.comment ||
+      ["Genera trigger", "Generatore di segnali", "Generatore di trigger"].includes(
+        meta.comment.trim(),
+      )) &&
+    data.blockTypeId === "ui.manual_trigger"
+  )
+    return locale === "it" ? "Attiva azione" : "Activate action";
   if (meta?.comment && meta.comment.trim() !== "") return meta.comment.trim();
   const entry = catalogEntryForNode(data);
   if (entry) return localizeCatalogEntry(entry, locale).label;
@@ -777,7 +902,7 @@ function subtitleFor(
     if (isSquareWave(data) && isBlockNodeData(data)) {
       const period = squareWavePeriodMs(data.properties);
       const duty = squareWaveDutyPercent(data.properties);
-      return `${locale === "it" ? "Acceso" : "On"} ${(period * duty / 100000).toLocaleString(locale)} s · ${locale === "it" ? "spento" : "off"} ${(period * (100 - duty) / 100000).toLocaleString(locale)} s`;
+      return `${locale === "it" ? "Acceso" : "On"} ${((period * duty) / 100000).toLocaleString(locale)} s · ${locale === "it" ? "spento" : "off"} ${((period * (100 - duty)) / 100000).toLocaleString(locale)} s`;
     }
     const input = incomingLabel(nodeId, graphState, titles, outputNames);
     if (data.blockTypeId === "logic_if") {
@@ -853,7 +978,12 @@ function incomingLabel(
     ...new Set(
       graphState.edges
         .filter((edge) => edge.target === nodeId)
-        .map((edge) => (outputNames.get(edge.source)?.get(edge.sourceHandle ?? "0") ?? titles.get(edge.source))?.trim())
+        .map((edge) =>
+          (
+            outputNames.get(edge.source)?.get(edge.sourceHandle ?? "0") ??
+            titles.get(edge.source)
+          )?.trim(),
+        )
         .filter((name): name is string => Boolean(name)),
     ),
   ];
@@ -861,13 +991,29 @@ function incomingLabel(
   return names.join(", ");
 }
 
-function logicIfPresentation(data: Extract<DeviceProcessingNodeData, { kind: "block" }>, input: string | undefined, locale: LocaleId) {
+function logicIfPresentation(
+  data: Extract<DeviceProcessingNodeData, { kind: "block" }>,
+  input: string | undefined,
+  locale: LocaleId,
+) {
   const op = Number(data.properties.condition ?? 1);
-  const operator = [locale === "it" ? "è falso" : "is false", locale === "it" ? "è vero" : "is true", "=", "≠", ">", "≥", "<", "≤"][op] ?? "";
+  const operator =
+    [
+      locale === "it" ? "è falso" : "is false",
+      locale === "it" ? "è vero" : "is true",
+      "=",
+      "≠",
+      ">",
+      "≥",
+      "<",
+      "≤",
+      locale === "it" ? "è compreso tra" : "is between",
+      locale === "it" ? "non è compreso tra" : "is not between",
+    ][op] ?? "";
   const high = locale === "it" ? "Alto" : "High";
   const low = locale === "it" ? "Basso" : "Low";
   return {
-    condition: `${input ?? (locale === "it" ? "Valore" : "Value")} ${operator}${op >= 2 ? ` ${String(data.properties.value ?? 0)}` : ""}`,
+    condition: `${input ?? (locale === "it" ? "Valore" : "Value")} ${operator}${op >= 2 ? ` ${String(data.properties.value ?? 0)}${op >= 8 ? ` ${locale === "it" ? "e" : "and"} ${String(data.properties.valueMax ?? 0)}` : ""}` : ""}`,
     whenTrue: data.properties.whenTrue === "low" ? low : high,
     whenFalse: data.properties.whenFalse === "high" ? high : low,
   };

@@ -129,9 +129,9 @@ export const GPIO_OPERATION_DEFINITIONS: readonly GpioOperationDefinition[] = [
     },
     signalTypes: ["pwm_output"],
     capabilities: ["pwm", "continuous_route"],
-    runtime: "representation_only",
+    runtime: "supported",
     runtimeNote: {
-      it: "Richiede una rotta PWM continua e bloccabile.",
+      it: "Frequenza costante; intensità da costante o variabile, firmware 0.5.52+.",
       en: "Requires a continuous lockable PWM route.",
     },
   },

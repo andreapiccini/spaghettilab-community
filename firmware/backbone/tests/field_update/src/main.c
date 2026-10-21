@@ -15,6 +15,7 @@
 #include <spaghetti/update.h>
 
 #include "field_update_internal.h"
+#include "status_led_policy.h"
 
 static int physical_apply_calls;
 int spaghetti_physical_describe(uint8_t out[SPAGHETTI_PHYSICAL_SIZE])
@@ -33,6 +34,11 @@ int spaghetti_physical_apply_config(const uint8_t modes[4], uint8_t speed,
 	return 0;
 }
 
+int spaghetti_physical_apply_config_extended(const uint8_t *modes,uint8_t count,uint8_t speed,const uint8_t expected[20],const uint8_t config[20])
+{
+ zassert_true(count==4 || count==8);
+ return spaghetti_physical_apply_config(modes,speed,expected,config);
+}
 static int arm_calls;
 static int begin_calls;
 static int write_calls;
@@ -281,7 +287,8 @@ ZTEST(field_update, test_slup_identity_discover_and_number)
 	zassert_ok(spaghetti_field_update_number_chain());
 	zassert_equal(spaghetti_field_update_local_chain_index(), 1U);
 
-	zassert_ok(spaghetti_field_update_blink(0x112233U, 1U));
+	/* native_sim has no Backbone PWM LED. */
+	zassert_equal(spaghetti_field_update_blink(0x112233U, 1U), -ENOTSUP);
 	zassert_equal(spaghetti_field_update_blink(0U, 1U), -EINVAL);
 	zassert_equal(spaghetti_field_update_blink(0x445566U, 1U), -ENOTSUP);
 	zassert_false(spaghetti_field_update_usb_feed(0x00));
@@ -370,4 +377,14 @@ int spaghetti_communication_emit_discovery(uint32_t candidate, uint8_t port,
 {
  ARG_UNUSED(candidate); ARG_UNUSED(port); ARG_UNUSED(generation);
  return 0;
+}
+
+ZTEST(field_update, test_idle_led_breathing_wave)
+{
+ zassert_equal(spaghetti_status_led_idle_percent(0),0);
+ zassert_equal(spaghetti_status_led_idle_percent(500),12);
+ zassert_equal(spaghetti_status_led_idle_percent(1000),25);
+ zassert_equal(spaghetti_status_led_idle_percent(1500),12);
+ zassert_equal(spaghetti_status_led_idle_percent(2000),0);
+ for(uint32_t t=0;t<8000;t+=40)zassert_true(spaghetti_status_led_idle_percent(t)<=25);
 }

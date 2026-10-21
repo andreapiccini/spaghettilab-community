@@ -6,6 +6,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
+#include <zephyr/sys/byteorder.h>
 
 #include <spaghetti/device_profile.h>
 #include <spaghetti/module.h>
@@ -280,7 +281,7 @@ static bool profile_uses_physical_port(const struct spaghetti_device_profile *pr
 			if (code <= SPAGHETTI_DEVICE_PROFILE_OP_ADC_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_WAIT_FIELD_MASK ||
 			    code == SPAGHETTI_DEVICE_PROFILE_OP_W1_WRITE_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_UART_READ ||
 			    code == SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO || code == SPAGHETTI_DEVICE_PROFILE_OP_I2C_MESSAGE_WRITE ||
-			    code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE || code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || code == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER || code == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || code == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || code == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) return true;
+			    code == SPAGHETTI_DEVICE_PROFILE_OP_PWM_SET || code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE || code == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || code == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER || code == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM || code == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || code == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || code == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) return true;
 		}
 	return false;
 }
@@ -317,35 +318,37 @@ static int declarative_describe_endpoint(const struct spaghetti_property_set *co
 	case SPAGHETTI_PORT_TRANSPORT_UART:
 		out->kind = SPAGHETTI_ENDPOINT_UART_EXCLUSIVE;
 		break;
-	case SPAGHETTI_PORT_TRANSPORT_GPIO:
-		for (size_t i = 0; i < profile->init_count + profile->sample_count; ++i) {
-			const struct spaghetti_device_profile_op *op = i < profile->init_count ? &profile->init_ops[i] : &profile->sample_ops[i - profile->init_count];
-			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_STEPPER) { out->kind = SPAGHETTI_ENDPOINT_PORT_EXCLUSIVE; return 0; }
-      if(op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ) {
-        out->kind=SPAGHETTI_ENDPOINT_GPIO_LINE;out->value_size=1;out->value[0]=op->imm0;
-        if(op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP && op->imm2) { out->value_size=2;out->value[1]=op->imm2-1; }
-        return 0;
+	case SPAGHETTI_PORT_TRANSPORT_GPIO: {
+    uint8_t mask=0U;
+    const struct spaghetti_device_profile_op *plans[]={profile->init_ops,profile->sample_ops,profile->safe_stop_ops};
+    size_t counts[]={profile->init_count,profile->sample_count,profile->safe_stop_count};
+    for(size_t p=0;p<ARRAY_SIZE(plans);p++) for(size_t i=0;i<counts[p];i++) {
+      const struct spaghetti_device_profile_op *op=&plans[p][i];
+      switch(op->opcode) {
+      case SPAGHETTI_DEVICE_PROFILE_OP_STEPPER: out->kind=SPAGHETTI_ENDPOINT_PORT_EXCLUSIVE;return 0;
+      case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET: mask|=BIT(op->imm1);break;
+      case SPAGHETTI_DEVICE_PROFILE_OP_WAIT_GPIO: mask|=BIT(0);break;
+      case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET:
+      case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE:
+      case SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE:
+      case SPAGHETTI_DEVICE_PROFILE_OP_PWM_SET:
+      case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ: mask|=BIT(op->imm0);break;
+      case SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP:
+        mask|=BIT(op->imm0);if(op->imm2 && op->imm2<5U)mask|=BIT(op->imm2-1);break;
+      case SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER:
+      case SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ: mask|=BIT(op->imm0)|BIT(op->imm1);break;
+      case SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM:
+        if(op->imm3>>1){out->kind=SPAGHETTI_ENDPOINT_LOGICAL;out->value_size=0;return 0;}
+        for(unsigned c=0;c<3;c++){mask|=BIT((op->imm2>>(2*c))&3U);}
+        break;
+      default:break;
       }
-      if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_POWER || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ) {
-        out->kind = SPAGHETTI_ENDPOINT_GPIO_LINE; out->value_size = 2;
-        out->value[0] = op->imm0; out->value[1] = op->imm1; return 0;
-      }
-      if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM) {
-        out->kind = SPAGHETTI_ENDPOINT_GPIO_LINE; out->value_size = 3;
-        for (unsigned channel = 0; channel < 3; channel++) out->value[channel] = (op->imm2 >> (2 * channel)) & 3;
-        return 0;
-      }
-		}
-		out->kind = SPAGHETTI_ENDPOINT_GPIO_LINE;
-		out->value_size = 1U;
-		out->value[0] = 0U;
-		for (size_t i = 0; i < profile->init_count + profile->sample_count; ++i) {
-			const struct spaghetti_device_profile_op *op = i < profile->init_count
-				? &profile->init_ops[i] : &profile->sample_ops[i - profile->init_count];
-			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET) { out->value[0] = op->imm1; break; }
-			if (op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_GET || op->opcode == SPAGHETTI_DEVICE_PROFILE_OP_GPIO_SET_VALUE) { out->value[0] = op->imm0; break; }
-		}
-		break;
+    }
+    out->kind=SPAGHETTI_ENDPOINT_GPIO_LINE;out->value_size=0;
+    for(unsigned c=0;c<4;c++)if(mask&BIT(c))out->value[out->value_size++]=c;
+    if(!out->value_size){out->value_size=1;out->value[0]=0;}
+    break;
+  }
 	case SPAGHETTI_PORT_TRANSPORT_ADC:
 		out->kind = SPAGHETTI_ENDPOINT_ADC_CHANNEL;
 		out->value_size = 1U;
@@ -505,6 +508,19 @@ static int declarative_validate_command(struct spaghetti_module *module,
 			err = spaghetti_device_profile_pack_argument(op, context->values, packed);
 			continue;
 		}
+        if(op->opcode==SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM){
+          for(unsigned offset=op->imm0;err==0 && offset<op->imm0+op->imm1;offset+=6){
+            const uint8_t *row=context->profile->message_data+offset;
+            if(row[0]!=7U)continue;
+            uint32_t id=sys_get_le32(row+2);
+            used|=BIT(id);
+            const struct spaghetti_value *value=spaghetti_property_find(merged,id);
+            if(!value){if(!command->update_only)err=-ENOENT;continue;}
+            if(value->type==SPAGHETTI_VALUE_UINT64){if(value->data.unsigned_integer>0xffffffU)err=-ERANGE;}
+            else if(value->type!=SPAGHETTI_VALUE_TEXT || value->data.text.size!=7 || value->data.text.text[0]!='#')err=-EINVAL;
+            else for(unsigned c=1;c<7;c++){char ch=value->data.text.text[c];if(!((ch>='0'&&ch<='9')||(ch>='a'&&ch<='f')||(ch>='A'&&ch<='F')))err=-EINVAL;}
+          }
+        }
 		if (op->opcode != SPAGHETTI_DEVICE_PROFILE_OP_LOAD_ARGUMENT) {
 			continue;
 		}

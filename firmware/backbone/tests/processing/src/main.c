@@ -175,7 +175,7 @@ static void prop_u64(struct spaghetti_property_set *props, uint16_t field_id,
 
 static void *processing_setup(void)
 {
-	(void)spaghetti_block_registry_init();
+	zassert_ok(spaghetti_block_registry_init());
 	(void)spaghetti_processing_init();
 	published_count = 0;
 	return NULL;
@@ -764,4 +764,220 @@ ZTEST(processing, test_deployed_if_drives_led_after_plan_install_and_reload)
   zassert_ok(spaghetti_processing_on_record(&record,NULL,NULL));zassert_false(test_led_on);
  }
  zassert_ok(spaghetti_processing_configure(NULL,0,NULL,0));zassert_is_null(test_led_owner);k_free(blocks);
+}
+
+ZTEST(processing, test_led_driver_presets_follow_high_and_low)
+{
+ const struct spaghetti_block_driver *d=spaghetti_block_registry_find("led_driver");zassert_not_null(d);
+ struct spaghetti_property_set p={0};for(uint8_t i=1;i<=10;i++)prop_u64(&p,i,i==1?0xFF0000:i==2?0x0000FF:i>=5&&i<=8?1:i==9?3:0);
+ zassert_ok(d->ops->validate(&p));uint64_t state[8]={0};zassert_ok(d->ops->init(&p,state));
+ struct spaghetti_value inputs[4]={{.type=SPAGHETTI_VALUE_BOOL,.data.boolean=true}},out;bool valid[4]={true,false,false,false},ov=false;
+ zassert_ok(d->ops->process(state,NULL,inputs,valid,4,&out,&ov,1,NULL,NULL,NULL));zassert_true(ov);zassert_equal(out.data.unsigned_integer,0xFF0000);
+ ov=false;zassert_ok(d->ops->process(state,NULL,inputs,valid,4,&out,&ov,1,NULL,NULL,NULL));zassert_false(ov);
+ inputs[0].data.boolean=false;ov=false;zassert_ok(d->ops->process(state,NULL,inputs,valid,4,&out,&ov,1,NULL,NULL,NULL));zassert_true(ov);zassert_equal(out.data.unsigned_integer,0);
+ valid[0]=false;valid[1]=true;inputs[1].type=SPAGHETTI_VALUE_UINT64;inputs[1].data.unsigned_integer=1;
+ zassert_ok(d->ops->process(state,NULL,inputs,valid,4,&out,&ov,1,NULL,NULL,NULL));zassert_true(ov);zassert_equal(out.data.unsigned_integer,0x0000FF);
+}
+ZTEST(processing, test_led_driver_low_and_repeatable_event_triggers)
+{
+ const struct spaghetti_block_driver *d=spaghetti_block_registry_find("led_driver");struct spaghetti_property_set p={0};
+ for(uint8_t i=1;i<=10;i++)prop_u64(&p,i,i==1?0x00FF00:i==9||i==10?1:0);
+ zassert_ok(d->ops->validate(&p));uint64_t state[8]={0};zassert_ok(d->ops->init(&p,state));
+ struct spaghetti_value in={.type=SPAGHETTI_VALUE_BOOL,.data.boolean=false},out;bool valid=true,ov=false;
+ zassert_ok(d->ops->process(state,NULL,&in,&valid,1,&out,&ov,1,NULL,NULL,NULL));zassert_true(ov);zassert_equal(out.data.unsigned_integer,0);
+ in.data.boolean=true;
+ for(uint8_t i=0;i<2;i++){ov=false;zassert_ok(d->ops->process(state,NULL,&in,&valid,1,&out,&ov,1,NULL,NULL,NULL));zassert_true(ov);zassert_equal(out.data.unsigned_integer,0x00FF00);}
+ in.type=SPAGHETTI_VALUE_TEXT;ov=false;zassert_equal(d->ops->process(state,NULL,&in,&valid,1,&out,&ov,1,NULL,NULL,NULL),-EINVAL);
+}
+
+ZTEST(processing, test_color_generator_exclusive_encodings)
+{
+ const struct spaghetti_block_driver *d=spaghetti_block_registry_find("led_driver");
+ for(unsigned mode=0;mode<2;mode++){
+ struct spaghetti_property_set p={0};for(uint8_t i=1;i<=11;i++)prop_u64(&p,i,i==1?0xFF8000:i>=5&&i<=9?1:i==11?mode:0);
+ zassert_ok(d->ops->validate(&p));uint64_t state[8]={0};zassert_ok(d->ops->init(&p,state));
+ struct spaghetti_value in={.type=SPAGHETTI_VALUE_BOOL,.data.boolean=true},out[4];bool valid=true,ov[4];
+ zassert_ok(d->ops->process(state,NULL,&in,&valid,1,out,ov,4,NULL,NULL,NULL));
+ if(mode==0){zassert_true(ov[0]);zassert_false(ov[1]);zassert_equal(out[0].type,SPAGHETTI_VALUE_TEXT);zassert_equal(out[0].data.text.size,7);zassert_mem_equal(out[0].data.text.text,"#FF8000",7);}
+ else{zassert_false(ov[0]);zassert_true(ov[1]&&ov[2]&&ov[3]);zassert_equal(out[1].data.unsigned_integer,100);zassert_equal(out[2].data.unsigned_integer,50);zassert_equal(out[3].data.unsigned_integer,0);}
+ in.data.boolean=false;
+ zassert_ok(d->ops->process(state,NULL,&in,&valid,1,out,ov,4,NULL,NULL,NULL));
+ if(mode==0){zassert_true(ov[0]);zassert_false(ov[1]);zassert_mem_equal(out[0].data.text.text,"#000000",7);}
+ else{zassert_false(ov[0]);for(unsigned channel=1;channel<4;channel++){zassert_true(ov[channel]);zassert_equal(out[channel].data.unsigned_integer,0);}}
+ zassert_ok(d->ops->process(state,NULL,&in,&valid,1,out,ov,4,NULL,NULL,NULL));
+ for(unsigned channel=0;channel<4;channel++)zassert_false(ov[channel]);
+ }
+}
+
+ZTEST(processing, test_publish_preserves_color_text_decimal_and_bytes)
+{
+ struct spaghetti_block_config block={.key=21,.min_version=1};
+ strcpy(block.type_id,"publish_field");
+ struct spaghetti_value schema={.field_id=1,.type=SPAGHETTI_VALUE_TEXT};
+ strcpy(schema.data.text.text,"typed.sample");schema.data.text.size=strlen(schema.data.text.text);
+ block.properties.fields[block.properties.field_count++]=schema;
+ prop_u64(&block.properties,2,1);prop_u64(&block.properties,3,1);
+ struct spaghetti_edge_config edge={.source_key=1,.source_port_or_field=1,.target_key=21,.target_input=0,.source_kind=SPAGHETTI_EDGE_SOURCE_MODULE};
+ zassert_ok(spaghetti_processing_configure(&block,1,&edge,1));published_count=0;
+ struct spaghetti_record record=make_record(1,1,0);
+ struct spaghetti_value *value=&record.payload.values.fields[0];
+ value->type=SPAGHETTI_VALUE_TEXT;value->data.text.size=7;strcpy(value->data.text.text,"#204060");
+ zassert_ok(spaghetti_processing_on_record(&record,capture_publish,NULL));
+ zassert_equal(published_count,1);zassert_equal(last_published.payload.values.fields[0].type,SPAGHETTI_VALUE_TEXT);
+ zassert_str_equal(last_published.payload.values.fields[0].data.text.text,"#204060");
+ value->type=SPAGHETTI_VALUE_FLOAT;value->data.decimal=28.12;
+ zassert_ok(spaghetti_processing_on_record(&record,capture_publish,NULL));
+ zassert_equal(published_count,2);zassert_equal(last_published.payload.values.fields[0].type,SPAGHETTI_VALUE_FLOAT);
+ zassert_equal(last_published.payload.values.fields[0].data.decimal,28.12);
+ value->type=SPAGHETTI_VALUE_BYTES;value->data.bytes.size=3;memcpy(value->data.bytes.bytes,"rgb",3);
+ zassert_ok(spaghetti_processing_on_record(&record,capture_publish,NULL));
+ zassert_equal(published_count,3);zassert_equal(last_published.payload.values.fields[0].type,SPAGHETTI_VALUE_BYTES);
+ zassert_mem_equal(last_published.payload.values.fields[0].data.bytes.bytes,"rgb",3);
+}
+
+/* A contained manual button and its clock are independent activation paths. */
+ZTEST(processing, test_color_preset_accepts_manual_and_clock_sources)
+{
+ struct spaghetti_block_config blocks[2]={{.key=10,.min_version=1},{.key=11,.min_version=1}};
+ strcpy(blocks[0].type_id,"led_driver");
+ for(uint16_t field=1;field<=10;field++)prop_u64(&blocks[0].properties,field,field==1?0x204060:field>=5?1:0);
+ prop_u64(&blocks[0].properties,11,0);
+ strcpy(blocks[1].type_id,"publish_field");
+ struct spaghetti_value schema={.field_id=1,.type=SPAGHETTI_VALUE_TEXT};
+ strcpy(schema.data.text.text,"color.test");schema.data.text.size=10;
+ blocks[1].properties.fields[blocks[1].properties.field_count++]=schema;
+ prop_u64(&blocks[1].properties,2,1);prop_u64(&blocks[1].properties,3,1);
+ struct spaghetti_edge_config edges[]={
+  {.source_kind=SPAGHETTI_EDGE_SOURCE_MODULE,.source_key=1,.source_port_or_field=1,.target_key=10,.target_input=0},
+  {.source_kind=SPAGHETTI_EDGE_SOURCE_MODULE,.source_key=2,.source_port_or_field=1,.target_key=10,.target_input=0},
+  {.source_kind=SPAGHETTI_EDGE_SOURCE_BLOCK,.source_key=10,.source_port_or_field=0,.target_key=11,.target_input=0},
+ };
+ zassert_ok(spaghetti_processing_configure(blocks,2,edges,3));published_count=0;
+ struct spaghetti_record record=make_record(1,1,1);
+ zassert_ok(spaghetti_processing_on_record(&record,capture_publish,NULL));zassert_equal(published_count,1);
+ record=make_record(2,1,1);
+ zassert_ok(spaghetti_processing_on_record(&record,capture_publish,NULL));zassert_equal(published_count,2);
+ record=make_record(1,1,0);
+ zassert_ok(spaghetti_processing_on_record(&record,capture_publish,NULL));zassert_equal(published_count,3);
+ record=make_record(1,1,1);
+ zassert_ok(spaghetti_processing_on_record(&record,capture_publish,NULL));zassert_equal(published_count,4);
+ /* The same fan-in remains invalid for a data sink. */
+ edges[0].target_key=11;edges[1].target_key=11;
+ zassert_equal(spaghetti_processing_configure(blocks+1,1,edges,2),-EEXIST);
+}
+
+int spaghetti_port_pwm_write(const struct spaghetti_port *port,uint8_t channel,uint32_t frequency,uint16_t duty) { ARG_UNUSED(frequency);return spaghetti_port_pwm_set(port,channel,duty); }
+
+ZTEST(processing, test_compiled_temperature_if_color_can_graph) {
+ struct spaghetti_block_config *blocks=k_calloc(6,sizeof(*blocks)); zassert_not_null(blocks);
+ blocks[0].key=1; strcpy(blocks[0].type_id,"led_driver");
+ prop_u64(&blocks[0].properties,1,16724838ULL);
+ prop_u64(&blocks[0].properties,2,3377407ULL);
+ prop_u64(&blocks[0].properties,3,0ULL);
+ prop_u64(&blocks[0].properties,4,0ULL);
+ prop_u64(&blocks[0].properties,5,1ULL);
+ prop_u64(&blocks[0].properties,6,1ULL);
+ prop_u64(&blocks[0].properties,7,1ULL);
+ prop_u64(&blocks[0].properties,8,1ULL);
+ prop_u64(&blocks[0].properties,9,3ULL);
+ prop_u64(&blocks[0].properties,10,0ULL);
+ prop_u64(&blocks[0].properties,11,0ULL);
+ blocks[1].key=2; strcpy(blocks[1].type_id,"publish_field");
+ blocks[1].properties.fields[blocks[1].properties.field_count++]=(struct spaghetti_value){.field_id=1,.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="flow.60d006223c5e3302",.size=21}};
+ prop_u64(&blocks[1].properties,2,1ULL);
+ prop_u64(&blocks[1].properties,3,1ULL);
+ prop_u64(&blocks[1].properties,4,1879048192ULL);
+ blocks[2].key=3; strcpy(blocks[2].type_id,"publish_field");
+ blocks[2].properties.fields[blocks[2].properties.field_count++]=(struct spaghetti_value){.field_id=1,.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="flow.6f2af903c0149e44",.size=21}};
+ prop_u64(&blocks[2].properties,2,1ULL);
+ prop_u64(&blocks[2].properties,3,1ULL);
+ prop_u64(&blocks[2].properties,4,1879048194ULL);
+ blocks[3].key=4; strcpy(blocks[3].type_id,"publish_field");
+ blocks[3].properties.fields[blocks[3].properties.field_count++]=(struct spaghetti_value){.field_id=1,.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="flow.38dcb5e2cc88aa19",.size=21}};
+ prop_u64(&blocks[3].properties,2,1ULL);
+ prop_u64(&blocks[3].properties,3,1ULL);
+ prop_u64(&blocks[3].properties,4,1879048193ULL);
+ blocks[4].key=5; strcpy(blocks[4].type_id,"logic_if");
+ prop_u64(&blocks[4].properties,1,4ULL);
+ prop_u64(&blocks[4].properties,2,0ULL);
+ prop_u64(&blocks[4].properties,5,1ULL);
+ prop_u64(&blocks[4].properties,6,0ULL);
+ blocks[4].properties.fields[blocks[4].properties.field_count++]=(struct spaghetti_value){.field_id=7,.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="30",.size=2}};
+ prop_u64(&blocks[4].properties,8,2ULL);
+ blocks[5].key=6; strcpy(blocks[5].type_id,"status_led");
+ prop_u64(&blocks[5].properties,1,1ULL);
+ blocks[5].properties.fields[blocks[5].properties.field_count++]=(struct spaghetti_value){.field_id=2,.type=SPAGHETTI_VALUE_BOOL,.data.boolean=false};
+ prop_u64(&blocks[5].properties,3,0ULL);
+ blocks[5].properties.fields[blocks[5].properties.field_count++]=(struct spaghetti_value){.field_id=6,.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="100",.size=3}};
+ blocks[5].properties.fields[blocks[5].properties.field_count++]=(struct spaghetti_value){.field_id=7,.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="0",.size=1}};
+ blocks[5].properties.fields[blocks[5].properties.field_count++]=(struct spaghetti_value){.field_id=8,.type=SPAGHETTI_VALUE_TEXT,.data.text={.text="50",.size=2}};
+ struct spaghetti_module_config modules[3]={{.key=1},{.key=2},{.key=3}};
+ struct spaghetti_edge_config edges[]={
+{.source_key=3,.source_port_or_field=1,.target_key=5,.target_input=0,.source_kind=0},
+{.source_key=1,.source_port_or_field=0,.target_key=2,.target_input=0,.source_kind=1},
+{.source_key=5,.source_port_or_field=0,.target_key=1,.target_input=1,.source_kind=1},
+{.source_key=5,.source_port_or_field=0,.target_key=3,.target_input=0,.source_kind=1},
+{.source_key=5,.source_port_or_field=0,.target_key=4,.target_input=0,.source_kind=1},
+{.source_key=5,.source_port_or_field=0,.target_key=6,.target_input=0,.source_kind=1},
+};
+ zassert_ok(spaghetti_processing_validate_graph(blocks,6,edges,6,modules,3)); k_free(blocks);
+}
+
+ZTEST(processing, test_color_split_channels_and_invalid_input)
+{
+ const struct spaghetti_block_driver *d = spaghetti_block_registry_find("color_split");
+ zassert_not_null(d);
+ struct spaghetti_property_set p = {0};
+ zassert_ok(d->ops->validate(&p));
+ uint8_t state = 0;
+ zassert_ok(d->ops->init(&p, &state));
+ struct spaghetti_value in = {.type=SPAGHETTI_VALUE_TEXT}, out[3];
+ bool valid = true, ov[3];
+ memcpy(in.data.text.text, "#ff8000", 7); in.data.text.size=7;
+ zassert_ok(d->ops->process(&state,NULL,&in,&valid,1,out,ov,3,NULL,NULL,NULL));
+ zassert_equal(out[0].data.unsigned_integer,100);
+ zassert_equal(out[1].data.unsigned_integer,50);
+ zassert_equal(out[2].data.unsigned_integer,0);
+ for (size_t i=0;i<3;i++) { zassert_true(ov[i]); zassert_equal(out[i].field_id,i+1); }
+ in.type=SPAGHETTI_VALUE_UINT64; in.data.unsigned_integer=0x0000FF;
+ zassert_ok(d->ops->process(&state,NULL,&in,&valid,1,out,ov,3,NULL,NULL,NULL));
+ zassert_equal(out[0].data.unsigned_integer,0); zassert_equal(out[1].data.unsigned_integer,0); zassert_equal(out[2].data.unsigned_integer,100);
+ in.data.unsigned_integer=0;
+ zassert_ok(d->ops->process(&state,NULL,&in,&valid,1,out,ov,3,NULL,NULL,NULL));
+ for(size_t i=0;i<3;i++)zassert_equal(out[i].data.unsigned_integer,0);
+ in.type=SPAGHETTI_VALUE_TEXT; memcpy(in.data.text.text,"#ZZ0000",7);in.data.text.size=7;
+ zassert_equal(d->ops->process(&state,NULL,&in,&valid,1,out,ov,3,NULL,NULL,NULL),-EINVAL);
+ for(size_t i=0;i<3;i++)zassert_false(ov[i]);
+ in.data.text.size=6;
+ zassert_equal(d->ops->process(&state,NULL,&in,&valid,1,out,ov,3,NULL,NULL,NULL),-EINVAL);
+ valid=false;
+ zassert_ok(d->ops->process(&state,NULL,&in,&valid,1,out,ov,3,NULL,NULL,NULL));
+}
+
+ZTEST(processing, test_if_inclusive_range_and_inverse)
+{
+ const struct spaghetti_block_driver *d=spaghetti_block_registry_find("logic_if");
+ for(unsigned operation=8;operation<=9;operation++) {
+  struct spaghetti_property_set p={0};
+  prop_u64(&p,1,operation);prop_u64(&p,2,20);
+  struct spaghetti_value hi={.field_id=9,.type=SPAGHETTI_VALUE_TEXT};
+  memcpy(hi.data.text.text,"30.5",4);hi.data.text.size=4;
+  p.fields[p.field_count++]=hi;
+  zassert_ok(d->ops->validate(&p));
+  uint64_t state[(SPAGHETTI_BLOCK_STATE_MAX+7)/8]={0};
+  zassert_ok(d->ops->init(&p,state));
+  const double values[]={19.99,20,25,30.5,30.51};
+  for(size_t i=0;i<ARRAY_SIZE(values);i++) {
+   struct spaghetti_value in={.type=SPAGHETTI_VALUE_FLOAT,.data.decimal=values[i]},out;
+   bool valid=true,ov=false;
+   zassert_ok(d->ops->process(state,NULL,&in,&valid,1,&out,&ov,1,NULL,NULL,NULL));
+   zassert_true(ov);
+   bool inside=i>=1 && i<=3;
+   zassert_equal(out.data.unsigned_integer,operation==8?inside:!inside);
+  }
+  p.field_count--;hi.data.text.size=2;memcpy(hi.data.text.text,"10",2);p.fields[p.field_count++]=hi;
+  zassert_equal(d->ops->validate(&p),-EINVAL);
+  p.field_count--;
+  zassert_equal(d->ops->validate(&p),-EINVAL);
+ }
 }

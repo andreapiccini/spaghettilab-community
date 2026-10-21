@@ -34,6 +34,7 @@ const RIGHT = 1;
 export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
   const base = { dst: 0, srcA: 0, srcB: 0, imm0: 0, imm1: 0, imm2: 0, imm3: 0 };
   switch (instruction.op) {
+    case "PWM_SET": return { ...base, opcode: DeviceProfileOpcode.PWM_SET, srcA: instruction.src, imm0: instruction.channel, imm2: instruction.frequencyHz };
     case "I2C_WRITE":
       return {
         ...base,
@@ -163,7 +164,11 @@ export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
         opcode: DeviceProfileOpcode.DS18B20_SETUP,
         imm0: instruction.channel,
         imm1: instruction.on ? 1 : 0,
-        imm2: instruction.powerChannel === undefined ? 0 : instruction.powerChannel + 1,
+        imm2: instruction.externalPower
+          ? 5
+          : instruction.powerChannel === undefined
+            ? 0
+            : instruction.powerChannel + 1,
       };
     case "RGB_PROGRAM":
       return {
@@ -172,7 +177,7 @@ export function toRawOp(instruction: Instruction): RawDeviceProfileOp {
         imm0: instruction.offset,
         imm1: instruction.length,
         imm2: instruction.channels,
-        imm3: instruction.inverted ? 1 : 0,
+        imm3: (instruction.nodeId ?? 0) * 2 + (instruction.inverted ? 1 : 0),
       };
     case "STEPPER":
       return {
@@ -488,6 +493,7 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
         powerChannel: raw.imm1,
         on: raw.imm2 !== 0,
       });
+    case DeviceProfileOpcode.PWM_SET: return ok({ op: "PWM_SET", src: raw.srcA, channel: raw.imm0, frequencyHz: raw.imm2 });
     case DeviceProfileOpcode.DS18B20_READ:
       return ok({
         op: "DS18B20_READ",
@@ -500,7 +506,11 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
         op: "DS18B20_SETUP",
         channel: raw.imm0,
         on: !!raw.imm1,
-        ...(raw.imm2 ? { powerChannel: raw.imm2 - 1 } : {}),
+        ...(raw.imm2 === 5
+          ? { externalPower: true }
+          : raw.imm2
+            ? { powerChannel: raw.imm2 - 1 }
+            : {}),
       });
     case DeviceProfileOpcode.DHT22_READ:
       return ok({
@@ -518,7 +528,8 @@ export function fromRawOp(raw: RawDeviceProfileOp): Result<Instruction, DomainEr
         offset: raw.imm0,
         length: raw.imm1,
         channels: raw.imm2,
-        inverted: raw.imm3 !== 0,
+        inverted: (raw.imm3 & 1) !== 0,
+        ...(raw.imm3 > 1 ? { nodeId: raw.imm3 >>> 1 } : {}),
       });
     case DeviceProfileOpcode.STEPPER:
       return ok({

@@ -4,7 +4,7 @@ import { BACKBONE_SENSOR_MODULES_META_KEY, parseBackboneSensorModules, upsertMod
 import { PHYSICAL_META_KEY, parsePhysicalProject } from "./backbone-physical.js";
 
 export function configureDs18b20(project: ProjectV1, bindingId: string, moduleId: string,
-  mode: "parasite" | "gpio", data: number, power: number, applied = false): ProjectV1 {
+  mode: "parasite" | "vcc" | "gpio", data: number, power: number, applied = false, voltage?: "3.3" | "5"): ProjectV1 {
   if (![data, ...(mode === "gpio" ? [power] : [])].every(pin => Number.isInteger(pin) && pin >= 0 && pin < 4))
     throw new Error("Scegli un pin da A0 ad A3.");
   if (mode === "gpio" && data === power) throw new Error("DATA e VCC devono usare pin diversi.");
@@ -26,9 +26,16 @@ export function configureDs18b20(project: ProjectV1, bindingId: string, moduleId
   }
   if (touched.some(pin => ((board.modes[pin] ?? 0) & 15) >= 4)) throw new Error("Uno dei pin selezionati è assegnato a un altro protocollo.");
   const modes = [...board.modes];
+  const oldPower = module.gpioAssignments?.channels.POWER;
+  if (mode !== "gpio" && oldPower !== undefined && oldPower !== data) {
+    const usedElsewhere = (modules.byBinding[bindingId] ?? []).some(other => other.id !== moduleId &&
+      (other.gpioAssignments?.boardKey === boardKey ? Object.values(other.gpioAssignments.channels).includes(oldPower)
+        : other.gpioAssignment?.boardKey === boardKey && other.gpioAssignment.channel === oldPower));
+    if (!usedElsewhere && modes[oldPower] === 2) modes[oldPower] = 0;
+  }
   modes[data] = 1;
   if (mode === "gpio") modes[power] = 2;
-  const updatedDraft = withDs18b20PowerMode(draft, mode);
+  const updatedDraft = withDs18b20PowerMode(draft, mode, voltage);
   const updated = { ...module, recipe: { ...module.recipe, deviceDraft: updatedDraft },
     actions: module.actions?.map(action => ({ ...action, deviceDraft: updatedDraft })),
     gpioAssignment: { boardKey, channel: data }, gpioAssignments: { boardKey, channels } };

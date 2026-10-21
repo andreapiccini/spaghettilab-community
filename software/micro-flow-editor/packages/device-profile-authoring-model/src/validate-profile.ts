@@ -79,6 +79,7 @@ function tempSlots(instruction: Instruction): number[] {
       return [instruction.src];
     case "DS18B20_READ":
       return [instruction.dst];
+    case "PWM_SET": return [instruction.src];
     case "DS18B20_SETUP":
       return [];
     case "DHT22_READ":
@@ -119,6 +120,7 @@ function transactionsFor(instruction: Instruction): number {
     case "UART_WRITE":
     case "UART_READ_UNTIL":
     case "UART_READ":
+    case "PWM_SET":
     case "GPIO_GET":
     case "GPIO_SET":
     case "GPIO_SET_VALUE":
@@ -208,11 +210,15 @@ function structuralError(
   instruction: Instruction,
 ): { target: string; remediation: string } | undefined {
   switch (instruction.op) {
+    case "PWM_SET": return !Number.isInteger(instruction.channel) || instruction.channel<0 || instruction.channel>3 || !Number.isInteger(instruction.frequencyHz) || instruction.frequencyHz<0 || instruction.frequencyHz>1000000 ? { target: "PWM_SET", remediation: "PWM requires a channel 0..3 and frequency 0..1000000 Hz" } : undefined;
     case "DS18B20_SETUP":
     case "DS18B20_READ":
       return !Number.isInteger(instruction.channel) ||
         instruction.channel < 0 ||
         instruction.channel > 3 ||
+        (instruction.op === "DS18B20_SETUP" &&
+          instruction.externalPower === true &&
+          instruction.powerChannel !== undefined) ||
         (instruction.op === "DS18B20_SETUP" &&
           instruction.powerChannel !== undefined &&
           (!Number.isInteger(instruction.powerChannel) ||
@@ -241,7 +247,11 @@ function structuralError(
           }
         : undefined;
     case "RGB_PROGRAM":
-      return instruction.offset < 0 ||
+      return (instruction.nodeId !== undefined &&
+        (!Number.isInteger(instruction.nodeId) ||
+          instruction.nodeId < 1 ||
+          instruction.nodeId > 0xffffff)) ||
+        instruction.offset < 0 ||
         !Number.isInteger(instruction.offset) ||
         instruction.length < 6 ||
         instruction.length > 96 ||

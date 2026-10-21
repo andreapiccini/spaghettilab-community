@@ -49,6 +49,15 @@ int spaghetti_config_decode_cbor(const uint8_t *bytes, size_t length,
 				 struct spaghetti_config *out);
 
 /**
+ * @brief Decode and validate while retaining the semantic failure diagnostic.
+ * Same inputs and return values as spaghetti_config_decode_cbor(). For current
+ * wire formats, failure->field is -1 for malformed input, or the failed section
+ * for a semantic validation error. Ignore out after any error. No hardware I/O.
+ */
+int spaghetti_config_decode_cbor_checked(const uint8_t *bytes, size_t length,
+ struct spaghetti_config *out, struct spaghetti_config_failure *failure);
+
+/**
  * @brief Encode one validated Config as canonical wire V3 CBOR.
  *
  * Validates @p config first, then writes deterministic root and property field

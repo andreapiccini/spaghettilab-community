@@ -1,3 +1,4 @@
+import { compileModuleProgram } from "./module-program.js";
 import { compileRgbRuntime } from "./rgb-runtime.js";
 import { MOVEMENT_COMPLETED_FIELD } from "./flow-sequence.js";
 import {
@@ -90,6 +91,7 @@ export function compileRuntimeDriver(
   gpioChannels: ReadonlyMap<string, number> = new Map(),
   scheduledActionId?: string,
 ): RuntimeDriver {
+  if (draft.moduleProgram) return compileModuleProgram(draft, gpioChannels, connectedInputs);
   if (draft.rgbModule) return compileRgbRuntime(draft, gpioChannels);
   if (draft.binding.bus !== "i2c" && draft.binding.bus !== "gpio")
     throw new Error(`${draft.name}: il driver richiede I²C o GPIO digitale.`);
@@ -400,6 +402,7 @@ export function compileRuntimeDriver(
               op: "DS18B20_SETUP",
               channel: data,
               on: op.on,
+              ...(draft.ds18b20PowerMode === "vcc" ? { externalPower: true } : {}),
               ...(draft.ds18b20PowerMode === "gpio"
                 ? { powerChannel: gpioSignal("POWER", true).channel }
                 : {}),
@@ -471,6 +474,29 @@ export function compileRuntimeDriver(
             signed: false,
             ...(signal.activeLow ? { multiply: -1, offset: 1 } : {}),
           });
+          break;
+        }
+        case "gpio_set_pwm":
+        case "gpio_stop_pwm": {
+          const signal = draft.binding.gpioSignals.find(signal => signal.id === op.signalId);
+          const channel = gpioChannels.get(op.signalId);
+          if (!signal || gpioSignalType(signal) !== "pwm_output" || channel === undefined) throw new Error("Assegna un segnale PWM al modulo.");
+          const frequencyHz = op.type === "gpio_stop_pwm" ? 0 : op.frequencyHz.kind === "fixed" ? integer(Number(op.frequencyHz.value),"Frequenza PWM",1,1000000) : undefined;
+          if (frequencyHz === undefined) throw new Error("La frequenza PWM deve essere costante; l’intensità può arrivare da un ingresso.");
+          let src: number;
+          if (op.type === "gpio_stop_pwm") {
+            if (!["low","configured"].includes(op.behavior)) throw new Error("Arresto PWM: sono supportati Basso e configurato.");
+            src=take(); target.push(constant(src,[0,0]));
+          } else if (op.dutyPercent.kind === "fixed") {
+            const duty=Number(op.dutyPercent.value);
+            if (!Number.isFinite(duty) || duty<0 || duty>100) throw new Error("Intensità PWM: usa un valore tra 0 e 100%.");
+            src=take();target.push(constant(src,bytesOf(BigInt(Math.round(duty*100)),2)));
+          } else {
+            const value = get(op.dutyPercent.kind === "variable" ? op.dutyPercent.name : op.dutyPercent.parameterId);
+            const input = materialize(value); src=take();
+            target.push({op:"SCALE_PACK",src:input,dst:src,flags:(value.byteOrder==="be"?1:0)|(value.signed?2:0),width:8,divisor:value.divide??1,multiplier:(value.multiply??1)*100,offset:(value.offset??0)*100});
+          }
+          target.push({op:"PWM_SET",src,channel,frequencyHz});
           break;
         }
         case "gpio_write": {
@@ -881,7 +907,7 @@ export function compileRuntimeDriver(
     transport: draft.binding.bus === "gpio" ? PortTransport.GPIO : PortTransport.I2C,
     requiredCapabilities:
       draft.binding.bus === "gpio"
-        ? (draft.temperatureSensorModel === "ds18b20" ||
+        ? (draft.binding.gpioSignals.some(signal => gpioSignalType(signal)==="pwm_output") ? PortCapability.PWM : 0) | (draft.temperatureSensorModel === "ds18b20" ||
           draft.binding.gpioSignals.some(
             (signal) => gpioSignalType(signal) === "digital_output",
           )
@@ -900,6 +926,7 @@ export function compileRuntimeDriver(
               op: "DS18B20_SETUP",
               channel: gpioChannels.get("DATA")!,
               on: false,
+              ...(draft.ds18b20PowerMode === "vcc" ? { externalPower: true } : {}),
               ...(draft.ds18b20PowerMode === "gpio"
                 ? { powerChannel: gpioChannels.get("POWER")! }
                 : {}),

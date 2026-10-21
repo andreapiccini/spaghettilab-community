@@ -281,12 +281,14 @@ int spaghetti_config_apply(
 	return 0;
 }
 
+static int config_validation_error;
+
 int spaghetti_config_validate(
 	const struct spaghetti_config *candidate,
 	struct spaghetti_config_failure *failure)
 {
-	ARG_UNUSED(failure);
-	return (candidate != NULL) ? 0 : -EINVAL;
+	if (config_validation_error && failure) *failure = (struct spaghetti_config_failure){.field=SPAGHETTI_CONFIG_FAILURE_MODULE,.index=1,.reason=SPAGHETTI_CONFIG_FAILURE_DUPLICATE};
+	return config_validation_error ? config_validation_error : (candidate != NULL) ? 0 : -EINVAL;
 }
 
 int spaghetti_config_decode_cbor(const uint8_t *bytes, size_t length,
@@ -299,6 +301,13 @@ int spaghetti_config_decode_cbor(const uint8_t *bytes, size_t length,
 		.version = SPAGHETTI_CONFIG_VERSION,
 	};
 	return 0;
+}
+
+int spaghetti_config_decode_cbor_checked(const uint8_t *bytes, size_t length, struct spaghetti_config *out, struct spaghetti_config_failure *failure)
+{
+ if (failure) failure->field = (enum spaghetti_config_failure_field)-1;
+ int err=spaghetti_config_decode_cbor(bytes,length,out);
+ return err ? err : spaghetti_config_validate(out,failure);
 }
 
 int spaghetti_config_encode_cbor(
@@ -1374,4 +1383,57 @@ ZTEST(communication, test_get_status_reports_blank_remote_tag)
 	}
 	zassert_true(zcbor_map_end_decode(state));
 	zassert_true(found, "Reader UID missing from GET_STATUS");
+}
+
+/* An interrupted transfer must not decode or apply partial configuration data. */
+ZTEST(communication, test_config_chunks_commit_only_when_complete)
+{
+ struct spaghetti_request_context context = make_context(all_permissions);
+ struct spaghetti_protocol_request request = {.version = SPAGHETTI_PROTOCOL_VERSION,
+  .operation = SPAGHETTI_PROTOCOL_APPLY_CONFIG};
+ struct spaghetti_protocol_response response;
+ uint8_t chunk[256];
+ memset(chunk, 0xa0, sizeof(chunk));
+ const uint32_t generation = apply_generation;
+ int err = spaghetti_communication_init();
+ zassert_true(err == 0 || err == -EALREADY);
+ for (uint32_t part = 0; part < 5; part++) {
+  /* Ordered first chunk, identical retry, gap, wrong token, valid final chunk. */
+  uint32_t offset = part == 0 || part == 1 ? 0 : part == 2 ? 300 : 256;
+  uint32_t token = part == 3 ? 1235 : 1234;
+  ZCBOR_STATE_E(state, 4, request.payload.bytes, sizeof(request.payload.bytes), 1);
+  zassert_true(zcbor_map_start_encode(state, 5) &&
+   zcbor_uint32_put(state, 0) && zcbor_uint32_put(state, generation) &&
+   zcbor_uint32_put(state, 1) && zcbor_bstr_encode_ptr(state, chunk, sizeof(chunk)) &&
+   zcbor_uint32_put(state, 10) && zcbor_uint32_put(state, token) &&
+   zcbor_uint32_put(state, 11) && zcbor_uint32_put(state, offset) &&
+   zcbor_uint32_put(state, 12) && zcbor_uint32_put(state, 512) &&
+   zcbor_map_end_encode(state, 5));
+  request.payload.size = state->payload - request.payload.bytes;
+  request.correlation_id = 60000 + part;
+  zassert_ok(spaghetti_communication_handle_request(&context, &request, &response));
+  if (part == 2 || part == 3) zassert_not_equal(response.status, SPAGHETTI_PROTOCOL_STATUS_OK);
+  else zassert_equal(response.status, SPAGHETTI_PROTOCOL_STATUS_OK);
+  zassert_equal(apply_generation, generation + (part == 4 ? 1 : 0));
+ }
+}
+
+ZTEST(communication, test_validate_retains_endpoint_conflict_diagnostic)
+{
+ struct spaghetti_request_context context=make_context(all_permissions);
+ struct spaghetti_protocol_request request={.version=SPAGHETTI_PROTOCOL_VERSION,.operation=SPAGHETTI_PROTOCOL_VALIDATE_CONFIG,.correlation_id=76001};
+ struct spaghetti_protocol_response response;
+ request.payload.bytes[0]=0xa1;request.payload.bytes[1]=0;request.payload.bytes[2]=0x41;request.payload.bytes[3]=0xa0;request.payload.size=4;
+ config_validation_error=-EADDRINUSE;
+ int err=spaghetti_communication_handle_request(&context,&request,&response);
+ config_validation_error=0;
+ zassert_ok(err);zassert_equal(response.status,SPAGHETTI_PROTOCOL_STATUS_OK);
+ ZCBOR_STATE_D(state,4,response.payload.bytes,response.payload.size,1,0);
+ uint32_t key,value;bool valid;
+ zassert_true(zcbor_map_start_decode(state));
+ zassert_true(zcbor_uint32_decode(state,&key));zassert_equal(key,0);zassert_true(zcbor_bool_decode(state,&valid));zassert_false(valid);
+ zassert_true(zcbor_uint32_decode(state,&key));zassert_equal(key,1);zassert_true(zcbor_uint32_decode(state,&value));zassert_equal(value,SPAGHETTI_CONFIG_FAILURE_MODULE);
+ zassert_true(zcbor_uint32_decode(state,&key));zassert_equal(key,2);zassert_true(zcbor_uint32_decode(state,&value));zassert_equal(value,1);
+ zassert_true(zcbor_uint32_decode(state,&key));zassert_equal(key,3);zassert_true(zcbor_uint32_decode(state,&value));zassert_equal(value,SPAGHETTI_CONFIG_FAILURE_DUPLICATE);
+ zassert_true(zcbor_map_end_decode(state));
 }

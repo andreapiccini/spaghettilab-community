@@ -22,12 +22,13 @@ export function availableModuleDrivers(
   const builtinOrder = ["uln2003-28byj48", "gpio-relay", "gpio-buzzer-active"];
   return [...candidates.values()]
     .filter((driver) => {
-      if (!driver.ready || !["gpio", "i2c"].includes(driver.draft.binding.bus))
+      if (driver.id === "gpio-pwm-led") return false;
+      if (!driver.ready || (!["gpio", "i2c"].includes(driver.draft.binding.bus) && !driver.draft.moduleProgram))
         return false;
       if (
         driver.draft.binding.bus === "gpio" &&
         driver.draft.binding.gpioSignals.length > 1 &&
-        driver.id !== "uln2003-28byj48" && !driver.draft.rgbModule && !driver.draft.dht22Module
+        driver.id !== "uln2003-28byj48" && !driver.draft.rgbModule && !driver.draft.dht22Module && !driver.draft.moduleProgram
       )
         return false;
       try {

@@ -17,7 +17,7 @@ import { StepRow } from "./StepRow.js";
  * three sections render disabled with an explicit gap note instead of a fake
  * empty list a user could add to and lose their work.
  */
-export function InstructionSection({ title, steps, onChange, disabledNote }: { readonly title: string; readonly steps?: readonly Instruction[]; readonly onChange?: (next: readonly Instruction[]) => void; readonly disabledNote?: string }) {
+export function InstructionSection({ title, steps, onChange, disabledNote, allowedOps, signalNames }: { readonly signalNames?: readonly string[]; readonly allowedOps?: readonly Instruction["op"][]; readonly title: string; readonly steps?: readonly Instruction[]; readonly onChange?: (next: readonly Instruction[]) => void; readonly disabledNote?: string }) {
   const [open, setOpen] = useState((steps?.length ?? 0) > 0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [justAdded, setJustAdded] = useState<number | null>(null);
@@ -57,6 +57,7 @@ export function InstructionSection({ title, steps, onChange, disabledNote }: { r
                     <StepRow
                       key={i}
                       instruction={step}
+                      signalNames={signalNames}
                       index={i}
                       isFirst={i === 0}
                       isLast={i === (steps?.length ?? 1) - 1}
@@ -79,10 +80,10 @@ export function InstructionSection({ title, steps, onChange, disabledNote }: { r
                     <AnimatePresence>
                       {menuOpen && (
                         <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={motionTokens.duration.fast} className="absolute left-0 top-9 z-30 max-h-80 w-64 overflow-auto rounded-slmd border border-border bg-surface shadow-e2">
-                          {STEP_CATEGORIES.map((cat) => (
+                          {STEP_CATEGORIES.filter(cat => cat.ops.some(op => !allowedOps || allowedOps.includes(op))).map((cat) => (
                             <div key={cat.label}>
                               <div className="bg-surface-sunken px-3 py-1 font-body text-xs font-semibold text-ink-faint">{cat.label}</div>
-                              {cat.ops.map((op) => (
+                              {cat.ops.filter(op => !allowedOps || allowedOps.includes(op)).map((op) => (
                                 <button
                                   key={op}
                                   type="button"

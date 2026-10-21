@@ -65,6 +65,8 @@ export const DEFAULT_W1_CONFIG: W1PeripheralConfig = {
 };
 
 export type BackbonePhysicalDraft = {
+  /** One-based project position; independent of the board MAC address. */
+  readonly logicalSlot?: number;
   readonly applied?: boolean;
   readonly nodeId?: number;
   readonly local?: boolean;
@@ -1022,6 +1024,11 @@ export const INTERFACE_PRESETS: Record<PhysicalInterfaceKind, readonly number[]>
   adc: [14, 0, 0, 0],
 };
 
+/** Connector layout is independent of the four modes carried by the wire descriptor. */
+export function reportedFunctionVariant(topology: PhysicalBackbone | undefined): FunctionModuleVariant | undefined {
+  return topology?.layout === 2 ? "v2" : topology?.layout === 1 ? "v1" : undefined;
+}
+
 export function topologyForBoard(
   status: GetStatusResponse | undefined,
   board: { readonly local: boolean; readonly nodeId: number },
@@ -1132,4 +1139,13 @@ export function parsePhysicalCatalog(raw: string): readonly PhysicalCatalogEntry
     if (entry.settings) encodePhysicalSettings(entry.settings);
     return entry;
   });
+}
+
+/** A0–A3 retain their logical indices across board revisions. Never discard an assigned pin. */
+export function adaptPhysicalModes(modes: readonly number[], pinCount: number): number[] {
+  if (![4, 8].includes(pinCount) || ![4, 8].includes(modes.length))
+    throw new Error("Formato dei pin della Backbone non supportato.");
+  if (modes.slice(pinCount).some(mode => mode !== 0))
+    throw new Error("La Backbone collegata non dispone dei pin A4–A7 usati dal progetto. Collega una Backbone V2 oppure sposta i moduli su pin disponibili.");
+  return Array.from({ length: pinCount }, (_, index) => modes[index] ?? 0);
 }

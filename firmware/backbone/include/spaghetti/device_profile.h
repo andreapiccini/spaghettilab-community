@@ -61,6 +61,7 @@ enum spaghetti_device_profile_opcode {
 	SPAGHETTI_DEVICE_PROFILE_OP_DHT22_READ = 37U,
  SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_READ = 39U,
  SPAGHETTI_DEVICE_PROFILE_OP_DS18B20_SETUP = 40U,
+ SPAGHETTI_DEVICE_PROFILE_OP_PWM_SET = 41U, /**< src_a duty 0..10000, imm0 channel, imm2 Hz (0: configured). */
 	SPAGHETTI_DEVICE_PROFILE_OP_RGB_PROGRAM = 35U,
 	SPAGHETTI_DEVICE_PROFILE_OP_STEPPER = 34U, /**< Nonblocking four-coil half-step motor: stop/start/position. */
 	SPAGHETTI_DEVICE_PROFILE_OP_GPIO_PULSE = 33U, /**< Indexed pulse; timer restores the level without blocking execution. */
@@ -236,6 +237,7 @@ struct spaghetti_device_profile_failure {
  * Values come from Module config property fields, not from the shared profile.
  */
 struct spaghetti_rgb_state {
+ uint32_t remote_node;
  uint32_t variables[8];
  uint32_t color;
  uint32_t revision;

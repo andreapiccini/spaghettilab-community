@@ -69,6 +69,8 @@ enum spaghetti_protocol_operation {
 	SPAGHETTI_PROTOCOL_FINISH_BLE_UPDATE = 30, /**< Finish BLE Update session. */
 	SPAGHETTI_PROTOCOL_CANCEL_BLE_UPDATE = 31, /**< Cancel BLE Update session. */
 	SPAGHETTI_PROTOCOL_NFC_PAGE = 33, /**< UID-bound NFC user-memory page access. */
+	SPAGHETTI_PROTOCOL_CAN_REQUEST = 35, /**< Bounded relay to a CAN Backbone. */
+	SPAGHETTI_PROTOCOL_IDENTIFY_BACKBONE = 34, /**< Identify via LED for ten seconds. */
 	SPAGHETTI_PROTOCOL_APPLY_PHYSICAL = 32, /**< Apply Function port 2 on a Backbone. */
 };
 

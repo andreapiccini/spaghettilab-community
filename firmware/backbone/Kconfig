@@ -555,7 +555,7 @@ config SPAGHETTI_OTA_WORK_PRIORITY
 config SPAGHETTI_NFC
 	bool "ST25R100 Type-A tag presence"
 	depends on SPI && GPIO
-	default y if BOARD_SPAGHETTILAB_BACKBONE_V1
+	default y if BOARD_SPAGHETTILAB_BACKBONE_V1 || BOARD_SPAGHETTILAB_BACKBONE_V2
 	default n
 	help
 	  Periodic Type-A scan on the Backbone ST25R100. Tags are published
@@ -573,7 +573,7 @@ config SPAGHETTI_NFC_WORK_STACK_SIZE
 
 config SPAGHETTI_FIELD_UPDATE
 	bool "SLUP field firmware update over CAN and ESP-NOW"
-	default y if BOARD_SPAGHETTILAB_BACKBONE_V1
+	default y if BOARD_SPAGHETTILAB_BACKBONE_V1 || BOARD_SPAGHETTILAB_BACKBONE_V2
 	default n
 	help
 	  SLUP: a USB-connected Backbone discovers peers on the CAN bus, puts
@@ -583,7 +583,7 @@ config SPAGHETTI_FIELD_UPDATE
 config SPAGHETTI_FIELD_UPDATE_CAN
 	bool "SLUP CAN adapter"
 	depends on SPAGHETTI_FIELD_UPDATE && CAN
-	default y if BOARD_SPAGHETTILAB_BACKBONE_V1
+	default y if BOARD_SPAGHETTILAB_BACKBONE_V1 || BOARD_SPAGHETTILAB_BACKBONE_V2
 	default n
 	help
 	  SLUP on the Backbone SN65HVD230 transceiver. Discover, EnterUpdate,
@@ -593,7 +593,7 @@ config SPAGHETTI_FIELD_UPDATE_CAN
 config SPAGHETTI_FIELD_UPDATE_ESPNOW
 	bool "ESP-NOW field-update adapter"
 	depends on SPAGHETTI_FIELD_UPDATE && WIFI
-	default y if BOARD_SPAGHETTILAB_BACKBONE_V1
+	default y if BOARD_SPAGHETTILAB_BACKBONE_V1 || BOARD_SPAGHETTILAB_BACKBONE_V2
 	default n
 	help
 	  Accept and send firmware images with the existing BNOW packet on Wi-Fi

@@ -221,8 +221,20 @@ export type InstallProfileResult = {
 export async function installProfile(
   client: DeviceProfileWireClient,
   draft: DeviceProfileDraft,
+  options: { readonly reuseInstalled?: boolean } = {},
 ): Promise<Result<InstallProfileResult, DomainError>> {
   const profileCbor = encodeDeviceProfileCbor(draft);
+  const expectedHash = await sha256(profileCbor);
+  if (options.reuseInstalled) {
+    try {
+      const installed = await client.getFullDeviceProfileList();
+      const match = installed.find(profile => profile.profileId === draft.profileId && profile.version === draft.version && bytesEqual(profile.hash, expectedHash));
+      if (match) return ok({ summary: match });
+    } catch (cause) {
+      return err(wireFailure("getFullDeviceProfileList", cause));
+    }
+  }
+
 
   try {
     const validation = await client.validateDeviceProfile({ profileCbor });
@@ -258,8 +270,6 @@ export async function installProfile(
   } catch (cause) {
     return err(wireFailure("installDeviceProfile", cause));
   }
-
-  const expectedHash = await sha256(profileCbor);
 
   let installed: readonly DeviceProfileSummary[];
   try {

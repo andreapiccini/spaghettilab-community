@@ -1,3 +1,5 @@
+import { ModuleProgramEditor } from "./components/device-recipe-editor/ModuleProgramEditor.js";
+import { MODULE_EDITOR_CONTEXT, editModuleMetadata } from "./lib/new-device-driver.js";
 import { RgbModuleEditor } from "./components/device-recipe-editor/RgbModuleEditor.js";
 import { dht22OutputFormat, setDht22OutputFormat } from "./lib/dht22-driver.js";
 import { ModulesScreen } from "./components/modules/ModulesScreen.js";
@@ -109,8 +111,9 @@ function DeviceRecipeEditorRoute({ initialDraft }: { readonly initialDraft?: Dev
   const { execute, navigate, session } = useSession();
 
   const nfc = useNfcWorkspace();
+  const returnScreen = initialDraft ? "processing-graph" : "modules";
   function persistDraft(inputDraft: DeviceRecipeDraft, pendingCreate: boolean) {
-    const draft = inputDraft.dht22Module ? setDht22OutputFormat(inputDraft, dht22OutputFormat(inputDraft)) : inputDraft;
+    const draft = inputDraft.dht22Module && !inputDraft.moduleProgram ? setDht22OutputFormat(inputDraft, dht22OutputFormat(inputDraft)) : inputDraft;
     if (nfc.finishDriver(draft, pendingCreate)) return true;
     if (!execute) return;
     execute({
@@ -129,20 +132,38 @@ function DeviceRecipeEditorRoute({ initialDraft }: { readonly initialDraft?: Dev
     });
   }
 
-  if (initialDraft?.rgbModule) return <RgbModuleEditor initialDraft={initialDraft} onCancel={() => navigate("processing-graph")} onSave={draft => { if (!persistDraft(draft, true)) navigate("processing-graph"); }} />;
+  if (initialDraft && (initialDraft.moduleProgram || session?.stack.current.authoringMetadata[MODULE_EDITOR_CONTEXT]?.comment === "library")) {
+    const libraryEdit=session?.stack.current.authoringMetadata[MODULE_EDITOR_CONTEXT]?.comment === "library" && !session?.stack.current.authoringMetadata[NFC_CONTEXT_META]?.comment;
+    return <ModuleProgramEditor initialDraft={initialDraft} onCancel={() => { if (!libraryEdit && nfc.cancelDriver()) return; navigate(libraryEdit ? "modules" : returnScreen); }}
+      onDuplicate={draft => {
+        execute?.({ kind: "DuplicateModuleRecipe", apply: project => ({ ok: true, value: { ...project, authoringMetadata: editModuleMetadata(project.authoringMetadata,draft,true) } }) });
+      }}
+      onSave={draft => {
+        if (!libraryEdit) { if (!persistDraft(draft,true)) navigate(returnScreen); return; }
+        execute?.({ kind: "SaveModuleRecipe", apply: project => ({ ok: true, value: { ...project, authoringMetadata: {
+          ...saveDriverMetadata(project.authoringMetadata,draft),
+          [DEVICE_RECIPE_DRAFT_META_KEY]: { comment: serializeDeviceRecipeDraft(draft) },
+          [DEVICE_RECIPE_PENDING_CREATE_META_KEY]: { comment: "" },
+          [MODULE_EDITOR_CONTEXT]: { comment: "" },
+        } } }) });
+        navigate("modules");
+      }}/>
+  }
+
+  if (initialDraft?.rgbModule) return <RgbModuleEditor initialDraft={initialDraft} onCancel={() => navigate(returnScreen)} onSave={draft => { if (!persistDraft(draft, true)) navigate(returnScreen); }} />;
 
   return (
     <DeviceRecipeEditorScreen
       initialDraft={initialDraft}
       saveDriverOnly={!!session?.stack.current.authoringMetadata[NFC_CONTEXT_META]?.comment}
-      onCancel={() => { if (!nfc.cancelDriver()) navigate("processing-graph"); }}
+      onCancel={() => { if (!nfc.cancelDriver()) navigate(returnScreen); }}
       onSaveDraft={(draft) => {
         persistDraft(draft, Boolean(draft.dht22Module));
-        if (draft.dht22Module) navigate("processing-graph");
+        if (draft.dht22Module) navigate(returnScreen);
       }}
       onCreate={(draft) => {
         if (persistDraft(draft, true)) return;
-        navigate("processing-graph");
+        navigate(returnScreen);
       }}
     />
   );

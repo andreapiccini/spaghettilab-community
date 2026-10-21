@@ -295,6 +295,14 @@ ZTEST(storage, test_v2_round_trip_crc_and_legacy)
 
 	valid_size = persistent_size;
 	memcpy(valid_record, persistent_bytes, valid_size);
+	/* Records from builds with the old 576-byte capacity remain readable. */
+	if (valid_size >= 588U) {
+		persistent_size = 588U;
+		zassert_ok(settings_handler_spaghetti_storage.h_set(NULL, persistent_size, fake_settings_read, &persistent_size));
+		zassert_ok(spaghetti_storage_read_config(&output));
+		zassert_equal(output.module_count, 1U);
+		persistent_size = valid_size;
+	}
 	persistent_bytes[sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint16_t)] ^=
 		0xFFU;
 	zassert_ok(settings_handler_spaghetti_storage.h_set(

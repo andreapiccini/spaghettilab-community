@@ -75,7 +75,9 @@ export function blockPortsFromChannels(channels: readonly SensorChannel[]): {
           channel.id,
           channel.inputMode === "trigger"
             ? [T.activationTrigger, T.eventTrigger, T.digitalComando]
-            : portTypesForQuantity(channel.quantity, "write"),
+            : channel.dataType === "string"
+              ? [{ domain: "text", role: "comando" }]
+              : portTypesForQuantity(channel.quantity, "write"),
           { label, required: false },
         ),
       );
@@ -133,18 +135,64 @@ export function propertiesForSensorModule(
   selection?: { inputId?: string; outputId?: string },
 ): Record<string, string | number | boolean> {
   const rgb = Boolean(recipe.deviceDraft?.rgbModule);
-  const single = Boolean(recipe.actionId && recipe.deviceDraft) && !recipe.deviceDraft?.dht22Module;
+  const single =
+    Boolean(recipe.actionId && recipe.deviceDraft) && !recipe.deviceDraft?.dht22Module;
   const selected = sensorInstanceSelection(
     recipe,
     selection?.inputId,
     selection?.outputId,
   );
-  const channels = recipe.deviceDraft?.dht22Module ? recipe.deviceDraft.channels : rgb ? recipe.deviceDraft!.channels.map(channel => ({ ...channel, label: channel.direction === "write" ? rgbInputLabel(recipe.deviceDraft!.rgbModule!.inputs.find(input => input.id === channel.id) ?? { id: channel.id, name: channel.label, mode: "trigger", actionId: "", edge: "rising" }) : channel.id === "state" ? "È acceso" : channel.id === "color" ? "Colore emesso" : channel.label })) : single ? selected.channels : recipeChannels(recipe);
+  const channels = recipe.deviceDraft?.dht22Module
+    ? recipe.deviceDraft.channels
+    : rgb
+      ? recipe.deviceDraft!.channels.map((channel) => ({
+          ...channel,
+          label:
+            channel.direction === "write"
+              ? rgbInputLabel(
+                  recipe.deviceDraft!.rgbModule!.inputs.find(
+                    (input) => input.id === channel.id,
+                  ) ?? {
+                    id: channel.id,
+                    name: channel.label,
+                    mode: "trigger",
+                    actionId: "",
+                    edge: "rising",
+                  },
+                )
+              : channel.id === "state"
+                ? "È acceso"
+                : channel.id === "color"
+                  ? "Colore emesso"
+                  : channel.label,
+        }))
+      : single
+        ? selected.channels
+        : recipeChannels(recipe);
   return {
     [SENSOR_MODULE_ID_PROP]: module.id,
+    ...(rgb
+      ? {
+          sensorRgbInputFamilies: JSON.stringify(
+            Object.fromEntries(
+              recipe
+                .deviceDraft!.rgbModule!.inputs.filter(
+                  (input) => input.mode !== "trigger",
+                )
+                .map((input) => [
+                  input.id,
+                  input.mode === "component" ? "rgb" : "color",
+                ]),
+            ),
+          ),
+        }
+      : {}),
     ...(recipe.deviceDraft?.dht22Module ? { sensorDht22: true } : {}),
-    ...(recipe.deviceDraft?.commands.some((command) => command.steps.some((op) => op.type === "stepper"))
-      ? { sensorMotion: true } : {}),
+    ...(recipe.deviceDraft?.commands.some((command) =>
+      command.steps.some((op) => op.type === "stepper"),
+    )
+      ? { sensorMotion: true }
+      : {}),
     ...(single
       ? {
           [SENSOR_INSTANCE_PROP]: true,

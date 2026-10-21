@@ -46,13 +46,13 @@ static int execute_apply_physical(
 	err = spaghetti_ops_decode_bstr(request, 4U, &config, &config_size);
 	if ((err != 0) && (err != -EINVAL)) return err;
 	if (config && config_size != 20U) return -EINVAL;
-	if ((length != 4U) || (speed > 1U) || (expected_size != SPAGHETTI_PHYSICAL_EXPECTED_SIZE)) {
+	if ((length != 4U && length != 8U) || (speed > 1U) || (expected_size != SPAGHETTI_PHYSICAL_EXPECTED_SIZE)) {
 		return -EINVAL;
 	}
 #if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
-	err = spaghetti_field_update_apply_physical_config(node, modes, (uint8_t)speed, expected, config);
+	err = spaghetti_field_update_apply_physical_config_extended(node, modes, (uint8_t)length, (uint8_t)speed, expected, config);
 #else
-	err = node == 0U ? spaghetti_physical_apply_config(modes, (uint8_t)speed, expected, config) : -ENOTSUP;
+	err = node == 0U ? spaghetti_physical_apply_config_extended(modes, (uint8_t)length, (uint8_t)speed, expected, config) : -ENOTSUP;
 #endif
 	if (err != 0) {
 		return err;
@@ -61,7 +61,7 @@ static int execute_apply_physical(
 		       sizeof(response->bytes), 1U);
 	if (!zcbor_map_start_encode(state, 3U) ||
 	    !zcbor_uint32_put(state, 0U) || !zcbor_uint32_put(state, node) ||
-	    !zcbor_uint32_put(state, 1U) || !zcbor_bstr_encode_ptr(state, modes, 4U) ||
+	    !zcbor_uint32_put(state, 1U) || !zcbor_bstr_encode_ptr(state, modes, length) ||
 	    !zcbor_uint32_put(state, 2U) || !zcbor_uint32_put(state, speed) ||
 	    !zcbor_map_end_encode(state, 3U)) {
 		return -EMSGSIZE;
@@ -77,4 +77,29 @@ SPAGHETTI_OPERATION_HANDLER_DEFINE(op_apply_physical) = {
 	.request_schema = &physical_schema,
 	.response_schema = &physical_schema,
 	.execute = execute_apply_physical,
+};
+
+static int execute_identify_backbone(const struct spaghetti_request_context *context,
+ const struct spaghetti_protocol_payload *request, struct spaghetti_protocol_payload *response)
+{
+ ARG_UNUSED(context);
+ uint32_t node = 0U;
+ int err = spaghetti_ops_decode_u32(request, 0U, &node);
+ if (err) return err;
+#if defined(CONFIG_SPAGHETTI_FIELD_UPDATE)
+ if (node == 0U) node = spaghetti_field_update_local_node_id();
+ err = spaghetti_field_update_blink(node, 10U);
+#else
+ err = -ENOTSUP;
+#endif
+ response->size = 0U;
+ return err;
+}
+SPAGHETTI_OPERATION_HANDLER_DEFINE(op_identify_backbone) = {
+ .operation = SPAGHETTI_PROTOCOL_IDENTIFY_BACKBONE,
+ .required_permissions = SPAGHETTI_PERMISSION_CONFIGURE,
+ .execution = SPAGHETTI_OPERATION_SERIALIZED_MUTATION,
+ .request_schema = &physical_schema,
+ .response_schema = &physical_schema,
+ .execute = execute_identify_backbone,
 };

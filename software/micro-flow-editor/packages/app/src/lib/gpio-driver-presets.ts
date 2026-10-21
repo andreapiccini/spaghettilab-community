@@ -1106,7 +1106,8 @@ export function catalogDs18b20Driver(): DeviceRecipeDraft {
 /** Rebuild pin requirements without changing actions, variables or driver identity. */
 export function withDs18b20PowerMode(
   draft: DeviceRecipeDraft,
-  mode: "parasite" | "gpio",
+  mode: "parasite" | "vcc" | "gpio",
+  _legacyVoltage?: "3.3" | "5",
 ): DeviceRecipeDraft {
   if (draft.temperatureSensorModel !== "ds18b20") return draft;
   const data = draft.binding.gpioSignals.find((signal) => signal.id === "DATA");
@@ -1117,6 +1118,7 @@ export function withDs18b20PowerMode(
   return {
     ...draft,
     ds18b20PowerMode: mode,
+    gpioHardware: { kind: "sensor", power: mode === "vcc" ? "3.3" : "none", ground: true, extraTerminals: [] },
     binding: {
       ...draft.binding,
       gpioSignals: mode === "gpio" ? [data, power] : [data],
@@ -1124,6 +1126,8 @@ export function withDs18b20PowerMode(
     description:
       mode === "gpio"
         ? "DATA A0, VCC A1 HIGH, GND comune. Alimentazione da GPIO durante avvio, conversione e lettura."
-        : catalogDs18b20Driver().description,
+        : mode === "vcc"
+          ? "DATA sul pin scelto, VCC alla linea 3,3 V della Backbone V2 e GND comune. Non collegare VCC a 5 V: il pull-up della schedina porterebbe DATA a 5 V. Conversione fino a 750 ms."
+          : catalogDs18b20Driver().description,
   };
 }

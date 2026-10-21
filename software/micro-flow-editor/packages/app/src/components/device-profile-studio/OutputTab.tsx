@@ -33,6 +33,8 @@ export function OutputTab({ schemaId, onSchemaId, schemaVersion, onSchemaVersion
             <select value={field.type} onChange={(e) => update(i, { type: e.target.value as SampleField["type"] })} className="rounded-slsm border border-border-strong px-2 py-1 font-mono text-sm outline-none">
               <option value="int64">int64</option>
               <option value="uint64">uint64</option>
+              <option value="float">Decimale</option>
+              <option value="text">Testo</option>
             </select>
             <input value={field.unit ?? ""} onChange={(e) => update(i, { unit: e.target.value || undefined })} placeholder="unità" className="w-24 rounded-slsm border border-border-strong px-2 py-1 font-mono text-sm outline-none" />
             <input type="number" value={field.fieldId} onChange={(e) => update(i, { fieldId: Number(e.target.value) })} title="fieldId" className="w-16 rounded-slsm border border-border-strong px-2 py-1 font-mono text-sm outline-none" />

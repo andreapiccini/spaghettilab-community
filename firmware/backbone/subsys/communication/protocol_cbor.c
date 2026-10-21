@@ -173,7 +173,7 @@ int spaghetti_protocol_decode_request(
 		return err;
 	}
 	if ((operation < (uint32_t)SPAGHETTI_PROTOCOL_GET_CATALOG) ||
-	    (operation > (uint32_t)SPAGHETTI_PROTOCOL_NFC_PAGE)) {
+	    (operation > (uint32_t)SPAGHETTI_PROTOCOL_CAN_REQUEST)) {
 		return -ENOTSUP;
 	}
 

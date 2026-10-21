@@ -5,7 +5,7 @@ properties:
   layout-version:
     type: int
     required: true
-    const: 1
+    enum: [1, 2]
   mcu-id:
     type: int
     required: true

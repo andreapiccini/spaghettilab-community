@@ -228,7 +228,7 @@ static int encode_get_status(
 					(peer->flags & SPAGHETTI_SLUP_FLAG_LOCAL) !=
 					0U;
 
-				const bool have_layout = (peer->physical[0] == 1U && peer->physical_parts == 7U) || (peer->physical[0] == 2U && peer->physical_parts == 63U);
+				const bool have_layout = (peer->physical[0] == 1U && peer->physical_parts == 7U) || (peer->physical[0] == 2U && peer->physical_parts == 63U) || (peer->physical[0] == 3U && peer->physical_parts == 127U);
 				const size_t peer_keys = have_layout ? 6U : 5U;
 				if (!zcbor_map_start_encode(state, peer_keys) ||
 				    !zcbor_uint32_put(state, 0U) ||
@@ -247,7 +247,7 @@ static int encode_get_status(
 				}
 				if (have_layout && (!zcbor_uint32_put(state, 5U) ||
 				    !zcbor_bstr_encode_ptr(state, peer->physical,
-					peer->physical[0] == 1U ? 13U : SPAGHETTI_PHYSICAL_SIZE))) {
+					peer->physical[0] == 1U ? 13U : peer->physical[0] == 2U ? 33U : SPAGHETTI_PHYSICAL_SIZE))) {
 					return -EMSGSIZE;
 				}
 				if (!zcbor_map_end_encode(state, peer_keys)) {

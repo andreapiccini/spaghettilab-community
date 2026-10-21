@@ -19,7 +19,8 @@ struct publish_field_state {
 static const struct spaghetti_block_port_descriptor one_in[] = {
 	{ .port_id = 0U, .name = "in",
 	  .accepted_types = SPAGHETTI_BLOCK_TYPE_NUMERIC |
-			    SPAGHETTI_BLOCK_TYPE_BOOL,
+			    SPAGHETTI_BLOCK_TYPE_BOOL | SPAGHETTI_BLOCK_TYPE_TEXT |
+                            SPAGHETTI_BLOCK_TYPE_BYTES | BIT(SPAGHETTI_VALUE_FLOAT),
 	  .required = true },
 };
 

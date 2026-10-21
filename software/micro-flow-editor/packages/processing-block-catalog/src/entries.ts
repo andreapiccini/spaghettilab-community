@@ -73,6 +73,54 @@ function area(id: string, label: string, placeholder?: string): CatalogField {
  */
 export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
   e({
+    id: "native.color_split",
+    label: "Scomponi colore",
+    subtitle: "Colore → Rosso, Verde e Blu",
+    category: "io", runtime: "core-block", availability: "shipped",
+    family: "functionality", typeId: "color_split", needsModule: false,
+    inputs: [inPort("0", [
+      { domain: "text", role: "comando" }, { domain: "text", role: "misura" },
+      { domain: "analog", role: "comando", range: { min: 0, max: 16777215 } },
+      { domain: "analog", role: "misura", range: { min: 0, max: 16777215 } },
+    ], { label: "Colore", required: true })],
+    outputs: ["Rosso", "Verde", "Blu"].map((label, i) => outPort(String(i + 1), [
+      { domain: "analog", role: "comando", range: { min: 0, max: 100 } },
+      { domain: "analog", role: "misura", range: { min: 0, max: 100 } },
+    ], `${label} (%)`)),
+    fields: [],
+    notes: "Riceve un colore e lo divide in tre livelli da 0 a 100%, collegabili al LED RGB o ad altri blocchi.",
+  }),
+  e({
+    id: "native.led_driver",
+    label: "Generatore colori",
+    subtitle: "Preset → RGB o colore",
+    category: "io",
+    runtime: "core-block",
+    availability: "shipped",
+    family: "functionality",
+    typeId: "led_driver",
+    needsModule: false,
+    inputs: [0, 1, 2, 3].map((i) =>
+      inPort(String(i), [T.digitalComando, T.activationTrigger, T.eventTrigger], {
+        label: `Preset ${i + 1}`,
+        required: false,
+      }),
+    ),
+    outputs: [
+      outPort(
+        "0",
+        [
+          { domain: "analog", role: "comando", range: { min: 0, max: 16777215 } },
+          { domain: "analog", role: "misura", range: { min: 0, max: 16777215 } },
+        ],
+        "Colore",
+      ),
+    ],
+    fields: [],
+    notes:
+      "Ogni ingresso attiva il proprio preset e invia una sola volta il colore al LED. Doppio clic per inizializzazione, azioni e Input/Output.",
+  }),
+  e({
     id: "native.physical_gpio_input",
     label: "GPIO IN",
     subtitle: "Ingresso dalla bay Function 2",
@@ -933,28 +981,90 @@ export const PROCESSING_BLOCK_CATALOG: readonly ProcessingCatalogEntry[] = [
     notes:
       "Generatore libero: non serve Schedule. Collegalo a un relè o a un LED per provarlo. Periodo = ciclo completo; duty cycle = quanto resta HIGH.",
   }),
-  ...(["and", "or", "if", "while"] as const).map((kind) => e({
-    id: `logic.${kind}`, label: kind.toUpperCase(),
-    subtitle: ({ and: "Vero se entrambi sono veri", or: "Vero se almeno uno è vero", if: "Verifica una condizione", while: "Al cambio valore, esegue se vero" })[kind],
-    category: "logic", runtime: "core-block", availability: "shipped", family: "functionality",
-    typeId: `logic_${kind}`, needsModule: false,
-    inputs: (kind === "and" || kind === "or" ? ["0", "1"] : ["0"]).map(id => inPort(id, [{ domain: "any", role: "comando" }], { label: kind === "and" || kind === "or" ? `Valore ${id === "0" ? "A" : "B"}` : "Valore da verificare" })),
-    outputs: [outPort("0", kind === "while" ? [T.eventTrigger] : [T.digitalComando], kind === "while" ? "Esegui al cambio valore" : kind === "if" ? "Segnale alto / basso" : "Condizione vera / falsa")],
-    fields: kind === "and" || kind === "or" ? [] : [
-      sel("condition", "Condizione", [
-        { value: "1", label: "È vero / diverso da zero" }, { value: "0", label: "È falso / uguale a zero" },
-        { value: "2", label: "È uguale al valore" }, { value: "3", label: "È diverso dal valore" },
-        { value: "4", label: "È maggiore del valore" }, { value: "5", label: "È maggiore o uguale" },
-        { value: "6", label: "È minore del valore" }, { value: "7", label: "È minore o uguale" },
-      ], "1"),
-      txt("value", "Valore di confronto", "0"),
-      ...(kind === "if" ? [
-        sel("whenTrue", "Se vera, imposta l’uscita", [{ value: "high", label: "Alto (1)" }, { value: "low", label: "Basso (0)" }], "high"),
-        sel("whenFalse", "Se falsa, imposta l’uscita", [{ value: "low", label: "Basso (0)" }, { value: "high", label: "Alto (1)" }], "low"),
-      ] : []),
-    ],
-    notes: "Memorizza l’ultimo valore di ogni ingresso. Accetta booleani, segnali digitali e interi. Zero è falso, ogni altro intero è vero. Accetta anche decimali e stringhe contenenti soltanto un numero; altri testi non sono validi. WHILE controlla la condizione al primo valore e a ogni cambio del valore in ingresso. Se è vera invia un trigger; un valore invariato non genera altri trigger. Non usa timer.",
-  })),
+  ...(["and", "or", "if", "while"] as const).map((kind) =>
+    e({
+      id: `logic.${kind}`,
+      label: kind.toUpperCase(),
+      subtitle: {
+        and: "Vero se entrambi sono veri",
+        or: "Vero se almeno uno è vero",
+        if: "Verifica una condizione",
+        while: "Al cambio valore, esegue se vero",
+      }[kind],
+      category: "logic",
+      runtime: "core-block",
+      availability: "shipped",
+      family: "functionality",
+      typeId: `logic_${kind}`,
+      needsModule: false,
+      inputs: (kind === "and" || kind === "or" ? ["0", "1"] : ["0"]).map((id) =>
+        inPort(id, [{ domain: "any", role: "comando" }], {
+          label:
+            kind === "and" || kind === "or"
+              ? `Valore ${id === "0" ? "A" : "B"}`
+              : "Valore da verificare",
+        }),
+      ),
+      outputs: [
+        outPort(
+          "0",
+          kind === "while" ? [T.eventTrigger] : [T.digitalComando],
+          kind === "while"
+            ? "Esegui al cambio valore"
+            : kind === "if"
+              ? "Segnale alto / basso"
+              : "Condizione vera / falsa",
+        ),
+      ],
+      fields:
+        kind === "and" || kind === "or"
+          ? []
+          : [
+              sel(
+                "condition",
+                "Condizione",
+                [
+                  { value: "1", label: "È vero / diverso da zero" },
+                  { value: "0", label: "È falso / uguale a zero" },
+                  { value: "2", label: "È uguale al valore" },
+                  { value: "3", label: "È diverso dal valore" },
+                  { value: "4", label: "È maggiore del valore" },
+                  { value: "5", label: "È maggiore o uguale" },
+                  { value: "6", label: "È minore del valore" },
+                  { value: "7", label: "È minore o uguale" },
+                  ...(kind === "if" ? [{ value: "8", label: "È compreso tra" }, { value: "9", label: "Non è compreso tra" }] : []),
+                ],
+                "1",
+              ),
+              txt("value", "Valore di confronto", "0"),
+              ...(kind === "if" ? [txt("valueMax", "Valore massimo", "0")] : []),
+              ...(kind === "if"
+                ? [
+                    sel(
+                      "whenTrue",
+                      "Se vera, imposta l’uscita",
+                      [
+                        { value: "high", label: "Alto (1)" },
+                        { value: "low", label: "Basso (0)" },
+                      ],
+                      "high",
+                    ),
+                    sel(
+                      "whenFalse",
+                      "Se falsa, imposta l’uscita",
+                      [
+                        { value: "low", label: "Basso (0)" },
+                        { value: "high", label: "Alto (1)" },
+                      ],
+                      "low",
+                    ),
+                  ]
+                : []),
+            ],
+      notes:
+        "Memorizza l’ultimo valore di ogni ingresso. Accetta booleani, segnali digitali e interi. Zero è falso, ogni altro intero è vero. Accetta anche decimali e stringhe contenenti soltanto un numero; altri testi non sono validi. WHILE controlla la condizione al primo valore e a ogni cambio del valore in ingresso. Se è vera invia un trigger; un valore invariato non genera altri trigger. Non usa timer.",
+    }),
+  ),
   e({
     id: "appblocks.compare_if",
     label: "IF",

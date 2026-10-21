@@ -289,6 +289,13 @@ int spaghetti_config_decode_cbor(const uint8_t *bytes, size_t length,
 	return 0;
 }
 
+int spaghetti_config_decode_cbor_checked(const uint8_t *bytes, size_t length, struct spaghetti_config *out, struct spaghetti_config_failure *failure)
+{
+ if (failure) failure->field = (enum spaghetti_config_failure_field)-1;
+ int err=spaghetti_config_decode_cbor(bytes,length,out);
+ return err ? err : spaghetti_config_validate(out,failure);
+}
+
 int spaghetti_config_encode_cbor(
 	const struct spaghetti_config *config,
 	uint8_t *buffer,

@@ -138,3 +138,20 @@ describe("removeProfile — S063 § Verifiche (in-use profile cannot be removed)
     expect(result.ok).toBe(true);
   });
 });
+
+
+it("reuses a remotely confirmed identical profile without validating or uploading it again", async () => {
+  const d = draft();
+  const summary = { profileId: d.profileId, version: d.version, hash: await sha256(encodeDeviceProfileCbor(d)) };
+  const client = fakeClient({ getFullDeviceProfileList: vi.fn().mockResolvedValue([summary]) });
+  expect((await installProfile(client, d, { reuseInstalled: true })).ok).toBe(true);
+  expect(client.validateDeviceProfile).not.toHaveBeenCalled();
+  expect(client.installDeviceProfile).not.toHaveBeenCalled();
+});
+it("does not reuse the same id and version when its content hash differs", async () => {
+  const client = fakeClient({ getFullDeviceProfileList: vi.fn().mockResolvedValue([{ profileId: draft().profileId, version: 1, hash: new Uint8Array(32) }]) });
+  const result = await installProfile(client, draft(), { reuseInstalled: true });
+  expect(client.validateDeviceProfile).toHaveBeenCalledOnce();
+  expect(client.installDeviceProfile).toHaveBeenCalledOnce();
+  expect(result.ok).toBe(false);
+});

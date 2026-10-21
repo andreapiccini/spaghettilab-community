@@ -2,7 +2,6 @@ import { decodeOne, encodeArray, encodeBytes, ProtocolCodecError } from "../cbor
 import {
   boolField,
   bytesField,
-  decodeEmptyPayload,
   encodeEmptyPayload,
   encodeMap,
   requireBool,
@@ -12,10 +11,17 @@ import {
   u32Field,
 } from "../fields.js";
 
-/** `GET_CONFIG` (op 16) has an empty request payload. */
-export const encodeGetConfigRequest = encodeEmptyPayload;
-export function decodeGetConfigRequest(bytes: Uint8Array): void {
-  decodeEmptyPayload(bytes, "GetConfigRequest");
+/** `GET_CONFIG` (op 16) optionally requests a chunk at a byte offset. */
+export function encodeGetConfigRequest(offset?: number): Uint8Array {
+  return offset === undefined ? encodeEmptyPayload() : encodeMap([u32Field(0, offset)]);
+}
+export function decodeGetConfigRequest(bytes: Uint8Array): number | undefined {
+  if (bytes.length === 0) return undefined;
+  const map = requireMap(decodeOne(bytes), "GetConfigRequest");
+  if (map.size === 0) return undefined;
+  if (map.size !== 1 || !map.has(0))
+    throw new ProtocolCodecError("Invalid GetConfigRequest fields");
+  return requireU32(map, 0, "GetConfigRequest");
 }
 
 /**
@@ -36,6 +42,8 @@ export type GetConfigResponse = {
   readonly generation: number;
   readonly sha256: Uint8Array;
   readonly configBytes: Uint8Array;
+  readonly totalSize?: number;
+  readonly offset?: number;
 };
 
 export function encodeGetConfigResponse(r: GetConfigResponse): Uint8Array {
@@ -43,6 +51,9 @@ export function encodeGetConfigResponse(r: GetConfigResponse): Uint8Array {
     u32Field(0, r.generation),
     bytesField(1, r.sha256),
     bytesField(2, r.configBytes),
+    ...(r.totalSize === undefined
+      ? []
+      : [u32Field(3, r.totalSize), u32Field(4, r.offset ?? 0)]),
   ]);
 }
 
@@ -52,6 +63,12 @@ export function decodeGetConfigResponse(bytes: Uint8Array): GetConfigResponse {
     generation: requireU32(map, 0, "GetConfigResponse"),
     sha256: requireBytes(map, 1, "GetConfigResponse"),
     configBytes: requireBytes(map, 2, "GetConfigResponse"),
+    ...(map.has(3)
+      ? {
+          totalSize: requireU32(map, 3, "GetConfigResponse"),
+          offset: requireU32(map, 4, "GetConfigResponse"),
+        }
+      : {}),
   };
 }
 
@@ -170,4 +187,22 @@ export function decodeApplyConfigResponse(bytes: Uint8Array): ApplyConfigRespons
     generation: requireU32(map, 1, "ApplyConfigResponse"),
     sha256: requireBytes(map, 2, "ApplyConfigResponse"),
   };
+}
+
+/** Bounded upload extension. Only the final chunk validates or commits. */
+export function encodeConfigChunk(
+  operation: "validate" | "apply",
+  configBytes: Uint8Array,
+  token: number,
+  offset: number,
+  total: number,
+  generation = 0,
+): Uint8Array {
+  return encodeMap([
+    ...(operation === "apply" ? [u32Field(0, generation)] : []),
+    bytesField(operation === "apply" ? 1 : 0, configBytes),
+    u32Field(10, token),
+    u32Field(11, offset),
+    u32Field(12, total),
+  ]);
 }

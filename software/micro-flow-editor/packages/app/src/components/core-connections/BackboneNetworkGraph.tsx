@@ -36,19 +36,36 @@ export function BackboneNetworkGraph({
   const reducedMotion = useReducedMotion();
   const it = locale === "it";
 
+  const listRef = useRef<HTMLOListElement>(null);
+  const [lineHeight, setLineHeight] = useState(0);
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const measure = () => {
+      const nodes = list.querySelectorAll<HTMLElement>(".can-network-node");
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      setLineHeight(first && last && nodes.length > 1 ? last.offsetTop - first.offsetTop : 0);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    measure();
+    return () => observer.disconnect();
+  }, [boards.length]);
+
   return (
     <section className="can-network" aria-label={it ? "Rete CAN" : "CAN network"}>
-      <h3 className="can-network-heading">
-        <GitFork size={20} aria-hidden />
-        {it ? "Rete CAN" : "CAN network"}
-      </h3>
-      <ol className="can-network-list">
+      <ol className="can-network-list" ref={listRef}>
+        {lineHeight > 0 && (
+          <li className="can-network-line" style={{ height: lineHeight }} aria-hidden>
+            {!reducedMotion && <span className="can-network-signal" />}
+          </li>
+        )}
         <AnimatePresence initial={false}>
-          {boards.map((board, index) => (
+          {boards.map((board) => (
             <CanNetworkNode
               key={board.id}
               board={board}
-              hasLink={index < boards.length - 1}
               tags={nfcByBoardId.get(board.id) ?? []}
               nfcLoading={nfcLoading}
               locale={locale}
@@ -77,7 +94,6 @@ export function BackboneNetworkGraph({
 
 function CanNetworkNode({
   board,
-  hasLink,
   tags,
   nfcLoading,
   locale,
@@ -85,7 +101,6 @@ function CanNetworkNode({
   onBoardClick,
 }: {
   readonly board: NetworkBoard;
-  readonly hasLink: boolean;
   readonly tags: readonly NfcNode[];
   readonly nfcLoading: boolean;
   readonly locale: LocaleId;
@@ -110,12 +125,12 @@ function CanNetworkNode({
           <span className={`can-network-role ${master ? "is-master" : ""}`}>{role}</span>
         )}
         <span className="can-network-meta">{board.sublabel}</span>
-        {master && (
-          <span className="can-network-host">
-            {board.hostLink === "wifi" ? <Wifi size={11} aria-hidden /> : <Cable size={11} aria-hidden />}
-            {board.hostLink === "wifi" ? "Wi-Fi" : "USB"}
-          </span>
-        )}
+        <span className="can-network-host">
+          {board.local
+            ? board.hostLink === "wifi" ? <Wifi size={11} aria-hidden /> : <Cable size={11} aria-hidden />
+            : <GitFork size={11} aria-hidden />}
+          {board.local ? board.hostLink === "wifi" ? "Wi-Fi" : "USB" : "CAN"}
+        </span>
         {reader && (
           <span className="can-network-tags">
             {tags.length === 0 ? (
@@ -147,11 +162,6 @@ function CanNetworkNode({
       exit={{ opacity: 0, y: -8 }}
       transition={reducedMotion ? { duration: 0 } : motionTokens.spring.smooth}
     >
-      {hasLink && (
-        <span className="can-network-line" aria-hidden>
-          {!reducedMotion && <span className="can-network-signal" />}
-        </span>
-      )}
       <span
         className={`can-network-junction ${master ? "is-master" : ""} ${reader ? "is-reader" : ""}`}
         aria-hidden

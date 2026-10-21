@@ -10,7 +10,7 @@ import {
 
 /** Layout 1 describes Connector ×1 and Function ×2, six physical pins each. */
 export type PhysicalBackbone = {
-  readonly version: 1 | 2;
+  readonly version: 1 | 2 | 3;
   readonly settings?: PhysicalInterfaceSettings;
   readonly mcu: "ESP32-S3" | "ESP32-C3" | "Unknown";
   readonly antennas: number;
@@ -27,18 +27,22 @@ export function decodePhysicalBackbone(
 ): PhysicalBackbone | undefined {
   if (!(
     (bytes.length === 13 && bytes[0] === 1) ||
-    (bytes.length === 33 && bytes[0] === 2)
+    (bytes.length === 33 && bytes[0] === 2) ||
+    (bytes.length === 37 && bytes[0] === 3)
   ))
     return undefined;
   return {
-    version: bytes[0] as 1 | 2,
-    settings: bytes[0] === 2 ? decodePhysicalSettings(bytes.slice(13)) : undefined,
+    version: bytes[0] as 1 | 2 | 3,
+    settings: bytes[0]! >= 2 ? decodePhysicalSettings(bytes.slice(13, 33)) : undefined,
     mcu: bytes[1] === 1 ? "ESP32-S3" : bytes[1] === 2 ? "ESP32-C3" : "Unknown",
     antennas: bytes[2]!,
     layout: bytes[3]!,
     backendPortId: bytes[4]!,
     capabilities: bytes[5]! | (bytes[6]! << 8),
-    modes: [...bytes.slice(7, 11)],
+    modes: [
+      ...bytes.slice(7, 11),
+      ...(bytes[0] === 3 && bytes[3] === 2 ? bytes.slice(33, 37) : []),
+    ],
     i2cSpeed: bytes[11]!,
     source: bytes[12]!,
   };
@@ -57,7 +61,7 @@ export function encodeApplyPhysicalRequest(request: ApplyPhysicalRequest): Uint8
     !Number.isInteger(request.nodeId) ||
     request.nodeId < 0 ||
     request.nodeId > 0xffffff ||
-    request.modes.length !== 4 ||
+    (request.modes.length !== 4 && request.modes.length !== 8) ||
     (request.i2cSpeed !== 0 && request.i2cSpeed !== 1)
   ) {
     throw new ProtocolCodecError("Invalid physical port configuration");
@@ -176,4 +180,8 @@ export function decodePhysicalSettings(bytes: Uint8Array): PhysicalInterfaceSett
   if (encoded.some((value, i) => value !== bytes[i]))
     throw new ProtocolCodecError("Invalid interface flags");
   return result;
+}
+
+export function encodeIdentifyBackboneRequest(nodeId: number): Uint8Array {
+  return encodeMap([u32Field(0, nodeId)]);
 }

@@ -7,7 +7,8 @@ import { motionTokens } from "../../lib/motion-tokens.js";
 import { fieldsFor, OP_LABEL, type FieldSpec } from "./instruction-config.js";
 
 /** A single field, rendered by `FieldSpec.kind` — no per-opcode bespoke form components (21 opcodes would mean 21 near-identical files); one generic renderer driven by `instruction-config.ts`'s table instead. */
-function FieldInput({ spec, value, onChange }: { readonly spec: FieldSpec; readonly value: unknown; readonly onChange: (value: unknown) => void }) {
+function FieldInput({ spec, value, onChange, signalNames }: { readonly signalNames?: readonly string[]; readonly spec: FieldSpec; readonly value: unknown; readonly onChange: (value: unknown) => void }) {
+  if (signalNames?.length && ["channel","dataChannel","powerChannel"].includes(spec.key)) return <label className="block text-sm">{spec.label}<select className="w-full rounded-lg border border-border-strong px-2 py-1.5" value={Number(value??0)} onChange={e=>onChange(Number(e.target.value))}>{signalNames.map((name,index)=><option key={index} value={index}>{name}</option>)}</select></label>;
   if (spec.kind === "boolean") {
     return (
       <label className="flex items-center gap-2 font-body text-sm text-ink">
@@ -70,6 +71,7 @@ export function StepRow({
   onMoveDown,
   onDelete,
   startExpanded,
+  signalNames,
 }: {
   readonly instruction: Instruction;
   readonly index: number;
@@ -80,6 +82,7 @@ export function StepRow({
   readonly onMoveDown: () => void;
   readonly onDelete: () => void;
   readonly startExpanded?: boolean;
+  readonly signalNames?: readonly string[];
 }) {
   const [expanded, setExpanded] = useState(Boolean(startExpanded));
   const fields = fieldsFor(instruction.op);
@@ -116,7 +119,7 @@ export function StepRow({
               {fields.length === 0 ? (
                 <p className="col-span-2 font-body text-xs text-ink-faint">Nessun campo per questo step.</p>
               ) : (
-                fields.map((spec) => <FieldInput key={spec.key} spec={spec} value={(instruction as unknown as Record<string, unknown>)[spec.key]} onChange={(v) => patch(spec.key, v)} />)
+                fields.map((spec) => <FieldInput signalNames={signalNames} key={spec.key} spec={spec} value={(instruction as unknown as Record<string, unknown>)[spec.key]} onChange={(v) => patch(spec.key, v)} />)
               )}
             </div>
           </motion.div>

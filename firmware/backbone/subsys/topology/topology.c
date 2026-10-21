@@ -36,6 +36,12 @@ LOG_MODULE_REGISTER(spaghetti_topology, CONFIG_SPAGHETTI_TOPOLOGY_LOG_LEVEL);
 			(uint8_t)DT_PROP(node_id, function_bay_count), \
 	},
 
+BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(spaghettilab_flow) <= CONFIG_SPAGHETTI_MAX_FLOWS,
+	     "Hardware flow count exceeds the resource profile");
+BUILD_ASSERT(DT_NUM_INST_STATUS_OKAY(spaghettilab_flow) ==
+	     DT_NUM_INST_STATUS_OKAY(spaghettilab_port),
+	     "Every hardware port requires one flow descriptor");
+
 DT_FOREACH_STATUS_OKAY(spaghettilab_flow, SPAGHETTI_FLOW_VALIDATE)
 
 static const struct spaghetti_flow_descriptor flows[] = {

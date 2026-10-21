@@ -81,3 +81,11 @@ it("publishes IF output to animate a direct internal LED connection, including L
  const compiled=compileConfig(plan.input,plan.options);expect(compiled.ok?[]:compiled.error).toEqual([]);
  expect(activeEdgesForRecord([route!],{sourceKey:route!.key,schemaId:route!.schemaId,fields:{[route!.field]:0n}} as Parameters<typeof activeEdgesForRecord>[1])).toHaveLength(1);
 });
+
+it("encodes inclusive ranges and rejects reversed bounds", () => {
+ expect(logicProperties("logic_if",{condition:"8",value:"20,5",valueMax:"30,25"},"number")).toMatchObject({"1":8n,"7":"20.5","9":"30.25"});
+ expect(logicProperties("logic_if",{condition:"9",value:-10,valueMax:0},"int")).toMatchObject({"1":9n,"2":-10n,"9":"0"});
+ expect(()=>logicProperties("logic_if",{condition:"8",value:30,valueMax:20},"number")).toThrow(/massimo/);
+ expect(()=>logicProperties("logic_if",{condition:"8",value:20,valueMax:"abc"},"number")).toThrow();
+ expect(()=>logicProperties("logic_if",{condition:"8",value:20,valueMax:30.001},"number")).toThrow(/decimali/);
+});

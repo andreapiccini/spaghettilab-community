@@ -8,6 +8,7 @@
  * delle istruzioni catalogate").
  */
 export const DeviceProfileOpcode = {
+  PWM_SET: 41,
   DHT22_POWER: 36,
   EMIT_DECIMAL: 38,
   DHT22_READ: 37,
