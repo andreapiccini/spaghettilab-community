@@ -1,3 +1,4 @@
+import { isRgbLed, rgbLedPresets, RGB_PRESET_PREFIX } from "../../lib/rgb-led-presets.js";
 import { disabledRgbInputs, rgbInputFamilies } from "../../lib/rgb-input-mode.js";
 import { generatorColorKind } from "../../lib/data-viewer.js";
 import { readLedDriver, type LedDriverConfig } from "../../lib/led-driver.js";
@@ -115,6 +116,7 @@ export type ProcessingNodeUiData = {
   };
   readonly manualTrigger?: { bindingId?: string };
   readonly sensorSchematic?: boolean;
+  readonly rgbPresetColors?: Readonly<Record<string, string>>;
   readonly hardwareKind?: GpioHardwareAppearance["kind"];
   readonly hardwareSummary?: string;
   readonly backboneLabel?: string;
@@ -544,6 +546,7 @@ export function toProcessingNodes(
           : {}),
         sensorSchematic: schematic,
         hardwareKind,
+        rgbPresetColors: data.kind === "block" && isRgbLed(data.properties) ? Object.fromEntries(rgbLedPresets(data.properties).presets.map(preset => [RGB_PRESET_PREFIX + preset.id, preset.color])) : undefined,
         hardwareSummary,
         backboneLabel: isBlockNodeData(data)
           ? backboneLabels.get(String(data.properties[SENSOR_MODULE_ID_PROP]))

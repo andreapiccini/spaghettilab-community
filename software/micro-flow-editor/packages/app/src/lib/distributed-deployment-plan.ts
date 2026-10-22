@@ -1,3 +1,4 @@
+import { lowerRgbLedPresets } from "./rgb-led-presets.js";
 import { activeModuleIds } from "./active-module-ids.js";
 import { resolveLogicalBackbones } from "./logical-backbone-slots.js";
 import type {
@@ -44,6 +45,7 @@ export function prepareDistributedDeployment(
   input: CompileConfigInput,
   status?: GetStatusResponse,
 ): DistributedDeploymentPlan {
+  input = { ...input, processingGraph: lowerRgbLedPresets(input.processingGraph) };
   const resolved = status
     ? resolveLogicalBackbones(project, bindingId, status)
     : undefined;

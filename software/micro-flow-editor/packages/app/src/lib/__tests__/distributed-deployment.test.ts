@@ -348,3 +348,23 @@ it("compiles the temperature IF to preset 2 and a remote RGB color input", async
     expect(manualDeploymentIsCurrent(changed, "master", compiled.value)).toBe(false);
   }
 });
+
+it("routes integrated LED preset triggers to an RGB driver on CAN", () => {
+  const { installed, input } = fixture();
+  const led = input.processingGraph.nodes.find(node => node.id !== "colors" && node.id !== "viewer")!.id;
+  const integrated = { ...input, processingGraph: { ...input.processingGraph,
+    nodes: input.processingGraph.nodes.filter(node => node.id !== "colors").concat([{
+      layer: "device-processing", id: "activate", data: { kind: "block", blockTypeId: "ui.manual_trigger", properties: {} },
+    }]),
+    edges: input.processingGraph.edges.filter(edge => edge.id !== "color-wire").concat([{
+      id: "preset-trigger", source: "activate", sourceHandle: "trigger", target: led, targetHandle: "preset:0",
+    }]),
+  } };
+  const plan = prepareDistributedDeployment(installed, "master", integrated);
+  expect(plan.remotePlans).toHaveLength(1);
+  for (const part of [plan, plan.remotePlans[0]!.plan]) {
+    const compiled = compileConfig(part.input, part.options);
+    if (!compiled.ok) throw new Error(JSON.stringify(compiled.error));
+    expect(compiled.ok).toBe(true);
+  }
+});

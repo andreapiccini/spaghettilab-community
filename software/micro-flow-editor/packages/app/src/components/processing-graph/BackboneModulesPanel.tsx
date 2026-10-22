@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { topologyNeedsReconfiguration } from "../../lib/backbone-topology-change.js";
 import { logicalBackboneKey } from "../../lib/logical-backbone-slots.js";
 import { BackboneTargetPicker } from "../backbone/BackboneTargetPicker.js";
@@ -5,7 +6,7 @@ import { useSession } from "../../state/session-context.js";
 import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { NFC_INSTALL_META } from "../../lib/nfc-workspace.js";
 import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
-import { Cpu, Plus, Trash2 } from "lucide-react";
+import { Cpu, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import type { BackboneSensorModule } from "../../lib/backbone-sensor-modules.js";
 import { resolveRecipe } from "../../lib/backbone-sensor-modules.js";
 import { STATUS_LED_LABEL } from "../../lib/backbone-physical.js";
@@ -30,6 +31,7 @@ export function BackboneModulesPanel({
   readonly onRemove: (moduleId: string) => void;
   readonly onUseStatusLed: () => void;
 }) {
+  const [collapsed, setCollapsed] = useState(false);
   const { locale } = useLocale();
   const it = locale === "it";
   const { session, moduleTarget } = useSession();
@@ -48,7 +50,7 @@ export function BackboneModulesPanel({
   return (
     <div
       data-tour-target="backbone-modules-panel"
-      className="pointer-events-auto absolute z-20 flex w-[min(100%-1.5rem,20rem)] flex-col overflow-hidden rounded-slmd border-2 border-dashed shadow-e1"
+      className={`pointer-events-auto absolute z-20 flex ${collapsed ? "w-44" : "w-[min(100%-1.5rem,20rem)]"} flex-col overflow-hidden rounded-slmd border-2 border-dashed shadow-e1`}
       style={{
         right: "max(0.75rem, env(safe-area-inset-right))",
         top: "0.75rem",
@@ -56,7 +58,9 @@ export function BackboneModulesPanel({
         backgroundColor: "color-mix(in srgb, #64748B 8%, var(--color-surface))",
       }}
     >
-      <div className="flex h-8 shrink-0 items-center gap-1.5 border-b border-slate-400/25 px-2">
+      <button type="button" onClick={() => setCollapsed(value => !value)} aria-expanded={!collapsed}
+        aria-label={it ? (collapsed ? "Espandi pannello Backbone" : "Riduci pannello Backbone") : (collapsed ? "Expand Backbone panel" : "Collapse Backbone panel")}
+        className="flex h-9 shrink-0 items-center gap-1.5 border-b border-slate-400/25 px-2 hover:bg-surface-raised">
         <Cpu size={13} className="shrink-0 text-slate-500" />
         <span className="min-w-0 truncate font-body text-xs font-semibold text-ink-muted">
           Backbone
@@ -67,8 +71,10 @@ export function BackboneModulesPanel({
         >
           {it ? "Moduli" : "Modules"}
         </span>
-      </div>
+        {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+      </button>
 
+      {!collapsed && <>
       <div className="border-b border-border px-2 py-2"><BackboneTargetPicker bindingId={bindingId} /></div>
       {topologyPending && <p className="p-3 text-sm text-ink-muted">Assegnazioni da riconfigurare. Controlla la nuova disposizione delle Backbone nell’avviso in alto.</p>}
       <div className="flex flex-wrap gap-2 p-2">
@@ -151,6 +157,7 @@ export function BackboneModulesPanel({
             : "Internal LED is the on-board LED. + pick a sensor: its channel block appears on the canvas."}
         </p>
       )}
+      </>}
     </div>
   );
 }

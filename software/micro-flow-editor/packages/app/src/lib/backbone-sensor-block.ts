@@ -1,3 +1,4 @@
+import { isRgbLed, rgbLedPresets, RGB_PRESET_PREFIX } from "./rgb-led-presets.js";
 import { rgbInputLabel } from "./rgb-module.js";
 import { MOVEMENT_COMPLETED } from "./flow-sequence.js";
 import {
@@ -126,7 +127,12 @@ function isSensorChannel(value: unknown): value is SensorChannel {
 export function channelsFromNodeProperties(
   properties: Readonly<Record<string, unknown>>,
 ): readonly SensorChannel[] {
-  return parseSensorChannels(properties[SENSOR_CHANNELS_JSON_PROP]);
+  const channels = parseSensorChannels(properties[SENSOR_CHANNELS_JSON_PROP]);
+  return isRgbLed(properties) ? [
+    ...rgbLedPresets(properties).presets.map(preset => ({ id: RGB_PRESET_PREFIX + preset.id, label: preset.name,
+      direction: "write" as const, quantity: "digital" as const, dataType: "bool" as const, inputMode: "trigger" as const, unit: "" })),
+    ...channels,
+  ] : channels;
 }
 
 export function propertiesForSensorModule(

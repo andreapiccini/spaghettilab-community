@@ -517,7 +517,7 @@ export function ProcessingNode({
           }}
         >
           <div className="h-9 w-9 shrink-0" aria-hidden="true">
-            <ModuleArtwork kind={data.hardwareKind ?? "generic"} name={data.label} />
+            {data.hardwareKind === "rgb" ? <RgbRing /> : <ModuleArtwork kind={data.hardwareKind ?? "generic"} name={data.label} />}
           </div>
           <div className="min-w-0 flex-1 pt-1">
             <div className="flex min-w-0 items-center gap-2 pr-3">
@@ -571,6 +571,7 @@ export function ProcessingNode({
                       transform: "translateY(-50%)",
                     }}
                   >
+                    {type === "target" && data.rgbPresetColors?.[port.id] && <span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-middle" style={{ background: data.rgbPresetColors[port.id] }} />}
                     {port.label}
                   </span>
                 )}

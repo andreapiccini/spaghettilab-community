@@ -52,3 +52,8 @@ export async function sendManualTrigger(
     await command(1);
   }
 }
+
+/** Timers own scheduled buttons during Run; standalone buttons remain manual. */
+export function manualTriggerBlocked(mode: string, scheduled: boolean): boolean {
+  return mode === "busy" || (mode === "continuous" && scheduled);
+}

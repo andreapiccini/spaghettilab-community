@@ -1,3 +1,4 @@
+import { isRgbLed, rgbLedPresets, migrateRgbLedGenerators, RGB_PRESET_PREFIX } from "../../lib/rgb-led-presets.js";
 import { abortableModuleOperation } from "../../lib/module-operation.js";
 import { MODULE_EDITOR_CONTEXT } from "../../lib/new-device-driver.js";
 import { moduleBackboneLabels } from "../../lib/logical-backbone-slots.js";
@@ -5,10 +6,8 @@ import { pauseDistributedParticipants } from "../../lib/distributed-deployment.j
 import { disabledRgbInputs, rgbInputFamilies } from "../../lib/rgb-input-mode.js";
 import { LedDriverDialog } from "../device-recipe-editor/LedDriverEditor.js";
 import {
-  SIGNAL_STYLES,
   nodeSignalTypes,
   wireSignalType,
-  type WireSignalType,
 } from "./signal-colors.js";
 import { decodeConfigCbor as decodeDeploymentConfig } from "@spaghettilab/config-decompiler";
 import { deploymentIsCurrent } from "../../lib/manual-deployment-current.js";
@@ -323,6 +322,7 @@ function ProcessingGraphScreenInner() {
   const copy = processingGraphCopy(locale);
   const demoOnly = isDemoOnlyEnabled();
   const demoAutoStarted = useRef(false);
+  const canvasElement = useRef<HTMLDivElement>(null);
   const createdDriverToken = useRef<string | null>(null);
   const {
     configuredPorts,
@@ -507,6 +507,11 @@ function ProcessingGraphScreenInner() {
     () => modulesForBinding(sensorModulesProject, selected?.bindingId),
     [sensorModulesProject, selected?.bindingId],
   );
+  useEffect(() => {
+    if (!execute || !session) return;
+    if (migrateRgbLedGenerators(session.stack.current) === session.stack.current) return;
+    execute({ kind: "IntegrateRgbPresets", apply: project => ({ ok: true, value: migrateRgbLedGenerators(project) }) });
+  }, [execute, session, domainNodes]);
   // Saved canvas cards cache their ports. Refresh RGB cards from the current module
   // recipe, including migrations and the selected color/channel input mode.
   useEffect(() => {
@@ -2468,6 +2473,9 @@ function ProcessingGraphScreenInner() {
       setLedDriverEditor(node.id);
       return;
     }
+    if (domainNode.data.kind === "block" && isRgbLed(domainNode.data.properties)) {
+      setInspector(null); setLedDriverEditor(node.id); return;
+    }
     const meta = authoringMetadata[node.id];
     setInspector({
       kind: "edit",
@@ -2485,6 +2493,7 @@ function ProcessingGraphScreenInner() {
       setLedDriverEditor(node.id);
       return;
     }
+    if (isRgbLed(domain.data.properties)) { setInspector(null); setLedDriverEditor(node.id); return; }
     if (domain.data.properties.statusLed === true) {
       setInspector(null);
       setWhiteLedEditor(node.id);
@@ -2876,7 +2885,13 @@ function ProcessingGraphScreenInner() {
   const ledDriverDialog =
     ledDriverNode?.data.kind === "block" ? (
       <LedDriverDialog
-        properties={ledDriverNode.data.properties}
+        connections={isRgbLed(ledDriverNode.data.properties) && selected ? (() => {
+          const module = backboneSensorModules.find(module => module.id === (ledDriverNode.data.kind === "block" ? ledDriverNode.data.properties[SENSOR_MODULE_ID_PROP] : undefined));
+          return module ? <ModuleGpioPinField module={module} bindingId={selected.bindingId} it={locale === "it"} /> : undefined;
+        })() : undefined}
+        integrated={isRgbLed(ledDriverNode.data.properties)}
+        properties={isRgbLed(ledDriverNode.data.properties)
+          ? { ledDriverConfig: JSON.stringify(rgbLedPresets(ledDriverNode.data.properties)) } : ledDriverNode.data.properties}
         onCancel={() => {
           setLedDriverEditor(null);
           setInspector(null);
@@ -2890,18 +2905,19 @@ function ProcessingGraphScreenInner() {
                 ...(ledDriverNode.data.kind === "block"
                   ? ledDriverNode.data.properties
                   : {}),
-                ledDriverConfig: JSON.stringify(config),
+                [ledDriverNode.data.kind === "block" && isRgbLed(ledDriverNode.data.properties) ? "rgbLedPresets" : "ledDriverConfig"]: JSON.stringify(config),
               },
             } as DeviceProcessingNodeData,
             authoringMetadata[ledDriverNode.id]?.comment ?? "Generatore colori",
           );
-          const ids = new Set(config.presets.map((p) => p.id));
+          const integrated = ledDriverNode.data.kind === "block" && isRgbLed(ledDriverNode.data.properties);
+          const ids = new Set(config.presets.map((p) => integrated ? RGB_PRESET_PREFIX + p.id : p.id));
           onEdgesChange(
             graphState.edges
               .filter(
                 (e) =>
-                  (e.target === ledDriverNode.id && !ids.has(e.targetHandle ?? "")) ||
-                  (e.source === ledDriverNode.id &&
+                  (e.target === ledDriverNode.id && (!integrated || e.targetHandle?.startsWith(RGB_PRESET_PREFIX)) && !ids.has(e.targetHandle ?? "")) ||
+                  (e.source === ledDriverNode.id && !integrated &&
                     !(config.outputMode === "rgb" ? ["1", "2", "3"] : ["0"]).includes(
                       e.sourceHandle ?? "0",
                     )),
@@ -3091,26 +3107,6 @@ function ProcessingGraphScreenInner() {
           </button>
         </div>
       )}
-      <div
-        aria-label="Tipi di segnale sui fili"
-        className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-border bg-surface px-4 py-1.5 text-[11px] text-ink-muted"
-      >
-        <span className="font-semibold">Segnali</span>
-        {[
-          ...new Set(
-            edges.map((edge) => (edge.data?.signalType ?? "any") as WireSignalType),
-          ),
-        ].map((type) => (
-          <span key={type} className="inline-flex items-center gap-1.5">
-            <span
-              aria-hidden="true"
-              className="h-0.5 w-4 rounded-full"
-              style={{ backgroundColor: SIGNAL_STYLES[type].color }}
-            />
-            {SIGNAL_STYLES[type].label}
-          </span>
-        ))}
-      </div>
       {pauseError && (
         <div
           role="alert"
@@ -3130,26 +3126,32 @@ function ProcessingGraphScreenInner() {
             <ProcessingBlockPalette
               bindingId={selected?.bindingId}
               onCreateRecipe={() => navigate("device-recipe-editor")}
-              onAddLedDriver={() => {
-                const entry = findCatalogEntryById("native.led_driver");
-                if (entry) placeFromCatalog(entry);
-              }}
-              onAddSchedule={() => {
-                const entry = findCatalogEntryById("native.schedule");
-                if (entry) placeFromCatalog(entry);
-              }}
-              onAddTrigger={() => {
-                const entry = findCatalogEntryById("appblocks.manual_trigger");
-                if (entry) placeFromCatalog(entry);
-              }}
-              onAddViewer={() => {
-                const entry = findCatalogEntryById("appblocks.data_viewer");
-                if (entry) placeFromCatalog(entry);
+              onInsert={(row) => {
+                const bounds = canvasElement.current?.getBoundingClientRect();
+                const center = bounds && rf?.screenToFlowPosition({
+                  x: bounds.left + bounds.width / 2,
+                  y: bounds.top + bounds.height / 2,
+                });
+                const offset = (domainNodes.length % 4) * 24;
+                const position = center ? {
+                  x: snapToGrid(center.x - 140 + offset),
+                  y: snapToGrid(center.y - 70 + offset),
+                } : nextSpawnPosition(domainNodes.length);
+                if (row.sensorRecipeId) {
+                  const recipe = findSensorRecipeById(row.sensorRecipeId) ?? backboneSensorModules
+                    .flatMap(module => module.actions ?? [module.recipe])
+                    .find(recipe => recipe.id === row.sensorRecipeId);
+                  if (recipe) placeSensorRecipeOnCanvas(recipe, position);
+                } else {
+                  const entry = findCatalogEntryById(row.entry.id);
+                  if (entry) placeFromCatalog(entry, position, row.baySide, row.physicalPinId);
+                }
               }}
             />
           )}
 
           <div
+            ref={canvasElement}
             className="relative flex-1"
             onDragOver={onCanvasDragOver}
             onDragLeave={() => {

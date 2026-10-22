@@ -1,3 +1,4 @@
+import { lowerRgbLedPresets } from "./rgb-led-presets.js";
 import { generatorColorKind, type ViewerColorKind } from "./data-viewer.js";
 import { ledDriverProperties, readLedDriver } from "./led-driver.js";
 import { whiteLedProperties } from "./white-led-module.js";
@@ -171,6 +172,7 @@ export function prepareDriverDeployment(
   bindingId: string,
   input: CompileConfigInput,
 ): DriverDeploymentPlan {
+  input = { ...input, processingGraph: lowerRgbLedPresets(input.processingGraph) };
   const viewerIds = new Set(
     (input.processingGraph.nodes as readonly Node[])
       .filter(
@@ -1802,6 +1804,11 @@ export function prepareDriverDeployment(
       });
       continue;
     }
+    // A mapped level input (e.g. relay ON/OFF) is itself the command:
+    // receiving HIGH or LOW must execute the action after storing its argument.
+    const mappedLevelInput = targetSensor?.recipe.deviceDraft &&
+      sensorInterfaces(targetSensor.recipe.deviceDraft).inputs.some(input =>
+        input.fromChannelId === edge.targetHandle && isMappedTrigger(input));
     const execute =
       edge.targetHandle === "execute" ||
       Boolean(target.triggerHandle && edge.targetHandle === target.triggerHandle);
@@ -1843,7 +1850,7 @@ export function prepareDriverDeployment(
                   sensorNodes.some(
                     (node) =>
                       node.id === edge.target &&
-                      node.data.properties[SENSOR_INSTANCE_PROP] === true,
+                      node.data.properties[SENSOR_INSTANCE_PROP] === true && !mappedLevelInput,
                   )
                 ? 3
                 : 4,

@@ -4,13 +4,14 @@ import { useCoreSessions } from "../../state/core-sessions-context.js";
 import { useSession } from "../../state/session-context.js";
 import { useLocale } from "../../state/locale-context.js";
 
-export function BackboneTargetPicker({ disabled = false, onChange, bindingId }: { readonly bindingId?: string; readonly disabled?: boolean; readonly onChange?: (target: { bindingId: string; deviceIdHex: string }) => void }) {
+export function BackboneTargetPicker({ disabled = false, onChange, bindingId, value }: { readonly value?: { bindingId: string; deviceIdHex: string }; readonly bindingId?: string; readonly disabled?: boolean; readonly onChange?: (target: { bindingId: string; deviceIdHex: string }) => void }) {
   const { rows, getClient } = useCoreSessions();
   const { moduleTarget, setModuleTarget } = useSession();
   const { locale } = useLocale();
   const it = locale === "it";
   const choices = rows.filter(row => !bindingId || row.binding.bindingId === bindingId).flatMap(row => row.attachedBackbones.filter(board => board.productKind !== "nfc-reader").map((board, i) => ({ ...board, bindingId: row.binding.bindingId, ready: row.sessionState === "READY", label: `${rows.length > 1 ? `${row.displayName} · ` : ""}Backbone ${i + 1} · ${board.local ? row.hostLink === "wifi" ? "Wi-Fi" : "USB" : "CAN"} · ${board.mac || board.deviceIdHex.slice(0, 12)}` })));
-  const selected = choices.find(choice => choice.bindingId === moduleTarget?.bindingId && choice.deviceIdHex === moduleTarget.deviceIdHex) ?? choices[0];
+  const target = value ?? moduleTarget;
+  const selected = choices.find(choice => choice.bindingId === target?.bindingId && choice.deviceIdHex === target.deviceIdHex) ?? choices[0];
   const recentFirmware = (version: string | undefined) => {
     const match = /^(\d+)\.(\d+)\.(\d+)/.exec(version ?? "");
     return !!match && (Number(match[1]) > 0 || Number(match[2]) > 5 || (Number(match[2]) === 5 && Number(match[3]) >= 38));

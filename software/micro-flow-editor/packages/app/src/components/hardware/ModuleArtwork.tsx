@@ -1,3 +1,4 @@
+import { RgbRing } from "../processing-graph/RgbRing.js";
 import { useId, type ReactNode } from "react";
 import type { GpioHardwareAppearance } from "../../lib/device-recipe-draft.js";
 
@@ -19,6 +20,7 @@ export function ModuleArtwork({
 }) {
   const id = useId().replaceAll(":", "");
   const face = `url(#${id}-face)`;
+  if (kind === "rgb" && !glyph) return <div className="flex h-full w-full items-center justify-center" role="img" aria-label={name}><RgbRing /></div>;
   const lamp = active ? (lightColor ?? "#e7a2a2") : "#e5ebf3";
   return (
     <svg

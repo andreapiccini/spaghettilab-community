@@ -2,6 +2,8 @@ import {
   isGpioModule,
   type BackboneSensorModule,
 } from "../../lib/backbone-sensor-modules.js";
+import { useState, useEffect, useRef } from "react";
+import { ModulesScreen } from "../modules/ModulesScreen.js";
 import { useSession } from "../../state/session-context.js";
 
 /** Pin ownership is configured centrally in Modules, never from a canvas block. */
@@ -15,6 +17,14 @@ export function ModuleGpioPinField({
   readonly it: boolean;
 }) {
   const { navigate } = useSession();
+  const [editing, setEditing] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (!editing) return;
+    const element = dialog.current;
+    element?.showModal();
+    return () => element?.close();
+  }, [editing]);
   if (!isGpioModule(module)) return null;
   const draft = module.recipe.deviceDraft;
   const channels =
@@ -22,6 +32,7 @@ export function ModuleGpioPinField({
     (module.gpioAssignment
       ? { [draft?.binding.gpioSignals[0]?.id ?? "DATA"]: module.gpioAssignment.channel }
       : {});
+  const boardKey = module.gpioAssignments?.boardKey ?? module.gpioAssignment?.boardKey;
   return (
     <section
       className="rounded-xl border border-border p-3 font-body text-sm"
@@ -56,10 +67,18 @@ export function ModuleGpioPinField({
       <button
         type="button"
         className="mt-2 text-xs font-semibold text-brand-blue hover:underline"
-        onClick={() => navigate("modules")}
+        onClick={() => draft && boardKey ? setEditing(true) : navigate("modules")}
       >
-        {it ? "Apri Moduli" : "Open Modules"}
+        {it ? "Cambia pin o Backbone" : "Change pins or Backbone"}
       </button>
+      {editing && draft && boardKey && <dialog ref={dialog}
+        aria-label="Pin e Backbone del modulo" onCancel={event => { event.preventDefault(); setEditing(false); }}
+        className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none border-0 bg-transparent p-0 text-ink backdrop:bg-black/20">
+        <ModulesScreen nfcImport={{
+        driver: draft, uid: module.id, bindingId,
+        editingModule: { id: module.id, boardKey, channels },
+        onClose: () => setEditing(false),
+      }} /></dialog>}
     </section>
   );
 }

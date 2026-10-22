@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
 import { Palette, Play, Cable, Plus, Trash2 } from "lucide-react";
 import {
   readLedDriver,
@@ -7,10 +7,14 @@ import {
 } from "../../lib/led-driver.js";
 export function LedDriverEditor({
   properties,
+  integrated = false,
+  connections,
   onSave,
   onCancel,
 }: {
   properties: Readonly<Record<string, unknown>>;
+  integrated?: boolean;
+  connections?: ReactNode;
   onSave: (config: LedDriverConfig) => void;
   onCancel: () => void;
 }) {
@@ -32,9 +36,9 @@ export function LedDriverEditor({
         <div className="flex items-center gap-3">
           <Palette className="text-brand-blue" />
           <div>
-            <h1 className="text-xl font-semibold">Generatore colori</h1>
+            <h1 className="text-xl font-semibold">{integrated ? "LED RGB · preset" : "Generatore colori"}</h1>
             <p className="text-xs text-ink-muted">
-              Un preset, un colore, un comando al LED
+              Alto applica il colore del preset · Basso spegne il LED
             </p>
           </div>
         </div>
@@ -61,7 +65,8 @@ export function LedDriverEditor({
             { id: "init", name: "Inizializzazione", icon: Play },
             { id: "actions", name: "Azioni · preset", icon: Palette },
             { id: "io", name: "Input / Output", icon: Cable },
-          ].map((item) => (
+            ...(connections ? [{ id: "connections", name: "Pin e Backbone", icon: Cable }] : []),
+          ].filter(item => !integrated || item.id !== "io").map((item) => (
             <button
               key={item.id}
               onClick={() => setPage(item.id)}
@@ -74,6 +79,7 @@ export function LedDriverEditor({
         </nav>
         <main className="overflow-auto p-6">
           <div className="mx-auto max-w-3xl space-y-4">
+            {page === "connections" && connections}
             {page === "init" && (
               <>
                 <h2 className="text-xl font-semibold">Inizializzazione</h2>
@@ -114,8 +120,7 @@ export function LedDriverEditor({
                   </button>
                 </div>
                 <p className="text-sm text-ink-muted">
-                  Ogni preset crea un ingresso sul blocco. Scegli in Input / Output se
-                  inviare un colore oppure i tre livelli RGB.
+                  {integrated ? "Ogni preset crea un ingresso sul LED RGB. Alto applica il colore; Basso spegne il LED." : "Ogni preset crea un ingresso sul blocco. Scegli in Input / Output se inviare un colore oppure i tre livelli RGB."}
                 </p>
                 {config.presets.map((p) => (
                   <section
@@ -240,7 +245,7 @@ export function LedDriverDialog(props: ComponentProps<typeof LedDriverEditor>) {
   return (
     <dialog
       ref={ref}
-      aria-label="Configura Generatore colori"
+      aria-label={props.integrated ? "Configura preset LED RGB" : "Configura Generatore colori"}
       onCancel={(event) => {
         event.preventDefault();
         props.onCancel();

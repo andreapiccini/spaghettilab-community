@@ -342,6 +342,8 @@ it.each(["hex", "rgb"] as const)(
       },
     });
     expect(led?.inputs?.map((port) => port.label)).toEqual([
+      "Preset 1",
+      "Preset 2",
       "Ricevi colore",
       "Rosso (%)",
       "Verde (%)",

@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { manualTriggerProfile, sendManualTrigger } from "../flow-trigger.js";
+import { manualTriggerProfile, sendManualTrigger, manualTriggerBlocked } from "../flow-trigger.js";
 import { validateDeviceProfile } from "@spaghettilab/device-profile-authoring-model";
 import {
   encodeDeviceProfileCbor,
@@ -33,4 +33,12 @@ it("makes each click a new rising edge and always restores LOW on failure", asyn
     }),
   ).rejects.toThrow("offline");
   expect(failed).toEqual([1, 2, 1]);
+});
+
+it("keeps standalone one-shot buttons available while other schedules run", () => {
+  expect(manualTriggerBlocked("continuous", false)).toBe(false);
+  expect(manualTriggerBlocked("one-shot", false)).toBe(false);
+  expect(manualTriggerBlocked("continuous", true)).toBe(true);
+  expect(manualTriggerBlocked("busy", false)).toBe(true);
+  expect(manualTriggerBlocked("busy", true)).toBe(true);
 });

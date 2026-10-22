@@ -10,7 +10,7 @@ it("keeps both input families available before any wire and after disconnect", (
   expect(disabledRgbInputs(families, [])).toEqual([]);
   expect(
     rgbInputFamilies({ sensorRgbInputFamilies: JSON.stringify(families) }),
-  ).toEqual(families);
+  ).toEqual({ ...families, "preset:0": "preset", "preset:1": "preset" });
 });
 it("disables all three RGB ports when Color is connected", () => {
   expect(disabledRgbInputs(families, ["color-input"])).toEqual([
@@ -37,4 +37,11 @@ it("ignores unrelated inputs and supports user-named color inputs", () => {
   expect(
     disabledRgbInputs({ ...families, "custom-color": "color" }, ["green-level"]),
   ).toEqual(["color-input", "custom-color"]);
+});
+
+it("makes integrated presets exclusive with direct Color and RGB inputs", () => {
+  const integrated = rgbInputFamilies({ sensorRgbInputFamilies: JSON.stringify(families) });
+  expect(disabledRgbInputs(integrated, ["preset:0"])).toEqual(Object.keys(families));
+  expect(disabledRgbInputs(integrated, ["color-input"])).toContain("preset:0");
+  expect(disabledRgbInputs(integrated, [])).toEqual([]);
 });

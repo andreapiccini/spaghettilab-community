@@ -39,10 +39,6 @@ export function BackboneTopologyNotice() {
  const changed=observations.filter(item=>topologyNeedsReconfiguration(project,item.bindingId,item.status));
  if(!changed.length)return null;
  return <>
-  <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border-b border-warning/30 bg-warning/10 px-5 py-3 text-sm">
-   <div><strong>Variazione delle Backbone rilevata.</strong> Le assegnazioni dei moduli sono da riconfigurare prima di usarle.</div>
-   <button className="rounded-lg border border-border bg-surface px-3 py-2 font-semibold" onClick={()=>setReview(true)}>Riconfigura Backbone</button>
-  </div>
   {review && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-5"><section role="dialog" aria-modal="true" aria-label="Riconfigura Backbone" className="max-h-[85vh] w-full max-w-2xl overflow-auto rounded-2xl border border-border bg-surface p-6 shadow-xl">
    <h2 className="text-xl font-semibold">Riconfigura Backbone</h2>
    <p className="my-3 text-sm text-ink-muted">Controlla le posizioni: i moduli del progetto verranno preparati sulle nuove schede indicate. Verifica anche il cablaggio. Il caricamento richiede un’ulteriore conferma e lascia il programma fermo.</p>

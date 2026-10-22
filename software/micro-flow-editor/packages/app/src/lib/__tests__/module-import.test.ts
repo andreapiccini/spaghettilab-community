@@ -4,7 +4,7 @@ import {
   catalogUln2003Driver,
   catalogGpioRelayDriver,
 } from "../gpio-driver-presets.js";
-import { planModuleImport, commitModuleImport } from "../module-import.js";
+import { planModuleImport, commitModuleImport, commitModulePinConfiguration, removeInstalledModule } from "../module-import.js";
 import { PHYSICAL_META_KEY, parsePhysicalProject } from "../backbone-physical.js";
 import {
   parseBackboneSensorModules,
@@ -182,13 +182,16 @@ it("installs an NFC RGB unit with three PWM channels and preserves its calibrate
   );
   expect(first.physical.modes).toEqual([12, 12, 12, 0]);
   expect(first.physical.settings?.pwmHz).toBe(1000);
+  expect(first.channels).toEqual({ RED: 1, GREEN: 0, BLUE: 2 });
+  const runtime = compileRuntimeDriver(driver, new Map(), new Map(Object.entries(first.channels)));
+  expect(runtime.profile.initOps.find(op => op.op === "RGB_PROGRAM")).toMatchObject({ channels: 33 });
   const installed = commitModuleImport(p, first, "0471C102A02190", false, true);
   const stored = parseBackboneSensorModules(
     installed.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment,
   );
   const module = stored.byBinding.master![0]!;
   expect(module.id).toBe("nfc-module-0471C102A02190");
-  expect(module.gpioAssignments?.channels).toEqual({ RED: 0, GREEN: 1, BLUE: 2 });
+  expect(module.gpioAssignments?.channels).toEqual({ RED: 1, GREEN: 0, BLUE: 2 });
   const calibrated = {
     ...installed,
     authoringMetadata: {
@@ -438,4 +441,72 @@ it("maps I²C to selected pins and prevents relocating a bus still used by anoth
   );
   expect(overlap.conflicts).toHaveLength(1);
   expect(overlap.physical.modes).toEqual([0, 0, 0, 2]);
+});
+
+it("remaps an installed module in place, releases its old pin and retains canvas wiring", () => {
+  const initial = commitModuleImport(project(), planModuleImport(project(), "master", "master:board",
+    catalogGpioRelayDriver(), physical), "relay-remap", false, false);
+  const stored = parseBackboneSensorModules(initial.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment);
+  const module = stored.byBinding.master![0]!;
+  const before = initial.deviceGraphs[0]!;
+  const draft = module.recipe.deviceDraft!;
+  const signal = draft.binding.gpioSignals[0]!.id;
+  const board = parsePhysicalProject(initial.authoringMetadata[PHYSICAL_META_KEY]?.comment).drafts["master:board"]!;
+  const plan = planModuleImport(initial, "master", "master:board", draft, board, { [signal]: 2 }, module.id);
+  expect(plan.conflicts).toEqual([]);
+  expect(plan.physical.modes).toEqual([0, 0, 2, 0]);
+  const updated = commitModulePinConfiguration(initial, plan, module.id, false);
+  expect(updated.deviceGraphs[0]).toEqual(before);
+  const after = parseBackboneSensorModules(updated.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master!;
+  expect(after).toHaveLength(1);
+  expect(after[0]!.id).toBe(module.id);
+  expect(after[0]!.gpioAssignments?.channels).toEqual({ [signal]: 2 });
+});
+
+it("remapping onto another module replaces only that module and frees the original pin", () => {
+  const driver = catalogGpioRelayDriver();
+  const signal = driver.binding.gpioSignals[0]!.id;
+  let p = commitModuleImport(project(), planModuleImport(project(), "master", "master:board", driver, physical), "first", false, false);
+  let board = parsePhysicalProject(p.authoringMetadata[PHYSICAL_META_KEY]?.comment).drafts["master:board"]!;
+  p = commitModuleImport(p, planModuleImport(p, "master", "master:board", driver, board, { [signal]: 1 }), "second", false, false);
+  const modules = parseBackboneSensorModules(p.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master!;
+  board = parsePhysicalProject(p.authoringMetadata[PHYSICAL_META_KEY]?.comment).drafts["master:board"]!;
+  const first = modules[0]!;
+  const plan = planModuleImport(p, "master", "master:board", driver, board, { [signal]: 1 }, first.id);
+  expect(plan.conflicts.map(item => item.id)).toEqual([modules[1]!.id]);
+  const updated = commitModulePinConfiguration(p, plan, first.id, false);
+  const remaining = parseBackboneSensorModules(updated.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master!;
+  expect(remaining.map(item => item.id)).toEqual([first.id]);
+  expect(updated.deviceGraphs[0]!.nodes.map(node => node.id)).toEqual(p.deviceGraphs[0]!.nodes.filter(node => !modules[1]!.graphNodeIds?.includes(node.id) && node.id !== modules[1]!.graphNodeId).map(node => node.id));
+  expect(plan.physical.modes).toEqual([0, 2, 0, 0]);
+});
+
+it("deletes an installed module and its canvas copies while releasing only its pins", () => {
+  const driver = catalogGpioRelayDriver();
+  const initial = commitModuleImport(project(), planModuleImport(project(), "master", "master:board", driver, physical), "delete-me", false, false);
+  const module = parseBackboneSensorModules(initial.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master![0]!;
+  const deleted = removeInstalledModule(initial, "master", module.id);
+  expect(deleted.deviceGraphs[0]!.nodes).toEqual([]);
+  expect(deleted.deviceGraphs[0]!.edges).toEqual([]);
+  expect(parseBackboneSensorModules(deleted.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master).toEqual([]);
+  const board = parsePhysicalProject(deleted.authoringMetadata[PHYSICAL_META_KEY]?.comment).drafts["master:board"]!;
+  expect(board.modes).toEqual([0, 0, 0, 0]);
+  expect(board.applied).toBe(false);
+  expect(JSON.parse(deleted.authoringMetadata.__nfcInstallations!.comment!)).toEqual({});
+});
+it("moves a module to another Backbone without changing the canvas and frees source pins", () => {
+  const driver = catalogGpioRelayDriver();
+  const initial = commitModuleImport(project(), planModuleImport(project(), "master", "master:board", driver, physical), "move-me", false, false);
+  const module = parseBackboneSensorModules(initial.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master![0]!;
+  const signal = driver.binding.gpioSignals[0]!.id;
+  const plan = planModuleImport(initial, "master", "master:second", driver, { ...physical, local: false, nodeId: 123, logicalSlot: 2 }, { [signal]: 1 }, module.id);
+  const moved = commitModulePinConfiguration(initial, plan, module.id, false);
+  expect(moved.deviceGraphs).toEqual(initial.deviceGraphs);
+  const saved = parseBackboneSensorModules(moved.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment).byBinding.master![0]!;
+  expect(saved.id).toBe(module.id);
+  expect(saved.gpioAssignments).toEqual({ boardKey: "master:second", channels: { [signal]: 1 } });
+  const boards = parsePhysicalProject(moved.authoringMetadata[PHYSICAL_META_KEY]?.comment).drafts;
+  expect(boards["master:board"]!.modes).toEqual([0, 0, 0, 0]);
+  expect(boards["master:board"]!.applied).toBe(false);
+  expect(boards["master:second"]!.modes).toEqual([0, 2, 0, 0]);
 });

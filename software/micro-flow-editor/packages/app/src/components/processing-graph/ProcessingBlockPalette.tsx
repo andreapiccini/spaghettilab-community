@@ -13,6 +13,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import {
   Boxes,
+  PanelLeftClose,
+  PanelLeftOpen,
   ChefHat,
   Cpu,
   Search,
@@ -82,16 +84,10 @@ const DEFAULT_OPEN: ReadonlySet<FamilySectionId> = new Set([
 export function ProcessingBlockPalette({
   bindingId,
   onCreateRecipe,
-  onAddViewer,
-  onAddTrigger,
-  onAddSchedule,
-  onAddLedDriver,
+  onInsert,
 }: {
   readonly bindingId?: string;
-  readonly onAddViewer?: () => void;
-  readonly onAddTrigger?: () => void;
-  readonly onAddSchedule?: () => void;
-  readonly onAddLedDriver?: () => void;
+  readonly onInsert?: (row: PalettePlaceable) => void;
   /** Opens the sensor-recipe wizard on the create form. */
   readonly onCreateRecipe?: () => void;
 }) {
@@ -103,6 +99,7 @@ export function ProcessingBlockPalette({
   const { configuredPorts } = usePortProtocol();
   const portsConfigured = configuredPorts.length > 0;
   const [query, setQuery] = useState("");
+  const [collapsed, setCollapsed] = useState(false);
   const [openIds, setOpenIds] = useState<ReadonlySet<FamilySectionId>>(DEFAULT_OPEN);
   const [dragReminder, setDragReminder] = useState(false);
 
@@ -123,6 +120,7 @@ export function ProcessingBlockPalette({
               (e.id.startsWith("native.") &&
                 e.runtime === "core-block" &&
                 !e.id.startsWith("native.physical_"))) &&
+          e.id !== "native.led_driver" &&
           e.id !== "appblocks.digital_out_toggle" &&
           e.availability !== "unavailable" &&
           !FLOW_START_IDS.has(e.id) &&
@@ -203,10 +201,30 @@ export function ProcessingBlockPalette({
     },
   ];
 
+  if (collapsed) return (
+    <div className="flex h-full w-12 shrink-0 flex-col items-center gap-3 border-r border-border bg-surface py-2">
+      <button type="button" aria-label={locale === "it" ? "Espandi menu blocchi" : "Expand block menu"}
+        title={locale === "it" ? "Espandi menu blocchi" : "Expand block menu"} aria-expanded={false}
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted hover:bg-surface-raised"
+        onClick={() => setCollapsed(false)}><PanelLeftOpen size={19} /></button>
+      {[{ icon: Zap, label: locale === "it" ? "Funzionalità" : "Functionality" },
+        { icon: GitBranch, label: locale === "it" ? "Logica" : "Logic" },
+        { icon: Cpu, label: "Backbone" }].map(({ icon: Icon, label }) => (
+        <button key={label} type="button" aria-label={label} title={label}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-brand-blue hover:bg-surface-raised"
+          onClick={() => setCollapsed(false)}><Icon size={18} /></button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="flex h-full w-[260px] shrink-0 flex-col border-r border-border bg-surface">
-      <div className="p-3">
-        <label className="flex items-center gap-2 rounded-full border border-border-strong bg-surface-sunken px-3 py-2">
+      <div className="flex items-center gap-1 p-2">
+        <button type="button" aria-label={locale === "it" ? "Riduci menu blocchi" : "Collapse block menu"}
+          title={locale === "it" ? "Riduci menu blocchi" : "Collapse block menu"} aria-expanded={true}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted hover:bg-surface-raised"
+          onClick={() => setCollapsed(true)}><PanelLeftClose size={19} /></button>
+        <label className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-border-strong bg-surface-sunken px-3 py-2">
           <Search size={14} className="text-ink-faint" />
           <input
             value={query}
@@ -329,19 +347,8 @@ export function ProcessingBlockPalette({
                             circular={isCircular}
                             delay={index * 0 + entryIndex * motionTokens.stagger.list}
                             portsConfigured={portsConfigured}
-                            onClickRemind={() =>
-                              row.entry.id === "native.led_driver" && onAddLedDriver
-                                ? onAddLedDriver()
-                                : row.entry.id === "native.schedule" && onAddSchedule
-                                  ? onAddSchedule()
-                                  : row.entry.id === "appblocks.data_viewer" &&
-                                      onAddViewer
-                                    ? onAddViewer()
-                                    : row.entry.id === "appblocks.manual_trigger" &&
-                                        onAddTrigger
-                                      ? onAddTrigger()
-                                      : setDragReminder(true)
-                            }
+                            onClickRemind={() => setDragReminder(true)}
+                            onInsert={() => { setDragReminder(false); onInsert?.(row); }}
                             onDragBegan={() => setDragReminder(false)}
                           />
                         );
@@ -375,6 +382,7 @@ function PaletteRow({
   delay,
   portsConfigured,
   onClickRemind,
+  onInsert,
   onDragBegan,
 }: {
   readonly row: PalettePlaceable;
@@ -385,6 +393,7 @@ function PaletteRow({
   readonly delay: number;
   readonly portsConfigured: boolean;
   readonly onClickRemind: () => void;
+  readonly onInsert: () => void;
   readonly onDragBegan: () => void;
 }) {
   const { locale } = useLocale();
@@ -414,6 +423,9 @@ function PaletteRow({
         }
         onClick={() => {
           if (placeable) onClickRemind();
+        }}
+        onDoubleClick={() => {
+          if (placeable) onInsert();
         }}
         onDragStart={(e: DragEvent<HTMLButtonElement>) => {
           if (!placeable) {

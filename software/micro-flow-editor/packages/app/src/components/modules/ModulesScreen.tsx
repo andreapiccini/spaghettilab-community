@@ -1,3 +1,4 @@
+import { BACKBONE_SENSOR_MODULES_META_KEY, parseBackboneSensorModules } from "../../lib/backbone-sensor-modules.js";
 import { topologyNeedsReconfiguration } from "../../lib/backbone-topology-change.js";
 import { modulePinOwners } from "../../lib/module-pin-ownership.js";
 import { logicalBackboneKey } from "../../lib/logical-backbone-slots.js";
@@ -32,6 +33,8 @@ import { ModuleArtwork } from "../hardware/ModuleArtwork.js";
 import {
   planModuleImport,
   commitModuleImport,
+  commitModulePinConfiguration,
+  removeInstalledModule,
   type ModuleImportPlan,
 } from "../../lib/module-import.js";
 import {
@@ -61,9 +64,13 @@ export function ModulesScreen({
     driver: DeviceRecipeDraft;
     uid: string;
     bindingId: string;
+    editingModule?: { id: string; boardKey: string; channels: Readonly<Record<string, number>> };
     onClose: () => void;
   };
 } = {}) {
+  const [destination, setDestination] = useState<{ bindingId: string; deviceIdHex: string }>();
+  const [editingImport, setEditingImport] = useState<typeof nfcImport>(undefined);
+  const importContext = nfcImport ?? editingImport;
   const { session, execute, navigate, moduleTarget, requestTopologyReview } = useSession();
   const { library, busy: nfcBusy, writeSession } = useNfcWorkspace();
   const {
@@ -76,7 +83,7 @@ export function ModulesScreen({
   } = useCoreSessions();
   const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
   const [bindingId, setBindingId] = useState(
-    nfcImport?.bindingId ?? moduleTarget?.bindingId ?? "",
+    importContext?.bindingId ?? moduleTarget?.bindingId ?? "",
   );
   const [plan, setPlan] = useState<ModuleImportPlan | null>(null);
   const [busy, setBusy] = useState(false);
@@ -126,11 +133,15 @@ export function ModulesScreen({
         return;
       }
       const row = rows.find((item) => item.binding.bindingId === selected.bindingId);
+      const editing = importContext?.editingModule;
+      const existingPhysical = editing && parsePhysicalProject(project.authoringMetadata[PHYSICAL_META_KEY]?.comment).drafts[editing.boardKey];
       const board =
+        (destination ? row?.attachedBackbones.find(item => item.deviceIdHex === destination.deviceIdHex) : undefined) ??
+        (existingPhysical ? row?.attachedBackbones.find(item => existingPhysical.local !== false ? item.local : item.nodeId === existingPhysical.nodeId) : undefined) ??
         row?.attachedBackbones.find(
           (item) => item.deviceIdHex === moduleTarget?.deviceIdHex,
         ) ?? row?.attachedBackbones.find((item) => item.local);
-      const boardKey =
+      const boardKey = (!destination ? editing?.boardKey : undefined) ??
         (board
           ? logicalBackboneKey(
               project,
@@ -175,7 +186,8 @@ export function ModulesScreen({
           nodeId: board?.local === false ? board.nodeId : 0,
           variant: topology?.layout === 2 ? "v2" : functionVariantOf(physical),
         },
-        pins ?? (plan?.driver.id === driver.id ? plan.channels : undefined),
+        pins ?? (plan?.driver.id === driver.id ? plan.channels : editing?.channels),
+        editing?.id,
       );
       setMessage("");
       setPlan(next);
@@ -184,21 +196,22 @@ export function ModulesScreen({
     }
   }
   useEffect(() => {
-    if (!nfcImport && plan && !busy) propose(plan.driver);
-    if (nfcImport)
+    if (importContext) setBindingId(importContext.bindingId);
+    if (!importContext && plan && !busy) propose(plan.driver);
+    if (importContext)
       propose(
-        nfcImport.driver.temperatureSensorModel === "ds18b20"
+        importContext.driver.temperatureSensorModel === "ds18b20"
           ? withDs18b20PowerMode(
-              nfcImport.driver,
+              importContext.driver,
               plan?.driver.ds18b20PowerMode ??
-                nfcImport.driver.ds18b20PowerMode ??
+                importContext.driver.ds18b20PowerMode ??
                 "parasite",
             )
-          : nfcImport.driver,
+          : importContext.driver,
       );
     // Rebuild the proposal when the user chooses a different Backbone.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nfcImport?.uid, bindingId, moduleTarget?.deviceIdHex]);
+  }, [importContext?.uid, bindingId, moduleTarget?.deviceIdHex, destination?.deviceIdHex]);
   async function add(replace: boolean) {
     if (!project || !plan || !execute || busy) return;
     let activePlan = plan;
@@ -262,6 +275,7 @@ export function ModulesScreen({
               backendPortId: actual.backendPortId ?? activePlan.physical.backendPortId,
             },
             activePlan.channels,
+            importContext?.editingModule?.id,
           );
           activePlan = fresh;
           setPlan(fresh);
@@ -303,12 +317,14 @@ export function ModulesScreen({
         confirmed = true;
       }
       signal.throwIfAborted();
-      const id = nfcImport?.uid ?? `local-${crypto.randomUUID()}`;
+      const id = importContext?.uid ?? `local-${crypto.randomUUID()}`;
       const result = execute({
         kind: "ImportModule",
         apply: (current) => ({
           ok: true,
-          value: commitModuleImport(current, activePlan, id, replace, confirmed),
+          value: importContext?.editingModule
+            ? commitModulePinConfiguration(current, activePlan, importContext.editingModule.id, confirmed)
+            : commitModuleImport(current, activePlan, id, replace, confirmed),
         }),
       });
       if (!result.ok)
@@ -316,7 +332,7 @@ export function ModulesScreen({
           "Il modulo non è stato inserito nel progetto. Controlla il canvas.",
         );
       setPlan(null);
-      nfcImport?.onClose();
+      importContext?.onClose();
       navigate("processing-graph");
     } catch (error) {
       setMessage(
@@ -339,7 +355,7 @@ export function ModulesScreen({
   }
   return (
     <div className="h-full overflow-auto bg-surface-sunken/40 p-6 font-body text-ink">
-      {!nfcImport && (
+      {!importContext && (
         <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="flex items-center gap-3 text-2xl font-semibold">
@@ -417,7 +433,35 @@ export function ModulesScreen({
           {message}
         </p>
       )}
-      {!nfcImport && (
+      {!importContext && project && selected && (
+        <section className="mb-6 space-y-3" aria-label="Moduli configurati">
+          <h2 className="font-semibold">Moduli configurati · modifica i collegamenti</h2>
+          {(parseBackboneSensorModules(project.authoringMetadata[BACKBONE_SENSOR_MODULES_META_KEY]?.comment)
+            .byBinding[selected.bindingId] ?? []).filter(module => module.bus === "gpio" && module.recipe.deviceDraft)
+            .map(module => {
+              const driver = module.recipe.deviceDraft!;
+              const boardKey = module.gpioAssignments?.boardKey ?? module.gpioAssignment?.boardKey;
+              if (!boardKey) return null;
+              const channels = module.gpioAssignments?.channels ?? {
+                [driver.binding.gpioSignals[0]?.id ?? "DATA"]: module.gpioAssignment!.channel,
+              };
+              const board = parsePhysicalProject(project.authoringMetadata[PHYSICAL_META_KEY]?.comment).drafts[boardKey];
+              return <div key={module.id} className="inline-flex flex-wrap items-center gap-3 rounded-xl border border-border-strong bg-surface p-3 mr-3">
+                <button type="button" className="text-left"
+                onClick={() => { setDestination(undefined); setEditingImport({ driver, uid: module.id, bindingId: selected.bindingId,
+                  editingModule: { id: module.id, boardKey, channels }, onClose: () => { setEditingImport(undefined); setDestination(undefined); } }); }}>
+                <strong>{driver.name}</strong> · Backbone {board?.logicalSlot ?? (board?.local === false ? "CAN" : "1")}
+                <span className="ml-3 font-mono text-xs">{Object.entries(channels).map(([signal, pin]) => `${signal}: A${pin}`).join(" · ")}</span>
+                <span className="ml-3 text-brand-blue">Pin e Backbone</span>
+                </button>
+                <button type="button" className="text-sm text-error hover:underline" aria-label={`Elimina ${driver.name}`}
+                  onClick={() => execute?.({ kind: "RemoveInstalledModule", apply: current => ({ ok: true,
+                    value: removeInstalledModule(current, selected.bindingId, module.id) }) })}>Elimina</button>
+              </div>;
+            })}
+        </section>
+      )}
+      {!importContext && (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {drivers.map((driver) => (
             <article
@@ -426,9 +470,9 @@ export function ModulesScreen({
             >
               <button
                 type="button"
-                onClick={() => edit(driver.draft)}
+                onClick={() => { setDestination(undefined); propose(driver.draft); }}
                 className="mb-3 flex items-center gap-3 text-left"
-                aria-label={`Modifica ${driver.draft.name}`}
+                aria-label={`Configura ${driver.draft.name}`}
               >
                 <div className="h-16 w-16 shrink-0">
                   <ModuleArtwork
@@ -472,7 +516,7 @@ export function ModulesScreen({
           ))}
         </div>
       )}
-      {!nfcImport && (
+      {!importContext && (
         <aside className="mt-6 flex items-start gap-3 text-sm text-ink-muted">
           <Users size={20} className="shrink-0 text-brand-blue" />
           <div>
@@ -491,8 +535,8 @@ export function ModulesScreen({
           <section
             role="dialog"
             aria-modal="true"
-            aria-label="Aggiungi modulo"
-            className="w-full max-w-lg rounded-2xl border border-border-strong bg-surface p-6 shadow-xl"
+            aria-label={importContext?.editingModule ? "Modifica pin del modulo" : "Aggiungi modulo"}
+            className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border-strong bg-surface p-6 shadow-xl"
           >
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">{plan.driver.name}</h2>
@@ -500,7 +544,7 @@ export function ModulesScreen({
                 className={button}
                 aria-label="Chiudi importazione"
                 disabled={busy}
-                onClick={() => (nfcImport ? nfcImport.onClose() : setPlan(null))}
+                onClick={() => (importContext ? importContext.onClose() : setPlan(null))}
               >
                 <X size={18} />
               </button>
@@ -509,11 +553,24 @@ export function ModulesScreen({
               <p className="mb-2 text-xs text-ink-muted">Backbone di destinazione</p>
               <BackboneTargetPicker
                 disabled={busy}
+                bindingId={importContext?.editingModule ? importContext.bindingId : undefined}
+                value={importContext?.editingModule ? (() => {
+                  const board = rows.find(row => row.binding.bindingId === plan.bindingId)?.attachedBackbones
+                    .find(board => plan.physical.local !== false ? board.local : board.nodeId === plan.physical.nodeId);
+                  return board ? { bindingId: plan.bindingId, deviceIdHex: board.deviceIdHex } : undefined;
+                })() : undefined}
                 onChange={(target) => {
+                  setDestination(target);
                   setBindingId(target.bindingId);
                 }}
               />
             </div>
+            {plan.driver.rgbModule && (
+              <button type="button" disabled={busy} className="mt-3 text-sm font-semibold text-brand-blue hover:underline"
+                onClick={() => propose(plan.driver, { RED: 1, GREEN: 0, BLUE: 2 })}>
+                Usa pin predefiniti · RED A1 · GREEN A0 · BLUE A2
+              </button>
+            )}
             {plan.driver.temperatureSensorModel === "ds18b20" && (
               <label className="mt-4 block text-sm font-medium">
                 Alimentazione DS18B20
@@ -684,7 +741,7 @@ export function ModulesScreen({
                 Verranno configurati quando carichi il programma sulla scheda.
               </p>
             )}
-            {!!(plan.conflicts.length || plan.pinChanges.length) && (
+            {!!(plan.conflicts.length || (!importContext?.editingModule && plan.pinChanges.length)) && (
               <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
                 <strong className="flex items-center gap-2">
                   <AlertCircle size={16} />
@@ -699,7 +756,7 @@ export function ModulesScreen({
                   {plan.conflicts.map((conflict) => (
                     <li key={conflict.id}>{conflict.label}</li>
                   ))}
-                  {plan.pinChanges.map((pin) => (
+                  {(importContext?.editingModule ? [] : plan.pinChanges).map((pin) => (
                     <li key={pin}>{pin}</li>
                   ))}
                 </ul>
@@ -716,8 +773,8 @@ export function ModulesScreen({
                 onClick={() =>
                   busy
                     ? operation.current?.abort()
-                    : nfcImport
-                      ? nfcImport.onClose()
+                    : importContext
+                      ? importContext.onClose()
                       : setPlan(null)
                 }
               >
@@ -729,7 +786,7 @@ export function ModulesScreen({
                 onClick={() => void add(true)}
               >
                 {busy && <LoaderCircle size={16} className="animate-spin" />}
-                {plan.conflicts.length || plan.pinChanges.length
+                {importContext?.editingModule ? "Salva modifiche" : plan.conflicts.length || plan.pinChanges.length
                   ? "Sostituisci e aggiungi"
                   : "Configura e aggiungi"}
               </button>
