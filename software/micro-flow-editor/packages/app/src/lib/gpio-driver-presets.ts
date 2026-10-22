@@ -1076,7 +1076,8 @@ export function upgradeDht22Driver(draft: DeviceRecipeDraft): DeviceRecipeDraft 
     : draft;
 }
 
-/** One DS18B20 on DATA; parasite power uses DATA, VDD must be grounded. */
+const DS18B20_PARASITE_DESCRIPTION = "Alimentazione parassita da DATA A0. VDD e GND a massa; pull-up esterno DATA–3,3 V. Un sensore per pin; conversione fino a 750 ms. Verificare la schedina con LED prima del collegamento.";
+/** One DS18B20 on DATA, powered by the fixed 3.3 V supply by default. */
 export function catalogDs18b20Driver(): DeviceRecipeDraft {
   const dht = catalogDht22Driver();
   return {
@@ -1084,9 +1085,9 @@ export function catalogDs18b20Driver(): DeviceRecipeDraft {
     id: "gpio-ds18b20-parasite",
     name: "DS18B20",
     temperatureSensorModel: "ds18b20",
-    ds18b20PowerMode: "parasite",
-    description:
-      "Alimentazione parassita da DATA A0. VDD e GND a massa; pull-up esterno DATA–3,3 V. Un sensore per pin; conversione fino a 750 ms. Verificare la schedina con LED prima del collegamento.",
+    ds18b20PowerMode: "vcc",
+    gpioHardware: { kind: "sensor", power: "3.3", ground: true, extraTerminals: [] },
+    description: "DATA sul pin scelto, VCC alla linea 3,3 V della Backbone e GND comune. Conversione fino a 750 ms.",
     binding: {
       ...dht.binding,
       gpioSignals: dht.binding.gpioSignals.filter((s) => s.id === "DATA"),
@@ -1128,6 +1129,6 @@ export function withDs18b20PowerMode(
         ? "DATA A0, VCC A1 HIGH, GND comune. Alimentazione da GPIO durante avvio, conversione e lettura."
         : mode === "vcc"
           ? "DATA sul pin scelto, VCC alla linea 3,3 V della Backbone V2 e GND comune. Non collegare VCC a 5 V: il pull-up della schedina porterebbe DATA a 5 V. Conversione fino a 750 ms."
-          : catalogDs18b20Driver().description,
+          : DS18B20_PARASITE_DESCRIPTION,
   };
 }

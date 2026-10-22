@@ -120,7 +120,7 @@ export function ModulesScreen({
         driver,
         driver.ds18b20PowerMode === "gpio"
           ? "vcc"
-          : (driver.ds18b20PowerMode ?? "parasite"),
+          : (driver.ds18b20PowerMode ?? "vcc"),
       );
     if (!project || !selected) {
       setMessage("Aggiungi una Backbone al progetto prima di importare un modulo.");
@@ -205,7 +205,7 @@ export function ModulesScreen({
               importContext.driver,
               plan?.driver.ds18b20PowerMode ??
                 importContext.driver.ds18b20PowerMode ??
-                "parasite",
+                "vcc",
             )
           : importContext.driver,
       );
@@ -579,7 +579,7 @@ export function ModulesScreen({
                   className={`${button} mt-2 w-full`}
                   disabled={busy}
                   value={
-                    (plan.driver.ds18b20PowerMode ?? "parasite") === "parasite"
+                    (plan.driver.ds18b20PowerMode ?? "vcc") === "parasite"
                       ? "parasite"
                       : "vcc"
                   }
@@ -678,7 +678,7 @@ export function ModulesScreen({
               )}
             </dl>
             {plan.driver.temperatureSensorModel === "ds18b20" &&
-              (plan.driver.ds18b20PowerMode ?? "parasite") === "parasite" && (
+              (plan.driver.ds18b20PowerMode ?? "vcc") === "parasite" && (
                 <p className="mb-4 text-sm text-ink-muted">
                   Alimentazione parassita: DATA sul pin scelto, VDD e GND a massa.
                   Pull-up esterno DATA–3,3 V; il driver mantiene DATA alto durante la

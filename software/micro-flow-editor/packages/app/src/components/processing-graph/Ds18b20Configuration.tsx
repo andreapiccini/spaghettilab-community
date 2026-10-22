@@ -12,7 +12,7 @@ export function Ds18b20Configuration({ module, bindingId }: { module: BackboneSe
   const { session, execute } = useSession();
   const { getClient, observeConfig, setExecutionMode, lockTransport, unlockTransport } = useCoreSessions();
   const { pausePolling, resumePolling, waitUntilIdle } = useNfcPresence();
-  const [mode, setMode] = useState<"parasite" | "vcc">((module.recipe.deviceDraft?.ds18b20PowerMode ?? "parasite") === "parasite" ? "parasite" : "vcc");
+  const [mode, setMode] = useState<"parasite" | "vcc">((module.recipe.deviceDraft?.ds18b20PowerMode ?? "vcc") === "parasite" ? "parasite" : "vcc");
   const [data, setData] = useState(module.gpioAssignments?.channels.DATA ?? module.gpioAssignment?.channel ?? 0);
   const power = module.gpioAssignments?.channels.POWER ?? 1;
   const [busy, setBusy] = useState(false);

@@ -83,3 +83,14 @@ it("normalizes saved DS18B20 VCC 5 V metadata and action drafts to 3.3 V", () =>
  expect(modules.byBinding.master?.[0]?.recipe.deviceDraft?.gpioHardware?.power).toBe("3.3");
  expect(modules.byBinding.master?.[0]?.actions?.[0]?.deviceDraft?.gpioHardware?.power).toBe("3.3");
 });
+
+it("defaults new DS18B20 modules to fixed VCC while keeping parasite power selectable", () => {
+ const draft = catalogDs18b20Driver();
+ expect(draft.ds18b20PowerMode).toBe("vcc");
+ expect(draft.gpioHardware?.power).toBe("3.3");
+ expect(draft.binding.gpioSignals.map(signal => signal.id)).toEqual(["DATA"]);
+ const parasite = withDs18b20PowerMode(draft, "parasite");
+ expect(parasite.ds18b20PowerMode).toBe("parasite");
+ expect(parasite.description).toContain("parassita");
+ expect(parasite.gpioHardware?.power).toBe("none");
+});

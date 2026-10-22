@@ -49,7 +49,7 @@ it("DS18B20 claims only DATA and uses a queued conversion with 1/16 degree resol
     new Map([["DATA", 0]]),
   ).profile;
   expect(profile.requiredCapabilities).toBe(24);
-  expect(profile.initOps).toEqual([{ op: "DS18B20_SETUP", channel: 0, on: true }]);
+  expect(profile.initOps).toEqual([{ op: "DS18B20_SETUP", channel: 0, on: true, externalPower: true }]);
   expect(profile.sampleOps).toContainEqual({ op: "DS18B20_READ", dst: 0, channel: 0 });
   expect(profile.sampleOps).toContainEqual({
     op: "EMIT_DECIMAL",
@@ -58,7 +58,7 @@ it("DS18B20 claims only DATA and uses a queued conversion with 1/16 degree resol
     text: false,
     divisor: 16,
   });
-  expect(profile.safeStopOps).toEqual([{ op: "DS18B20_SETUP", channel: 0, on: false }]);
+  expect(profile.safeStopOps).toEqual([{ op: "DS18B20_SETUP", channel: 0, on: false, externalPower: true }]);
   expect(decodeDeviceProfileCbor(encodeDeviceProfileCbor(profile))).toMatchObject({
     ok: true,
     value: expect.objectContaining({ sampleOps: profile.sampleOps }),
