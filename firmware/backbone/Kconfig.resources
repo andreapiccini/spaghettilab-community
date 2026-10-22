@@ -79,7 +79,7 @@ config SPAGHETTI_MAX_SCHEDULES
 	default 32
 
 config SPAGHETTI_MAX_RULES
-	int
+	int "Maximum number of runtime rules"
 	range 1 255
 	default 4 if SPAGHETTI_RESOURCE_PROFILE_MINIMAL
 	default 8 if SPAGHETTI_RESOURCE_PROFILE_STANDARD

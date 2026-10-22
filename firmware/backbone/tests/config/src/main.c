@@ -618,3 +618,17 @@ ZTEST(config, test_radio_mutex_rejects_inconsistent_policies)
 }
 
 ZTEST_SUITE(config, NULL, config_setup, NULL, NULL, NULL);
+
+ZTEST(config, test_workspace_is_transient_and_reusable)
+{
+ struct spaghetti_config *workspace = spaghetti_config_acquire_workspace();
+ zassert_not_null(workspace);
+ workspace->rule_count = 1U;
+ spaghetti_config_release_workspace(workspace);
+ workspace = spaghetti_config_acquire_workspace();
+ zassert_not_null(workspace);
+ zassert_equal(workspace->rule_count, 0U);
+ spaghetti_config_release_workspace(workspace);
+ /* NULL release cannot unlock another transaction or free arbitrary memory. */
+ spaghetti_config_release_workspace(NULL);
+}

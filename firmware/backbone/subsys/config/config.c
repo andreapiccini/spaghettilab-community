@@ -1289,7 +1289,7 @@ int spaghetti_config_get_revision(struct spaghetti_config_revision *out_revision
 }
 
 K_MUTEX_DEFINE(config_workspace_lock);
-static struct spaghetti_config config_workspace;
+static struct spaghetti_config *config_workspace;
 
 struct spaghetti_config *spaghetti_config_acquire_workspace(void)
 {
@@ -1297,12 +1297,20 @@ struct spaghetti_config *spaghetti_config_acquire_workspace(void)
 		return NULL;
 	}
 
-	return &config_workspace;
+	/* Configuration scratch is needed only during reads/updates, never Run.
+	 * Keep one serialized allocation instead of a second permanent Config. */
+	config_workspace = k_calloc(1U, sizeof(*config_workspace));
+	if (config_workspace == NULL) {
+		k_mutex_unlock(&config_workspace_lock);
+	}
+	return config_workspace;
 }
 
 void spaghetti_config_release_workspace(struct spaghetti_config *config)
 {
-	if (config == &config_workspace) {
+	if (config != NULL && config == config_workspace) {
+		k_free(config_workspace);
+		config_workspace = NULL;
 		k_mutex_unlock(&config_workspace_lock);
 	}
 }

@@ -62,3 +62,25 @@ it("rejects mixed preset and direct RGB commands instead of racing colors", () =
     layer: "device-processing", id: "mixed", source: "other", target: led.id, targetHandle: "red-level",
   }] })).toThrow("usa i preset");
 });
+
+it("allows five generated rules for an RGB flow within the eight-rule firmware budget", () => {
+  const { installed, graph } = setup();
+  const plan = prepareDriverDeployment(installed, "master", {
+    physicalGraph: installed.physicalGraphs[0]!, processingGraph: graph,
+    mqtt: DISABLED_MQTT, energy: DEFAULT_ENERGY,
+  } as CompileConfigInput);
+  expect(plan.options.maxRules).toBe(8);
+  const base = compileConfig(plan.input, plan.options);
+  if (!base.ok) throw new Error(JSON.stringify(base.error));
+  const alternate = base.value.modules.find(module => String(module.properties[1]).startsWith("flow.trigger."))!;
+  const template = plan.input.processingGraph.nodes.find(node => (node.data as { kind: string }).kind === "rule")!;
+  const data = template.data as { kind: "rule"; ruleTypeId: string; properties: Record<string, bigint> };
+  const nodes = [...plan.input.processingGraph.nodes.filter(node => (node.data as { kind: string }).kind !== "rule"),
+    ...Array.from({ length: 5 }, (_, index) => ({ ...template, id: `capacity-rule-${index}`, data: {
+      ...data, properties: { ...data.properties, "1": index < 3 ? data.properties["1"]! : BigInt(alternate.key) },
+    } })),
+  ];
+  const compiled = compileConfig({ ...plan.input, processingGraph: { ...plan.input.processingGraph, nodes } }, plan.options);
+  if (!compiled.ok) throw new Error(JSON.stringify(compiled.error));
+  expect(compiled.value.rules).toHaveLength(5);
+});

@@ -1983,7 +1983,7 @@ export function prepareDriverDeployment(
       resolveTargetInput: ({ node, handle }) => numericPort(node, handle, "inputs"),
       maxModules: 8,
       maxSchedules: 8,
-      maxRules: 4,
+      maxRules: 8,
       maxBlocks: 16,
       maxEdges: 24,
     },
