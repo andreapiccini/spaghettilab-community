@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeDeployProblem, uniqueDeployProblems, canRecheckDeployProblem } from "../deploy-feedback.js";
+import { describeDeployProblem, uniqueDeployProblems, canRecheckDeployProblem, canReconfigureDeployProblem } from "../deploy-feedback.js";
 describe("deploy feedback", () => {
   it("groups identical problems but preserves different boards and blocks", () => {
     const problem = { bindingId: "a", nodeId: "motor", technical: "Bad connection" };
@@ -61,3 +61,14 @@ it("offers a config refresh instead of blaming the canvas for a stale generation
   expect(result.title).toContain("pin");
   expect(result.remedy).toContain("Configura");
  });
+
+
+it("routes topology changes to reconfiguration rather than canvas wiring", () => {
+  const problem = { technical: "Variazione delle Backbone rilevata: riconfigura le schede prima di caricare il programma." };
+  expect(canReconfigureDeployProblem(problem)).toBe(true);
+  expect(canReconfigureDeployProblem({code: "backbone-topology-changed", technical: "Layout changed"})).toBe(true);
+  expect(canReconfigureDeployProblem({technical: "Pin occupato"})).toBe(false);
+  expect(canRecheckDeployProblem(problem)).toBe(false);
+  expect(describeDeployProblem(problem).remedy).toContain("Premi Riconfigura");
+  expect(describeDeployProblem(problem, false).remedy).toContain("Press Reconfigure");
+});

@@ -79,3 +79,11 @@ Host cloud: `cloud://loopback` (JSON HOST_API in-process) o `https://…/v1`.
 | D070 HOST_API freeze | ✅ V1 2026-08-16 |
 | D080 Gate fase 1 | ✅ 2026-08-16 |
 | D200–D220 Scene / Schema | ✅ (Pianta ritirata) |
+
+## Presentazione leggera sul Raspberry
+
+`sh scripts/build-fair-web.sh` compila `lib/main_fair.dart` in release usando la
+stessa UI e `FakeHost`, senza login o host live. Le risorse web sono locali e non
+viene attivata una cache PWA. La normale applicazione `lib/main.dart` è invariata.
+Sul Raspberry si servono solo i file generati in `app/build/web`, con i comandi
+[`dashboard` e `demo` del chiosco](../micro-flow-editor/scripts/fair-kiosk/README.md).

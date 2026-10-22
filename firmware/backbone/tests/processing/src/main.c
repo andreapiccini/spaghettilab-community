@@ -981,3 +981,27 @@ ZTEST(processing, test_if_inclusive_range_and_inverse)
   zassert_equal(d->ops->validate(&p),-EINVAL);
  }
 }
+
+
+ZTEST(processing, test_rgb_presets_restore_on_descending_temperature)
+{
+ const struct spaghetti_block_driver *d=spaghetti_block_registry_find("led_driver");
+ struct spaghetti_property_set p={0};
+ for(uint8_t i=1;i<=10;i++)prop_u64(&p,i,i==1?0xFF0000:i==2?0x0000FF:i>=5&&i<=8?1:i==9?3:0);
+ uint64_t state[8]={0};zassert_ok(d->ops->init(&p,state));
+ struct spaghetti_value in[2]={{.type=SPAGHETTI_VALUE_BOOL},{.type=SPAGHETTI_VALUE_BOOL}},out;
+ bool valid[2],ov;
+ const bool levels[][2]={{false,false},{true,false},{false,true},{true,false},{false,false}};
+ for(unsigned step=0;step<ARRAY_SIZE(levels);step++) {
+  for(unsigned input=0;input<2;input++) {
+   valid[0]=input==0;valid[1]=input==1;in[input].data.boolean=levels[step][input];
+   zassert_ok(d->ops->process(state,NULL,in,valid,2,&out,&ov,1,NULL,NULL,NULL));
+  }
+  uint32_t expected=levels[step][0]?0xFF0000:levels[step][1]?0x0000FF:0;
+  zassert_equal(out.data.unsigned_integer,expected,"Wrong color after temperature transition %u",step);
+ }
+ memset(state,0,sizeof(state));zassert_ok(d->ops->init(&p,state));
+ in[0].data.boolean=true;in[1].data.boolean=false;valid[0]=valid[1]=true;
+ zassert_ok(d->ops->process(state,NULL,in,valid,2,&out,&ov,1,NULL,NULL,NULL));
+ zassert_true(ov);zassert_equal(out.data.unsigned_integer,0xFF0000);
+}

@@ -1,3 +1,4 @@
+import { FairKioskBridge } from "./components/FairKioskBridge.js";
 import { ModuleProgramEditor } from "./components/device-recipe-editor/ModuleProgramEditor.js";
 import { MODULE_EDITOR_CONTEXT, editModuleMetadata } from "./lib/new-device-driver.js";
 import { RgbModuleEditor } from "./components/device-recipe-editor/RgbModuleEditor.js";
@@ -351,6 +352,7 @@ export default function App() {
                     <CoreSessionsProvider>
                       <NfcPresenceProvider>
                         <NfcWorkspaceProvider>
+                        <FairKioskBridge key="empty-visitor-canvas-v1" />
                         <AppContent />
                         <NfcToast />
                         <NfcModuleDialog />

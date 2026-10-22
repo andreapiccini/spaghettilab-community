@@ -18,11 +18,20 @@ export function isStaleDeployProblem(problem: DeployProblem): boolean {
   return problem.code === "config-deployment.stale_generation" ||
     /Config changed since this candidate was prepared/i.test(problem.technical);
 }
+export function canReconfigureDeployProblem(problem: DeployProblem): boolean {
+  return problem.code === "backbone-topology-changed" ||
+    /Variazione delle Backbone rilevata|Backbone topology changed/i.test(problem.technical);
+}
 export function canRecheckDeployProblem(problem: DeployProblem): boolean {
   return ["offline", "upload-unconfirmed"].includes(problem.code ?? "") || isStaleDeployProblem(problem);
 }
 export function describeDeployProblem(problem: DeployProblem, it = true) {
   const message = problem.technical.replace(/^[0-9a-f]{32,}:\s*/i, "");
+  if (canReconfigureDeployProblem(problem)) return {
+    title: it ? "Le Backbone devono essere riconfigurate" : "Backbones need reconfiguration",
+    body: it ? "È cambiata la disposizione delle Backbone collegate rispetto al progetto." : "The connected Backbone layout has changed since the project was configured.",
+    remedy: it ? "Premi Riconfigura per controllare la nuova disposizione e preparare moduli e pin sulle schede attuali. Dopo il caricamento il programma resterà fermo." : "Press Reconfigure to review the new layout and prepare modules and pins on the current boards. The program will remain stopped after upload.",
+  };
   if (/phase activate_module, errno -133, rollback 0/.test(message)) return {
     title: it ? "I pin del modulo non sono configurati sulla Backbone" : "Module pins are not configured on the Backbone",
     body: it ? "Il modulo non può essere inizializzato con la configurazione attuale dei pin. Il programma precedente è stato ripristinato." : "The module cannot initialize with the current pin configuration. The previous program was restored.",

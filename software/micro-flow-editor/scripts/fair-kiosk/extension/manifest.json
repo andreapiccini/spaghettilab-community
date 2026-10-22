@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "SpaghettiLAB · Maker Faire",
+  "version": "1.1.0",
+  "minimum_chrome_version": "120",
+  "description": "Passaggio controllato tra questionario e demo, senza ricaricare le risposte.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8767/*"
+  ],
+  "background": {
+    "service_worker": "worker-dashboard.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:5173/*",
+        "http://127.0.0.1:5173/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+import { projectId as parseProjectId } from "@spaghettilab/domain";
+import { projectRepository, uuidGenerator } from "../../lib/repository.js";
 import {
   Activity,
   BookOpen,
@@ -54,11 +56,15 @@ type PaletteEntry = {
  * so it is fixed here rather than deferred.
  */
 export function CommandPalette() {
-  const { session, navigate, undo, redo, markSaved } = useSession();
+  const { session, navigate, undo, redo, markSaved, openProject, closeProject } = useSession();
   const { mode, setMode } = useUiMode();
   const { locale } = useLocale();
   const { openSettings } = useSettingsModal();
   const copy = chromeCopy(locale);
+  const [saveAsOpen, setSaveAsOpen] = useState(false);
+  const [projectName, setProjectName] = useState("");
+  const [saveAsError, setSaveAsError] = useState("");
+  const [savingAs, setSavingAs] = useState(false);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [highlighted, setHighlighted] = useState(0);
@@ -98,6 +104,26 @@ export function CommandPalette() {
     setTimeout(() => setSaveState("idle"), 2000);
   }
 
+  async function saveAs() {
+    if (!session || !projectName.trim() || savingAs) return;
+    setSavingAs(true);
+    setSaveAsError("");
+    try {
+      const id = parseProjectId(uuidGenerator.generate());
+      if (!id.ok) throw new Error(id.error.remediation);
+      const original = session.stack.current;
+      const project = { ...original, projectId: id.value, name: projectName.trim(), deploymentRecords: [] };
+      await projectRepository.save(original);
+      await projectRepository.save(project);
+      openProject(project.projectId, project, { screen: "processing-graph" });
+      setSaveAsOpen(false);
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 2000);
+    } catch (error) {
+      setSaveAsError(error instanceof Error ? error.message : String(error));
+    } finally { setSavingAs(false); }
+  }
+
   const entries = useMemo<PaletteEntry[]>(() => {
     const navEntries: PaletteEntry[] = (
       [
@@ -133,6 +159,18 @@ export function CommandPalette() {
       run: () => openSettings(),
     });
     if (session) {
+      actionEntries.push({
+        id: "save-as",
+        label: locale === "it" ? "Salva progetto come…" : "Save project as…",
+        icon: Save,
+        run: () => { setProjectName(session.stack.current.name); setSaveAsError(""); setSaveAsOpen(true); },
+      });
+      actionEntries.push({
+        id: "open-projects",
+        label: locale === "it" ? "Apri progetti salvati" : "Open saved projects",
+        icon: BookOpen,
+        run: () => { void saveOpenProject(session).then(() => closeProject()).catch(() => setSaveState("error")); },
+      });
       actionEntries.push({
         id: "save",
         label: copy.palette.saveProject,
@@ -196,6 +234,22 @@ export function CommandPalette() {
 
   return (
     <>
+      {saveAsOpen && <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 pt-24">
+        <form role="dialog" aria-modal="true" aria-label={locale === "it" ? "Salva progetto come" : "Save project as"}
+          onSubmit={event => { event.preventDefault(); void saveAs(); }} className="w-[420px] rounded-2xl border border-border bg-surface p-6 shadow-e3">
+          <h2 className="mb-4 text-lg font-semibold">{locale === "it" ? "Salva progetto come…" : "Save project as…"}</h2>
+          <label className="block text-sm">{locale === "it" ? "Nome progetto" : "Project name"}
+            <input autoFocus aria-label={locale === "it" ? "Nome progetto" : "Project name"} value={projectName} disabled={savingAs}
+              onChange={event => setProjectName(event.target.value)} className="mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2" />
+          </label>
+          <p className="mt-3 text-xs text-ink-muted">{locale === "it" ? "Salva una nuova copia con moduli, pin e collegamenti. Il progetto originale viene conservato." : "Save a new copy with modules, pins and connections. The original project is preserved."}</p>
+          {saveAsError && <p role="alert" className="mt-3 text-sm text-error">{saveAsError}</p>}
+          <div className="mt-5 flex justify-end gap-3">
+            <button type="button" disabled={savingAs} onClick={() => setSaveAsOpen(false)} className="rounded-lg border border-border px-4 py-2">{locale === "it" ? "Annulla" : "Cancel"}</button>
+            <button type="submit" disabled={savingAs || !projectName.trim()} className="rounded-lg bg-brand-blue px-4 py-2 text-white disabled:opacity-40">{savingAs ? (locale === "it" ? "Salvataggio…" : "Saving…") : (locale === "it" ? "Salva" : "Save")}</button>
+          </div>
+        </form>
+      </div>}
       <AnimatePresence>
         {saveState !== "idle" && (
           <motion.div

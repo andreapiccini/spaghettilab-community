@@ -507,7 +507,7 @@ DEFINE_LOGICAL(spaghetti_logic_if,"logic_if",2,logical_pair,1);
 DEFINE_LOGICAL(spaghetti_logic_while,"logic_while",3,logical_pair,1);
 
 /* Presets follow input state: high selects the color, low emits black. */
-struct led_driver_state { uint32_t colors[4]; uint8_t active, levels, events, seen, last, mode; };
+struct led_driver_state { uint32_t colors[4]; uint8_t active, levels, events, seen, last, mode; uint32_t color; bool emitted; };
 static const struct spaghetti_block_port_descriptor led_driver_inputs[] = {
  { .port_id=0, .name="preset1", .allow_multiple_sources=true, .accepted_types=SPAGHETTI_BLOCK_TYPE_BOOL | SPAGHETTI_BLOCK_TYPE_INT64 | SPAGHETTI_BLOCK_TYPE_UINT64 },
  { .port_id=1, .name="preset2", .allow_multiple_sources=true, .accepted_types=SPAGHETTI_BLOCK_TYPE_BOOL | SPAGHETTI_BLOCK_TYPE_INT64 | SPAGHETTI_BLOCK_TYPE_UINT64 },
@@ -555,20 +555,29 @@ static int led_driver_process(void *state,void *workspace,const struct spaghetti
  struct led_driver_state *s=state;if(!s || !out_count)return -EINVAL;
  for(size_t j=0;j<out_count;j++)out_valid[j]=false;
  if(s->mode==1 && out_count<4)return -EINVAL;
+ bool updated=false, repeat=false;
  for(uint8_t i=0;i<MIN(count,4U);i++)if(valid[i]) {
   if(!(s->active&BIT(i)))return -EINVAL;
   if(!(led_driver_inputs[i].accepted_types&BIT(inputs[i].type)))return -EINVAL;
   bool high=logical_truth(&inputs[i]);bool previous=(s->last&BIT(i))!=0;
-  bool changed=!(s->seen&BIT(i)) || previous!=high;
+  updated |= !(s->seen&BIT(i)) || previous!=high;
+  repeat |= high && (s->events&BIT(i));
   s->seen|=BIT(i);if(high)s->last|=BIT(i);else s->last&=~BIT(i);
-  uint32_t color = high ? s->colors[i] : 0U;
-  if(changed || (high && (s->events&BIT(i)))) {if(s->mode==1){for(unsigned channel=0;channel<3;channel++){spaghetti_block_set_u64(&outputs[channel+1],channel+1,(((color>>((2-channel)*8))&255U)*100U+127U)/255U);out_valid[channel+1]=true;}}
-   else if(s->mode==0){memset(&outputs[0],0,sizeof(outputs[0]));outputs[0].type=SPAGHETTI_VALUE_TEXT;snprintf(outputs[0].data.text.text,sizeof(outputs[0].data.text.text),"#%06X",(unsigned)color);outputs[0].data.text.size=7;out_valid[0]=true;}
-   else{spaghetti_block_set_u64(&outputs[0],0,color);out_valid[0]=true;}}
  }
+ if(!updated && !repeat)return 0;
+ /* Resolve all active inputs: one preset going LOW must not extinguish another.
+  * Preset order gives stable priority when inclusive ranges overlap. */
+ uint32_t color=0U;
+ for(uint8_t i=0;i<4;i++)if(s->active & s->seen & s->last & BIT(i)){color=s->colors[i];break;}
+ if(s->emitted && s->color==color && !repeat)return 0;
+ s->color=color;s->emitted=true;
+ if(s->mode==1){for(unsigned channel=0;channel<3;channel++){spaghetti_block_set_u64(&outputs[channel+1],channel+1,(((color>>((2-channel)*8))&255U)*100U+127U)/255U);out_valid[channel+1]=true;}}
+ else if(s->mode==0){memset(&outputs[0],0,sizeof(outputs[0]));outputs[0].type=SPAGHETTI_VALUE_TEXT;snprintf(outputs[0].data.text.text,sizeof(outputs[0].data.text.text),"#%06X",(unsigned)color);outputs[0].data.text.size=7;out_valid[0]=true;}
+ else{spaghetti_block_set_u64(&outputs[0],0,color);out_valid[0]=true;}
+
  return 0;
 }
-static void led_driver_reset(void *state){struct led_driver_state *s=state;s->seen=0;s->last=0;}
+static void led_driver_reset(void *state){struct led_driver_state *s=state;s->seen=0;s->last=0;s->color=0;s->emitted=false;}
 static const struct spaghetti_block_driver_ops led_driver_ops={.validate=led_driver_validate,.init=led_driver_init,.process=led_driver_process,.reset=led_driver_reset,.deinit=spaghetti_block_noop_deinit};
 SPAGHETTI_BLOCK_DRIVER_DEFINE(spaghetti_led_driver)={.type_id="led_driver",.api_version=SPAGHETTI_BLOCK_DRIVER_API_VERSION,.algorithm_version=1,.config_schema=&led_driver_schema,.inputs=led_driver_inputs,.input_count=4,.outputs=led_driver_outputs,.output_count=4,.state_size=sizeof(struct led_driver_state),.state_align=__alignof__(struct led_driver_state),.max_cost_per_record=1,.ops=&led_driver_ops};
 

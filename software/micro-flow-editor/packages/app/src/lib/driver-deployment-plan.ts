@@ -290,6 +290,18 @@ export function prepareDriverDeployment(
       }),
     },
   };
+  // An unused orphan tick has no runtime behavior (e.g. after removing a Schedule).
+  // Keep connected ticks for alias validation/lowering below.
+  input = {
+    ...input,
+    processingGraph: {
+      ...input.processingGraph,
+      nodes: (input.processingGraph.nodes as readonly Node[]).filter((node) =>
+        node.data.kind !== "block" || node.data.blockTypeId !== "ab.flow_start" ||
+        input.processingGraph.edges.some(edge => edge.source === node.id || edge.target === node.id),
+      ),
+    },
+  };
   const originalNodes = input.processingGraph.nodes as readonly Node[];
   const manualTriggers = originalNodes.filter(
     (node) =>
@@ -333,6 +345,9 @@ export function prepareDriverDeployment(
     !sequences.length &&
     !viewerEdges.length &&
     !manualTriggers.length &&
+    !originalNodes.some(
+      (node) => node.data.kind === "block" && node.data.blockTypeId === "ab.flow_start",
+    ) &&
     !originalNodes.some(
       (node) => node.data.kind === "block" && LOGIC_TYPES.has(node.data.blockTypeId),
     )

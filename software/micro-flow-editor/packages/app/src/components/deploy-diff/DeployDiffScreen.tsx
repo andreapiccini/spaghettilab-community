@@ -55,6 +55,7 @@ import {
   type RemotePlan,
 } from "../../lib/distributed-deployment.js";
 import {
+  canReconfigureDeployProblem,
   describeDeployProblem,
   uniqueDeployProblems,
   type DeployProblem,
@@ -118,7 +119,7 @@ type CoreCandidate = {
 export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
   const { locale } = useLocale();
   const it = locale === "it";
-  const { session, execute, navigate, closeDeploy, focusCanvas, manualDeployTarget } =
+  const { session, execute, navigate, closeDeploy, focusCanvas, manualDeployTarget, requestTopologyReview } =
     useSession();
   const close =
     onClose ??
@@ -862,6 +863,10 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
   const showProblem = (problem: DeployProblem) => {
     closeDeploy();
     if (onClose) onClose();
+    if (canReconfigureDeployProblem(problem)) {
+      requestTopologyReview();
+      return;
+    }
     const id = problem.bindingId ?? bindings[0]?.bindingId;
     if (id) focusCanvas(id, problem.nodeId);
     else navigate("processing-graph");
@@ -1202,7 +1207,9 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
                   className="mt-3 inline-flex items-center gap-2 rounded-md border border-brand-blue px-3 py-2 text-xs text-brand-blue"
                 >
                   <LocateFixed size={14} />
-                  {it ? "Mostra nel canvas" : "Show on canvas"}
+                  {canReconfigureDeployProblem(problem)
+                    ? (it ? "Riconfigura" : "Reconfigure")
+                    : (it ? "Mostra nel canvas" : "Show on canvas")}
                 </button>
               )}
               <details className="mt-3 text-[11px] text-ink-muted">
@@ -1325,7 +1332,9 @@ export function DeployDiffScreen({ onClose }: { onClose?: () => void }) {
             className="inline-flex items-center gap-2 rounded-lg bg-brand-blue px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"
           >
             <LocateFixed size={15} />
-            {canRecheckDeployProblem(shownProblems[0])
+            {canReconfigureDeployProblem(shownProblems[0])
+              ? (it ? "Riconfigura" : "Reconfigure")
+              : canRecheckDeployProblem(shownProblems[0])
               ? it
                 ? "Ricontrolla"
                 : "Check again"
