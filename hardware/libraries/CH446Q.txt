@@ -1,0 +1,16 @@
+WCH CH446Q - LCSC C109471
+Symbol: SpaghettiLAB:CH446Q
+Footprint: SpaghettiLAB:LQFP-44_10x10mm_P0.8mm
+Pinout verified against manufacturer CH446DS1 rev 1D sections 3/4.1. Footprint and 3D reference from official KiCad library (CC-BY-SA 4.0 with KiCad exception).
+Sources:
+https://www.wch.cn/products/CH446.html
+https://www.wch.cn/downloads/CH446DS1_PDF.html
+https://bitsavers.trailing-edge.com/components/wch/_dataSheets/CH446DS1.PDF
+A single chip offers 8 Y and 16 X terminals with independently controlled switches at all 128 intersections. It is not a general 24x24 nonblocking matrix. Never join driven outputs with conflicting levels.
+Recommended for this project: VDD=5V, GND=0V, VEE=0V; do not power VDD at 3.3V. At 5V supply VIH min is 2.0V, suitable for ESP32-S3 3.3V control outputs.
+Serial mode: pin10 P/S low; AX0..AX3 and AY0..AY2 directly to GND; command pins DAT36, CS/CK34, STB14, RST41. RST is ACTIVE HIGH, unlike ESP32 EN. Initialize to all switches off and establish defined boot levels.
+NC pins 9,22,23,32,44 must remain unconnected.
+RON at 5V and 25C: 120 ohm typical, 185 ohm max. 15mA continuous switch current and 100mA total are ABSOLUTE MAXIMUM limits, not design targets. Do not route power loads through this switch.
+An analog switch is not a logic level shifter. External signals routed into ESP32 GPIO/ADC must respect ESP32 limits even when CH446Q is powered at 5V.
+Add local decoupling; assess source impedance and ADC settling for analog measurements. 8x16 channel assignment, control GPIOs and actual schematic wiring remain to be defined.
+Imported into library only; not placed or wired into the board. No push performed for this addition.
