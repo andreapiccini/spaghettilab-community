@@ -211,6 +211,7 @@
       ],
       "track_widths": [
         0.0,
+        0.25,
         0.5,
         1.0
       ],
@@ -753,7 +754,7 @@
         "uuid": "9de6ddb4-2647-4876-90a9-c16e585eea03"
       }
     ],
-    "used_designators": "H1-4",
+    "used_designators": "R19,R21-22,R25,#PWR148-149,#PWR151-152,#PWR155-159,C11,C75-76,#FLG105-106,TP10-11,TP14,TP16-17,TP20,TP22-23,U1,U3,U20,J4-6",
     "variants": []
   },
   "sheets": [
@@ -762,7 +763,9 @@
       "Principale"
     ]
   ],
-  "text_variables": {},
+  "text_variables": {
+    "SPAGHETTILAB_FLEXYPIN_3D": "${KIPRJMOD}/../libraries/flexypin/3d"
+  },
   "tuning_profiles": {
     "meta": {
       "version": 0

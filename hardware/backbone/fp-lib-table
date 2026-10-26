@@ -1,3 +1,4 @@
 (fp_lib_table
   (lib (name "SpaghettiLAB")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB.pretty")(options "")(descr "Community hardware footprints"))
+  (lib (name "FlexyPin")(type "KiCad")(uri "${KIPRJMOD}/../libraries/flexypin/FlexyPin.pretty")(options "")(descr "Solder Party FlexyPin"))
 )

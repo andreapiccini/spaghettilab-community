@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "SpaghettiLab_FlexyPin")(type "KiCad")(uri "${KIPRJMOD}/../../libraries/flexypin/SpaghettiLab_FlexyPin.kicad_sym")(options "")(descr "Solder Party FlexyPin"))
+)

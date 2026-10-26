@@ -721,7 +721,9 @@
       "Principale"
     ]
   ],
-  "text_variables": {},
+  "text_variables": {
+    "SPAGHETTILAB_FLEXYPIN_3D": "${KIPRJMOD}/../../libraries/flexypin/3d"
+  },
   "tuning_profiles": {
     "meta": {
       "version": 0

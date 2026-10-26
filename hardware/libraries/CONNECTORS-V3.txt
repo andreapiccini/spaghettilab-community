@@ -1,0 +1,18 @@
+Connettori V3 - 27 ottobre 2026
+SpaghettiLAB:FPC_24_Hirose_FH12: Hirose FH12-24S-0.5SH(55), LCSC C202112.
+24 poli, passo 0.5 mm, contatti inferiori, cavo FFC/FPC spesso 0.3 mm.
+SpaghettiLAB:Qwiic_JST_SH_4: JST SM04B-SRSS-TB(LF)(SN), LCSC C160404.
+Pinout Qwiic: 1 GND, 2 +3V3, 3 SDA, 4 SCL. Non alimentare a 5 V.
+Simboli nuovi con pin passivi, footprint preassegnato e campi MPN/Manufacturer/LCSC.
+Footprint e riferimenti STEP: librerie ufficiali KiCad 10, CC-BY-SA 4.0 con eccezione KiCad. Modelli 3D tramite KICAD10_3DMODEL_DIR.
+Fonti:
+https://www.hirose.com/product/p/CL0586-0521-0-55
+https://www.lcsc.com/product-detail/C202112.html
+https://www.lcsc.com/product-detail/C160404.html
+https://learn.sparkfun.com/tutorials/redboard-qwiic-hookup-guide/hardware-overview
+Alternative economiche NON approvate come sostituti identici:
+XUNPU FPC0521-24PH20: corpo 24 poli largo 16.4 mm e pad meccanici differenti dal footprint Hirose (corpo 16.1 mm).
+https://atta.szlcsc.com/upload/public/pdf/source/20260512/2F4C1FEFD6B7E28307FDB56DE60A58EC.pdf
+DEALON 1.0-4PWB: pad segnale raccomandati 0.70 mm e fissaggi 1.2 x 2.0 mm; footprint JST: 0.6 x 1.55 mm e 1.2 x 1.8 mm. Non dimostrata intercambiabilita completa.
+https://datasheet.lcsc.com/datasheet/pdf/c615e0f5fc3b6ed4d5fddf3ad1af4ce0.pdf
+Componenti importati nelle librerie: non ancora disposti/collegati nello schema o nel PCB.

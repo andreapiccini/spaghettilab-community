@@ -1,0 +1,3 @@
+(fp_lib_table
+ (lib (name "FlexyPin")(type "KiCad")(uri "${KIPRJMOD}/flexypin/FlexyPin.pretty")(options "")(descr "Solder Party FlexyPin official land patterns"))
+)
