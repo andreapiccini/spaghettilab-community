@@ -10,14 +10,13 @@ Aggiornamento 2026-10-27. Implementazione nello **schema** `backbone.kicad_sch`;
 | U10 ME6211C15M5G-N | VAUX 3,3 V → CAM_1V5, alimenta DVDD |
 | C75–C78 | 4,7 µF / 10 V X7R, ingresso e uscita di ciascun LDO |
 | C79, C80, C81 | 100 nF presso J5, rispettivamente pin 4, 11, 10 |
-| Q3, Q4 BSS138 | Adattamento bidirezionale SCCB tra IO4/IO5 a 3,3 V e camera a 2,8 V |
-| R24–R27 | Pull-up 4,7 kΩ, due per ciascun lato del bus |
+| R24, R25 | Pull-up 4,7 kΩ a VCORE 3,3 V, condivise da Qwiic e camera |
 | U11 SN74LVC1G125DBVR | Buffer XCLK: ingresso GPIO15, uscita a 2,8 V; OE a GND |
 | C82, R30 | 100 nF presso U11 e 33 Ω serie su XCLK |
 | R28, R29 | RESET_N alto a 2,8 V e PWDN basso, entrambi con 10 kΩ |
 | C83 | 100 nF presso l'alimentazione Qwiic |
 
-Tutti i nuovi componenti hanno footprint assegnato. I quattro simboli attivi sono anche nella libreria SpaghettiLAB. `#FLG0105` dichiara VAUX alimentata da U5: il simbolo AP2112 importato ha pin elettrici generici, quindi KiCad non riconosce da solo l'uscita di U5 come sorgente. Non è un componente fisico.
+Tutti i nuovi componenti hanno footprint assegnato. I simboli attivi sono anche nella libreria SpaghettiLAB; BSS138 resta disponibile in libreria ma non è più usato nel circuito. `#FLG0105` dichiara VAUX alimentata da U5: il simbolo AP2112 importato ha pin elettrici generici, quindi KiCad non riconosce da solo l'uscita di U5 come sorgente. Non è un componente fisico.
 
 ## J5: flat camera 24 poli
 
@@ -27,9 +26,9 @@ Piedinatura di riferimento ESP32-S3-EYE-MB V2.2. I numeri indicano i contatti J5
 |---|---|---|
 | 1 | NC | Non collegato |
 | 2 | AGND | GND |
-| 3 | SCCB SDA | CAM_SDA → Q3 → IO4 / GPIO4 |
+| 3 | SCCB SDA | IO4 / GPIO4 (collegamento diretto) |
 | 4 | AVDD | CAM_2V8 |
-| 5 | SCCB SCL | CAM_SCL → Q4 → IO5 / GPIO5 |
+| 5 | SCCB SCL | IO5 / GPIO5 (collegamento diretto) |
 | 6 | RESET_N | Pull-up 10 kΩ a CAM_2V8 |
 | 7 | VSYNC | IO6 / GPIO6 |
 | 8 | PWDN | Pull-down 10 kΩ a GND |
@@ -61,14 +60,14 @@ Ordine firmware D0..D7: **38, 39, 40, 41, 42, 17, 18, 21**. XCLK=15, PCLK=2, VSY
 | 3 | SDA | IO4 / GPIO4 |
 | 4 | SCL | IO5 / GPIO5 |
 
-Qwiic e camera condividono lo stesso bus logico tramite Q3/Q4. Il firmware deve gestire un unico bus I2C e verificare indirizzi, frequenza e capacità complessiva; evitare inizializzazioni concorrenti indipendenti del medesimo controller. Le pull-up sui moduli Qwiic si sommano a R24/R25: verificare il valore equivalente nella catena reale.
+Qwiic e camera condividono direttamente IO4/IO5, con pull-up a VCORE 3,3 V; Q3/Q4 e R26/R27 sono stati rimossi su richiesta dell’utente. Il firmware deve gestire un unico bus I2C e verificare indirizzi, frequenza e capacità complessiva; evitare inizializzazioni concorrenti indipendenti del medesimo controller. Le pull-up sui moduli Qwiic si sommano a R24/R25: verificare il valore equivalente nella catena reale.
 
 ## Reti preservate e limiti
 
 - Nessun pin precedentemente collegato ha cambiato nome rete o connessione nella netlist. Conservati A0–A7/GPIO7–14, ALED/GPIO16, CAN/GPIO47–48, USB/GPIO19–20, UART, BOOT e reset MCU.
 - Non impiegati GPIO35–37, riservati alla PSRAM nelle varianti interessate, né i GPIO di strap liberi 3/45/46.
 - Questa implementazione ha rail **fissi 2,8 V e 1,5 V**. L'obiettivo dell'utente resta supportare più camere; non è una certificazione universale OV2640/OV3660/OV5640. Verificare pinout, tensioni e verso del flat del modulo concreto. Moduli con DVDD diversa richiedono una variante di alimentazione/adattatore prima di collegarli.
-- La conversione XCLK e SCCB protegge il dominio camera dai livelli nominali 3,3 V. Le uscite DVP vanno direttamente all'ESP32, come nel riferimento: margini logici e timing vanno qualificati sul modulo scelto.
+- Il buffer XCLK porta il clock a 2,8 V. SCCB è invece collegato direttamente al bus a 3,3 V, come nel riferimento S3-EYE: il modulo scelto deve ammettere questi livelli sugli ingressi SDA/SCL. Le uscite DVP vanno direttamente all'ESP32, come nel riferimento: margini logici e timing vanno qualificati sul modulo scelto.
 - VAUX alimenta già i LED: controllare picchi, dissipazione e margine di U5 con camera e LED simultanei. Verificare anche il budget VCORE con i dispositivi Qwiic. Nessuna misura di corrente o temperatura effettuata.
 - Sul PCB: condensatori presso i pin indicati, massa continua, percorsi DVP brevi, R30 vicino all'uscita U11, separazione dai ritorni dei LED. Il PCB esistente deve ancora essere aggiornato dallo schema e sbrogliato.
 
@@ -92,3 +91,10 @@ ERC: **233 → 176 segnalazioni; errori 56 → 27**. I 27 errori rimanenti rigua
 The camera/Qwiic section is organized into seven dashed functional blocks with English comments: 2.8 V regulator, 1.5 V regulator, SCCB level shifting, Qwiic expansion, clock buffering, default controls, and the 24-pin camera interface. Local connections now use orthogonal wires, visible junctions, shared power/ground rails and directly connected decoupling capacitors. Labels remain at block interfaces and MCU signal ports.
 
 The full netlist comparison against commit 9110be4 preserves all 63 net names and all 237 connected component pins, including complete net membership. No parts, values, GPIO assignments, footprints or PCB routing were changed. KiCad export and visual inspection passed. ERC still reports the same 27 pre-existing errors; total messages are now 178 (151 warnings). Two additional single-global-label warnings concern VCORE and CAM_XCLK_DRV: their former duplicate labels were replaced with physical wires. These warnings do not indicate disconnected pins; net connectivity was checked independently.
+
+
+## Collegamento SCCB diretto — 2026-10-27
+
+Su richiesta dell’utente, rimossi Q3/Q4 BSS138 e R26/R27 (pull-up a 2,8 V). J5.3 e J5.5 sono ora collegati direttamente a IO4 e IO5, condivisi con J4 e con le pull-up R24/R25 a 3,3 V. Il circuito resta cablato per la camera di riferimento S3-EYE; il collegamento diretto non costituisce qualifica di tutte le varianti di modulo camera. Qwiic conserva alimentazione, pull-up e GPIO precedenti. U11 sul clock resta presente.
+
+Verifica netlist: le sole variazioni elettriche sono la rimozione dei quattro componenti e l’unione CAM_SDA→IO4 / CAM_SCL→IO5. Tutte le altre reti preservate. Nessun aggiornamento PCB o firmware. La descrizione dei sette blocchi e il conteggio ERC nella sezione precedente documentano la revisione prima della rimozione: il blocco level-shift è ora eliminato.

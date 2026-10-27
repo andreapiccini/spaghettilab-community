@@ -22941,256 +22941,26 @@
 
 
 
-(symbol
-  (lib_id "SpaghettiLAB:BSS138")
-  (at 420.37 133.35 0)
-  (unit 1)
-  (in_bom yes)
-  (on_board yes)
-  (dnp no)
-  (uuid "1cbf1eb8-0ada-48ef-91cd-395b16a89359")
-  (property "Reference" "Q3"
-    (at 426.72 132.08 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Value" "BSS138"
-    (at 426.72 134.62 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-    (at 420.37 133.35 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (property "Datasheet" "https://www.onsemi.com/pdf/datasheet/bss138-d.pdf"
-    (at 420.37 133.35 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (pin "1"
-    (uuid "537da595-bb1c-4a97-9b43-849cbd157def")
-  )
-  (pin "2"
-    (uuid "25b8b896-7b0e-4266-aee6-3e77c0fcd823")
-  )
-  (pin "3"
-    (uuid "6c1e820e-57dc-402c-aab4-52eb66a5edf4")
-  )
-  (instances
-    (project "backbone"
-      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
-        (reference "Q3")
-        (unit 1)
-      )
-    )
-  )
-)
 
 
 
 
 
 
-(symbol
-  (lib_id "Device:R")
-  (at 397.51 139.7 0)
-  (unit 1)
-  (in_bom yes)
-  (on_board yes)
-  (dnp no)
-  (uuid "8a98ab8d-97dd-498d-97ba-2ad7334fd9de")
-  (property "Reference" "R26"
-    (at 403.86 138.43 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Value" "4.7k"
-    (at 403.86 140.97 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Footprint" "SpaghettiLAB:R0603"
-    (at 397.51 139.7 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (property "Datasheet" ""
-    (at 397.51 139.7 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (pin "1"
-    (uuid "5d0e41cb-8582-41d0-aff9-6e8a68d1e7bb")
-  )
-  (pin "2"
-    (uuid "147c4c00-524d-4e1a-828b-8ad5f8a3fba2")
-  )
-  (instances
-    (project "backbone"
-      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
-        (reference "R26")
-        (unit 1)
-      )
-    )
-  )
-)
-
-
-
-
-(symbol
-  (lib_id "SpaghettiLAB:BSS138")
-  (at 520.7 133.35 0)
-  (unit 1)
-  (in_bom yes)
-  (on_board yes)
-  (dnp no)
-  (uuid "c01d3934-8ef4-4552-9382-96528ea26796")
-  (property "Reference" "Q4"
-    (at 527.05 132.08 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Value" "BSS138"
-    (at 527.05 134.62 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-    (at 520.7 133.35 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (property "Datasheet" "https://www.onsemi.com/pdf/datasheet/bss138-d.pdf"
-    (at 520.7 133.35 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (pin "1"
-    (uuid "df47410d-8f7b-4b25-b12e-968540fcc1d7")
-  )
-  (pin "2"
-    (uuid "9cb6e970-524e-40e4-aebc-636b65227df4")
-  )
-  (pin "3"
-    (uuid "aaa7973f-e8b4-4766-ba20-3c0b227bcecf")
-  )
-  (instances
-    (project "backbone"
-      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
-        (reference "Q4")
-        (unit 1)
-      )
-    )
-  )
-)
 
 
 
 
 
 
-(symbol
-  (lib_id "Device:R")
-  (at 497.84 139.7 0)
-  (unit 1)
-  (in_bom yes)
-  (on_board yes)
-  (dnp no)
-  (uuid "f328742c-ae46-4810-9fb8-d1a73d97b18e")
-  (property "Reference" "R27"
-    (at 504.19 138.43 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Value" "4.7k"
-    (at 504.19 140.97 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Footprint" "SpaghettiLAB:R0603"
-    (at 497.84 139.7 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (property "Datasheet" ""
-    (at 497.84 139.7 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (pin "1"
-    (uuid "bc46476e-cbf3-486c-9702-93bb5e2c2ee4")
-  )
-  (pin "2"
-    (uuid "e9b8be02-061e-4c88-9992-bc6c18dd1e7b")
-  )
-  (instances
-    (project "backbone"
-      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
-        (reference "R27")
-        (unit 1)
-      )
-    )
-  )
-)
+
+
+
+
+
+
+
+
 
 
 
@@ -23851,18 +23621,18 @@
 (no_connect (at 525.78 60.96) (uuid "a21d4b1e-54a4-4130-9c07-cfb326504c5c"))
 (global_label "GND" (shape bidirectional) (at 551.18 81.28 0) (effects (font (size 1 1)) (justify left)) (uuid "77a841cd-d1dc-4463-8762-36de74ff6816"))
 (text "VAUX also supplies LEDs: check total load and temperature." (at 486.41 88.9 0) (effects (font (size 0.9 0.9)) (justify left)) (uuid "24bafa1e-9758-442e-9011-6709f784866a"))
-(rectangle (start 382.27 101.6) (end 579.12 173.99) (stroke (width 0.254) (type dash)) (fill (type none)) (uuid "76006b62-d039-4f3a-9ecb-f00dd482a49f"))
-(text "CAMERA SCCB / I2C LEVEL SHIFT" (at 386.08 106.68 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "b4da8a9c-55df-4463-b99d-9b59623d75b6"))
-(text "SDA and SCL share the Qwiic bus. Camera-side pull-ups are tied to 2.8 V." (at 386.08 111.13 0) (effects (font (size 1 1)) (justify left)) (uuid "66aecdce-5ff9-4939-bc9a-abeeba2895c7"))
-(global_label "IO4" (shape bidirectional) (at 430.53 118.11 0) (effects (font (size 1 1)) (justify left)) (uuid "521bbf97-8ae2-465a-b3a2-4892bb82d368"))
-(global_label "CAM_SDA" (shape bidirectional) (at 443.23 158.75 0) (effects (font (size 1 1)) (justify left)) (uuid "fa196dc5-b1f9-4a21-9eb5-bf2a97d60c7c"))
-(global_label "CAM_2V8" (shape bidirectional) (at 397.51 133.35 180) (effects (font (size 1 1)) (justify right)) (uuid "e2fe1a77-fd7b-4dca-92c1-26eeb1c784c1"))
-(global_label "IO5" (shape bidirectional) (at 530.86 118.11 0) (effects (font (size 1 1)) (justify left)) (uuid "61187d17-7716-47a9-934a-f2ee83cd83ac"))
-(global_label "CAM_SCL" (shape bidirectional) (at 543.56 158.75 0) (effects (font (size 1 1)) (justify left)) (uuid "be92121c-a6ec-4691-84d8-497d19a2e2de"))
-(global_label "CAM_2V8" (shape bidirectional) (at 497.84 133.35 180) (effects (font (size 1 1)) (justify right)) (uuid "cdc2251c-1399-46db-a7ae-8cb49d3fb339"))
+
+
+
+
+
+
+
+
+
 (rectangle (start 297.18 180.34) (end 382.27 254.0) (stroke (width 0.254) (type dash)) (fill (type none)) (uuid "00c8555e-3550-480b-987f-8f47f05ca082"))
 (text "QWIIC EXPANSION - 3.3 V" (at 300.99 185.42 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "c259a4a1-ced3-4f41-8b0a-8d9817cbe0ac"))
-(text "SDA = GPIO4, SCL = GPIO5. Check total pull-up resistance." (at 300.99 189.87 0) (effects (font (size 1 1)) (justify left)) (uuid "3723e3ee-545f-40c4-b0c0-a21fe2711e1d"))
+(text "Camera SCCB shares GPIO4/5 directly; pull-ups to 3.3 V." (at 300.99 189.87 0) (effects (font (size 1 1)) (justify left)) (uuid "3723e3ee-545f-40c4-b0c0-a21fe2711e1d"))
 (global_label "VCORE" (shape bidirectional) (at 309.88 198.12 180) (effects (font (size 1 1)) (justify right)) (uuid "29f407d6-c6de-49be-96dd-49d91b213d7b"))
 (global_label "IO4" (shape bidirectional) (at 309.88 229.87 180) (effects (font (size 1 1)) (justify right)) (uuid "71773230-df9d-4211-9b32-4aa1f9bbaf09"))
 (global_label "IO5" (shape bidirectional) (at 309.88 232.41 180) (effects (font (size 1 1)) (justify right)) (uuid "8e9e482c-2afe-44f3-825d-701b1b7933bb"))
@@ -23891,10 +23661,10 @@
 (no_connect (at 546.1 222.25) (uuid "c609394f-d2c6-42df-9abe-c3a8e20693f3"))
 (text "GND" (at 558.8 224.79 0) (effects (font (size 0.9 0.9)) (justify left)) (uuid "c6f0ada8-b19f-4c4a-9fd6-31ae1fb7418a"))
 (text "SDA" (at 558.8 227.33 0) (effects (font (size 0.9 0.9)) (justify left)) (uuid "b16c491b-2adf-4153-b41a-0205ea109cdc"))
-(global_label "CAM_SDA" (shape bidirectional) (at 529.59 227.33 180) (effects (font (size 1 1)) (justify right)) (uuid "36dee055-7417-49f3-b06b-6d17e95977ed"))
+(global_label "IO4" (shape bidirectional) (at 529.59 227.33 180) (effects (font (size 1 1)) (justify right)) (uuid "36dee055-7417-49f3-b06b-6d17e95977ed"))
 (text "AVDD 2.8V" (at 558.8 229.87 0) (effects (font (size 0.9 0.9)) (justify left)) (uuid "b4efa61b-ab19-43d2-b9d9-783db8ca679f"))
 (text "SCL" (at 558.8 232.41 0) (effects (font (size 0.9 0.9)) (justify left)) (uuid "476d3170-cdcd-4396-9f35-dcfbc78631ea"))
-(global_label "CAM_SCL" (shape bidirectional) (at 529.59 232.41 180) (effects (font (size 1 1)) (justify right)) (uuid "ce4822f9-e778-408a-9dc4-341da69bbd79"))
+(global_label "IO5" (shape bidirectional) (at 529.59 232.41 180) (effects (font (size 1 1)) (justify right)) (uuid "ce4822f9-e778-408a-9dc4-341da69bbd79"))
 (text "RESET_N" (at 558.8 234.95 0) (effects (font (size 0.9 0.9)) (justify left)) (uuid "293122be-2e86-4ad3-8981-631835f1e324"))
 (global_label "CAM_RESET_N" (shape bidirectional) (at 529.59 234.95 180) (effects (font (size 1 1)) (justify right)) (uuid "42262fad-65c1-40cc-9ce8-0c67eb257bd0"))
 (text "VSYNC" (at 558.8 237.49 0) (effects (font (size 0.9 0.9)) (justify left)) (uuid "07569557-8e23-437e-bd78-246291793c62"))
@@ -23975,19 +23745,19 @@
 (wire (pts (xy 397.51 58.42) (xy 407.67 58.42)) (stroke (width 0) (type default)) (uuid "8307a0d9-01fd-4f95-bf53-315fd19efb83"))
 (wire (pts (xy 397.51 69.85) (xy 397.51 81.28)) (stroke (width 0) (type default)) (uuid "5aa82d86-1d69-49e7-9e0a-605f36532d7a"))
 (wire (pts (xy 397.51 81.28) (xy 420.37 81.28)) (stroke (width 0) (type default)) (uuid "f51c8f10-512c-44ba-b7b3-3ea945b4fc83"))
-(wire (pts (xy 397.51 133.35) (xy 397.51 135.89)) (stroke (width 0) (type default)) (uuid "2d5c1a5c-4bdb-4182-9a9e-0c9ebba662a5"))
-(wire (pts (xy 397.51 133.35) (xy 415.29 133.35)) (stroke (width 0) (type default)) (uuid "3c20b0dc-ab92-4f2e-b3a2-1406f859e32f"))
-(wire (pts (xy 397.51 143.51) (xy 397.51 158.75)) (stroke (width 0) (type default)) (uuid "debcb96d-8a2d-405e-95f4-00c29c8a9c09"))
-(wire (pts (xy 397.51 158.75) (xy 422.91 158.75)) (stroke (width 0) (type default)) (uuid "4ead7914-a012-4f27-81ad-fe7f76533a3a"))
+
+
+
+
 (wire (pts (xy 407.67 58.42) (xy 407.67 60.96)) (stroke (width 0) (type default)) (uuid "43408a17-7eeb-4b8d-b03c-d9db98c8dd45"))
 (wire (pts (xy 407.67 58.42) (xy 412.75 58.42)) (stroke (width 0) (type default)) (uuid "679db33c-64b8-4440-8787-0ea962b0c510"))
 (wire (pts (xy 407.67 60.96) (xy 412.75 60.96)) (stroke (width 0) (type default)) (uuid "575e3709-06ef-41c6-94c7-4af7d8aefd29"))
 (wire (pts (xy 420.37 68.58) (xy 420.37 81.28)) (stroke (width 0) (type default)) (uuid "5c98e54e-646c-49f1-aaa6-ce8473229941"))
 (wire (pts (xy 420.37 81.28) (xy 443.23 81.28)) (stroke (width 0) (type default)) (uuid "80d19026-9893-42aa-9323-82f37bf5dde9"))
-(wire (pts (xy 422.91 118.11) (xy 422.91 128.27)) (stroke (width 0) (type default)) (uuid "f2e2cbad-3fb7-4a4a-8f83-a2c26ef4b9fe"))
-(wire (pts (xy 422.91 118.11) (xy 430.53 118.11)) (stroke (width 0) (type default)) (uuid "b2bde374-6955-4b0e-aba6-9a1232d187f8"))
-(wire (pts (xy 422.91 138.43) (xy 422.91 158.75)) (stroke (width 0) (type default)) (uuid "775da1c8-3ae0-4583-9ca6-f6339e3d4bf4"))
-(wire (pts (xy 422.91 158.75) (xy 443.23 158.75)) (stroke (width 0) (type default)) (uuid "ddd1faf1-4591-4d88-9cb7-83bbb3806254"))
+
+
+
+
 (wire (pts (xy 427.99 58.42) (xy 443.23 58.42)) (stroke (width 0) (type default)) (uuid "e44717de-a2cd-4fbe-9685-35db49f12568"))
 (wire (pts (xy 427.99 290.83) (xy 427.99 300.99)) (stroke (width 0) (type default)) (uuid "334dcaed-7e90-474e-ba0f-41f572b258d5"))
 (wire (pts (xy 427.99 308.61) (xy 427.99 322.58)) (stroke (width 0) (type default)) (uuid "25b6ce59-0811-41a0-a2c6-2eb38c79f9a0"))
@@ -24007,10 +23777,10 @@
 (wire (pts (xy 497.84 58.42) (xy 508.0 58.42)) (stroke (width 0) (type default)) (uuid "e20225da-41af-4faa-8040-9b5f761b236d"))
 (wire (pts (xy 497.84 69.85) (xy 497.84 81.28)) (stroke (width 0) (type default)) (uuid "e3031199-6237-4051-9d98-e01c7f27a8a1"))
 (wire (pts (xy 497.84 81.28) (xy 520.7 81.28)) (stroke (width 0) (type default)) (uuid "706d9789-4220-49f6-b635-167fb9080be0"))
-(wire (pts (xy 497.84 133.35) (xy 497.84 135.89)) (stroke (width 0) (type default)) (uuid "e1f4b572-20d7-4a6f-9788-107665908f29"))
-(wire (pts (xy 497.84 133.35) (xy 515.62 133.35)) (stroke (width 0) (type default)) (uuid "e7ccac4a-6e1e-43f8-a8f6-36240fbddfe3"))
-(wire (pts (xy 497.84 143.51) (xy 497.84 158.75)) (stroke (width 0) (type default)) (uuid "28f16419-084a-4617-82e8-b11e57fb35c7"))
-(wire (pts (xy 497.84 158.75) (xy 523.24 158.75)) (stroke (width 0) (type default)) (uuid "202e538d-9675-429b-8b51-23168ec9dd32"))
+
+
+
+
 (wire (pts (xy 500.38 229.87) (xy 500.38 247.65)) (stroke (width 0) (type default)) (uuid "9102a40e-07d7-4ab7-a131-a0155375d8a8"))
 (wire (pts (xy 500.38 229.87) (xy 546.1 229.87)) (stroke (width 0) (type default)) (uuid "fec2a82c-9d04-4bb0-87ee-ecfd2552820c"))
 (wire (pts (xy 500.38 247.65) (xy 500.38 293.37)) (stroke (width 0) (type default)) (uuid "7b2be693-f17d-4f77-9934-2f64f9522878"))
@@ -24027,10 +23797,10 @@
 (wire (pts (xy 508.0 297.18) (xy 560.07 297.18)) (stroke (width 0) (type default)) (uuid "1b85e0f5-f397-4388-b52d-1cdd85bf0043"))
 (wire (pts (xy 520.7 68.58) (xy 520.7 81.28)) (stroke (width 0) (type default)) (uuid "fb4dd960-5a30-48cf-b167-c859c7655e06"))
 (wire (pts (xy 520.7 81.28) (xy 543.56 81.28)) (stroke (width 0) (type default)) (uuid "75ad799f-b2a9-4c98-b4f4-55515dfe05e8"))
-(wire (pts (xy 523.24 118.11) (xy 523.24 128.27)) (stroke (width 0) (type default)) (uuid "031b938b-c27b-4d6a-8dfa-7e3c194dfb39"))
-(wire (pts (xy 523.24 118.11) (xy 530.86 118.11)) (stroke (width 0) (type default)) (uuid "3c711f5d-514c-4ba1-88fa-fcf108bdd9fa"))
-(wire (pts (xy 523.24 138.43) (xy 523.24 158.75)) (stroke (width 0) (type default)) (uuid "b1ea5716-3872-4e80-a1c1-8a598c6b1897"))
-(wire (pts (xy 523.24 158.75) (xy 543.56 158.75)) (stroke (width 0) (type default)) (uuid "b9a15ed0-1548-4377-be54-8ceb8d4859f6"))
+
+
+
+
 (wire (pts (xy 528.32 58.42) (xy 543.56 58.42)) (stroke (width 0) (type default)) (uuid "68ab9f3f-f8ad-497f-9c2d-3b889bca4578"))
 (wire (pts (xy 529.59 227.33) (xy 546.1 227.33)) (stroke (width 0) (type default)) (uuid "fc08e79d-5a14-47d0-ad75-37f91d624998"))
 (wire (pts (xy 529.59 232.41) (xy 546.1 232.41)) (stroke (width 0) (type default)) (uuid "4601cc84-7bbb-4a88-ab21-55ca61ebd7f0"))
@@ -24058,7 +23828,7 @@
 (wire (pts (xy 560.07 297.18) (xy 560.07 306.07)) (stroke (width 0) (type default)) (uuid "9b172266-ba42-4652-b250-338bf89f80c6"))
 (wire (pts (xy 560.07 313.69) (xy 560.07 325.12)) (stroke (width 0) (type default)) (uuid "773e94f4-750c-4109-9822-94cf921b1bb0"))
 (wire (pts (xy 560.07 325.12) (xy 568.96 325.12)) (stroke (width 0) (type default)) (uuid "20a65ccc-185f-4627-a40c-4d9175e6c9ba"))
-(junction (at 523.24 158.75) (diameter 0) (color 0 0 0 0) (uuid "74e1f110-10ec-430e-863f-4f48b8ae7097"))
+
 (junction (at 350.52 198.12) (diameter 0) (color 0 0 0 0) (uuid "5f03de82-0ed1-499c-b274-8b80cfe3572e"))
 (junction (at 500.38 247.65) (diameter 0) (color 0 0 0 0) (uuid "9216cd6d-211c-41eb-975b-9c34eb3d5d7a"))
 (junction (at 330.2 284.48) (diameter 0) (color 0 0 0 0) (uuid "91714481-ebb7-40af-bc2d-27db21edba16"))
@@ -24073,7 +23843,7 @@
 (junction (at 508.0 58.42) (diameter 0) (color 0 0 0 0) (uuid "22623b54-cdea-4551-b06b-5efb90687776"))
 (junction (at 320.04 198.12) (diameter 0) (color 0 0 0 0) (uuid "58ecea17-987c-46b2-8207-cd564bebf9b3"))
 (junction (at 500.38 293.37) (diameter 0) (color 0 0 0 0) (uuid "15545235-dc72-4b0e-8fc4-0a598b0fdf3d"))
-(junction (at 422.91 158.75) (diameter 0) (color 0 0 0 0) (uuid "5d5e79c7-dbf3-4d47-848e-1cbf57cad263"))
+
 (junction (at 420.37 81.28) (diameter 0) (color 0 0 0 0) (uuid "8780b9dd-2833-4397-8dba-b33ca40a6132"))
 (junction (at 443.23 81.28) (diameter 0) (color 0 0 0 0) (uuid "abcb7072-1604-4dda-b7f5-cadca405dd2d"))
 (junction (at 337.82 198.12) (diameter 0) (color 0 0 0 0) (uuid "e05e8b37-e729-4df1-899b-db95345070ea"))
