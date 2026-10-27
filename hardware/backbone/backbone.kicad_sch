@@ -23586,72 +23586,7 @@
 
 
 
-(symbol
-  (lib_id "SpaghettiLAB:SN74LVC1G125DBVR")
-  (at 335.28 307.34 0)
-  (unit 1)
-  (in_bom yes)
-  (on_board yes)
-  (dnp no)
-  (uuid "49215979-2b7d-4ecc-86f1-15c6fadd49b9")
-  (property "Reference" "U11"
-    (at 335.28 330.2 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Value" "SN74LVC1G125DBVR"
-    (at 335.28 333.375 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
-    (at 335.28 307.34 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf"
-    (at 335.28 307.34 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (pin "1"
-    (uuid "d688b2f7-ce5e-4c11-b447-788a05383a85")
-  )
-  (pin "2"
-    (uuid "2a35909b-1e2d-4167-9372-927e123b4701")
-  )
-  (pin "3"
-    (uuid "988cf097-1f3d-492e-9437-9beb4ac5c2c5")
-  )
-  (pin "4"
-    (uuid "d00c967e-f4dc-4dd0-b973-89cab2054068")
-  )
-  (pin "5"
-    (uuid "4bebcbc3-5f1c-43d0-a330-65d9d2b34542")
-  )
-  (instances
-    (project "backbone"
-      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
-        (reference "U11")
-        (unit 1)
-      )
-    )
-  )
-)
+
 
 
 
@@ -23678,7 +23613,7 @@
       )
     )
   )
-  (property "Value" "33R"
+  (property "Value" "0"
     (at 360.68 303.53 90)
     (effects
       (font
@@ -23906,63 +23841,7 @@
 
 
 
-(symbol
-  (lib_id "Device:C")
-  (at 309.88 290.83 0)
-  (unit 1)
-  (in_bom yes)
-  (on_board yes)
-  (dnp no)
-  (uuid "5a1c49f6-de7d-4c75-b85b-813a232e4583")
-  (property "Reference" "C82"
-    (at 316.23 289.56 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Value" "100nF"
-    (at 316.23 292.1 0)
-    (effects
-      (font
-        (size 1 1)
-      )
-    )
-  )
-  (property "Footprint" "SpaghettiLAB:C0603"
-    (at 309.88 290.83 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (property "Datasheet" ""
-    (at 309.88 290.83 0)
-    (effects
-      (font
-        (size 1.0 1.0)
-      )
-      (hide yes)
-    )
-  )
-  (pin "1"
-    (uuid "657d678a-fb61-4dd9-86e3-0657c858b5fb")
-  )
-  (pin "2"
-    (uuid "92f314f8-2138-40a5-b78d-f544df2145dd")
-  )
-  (instances
-    (project "backbone"
-      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
-        (reference "C82")
-        (unit 1)
-      )
-    )
-  )
-)
+
 
 
 
@@ -24065,13 +23944,13 @@
 (global_label "IO5" (shape bidirectional) (at 309.88 232.41 180) (effects (font (size 1 1)) (justify right)) (uuid "8e9e482c-2afe-44f3-825d-701b1b7933bb"))
 (symbol (lib_id "power:GND") (at 345.44 224.79 0) (unit 1) (in_bom no) (on_board no) (dnp no) (uuid "28720459-513a-4c23-9460-bed64fe3615e") (property "Reference" "#PWR0176" (at 345.44 224.79 0) (effects (font (size 1 1)) (hide yes))) (property "Value" "GND" (at 351.79 227.33 0) (effects (font (size 1 1)))) (pin "1" (uuid "ab1edbc4-f45a-4457-9d36-6c62b1a2872d")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "#PWR0176") (unit 1)))))
 (rectangle (start 297.18 261.62) (end 402.59 342.9) (stroke (width 0.254) (type dash)) (fill (type none)) (uuid "3bc25460-476f-487d-afa6-42ae4d12ad85"))
-(text "BUFFERED CLOCK - 3.3 V TO 2.8 V" (at 300.99 266.7 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "659e137c-c67c-4fae-8d05-82a89b03fb94"))
-(text "Buffer GPIO15; place R30 close to U11 output." (at 300.99 271.15 0) (effects (font (size 1 1)) (justify left)) (uuid "1fdc0893-525d-4fe6-97e2-c84ce6b9a26e"))
-(global_label "IO15" (shape bidirectional) (at 304.8 307.34 180) (effects (font (size 1 1)) (justify right)) (uuid "357f33df-0945-4755-9336-ce77e11c764a"))
-(global_label "FPC_CLK" (shape bidirectional) (at 377.19 307.34 0) (effects (font (size 1 1)) (justify left)) (uuid "12c29cc8-aaba-4891-a3bd-bbe1f784f9a8"))
-(global_label "FPC_CLK_DRV" (shape bidirectional) (at 349.25 314.96 0) (effects (font (size 1 1)) (justify left)) (uuid "3abf286c-ea60-48f8-97d7-be5ceef0ed08"))
-(symbol (lib_id "power:+2V8") (at 345.44 284.48 0) (unit 1) (in_bom no) (on_board no) (dnp no) (uuid "4431bcc1-64ec-4c40-bb8b-c9763c617a5e") (property "Reference" "#PWR0177" (at 345.44 284.48 0) (effects (font (size 1 1)) (hide yes))) (property "Value" "+2V8" (at 345.44 279.4 0) (effects (font (size 1 1)))) (pin "1" (uuid "2c53247c-f164-4d43-b375-699f1b73d179")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "#PWR0177") (unit 1)))))
-(symbol (lib_id "power:GND") (at 391.16 322.58 0) (unit 1) (in_bom no) (on_board no) (dnp no) (uuid "f34ccf25-2389-421f-b428-75f1bbf6247e") (property "Reference" "#PWR0178" (at 391.16 322.58 0) (effects (font (size 1 1)) (hide yes))) (property "Value" "GND" (at 391.16 326.39 0) (effects (font (size 1 1)))) (pin "1" (uuid "5163ea2e-a731-4c93-ab67-f16eccdc755f")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "#PWR0178") (unit 1)))))
+(text "DIRECT CLOCK - 3.3 V" (at 300.99 266.7 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "659e137c-c67c-4fae-8d05-82a89b03fb94"))
+(text "GPIO15 through 0 ohm, as in ESP32-S3-EYE." (at 300.99 271.15 0) (effects (font (size 1 1)) (justify left)) (uuid "1fdc0893-525d-4fe6-97e2-c84ce6b9a26e"))
+
+
+
+
+
 (rectangle (start 408.94 261.62) (end 480.06 342.9) (stroke (width 0.254) (type dash)) (fill (type none)) (uuid "8ab71874-2e34-48d5-93a4-219e224aebbe"))
 (text "FPC BIAS RESISTORS" (at 412.75 266.7 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "79bb3d7b-9db1-40e1-9301-21b29c2dc0fa"))
 (text "Fixed pull-up / pull-down; no MCU control assigned." (at 412.75 271.15 0) (effects (font (size 1 1)) (justify left)) (uuid "2f10b67e-f583-4460-a818-501670edd3d5"))
@@ -24133,41 +24012,41 @@
 (text "C79/C80: +2V8 decoupling. C81: +1V5 decoupling." (at 490.22 335.28 0) (effects (font (size 0.9 0.9)) (justify left)) (uuid "ba61b5db-4cac-4ff1-a2cd-79b429c9a11c"))
 (text "Fixed auxiliary rails: 2.8 V / 1.5 V. Check peripheral voltage requirements." (at 302.26 355.6 0) (effects (font (size 1 1)) (justify left)) (uuid "38e8ddc3-381e-4b3f-a839-93ad4a84440e"))
 (text "FPC signals, fixed bias pins and voltage limits: see project documentation." (at 302.26 360.68 0) (effects (font (size 1 1)) (justify left)) (uuid "05b8f8bf-83a6-4f18-affa-5fd95322f125"))
-(wire (pts (xy 304.8 307.34) (xy 320.04 307.34)) (stroke (width 0) (type default)) (uuid "25c20e56-6de0-4ce7-8840-e52b4e296bce"))
+
 (wire (pts (xy 309.88 198.12) (xy 320.04 198.12)) (stroke (width 0) (type default)) (uuid "f2bf4652-f97a-4a0b-bf45-f33e784c67ef"))
 (wire (pts (xy 309.88 229.87) (xy 320.04 229.87)) (stroke (width 0) (type default)) (uuid "745c738d-d273-4ca0-a8eb-e17387beaf03"))
 (wire (pts (xy 309.88 232.41) (xy 337.82 232.41)) (stroke (width 0) (type default)) (uuid "10fbcc94-ff26-4d15-9bf4-f5feb598ccbe"))
-(wire (pts (xy 309.88 284.48) (xy 309.88 287.02)) (stroke (width 0) (type default)) (uuid "f13ec9b1-0228-4f85-8de2-3423e562067f"))
-(wire (pts (xy 309.88 284.48) (xy 330.2 284.48)) (stroke (width 0) (type default)) (uuid "7090fcb0-f98d-4032-b609-7eadde471507"))
-(wire (pts (xy 309.88 294.64) (xy 309.88 322.58)) (stroke (width 0) (type default)) (uuid "95f99624-e2b6-468f-9010-51c85ff09710"))
-(wire (pts (xy 309.88 322.58) (xy 330.2 322.58)) (stroke (width 0) (type default)) (uuid "efa1a541-0784-4252-b12e-ad6ab4adcc83"))
+
+
+
+
 (wire (pts (xy 320.04 198.12) (xy 320.04 204.47)) (stroke (width 0) (type default)) (uuid "7ede8516-7e44-4696-8de5-c5931278bc2e"))
 (wire (pts (xy 320.04 198.12) (xy 337.82 198.12)) (stroke (width 0) (type default)) (uuid "4593cd92-d8be-4d60-8671-bfa4983d2c14"))
 (wire (pts (xy 320.04 212.09) (xy 320.04 229.87)) (stroke (width 0) (type default)) (uuid "15336263-7872-4b29-9156-20136640d1ab"))
 (wire (pts (xy 320.04 229.87) (xy 360.68 229.87)) (stroke (width 0) (type default)) (uuid "e670ed83-49ad-49a2-9d46-372a7c5f3bdb"))
-(wire (pts (xy 330.2 284.48) (xy 330.2 297.18)) (stroke (width 0) (type default)) (uuid "e7d6830a-cd54-4a98-bce1-6ed1bc7fd1f3"))
-(wire (pts (xy 330.2 284.48) (xy 345.44 284.48)) (stroke (width 0) (type default)) (uuid "b3737eb9-5dca-4c0a-a77d-df315825d0fd"))
-(wire (pts (xy 330.2 317.5) (xy 330.2 322.58)) (stroke (width 0) (type default)) (uuid "03e907f9-f936-4e83-b54b-290bbf290168"))
-(wire (pts (xy 330.2 322.58) (xy 391.16 322.58)) (stroke (width 0) (type default)) (uuid "391f5a2b-f85e-4995-9b71-1d92baa4ec9d"))
-(wire (pts (xy 335.28 292.1) (xy 335.28 297.18)) (stroke (width 0) (type default)) (uuid "9b8cdb66-03c0-46c5-885d-91784f279a4f"))
-(wire (pts (xy 335.28 292.1) (xy 391.16 292.1)) (stroke (width 0) (type default)) (uuid "3699915c-6de3-49fd-a9d0-0534b171ec6e"))
+
+
+
+
+
+
 (wire (pts (xy 337.82 198.12) (xy 337.82 204.47)) (stroke (width 0) (type default)) (uuid "e568d8f1-2df9-4b8c-9a9f-392fed242709"))
 (wire (pts (xy 337.82 198.12) (xy 350.52 198.12)) (stroke (width 0) (type default)) (uuid "9ba41dc7-cac0-45ad-a30c-ac65b6ea3344"))
 (wire (pts (xy 337.82 212.09) (xy 337.82 232.41)) (stroke (width 0) (type default)) (uuid "71fa23fa-68f1-4515-b2da-400e016dc9e2"))
 (wire (pts (xy 337.82 232.41) (xy 360.68 232.41)) (stroke (width 0) (type default)) (uuid "17b82aa1-e817-4a1d-8ca3-f2b48e253d1d"))
 (wire (pts (xy 345.44 224.79) (xy 350.52 224.79)) (stroke (width 0) (type default)) (uuid "e5dad656-7659-44e2-aed4-f881429c87e0"))
-(wire (pts (xy 347.98 307.34) (xy 349.25 307.34)) (stroke (width 0) (type default)) (uuid "b9ff2712-379e-4427-ab78-2bdef1e8cd2b"))
-(wire (pts (xy 349.25 307.34) (xy 349.25 314.96)) (stroke (width 0) (type default)) (uuid "398c23c9-2b61-4c8f-9e1a-96a7291c8e0e"))
-(wire (pts (xy 349.25 307.34) (xy 356.87 307.34)) (stroke (width 0) (type default)) (uuid "af651f7a-66bd-4835-b7c8-a65017d7059e"))
+
+
+
 (wire (pts (xy 350.52 198.12) (xy 350.52 204.47)) (stroke (width 0) (type default)) (uuid "6e5abf5e-6010-4152-ad6b-a7f367a3494c"))
 (wire (pts (xy 350.52 198.12) (xy 358.14 198.12)) (stroke (width 0) (type default)) (uuid "552d1ed7-dacd-476e-af37-ec2a8a167cdf"))
 (wire (pts (xy 350.52 212.09) (xy 350.52 224.79)) (stroke (width 0) (type default)) (uuid "1f4e8c10-7219-43fb-a391-710b262e3815"))
 (wire (pts (xy 350.52 224.79) (xy 360.68 224.79)) (stroke (width 0) (type default)) (uuid "96e6e1e2-9bb3-495f-9242-94ea8379d48b"))
 (wire (pts (xy 358.14 198.12) (xy 358.14 227.33)) (stroke (width 0) (type default)) (uuid "72273dac-180a-4d17-9b00-040fe8af7a5d"))
 (wire (pts (xy 358.14 227.33) (xy 360.68 227.33)) (stroke (width 0) (type default)) (uuid "55624fff-8552-491a-9de4-bc47539fc7e9"))
-(wire (pts (xy 364.49 307.34) (xy 377.19 307.34)) (stroke (width 0) (type default)) (uuid "05b07c4e-1038-463d-9584-30968a64ae6e"))
+
 (wire (pts (xy 389.89 58.42) (xy 397.51 58.42)) (stroke (width 0) (type default)) (uuid "6edcae54-a72b-443d-abc1-8eeea60f9a3f"))
-(wire (pts (xy 391.16 292.1) (xy 391.16 322.58)) (stroke (width 0) (type default)) (uuid "c97f49d5-7989-42d2-bde7-fe0abb4cb467"))
+
 (wire (pts (xy 397.51 58.42) (xy 397.51 62.23)) (stroke (width 0) (type default)) (uuid "cf3b16d5-072c-400d-8433-1459b2bf9c6f"))
 
 (wire (pts (xy 397.51 69.85) (xy 397.51 81.28)) (stroke (width 0) (type default)) (uuid "5aa82d86-1d69-49e7-9e0a-605f36532d7a"))
@@ -24258,8 +24137,8 @@
 
 (junction (at 350.52 198.12) (diameter 0) (color 0 0 0 0) (uuid "5f03de82-0ed1-499c-b274-8b80cfe3572e"))
 (junction (at 500.38 247.65) (diameter 0) (color 0 0 0 0) (uuid "9216cd6d-211c-41eb-975b-9c34eb3d5d7a"))
-(junction (at 330.2 284.48) (diameter 0) (color 0 0 0 0) (uuid "91714481-ebb7-40af-bc2d-27db21edba16"))
-(junction (at 349.25 307.34) (diameter 0) (color 0 0 0 0) (uuid "07d5574a-dc18-4c20-9416-9b82904dd2d6"))
+
+
 (junction (at 492.76 257.81) (diameter 0) (color 0 0 0 0) (uuid "a01e2534-5ddd-427d-b750-2330eb202b8b"))
 (junction (at 337.82 232.41) (diameter 0) (color 0 0 0 0) (uuid "8d6555ee-b7a3-4489-b05b-8f355c4f6aba"))
 (junction (at 350.52 224.79) (diameter 0) (color 0 0 0 0) (uuid "4e1100e2-e840-42ab-8759-90f92b1c5dfc"))
@@ -24278,7 +24157,7 @@
 (junction (at 529.59 325.12) (diameter 0) (color 0 0 0 0) (uuid "97766a31-d0b7-45d1-b8e7-9e9d9c18747d"))
 (junction (at 520.7 81.28) (diameter 0) (color 0 0 0 0) (uuid "ff3c6661-645f-4a82-ad33-91c7944da46f"))
 (junction (at 560.07 325.12) (diameter 0) (color 0 0 0 0) (uuid "aa2fb6d1-0a5a-4cea-a366-b59f8aaa882c"))
-(junction (at 330.2 322.58) (diameter 0) (color 0 0 0 0) (uuid "4df6d786-9826-45fd-b52f-a8985d4de6f0"))
+
 (junction (at 443.23 58.42) (diameter 0) (color 0 0 0 0) (uuid "e5b95ea2-f88c-473c-b2c3-bd0d8de34c99"))
 (junction (at 500.38 325.12) (diameter 0) (color 0 0 0 0) (uuid "e70d0bbe-c59e-4476-b021-fbbcea0ca71a"))
 (junction (at 397.51 58.42) (diameter 0) (color 0 0 0 0) (uuid "92aa7b07-f175-434f-b9b0-98c082ea1199"))
@@ -24286,4 +24165,9 @@
 (wire (pts (xy 397.51 58.42) (xy 402.59 58.42)) (stroke (width 0) (type default)) (uuid "bbb2e499-6b44-4a52-b6ec-e5016c0364d8"))
 (wire (pts (xy 402.59 58.42) (xy 407.67 58.42)) (stroke (width 0) (type default)) (uuid "ede5f808-ec85-4b9a-b0bb-e965c03353ce"))
 (junction (at 402.59 58.42) (diameter 0) (color 0 0 0 0) (uuid "ea0bd06d-9c8c-4d9f-a148-fea9251643cf"))
+
+(wire (pts (xy 304.8 307.34) (xy 356.87 307.34)) (stroke (width 0) (type default)) (uuid "88f0a206-4fd7-43b9-b176-bb00bfbce464"))
+(wire (pts (xy 364.49 307.34) (xy 377.19 307.34)) (stroke (width 0) (type default)) (uuid "ec876ef5-4602-46e1-80a0-82bf1bcdbdc5"))
+(global_label "IO15" (shape bidirectional) (at 304.8 307.34 180) (effects (font (size 1 1)) (justify right)) (uuid "7b88d3fc-6a58-459d-aed2-76fae99f9506"))
+(global_label "FPC_CLK" (shape bidirectional) (at 377.19 307.34 0) (effects (font (size 1 1)) (justify left)) (uuid "dd4e721e-e182-41c3-9541-085edfe46075"))
 )

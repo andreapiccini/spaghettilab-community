@@ -11,8 +11,7 @@ Aggiornamento 2026-10-27. Implementazione nello **schema** `backbone.kicad_sch`;
 | C75–C78 | 4,7 µF / 10 V X7R, ingresso e uscita di ciascun LDO |
 | C79, C80, C81 | 100 nF presso J5, rispettivamente pin 4, 11, 10 |
 | R24, R25 | Pull-up 4,7 kΩ a VCORE 3,3 V, condivise da Qwiic e camera |
-| U11 SN74LVC1G125DBVR | Buffer XCLK: ingresso GPIO15, uscita a 2,8 V; OE a GND |
-| C82, R30 | 100 nF presso U11 e 33 Ω serie su XCLK |
+| R30 | 0 Ω sul clock, senza buffer, come R55 nel riferimento Espressif |
 | R28, R29 | FPC_PULLUP a +2V8 e FPC_PULLDOWN a GND, entrambi con 10 kΩ |
 | C83 | 100 nF presso l'alimentazione Qwiic |
 
@@ -36,7 +35,7 @@ Il connettore usa ora nomi generici nello schema. La tabella conserva le funzion
 | 10 | DVDD | +1V5 |
 | 11 | DOVDD | +2V8 |
 | 12 | Y9 / D7 | IO21 / GPIO21 |
-| 13 | XCLK | FPC_CLK ← R30 ← U11 ← IO15 / GPIO15 |
+| 13 | XCLK | FPC_CLK ← R30 (0 Ω) ← IO15 / GPIO15 |
 | 14 | Y8 / D6 | IO18 / GPIO18 |
 | 15 | DGND | GND |
 | 16 | Y7 / D5 | IO17 / GPIO17 |
@@ -67,9 +66,9 @@ Qwiic e camera condividono direttamente IO4/IO5, con pull-up a VCORE 3,3 V; Q3/Q
 - Nessun pin precedentemente collegato ha cambiato connessione nella netlist; le rinomine generiche sono elencate sotto. Conservati A0–A7/GPIO7–14, ALED/GPIO16, CAN/GPIO47–48, USB/GPIO19–20, UART, BOOT e reset MCU.
 - Non impiegati GPIO35–37, riservati alla PSRAM nelle varianti interessate, né i GPIO di strap liberi 3/45/46.
 - Questa implementazione ha rail **fissi 2,8 V e 1,5 V**. L'obiettivo dell'utente resta supportare più camere; non è una certificazione universale OV2640/OV3660/OV5640. Verificare pinout, tensioni e verso del flat del modulo concreto. Moduli con DVDD diversa richiedono una variante di alimentazione/adattatore prima di collegarli.
-- Il buffer XCLK porta il clock a 2,8 V. SCCB è invece collegato direttamente al bus a 3,3 V, come nel riferimento S3-EYE: il modulo scelto deve ammettere questi livelli sugli ingressi SDA/SCL. Le uscite DVP vanno direttamente all'ESP32, come nel riferimento: margini logici e timing vanno qualificati sul modulo scelto.
+- Il clock arriva direttamente dall’ESP32 a 3,3 V attraverso R30 da 0 Ω, come nel riferimento Espressif; U11 e C82 sono rimossi. SCCB è invece collegato direttamente al bus a 3,3 V, come nel riferimento S3-EYE: il modulo scelto deve ammettere questi livelli sugli ingressi SDA/SCL. Le uscite DVP vanno direttamente all'ESP32, come nel riferimento: margini logici e timing vanno qualificati sul modulo scelto.
 - VAUX alimenta già i LED: controllare picchi, dissipazione e margine di U5 con camera e LED simultanei. Verificare anche il budget VCORE con i dispositivi Qwiic. Nessuna misura di corrente o temperatura effettuata.
-- Sul PCB: condensatori presso i pin indicati, massa continua, percorsi DVP brevi, R30 vicino all'uscita U11, separazione dai ritorni dei LED. Il PCB esistente deve ancora essere aggiornato dallo schema e sbrogliato.
+- Sul PCB: condensatori presso i pin indicati, massa continua, percorsi DVP brevi, R30 sul percorso del clock, separazione dai ritorni dei LED. Il PCB esistente deve ancora essere aggiornato dallo schema e sbrogliato.
 
 ## Verifiche
 
@@ -116,3 +115,12 @@ Su richiesta dell’utente, rimossa la dicitura CAM/CAMERA dalla presentazione d
 Le alimentazioni della sezione usano simboli di potenza KiCad: frecce VCC con valore VAUX/VCORE, simboli +2V8 e +1V5, e simboli GND. Le reti mantengono esattamente gli stessi pin dopo le sei rinomine; nessun componente fisico o valore è cambiato. La denominazione generica non rende universali tensioni e piedinatura: verificare la periferica concreta prima del collegamento. PCB e firmware restano da aggiornare separatamente.
 
 Esportazione KiCad, confronto completo delle netlist e revisione visiva superati. ERC: 178 segnalazioni, inclusi gli stessi 27 errori preesistenti. Le sezioni precedenti sulle revisioni riportano intenzionalmente i nomi storici. Il nome di questo documento resta invariato per preservare i collegamenti esistenti.
+
+
+## Clock conforme al collegamento Espressif — 2026-10-27
+
+Requisito confermato: evitare stadi aggiunti dall’assistente rispetto al circuito camera Espressif. Rimossi U11 SN74LVC1G125 e C82; R30 passa da 33 Ω a 0 Ω, corrispondente alla funzione di R55 nello schema ESP32-S3-EYE-MB V2.2, pagina 4. GPIO15 raggiunge J5.13 attraverso il solo ponticello resistivo. Eliminata FPC_CLK_DRV e rimosso il cablaggio di alimentazione del buffer. Il blocco inglese diventa DIRECT CLOCK - 3.3 V. Q3/Q4 e R26/R27 restano assenti; non introdotti altri componenti fisici.
+
+Questa revisione sostituisce le precedenti scelte di buffer e adattamento del clock a 2,8 V. R28/R29 da 10 kΩ hanno invece una funzione presente nel riferimento (R57/R63) e restano. Conservati GPIO spaghettiLAB, nomi generici e simboli di potenza. La revisione riproduce il percorso del clock Espressif; non dichiara una copia integrale della scheda S3-EYE: alimentazione a monte, disaccoppiamento e ponticelli sugli altri segnali restano quelli già documentati per Backbone.
+
+Confronto completo delle netlist: sole differenze rimozione U11/C82 e connessione di R30.1 a IO15; tutte le altre connessioni preservate. PCB e firmware non modificati, nessuna prova al banco.
