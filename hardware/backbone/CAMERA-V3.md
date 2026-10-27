@@ -1,6 +1,6 @@
 # Espansione FPC, alimentazioni ausiliarie e Qwiic — Backbone V3
 
-Aggiornamento 2026-10-27. Implementazione nello **schema** `backbone.kicad_sch`; PCB, routing, firmware e prove fisiche non aggiornati da questa modifica.
+Aggiornamento 2026-10-27. **Configurazione attuale: R31–R35, 0 Ω 0402, DNP nel profilo camera; sostituiscono JP1–JP5.** Implementazione nello **schema** `backbone.kicad_sch`; PCB, routing, firmware e prove fisiche non aggiornati da questa modifica.
 
 ## Circuito aggiunto
 
@@ -19,18 +19,18 @@ Tutti i nuovi componenti hanno footprint assegnato. I simboli attivi sono anche 
 
 ## J5: espansione FPC 24 poli — esempio di utilizzo camera
 
-Il connettore usa ora nomi generici nello schema. La tabella conserva le funzioni camera come esempio applicativo, basato sulla piedinatura ESP32-S3-EYE-MB V2.2. I pin 6 e 8 mantengono le polarizzazioni FPC_PULLUP e FPC_PULLDOWN; i ponticelli JP4/JP5 abilitano controlli opzionali con le restrizioni sotto. Tutti i ponticelli sono aperti di default. I numeri indicano i contatti J5; non vanno interpretati come GPIO. La mappatura GPIO è specifica spaghettiLAB e conserva tutte le assegnazioni esistenti.
+Il connettore usa ora nomi generici nello schema. La tabella conserva le funzioni camera come esempio applicativo, basato sulla piedinatura ESP32-S3-EYE-MB V2.2. I pin 6 e 8 mantengono le polarizzazioni FPC_PULLUP e FPC_PULLDOWN; i ponticelli R34/R35 abilitano controlli opzionali con le restrizioni sotto. Tutti i ponticelli resistivi sono non montati (DNP) di default. I numeri indicano i contatti J5; non vanno interpretati come GPIO. La mappatura GPIO è specifica spaghettiLAB e conserva tutte le assegnazioni esistenti.
 
 | J5 | Funzione | Rete / GPIO |
 |---|---|---|
-| 1 | 3,3 V opzionale | FPC_3V3 da VCORE tramite JP1; NC con JP1 aperto |
+| 1 | 3,3 V opzionale | FPC_3V3 da VCORE tramite R31; NC con R31 non montata |
 | 2 | AGND | GND |
 | 3 | SCCB SDA | IO4 / GPIO4 (collegamento diretto) |
 | 4 | AVDD | +2V8 |
 | 5 | SCCB SCL | IO5 / GPIO5 (collegamento diretto) |
-| 6 | RESET_N | Pull-up 10 kΩ a +2V8; GPIO3 opzionale tramite JP4 |
+| 6 | RESET_N | Pull-up 10 kΩ a +2V8; GPIO3 opzionale tramite R34 |
 | 7 | VSYNC | IO6 / GPIO6 |
-| 8 | PWDN | Pull-down 10 kΩ a GND; GPIO46 opzionale tramite JP5 |
+| 8 | PWDN | Pull-down 10 kΩ a GND; GPIO46 opzionale tramite R35 |
 | 9 | HREF | IO1 / GPIO1 |
 | 10 | DVDD | +1V5 |
 | 11 | DOVDD | +2V8 |
@@ -45,10 +45,10 @@ Il connettore usa ora nomi generici nello schema. La tabella conserva le funzion
 | 20 | Y5 / D3 | IO41 / GPIO41 |
 | 21 | Y3 / D1 | IO39 / GPIO39 |
 | 22 | Y4 / D2 | IO40 / GPIO40 |
-| 23 | UART TX / GPIO43 opzionale | FPC_TX tramite JP2; NC con JP2 aperto |
-| 24 | UART RX / GPIO44 opzionale | FPC_RX tramite JP3; NC con JP3 aperto |
+| 23 | UART TX / GPIO43 opzionale | FPC_TX tramite R32; NC con R32 non montata |
+| 24 | UART RX / GPIO44 opzionale | FPC_RX tramite R33; NC con R33 non montata |
 
-Ordine firmware D0..D7: **38, 39, 40, 41, 42, 17, 18, 21**. XCLK=15, PCLK=2, VSYNC=6, HREF=1, SDA=4, SCL=5. Con JP4/JP5 aperti, RESET/PWDN non sono pilotati da GPIO: configurare il driver di conseguenza (tipicamente `-1`). Non abilitare JP4/JP5 senza verificare livelli e gestione firmware indicati sotto. Non copiare la configurazione GPIO della S3-EYE.
+Ordine firmware D0..D7: **38, 39, 40, 41, 42, 17, 18, 21**. XCLK=15, PCLK=2, VSYNC=6, HREF=1, SDA=4, SCL=5. Con R34/R35 non montate, RESET/PWDN non sono pilotati da GPIO: configurare il driver di conseguenza (tipicamente `-1`). Non abilitare R34/R35 senza verificare livelli e gestione firmware indicati sotto. Non copiare la configurazione GPIO della S3-EYE.
 
 ## J4: Qwiic
 
@@ -126,7 +126,9 @@ Questa revisione sostituisce le precedenti scelte di buffer e adattamento del cl
 Confronto completo delle netlist: sole differenze rimozione U11/C82 e connessione di R30.1 a IO15; tutte le altre connessioni preservate. PCB e firmware non modificati, nessuna prova al banco.
 
 
-## Estensione opzionale del flat — 2026-10-27
+## Estensione opzionale del flat — revisione storica con JP1–JP5
+
+**Superata dalla revisione R31–R35 descritta sotto.**
 
 Richiesta confermata: 3,3 V, segnali aggiuntivi e controllo periferica, con possibilità di isolamento. Aggiunti cinque ponticelli saldabili **aperti di default**, simbolo `Jumper:SolderJumper_2_Open`, footprint `Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm`. Chiudere significa unire i due pad con stagno; riaprire significa rimuovere il ponte a scheda disalimentata. Non sono interruttori comandati dal firmware e non limitano la corrente.
 
@@ -149,3 +151,36 @@ Richiesta confermata: 3,3 V, segnali aggiuntivi e controllo periferica, con poss
 Fonti: netlist attuale Backbone; [datasheet ESP32-S3 v2.2, sezioni 2 e 3](https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf); [guida GPIO Espressif](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/peripherals/gpio.html). KiCad: esportazione e revisione visiva superate; confronto completo netlist conferma soltanto i nuovi collegamenti ai cinque ponticelli e ai tre pin precedentemente NC. Tutte le reti precedenti preservate. PCB, firmware e qualifica elettrica sul banco non aggiornati.
 
 ERC di questa revisione: 176 → 172 segnalazioni; restano gli stessi 27 errori preesistenti (16 pin non connessi e 11 fili scollegati). Nessun nuovo errore.
+
+
+## Verifica compatibilità e ponticelli resistivi compatti — 2026-10-27
+
+Richiesta: valutare collegamenti permanenti per risparmiare spazio; se incompatibili, utilizzare 0 Ω. Non collegata direttamente la 3,3 V: non è dimostrata la compatibilità sui moduli considerati, ed esistono riferimenti con funzioni diverse sugli stessi contatti. Il nome del sensore e il supporto del driver non certificano il flat. Non esiste ancora una lista di codici modulo/revisioni fisicamente qualificati per Backbone.
+
+| Famiglia / fonte esaminata | Pin 1 | Pin 23 / 24 | Conclusione |
+|---|---|---|---|
+| OV2640, scheda di riferimento ESP32-S3-EYE-MB V2.2 | NC lato scheda | NC lato scheda | Espressif li lascia scollegati; questo non prova che ogni flex OV2640 sia internamente NC o ammetta tensione su questi contatti. |
+| OV3660, schema di riferimento OmniVision, figura 2-2 | STROBE | D1 / D0 | Sono segnali della camera: non collegare 3,3 V al pin 1 né un trasmettitore UART al pin 23. Non implica che ogni modulo OV3660 implementi questo riferimento. |
+| OV5640 | Da verificare sul modulo concreto | Da verificare sul modulo concreto | Supporto firmware presente; manca il codice esatto del flex da qualificare. Nessuna autorizzazione a collegamenti diretti ricavata dal solo nome OV5640. |
+
+Il riferimento OV3660 citato ha inoltre **FSIN sul pin 10**, invece della DVDD sul nostro connettore. Non è quindi un modulo da dichiarare compatibile pin-per-pin con Backbone: è un controesempio documentato all’universalità del flat. Le resistenze DNP sulle estensioni non risolvono da sole differenze sui pin/alimentazioni originari.
+
+Sostituiti i cinque ponticelli saldabili con **R31–R35, valore 0R, footprint Resistor_SMD:R_0402_1005Metric**, tutti marcati **DNP** nello schema. Corpo nominale 1,0 × 0,5 mm (0402 imperiale / 1005 metrico). Courtyard libreria KiCad: 1,86 × 0,94 mm contro 3,30 × 2,50 mm del precedente solder jumper, circa 79% in meno per elemento, esclusi piste e spazi di accesso. Il PCB resta da aggiornare; il risparmio finale dipende dal layout.
+
+| Nuovo riferimento | Precedente | Funzione se montata |
+|---|---|---|
+| R31 | JP1 | VCORE 3,3 V → J5.1 |
+| R32 | JP2 | TXD0/GPIO43 → J5.23 |
+| R33 | JP3 | RXD0/GPIO44 → J5.24 |
+| R34 | JP4 | GPIO3 → J5.6, RESET open-drain con pull-up a 2,8 V |
+| R35 | JP5 | GPIO46 → J5.8, standby; richiede ingresso periferica compatibile 3,3 V |
+
+**Montaggio camera:** R31–R35 non montate, quindi estensioni isolate. I pin RESET/PWDN mantengono R28/R29 e gli stati preesistenti. R34 e R35 non diventano collegamenti permanenti: restano vincoli open-drain, tensioni e strap documentati sopra. **Montaggio periferica esterna:** montare solo le 0 Ω necessarie dopo verifica del pinout e del firmware. Per avere 3,3 V sul flat montare R31. Per isolare un collegamento rimuovere la relativa resistenza a scheda spenta. Una 0 Ω montata equivale a un collegamento, non protegge né limita la corrente; per R31 scegliere un componente con corrente nominale adeguata al carico e verificare il budget VCORE e del cavo. 0402 richiede lavorazione più fine rispetto al ponticello saldabile.
+
+Fonti consultate:
+- [Schema Espressif S3-EYE-MB V2.2, pagina 4](https://dl.espressif.com/dl/schematics/SCH_ESP32-S3-EYE-MB_20211201_V2.2.pdf).
+- [Datasheet OmniVision OV3660 v1.3, copia Seeed, figura 2-2 / pagina PDF 23](https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/OV3660_datasheet.pdf).
+- [Driver ufficiale esp32-camera e sensori supportati](https://github.com/espressif/esp32-camera). Supporto software distinto dalla compatibilità elettrica del modulo.
+- Ingombri verificati nelle librerie ufficiali KiCad 10 installate: Resistor_SMD e Jumper.
+
+Verifiche: netlist identica dopo la sola mappatura JP1–JP5→R31–R35; nessun GPIO o net cambiato. DNP, valore e footprint verificati sui cinque componenti. Esportazione KiCad e revisione visiva superate. PCB, firmware e prove al banco non modificati.

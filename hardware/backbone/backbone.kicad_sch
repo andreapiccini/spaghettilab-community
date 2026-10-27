@@ -8545,7 +8545,7 @@
 		)
 		(uuid "07569557-8e23-437e-bd78-246291793c62")
 	)
-	(text "TX43 / JP2"
+	(text "TX43 / R32"
 		(exclude_from_sim no)
 		(at 558.8 278.13 0)
 		(effects
@@ -8622,7 +8622,7 @@
 		)
 		(uuid "2c3df96a-3295-4e38-9637-d060c9810cbd")
 	)
-	(text "Defaults retained; optional GPIO links via JP4/JP5."
+	(text "Defaults retained; optional GPIO links via R34/R35."
 		(exclude_from_sim no)
 		(at 412.75 271.15 0)
 		(effects
@@ -8795,7 +8795,7 @@
 		)
 		(uuid "6ea070e6-ecfe-4891-a7b0-d6dfd4f19433")
 	)
-	(text "3V3 / JP1"
+	(text "3V3 / R31"
 		(exclude_from_sim no)
 		(at 558.8 222.25 0)
 		(effects
@@ -8891,7 +8891,7 @@
 		)
 		(uuid "95a30e45-0fda-4d6f-9782-dfe7d54584c3")
 	)
-	(text "RX44 / JP3"
+	(text "RX44 / R33"
 		(exclude_from_sim no)
 		(at 558.8 280.67 0)
 		(effects
@@ -27240,37 +27240,272 @@
 	)
 	(embedded_fonts no)
 
-(symbol (lib_id "Jumper:SolderJumper_2_Open") (at 420.37 124.46 0) (unit 1) (in_bom no) (on_board yes) (dnp no) (uuid "fc1c5de0-d083-4d3f-9600-4ab8088c0575")(property "Reference" "JP1" (at 420.37 118.11 0) (effects (font (size 1 1))))(property "Value" "OPEN" (at 420.37 120.64999999999999 0) (effects (font (size 1 1))))(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" (at 420.37 124.46 0) (effects (font (size 1 1)) (hide yes)))(pin "1" (uuid "c4c7b44c-e465-4e44-b77c-318af1e7f4e4"))(pin "2" (uuid "d77a967f-0f8b-4290-bb9a-c6d784277e4a"))(instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "JP1") (unit 1)))))
+(symbol
+  (lib_id "Device:R")
+  (at 420.37 124.46 90)
+  (unit 1)
+  (in_bom yes)
+  (on_board yes)
+  (dnp yes)
+  (uuid "fc1c5de0-d083-4d3f-9600-4ab8088c0575")
+  (property "Reference" "R31"
+    (at 420.37 118.11 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Value" "0R"
+    (at 420.37 120.64999999999999 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+    (at 420.37 124.46 0)
+    (effects
+      (font
+        (size 1 1)
+      )
+      (hide yes)
+    )
+  )
+  (pin "1"
+    (uuid "c4c7b44c-e465-4e44-b77c-318af1e7f4e4")
+  )
+  (pin "2"
+    (uuid "d77a967f-0f8b-4290-bb9a-c6d784277e4a")
+  )
+  (instances
+    (project "backbone"
+      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
+        (reference "R31")
+        (unit 1)
+      )
+    )
+  )
+)
 (wire (pts (xy 400.05 124.46) (xy 415.29 124.46)) (stroke (width 0) (type default)) (uuid "e9167c28-722c-4f5e-8612-cc8358fd0807"))
 (wire (pts (xy 425.45 124.46) (xy 440.69 124.46)) (stroke (width 0) (type default)) (uuid "f1949578-f19a-4310-916b-fd1072866c63"))
 (symbol (lib_id "power:VCC") (at 400.05 124.46 0) (unit 1) (in_bom no) (on_board no) (dnp no) (uuid "64c6750a-9296-4d72-8a14-574112748308")(property "Reference" "#PWR0184" (at 400.05 124.46 0) (effects (font (size 1 1)) (hide yes)))(property "Value" "VCORE" (at 400.05 119.38 0) (effects (font (size 1 1))))(pin "1" (uuid "ab576333-5718-467b-aa93-4e2fd27fb707")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "#PWR0184") (unit 1)))))
 (global_label "FPC_3V3" (shape bidirectional) (at 440.69 124.46 0) (effects (font (size 1 1)) (justify left)) (uuid "ecd3c751-77f2-4e74-93af-0adbdc04c27a"))
-(symbol (lib_id "Jumper:SolderJumper_2_Open") (at 420.37 144.78 0) (unit 1) (in_bom no) (on_board yes) (dnp no) (uuid "53eb687b-384d-442a-b68c-eb9edd716513")(property "Reference" "JP2" (at 420.37 138.43 0) (effects (font (size 1 1))))(property "Value" "OPEN" (at 420.37 140.97 0) (effects (font (size 1 1))))(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" (at 420.37 144.78 0) (effects (font (size 1 1)) (hide yes)))(pin "1" (uuid "c3d1c2e9-fd29-47dd-9f93-241e3601290c"))(pin "2" (uuid "dd8fa1e6-934d-4272-95d1-dcad0fe716a9"))(instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "JP2") (unit 1)))))
+(symbol
+  (lib_id "Device:R")
+  (at 420.37 144.78 90)
+  (unit 1)
+  (in_bom yes)
+  (on_board yes)
+  (dnp yes)
+  (uuid "53eb687b-384d-442a-b68c-eb9edd716513")
+  (property "Reference" "R32"
+    (at 420.37 138.43 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Value" "0R"
+    (at 420.37 140.97 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+    (at 420.37 144.78 0)
+    (effects
+      (font
+        (size 1 1)
+      )
+      (hide yes)
+    )
+  )
+  (pin "1"
+    (uuid "c3d1c2e9-fd29-47dd-9f93-241e3601290c")
+  )
+  (pin "2"
+    (uuid "dd8fa1e6-934d-4272-95d1-dcad0fe716a9")
+  )
+  (instances
+    (project "backbone"
+      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
+        (reference "R32")
+        (unit 1)
+      )
+    )
+  )
+)
 (wire (pts (xy 400.05 144.78) (xy 415.29 144.78)) (stroke (width 0) (type default)) (uuid "ff6d651e-6f07-40b2-a1fa-02de932683e6"))
 (wire (pts (xy 425.45 144.78) (xy 440.69 144.78)) (stroke (width 0) (type default)) (uuid "655ce3cf-d7a3-4f23-8c30-1f0f48beabeb"))
 (label "TXD0"  (at 400.05 144.78 180) (effects (font (size 1 1)) (justify right)) (uuid "380fa6d3-b279-4546-b504-b0ef8ecbbdc3"))
 (global_label "FPC_TX" (shape bidirectional) (at 440.69 144.78 0) (effects (font (size 1 1)) (justify left)) (uuid "9764e1a2-95d1-455a-aa5d-01c9f98d4b14"))
-(symbol (lib_id "Jumper:SolderJumper_2_Open") (at 420.37 165.1 0) (unit 1) (in_bom no) (on_board yes) (dnp no) (uuid "e45e137b-7997-4440-9686-a6c96235f098")(property "Reference" "JP3" (at 420.37 158.75 0) (effects (font (size 1 1))))(property "Value" "OPEN" (at 420.37 161.29 0) (effects (font (size 1 1))))(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" (at 420.37 165.1 0) (effects (font (size 1 1)) (hide yes)))(pin "1" (uuid "db03d7cb-66b6-45e5-9b5e-0e86e81b2285"))(pin "2" (uuid "245a7fdf-9a79-4360-be18-0fb427b1dd58"))(instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "JP3") (unit 1)))))
+(symbol
+  (lib_id "Device:R")
+  (at 420.37 165.1 90)
+  (unit 1)
+  (in_bom yes)
+  (on_board yes)
+  (dnp yes)
+  (uuid "e45e137b-7997-4440-9686-a6c96235f098")
+  (property "Reference" "R33"
+    (at 420.37 158.75 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Value" "0R"
+    (at 420.37 161.29 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+    (at 420.37 165.1 0)
+    (effects
+      (font
+        (size 1 1)
+      )
+      (hide yes)
+    )
+  )
+  (pin "1"
+    (uuid "db03d7cb-66b6-45e5-9b5e-0e86e81b2285")
+  )
+  (pin "2"
+    (uuid "245a7fdf-9a79-4360-be18-0fb427b1dd58")
+  )
+  (instances
+    (project "backbone"
+      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
+        (reference "R33")
+        (unit 1)
+      )
+    )
+  )
+)
 (wire (pts (xy 400.05 165.1) (xy 415.29 165.1)) (stroke (width 0) (type default)) (uuid "4fd83e94-085e-494f-9b36-43efa642e9a8"))
 (wire (pts (xy 425.45 165.1) (xy 440.69 165.1)) (stroke (width 0) (type default)) (uuid "58977904-51fe-4487-9190-2d54dd140f21"))
 (label "RXD0"  (at 400.05 165.1 180) (effects (font (size 1 1)) (justify right)) (uuid "f634d5b1-7c8f-4f3a-bb66-538870f586c9"))
 (global_label "FPC_RX" (shape bidirectional) (at 440.69 165.1 0) (effects (font (size 1 1)) (justify left)) (uuid "873e90f3-9821-47bb-86e3-69496dfcf687"))
-(symbol (lib_id "Jumper:SolderJumper_2_Open") (at 520.7 124.46 0) (unit 1) (in_bom no) (on_board yes) (dnp no) (uuid "06a26501-9b9f-4cde-a636-6a545ab3eb95")(property "Reference" "JP4" (at 520.7 118.11 0) (effects (font (size 1 1))))(property "Value" "OPEN" (at 520.7 120.64999999999999 0) (effects (font (size 1 1))))(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" (at 520.7 124.46 0) (effects (font (size 1 1)) (hide yes)))(pin "1" (uuid "85f479c1-64cc-43eb-94da-f7dcfd0517f8"))(pin "2" (uuid "4fd28374-2fbb-4d90-87d4-75312250cfab"))(instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "JP4") (unit 1)))))
+(symbol
+  (lib_id "Device:R")
+  (at 520.7 124.46 90)
+  (unit 1)
+  (in_bom yes)
+  (on_board yes)
+  (dnp yes)
+  (uuid "06a26501-9b9f-4cde-a636-6a545ab3eb95")
+  (property "Reference" "R34"
+    (at 520.7 118.11 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Value" "0R"
+    (at 520.7 120.64999999999999 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+    (at 520.7 124.46 0)
+    (effects
+      (font
+        (size 1 1)
+      )
+      (hide yes)
+    )
+  )
+  (pin "1"
+    (uuid "85f479c1-64cc-43eb-94da-f7dcfd0517f8")
+  )
+  (pin "2"
+    (uuid "4fd28374-2fbb-4d90-87d4-75312250cfab")
+  )
+  (instances
+    (project "backbone"
+      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
+        (reference "R34")
+        (unit 1)
+      )
+    )
+  )
+)
 (wire (pts (xy 500.38 124.46) (xy 515.62 124.46)) (stroke (width 0) (type default)) (uuid "dc93ee6b-d6c4-49df-b788-0c6f40d84638"))
 (wire (pts (xy 525.78 124.46) (xy 541.02 124.46)) (stroke (width 0) (type default)) (uuid "31e87b47-1dac-47f2-a887-a622b3fbc59e"))
 (global_label "IO3" (shape bidirectional) (at 500.38 124.46 180) (effects (font (size 1 1)) (justify right)) (uuid "a93cea3d-4a54-40b4-86c9-5e53cae0d1d4"))
 (global_label "FPC_PULLUP" (shape bidirectional) (at 541.02 124.46 0) (effects (font (size 1 1)) (justify left)) (uuid "63f1e90b-a354-45eb-af7f-edb4445366c6"))
-(symbol (lib_id "Jumper:SolderJumper_2_Open") (at 520.7 144.78 0) (unit 1) (in_bom no) (on_board yes) (dnp no) (uuid "b6afec13-4ebf-4336-b6d3-7eb20293b14c")(property "Reference" "JP5" (at 520.7 138.43 0) (effects (font (size 1 1))))(property "Value" "OPEN" (at 520.7 140.97 0) (effects (font (size 1 1))))(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" (at 520.7 144.78 0) (effects (font (size 1 1)) (hide yes)))(pin "1" (uuid "451f6997-493f-43ce-9a90-5bd7c2ed3b27"))(pin "2" (uuid "2df529c0-496c-49c6-ab50-f0ed8565784c"))(instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "JP5") (unit 1)))))
+(symbol
+  (lib_id "Device:R")
+  (at 520.7 144.78 90)
+  (unit 1)
+  (in_bom yes)
+  (on_board yes)
+  (dnp yes)
+  (uuid "b6afec13-4ebf-4336-b6d3-7eb20293b14c")
+  (property "Reference" "R35"
+    (at 520.7 138.43 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Value" "0R"
+    (at 520.7 140.97 90)
+    (effects
+      (font
+        (size 1 1)
+      )
+    )
+  )
+  (property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+    (at 520.7 144.78 0)
+    (effects
+      (font
+        (size 1 1)
+      )
+      (hide yes)
+    )
+  )
+  (pin "1"
+    (uuid "451f6997-493f-43ce-9a90-5bd7c2ed3b27")
+  )
+  (pin "2"
+    (uuid "2df529c0-496c-49c6-ab50-f0ed8565784c")
+  )
+  (instances
+    (project "backbone"
+      (path "/9262d91e-b0ff-47b4-bf11-6f94636af855"
+        (reference "R35")
+        (unit 1)
+      )
+    )
+  )
+)
 (wire (pts (xy 500.38 144.78) (xy 515.62 144.78)) (stroke (width 0) (type default)) (uuid "2ad47b14-2868-4fd9-85af-87ace13dfc89"))
 (wire (pts (xy 525.78 144.78) (xy 541.02 144.78)) (stroke (width 0) (type default)) (uuid "7de6d13e-c60d-412a-bf49-1369a5afcdcd"))
 (global_label "IO46" (shape bidirectional) (at 500.38 144.78 180) (effects (font (size 1 1)) (justify right)) (uuid "4c0ff3c6-d7a2-4c23-831f-11d97c028b35"))
 (global_label "FPC_PULLDOWN" (shape bidirectional) (at 541.02 144.78 0) (effects (font (size 1 1)) (justify left)) (uuid "5a4c5d76-baaa-4609-93e9-805d2cf2821e"))
 (rectangle (start 382.27 101.6) (end 579.12 176.53) (stroke (width 0.254) (type dash)) (fill (type none)) (uuid "e6b5cd67-868d-4ab0-8c73-623d2b95f22b"))
-(text "OPTIONAL FPC CONNECTIONS - ALL JUMPERS OPEN BY DEFAULT" (at 386.08 106.68 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "2794857e-78b0-4396-aef4-d394c3805544"))
-(text "Close only for a verified peripheral. Open JP1/JP2/JP3 for camera NC pins." (at 386.08 111.76 0) (effects (font (size 0.95 0.95)) (justify left)) (uuid "86932c41-af19-4ada-89de-cb6aa6a80400"))
+(text "OPTIONAL FPC CONNECTIONS - 0R LINKS, DNP BY DEFAULT" (at 386.08 106.68 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "2794857e-78b0-4396-aef4-d394c3805544"))
+(text "Fit only for a verified peripheral. R31-R35: DNP in camera profile." (at 386.08 111.76 0) (effects (font (size 0.95 0.95)) (justify left)) (uuid "86932c41-af19-4ada-89de-cb6aa6a80400"))
 (text "GPIO3: RESET, open-drain only; JTAG strap." (at 487.68 157.48 0) (effects (font (size 0.95 0.95)) (justify left)) (uuid "4bfeb70b-2340-4c3e-b1cc-139b72135947"))
 (text "GPIO46: standby; boot strap, keep low at reset." (at 487.68 162.56 0) (effects (font (size 0.95 0.95)) (justify left)) (uuid "adec6128-9082-44d4-992a-94ee816410b3"))
-(text "JP5: only if peripheral accepts 3.3 V control." (at 487.68 167.64 0) (effects (font (size 0.95 0.95)) (justify left)) (uuid "783e7a82-d512-41bb-80f7-93f10318963f"))
+(text "R35: only if peripheral accepts 3.3 V control." (at 487.68 167.64 0) (effects (font (size 0.95 0.95)) (justify left)) (uuid "783e7a82-d512-41bb-80f7-93f10318963f"))
 (text "UART0 shared with debug; TX may emit boot logs." (at 386.08 172.72 0) (effects (font (size 0.95 0.95)) (justify left)) (uuid "0d693bf8-2c74-4542-a01a-25cf12ee1b8f"))
 (wire (pts (xy 529.59 278.13) (xy 546.1 278.13)) (stroke (width 0) (type default)) (uuid "7e375be4-9a36-434e-850d-9c19b2edf871"))
 (global_label "FPC_TX" (shape bidirectional) (at 529.59 278.13 180) (effects (font (size 1 1)) (justify right)) (uuid "c1a418b7-1b2d-4cfb-8487-e12bf670c1ce"))
@@ -27278,4 +27513,15 @@
 (global_label "FPC_RX" (shape bidirectional) (at 529.59 280.67 180) (effects (font (size 1 1)) (justify right)) (uuid "573f5685-c937-4869-be2b-d349f6e5c55b"))
 (wire (pts (xy 529.59 222.25) (xy 546.1 222.25)) (stroke (width 0) (type default)) (uuid "765c60c6-4fcc-4fc7-8a44-2bd825859376"))
 (global_label "FPC_3V3" (shape bidirectional) (at 529.59 222.25 180) (effects (font (size 1 1)) (justify right)) (uuid "45f2f9c0-8133-4fd9-9e39-3c2ea3a7a273"))
+
+(wire (pts (xy 415.29 124.46) (xy 416.56 124.46)) (stroke (width 0) (type default)) (uuid "51dfe6c3-06cd-4138-a545-96abf4aaae3d"))
+(wire (pts (xy 424.18 124.46) (xy 425.45 124.46)) (stroke (width 0) (type default)) (uuid "557c59ca-0a89-4727-860a-1d56cb15b873"))
+(wire (pts (xy 415.29 144.78) (xy 416.56 144.78)) (stroke (width 0) (type default)) (uuid "df51b267-0159-4385-9ba3-fe14f4a22b14"))
+(wire (pts (xy 424.18 144.78) (xy 425.45 144.78)) (stroke (width 0) (type default)) (uuid "4d11e5fd-1cb8-4ad6-a269-378cb802bcdf"))
+(wire (pts (xy 415.29 165.1) (xy 416.56 165.1)) (stroke (width 0) (type default)) (uuid "ddcbf01e-5f3e-4f3c-b26f-44057db6af79"))
+(wire (pts (xy 424.18 165.1) (xy 425.45 165.1)) (stroke (width 0) (type default)) (uuid "38caedbb-1f42-48ac-8300-9dcca7d5b7ba"))
+(wire (pts (xy 515.62 124.46) (xy 516.89 124.46)) (stroke (width 0) (type default)) (uuid "99d86e66-842e-4839-a0d3-7e9f70a22bbc"))
+(wire (pts (xy 524.51 124.46) (xy 525.78 124.46)) (stroke (width 0) (type default)) (uuid "879c3520-9aba-4003-93a8-5edf845cfcc7"))
+(wire (pts (xy 515.62 144.78) (xy 516.89 144.78)) (stroke (width 0) (type default)) (uuid "6888f139-139e-471b-b14f-54a655b0cdbf"))
+(wire (pts (xy 524.51 144.78) (xy 525.78 144.78)) (stroke (width 0) (type default)) (uuid "85dc2501-b205-43e8-9e4d-9dbf738144d3"))
 )
