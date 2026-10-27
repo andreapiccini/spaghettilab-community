@@ -1,6 +1,6 @@
 # Espansione FPC, alimentazioni ausiliarie e Qwiic — Backbone V3
 
-Aggiornamento 2026-10-27. **Configurazione attuale: R31–R35, 0 Ω 0402, DNP nel profilo camera; sostituiscono JP1–JP5.** Implementazione nello **schema** `backbone.kicad_sch`; PCB, routing, firmware e prove fisiche non aggiornati da questa modifica.
+Aggiornamento 2026-10-27. **Configurazione attuale: R31–R35, 0 Ω 0603 HandSolder, DNP nel profilo camera; sostituiscono JP1–JP5.** Implementazione nello **schema** `backbone.kicad_sch`; PCB, routing, firmware e prove fisiche non aggiornati da questa modifica.
 
 ## Circuito aggiunto
 
@@ -184,3 +184,39 @@ Fonti consultate:
 - Ingombri verificati nelle librerie ufficiali KiCad 10 installate: Resistor_SMD e Jumper.
 
 Verifiche: netlist identica dopo la sola mappatura JP1–JP5→R31–R35; nessun GPIO o net cambiato. DNP, valore e footprint verificati sui cinque componenti. Esportazione KiCad e revisione visiva superate. PCB, firmware e prove al banco non modificati.
+
+
+## Montaggio manuale e confronto moduli camera — 2026-10-27
+
+R31–R35 passano a **0603 imperiale / 1608 metrico**, footprint `Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder`, con pad maggiorati per saldatura manuale. Valore 0R e DNP invariati. Questa scelta supera il formato 0402 e il relativo confronto di ingombri riportato nella cronologia. Nessun altro componente miniaturizzato è stato cambiato. Modifica limitata alle assegnazioni footprint nello schema; PCB da aggiornare.
+
+### Risultato della verifica
+
+Non si può dichiarare che tutte le varianti delle tre famiglie siano intercambiabili. Sono stati confrontati documenti di moduli specifici; il firmware supporta i tre sensori, ma questo non certifica il cablaggio né il funzionamento elettrico su Backbone.
+
+| Modulo / riferimento | Pinout e alimentazioni rispetto a J5 | Esito documentale |
+|---|---|---|
+| OV2640 della ESP32-S3-EYE-MB V2.2 | J5 riprende la stessa assegnazione delle funzioni camera e rail AVDD/DOVDD 2,8 V, DVDD 1,5 V; GPIO MCU rimappati per Backbone | Coerente con il circuito di riferimento; nessuna prova su Backbone. |
+| OV3660 Camera Module Specification pubblicato da Seeed, disegno 20/12/2018 | 1/23/24 NC; 10 DVDD, 11 DOVDD; dati D7…D0 negli stessi contatti. AVDD 2,6–3,0 V, DOVDD 1,8/2,8 V, DVDD 1,5 V | Pinout e rail nominali coerenti. Restano da validare livelli, sequenza di avvio e modulo ricevuto. |
+| OV5640-8225N-modelHQB / documento OV5640-8225N-120 pubblicato da Seeed | 1/23/24 NC; 4 AVDD 2,8 V, 10 DVDD 1,5 V, 11 DOVDD 1,8/2,8 V; stessa mappatura DVP a 8 bit | Pinout e rail nominali coerenti. Non equivale a prova fisica; il documento usa sia D9…D2 sia D7…D0 per lo stesso bus a 8 bit. |
+| OV5640 autofocus MJY5OAF-F3M-V1, documento Seeed del 20/06/2023 | 1 STROBE; 11 DOVDD indicata 1,8 V; 23 AF-GND; 24 AFVDD 2,8 V | **Non compatibile come sostituzione diretta**: mancano alimentazione/massa autofocus e il rail I/O non coincide. R32/R33 devono restare non montate: UART non può essere collegata ai pin AF. |
+
+Correzione del contesto precedente: la figura 2-2 del datasheet del sensore OV3660 (FSIN sul pin 10 e D1/D0 su 23/24) è un riferimento diverso dal modulo Seeed sopra, che ha DVDD e NC su quei contatti. Non estendere la sua piedinatura a tutti i moduli OV3660; resta utile per dimostrare che il solo nome del sensore non basta.
+
+### Verifiche ancora necessarie prima della qualifica elettrica
+
+- **SCCB e clock:** Backbone usa pull-up SCCB a 3,3 V e clock GPIO15 diretto a 3,3 V, con DOVDD a 2,8 V. Il datasheet OV3660 riporta una caratterizzazione SCCB fino a 3,0 V basata su DOVDD=1,8 V: non basta a certificare l’interfaccia del modulo a 2,8 V con pull-up a 3,3 V. Confermare condizioni ammesse dal fornitore per il modulo reale; non dedurre il funzionamento garantito dai soli absolute maximum. Analoga verifica richiesta per OV5640.
+- **Avvio:** RESET alto fisso e PWDN basso fisso sono ripresi dalla S3-EYE OV2640. Le indicazioni di sequenza per OV3660/OV5640 richiedono una verifica specifica; non assumere che il profilo fisso soddisfi ogni sensore. R34/R35 rimangono DNP e non costituiscono controllo camera già qualificato.
+- **Meccanica e prove:** controllare orientamento dei contatti, passo/spessore del flex, budget dei regolatori e integrità/timing DVP. La scheda non è stata collaudata con nessuna delle tre camere.
+
+Decisione di questa revisione: solo cambio 0603 richiesto e documentazione; nessuna modifica automatica di rail, buffer, traslatori o pin autofocus. Profilo camera conserva R31–R35 DNP. Per la futura scelta selezionare il modulo a fuoco fisso corrispondente al disegno qualificabile, oppure progettare esplicitamente la variante autofocus.
+
+Fonti primarie:
+- [Espressif S3-EYE-MB V2.2](https://dl.espressif.com/dl/schematics/SCH_ESP32-S3-EYE-MB_20211201_V2.2.pdf).
+- [Disegno modulo OV3660 Seeed](https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/new-res/OV3660_Camera_Module_Specification.pdf).
+- [Modulo OV5640-8225N-120 Seeed](https://files.seeedstudio.com/wiki/xiaos3-sscma/OV5640-8225N-120.pdf).
+- [Modulo OV5640 AF MJY5OAF-F3M-V1 Seeed](https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/new-res/OV5640_Camera_Module_Specification.pdf).
+- [Datasheet OV3660, tabella 8-3 e sequenza di avvio](https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/OV3660_datasheet.pdf).
+- [Datasheet OV5640](https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/OV5640_datasheet.pdf).
+
+Verifica modifica: esattamente cinque proprietà Footprint modificate, valori e flag DNP conservati; nessuna modifica a pin, reti, posizioni o altri simboli. Footprint HandSolder disponibile nella libreria ufficiale KiCad installata.
