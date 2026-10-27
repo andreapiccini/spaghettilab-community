@@ -1,5 +1,14 @@
 # Backbone V3 — dual-face chain contacts
 
+## 3 A requirement — local interlayer reinforcement (2026-10-27)
+
+User specified 3 A on connector 5 V. Replaced each single 0.8/0.4 mm via for 5V or GND at J2/J9 with two parallel 1.0/0.6 mm vias (copper diameter/drill), at +/-0.55 mm along the row from the original via center. Applies to J2 pins 1,4,5 and J9 pins 1,5; signal vias unchanged. Independent short 1.2 mm wide branches on both external layers connect the pad to each via; no 0.6 mm common neck retained. Pad positions/shapes/nets and 3D unchanged. Installed DRC unchanged: 152 violations, 132 unconnected.
+
+First-order barrel estimate at 20 C: PCB thickness 1.6 mm, assumed hole-wall copper 20 um, approximate area per via pi*0.6*0.020 = 0.0377 mm2. Copper resistivity 0.01724 ohm*mm2/m gives about 0.73 milliohm per via, 0.37 milliohm per pair, 1.1 mV and 3.3 mW at 3 A with equal sharing. This estimates barrel resistance only, not thermal qualification; verify actual plating, current distribution, copper pours and completed routing. Source for plating relevance: https://jlcpcb.com/blog/pcb-plating-thickness . Remaining board power routing is incomplete and must be sized for total upstream/downstream chain current including local consumption.
+
+Blocking connector rating: LCSC lists SAMZO PR5L5015-5P-C-H at 2 A (https://item.szlcsc.com/43105444.html); therefore the existing connector cannot be declared suitable for 3 A continuous on this evidence. Reinforcing vias does not raise its rating. No assumption of sharing between J2 pins 1 and 4: J9 pin 4 is TERM_CTRL_OUT and GND remains a single contact. Select/qualify a connector rated at least 3 A for both supply and return before claiming 3 A chain capability. Pinout not modified. User confirmed the 3 A PCB design target, without intending to draw 3 A through the current 2 A connector, and authorized commit/push. This is not a claim of whole-board or connector 3 A compliance.
+
+
 ## Current revision — edge-reaching contacts and horizontal 3D (2026-10-27)
 
 This revision supersedes the earlier 1.8 mm pad length below. Explicit user request: extend the pads to the PCB edge for adjustable connector insertion/overhang. J2 pads are 2.56 x 1.6 mm and reach X=183.25 mm; J9 pads are 2.45 x 1.6 mm and reach X=151.90 mm. Inner pad ends, row pitch, numbering and nets preserved; identical physical XY on both faces. Contact surfaces remain solid and oval, with offset interlayer vias retained. Width increased to 1.6 mm on user request for centering adjustment, leaving 0.94 mm between adjacent copper lands at 2.54 mm pitch.
