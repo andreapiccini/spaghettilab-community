@@ -147,3 +147,5 @@ Richiesta confermata: 3,3 V, segnali aggiuntivi e controllo periferica, con poss
 **Scelta dei pin:** 35–37 esclusi per PSRAM, 45 escluso per VDD_SPI, 0/EN preservati per avvio/reset Backbone; USB19/20, CAN47/48, A0–A7, LED e segnali FPC esistenti preservati. Non esistevano quattro GPIO completamente liberi e privi di restrizioni: UART43/44 e strap3/46 sono estensioni opzionali, non una promessa di quattro GPIO generici sempre disponibili.
 
 Fonti: netlist attuale Backbone; [datasheet ESP32-S3 v2.2, sezioni 2 e 3](https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf); [guida GPIO Espressif](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/peripherals/gpio.html). KiCad: esportazione e revisione visiva superate; confronto completo netlist conferma soltanto i nuovi collegamenti ai cinque ponticelli e ai tre pin precedentemente NC. Tutte le reti precedenti preservate. PCB, firmware e qualifica elettrica sul banco non aggiornati.
+
+ERC di questa revisione: 176 → 172 segnalazioni; restano gli stessi 27 errori preesistenti (16 pin non connessi e 11 fili scollegati). Nessun nuovo errore.

@@ -8149,7 +8149,7 @@
 			)
 			(embedded_fonts no)
 		)
-	
+
 (symbol "Jumper:SolderJumper_2_Open"
   (pin_numbers
     (hide yes)
@@ -9549,7 +9549,7 @@
 		(at 194.31 350.52)
 		(uuid "6b3d33f3-adf2-4361-b609-5581c768a315")
 	)
-	
+
 	(no_connect
 		(at 166.37 373.38)
 		(uuid "75cc1585-8e95-4cdc-8852-024c6ab897a8")
@@ -9558,7 +9558,7 @@
 		(at 194.31 370.84)
 		(uuid "7c655a41-ecb9-4806-8e6d-78e7a5d14149")
 	)
-	
+
 	(no_connect
 		(at 525.78 60.96)
 		(uuid "a21d4b1e-54a4-4130-9c07-cfb326504c5c")
@@ -9575,7 +9575,7 @@
 		(at 196.85 312.42)
 		(uuid "c146231e-4f28-49cf-ab64-1f39dbcba547")
 	)
-	
+
 	(no_connect
 		(at 166.37 370.84)
 		(uuid "fc1bdb03-79b7-4611-bc79-ef89d17cb649")
