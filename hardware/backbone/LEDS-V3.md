@@ -28,3 +28,12 @@ Hand assembly required: bend leads to lift the LED body clear of FR4. Existing S
 
 ## Row alignment update
 LED row aligned at Y=110.825 mm, 3.3 mm pitch; current physical order preserved. Courtyard narrowed to 3.2 mm for hand assembly. Row shifted left 1.2 mm to clear J5 courtyard. No LED courtyard/clearance/short/keepout violations in targeted check.
+
+
+## Aggiornamento alimentazioni 2026-10-27
+
+U4/U5 AP2112 sostituiti da TPS562201: VCORE e VAUX restano due linee separate da 3,3 V. I riferimenti precedenti agli AP2112 descrivono la revisione storica. Vedere [POWER-V3.md](POWER-V3.md) per distinta, limiti e stato del PCB. La sostituzione non qualifica i LED a 3,3 V e non modifica U9/U10.
+
+
+## Revisione finale alimentazione unica — 2026-10-27
+U5 e il relativo circuito eliminati. Tutti i carichi precedentemente VAUX ora sono su VCORE, dal solo buck U4. I due LDO camera restano alimentati a3,3V; verifica dropout e limiti in [POWER-V3.md](POWER-V3.md). Questa nota supera la configurazione a due buck descritta sopra.
