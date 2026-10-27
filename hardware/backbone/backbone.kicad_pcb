@@ -42545,7 +42545,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/ESP32-S3-WROOM-1.step"
+		(model "${KIPRJMOD}/../libraries/flexypin/3d/ESP32-S3-WROOM-1.step"
 			(offset
 				(xyz 0 -5.26 0)
 			)

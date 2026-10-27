@@ -27,3 +27,10 @@ README consulted do not declare a redistribution licence. This provenance note
 does not assign the spaghettiLAB project licence to the third-party model or
 assert a new licence grant. The model was already present in the V3 repository;
 this change adds the requested shared-library location without changing it.
+
+## ESP32-S3 module model
+The socket also uses the existing `flexypin/3d/ESP32-S3-WROOM-1.step`.
+The placed Backbone socket now resolves that model through
+`${KIPRJMOD}/../libraries/flexypin/3d/ESP32-S3-WROOM-1.step`
+instead of the custom path variable. Its offset (0, -5.26, 0), scale and
+rotation are preserved. No replacement or download of module geometry was needed.
