@@ -2,4 +2,6 @@
   (version 7)
   (lib (name "SpaghettiLAB")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB.kicad_sym")(options "")(descr "Community hardware symbols"))
   (lib (name "SpaghettiLab_FlexyPin")(type "KiCad")(uri "${KIPRJMOD}/../libraries/flexypin/SpaghettiLab_FlexyPin.kicad_sym")(options "")(descr "Solder Party FlexyPin"))
+
+  (lib (name "LCSC_Ports")(type "KiCad")(uri "${KIPRJMOD}/../libraries/LCSC_Ports.kicad_sym")(options "")(descr "LCSC/EasyEDA CAD for AO6604 C47744 and TCA9535RGER C527428"))
 )

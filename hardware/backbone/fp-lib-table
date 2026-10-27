@@ -1,4 +1,6 @@
 (fp_lib_table
   (lib (name "SpaghettiLAB")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB.pretty")(options "")(descr "Community hardware footprints"))
   (lib (name "FlexyPin")(type "KiCad")(uri "${KIPRJMOD}/../libraries/flexypin/FlexyPin.pretty")(options "")(descr "Solder Party FlexyPin"))
+
+  (lib (name "LCSC_Ports")(type "KiCad")(uri "${KIPRJMOD}/../libraries/LCSC_Ports.pretty")(options "")(descr "LCSC/EasyEDA CAD for AO6604 C47744 and TCA9535RGER C527428"))
 )
