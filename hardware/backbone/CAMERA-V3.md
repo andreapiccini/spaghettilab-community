@@ -19,18 +19,18 @@ Tutti i nuovi componenti hanno footprint assegnato. I simboli attivi sono anche 
 
 ## J5: espansione FPC 24 poli — esempio di utilizzo camera
 
-Il connettore usa ora nomi generici nello schema. La tabella conserva le funzioni camera come esempio applicativo, basato sulla piedinatura ESP32-S3-EYE-MB V2.2. I pin 6 e 8 sono FPC_PULLUP e FPC_PULLDOWN, con polarizzazione fissa; non sono GPIO liberi. I numeri indicano i contatti J5; non vanno interpretati come GPIO. La mappatura GPIO è specifica spaghettiLAB e conserva tutte le assegnazioni esistenti.
+Il connettore usa ora nomi generici nello schema. La tabella conserva le funzioni camera come esempio applicativo, basato sulla piedinatura ESP32-S3-EYE-MB V2.2. I pin 6 e 8 mantengono le polarizzazioni FPC_PULLUP e FPC_PULLDOWN; i ponticelli JP4/JP5 abilitano controlli opzionali con le restrizioni sotto. Tutti i ponticelli sono aperti di default. I numeri indicano i contatti J5; non vanno interpretati come GPIO. La mappatura GPIO è specifica spaghettiLAB e conserva tutte le assegnazioni esistenti.
 
 | J5 | Funzione | Rete / GPIO |
 |---|---|---|
-| 1 | NC | Non collegato |
+| 1 | 3,3 V opzionale | FPC_3V3 da VCORE tramite JP1; NC con JP1 aperto |
 | 2 | AGND | GND |
 | 3 | SCCB SDA | IO4 / GPIO4 (collegamento diretto) |
 | 4 | AVDD | +2V8 |
 | 5 | SCCB SCL | IO5 / GPIO5 (collegamento diretto) |
-| 6 | RESET_N | Pull-up 10 kΩ a +2V8 |
+| 6 | RESET_N | Pull-up 10 kΩ a +2V8; GPIO3 opzionale tramite JP4 |
 | 7 | VSYNC | IO6 / GPIO6 |
-| 8 | PWDN | Pull-down 10 kΩ a GND |
+| 8 | PWDN | Pull-down 10 kΩ a GND; GPIO46 opzionale tramite JP5 |
 | 9 | HREF | IO1 / GPIO1 |
 | 10 | DVDD | +1V5 |
 | 11 | DOVDD | +2V8 |
@@ -45,10 +45,10 @@ Il connettore usa ora nomi generici nello schema. La tabella conserva le funzion
 | 20 | Y5 / D3 | IO41 / GPIO41 |
 | 21 | Y3 / D1 | IO39 / GPIO39 |
 | 22 | Y4 / D2 | IO40 / GPIO40 |
-| 23 | NC | Non collegato |
-| 24 | NC | Non collegato |
+| 23 | UART TX / GPIO43 opzionale | FPC_TX tramite JP2; NC con JP2 aperto |
+| 24 | UART RX / GPIO44 opzionale | FPC_RX tramite JP3; NC con JP3 aperto |
 
-Ordine firmware D0..D7: **38, 39, 40, 41, 42, 17, 18, 21**. XCLK=15, PCLK=2, VSYNC=6, HREF=1, SDA=4, SCL=5. RESET/PWDN non sono pilotati da GPIO: configurare il driver di conseguenza (tipicamente `-1`). Non copiare la configurazione GPIO della S3-EYE.
+Ordine firmware D0..D7: **38, 39, 40, 41, 42, 17, 18, 21**. XCLK=15, PCLK=2, VSYNC=6, HREF=1, SDA=4, SCL=5. Con JP4/JP5 aperti, RESET/PWDN non sono pilotati da GPIO: configurare il driver di conseguenza (tipicamente `-1`). Non abilitare JP4/JP5 senza verificare livelli e gestione firmware indicati sotto. Non copiare la configurazione GPIO della S3-EYE.
 
 ## J4: Qwiic
 
@@ -64,7 +64,7 @@ Qwiic e camera condividono direttamente IO4/IO5, con pull-up a VCORE 3,3 V; Q3/Q
 ## Reti preservate e limiti
 
 - Nessun pin precedentemente collegato ha cambiato connessione nella netlist; le rinomine generiche sono elencate sotto. Conservati A0–A7/GPIO7–14, ALED/GPIO16, CAN/GPIO47–48, USB/GPIO19–20, UART, BOOT e reset MCU.
-- Non impiegati GPIO35–37, riservati alla PSRAM nelle varianti interessate, né i GPIO di strap liberi 3/45/46.
+- GPIO35–37 restano riservati alla PSRAM; GPIO45 non usato. GPIO3 e GPIO46 hanno connessioni opzionali tramite ponticelli aperti: sono pin di strap, non GPIO senza restrizioni.
 - Questa implementazione ha rail **fissi 2,8 V e 1,5 V**. L'obiettivo dell'utente resta supportare più camere; non è una certificazione universale OV2640/OV3660/OV5640. Verificare pinout, tensioni e verso del flat del modulo concreto. Moduli con DVDD diversa richiedono una variante di alimentazione/adattatore prima di collegarli.
 - Il clock arriva direttamente dall’ESP32 a 3,3 V attraverso R30 da 0 Ω, come nel riferimento Espressif; U11 e C82 sono rimossi. SCCB è invece collegato direttamente al bus a 3,3 V, come nel riferimento S3-EYE: il modulo scelto deve ammettere questi livelli sugli ingressi SDA/SCL. Le uscite DVP vanno direttamente all'ESP32, come nel riferimento: margini logici e timing vanno qualificati sul modulo scelto.
 - VAUX alimenta già i LED: controllare picchi, dissipazione e margine di U5 con camera e LED simultanei. Verificare anche il budget VCORE con i dispositivi Qwiic. Nessuna misura di corrente o temperatura effettuata.
@@ -124,3 +124,26 @@ Requisito confermato: evitare stadi aggiunti dall’assistente rispetto al circu
 Questa revisione sostituisce le precedenti scelte di buffer e adattamento del clock a 2,8 V. R28/R29 da 10 kΩ hanno invece una funzione presente nel riferimento (R57/R63) e restano. Conservati GPIO spaghettiLAB, nomi generici e simboli di potenza. La revisione riproduce il percorso del clock Espressif; non dichiara una copia integrale della scheda S3-EYE: alimentazione a monte, disaccoppiamento e ponticelli sugli altri segnali restano quelli già documentati per Backbone.
 
 Confronto completo delle netlist: sole differenze rimozione U11/C82 e connessione di R30.1 a IO15; tutte le altre connessioni preservate. PCB e firmware non modificati, nessuna prova al banco.
+
+
+## Estensione opzionale del flat — 2026-10-27
+
+Richiesta confermata: 3,3 V, segnali aggiuntivi e controllo periferica, con possibilità di isolamento. Aggiunti cinque ponticelli saldabili **aperti di default**, simbolo `Jumper:SolderJumper_2_Open`, footprint `Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm`. Chiudere significa unire i due pad con stagno; riaprire significa rimuovere il ponte a scheda disalimentata. Non sono interruttori comandati dal firmware e non limitano la corrente.
+
+| Ponticello | Lato Backbone | Lato flat | Condizioni di utilizzo |
+|---|---|---|---|
+| JP1 | VCORE, 3,3 V | J5.1, FPC_3V3 | Uscita di alimentazione; non collegare un’altra sorgente a questo pin. Corrente disponibile da qualificare con U4, carichi esistenti, piste e cavo. |
+| JP2 | TXD0 / GPIO43 | J5.23, FPC_TX | Condiviso con TP19 e UART0; il boot può trasmettere messaggi prima del firmware. |
+| JP3 | RXD0 / GPIO44 | J5.24, FPC_RX | Condiviso con TP18 e UART0; evitare più trasmettitori sullo stesso ingresso. |
+| JP4 | GPIO3 | J5.6, FPC_PULLUP | Solo open-drain: portare basso o rilasciare. Pull-up R28 a 2,8 V conservata. Non pilotare alto push-pull a 3,3 V. |
+| JP5 | GPIO46 | J5.8, FPC_PULLDOWN | Solo per periferiche che accettano controllo a 3,3 V; R29 da 10 kΩ a massa conservata. Per camera non verificata lasciare aperto. |
+
+**Profilo camera di riferimento:** JP1–JP5 aperti; J5.1/23/24 non alimentati/non collegati al MCU, RESET alto a 2,8 V, PWDN basso. Chiudere JP1 solo per una periferica che richiede 3,3 V sul pin 1. I nomi NC nel riferimento non garantiscono che i pin siano liberi in ogni modulo.
+
+**Profilo scheda esterna:** chiudere singolarmente i ponticelli necessari dopo controllo pinout e tensioni. JP2/JP3 possono essere usati come UART o GPIO riconfigurati, ma non sono due risorse indipendenti dal debug UART0; disabilitare/rimappare la console quando necessario. I segnali logici 3,3 V non sono ingressi a 5 V. Con alimentazione esterna evitare retroalimentazione attraverso VCORE e segnali, inclusa la pull-up a 2,8 V. Nessuna connessione a caldo prevista.
+
+**Strapping e controllo:** GPIO3 determina una selezione JTAG in funzione delle eFuse; chiudendo JP4 la pull-up a 2,8 V imposta il livello al reset. GPIO46 influenza download boot e messaggi ROM: mantenerlo basso durante reset e campionamento strap (hold minimo 3 ms dopo CHIP_PU alto). La periferica deve lasciare questi segnali in alta impedenza all’avvio. Non cambiare eFuse per rendere utilizzabili i collegamenti. La modalità open-drain di JP4 deve essere configurata prima di pilotare il pin; non si presume che il driver camera lo faccia automaticamente. GPIO46 può pilotare alto a 3,3 V solo dopo l’avvio e solo verso una periferica compatibile.
+
+**Scelta dei pin:** 35–37 esclusi per PSRAM, 45 escluso per VDD_SPI, 0/EN preservati per avvio/reset Backbone; USB19/20, CAN47/48, A0–A7, LED e segnali FPC esistenti preservati. Non esistevano quattro GPIO completamente liberi e privi di restrizioni: UART43/44 e strap3/46 sono estensioni opzionali, non una promessa di quattro GPIO generici sempre disponibili.
+
+Fonti: netlist attuale Backbone; [datasheet ESP32-S3 v2.2, sezioni 2 e 3](https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf); [guida GPIO Espressif](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/peripherals/gpio.html). KiCad: esportazione e revisione visiva superate; confronto completo netlist conferma soltanto i nuovi collegamenti ai cinque ponticelli e ai tre pin precedentemente NC. Tutte le reti precedenti preservate. PCB, firmware e qualifica elettrica sul banco non aggiornati.
