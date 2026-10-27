@@ -86,3 +86,9 @@ ERC: **233 → 176 segnalazioni; errori 56 → 27**. I 27 errori rimanenti rigua
 - [onsemi BSS138](https://www.onsemi.com/pdf/datasheet/bss138-d.pdf), pinout G=1, S=2, D=3.
 - [Driver Espressif](https://github.com/espressif/esp32-camera), supporto sensori distinto dalla compatibilità del flat.
 - Simboli derivati dalle librerie ufficiali KiCad 10 (`Regulator_Linear`, `Transistor_FET`, `74xGxx`), con MPN e footprint specificati. [Licenza KiCad delle librerie](https://www.kicad.org/libraries/license/): CC-BY-SA 4.0 con eccezione; gli asset derivati mantengono tale provenienza.
+
+## Schematic presentation update — 2026-10-27
+
+The camera/Qwiic section is organized into seven dashed functional blocks with English comments: 2.8 V regulator, 1.5 V regulator, SCCB level shifting, Qwiic expansion, clock buffering, default controls, and the 24-pin camera interface. Local connections now use orthogonal wires, visible junctions, shared power/ground rails and directly connected decoupling capacitors. Labels remain at block interfaces and MCU signal ports.
+
+The full netlist comparison against commit 9110be4 preserves all 63 net names and all 237 connected component pins, including complete net membership. No parts, values, GPIO assignments, footprints or PCB routing were changed. KiCad export and visual inspection passed. ERC still reports the same 27 pre-existing errors; total messages are now 178 (151 warnings). Two additional single-global-label warnings concern VCORE and CAM_XCLK_DRV: their former duplicate labels were replaced with physical wires. These warnings do not indicate disconnected pins; net connectivity was checked independently.
