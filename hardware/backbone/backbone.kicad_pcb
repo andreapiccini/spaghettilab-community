@@ -42105,7 +42105,7 @@
 			(uuid "1506cb88-8856-429c-a97f-2ac3a4e08314")
 		)
 		(embedded_fonts no)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 4.4577 -20.066 0)
 			)
@@ -42116,7 +42116,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 5.7277 -20.066 0)
 			)
@@ -42127,7 +42127,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -5.08 0)
 			)
@@ -42138,7 +42138,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -6.35 0)
 			)
@@ -42149,7 +42149,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -12.7 0)
 			)
@@ -42160,7 +42160,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -13.97 0)
 			)
@@ -42171,7 +42171,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -0.6223 -20.066 0)
 			)
@@ -42182,7 +42182,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 0.6477 -20.066 0)
 			)
@@ -42193,7 +42193,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -7.62 0)
 			)
@@ -42204,7 +42204,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -8.89 0)
 			)
@@ -42215,7 +42215,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -10.16 0)
 			)
@@ -42226,7 +42226,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -11.43 0)
 			)
@@ -42237,7 +42237,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -6.35 0)
 			)
@@ -42248,7 +42248,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -5.08 0)
 			)
@@ -42259,7 +42259,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -3.81 0)
 			)
@@ -42270,7 +42270,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -2.54 0)
 			)
@@ -42281,7 +42281,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -8.89 0)
 			)
@@ -42292,7 +42292,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -7.62 0)
 			)
@@ -42303,7 +42303,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -11.43 0)
 			)
@@ -42314,7 +42314,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -10.16 0)
 			)
@@ -42325,7 +42325,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 7.0037 -20.06 0)
 			)
@@ -42336,7 +42336,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 0 0)
 			)
@@ -42347,7 +42347,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -1.27 0)
 			)
@@ -42358,7 +42358,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -2.54 0)
 			)
@@ -42369,7 +42369,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -3.81 0)
 			)
@@ -42380,7 +42380,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -16.51 0)
 			)
@@ -42391,7 +42391,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -15.24 0)
 			)
@@ -42402,7 +42402,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -1.27 0)
 			)
@@ -42413,7 +42413,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 0 0)
 			)
@@ -42424,7 +42424,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -6.9763 -20.06 0)
 			)
@@ -42435,7 +42435,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 1.9177 -20.066 0)
 			)
@@ -42446,7 +42446,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 3.1877 -20.066 0)
 			)
@@ -42457,7 +42457,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -3.1623 -20.066 0)
 			)
@@ -42468,7 +42468,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -1.8923 -20.066 0)
 			)
@@ -42479,7 +42479,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -15.24 0)
 			)
@@ -42490,7 +42490,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -11.0363 -16.51 0)
 			)
@@ -42501,7 +42501,7 @@
 				(xyz 0 0 0)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -13.9745 0)
 			)
@@ -42512,7 +42512,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz 11.0363 -12.7045 0)
 			)
@@ -42523,7 +42523,7 @@
 				(xyz 0 0 -180)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -5.7023 -20.066 0)
 			)
@@ -42534,7 +42534,7 @@
 				(xyz 0 0 -90)
 			)
 		)
-		(model "${SPAGHETTILAB_FLEXYPIN_3D}/flexypin.step"
+		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/flexypin.step"
 			(offset
 				(xyz -4.4323 -20.066 0)
 			)
