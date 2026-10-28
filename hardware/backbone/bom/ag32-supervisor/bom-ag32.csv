@@ -49,8 +49,8 @@ R5,1k,SpaghettiLAB:R0603,C2907002,FIT,0.0015,engineering allowance for standard 
 R8,120R,SpaghettiLAB:R0603,C2906988,FIT,0.0015,engineering allowance for standard resistor
 R15,10k,SpaghettiLAB:R0603,C99782,FIT,0.0015,engineering allowance for standard resistor
 R16,10k,SpaghettiLAB:R0603,C99782,FIT,0.0015,engineering allowance for standard resistor
-R17,33R DNP / ESP USB,SpaghettiLAB:R0603,C2909394,DNP,0,DNP
-R18,33R DNP / ESP USB,SpaghettiLAB:R0603,C2909394,DNP,0,DNP
+R17,33R / ESP USB,SpaghettiLAB:R0603,C2909394,FIT,0.0015,standard resistor allowance; ESP USB now default
+R18,33R / ESP USB,SpaghettiLAB:R0603,C2909394,FIT,0.0015,standard resistor allowance; ESP USB now default
 R22,5.1k,SpaghettiLAB:R0603,C2907044,FIT,0.0015,engineering allowance for standard resistor
 R24,4.7k,SpaghettiLAB:R0603,,FIT,0.0015,engineering allowance for standard resistor
 R25,4.7k,SpaghettiLAB:R0603,,FIT,0.0015,engineering allowance for standard resistor
@@ -129,8 +129,8 @@ R77,4.7k 0.1% 25ppm,Resistor_SMD:R_0603_1608Metric,C513565,FIT,0.0297,LCSC 1000+
 R78,100k,Resistor_SMD:R_0603_1608Metric,C25803,FIT,0.0015,engineering allowance for standard resistor
 R79,4.7k,Resistor_SMD:R_0603_1608Metric,C23162,FIT,0.0015,engineering allowance for standard resistor
 R80,4.7k,Resistor_SMD:R_0603_1608Metric,C23162,FIT,0.0015,engineering allowance for standard resistor
-R81,22R,Resistor_SMD:R_0603_1608Metric,C23345,FIT,0.0015,"engineering allowance, confirm order code"
-R82,22R,Resistor_SMD:R_0603_1608Metric,C23345,FIT,0.0015,"engineering allowance, confirm order code"
+R81,22R DNP / AG USB,Resistor_SMD:R_0603_1608Metric,C23345,DNP,0,"engineering allowance, confirm order code"
+R82,22R DNP / AG USB,Resistor_SMD:R_0603_1608Metric,C23345,DNP,0,"engineering allowance, confirm order code"
 R83,10k,Resistor_SMD:R_0603_1608Metric,C25804,FIT,0.0015,"engineering allowance, confirm order code"
 R84,10k,Resistor_SMD:R_0603_1608Metric,C25804,FIT,0.0015,"engineering allowance, confirm order code"
 TP22,AG_NRST,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
@@ -143,8 +143,8 @@ TP41,DAC1,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
 TP42,ADC_SPARE_17,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
 TP43,ADC_SPARE_33,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
 TP44,ADC_SPARE_34,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
-TP45,ADC_SPARE_35,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
-TP46,ADC_SPARE_36,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP45,ISO4_CTRL,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP46,ISO5_CTRL,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
 U14,AG32VF407VGT6,LCSC_Ports:LQFP-100_L14.0-W14.0-P0.50-LS16.0-TL,C5336269,FIT,1.8809,"LCSC C5336269 900+ snapshot, not guaranteed availability"
 U16,INA226AIDGSR,LCSC_Ports:MSOP-10_L3.0-W3.0-P0.50-LS5.0-BL,C49851,FIT,0.5094,LCSC category 1000+; web quotes vary .3378-.5094
 U17,"74HC4051BQ,115",LCSC_Ports:DHVQFN-16_L3.5-W2.5-P0.50-BL-EP,C128429,FIT,0.1597,LCSC 3000+ (3 per board)
@@ -152,3 +152,10 @@ U18,"74HC4051BQ,115",LCSC_Ports:DHVQFN-16_L3.5-W2.5-P0.50-BL-EP,C128429,FIT,0.15
 U19,"74HC4051BQ,115",LCSC_Ports:DHVQFN-16_L3.5-W2.5-P0.50-BL-EP,C128429,FIT,0.1597,LCSC 3000+ (3 per board)
 X1,20MHz,LCSC_Ports:OSC-SMD_4P-L3.2-W2.5-BL,C390499,FIT,0.4452,previous LCSC category 1000+ snapshot; RFQ
 FlexyPin,40 original spring contacts,ESP32 module socket,Solder Party,FIT,1.88,100-pin pack volume snapshot; contacts stay on every board
+R85,1k,Resistor_SMD:R_0603_1608Metric,C21190,FIT,0.0015,engineering allowance; ESP-to-AG programming series resistor
+R86,1k,Resistor_SMD:R_0603_1608Metric,C21190,FIT,0.0015,engineering allowance; ESP-to-AG programming series resistor
+R87,1k,Resistor_SMD:R_0603_1608Metric,C21190,FIT,0.0015,engineering allowance; ESP-to-AG programming series resistor
+R88,1k,Resistor_SMD:R_0603_1608Metric,C21190,FIT,0.0015,engineering allowance; ESP-to-AG programming series resistor
+TP47,AG_UART_RX,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"copper test pad, no purchased component"
+TP48,AG_UART_TX,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"copper test pad, no purchased component"
+TP49,AG_BOOT0,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"copper test pad, no purchased component"

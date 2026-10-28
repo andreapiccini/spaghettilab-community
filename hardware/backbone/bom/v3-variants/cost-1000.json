@@ -1,0 +1,122 @@
+{
+  "Manual": {
+    "BOM_per_board_USD": 14.06,
+    "ports_BOM_USD": 0.02,
+    "common_BOM_USD": 14.04,
+    "BOM_1000_USD": 14058.91,
+    "process_allowances_USD": {
+      "PCB_2layer": [
+        0.7,
+        1.5
+      ],
+      "SMT_assembly": [
+        0.8,
+        1.5
+      ],
+      "FlexyPin_connectors_LED_mechanical_handwork": [
+        1.0,
+        3.0
+      ],
+      "Programming_test_calibration": [
+        0.35,
+        0.8
+      ],
+      "Basic_packaging": [
+        0.25,
+        0.6
+      ],
+      "Inbound_logistics_allowance": [
+        0.3,
+        0.9
+      ]
+    },
+    "budget_per_good_board_USD": [
+      18.16,
+      24.47
+    ],
+    "budget_1000_good_boards_USD": [
+      18162,
+      24468
+    ]
+  },
+  "Base": {
+    "BOM_per_board_USD": 15.32,
+    "ports_BOM_USD": 1.28,
+    "common_BOM_USD": 14.04,
+    "BOM_1000_USD": 15318.31,
+    "process_allowances_USD": {
+      "PCB_2layer": [
+        0.7,
+        1.5
+      ],
+      "SMT_assembly": [
+        1.1,
+        1.9
+      ],
+      "FlexyPin_connectors_LED_mechanical_handwork": [
+        1.0,
+        3.0
+      ],
+      "Programming_test_calibration": [
+        0.5,
+        1.1
+      ],
+      "Basic_packaging": [
+        0.25,
+        0.6
+      ],
+      "Inbound_logistics_allowance": [
+        0.3,
+        0.9
+      ]
+    },
+    "budget_per_good_board_USD": [
+      19.93,
+      26.62
+    ],
+    "budget_1000_good_boards_USD": [
+      19934,
+      26616
+    ]
+  },
+  "Pro": {
+    "BOM_per_board_USD": 19.43,
+    "ports_BOM_USD": 5.39,
+    "common_BOM_USD": 14.04,
+    "BOM_1000_USD": 19427.41,
+    "process_allowances_USD": {
+      "PCB_2layer": [
+        0.7,
+        1.5
+      ],
+      "SMT_assembly": [
+        1.6,
+        2.8
+      ],
+      "FlexyPin_connectors_LED_mechanical_handwork": [
+        1.0,
+        3.0
+      ],
+      "Programming_test_calibration": [
+        1.0,
+        2.0
+      ],
+      "Basic_packaging": [
+        0.25,
+        0.6
+      ],
+      "Inbound_logistics_allowance": [
+        0.3,
+        0.9
+      ]
+    },
+    "budget_per_good_board_USD": [
+      25.25,
+      33.14
+    ],
+    "budget_1000_good_boards_USD": [
+      25249,
+      33142
+    ]
+  }
+}

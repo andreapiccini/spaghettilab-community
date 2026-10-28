@@ -1,3 +1,5 @@
+> Current consolidated CAD status (2026-10-29): see [CURRENT-REVISION.md](CURRENT-REVISION.md). Earlier coordinates, J3 ordering, cost and placement statements below are historical and may be superseded. No mezzanine is implemented.
+
 # Backbone V3: reverse-mount RGB indicators
 
 Updated 2026-10-27. User requested replacement with the SK6812MINI-E already stocked and used in previous projects.

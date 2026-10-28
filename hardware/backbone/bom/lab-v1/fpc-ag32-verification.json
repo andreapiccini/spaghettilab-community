@@ -1,0 +1,17 @@
+{
+  "only_net_changes": "J5 pads19-22: GND to AG32 spare nets",
+  "remaining_GND_pads": [
+    1,
+    6,
+    10,
+    14,
+    24
+  ],
+  "remaining_VCORE_pads": [
+    2,
+    23
+  ],
+  "all_other_connectivity_preserved": true,
+  "erc_errors": 0,
+  "fpga_assignment": "requires AGM tool validation"
+}

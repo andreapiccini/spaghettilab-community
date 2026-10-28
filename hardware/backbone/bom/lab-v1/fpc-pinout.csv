@@ -1,0 +1,25 @@
+J5_pin,Signal,Note
+1,GND,ESP GPIO / 3.3V domain
+2,VCORE,ESP GPIO / 3.3V domain
+3,IO6,ESP GPIO / 3.3V domain
+4,IO11,ESP GPIO / 3.3V domain
+5,IO12,ESP GPIO / 3.3V domain
+6,GND,ESP GPIO / 3.3V domain
+7,IO17,ESP GPIO / 3.3V domain
+8,IO18,ESP GPIO / 3.3V domain
+9,IO21,ESP GPIO / 3.3V domain
+10,GND,ESP GPIO / 3.3V domain
+11,IO38,ESP GPIO / 3.3V domain
+12,IO39,ESP GPIO / 3.3V domain
+13,IO40,ESP GPIO / 3.3V domain
+14,GND,ESP GPIO / 3.3V domain
+15,IO41,ESP GPIO / 3.3V domain
+16,IO42,ESP GPIO / 3.3V domain
+17,IO4,Shared Qwiic bus
+18,IO5,Shared Qwiic bus
+19,SPARE_IO_17,AG32 pin17; TP42; digital IO / ADC12
+20,SPARE_IO_33,AG32 pin33; TP43; digital IO / ADC14
+21,SPARE_IO_34,AG32 pin34; TP44; digital IO / ADC15
+22,DAC1_SPARE,AG32 pin30; TP41; digital IO OR DAC1 / ADC5
+23,VCORE,ESP GPIO / 3.3V domain
+24,GND,ESP GPIO / 3.3V domain

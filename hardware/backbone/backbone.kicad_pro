@@ -71,9 +71,14 @@
       },
       "diff_pair_dimensions": [
         {
-          "gap": 0.0,
-          "via_gap": 0.0,
-          "width": 0.0
+          "gap": 0.15,
+          "via_gap": 0.3,
+          "width": 0.18
+        },
+        {
+          "gap": 0.2,
+          "via_gap": 0.3,
+          "width": 0.25
         }
       ],
       "drc_exclusions": [],
@@ -146,7 +151,7 @@
       },
       "rules": {
         "max_error": 0.005,
-        "min_clearance": 0.0,
+        "min_clearance": 0.15,
         "min_connection": 0.0,
         "min_copper_edge_clearance": 0.45,
         "min_groove_width": 0.0,
@@ -161,7 +166,7 @@
         "min_through_hole_diameter": 0.3,
         "min_track_width": 0.12,
         "min_via_annular_width": 0.1,
-        "min_via_diameter": 0.5,
+        "min_via_diameter": 0.6,
         "solder_mask_to_copper_clearance": 0.005,
         "use_height_for_length_calcs": true
       },
@@ -210,10 +215,18 @@
         }
       ],
       "track_widths": [
-        0.0,
+        0,
+        0.12,
+        0.15,
+        0.18,
+        0.2,
         0.25,
-        0.5,
-        1.0
+        0.3,
+        0.4,
+        0.6,
+        0.8,
+        1.0,
+        1.5
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -243,8 +256,12 @@
       },
       "via_dimensions": [
         {
-          "diameter": 0.0,
-          "drill": 0.0
+          "diameter": 0.6,
+          "drill": 0.3
+        },
+        {
+          "diameter": 0.8,
+          "drill": 0.4
         }
       ],
       "zones_allow_external_fillets": false
@@ -512,17 +529,302 @@
       {
         "bus_width": 12,
         "clearance": 0.2,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "Default",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "pcb_color": "rgba(215, 48, 39, 0.902)",
         "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "ANALOG_DAC",
+        "pcb_color": "rgba(80, 210, 100, 1.000)",
+        "priority": 8,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.2,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "ANALOG_SENSE",
+        "pcb_color": "rgba(50, 200, 160, 1.000)",
+        "priority": 7,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.2,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "BUCK_FEEDBACK",
+        "pcb_color": "rgba(90, 100, 110, 0.902)",
+        "priority": 10,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.2,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "BUCK_SWITCH",
+        "pcb_color": "rgba(245, 150, 20, 0.902)",
+        "priority": 9,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.6,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.25,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "CAN_BUS",
+        "pcb_color": "rgba(70, 180, 250, 1.000)",
+        "priority": 6,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.25,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "CLOCK",
+        "pcb_color": "rgba(40, 155, 70, 0.902)",
+        "priority": 11,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.18,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "CONTROL",
+        "pcb_color": "rgba(55, 130, 215, 0.902)",
+        "priority": 13,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.18,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "DEBUG",
+        "pcb_color": "rgba(20, 170, 210, 0.902)",
+        "priority": 14,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.18,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "FAST_DIGITAL",
+        "pcb_color": "rgba(220, 50, 160, 0.902)",
+        "priority": 12,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.2,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "GROUND",
+        "pcb_color": "rgba(140, 150, 160, 1.000)",
+        "priority": 3,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.6,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "PORT_IO_POWER",
+        "pcb_color": "rgba(245, 190, 40, 1.000)",
+        "priority": 4,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.3,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "POWER_3V3",
+        "pcb_color": "rgba(240, 60, 60, 1.000)",
+        "priority": 2,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.6,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "POWER_5V",
+        "pcb_color": "rgba(255, 130, 40, 1.000)",
+        "priority": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 1.0,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "USB_DIFF",
+        "pcb_color": "rgba(220, 70, 220, 1.000)",
+        "priority": 5,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.18,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.15,
+        "diff_pair_via_gap": 0.3,
+        "diff_pair_width": 0.18,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "USB_VBUS",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 1,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.6,
         "tuning_profile": "",
         "via_diameter": 0.6,
         "via_drill": 0.3,
@@ -534,7 +836,512 @@
     },
     "net_colors": null,
     "netclass_assignments": null,
-    "netclass_patterns": []
+    "netclass_patterns": [
+      {
+        "netclass": "DEBUG",
+        "pattern": "/AG_BOOT0"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/AG_BOOT1"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/AG_JNTRST_N"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/AG_JTCK"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/AG_JTDI"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/AG_JTDO"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/AG_JTMS"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/AG_NRST_N"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/BOOT"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/BUCK_BOOT"
+      },
+      {
+        "netclass": "BUCK_FEEDBACK",
+        "pattern": "/BUCK_FB"
+      },
+      {
+        "netclass": "BUCK_SWITCH",
+        "pattern": "/BUCK_SW"
+      },
+      {
+        "netclass": "CLOCK",
+        "pattern": "/CLK20M"
+      },
+      {
+        "netclass": "ANALOG_DAC",
+        "pattern": "/DAC1_SPARE"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/DAC_INHIBIT"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/DAC_S0"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/DAC_S1"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/DAC_S2"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/ESP_AG_BOOT0"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/ESP_AG_RESET_N"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/ESP_PROG_RX"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "/ESP_PROG_TX"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/INA_ALERT_N"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/INA_SCL"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/INA_SDA"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "/LED_CHAIN_1"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "/LED_CHAIN_2"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "/LED_CHAIN_3"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "/LED_CHAIN_4"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "/LED_CHAIN_5"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/MEAS_INHIBIT"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/MEAS_S0"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/MEAS_S1"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/MEAS_S2"
+      },
+      {
+        "netclass": "ANALOG_SENSE",
+        "pattern": "/SHUNT_HIGH_SELECTED"
+      },
+      {
+        "netclass": "ANALOG_SENSE",
+        "pattern": "/SHUNT_LOW_SELECTED"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "/SPARE_IO_17"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "/SPARE_IO_33"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "/SPARE_IO_34"
+      },
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "/USB_AG_D+"
+      },
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "/USB_AG_D-"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/USB_CC1"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "/USB_CC2"
+      },
+      {
+        "netclass": "POWER_5V",
+        "pattern": "5V"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "A0"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "A1"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "A2"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "A3"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "A4"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "A5"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "AG_BOOT_UART_RX"
+      },
+      {
+        "netclass": "DEBUG",
+        "pattern": "AG_BOOT_UART_TX"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "ALED"
+      },
+      {
+        "netclass": "CAN_BUS",
+        "pattern": "CAN_H"
+      },
+      {
+        "netclass": "CAN_BUS",
+        "pattern": "CAN_L"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "CAN_RX"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "CAN_TX"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "CTRL13"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "CTRL14"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "DAC_BYPASS_N"
+      },
+      {
+        "netclass": "ANALOG_DAC",
+        "pattern": "DAC_LIMITED"
+      },
+      {
+        "netclass": "ANALOG_DAC",
+        "pattern": "DAC_RAW"
+      },
+      {
+        "netclass": "GROUND",
+        "pattern": "GND"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO11"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO12"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO17"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO18"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO21"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO3"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO35"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO36"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO37"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO38"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO39"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO4"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO40"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO41"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO42"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO45"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO46"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO5"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "IO6"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "ISO_A0_N"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "ISO_A1_N"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "ISO_A2_N"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "ISO_A3_N"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "ISO_A4_N"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "ISO_A5_N"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "N_A0"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "N_A1"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "N_A2"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "N_A3"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "N_A4"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "N_A5"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "N_GATE_0"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "N_GATE_1"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "N_GATE_2"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "N_GATE_3"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "N_GATE_4"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "N_GATE_5"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "Net-(Q2-D)"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "Net-(R5-Pad1)"
+      },
+      {
+        "netclass": "CAN_BUS",
+        "pattern": "Net-(R8-Pad2)"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "PORT_A0"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "PORT_A1"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "PORT_A2"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "PORT_A3"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "PORT_A4"
+      },
+      {
+        "netclass": "PORT_IO_POWER",
+        "pattern": "PORT_A5"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "P_GATE_0"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "P_GATE_1"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "P_GATE_2"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "P_GATE_3"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "P_GATE_4"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "P_GATE_5"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "SPI_MISO"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "SPI_MOSI"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "TERM_CTRL"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "TERM_CTRL_OUT"
+      },
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "USB_D+"
+      },
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "USB_D-"
+      },
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "USB_ESP_D+"
+      },
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "USB_ESP_D-"
+      },
+      {
+        "netclass": "USB_VBUS",
+        "pattern": "VBUS"
+      },
+      {
+        "netclass": "POWER_3V3",
+        "pattern": "VCORE"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "~{RESET}"
+      }
+    ]
   },
   "pcbnew": {
     "last_paths": {

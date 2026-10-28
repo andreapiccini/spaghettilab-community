@@ -1,0 +1,43 @@
+{
+  "centerline_x_mm": 167.75,
+  "pitch_mm": 2.54,
+  "grid_origin_mm": [
+    161.4,
+    88.935
+  ],
+  "connector_centers_mm": {
+    "J3": [
+      167.75,
+      90.205
+    ],
+    "J1": [
+      167.75,
+      118.145
+    ],
+    "J140": [
+      167.75,
+      128.305
+    ]
+  },
+  "led_y_mm": 136.1,
+  "changed": [
+    "TP44",
+    "C95",
+    "R58",
+    "LED6",
+    "LED1",
+    "C124",
+    "J140",
+    "LED2",
+    "LED3",
+    "LED5",
+    "J3",
+    "LED4",
+    "J1"
+  ],
+  "locked_flags_preserved": true,
+  "nets_preserved": true,
+  "outline_preserved": true,
+  "tracks": 0,
+  "note": "Grid applies to 12 mating holes per connector; two locating holes excluded. Physical tolerances require prototype fit check."
+}

@@ -1,3 +1,9 @@
+> Current consolidated CAD status (2026-10-29): see [CURRENT-REVISION.md](CURRENT-REVISION.md). Earlier coordinates, J3 ordering, cost and placement statements below are historical and may be superseded. No mezzanine is implemented.
+
+## Current compact outline (2026-10-28)
+
+J2/J9 positions unchanged. Board edges now X186.25 for J2 andX148.9 for J9, only in side recesses Y85.2..109.2. Those edges coincide with pad outer endpoints and horizontal model body rear faces. All copper lands remain on-board and intentionally touch the edge;20generic copper-edge DRC reports retained without rule relaxation. Physical tolerances and fabrication need validation. These coordinates supersede old edge coordinates below.
+
 # Backbone V3 — dual-face chain contacts
 
 ## 3 A requirement — local interlayer reinforcement (2026-10-27)

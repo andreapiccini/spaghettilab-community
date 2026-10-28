@@ -1,3 +1,5 @@
+> Current consolidated CAD status (2026-10-29): see [CURRENT-REVISION.md](CURRENT-REVISION.md). Earlier coordinates, J3 ordering, cost and placement statements below are historical and may be superseded. No mezzanine is implemented.
+
 # AG32 branch supersedes the controller variants below
 
 See [AG32 supervisor](AG32-SUPERVISOR.md) and [current report](bom/ag32-supervisor/index.html). Active part is AG32VF407VGT6 C5336269, 100 pins. Historical TI/Q32 pin maps and variant prices below do not describe this branch.

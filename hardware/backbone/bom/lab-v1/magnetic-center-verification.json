@@ -1,0 +1,14 @@
+{
+  "J2": {
+    "old_contact_center_y": 97.05,
+    "new_contact_center_y": 101.15,
+    "delta_y": 4.1000000000000085,
+    "locked": true
+  },
+  "J9": {
+    "old_contact_center_y": 97.05,
+    "new_contact_center_y": 101.15,
+    "delta_y": 4.1000000000000085,
+    "locked": false
+  }
+}

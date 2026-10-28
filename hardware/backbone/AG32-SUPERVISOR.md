@@ -1,3 +1,28 @@
+> Current consolidated CAD status (2026-10-29): see [CURRENT-REVISION.md](CURRENT-REVISION.md). Earlier coordinates, J3 ordering, cost and placement statements below are historical and may be superseded. No mezzanine is implemented.
+
+## Compact edge-connector contour update
+
+- Maximum outline41.5x77.7mm; side recesses atY85.2..109.2 reduce local width to37.35mm. FR4 area -4.24% vs previous42x77.7 rectangle.
+- Local edges X148.9 and186.25 coincide with the ends of the unchanged magnetic pad lands. Retained horizontal VRML bodies are outside local FR4. Original J2/J9 poses and locked Harwin/socket poses preserved.
+- USB and FPC overhang their board edges with all pads/anchors on FR4. Qwiic anchors require its body to remain partly over the board. All pads verified inside FR4, connector anchor margins0.5mm, magnetic pads intentionally at edge.
+- DRC612reports,496unconnected.20copper-edge violations are exclusively the intentional J2/J9 edge lands; no global rule relaxation. Discuss edge copper with fabrication house. No routing or mechanical qualification yet.
+- Current preview: bom/lab-v1/board-3d.png. BOM and schematic unchanged.
+
+## Single-row RGB status update
+
+- LED1..6 now form one row at y135.2mm, pitch3.6mm, ordered A0..A5 from right to left, as the Harwin electrical numbering. Their pitch differs from Harwin2.54mm; silkscreen indicates mapping.
+- Board42x77.7mm, shortened8mm from42x85.7mm. Harwin, magnetic connectors and locked ESP socket retain exact poses. Qwiic right edge and FPC left edge retained.
+- No schematic/BOM changes in this placement revision. No copper/courtyard conflicts in current DRC; routing remains pending.
+- This supersedes the staggered-row placement notes below.
+
+## Port-status and expansion layout update
+
+- LED1..6 map to PORT_A0..5; centres align with the Harwin columns. Two staggered rows required by existing MINI-E bodies/pad envelopes; firmware assigns colours by actual port mode.
+- J4 Qwiic faces right edge at y76.5mm. J5 FPC restored on left edge at y116.8mm, general ESP expansion only. No camera LDOs.
+- FPC has 11 otherwise-free ESP GPIO plus shared GPIO4/5 Qwiic. GPIO35-37 reserved for N8R8 PSRAM; GPIO45/46 omitted. See bom/lab-v1/fpc-pinout.csv. ESP required for these expansion signals.
+- Outline42x85.7mm, area -3.8% vs47.85x78.2mm; locked socket/Harwin and magnetic poses preserved. Board is narrower and longer to accommodate aligned retained LEDs.
+- No routing yet. Review DRC and real cable/magnetic mating before manufacture.
+
 # Current revision: internal ADC/DAC and assisted scan (2026-10-28)
 
 This section supersedes the historical external-converter descriptions below.

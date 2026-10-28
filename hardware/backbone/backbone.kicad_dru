@@ -1,5 +1,19 @@
 (version 1)
-(rule "Keepout ESP32 - eccezioni necessarie"
-  (condition "A.intersectsArea('Antenna') && A.NetName != 'A0' && A.NetName != 'A1' && A.NetName != 'A2' && A.NetName != 'A3' && A.NetName != 'CAN_H' && A.NetName != '5V'")
-  (constraint disallow track via pad)
-)
+# All values in mm. Four-layer nominal FR4 stackup; USB geometry requires fab confirmation.
+(rule "General routing width" (constraint track_width (min 0.12mm)))
+(rule "Standard through vias" (condition "A.Type == 'Via'") (constraint via_diameter (min 0.60mm)) (constraint hole_size (min 0.30mm)))
+(rule "5V backbone trunk" (condition "A.hasNetclass('POWER_5V')") (constraint track_width (min 0.25mm) (opt 1.0mm)))
+(rule "3V3 and ground feeders" (condition "A.hasNetclass('POWER_3V3') || A.hasNetclass('GROUND')") (constraint track_width (min 0.15mm) (opt 0.60mm)))
+(rule "USB VBUS feed" (condition "A.hasNetclass('USB_VBUS')") (constraint track_width (min 0.25mm) (opt 0.60mm)))
+(rule "Universal port conductors" (condition "A.hasNetclass('PORT_IO_POWER')") (constraint track_width (min 0.15mm) (opt 0.30mm)))
+(rule "Buck switch short wide copper" (condition "A.hasNetclass('BUCK_SWITCH')") (constraint track_width (min 0.25mm) (opt 0.60mm)))
+(rule "USB differential geometry - preliminary 90 ohm target" (condition "A.hasNetclass('USB_DIFF')") (constraint track_width (min 0.15mm) (opt 0.18mm) (max 0.22mm)) (constraint diff_pair_gap (min 0.12mm) (opt 0.15mm) (max 0.20mm)) (constraint diff_pair_uncoupled (max 5mm)) (constraint skew (max 0.50mm)))
+(rule "USB pair internal spacing" (condition "A.hasNetclass('USB_DIFF') && AB.isCoupledDiffPair()") (constraint clearance (min 0.12mm)))
+(rule "CAN conductors - co-route H and L" (condition "A.hasNetclass('CAN_BUS')") (constraint track_width (min 0.18mm) (opt 0.25mm)))
+(rule "Sensitive analog away from switch node" (condition "(A.hasNetclass('ANALOG_SENSE') || A.hasNetclass('ANALOG_DAC') || A.hasNetclass('BUCK_FEEDBACK')) && B.NetName == '/BUCK_SW'") (constraint clearance (min 0.50mm)))
+# RF area exists on all copper layers. No net-specific bypass exceptions.
+(rule "No routing in ESP antenna area" (condition "A.intersectsArea('ESP_ANTENNA_RF')") (constraint disallow track via))
+
+(rule "L2 is a reference plane" (layer "In1.Cu") (constraint disallow track))
+(rule "USB on outer signal layers" (layer inner) (condition "A.hasNetclass('USB_DIFF')") (constraint disallow track))
+(rule "Standard low-cost through-via technology" (constraint disallow micro_via blind_via buried_via))

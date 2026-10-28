@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/erc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-28T21:21:30",
+    "date": "2026-10-28T21:47:43",
     "ignored_checks": [
         {
             "description": "SPICE model issue",
@@ -682,7 +682,7 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO6'",
@@ -691,10 +691,18 @@
                                 "y": 2.159
                             },
                             "uuid": "87db3f68-1b1e-452a-a729-d91808808b86"
+                        },
+                        {
+                            "description": "Etichetta \"IO6\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 0.8509
+                            },
+                            "uuid": "db81adfc-529f-4856-a6d6-8b9dc959a1db"
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Global label only appears once in the schematic",
@@ -712,7 +720,7 @@
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO11'",
@@ -721,10 +729,18 @@
                                 "y": 2.286
                             },
                             "uuid": "6b6d1b95-8750-4f29-ae47-11bbb0c41c17"
+                        },
+                        {
+                            "description": "Etichetta \"IO11\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 0.8763
+                            },
+                            "uuid": "af9e7352-8111-47ff-bae7-2c2367692279"
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Global label only appears once in the schematic",
@@ -742,7 +758,7 @@
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO12'",
@@ -751,10 +767,18 @@
                                 "y": 2.3114
                             },
                             "uuid": "e2760bdd-6d5a-44d3-971a-adbe17a666c8"
+                        },
+                        {
+                            "description": "Etichetta \"IO12\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 0.9017
+                            },
+                            "uuid": "7ccdef35-4a9f-4990-96b4-231c62a3ecc2"
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Global label only appears once in the schematic",
@@ -886,7 +910,7 @@
                     "type": "lib_symbol_issues"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO17'",
@@ -895,10 +919,18 @@
                                 "y": 2.0066
                             },
                             "uuid": "fb267444-ff7f-4282-a54d-00a211ab725f"
+                        },
+                        {
+                            "description": "Etichetta \"IO17\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 0.9525
+                            },
+                            "uuid": "d686a609-481c-4e9a-a023-d749b1ba1e0f"
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Global label only appears once in the schematic",
@@ -916,7 +948,7 @@
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO18'",
@@ -925,10 +957,18 @@
                                 "y": 2.032
                             },
                             "uuid": "d16a3540-62f8-4731-82f2-deedd3ff5840"
+                        },
+                        {
+                            "description": "Etichetta \"IO18\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 0.9779
+                            },
+                            "uuid": "0fd52bf5-0f46-4236-9d6c-9c9c80b88b2c"
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Global label only appears once in the schematic",
@@ -946,7 +986,7 @@
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO21'",
@@ -955,10 +995,18 @@
                                 "y": 2.1082
                             },
                             "uuid": "f98839c9-6bb9-4a91-b5ad-e8eb85aed9df"
+                        },
+                        {
+                            "description": "Etichetta \"IO21\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.0033
+                            },
+                            "uuid": "12305d07-796a-41a6-8b17-35bcfa5a907f"
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Global label only appears once in the schematic",
@@ -1066,7 +1114,30 @@
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'IO38'",
+                            "pos": {
+                                "x": 1.2192,
+                                "y": 2.2098
+                            },
+                            "uuid": "1c938b4e-1943-49b4-a33c-ba87b920a90b"
+                        },
+                        {
+                            "description": "Etichetta \"IO38\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.0541
+                            },
+                            "uuid": "07249cf1-5e58-4d3c-b588-e5a3165def7b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO38'",
@@ -1078,25 +1149,33 @@
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO38'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.2098
-                            },
-                            "uuid": "1c938b4e-1943-49b4-a33c-ba87b920a90b"
-                        }
-                    ],
-                    "severity": "warning",
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'IO39'",
+                            "pos": {
+                                "x": 1.2192,
+                                "y": 2.2352
+                            },
+                            "uuid": "9f8a906e-21c1-4b2c-8d98-51e21feb60a2"
+                        },
+                        {
+                            "description": "Etichetta \"IO39\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.0795
+                            },
+                            "uuid": "ae001fda-e9b4-4a31-9f32-d04ed61b17be"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO39'",
@@ -1108,25 +1187,33 @@
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO39'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.2352
-                            },
-                            "uuid": "9f8a906e-21c1-4b2c-8d98-51e21feb60a2"
-                        }
-                    ],
-                    "severity": "warning",
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'IO40'",
+                            "pos": {
+                                "x": 1.2192,
+                                "y": 2.2606
+                            },
+                            "uuid": "2f7e7f6f-355e-4e6a-9353-80f11087062d"
+                        },
+                        {
+                            "description": "Etichetta \"IO40\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.1049
+                            },
+                            "uuid": "c112a3d3-d4f6-4d8f-97aa-0886cb579542"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO40'",
@@ -1138,25 +1225,10 @@
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO40'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.2606
-                            },
-                            "uuid": "2f7e7f6f-355e-4e6a-9353-80f11087062d"
-                        }
-                    ],
-                    "severity": "warning",
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO41'",
@@ -1165,10 +1237,18 @@
                                 "y": 2.286
                             },
                             "uuid": "0a021884-184c-402d-b9a0-d34a58ffc637"
+                        },
+                        {
+                            "description": "Etichetta \"IO41\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.1557
+                            },
+                            "uuid": "f60f13be-71de-4dbe-b70e-6455fcba43cd"
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Global label only appears once in the schematic",
@@ -1186,7 +1266,7 @@
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Label connected to only one pin",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
                             "description": "Etichetta globale 'IO42'",
@@ -1195,10 +1275,18 @@
                                 "y": 2.3114
                             },
                             "uuid": "e645dc37-1a21-4bec-9090-c46271c667a7"
+                        },
+                        {
+                            "description": "Etichetta \"IO42\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.1811
+                            },
+                            "uuid": "47d53988-9d1b-443e-bdb6-d718a5e7dc67"
                         }
                     ],
                     "severity": "warning",
-                    "type": "isolated_pin_label"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Global label only appears once in the schematic",
@@ -1513,20 +1601,20 @@
                     "description": "Quattro elementi connessi a 1816100,4076700",
                     "items": [
                         {
-                            "description": "Filo orizzontale. lung. 0.1143 mm",
-                            "pos": {
-                                "x": 1.8161,
-                                "y": 4.0767
-                            },
-                            "uuid": "806738c0-b44d-4800-ae13-236e8332dc7a"
-                        },
-                        {
                             "description": "Filo verticale, lung. 0.0635 mm",
                             "pos": {
                                 "x": 1.8161,
                                 "y": 4.0132
                             },
                             "uuid": "2efc731c-7c62-4aef-869d-56d214534e27"
+                        },
+                        {
+                            "description": "Filo verticale, lung. 0.2286 mm",
+                            "pos": {
+                                "x": 1.8161,
+                                "y": 4.0767
+                            },
+                            "uuid": "05bc5371-e6e3-47e0-8461-b7252d6caad4"
                         }
                     ],
                     "severity": "warning",
@@ -2997,10 +3085,10 @@
                         {
                             "description": "Etichetta \"ESP_PROG_TX\"",
                             "pos": {
-                                "x": 9.8806,
-                                "y": 5.4356
+                                "x": 1.3208,
+                                "y": 2.3876
                             },
-                            "uuid": "48514375-81e2-44aa-aa64-739b9d733e0e"
+                            "uuid": "5570f8c9-0495-456d-a222-3190e2f4d04c"
                         },
                         {
                             "description": "Etichetta \"IO47_DIRECT\"",
@@ -3912,6 +4000,381 @@
                     "type": "single_global_label"
                 },
                 {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol J5 Pin 1 [1, Passivo, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8001
+                            },
+                            "uuid": "3996cded-57e2-432c-ad0d-7a3d7e9b8355"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9801 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8001
+                            },
+                            "uuid": "bd09a9a7-0c9a-4824-971c-f87d55253cde"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9802 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8255
+                            },
+                            "uuid": "a8f3312e-3af9-43ef-8fe7-f5a3f2f42e8c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8509
+                            },
+                            "uuid": "e37a6eed-4bff-4401-8c01-94b98a0bdb3d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8763
+                            },
+                            "uuid": "39be501b-ee01-4a69-b6c2-e96bea23a15c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.9017
+                            },
+                            "uuid": "45c3284f-83f1-4d9d-9e4d-338875567bb8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9803 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.9271
+                            },
+                            "uuid": "4cdb13a6-f4fb-48a1-b8f5-d0fea666def3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.9525
+                            },
+                            "uuid": "6f544576-ad58-4a4d-a664-1a98243a7394"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.9779
+                            },
+                            "uuid": "030f082f-e0db-42d2-b1bf-da175777dfe7"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.0033
+                            },
+                            "uuid": "2e69c711-4d22-45da-9471-d5363a64e52d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9804 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.0287
+                            },
+                            "uuid": "5be28626-568a-464e-94bb-2c331832e90f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.0541
+                            },
+                            "uuid": "4d7018ca-a41f-4c2b-bb31-14be71c94080"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.0795
+                            },
+                            "uuid": "4d0cf6af-a69a-44d4-96fb-ad9251e00274"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.1049
+                            },
+                            "uuid": "287a5bbd-3df8-49f9-9108-e7c79a1f97ae"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9805 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.1303
+                            },
+                            "uuid": "44ff4b02-c0ad-4022-a0b5-89ff22a74b72"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.1557
+                            },
+                            "uuid": "df587d0e-d2a2-46b8-af0b-66d07550e834"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.1811
+                            },
+                            "uuid": "0eac80dd-c0df-4a34-a26c-5654a275883d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.2065
+                            },
+                            "uuid": "b15a9d8e-3cd7-44d8-9b6c-21a8fca857d4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.2319
+                            },
+                            "uuid": "b0b65e05-5e1c-4bfd-95fb-443720316228"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9806 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.2573
+                            },
+                            "uuid": "e32c77f4-ced9-4f68-b5e3-45ea23d4782e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9807 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.2827
+                            },
+                            "uuid": "8496f4ea-0965-41cc-96b0-7dd9a677f250"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9808 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.3081
+                            },
+                            "uuid": "5bff35b7-da2f-4a80-96a5-e377da1af472"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9809 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.3335
+                            },
+                            "uuid": "644d84a3-2cc7-4a61-870c-9bc27496ccf9"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9810 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.3589
+                            },
+                            "uuid": "d66ae2b5-8c9c-4981-be11-44d010752b9d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9811 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.3843
+                            },
+                            "uuid": "1bfac52f-4c76-454b-a268-9505cd8e6a7f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
                     "description": "Capo filo non connesso",
                     "items": [
                         {
@@ -4175,12 +4638,12 @@
                     "description": "Quattro elementi connessi a 6832600,1346200",
                     "items": [
                         {
-                            "description": "Filo verticale, lung. 0.1016 mm",
+                            "description": "Filo orizzontale. lung. 0.2286 mm",
                             "pos": {
-                                "x": 6.8326,
-                                "y": 1.2446
+                                "x": 6.604,
+                                "y": 1.3462
                             },
-                            "uuid": "e1bd9a40-d8ba-4f60-8fdd-920649140807"
+                            "uuid": "a3a100a3-b801-4ca2-a233-0b032f1b5b56"
                         },
                         {
                             "description": "Filo verticale, lung. 0.1016 mm",
@@ -4201,17 +4664,17 @@
                             "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 6.8326,
-                                "y": 2.0574
+                                "y": 1.9558
                             },
-                            "uuid": "5dd1a22e-8534-4740-8c05-e9cfb87cc405"
+                            "uuid": "6d18ae1a-cfd6-4a60-9b12-77a42e14489b"
                         },
                         {
-                            "description": "Filo orizzontale. lung. 0.1905 mm",
+                            "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 6.8326,
                                 "y": 2.0574
                             },
-                            "uuid": "b0709bf2-c38d-473f-9333-b7151cd345ce"
+                            "uuid": "5dd1a22e-8534-4740-8c05-e9cfb87cc405"
                         }
                     ],
                     "severity": "warning",
@@ -4221,12 +4684,12 @@
                     "description": "Quattro elementi connessi a 6832600,2768600",
                     "items": [
                         {
-                            "description": "Filo orizzontale. lung. 0.2286 mm",
+                            "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
-                                "x": 6.604,
+                                "x": 6.8326,
                                 "y": 2.7686
                             },
-                            "uuid": "f1df0fe0-6741-4eb3-b376-6c6d2c9c2d4b"
+                            "uuid": "d70948e1-e054-4901-af17-3958f9847e2a"
                         },
                         {
                             "description": "Filo orizzontale. lung. 0.1905 mm",
@@ -4255,9 +4718,9 @@
                             "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 6.8326,
-                                "y": 3.4798
+                                "y": 3.3782
                             },
-                            "uuid": "45e3c2c8-f6f5-44e6-b446-4321937c28c5"
+                            "uuid": "90b698f4-4497-437f-ba60-cf9cffbd7f50"
                         }
                     ],
                     "severity": "warning",
@@ -4270,17 +4733,17 @@
                             "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 6.8326,
-                                "y": 4.0894
-                            },
-                            "uuid": "a3da6a0c-3317-4cd2-9388-fe656306b7ad"
-                        },
-                        {
-                            "description": "Filo orizzontale. lung. 0.1905 mm",
-                            "pos": {
-                                "x": 6.8326,
                                 "y": 4.191
                             },
-                            "uuid": "b41cdbd5-fa3d-49bf-a374-c8360d94f544"
+                            "uuid": "1650c4c1-ba5c-4cd8-ada5-c1793eb69bd7"
+                        },
+                        {
+                            "description": "Filo orizzontale. lung. 0.2286 mm",
+                            "pos": {
+                                "x": 6.604,
+                                "y": 4.191
+                            },
+                            "uuid": "1972b443-df5b-47e1-9e82-8dc7dde4bc9a"
                         }
                     ],
                     "severity": "warning",
@@ -4290,20 +4753,20 @@
                     "description": "Quattro elementi connessi a 6832600,4902200",
                     "items": [
                         {
-                            "description": "Filo orizzontale. lung. 0.1905 mm",
+                            "description": "Filo orizzontale. lung. 0.2286 mm",
                             "pos": {
-                                "x": 6.8326,
+                                "x": 6.604,
                                 "y": 4.9022
                             },
-                            "uuid": "e9b1352e-5e60-4364-a822-f46e89cf369f"
+                            "uuid": "528f2a74-5adb-4cfe-96e6-3e3959a06012"
                         },
                         {
                             "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 6.8326,
-                                "y": 4.9022
+                                "y": 4.8006
                             },
-                            "uuid": "aeac447c-593e-42a4-8d69-f4c5628c1fa2"
+                            "uuid": "82caef82-9873-4778-a213-42ededb43441"
                         }
                     ],
                     "severity": "warning",

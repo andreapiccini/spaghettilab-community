@@ -1,0 +1,38 @@
+{
+  "component_positions_and_locks_preserved": true,
+  "outline_preserved": true,
+  "only_electrical_change": "J3 pin permutation; six GPIO and three each 3V3/GND preserved",
+  "j3_map": {
+    "1": "A1",
+    "2": "VCORE",
+    "3": "VCORE",
+    "4": "GND",
+    "5": "GND",
+    "6": "A5",
+    "7": "A0",
+    "8": "A4",
+    "9": "GND",
+    "10": "A3",
+    "11": "VCORE",
+    "12": "A2"
+  },
+  "bottom_view_rows": [
+    [
+      "3V3",
+      "GND",
+      "IO7",
+      "GND",
+      "3V3",
+      "IO8"
+    ],
+    [
+      "IO9",
+      "IO10",
+      "IO1",
+      "IO2",
+      "GND",
+      "3V3"
+    ]
+  ],
+  "routing_added": false
+}

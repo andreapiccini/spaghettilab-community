@@ -1,0 +1,15 @@
+{
+  "fpc_and_slot_shift_y_mm": 1.5,
+  "fpc_center_mm": [
+    154.9,
+    121.775
+  ],
+  "slot_y_limits_mm": [
+    114.525,
+    129.025
+  ],
+  "magnetic_relief_bottom_y_mm": 113.15,
+  "nominal_vertical_separation_mm": 1.375,
+  "new_drc_findings": 0,
+  "routing_added": false
+}

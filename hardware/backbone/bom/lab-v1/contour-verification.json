@@ -1,0 +1,33 @@
+{
+  "all_component_poses_and_locks_preserved": true,
+  "all_component_nets_preserved": true,
+  "component_count": 173,
+  "existing_internal_opening_segments_preserved": 12,
+  "outer_corner_radius_mm": 1.5,
+  "magnetic_transition_radius_mm": 0.6,
+  "qwiic_notch": {
+    "width_mm": 3.3,
+    "depth_mm": 1.25,
+    "corner_radius_mm": 0.3,
+    "nearest_anchor_to_vertical_cut_mm": 0.55,
+    "body_projection_beyond_notch_floor_mm": 0.5,
+    "case_note": "PCB relief only; enclosure opening must also clear complete mating plug. Prototype fit required."
+  },
+  "outline_max_mm": [
+    41.5,
+    77.7
+  ],
+  "tracks_and_vias": 0,
+  "drc_counts": {
+    "annular_width": 40,
+    "copper_edge_clearance": 20,
+    "missing_courtyard": 23,
+    "silk_edge_clearance": 3,
+    "lib_footprint_mismatch": 6,
+    "text_height": 121,
+    "silk_overlap": 199,
+    "silk_over_copper": 199
+  },
+  "new_silkscreen_edge_warnings": 1,
+  "status": "Mechanical contour verified by DRC; no routing performed."
+}

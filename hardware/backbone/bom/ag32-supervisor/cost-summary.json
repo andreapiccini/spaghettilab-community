@@ -1,8 +1,10 @@
 {
-  "BOM_with_ESP_USD": 18.734,
-  "BOM_without_ESP_USD": 15.221,
+  "BOM_with_ESP_USD": 18.7404,
+  "BOM_without_ESP_USD": 15.2274,
   "ESP_module_USD": 3.513,
   "FlexyPin_contacts_USD": 1.88,
   "AG32_USD": 1.8809,
-  "warning": "Historical batch-1000 price model, not a fresh procurement quotation; PCB/assembly/firmware excluded."
+  "warning": "Historical batch-1000 price model, not a fresh procurement quotation; PCB/assembly/firmware excluded.",
+  "programming_additions_USD": 0.006,
+  "USB_default": "ESP32; R17/R18 fitted, R81/R82 DNP"
 }

@@ -1,474 +1,2913 @@
 {
-  "passed": 115,
+  "passed": 622,
   "erc_errors": 0,
-  "erc_warnings": 267,
+  "erc_warnings": 292,
   "checks": [
     {
-      "check": "Independent mux control AG78",
+      "check": "Existing connection ('U14', '94')",
       "pass": true
     },
     {
-      "check": "Independent mux control AG79",
+      "check": "Existing connection ('TP49', '1')",
       "pass": true
     },
     {
-      "check": "Independent mux control AG80",
+      "check": "Existing connection ('R83', '2')",
       "pass": true
     },
     {
-      "check": "Independent mux control AG81",
+      "check": "Existing connection ('R87', '2')",
       "pass": true
     },
     {
-      "check": "Raw DAC and raw ADC tap",
+      "check": "Existing connection ('U14', '37')",
       "pass": true
     },
     {
-      "check": "Limited ADC and mux common",
+      "check": "Existing connection ('R84', '2')",
       "pass": true
     },
     {
-      "check": "INA VBUS selected output",
+      "check": "Existing connection ('U14', '90')",
       "pass": true
     },
     {
-      "check": "Post-shunt native ADC 0",
+      "check": "Existing connection ('R73', '2')",
       "pass": true
     },
     {
-      "check": "DAC selectable path 0",
+      "check": "Existing connection ('TP27', '1')",
       "pass": true
     },
     {
-      "check": "Post-shunt native ADC 1",
+      "check": "Existing connection ('TP24', '1')",
       "pass": true
     },
     {
-      "check": "DAC selectable path 1",
+      "check": "Existing connection ('U14', '76')",
       "pass": true
     },
     {
-      "check": "Post-shunt native ADC 2",
+      "check": "Existing connection ('TP25', '1')",
       "pass": true
     },
     {
-      "check": "DAC selectable path 2",
+      "check": "Existing connection ('U14', '77')",
       "pass": true
     },
     {
-      "check": "Post-shunt native ADC 3",
+      "check": "Existing connection ('TP26', '1')",
       "pass": true
     },
     {
-      "check": "DAC selectable path 3",
+      "check": "Existing connection ('U14', '89')",
       "pass": true
     },
     {
-      "check": "Post-shunt native ADC 4",
+      "check": "Existing connection ('U14', '72')",
       "pass": true
     },
     {
-      "check": "DAC selectable path 4",
+      "check": "Existing connection ('TP23', '1')",
       "pass": true
     },
     {
-      "check": "Post-shunt native ADC 5",
+      "check": "Existing connection ('TP22', '1')",
       "pass": true
     },
     {
-      "check": "DAC selectable path 5",
+      "check": "Existing connection ('U14', '14')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '27')",
+      "check": "Existing connection ('C92', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '8')",
+      "check": "Existing connection ('R72', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '9')",
+      "check": "Existing connection ('R88', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '25')",
+      "check": "Existing connection ('R81', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '24')",
+      "check": "Existing connection ('U14', '70')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J2', '4')",
+      "check": "Existing connection ('U14', '71')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J2', '1')",
+      "check": "Existing connection ('R82', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J9', '1')",
+      "check": "Existing connection ('TP9', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '7')",
+      "check": "Existing connection ('U1', '27')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '3')",
+      "check": "Existing connection ('R15', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '12')",
+      "check": "Existing connection ('U4', '6')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '4')",
+      "check": "Existing connection ('C84', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '7')",
+      "check": "Existing connection ('R36', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '17')",
+      "check": "Existing connection ('R37', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '8')",
+      "check": "Existing connection ('U4', '4')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '18')",
+      "check": "Existing connection ('C84', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '11')",
+      "check": "Existing connection ('U4', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '39')",
+      "check": "Existing connection ('L1', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '38')",
+      "check": "Existing connection ('U14', '18')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '12')",
+      "check": "Existing connection ('X1', '3')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J2', '2')",
+      "check": "Existing connection ('U14', '12')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J9', '2')",
+      "check": "Existing connection ('TP41', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U2', '7')",
+      "check": "Existing connection ('U14', '30')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J2', '3')",
+      "check": "Existing connection ('U14', '81')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J9', '3')",
+      "check": "Existing connection ('R71', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U2', '6')",
+      "check": "Existing connection ('U19', '6')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U2', '4')",
+      "check": "Existing connection ('U19', '11')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U2', '1')",
+      "check": "Existing connection ('U14', '78')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '21')",
+      "check": "Existing connection ('U19', '10')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '22')",
+      "check": "Existing connection ('U14', '79')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '1')",
+      "check": "Existing connection ('U19', '9')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '40')",
+      "check": "Existing connection ('U14', '80')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U2', '2')",
+      "check": "Existing connection ('U1', '8')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '6')",
+      "check": "Existing connection ('R87', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U2', '8')",
+      "check": "Existing connection ('U1', '9')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J9', '5')",
+      "check": "Existing connection ('R88', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '2')",
+      "check": "Existing connection ('R86', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J2', '5')",
+      "check": "Existing connection ('U1', '25')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '10')",
+      "check": "Existing connection ('U1', '24')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '15')",
+      "check": "Existing connection ('R102', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '4')",
+      "check": "Existing connection ('R85', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '5')",
+      "check": "Existing connection ('U14', '84')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '6')",
+      "check": "Existing connection ('U16', '3')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '19')",
+      "check": "Existing connection ('R76', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '20')",
+      "check": "Existing connection ('R80', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '10')",
+      "check": "Existing connection ('U14', '83')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '11')",
+      "check": "Existing connection ('U16', '5')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '23')",
+      "check": "Existing connection ('R79', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '28')",
+      "check": "Existing connection ('U14', '82')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '29')",
+      "check": "Existing connection ('U16', '4')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '30')",
+      "check": "Existing connection ('LED2', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '31')",
+      "check": "Existing connection ('LED1', '4')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '32')",
+      "check": "Existing connection ('LED2', '4')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '33')",
+      "check": "Existing connection ('LED3', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '34')",
+      "check": "Existing connection ('LED4', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '35')",
+      "check": "Existing connection ('LED3', '4')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '26')",
+      "check": "Existing connection ('LED5', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '16')",
+      "check": "Existing connection ('LED4', '4')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '14')",
+      "check": "Existing connection ('LED6', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '13')",
+      "check": "Existing connection ('LED5', '4')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '1')",
+      "check": "Existing connection ('R70', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '2')",
+      "check": "Existing connection ('U14', '5')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '1')",
+      "check": "Existing connection ('U17', '6')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '2')",
+      "check": "Existing connection ('U18', '6')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '4')",
+      "check": "Existing connection ('U14', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '3')",
+      "check": "Existing connection ('U17', '11')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '4')",
+      "check": "Existing connection ('U18', '11')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '3')",
+      "check": "Existing connection ('U17', '10')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '6')",
+      "check": "Existing connection ('U14', '3')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '5')",
+      "check": "Existing connection ('U18', '10')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '6')",
+      "check": "Existing connection ('U18', '9')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '5')",
+      "check": "Existing connection ('U17', '9')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '7')",
+      "check": "Existing connection ('U14', '4')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '8')",
+      "check": "Existing connection ('U16', '10')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '7')",
+      "check": "Existing connection ('U17', '3')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '8')",
+      "check": "Existing connection ('U16', '8')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '9')",
+      "check": "Existing connection ('U18', '3')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '10')",
+      "check": "Existing connection ('U16', '9')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '9')",
+      "check": "Existing connection ('TP42', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '10')",
+      "check": "Existing connection ('U14', '17')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '12')",
+      "check": "Existing connection ('TP43', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '12')",
+      "check": "Existing connection ('U14', '33')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J140', '11')",
+      "check": "Existing connection ('TP44', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J1', '11')",
+      "check": "Existing connection ('U14', '34')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '36')",
+      "check": "Existing connection ('U3', 'A5')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '37')",
+      "check": "Existing connection ('R22', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J9', '4')",
+      "check": "Existing connection ('R27', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '9')",
+      "check": "Existing connection ('U3', 'B5')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '2')",
+      "check": "Existing connection ('Q2', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U2', '3')",
+      "check": "Existing connection ('U4', '3')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '1')",
+      "check": "Existing connection ('J2', '1')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('J3', '5')",
+      "check": "Existing connection ('NT1', '2')",
       "pass": true
     },
     {
-      "check": "Preserved external net ('U1', '3')",
+      "check": "Existing connection ('D6', '2')",
       "pass": true
     },
     {
-      "check": "No external converter components",
+      "check": "Existing connection ('U4', '5')",
       "pass": true
     },
     {
-      "check": "Main PCB unchanged incl locked positions",
+      "check": "Existing connection ('J9', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C5', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C85', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J2', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '38')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '39')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '40')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '9')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '17')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '41')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '18')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '11')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '39')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '42')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '43')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '38')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R85', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP47', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '69')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '68')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP48', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R86', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R102', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED1', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J2', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J9', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U2', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R8', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U8', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J2', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J9', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U2', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R101', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '93')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U2', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '92')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U2', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R100', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '86')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R74', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R98', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '21')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '22')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '87')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R99', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '85')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '10')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R78', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '16')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R77', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '9')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '15')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R77', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '29')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C9', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R47', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C86', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C95', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '74')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R39', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED2', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C100', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C92', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U16', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '20')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('X1', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R22', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q7', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C97', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C119', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP13', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED1', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R49', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q4', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '10')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U2', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J2', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', 'A1B12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '27')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C93', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R41', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C74', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C99', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP21', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U8', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C123', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R45', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '10')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP12', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q3', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U16', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C11', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED3', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C89', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C101', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U2', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C96', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R37', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C124', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R83', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J9', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C90', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U4', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R27', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C5', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R4', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED6', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '40')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U16', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED5', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C1', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '21')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J4', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C94', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R43', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '99')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q5', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', 'B1A12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED4', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q8', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C88', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C121', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C98', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R84', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q6', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C122', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C85', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C91', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R75', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '97')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '15')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R24', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '23')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '95')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J4', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '96')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J4', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R25', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '22')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '19')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '20')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '10')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '11')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '23')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '28')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '29')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '30')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '31')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '32')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '33')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '34')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '35')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '26')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '16')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R50', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '64')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '17')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R51', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '18')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '65')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '10')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R52', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '66')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '19')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '13')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '67')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R53', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '20')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP45', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R54', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '35')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R98', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP46', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '36')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R55', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R99', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '13')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '44')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q3', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '13')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q3', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R56', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q4', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R57', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '14')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q4', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '45')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '14')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '15')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q5', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R58', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q5', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '46')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '15')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '47')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '11')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R59', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q6', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q6', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q7', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R60', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q7', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '48')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q8', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q8', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R61', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '51')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q3', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R39', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '53')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '55')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q4', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R41', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q5', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R43', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '9')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '57')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '11')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q6', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '59')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R45', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q7', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '14')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '61')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R47', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R49', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '16')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q8', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '63')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R5', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q2', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U8', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R5', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U8', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R8', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '14')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R17', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '13')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R18', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R56', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '13')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '23')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R57', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '24')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '14')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '15')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '25')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R58', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R59', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '26')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '31')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R60', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '9')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '9')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '10')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '10')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '11')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '11')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R61', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '32')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J140', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J1', '12')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R38', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '52')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q3', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R40', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q4', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '54')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R42', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '56')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q5', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '8')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q6', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R44', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '58')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '10')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R46', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '13')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q7', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '60')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '62')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q8', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R48', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '15')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R101', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '91')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP18', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '36')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R100', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '37')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP19', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '88')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('NT1', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J9', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R4', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q2', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R82', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R17', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', 'B6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', 'A6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R18', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', 'B7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', 'A7')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R81', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', 'B4A9')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U3', 'A4B9')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('D6', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C89', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED5', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R71', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C101', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R51', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C96', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R38', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '17')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C124', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q6', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R24', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '75')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R42', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED4', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R53', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R76', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('L1', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '17')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U16', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C1', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED1', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R73', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C94', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('X1', '4')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R70', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q7', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R48', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '11')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C88', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '16')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C90', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED2', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C121', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '50')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J4', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R52', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C98', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q4', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '22')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R78', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C9', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R79', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '21')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '9')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R40', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R44', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C86', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C95', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('J3', '5')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '100')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C100', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R46', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '13')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R75', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R74', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('X1', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP15', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C97', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '6')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C119', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R54', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U12', '14')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q3', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R36', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R25', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U17', '16')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C122', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R15', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C91', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U19', '17')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R16', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R72', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R50', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R55', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C93', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U18', '16')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '24')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED3', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C99', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C123', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U13', '14')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q5', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R80', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('LED6', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '28')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('Q8', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C74', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U2', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U25', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('R16', '2')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U1', '3')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('U14', '98')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('TP8', '1')",
+      "pass": true
+    },
+    {
+      "check": "Existing connection ('C11', '2')",
+      "pass": true
+    },
+    {
+      "check": "FPC 1 GND",
+      "pass": true
+    },
+    {
+      "check": "FPC 2 VCORE",
+      "pass": true
+    },
+    {
+      "check": "FPC 3 IO6",
+      "pass": true
+    },
+    {
+      "check": "FPC 4 IO11",
+      "pass": true
+    },
+    {
+      "check": "FPC 5 IO12",
+      "pass": true
+    },
+    {
+      "check": "FPC 6 GND",
+      "pass": true
+    },
+    {
+      "check": "FPC 7 IO17",
+      "pass": true
+    },
+    {
+      "check": "FPC 8 IO18",
+      "pass": true
+    },
+    {
+      "check": "FPC 9 IO21",
+      "pass": true
+    },
+    {
+      "check": "FPC 10 GND",
+      "pass": true
+    },
+    {
+      "check": "FPC 11 IO38",
+      "pass": true
+    },
+    {
+      "check": "FPC 12 IO39",
+      "pass": true
+    },
+    {
+      "check": "FPC 13 IO40",
+      "pass": true
+    },
+    {
+      "check": "FPC 14 GND",
+      "pass": true
+    },
+    {
+      "check": "FPC 15 IO41",
+      "pass": true
+    },
+    {
+      "check": "FPC 16 IO42",
+      "pass": true
+    },
+    {
+      "check": "FPC 17 IO4",
+      "pass": true
+    },
+    {
+      "check": "FPC 18 IO5",
+      "pass": true
+    },
+    {
+      "check": "FPC 19 GND",
+      "pass": true
+    },
+    {
+      "check": "FPC 20 GND",
+      "pass": true
+    },
+    {
+      "check": "FPC 21 GND",
+      "pass": true
+    },
+    {
+      "check": "FPC 22 GND",
+      "pass": true
+    },
+    {
+      "check": "FPC 23 VCORE",
+      "pass": true
+    },
+    {
+      "check": "FPC 24 GND",
+      "pass": true
+    },
+    {
+      "check": "PSRAM pins not exported",
       "pass": true
     },
     {
       "check": "Zero ERC errors",
       "pass": true
+    },
+    {
+      "check": "No copper or courtyard conflicts reported",
+      "pass": true
+    },
+    {
+      "check": "Final FPC graphical relocation preserves all electrical nets",
+      "pass": true
+    },
+    {
+      "check": "Six RGB LEDs on one line with 3.6 mm centre pitch; fixed connectors preserved; no copper/courtyard conflicts reported",
+      "pass": true
+    },
+    {
+      "check": "All signal and mechanical pads of J2/J9/J4/J5/U3 remain on FR4",
+      "pass": true
+    },
+    {
+      "check": "Only magnetic edge-contact pads violate generic copper-edge rule (20 reports); no other copper-edge conflicts",
+      "pass": true
     }
   ],
-  "pcb": "Main PCB synchronized and placed; see placement-verification.json and placement-drc.json. Not routed.",
   "placement": {
-    "review_only": true,
-    "pcb": "/Users/andreapiccini/dev/spaghettilab-community/hardware/backbone/backbone.kicad_pcb",
-    "main_pcb_unchanged": false,
+    "locked_and_magnetic_preserved": [
+      "J2",
+      "J9",
+      "J140",
+      "J3",
+      "J1",
+      "U1"
+    ],
+    "all_movable_top": true,
+    "led_mapping": {
+      "LED1": {
+        "port": "A0",
+        "x_mm": 176.75,
+        "y_mm": 135.2
+      },
+      "LED2": {
+        "port": "A1",
+        "x_mm": 173.15,
+        "y_mm": 135.2
+      },
+      "LED3": {
+        "port": "A2",
+        "x_mm": 169.55,
+        "y_mm": 135.2
+      },
+      "LED4": {
+        "port": "A3",
+        "x_mm": 165.95,
+        "y_mm": 135.2
+      },
+      "LED5": {
+        "port": "A4",
+        "x_mm": 162.35,
+        "y_mm": 135.2
+      },
+      "LED6": {
+        "port": "A5",
+        "x_mm": 158.75,
+        "y_mm": 135.2
+      }
+    },
+    "outline_mm": [
+      41.5,
+      77.7
+    ],
+    "notch_width_mm": 37.35,
+    "notch_y_mm": [
+      85.2,
+      109.2
+    ],
+    "connector_pads_checked": [
+      {
+        "ref": "J2",
+        "pin": "1",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "1",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "2",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "2",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "3",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "3",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "4",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "4",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "5",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J2",
+        "pin": "5",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "1",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "1",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "2",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "2",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "3",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "3",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "4",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "4",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "5",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J9",
+        "pin": "5",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J4",
+        "pin": "1",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J4",
+        "pin": "2",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J4",
+        "pin": "3",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J4",
+        "pin": "4",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J4",
+        "pin": "MP",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J4",
+        "pin": "MP",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "1",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "2",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "3",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "4",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "5",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "6",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "7",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "8",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "9",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "10",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "11",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "12",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "13",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "14",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "15",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "16",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "17",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "18",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "19",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "20",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "21",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "22",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "23",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "24",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "MP",
+        "pad_on_board": true
+      },
+      {
+        "ref": "J5",
+        "pin": "MP",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "1",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "2",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "3",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "4",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "A1B12",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "A4B9",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "A5",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "A6",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "A7",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "A8",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "B1A12",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "B4A9",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "B5",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "B6",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "B7",
+        "pad_on_board": true
+      },
+      {
+        "ref": "U3",
+        "pin": "B8",
+        "pad_on_board": true
+      }
+    ],
+    "old_outline_mm": [
+      47.85,
+      78.2
+    ],
+    "area_change_percent": -4.242507813936392,
+    "movable_placed": 131,
+    "tracks": 0,
+    "qwiic_edge": "right",
+    "fpc_edge": "left",
+    "note": "Single row at 3.6mm pitch; pitch differs from Harwin columns; no routing or mechanical mating qualification"
+  },
+  "pcb": "Updated placement only, 496 unconnected items; routing and mechanical qualification still required.",
+  "routing_setup": {
     "locked_preserved": [
       "J2",
       "J140",
@@ -476,24 +2915,265 @@
       "J1",
       "U1"
     ],
-    "movable_top": 140,
-    "unplaced": [],
+    "moved_references": [
+      "TP44",
+      "U8",
+      "C123",
+      "R71",
+      "TP24",
+      "R18",
+      "R80",
+      "C84",
+      "C89",
+      "R44",
+      "C95",
+      "C74",
+      "R58",
+      "R60",
+      "TP12",
+      "C119",
+      "R46",
+      "C9",
+      "R57",
+      "R41",
+      "R56",
+      "TP19",
+      "R51",
+      "TP27",
+      "R47",
+      "U19",
+      "X1",
+      "TP15",
+      "R100",
+      "R83",
+      "R76",
+      "R88",
+      "U12",
+      "R48",
+      "C85",
+      "TP45",
+      "C122",
+      "R98",
+      "Q5",
+      "Q8",
+      "TP49",
+      "TP46",
+      "R40",
+      "R61",
+      "R45",
+      "C86",
+      "R52",
+      "R77",
+      "R72",
+      "U13",
+      "R39",
+      "U16",
+      "U2",
+      "C97",
+      "R82",
+      "TP23",
+      "C11",
+      "R24",
+      "TP9",
+      "R43",
+      "Q7",
+      "R50",
+      "U18",
+      "TP22",
+      "R99",
+      "Q3",
+      "C1",
+      "R36",
+      "R15",
+      "R75",
+      "R5",
+      "TP25",
+      "U3",
+      "C124",
+      "C121",
+      "TP18",
+      "R74",
+      "R101",
+      "C99",
+      "TP43",
+      "Q2",
+      "L1",
+      "R102",
+      "Q6",
+      "TP41",
+      "TP42",
+      "U4",
+      "C98",
+      "TP21",
+      "C96",
+      "C90",
+      "R49",
+      "TP13",
+      "D6",
+      "C92",
+      "R85",
+      "R54",
+      "R53",
+      "C5",
+      "R16",
+      "R70",
+      "R73",
+      "TP48",
+      "R8",
+      "R37",
+      "C101",
+      "C91",
+      "R78",
+      "R79",
+      "R25",
+      "R55",
+      "U17",
+      "C93",
+      "TP47",
+      "R42",
+      "C100",
+      "R86",
+      "R17",
+      "R81",
+      "R38",
+      "R59",
+      "R84",
+      "TP8",
+      "C88",
+      "TP26",
+      "R4",
+      "C94",
+      "Q4",
+      "R87"
+    ],
+    "components_before": 173,
+    "components_after": 173,
+    "same_connectivity_after_usb_net_rename": true,
+    "outline_and_all_slots_preserved": true,
+    "all_component_sides_preserved": true,
+    "tracks_and_vias": 0,
+    "copper_zones_filled": 0,
+    "reference_zone_outlines": [
+      "GND_L2_REFERENCE_UNFILLED",
+      "GND_L3_BACKGROUND_UNFILLED"
+    ],
+    "rf_keepout_all_copper_layers": true,
+    "copper_layers": 4,
+    "nominal_total_thickness_mm": 1.6,
+    "netclass_count": 16,
+    "classified_nets": 126,
+    "usb_pairs": [
+      [
+        "USB_D+",
+        "USB_D-"
+      ],
+      [
+        "USB_ESP_D+",
+        "USB_ESP_D-"
+      ],
+      [
+        "/USB_AG_D+",
+        "/USB_AG_D-"
+      ]
+    ],
+    "usb_geometry_provisional": {
+      "width_mm": 0.18,
+      "gap_mm": 0.15,
+      "target_ohm": 90,
+      "requires_fabricator_stackup_confirmation": true
+    },
+    "can_differential_router_note": "CAN_H/CAN_L retained: co-route as a pair manually; names do not use KiCad +/- or _P/_N suffixes.",
+    "erc_errors": 0,
+    "drc_counts": {
+      "annular_width": 40,
+      "copper_edge_clearance": 20,
+      "missing_courtyard": 23,
+      "silk_edge_clearance": 2,
+      "lib_footprint_mismatch": 6,
+      "text_height": 121,
+      "silk_overlap": 199,
+      "silk_over_copper": 199
+    },
+    "unconnected": 496,
+    "remaining_edge_findings": "20 intentional magnetic edge lands; retain errors pending fabrication review.",
+    "layout_status": "Pre-routing functional placement; no completed signal-integrity or thermal validation.",
+    "erc_warnings": 292
+  },
+  "rounded_outline": {
+    "all_component_poses_and_locks_preserved": true,
+    "all_component_nets_preserved": true,
+    "component_count": 173,
+    "existing_internal_opening_segments_preserved": 12,
+    "outer_corner_radius_mm": 1.5,
+    "magnetic_transition_radius_mm": 0.6,
+    "qwiic_notch": {
+      "width_mm": 3.3,
+      "depth_mm": 1.25,
+      "corner_radius_mm": 0.3,
+      "nearest_anchor_to_vertical_cut_mm": 0.55,
+      "body_projection_beyond_notch_floor_mm": 0.5,
+      "case_note": "PCB relief only; enclosure opening must also clear complete mating plug. Prototype fit required."
+    },
+    "outline_max_mm": [
+      41.5,
+      77.7
+    ],
+    "tracks_and_vias": 0,
+    "drc_counts": {
+      "annular_width": 40,
+      "copper_edge_clearance": 20,
+      "missing_courtyard": 23,
+      "silk_edge_clearance": 3,
+      "lib_footprint_issues": 16,
+      "lib_footprint_mismatch": 6,
+      "text_height": 121,
+      "silk_overlap": 199,
+      "silk_over_copper": 199
+    },
+    "new_silkscreen_edge_warnings": 1,
+    "status": "Mechanical contour verified by DRC; no routing performed."
+  },
+  "header_grid": {
+    "centerline_x_mm": 167.75,
+    "pitch_mm": 2.54,
+    "grid_origin_mm": [
+      161.4,
+      88.935
+    ],
+    "connector_centers_mm": {
+      "J3": [
+        167.75,
+        90.205
+      ],
+      "J1": [
+        167.75,
+        118.145
+      ],
+      "J140": [
+        167.75,
+        128.305
+      ]
+    },
+    "led_y_mm": 136.1,
+    "changed": [
+      "TP44",
+      "C95",
+      "R58",
+      "LED6",
+      "LED1",
+      "C124",
+      "J140",
+      "LED2",
+      "LED3",
+      "LED5",
+      "J3",
+      "LED4",
+      "J1"
+    ],
+    "locked_flags_preserved": true,
+    "nets_preserved": true,
+    "outline_preserved": true,
     "tracks": 0,
-    "usb_pose": [
-      186.37499999999932,
-      115.12500000000021,
-      90.0
-    ],
-    "slot_mm": [
-      166.2,
-      77.8,
-      3,
-      2.5
-    ],
-    "notes": [
-      "Conservative 2D packing; no routing or manufacturability approval.",
-      "Fixed U1 is on B.Cu; all movable electronics on F.Cu.",
-      "Magnetic mating clearance and the custom LEDs still require mechanical verification."
-    ]
+    "note": "Grid applies to 12 mating holes per connector; two locating holes excluded. Physical tolerances require prototype fit check."
   }
 }

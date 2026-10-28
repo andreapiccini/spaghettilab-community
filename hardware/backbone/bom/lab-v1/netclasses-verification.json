@@ -1,0 +1,173 @@
+{
+  "classes": [
+    {
+      "name": "Default",
+      "clearance": 0.2,
+      "track_width": 0.2,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "ANALOG_DAC",
+      "clearance": 0.2,
+      "track_width": 0.2,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "ANALOG_SENSE",
+      "clearance": 0.2,
+      "track_width": 0.2,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "BUCK_FEEDBACK",
+      "clearance": 0.2,
+      "track_width": 0.2,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "BUCK_SWITCH",
+      "clearance": 0.2,
+      "track_width": 0.6,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "CAN_BUS",
+      "clearance": 0.2,
+      "track_width": 0.25,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.25,
+      "diff_pair_gap": 0.2
+    },
+    {
+      "name": "CLOCK",
+      "clearance": 0.2,
+      "track_width": 0.18,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "CONTROL",
+      "clearance": 0.2,
+      "track_width": 0.18,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "DEBUG",
+      "clearance": 0.2,
+      "track_width": 0.18,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "FAST_DIGITAL",
+      "clearance": 0.2,
+      "track_width": 0.2,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "GROUND",
+      "clearance": 0.2,
+      "track_width": 0.6,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "PORT_IO_POWER",
+      "clearance": 0.2,
+      "track_width": 0.3,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "POWER_3V3",
+      "clearance": 0.2,
+      "track_width": 0.6,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "POWER_5V",
+      "clearance": 0.2,
+      "track_width": 1.0,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "USB_DIFF",
+      "clearance": 0.2,
+      "track_width": 0.18,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    },
+    {
+      "name": "USB_VBUS",
+      "clearance": 0.2,
+      "track_width": 0.6,
+      "via_diameter": 0.6,
+      "via_drill": 0.3,
+      "diff_pair_width": 0.18,
+      "diff_pair_gap": 0.15
+    }
+  ],
+  "assigned_nets": 126,
+  "total_named_nets": 127,
+  "unconnected_default": [
+    "unconnected-(U25-~{INT}-Pad1)"
+  ],
+  "assignment_counts": {
+    "DEBUG": 12,
+    "CONTROL": 43,
+    "BUCK_FEEDBACK": 1,
+    "BUCK_SWITCH": 1,
+    "CLOCK": 1,
+    "ANALOG_DAC": 3,
+    "FAST_DIGITAL": 38,
+    "ANALOG_SENSE": 2,
+    "USB_DIFF": 6,
+    "POWER_5V": 1,
+    "CAN_BUS": 3,
+    "GROUND": 1,
+    "PORT_IO_POWER": 12,
+    "USB_VBUS": 1,
+    "POWER_3V3": 1
+  },
+  "usb_geometry": "preliminary; 90 ohm target requires actual fabrication stackup",
+  "can": "CAN_H/CAN_L names retained; co-route manually, not recognized as a native +/- differential pair",
+  "pcb_unchanged": true
+}

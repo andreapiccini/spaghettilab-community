@@ -1,0 +1,23 @@
+{
+  "magnetic_relief_center_y_mm": 101.15,
+  "magnetic_relief_limits_y_mm": [
+    89.15,
+    113.15
+  ],
+  "vertical_shift_mm": 3.95,
+  "bottom_silkscreen": [
+    "mounting hole rings",
+    "FPC slot border with clearance gap",
+    "P1-P6 configurable ports",
+    "J3 IO7 IO8 IO9 IO10 IO1 IO2 labels"
+  ],
+  "moved_unlocked": [
+    "Q5",
+    "R27",
+    "TP49",
+    "TP23"
+  ],
+  "nets_preserved": true,
+  "locked_components_preserved": true,
+  "routing_added": false
+}
