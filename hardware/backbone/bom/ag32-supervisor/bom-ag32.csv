@@ -1,0 +1,154 @@
+Reference,Value,Footprint,LCSC_or_source,Assembly,USD_1000_model,Price_basis
+C1,100nF,SpaghettiLAB:C0603,C1591,FIT,0.004,engineering allowance for capacitor
+C5,22uF,Capacitor_SMD:C_0805_2012Metric,C45783,FIT,0.025,engineering allowance for capacitor
+C9,22uF,Capacitor_SMD:C_0805_2012Metric,C45783,FIT,0.025,engineering allowance for capacitor
+C11,1uF,SpaghettiLAB:C0603,C128624,FIT,0.008,engineering allowance for capacitor
+C74,100nF,SpaghettiLAB:C0603,C1591,FIT,0.004,engineering allowance for capacitor
+C75,4.7uF/10V X7R,SpaghettiLAB:C0603,,FIT,0.015,engineering allowance for capacitor
+C76,4.7uF/10V X7R,SpaghettiLAB:C0603,,FIT,0.015,engineering allowance for capacitor
+C77,4.7uF/10V X7R,SpaghettiLAB:C0603,,FIT,0.015,engineering allowance for capacitor
+C78,4.7uF/10V X7R,SpaghettiLAB:C0603,,FIT,0.015,engineering allowance for capacitor
+C79,100nF,SpaghettiLAB:C0603,,FIT,0.004,engineering allowance for capacitor
+C80,100nF,SpaghettiLAB:C0603,,FIT,0.004,engineering allowance for capacitor
+C81,100nF,SpaghettiLAB:C0603,,FIT,0.004,engineering allowance for capacitor
+C83,100nF,SpaghettiLAB:C0603,,FIT,0.004,engineering allowance for capacitor
+C84,100nF/50V,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C85,100nF/50V,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C86,22uF,Capacitor_SMD:C_0805_2012Metric,C45783,FIT,0.025,engineering allowance for capacitor
+C88,100nF,SpaghettiLAB:C0603,C14663,FIT,0.004,engineering allowance for capacitor
+C89,100nF,SpaghettiLAB:C0603,C14663,FIT,0.004,engineering allowance for capacitor
+D6,SS54_C22452,SpaghettiLAB:SMA_L4.4-W2.8-LS5.4-R-RD,C22452,FIT,0.035,engineering allowance; not quoted
+H1,MountingHole,MountingHole:MountingHole_2.2mm_M2_DIN965,,FIT,0.0,"PCB feature, no purchased part"
+H2,MountingHole,MountingHole:MountingHole_2.2mm_M2_DIN965,,FIT,0.0,"PCB feature, no purchased part"
+H3,MountingHole,MountingHole:MountingHole_2.2mm_M2_DIN965,,FIT,0.0,"PCB feature, no purchased part"
+H4,MountingHole,MountingHole:MountingHole_2.2mm_M2_DIN965,,FIT,0.0,"PCB feature, no purchased part"
+J1,M20-7810645R,SpaghettiLAB:HARWIN_M20-7810645R,Harwin M20-7810645R,FIT,1.40307,DigiKey 3000+ (3 per board)
+J2,FROM_PREVIOUS,SpaghettiLAB:Magnetic_J2_Edge_DualFace,C41361292,FIT,0.7452,LCSC 1000+; identified from existing connector docs; mechanical qualification pending
+J3,M20-7810645R,SpaghettiLAB:HARWIN_M20-7810645R,Harwin M20-7810645R,FIT,1.40307,DigiKey 3000+ (3 per board)
+J4,SM04B-SRSS-TB(LF)(SN),SpaghettiLAB:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal,C160404,FIT,0.35,engineering allowance; not quoted
+J5,FH12-24S-0.5SH(55),SpaghettiLAB:Hirose_FH12-24S-0.5SH_1x24-1MP_P0.50mm_Horizontal,C202112,FIT,0.3857,LCSC 1000+
+J9,TO NEXT,SpaghettiLAB:Magnetic_J9_Edge_DualFace,C41361293,FIT,1.1226,LCSC 1000+; identified from existing connector docs; mechanical qualification pending
+J140,M20-7810645R,SpaghettiLAB:HARWIN_M20-7810645R,Harwin M20-7810645R,FIT,1.40307,DigiKey 3000+ (3 per board)
+L1,3.3uH,SpaghettiLAB:L_XRTC404012S,C39846848,FIT,0.12,engineering allowance; not quoted
+LED1,SK6812MINI-E,SpaghettiLAB:LED_SK6812MINI-E_FR4_Window_HandFormed,C5149201,FIT,0.0454,LCSC 4000+ (6000 needed)
+LED2,SK6812MINI-E,SpaghettiLAB:LED_SK6812MINI-E_FR4_Window_HandFormed,C5149201,FIT,0.0454,LCSC 4000+ (6000 needed)
+LED3,SK6812MINI-E,SpaghettiLAB:LED_SK6812MINI-E_FR4_Window_HandFormed,C5149201,FIT,0.0454,LCSC 4000+ (6000 needed)
+LED4,SK6812MINI-E,SpaghettiLAB:LED_SK6812MINI-E_FR4_Window_HandFormed,C5149201,FIT,0.0454,LCSC 4000+ (6000 needed)
+LED5,SK6812MINI-E,SpaghettiLAB:LED_SK6812MINI-E_FR4_Window_HandFormed,C5149201,FIT,0.0454,LCSC 4000+ (6000 needed)
+LED6,SK6812MINI-E,SpaghettiLAB:LED_SK6812MINI-E_FR4_Window_HandFormed,C5149201,FIT,0.0454,LCSC 4000+ (6000 needed)
+NT1,NetTie_2,,,FIT,0.0,"PCB feature, no purchased part"
+Q2,AO3401A,SpaghettiLAB:SOT-23_L2.9-W1.3-P1.90-LS2.4-BR,C15127,FIT,0.03,engineering allowance; not quoted
+Q3,AO6604,LCSC_Ports:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL,C5182068,FIT,0.0667,LCSC 6000+
+Q4,AO6604,LCSC_Ports:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL,C5182068,FIT,0.0667,LCSC 6000+
+Q5,AO6604,LCSC_Ports:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL,C5182068,FIT,0.0667,LCSC 6000+
+Q6,AO6604,LCSC_Ports:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL,C5182068,FIT,0.0667,LCSC 6000+
+Q7,AO6604,LCSC_Ports:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL,C5182068,FIT,0.0667,LCSC 6000+
+Q8,AO6604,LCSC_Ports:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL,C5182068,FIT,0.0667,LCSC 6000+
+R4,470k,SpaghettiLAB:R0603,C114622,FIT,0.0015,engineering allowance for standard resistor
+R5,1k,SpaghettiLAB:R0603,C2907002,FIT,0.0015,engineering allowance for standard resistor
+R8,120R,SpaghettiLAB:R0603,C2906988,FIT,0.0015,engineering allowance for standard resistor
+R15,10k,SpaghettiLAB:R0603,C99782,FIT,0.0015,engineering allowance for standard resistor
+R16,10k,SpaghettiLAB:R0603,C99782,FIT,0.0015,engineering allowance for standard resistor
+R17,33R DNP / ESP USB,SpaghettiLAB:R0603,C2909394,DNP,0,DNP
+R18,33R DNP / ESP USB,SpaghettiLAB:R0603,C2909394,DNP,0,DNP
+R22,5.1k,SpaghettiLAB:R0603,C2907044,FIT,0.0015,engineering allowance for standard resistor
+R24,4.7k,SpaghettiLAB:R0603,,FIT,0.0015,engineering allowance for standard resistor
+R25,4.7k,SpaghettiLAB:R0603,,FIT,0.0015,engineering allowance for standard resistor
+R27,5.1k,SpaghettiLAB:R0603,C2907044,FIT,0.0015,engineering allowance for standard resistor
+R28,10k,SpaghettiLAB:R0603,,FIT,0.0015,engineering allowance for standard resistor
+R29,10k,SpaghettiLAB:R0603,,FIT,0.0015,engineering allowance for standard resistor
+R30,0,SpaghettiLAB:R0603,,FIT,0.0015,engineering allowance for standard resistor
+R31,0R,Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,,DNP,0,DNP
+R32,0R,Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,,DNP,0,DNP
+R33,0R,Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,,DNP,0,DNP
+R34,0R,Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,,DNP,0,DNP
+R35,0R,Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder,,DNP,0,DNP
+R36,33k 1%,Resistor_SMD:R_0603_1608Metric,C4216,FIT,0.0015,engineering allowance for standard resistor
+R37,10k 1%,Resistor_SMD:R_0603_1608Metric,C25804,FIT,0.0015,engineering allowance for standard resistor
+R38,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R39,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R40,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R41,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R42,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R43,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R44,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R45,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R46,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R47,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R48,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R49,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R50,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R51,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R52,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R53,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R54,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R55,100k,SpaghettiLAB:R0603,C25803,FIT,0.0015,engineering allowance for standard resistor
+R56,0.1R,Resistor_SMD:R_1206_3216Metric,C5123673,FIT,0.0515,LCSC 5000+ (6000 needed)
+R57,0.1R,Resistor_SMD:R_1206_3216Metric,C5123673,FIT,0.0515,LCSC 5000+ (6000 needed)
+R58,0.1R,Resistor_SMD:R_1206_3216Metric,C5123673,FIT,0.0515,LCSC 5000+ (6000 needed)
+R59,0.1R,Resistor_SMD:R_1206_3216Metric,C5123673,FIT,0.0515,LCSC 5000+ (6000 needed)
+R60,0.1R,Resistor_SMD:R_1206_3216Metric,C5123673,FIT,0.0515,LCSC 5000+ (6000 needed)
+R61,0.1R,Resistor_SMD:R_1206_3216Metric,C5123673,FIT,0.0515,LCSC 5000+ (6000 needed)
+TP8,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP9,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP12,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP13,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP15,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP18,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP19,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP21,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+U1,ESP32-S3-WROOM-1_1U_FlexyPin_Socket,FlexyPin:ESP32-S3-WROOM-1_1U_FlexyPin_Socket,C2913201,FIT,3.513,LCSC 650+; same module assumed across variants
+U2,SN65HVD230DR,SpaghettiLAB:SOIC-8_L4.9-W3.9-P1.27-LS6.0-BL,C12084,FIT,0.2743,LCSC 1000+
+U3,HC-TYPE-C-16P-01A,SpaghettiLAB:USB-C-SMD_HC-TYPE-C-16P-01A,C2894897,FIT,0.08,engineering allowance; not quoted
+U4,TPS562201DDCR,SpaghettiLAB:TSOT-23-6_Power,C90061,FIT,0.06,engineering allowance based on previous sourcing
+U8,G3VM-61VY3,SpaghettiLAB:SMD-4_L4.6-W3.7-P2.54-LS7.0-TL,C2152318,FIT,0.6445,"LCSC 1000+ reference; stock/NRND caution, RFQ"
+U9,ME6211C28M5G-N,Package_TO_SOT_SMD:SOT-23-5,,FIT,0.06,"engineering allowance for existing ME6211 LDO, exact MPN RFQ"
+U10,ME6211C15M5G-N,Package_TO_SOT_SMD:SOT-23-5,,FIT,0.06,"engineering allowance for existing ME6211 LDO, exact MPN RFQ"
+U12,SN74CBTLV3125PWR,LCSC_Ports:TSSOP-14_L5.0-W4.4-P0.65-LS6.4-BL,C406866,FIT,0.2645,LCSC 1000+ (2000 needed); availability/price need RFQ
+U13,SN74CBTLV3125PWR,LCSC_Ports:TSSOP-14_L5.0-W4.4-P0.65-LS6.4-BL,C406866,FIT,0.2645,LCSC 1000+ (2000 needed); availability/price need RFQ
+C90,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C91,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.008,engineering allowance for capacitor
+C92,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.006,engineering allowance for capacitor
+C93,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C94,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C95,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C96,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.008,engineering allowance for capacitor
+C97,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C98,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C99,1uF,Capacitor_SMD:C_0603_1608Metric,C15849,FIT,0.004,engineering allowance for capacitor
+C100,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+C101,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,FIT,0.004,engineering allowance for capacitor
+R70,100k,Resistor_SMD:R_0603_1608Metric,C25803,FIT,0.0015,engineering allowance for standard resistor
+R71,100k,Resistor_SMD:R_0603_1608Metric,C25803,FIT,0.0015,engineering allowance for standard resistor
+R72,10k,Resistor_SMD:R_0603_1608Metric,C25804,FIT,0.0015,engineering allowance for standard resistor
+R73,10k,Resistor_SMD:R_0603_1608Metric,C25804,FIT,0.0015,engineering allowance for standard resistor
+R74,100k,Resistor_SMD:R_0603_1608Metric,C25803,FIT,0.0015,engineering allowance for standard resistor
+R75,100k,Resistor_SMD:R_0603_1608Metric,C25803,FIT,0.0015,engineering allowance for standard resistor
+R76,100k,Resistor_SMD:R_0603_1608Metric,C25803,FIT,0.0015,engineering allowance for standard resistor
+R77,4.7k 0.1% 25ppm,Resistor_SMD:R_0603_1608Metric,C513565,FIT,0.0297,LCSC 1000+
+R78,100k,Resistor_SMD:R_0603_1608Metric,C25803,FIT,0.0015,engineering allowance for standard resistor
+R79,4.7k,Resistor_SMD:R_0603_1608Metric,C23162,FIT,0.0015,engineering allowance for standard resistor
+R80,4.7k,Resistor_SMD:R_0603_1608Metric,C23162,FIT,0.0015,engineering allowance for standard resistor
+R81,22R,Resistor_SMD:R_0603_1608Metric,C23345,FIT,0.0015,"engineering allowance, confirm order code"
+R82,22R,Resistor_SMD:R_0603_1608Metric,C23345,FIT,0.0015,"engineering allowance, confirm order code"
+R83,10k,Resistor_SMD:R_0603_1608Metric,C25804,FIT,0.0015,"engineering allowance, confirm order code"
+R84,10k,Resistor_SMD:R_0603_1608Metric,C25804,FIT,0.0015,"engineering allowance, confirm order code"
+TP22,AG_NRST,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP23,AG_JTMS,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP24,AG_JTCK,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP25,AG_JTDI,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP26,AG_JTDO,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP27,AG_JNTRST,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP41,DAC1,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP42,ADC_SPARE_17,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP43,ADC_SPARE_33,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP44,ADC_SPARE_34,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP45,ADC_SPARE_35,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+TP46,ADC_SPARE_36,TestPoint:TestPoint_Pad_D1.0mm,,FIT,0,"PCB copper, no purchased part"
+U14,AG32VF407VGT6,LCSC_Ports:LQFP-100_L14.0-W14.0-P0.50-LS16.0-TL,C5336269,FIT,1.8809,"LCSC C5336269 900+ snapshot, not guaranteed availability"
+U16,INA226AIDGSR,LCSC_Ports:MSOP-10_L3.0-W3.0-P0.50-LS5.0-BL,C49851,FIT,0.5094,LCSC category 1000+; web quotes vary .3378-.5094
+U17,"74HC4051BQ,115",LCSC_Ports:DHVQFN-16_L3.5-W2.5-P0.50-BL-EP,C128429,FIT,0.1597,LCSC 3000+ (3 per board)
+U18,"74HC4051BQ,115",LCSC_Ports:DHVQFN-16_L3.5-W2.5-P0.50-BL-EP,C128429,FIT,0.1597,LCSC 3000+ (3 per board)
+U19,"74HC4051BQ,115",LCSC_Ports:DHVQFN-16_L3.5-W2.5-P0.50-BL-EP,C128429,FIT,0.1597,LCSC 3000+ (3 per board)
+X1,20MHz,LCSC_Ports:OSC-SMD_4P-L3.2-W2.5-BL,C390499,FIT,0.4452,previous LCSC category 1000+ snapshot; RFQ
+FlexyPin,40 original spring contacts,ESP32 module socket,Solder Party,FIT,1.88,100-pin pack volume snapshot; contacts stay on every board

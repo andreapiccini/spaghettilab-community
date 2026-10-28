@@ -1,0 +1,8 @@
+{
+  "BOM_with_ESP_USD": 18.734,
+  "BOM_without_ESP_USD": 15.221,
+  "ESP_module_USD": 3.513,
+  "FlexyPin_contacts_USD": 1.88,
+  "AG32_USD": 1.8809,
+  "warning": "Historical batch-1000 price model, not a fresh procurement quotation; PCB/assembly/firmware excluded."
+}
