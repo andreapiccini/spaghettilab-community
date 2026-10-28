@@ -5,13 +5,13 @@ J5_pin,Signal,Note
 4,IO11,ESP GPIO / 3.3V domain
 5,IO12,ESP GPIO / 3.3V domain
 6,GND,ESP GPIO / 3.3V domain
-7,IO17,ESP GPIO / 3.3V domain
-8,IO18,ESP GPIO / 3.3V domain
-9,IO21,ESP GPIO / 3.3V domain
+7,ESP_CAN_TX,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
+8,CAN_RX,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
+9,ESP_LED_DATA,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
 10,GND,ESP GPIO / 3.3V domain
-11,IO38,ESP GPIO / 3.3V domain
-12,IO39,ESP GPIO / 3.3V domain
-13,IO40,ESP GPIO / 3.3V domain
+11,ESP_TERM_CTRL,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
+12,ESP_ISO4_N,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
+13,ESP_ISO5_N,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
 14,GND,ESP GPIO / 3.3V domain
 15,IO41,ESP GPIO / 3.3V domain
 16,IO42,ESP GPIO / 3.3V domain

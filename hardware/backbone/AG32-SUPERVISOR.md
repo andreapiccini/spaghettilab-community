@@ -1,3 +1,5 @@
+> Current peripheral ownership: [DUAL-CONTROLLER.md](DUAL-CONTROLLER.md) supersedes older direct AG gate drive and ESP-only bridge instructions.
+
 > Current consolidated CAD status (2026-10-29): see [CURRENT-REVISION.md](CURRENT-REVISION.md). Earlier coordinates, J3 ordering, cost and placement statements below are historical and may be superseded. No mezzanine is implemented.
 
 ## Compact edge-connector contour update

@@ -1099,15 +1099,15 @@
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO17"
+        "pattern": "ESP_CAN_TX"
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO18"
+        "pattern": "CAN_RX"
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO21"
+        "pattern": "ESP_LED_DATA"
       },
       {
         "netclass": "FAST_DIGITAL",
@@ -1127,11 +1127,11 @@
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO38"
+        "pattern": "ESP_TERM_CTRL"
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO39"
+        "pattern": "ESP_ISO4_N"
       },
       {
         "netclass": "FAST_DIGITAL",
@@ -1139,7 +1139,7 @@
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO40"
+        "pattern": "ESP_ISO5_N"
       },
       {
         "netclass": "FAST_DIGITAL",
@@ -1340,6 +1340,34 @@
       {
         "netclass": "CONTROL",
         "pattern": "~{RESET}"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "AG_CAN_TX"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "AG_ISO4_N"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "AG_ISO5_N"
+      },
+      {
+        "netclass": "FAST_DIGITAL",
+        "pattern": "AG_LED_DATA"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "AG_READY"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "AG_TERM_CTRL"
+      },
+      {
+        "netclass": "CONTROL",
+        "pattern": "TERM_CTRL_IN"
       }
     ]
   },

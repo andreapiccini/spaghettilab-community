@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/erc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-29T00:34:43",
+    "date": "2026-10-29T00:55:12",
     "ignored_checks": [
         {
             "description": "SPICE model issue",
@@ -246,10 +246,10 @@
                         {
                             "description": "Etichetta \"CAN_RX\"",
                             "pos": {
-                                "x": 3.0985,
-                                "y": 6.25
+                                "x": 5.4484,
+                                "y": 0.9779
                             },
-                            "uuid": "1dfeac66-5c2d-41ea-8d80-bf17b32eb8d9"
+                            "uuid": "0fd52bf5-0f46-4236-9d6c-9c9c80b88b2c"
                         }
                     ],
                     "severity": "warning",
@@ -267,12 +267,12 @@
                             "uuid": "5d688ec1-cc08-40c5-a683-3bcd9c6fa74a"
                         },
                         {
-                            "description": "Symbol R100 Pin 2 [Passivo, Linea]",
+                            "description": "Symbol U26 Pin 4 [A_OUT, Passivo, Linea]",
                             "pos": {
-                                "x": 2.8445,
-                                "y": 6.25
+                                "x": 3.1242,
+                                "y": 7.5057
                             },
-                            "uuid": "f4fb5d78-eadc-43f6-bbc3-a750e3a8964e"
+                            "uuid": "e777a10a-83b9-4d27-b072-d440a7b373d9"
                         }
                     ],
                     "severity": "warning",
@@ -325,7 +325,7 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "description": "I pin di tipo Imprecisato e Bidirezionale sono connessi",
                     "items": [
                         {
                             "description": "Symbol U2 Pin 4 [R, Imprecisato, Linea]",
@@ -336,12 +336,12 @@
                             "uuid": "d9728e5c-60b8-4e66-9a35-1b2d3371ef7b"
                         },
                         {
-                            "description": "Symbol R101 Pin 2 [Passivo, Linea]",
+                            "description": "Symbol U1 Pin 11 [IO18, Bidirezionale, Linea]",
                             "pos": {
-                                "x": 3.0477,
-                                "y": 6.25
+                                "x": 1.2192,
+                                "y": 2.032
                             },
-                            "uuid": "c9769219-410d-41c8-8681-136bbe9d5228"
+                            "uuid": "32b7ae7d-1bec-4e50-8649-90c72a61b173"
                         }
                     ],
                     "severity": "warning",
@@ -796,29 +796,6 @@
                     "type": "single_global_label"
                 },
                 {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'CTRL14'",
-                            "pos": {
-                                "x": 0.9144,
-                                "y": 2.3622
-                            },
-                            "uuid": "2e800f53-f7e8-4ced-9dba-7d61458a9baa"
-                        },
-                        {
-                            "description": "Etichetta \"CTRL14\"",
-                            "pos": {
-                                "x": 2.5143,
-                                "y": 6.25
-                            },
-                            "uuid": "a38080eb-0f1f-4c06-88f2-907638aa9c49"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
                     "description": "Simbolo 'G3VM-61VY3' non trovato nella libreria di simboli 'SpaghettiLAB'",
                     "items": [
                         {
@@ -913,7 +890,7 @@
                     "description": "Local and global labels have same name",
                     "items": [
                         {
-                            "description": "Etichetta globale 'IO17'",
+                            "description": "Etichetta globale 'ESP_CAN_TX'",
                             "pos": {
                                 "x": 1.2192,
                                 "y": 2.0066
@@ -921,7 +898,7 @@
                             "uuid": "fb267444-ff7f-4282-a54d-00a211ab725f"
                         },
                         {
-                            "description": "Etichetta \"IO17\"",
+                            "description": "Etichetta \"ESP_CAN_TX\"",
                             "pos": {
                                 "x": 5.4484,
                                 "y": 0.9525
@@ -933,63 +910,10 @@
                     "type": "same_local_global_label"
                 },
                 {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO17'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.0066
-                            },
-                            "uuid": "fb267444-ff7f-4282-a54d-00a211ab725f"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "single_global_label"
-                },
-                {
                     "description": "Local and global labels have same name",
                     "items": [
                         {
-                            "description": "Etichetta globale 'IO18'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.032
-                            },
-                            "uuid": "d16a3540-62f8-4731-82f2-deedd3ff5840"
-                        },
-                        {
-                            "description": "Etichetta \"IO18\"",
-                            "pos": {
-                                "x": 5.4484,
-                                "y": 0.9779
-                            },
-                            "uuid": "0fd52bf5-0f46-4236-9d6c-9c9c80b88b2c"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO18'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.032
-                            },
-                            "uuid": "d16a3540-62f8-4731-82f2-deedd3ff5840"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "single_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO21'",
+                            "description": "Etichetta globale 'ESP_LED_DATA'",
                             "pos": {
                                 "x": 1.2192,
                                 "y": 2.1082
@@ -997,7 +921,7 @@
                             "uuid": "f98839c9-6bb9-4a91-b5ad-e8eb85aed9df"
                         },
                         {
-                            "description": "Etichetta \"IO21\"",
+                            "description": "Etichetta \"ESP_LED_DATA\"",
                             "pos": {
                                 "x": 5.4484,
                                 "y": 1.0033
@@ -1009,21 +933,6 @@
                     "type": "same_local_global_label"
                 },
                 {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO21'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.1082
-                            },
-                            "uuid": "f98839c9-6bb9-4a91-b5ad-e8eb85aed9df"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "single_global_label"
-                },
-                {
                     "description": "Label connected to only one pin",
                     "items": [
                         {
@@ -1117,7 +1026,7 @@
                     "description": "Local and global labels have same name",
                     "items": [
                         {
-                            "description": "Etichetta globale 'IO38'",
+                            "description": "Etichetta globale 'ESP_TERM_CTRL'",
                             "pos": {
                                 "x": 1.2192,
                                 "y": 2.2098
@@ -1125,7 +1034,7 @@
                             "uuid": "1c938b4e-1943-49b4-a33c-ba87b920a90b"
                         },
                         {
-                            "description": "Etichetta \"IO38\"",
+                            "description": "Etichetta \"ESP_TERM_CTRL\"",
                             "pos": {
                                 "x": 5.4484,
                                 "y": 1.0541
@@ -1137,25 +1046,10 @@
                     "type": "same_local_global_label"
                 },
                 {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO38'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.2098
-                            },
-                            "uuid": "1c938b4e-1943-49b4-a33c-ba87b920a90b"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "single_global_label"
-                },
-                {
                     "description": "Local and global labels have same name",
                     "items": [
                         {
-                            "description": "Etichetta globale 'IO39'",
+                            "description": "Etichetta globale 'ESP_ISO4_N'",
                             "pos": {
                                 "x": 1.2192,
                                 "y": 2.2352
@@ -1163,7 +1057,7 @@
                             "uuid": "9f8a906e-21c1-4b2c-8d98-51e21feb60a2"
                         },
                         {
-                            "description": "Etichetta \"IO39\"",
+                            "description": "Etichetta \"ESP_ISO4_N\"",
                             "pos": {
                                 "x": 5.4484,
                                 "y": 1.0795
@@ -1175,25 +1069,10 @@
                     "type": "same_local_global_label"
                 },
                 {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO39'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.2352
-                            },
-                            "uuid": "9f8a906e-21c1-4b2c-8d98-51e21feb60a2"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "single_global_label"
-                },
-                {
                     "description": "Local and global labels have same name",
                     "items": [
                         {
-                            "description": "Etichetta globale 'IO40'",
+                            "description": "Etichetta globale 'ESP_ISO5_N'",
                             "pos": {
                                 "x": 1.2192,
                                 "y": 2.2606
@@ -1201,7 +1080,7 @@
                             "uuid": "2f7e7f6f-355e-4e6a-9353-80f11087062d"
                         },
                         {
-                            "description": "Etichetta \"IO40\"",
+                            "description": "Etichetta \"ESP_ISO5_N\"",
                             "pos": {
                                 "x": 5.4484,
                                 "y": 1.1049
@@ -1211,21 +1090,6 @@
                     ],
                     "severity": "warning",
                     "type": "same_local_global_label"
-                },
-                {
-                    "description": "Global label only appears once in the schematic",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'IO40'",
-                            "pos": {
-                                "x": 1.2192,
-                                "y": 2.2606
-                            },
-                            "uuid": "2f7e7f6f-355e-4e6a-9353-80f11087062d"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "single_global_label"
                 },
                 {
                     "description": "Local and global labels have same name",
@@ -1349,27 +1213,27 @@
                     "type": "isolated_pin_label"
                 },
                 {
-                    "description": "Local and global labels have same name",
+                    "description": "Sia ESP_PROG_TX che IO47_DIRECT sono collegati agli stessi elementi; nella netlist verrà usata ESP_PROG_TX",
                     "items": [
                         {
-                            "description": "Etichetta globale 'SPI_MISO'",
+                            "description": "Etichetta \"ESP_PROG_TX\"",
                             "pos": {
-                                "x": 1.2827,
-                                "y": 1.9812
+                                "x": 1.3208,
+                                "y": 2.3876
                             },
-                            "uuid": "c3d34ff0-a3b5-4302-8824-a07c9d0aaf09"
+                            "uuid": "5570f8c9-0495-456d-a222-3190e2f4d04c"
                         },
                         {
-                            "description": "Etichetta \"SPI_MISO\"",
+                            "description": "Etichetta \"IO47_DIRECT\"",
                             "pos": {
-                                "x": 2.9207,
-                                "y": 6.25
+                                "x": 1.2192,
+                                "y": 2.3876
                             },
-                            "uuid": "f55d146a-2137-47e5-bf0e-81f4ebbcf591"
+                            "uuid": "2dbb89c1-1f60-46b1-a3f0-36b4c75ca996"
                         }
                     ],
                     "severity": "warning",
-                    "type": "same_local_global_label"
+                    "type": "multiple_net_names"
                 },
                 {
                     "description": "Symbol pin or wire end off connection grid",
@@ -1966,36 +1830,6 @@
                     "type": "four_way_junction"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol R98 Pin 1 [Passivo, Linea]",
-                            "pos": {
-                                "x": 2.3619,
-                                "y": 6.25
-                            },
-                            "uuid": "7af06c96-b361-498f-bd78-90aa028710b9"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.3619,
-                                "y": 6.25
-                            },
-                            "uuid": "9cb2b45f-1f0e-4db3-a816-cf73cb523aaa"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "Capo filo non connesso",
                     "items": [
                         {
@@ -2026,21 +1860,6 @@
                     "type": "unconnected_wire_endpoint"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.4381,
-                                "y": 6.25
-                            },
-                            "uuid": "ba476cc4-2472-4ff9-a2e4-363299e2342e"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "Il simbolo 'M20-7810645R' non corrisponde alla copia nella libreria 'SpaghettiLAB'",
                     "items": [
                         {
@@ -2054,51 +1873,6 @@
                     ],
                     "severity": "warning",
                     "type": "lib_symbol_mismatch"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol R99 Pin 1 [Passivo, Linea]",
-                            "pos": {
-                                "x": 2.5651,
-                                "y": 6.25
-                            },
-                            "uuid": "52f42dd0-f6c9-44c0-a138-f57ed534cb51"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.5651,
-                                "y": 6.25
-                            },
-                            "uuid": "aad8b8fe-e0d6-414c-9df7-9cda3ac0e6ba"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.6413,
-                                "y": 6.25
-                            },
-                            "uuid": "046744ff-3630-4357-a417-ca63effaab1d"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
                 },
                 {
                     "description": "Symbol pin or wire end off connection grid",
@@ -2517,51 +2291,6 @@
                     ],
                     "severity": "warning",
                     "type": "pin_to_pin"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol R100 Pin 1 [Passivo, Linea]",
-                            "pos": {
-                                "x": 2.7683,
-                                "y": 6.25
-                            },
-                            "uuid": "4a06d84b-f2e5-4b54-b297-6dda6113cc47"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.7683,
-                                "y": 6.25
-                            },
-                            "uuid": "5037d1a4-b6d4-42c8-9895-55db66531827"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.8445,
-                                "y": 6.25
-                            },
-                            "uuid": "1fb2eeb2-7a83-48ff-8c6d-2adfaaad97cd"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
                 },
                 {
                     "description": "Symbol pin or wire end off connection grid",
@@ -3035,119 +2764,6 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol R101 Pin 1 [Passivo, Linea]",
-                            "pos": {
-                                "x": 2.9715,
-                                "y": 6.25
-                            },
-                            "uuid": "c27bcc59-e57e-48f5-ad7f-e62f7f23a5b9"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.9715,
-                                "y": 6.25
-                            },
-                            "uuid": "eb3e9f21-87ab-467f-819b-d823253de4e0"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 3.0477,
-                                "y": 6.25
-                            },
-                            "uuid": "9edaef65-3a26-47ee-bc7e-072fe7924172"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Sia ESP_PROG_TX che IO47_DIRECT sono collegati agli stessi elementi; nella netlist verrà usata ESP_PROG_TX",
-                    "items": [
-                        {
-                            "description": "Etichetta \"ESP_PROG_TX\"",
-                            "pos": {
-                                "x": 1.3208,
-                                "y": 2.3876
-                            },
-                            "uuid": "5570f8c9-0495-456d-a222-3190e2f4d04c"
-                        },
-                        {
-                            "description": "Etichetta \"IO47_DIRECT\"",
-                            "pos": {
-                                "x": 3.1239,
-                                "y": 6.25
-                            },
-                            "uuid": "bb6444e8-fcf6-4e74-9cbb-ea609e79320f"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "multiple_net_names"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'TERM_CTRL'",
-                            "pos": {
-                                "x": 3.1242,
-                                "y": 3.2639
-                            },
-                            "uuid": "7b88d3fc-6a58-459d-aed2-76fae99f9506"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 3.1747,
-                                "y": 6.25
-                            },
-                            "uuid": "03a06aa6-7cab-47dd-b856-70458319e718"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol R102 Pin 1 [Passivo, Linea]",
-                            "pos": {
-                                "x": 3.1747,
-                                "y": 6.25
-                            },
-                            "uuid": "a184bd62-4472-4c30-a83a-46c123e157d4"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "Capo filo non connesso",
                     "items": [
                         {
@@ -3163,21 +2779,6 @@
                     "type": "unconnected_wire_endpoint"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 3.2509,
-                                "y": 6.25
-                            },
-                            "uuid": "c0274768-64f7-4e31-a9b1-a33f5a24f97d"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
@@ -3189,12 +2790,12 @@
                             "uuid": "9beaacc3-0245-4d64-8464-7afa1b726549"
                         },
                         {
-                            "description": "Symbol R102 Pin 2 [Passivo, Linea]",
+                            "description": "Symbol U27 Pin 4 [A_OUT, Passivo, Linea]",
                             "pos": {
-                                "x": 3.2509,
-                                "y": 6.25
+                                "x": 4.1783,
+                                "y": 7.5057
                             },
-                            "uuid": "6ff39925-d1a7-4b01-b13e-8a2c2f9c93ac"
+                            "uuid": "f83efc9b-dce1-4d5d-b303-a204f4c3555d"
                         }
                     ],
                     "severity": "warning",
@@ -3667,29 +3268,6 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'SPI_MOSI'",
-                            "pos": {
-                                "x": 4.0005,
-                                "y": 1.9558
-                            },
-                            "uuid": "380fa6d3-b279-4546-b504-b0ef8ecbbdc3"
-                        },
-                        {
-                            "description": "Etichetta \"SPI_MOSI\"",
-                            "pos": {
-                                "x": 2.7175,
-                                "y": 6.25
-                            },
-                            "uuid": "25540936-f5da-472c-82e5-10badbdddf27"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
                     "description": "Capo filo non connesso",
                     "items": [
                         {
@@ -3796,6 +3374,29 @@
                     "type": "unconnected_wire_endpoint"
                 },
                 {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ISO_A1_N'",
+                            "pos": {
+                                "x": 4.3434,
+                                "y": 5.2832
+                            },
+                            "uuid": "88c1f84c-eb50-4423-96ed-cfef7c9ff1dc"
+                        },
+                        {
+                            "description": "Etichetta \"ISO_A1_N\"",
+                            "pos": {
+                                "x": 2.9024,
+                                "y": 5.5127
+                            },
+                            "uuid": "ae5ca585-c9b4-49ae-b060-8518a4fa7547"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
                     "description": "Capo filo non connesso",
                     "items": [
                         {
@@ -3839,6 +3440,52 @@
                     ],
                     "severity": "warning",
                     "type": "unconnected_wire_endpoint"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ISO_A2_N'",
+                            "pos": {
+                                "x": 4.3942,
+                                "y": 5.6134
+                            },
+                            "uuid": "56ee8bba-7b75-4158-9bc3-f1036ef2c161"
+                        },
+                        {
+                            "description": "Etichetta \"ISO_A2_N\"",
+                            "pos": {
+                                "x": 2.9024,
+                                "y": 5.4873
+                            },
+                            "uuid": "46ec2609-66ce-4a4b-9588-9ee38d715a83"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ISO_A3_N'",
+                            "pos": {
+                                "x": 4.3942,
+                                "y": 5.8674
+                            },
+                            "uuid": "9f32b05d-6811-449f-8c79-5539308b97ad"
+                        },
+                        {
+                            "description": "Etichetta \"ISO_A3_N\"",
+                            "pos": {
+                                "x": 2.9024,
+                                "y": 5.4619
+                            },
+                            "uuid": "c8c83afe-6025-4323-8bf4-de4c9e6079cd"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "Label connected to only one pin",
@@ -4500,24 +4147,77 @@
                     "description": "Local and global labels have same name",
                     "items": [
                         {
-                            "description": "Etichetta globale 'N_A5'",
+                            "description": "Etichetta globale 'P_GATE_0'",
                             "pos": {
-                                "x": 6.604,
-                                "y": 4.9022
+                                "x": 6.6548,
+                                "y": 1.1938
                             },
-                            "uuid": "1cf02bcf-1fbd-403f-a580-e881f157a005"
+                            "uuid": "3fbc05bb-0f0b-4b5f-b616-a0e75c300251"
                         },
                         {
-                            "description": "Etichetta \"N_A5\"",
+                            "description": "Etichetta \"P_GATE_0\"",
                             "pos": {
-                                "x": 14.2875,
-                                "y": 4.8768
+                                "x": 2.5976,
+                                "y": 5.4365
                             },
-                            "uuid": "4ff61205-c191-4c30-a00e-c8aaeb87a539"
+                            "uuid": "9e89b4e1-8e8b-4b66-8f15-7ca6310ac480"
                         }
                     ],
                     "severity": "warning",
                     "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'P_GATE_0'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 1.1938
+                            },
+                            "uuid": "3fbc05bb-0f0b-4b5f-b616-a0e75c300251"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_0'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 1.4986
+                            },
+                            "uuid": "b1cb4484-9f60-4798-9b36-58532b107c37"
+                        },
+                        {
+                            "description": "Etichetta \"N_GATE_0\"",
+                            "pos": {
+                                "x": 2.5976,
+                                "y": 5.4619
+                            },
+                            "uuid": "b86f3e1d-d379-4866-8457-301b579af17c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_0'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 1.4986
+                            },
+                            "uuid": "b1cb4484-9f60-4798-9b36-58532b107c37"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
                 },
                 {
                     "description": "Local and global labels have same name",
@@ -4543,6 +4243,97 @@
                     "type": "same_local_global_label"
                 },
                 {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'P_GATE_1'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 1.905
+                            },
+                            "uuid": "149ad24e-f9b9-4e44-9ae1-c7b3cb902dcb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_1'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 2.2098
+                            },
+                            "uuid": "751b605a-12d8-41ee-9c6c-4c6ed5dd64e2"
+                        },
+                        {
+                            "description": "Etichetta \"N_GATE_1\"",
+                            "pos": {
+                                "x": 2.5976,
+                                "y": 5.5127
+                            },
+                            "uuid": "743a82a1-502e-409c-8be6-161b183cb7d5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_1'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 2.2098
+                            },
+                            "uuid": "751b605a-12d8-41ee-9c6c-4c6ed5dd64e2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'P_GATE_2'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 2.6162
+                            },
+                            "uuid": "d361eaf7-4a54-4926-83c5-d7320361adcc"
+                        },
+                        {
+                            "description": "Etichetta \"P_GATE_2\"",
+                            "pos": {
+                                "x": 2.5976,
+                                "y": 5.5381
+                            },
+                            "uuid": "7cc1d924-0bd9-401c-8668-cf3211d314b7"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'P_GATE_2'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 2.6162
+                            },
+                            "uuid": "d361eaf7-4a54-4926-83c5-d7320361adcc"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
                     "description": "Local and global labels have same name",
                     "items": [
                         {
@@ -4564,6 +4355,21 @@
                     ],
                     "severity": "warning",
                     "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_2'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 2.921
+                            },
+                            "uuid": "e6b3dbb8-769d-4a87-b6c2-6b24cf7a7f38"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
                 },
                 {
                     "description": "Local and global labels have same name",
@@ -4589,6 +4395,59 @@
                     "type": "same_local_global_label"
                 },
                 {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'P_GATE_3'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 3.3274
+                            },
+                            "uuid": "16fc0ce6-0ff6-4b8a-8ac8-afa0ef0c9c96"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_3'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 3.6322
+                            },
+                            "uuid": "e1057818-1c0e-40a1-b200-6ed62968d80d"
+                        },
+                        {
+                            "description": "Etichetta \"N_GATE_3\"",
+                            "pos": {
+                                "x": 2.5976,
+                                "y": 5.6143
+                            },
+                            "uuid": "d3807896-3b9a-4f17-a1a0-9c879b813603"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_3'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 3.6322
+                            },
+                            "uuid": "e1057818-1c0e-40a1-b200-6ed62968d80d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
                     "description": "Local and global labels have same name",
                     "items": [
                         {
@@ -4610,6 +4469,21 @@
                     ],
                     "severity": "warning",
                     "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'P_GATE_5'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 4.7498
+                            },
+                            "uuid": "09fdc396-eaa1-4cd5-92a5-b1f256b25efa"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
                 },
                 {
                     "description": "Local and global labels have same name",
@@ -4635,6 +4509,21 @@
                     "type": "same_local_global_label"
                 },
                 {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_5'",
+                            "pos": {
+                                "x": 6.6548,
+                                "y": 5.0546
+                            },
+                            "uuid": "67475040-df64-468d-99f9-905045dfa95e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
                     "description": "Local and global labels have same name",
                     "items": [
                         {
@@ -4656,6 +4545,21 @@
                     ],
                     "severity": "warning",
                     "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'P_GATE_4'",
+                            "pos": {
+                                "x": 6.7564,
+                                "y": 4.0386
+                            },
+                            "uuid": "2124bb68-ea5e-4ad7-9d3d-e4ffa2f38ad2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
                 },
                 {
                     "description": "Local and global labels have same name",
@@ -4681,6 +4585,21 @@
                     "type": "same_local_global_label"
                 },
                 {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_GATE_4'",
+                            "pos": {
+                                "x": 6.7564,
+                                "y": 4.3434
+                            },
+                            "uuid": "0faa9e9b-0bbe-4c8e-ad45-5ab47f8887ef"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
                     "description": "Quattro elementi connessi a 6832600,1346200",
                     "items": [
                         {
@@ -4692,12 +4611,12 @@
                             "uuid": "a3a100a3-b801-4ca2-a233-0b032f1b5b56"
                         },
                         {
-                            "description": "Filo verticale, lung. 0.1016 mm",
+                            "description": "Filo orizzontale. lung. 0.1905 mm",
                             "pos": {
                                 "x": 6.8326,
                                 "y": 1.3462
                             },
-                            "uuid": "9f57d08a-e3f5-473f-b996-6eaabc23ddd2"
+                            "uuid": "11661dcc-6914-4526-ae24-e305ab2f25c6"
                         }
                     ],
                     "severity": "warning",
@@ -4710,17 +4629,17 @@
                             "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 6.8326,
-                                "y": 1.9558
-                            },
-                            "uuid": "6d18ae1a-cfd6-4a60-9b12-77a42e14489b"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.1016 mm",
-                            "pos": {
-                                "x": 6.8326,
                                 "y": 2.0574
                             },
                             "uuid": "5dd1a22e-8534-4740-8c05-e9cfb87cc405"
+                        },
+                        {
+                            "description": "Filo orizzontale. lung. 0.2286 mm",
+                            "pos": {
+                                "x": 6.604,
+                                "y": 2.0574
+                            },
+                            "uuid": "aeeb1cc7-5605-4a1e-b1e2-b9ec46dd26e1"
                         }
                     ],
                     "severity": "warning",
@@ -4730,20 +4649,20 @@
                     "description": "Quattro elementi connessi a 6832600,2768600",
                     "items": [
                         {
-                            "description": "Filo orizzontale. lung. 0.1905 mm",
-                            "pos": {
-                                "x": 6.8326,
-                                "y": 2.7686
-                            },
-                            "uuid": "7fde5db3-0a30-4d5e-aa37-4557f8954eac"
-                        },
-                        {
                             "description": "Filo orizzontale. lung. 0.2286 mm",
                             "pos": {
                                 "x": 6.604,
                                 "y": 2.7686
                             },
                             "uuid": "f1df0fe0-6741-4eb3-b376-6c6d2c9c2d4b"
+                        },
+                        {
+                            "description": "Filo verticale, lung. 0.1016 mm",
+                            "pos": {
+                                "x": 6.8326,
+                                "y": 2.667
+                            },
+                            "uuid": "f29637d4-9d71-44de-b1f6-b4bd0ed7e388"
                         }
                     ],
                     "severity": "warning",
@@ -4756,17 +4675,17 @@
                             "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 6.8326,
-                                "y": 3.4798
-                            },
-                            "uuid": "45e3c2c8-f6f5-44e6-b446-4321937c28c5"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.1016 mm",
-                            "pos": {
-                                "x": 6.8326,
                                 "y": 3.3782
                             },
                             "uuid": "90b698f4-4497-437f-ba60-cf9cffbd7f50"
+                        },
+                        {
+                            "description": "Filo orizzontale. lung. 0.1905 mm",
+                            "pos": {
+                                "x": 6.8326,
+                                "y": 3.4798
+                            },
+                            "uuid": "bd76ff15-f4f0-485f-b471-8b3ac26da1b7"
                         }
                     ],
                     "severity": "warning",
@@ -4882,29 +4801,6 @@
                     "description": "Local and global labels have same name",
                     "items": [
                         {
-                            "description": "Etichetta globale 'CTRL13'",
-                            "pos": {
-                                "x": 9.0297,
-                                "y": 2.9464
-                            },
-                            "uuid": "69130c6b-e230-453c-b0ef-0eb9c7142ef9"
-                        },
-                        {
-                            "description": "Etichetta \"CTRL13\"",
-                            "pos": {
-                                "x": 2.3111,
-                                "y": 6.25
-                            },
-                            "uuid": "b72ac45d-eaf6-4921-a687-4bdef7f6135e"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
                             "description": "Etichetta globale 'N_A3'",
                             "pos": {
                                 "x": 9.7409,
@@ -4919,29 +4815,6 @@
                                 "y": 4.7752
                             },
                             "uuid": "071a84c1-883e-45de-9a49-df201c02f9eb"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'CAN_TX'",
-                            "pos": {
-                                "x": 9.7409,
-                                "y": 2.9464
-                            },
-                            "uuid": "6046786c-a6e3-4862-af5c-21a916494694"
-                        },
-                        {
-                            "description": "Etichetta \"CAN_TX\"",
-                            "pos": {
-                                "x": 2.8953,
-                                "y": 6.25
-                            },
-                            "uuid": "bd4e5da8-93c5-4876-bcf1-d26e33531395"
                         }
                     ],
                     "severity": "warning",
@@ -4992,228 +4865,6 @@
                     ],
                     "severity": "warning",
                     "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'P_GATE_0'",
-                            "pos": {
-                                "x": 10.9474,
-                                "y": 1.1938
-                            },
-                            "uuid": "11678d00-fbc0-44aa-8f80-0bf8a4d54db0"
-                        },
-                        {
-                            "description": "Etichetta \"P_GATE_0\"",
-                            "pos": {
-                                "x": 2.5976,
-                                "y": 5.4365
-                            },
-                            "uuid": "9e89b4e1-8e8b-4b66-8f15-7ca6310ac480"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'N_GATE_0'",
-                            "pos": {
-                                "x": 10.9474,
-                                "y": 1.2446
-                            },
-                            "uuid": "802f7466-35d9-45ae-9e05-5494d2dfefba"
-                        },
-                        {
-                            "description": "Etichetta \"N_GATE_0\"",
-                            "pos": {
-                                "x": 2.5976,
-                                "y": 5.4619
-                            },
-                            "uuid": "b86f3e1d-d379-4866-8457-301b579af17c"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'N_GATE_1'",
-                            "pos": {
-                                "x": 10.9474,
-                                "y": 1.3462
-                            },
-                            "uuid": "3cc3f9a0-e1bf-4365-998f-30dd3b26e723"
-                        },
-                        {
-                            "description": "Etichetta \"N_GATE_1\"",
-                            "pos": {
-                                "x": 2.5976,
-                                "y": 5.5127
-                            },
-                            "uuid": "743a82a1-502e-409c-8be6-161b183cb7d5"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'P_GATE_2'",
-                            "pos": {
-                                "x": 10.9474,
-                                "y": 1.397
-                            },
-                            "uuid": "2d292fcb-23a3-4746-a7d0-57600d904c40"
-                        },
-                        {
-                            "description": "Etichetta \"P_GATE_2\"",
-                            "pos": {
-                                "x": 2.5976,
-                                "y": 5.5381
-                            },
-                            "uuid": "7cc1d924-0bd9-401c-8668-cf3211d314b7"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'N_GATE_3'",
-                            "pos": {
-                                "x": 10.9474,
-                                "y": 1.5494
-                            },
-                            "uuid": "75ac6e4d-4178-41b7-925a-7ce4e1e4edcd"
-                        },
-                        {
-                            "description": "Etichetta \"N_GATE_3\"",
-                            "pos": {
-                                "x": 2.5976,
-                                "y": 5.6143
-                            },
-                            "uuid": "d3807896-3b9a-4f17-a1a0-9c879b813603"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'ISO_A1_N'",
-                            "pos": {
-                                "x": 11.6586,
-                                "y": 1.2446
-                            },
-                            "uuid": "6e6f07d4-f6e7-497f-97ec-39277b364644"
-                        },
-                        {
-                            "description": "Etichetta \"ISO_A1_N\"",
-                            "pos": {
-                                "x": 2.9024,
-                                "y": 5.5127
-                            },
-                            "uuid": "ae5ca585-c9b4-49ae-b060-8518a4fa7547"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'ISO_A2_N'",
-                            "pos": {
-                                "x": 11.6586,
-                                "y": 1.2954
-                            },
-                            "uuid": "1a4b9137-fd43-4589-99eb-3da02e83e0c3"
-                        },
-                        {
-                            "description": "Etichetta \"ISO_A2_N\"",
-                            "pos": {
-                                "x": 2.9024,
-                                "y": 5.4873
-                            },
-                            "uuid": "46ec2609-66ce-4a4b-9588-9ee38d715a83"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'ISO_A3_N'",
-                            "pos": {
-                                "x": 11.6586,
-                                "y": 1.3462
-                            },
-                            "uuid": "64aada22-b1ed-45fa-bef2-59b079355605"
-                        },
-                        {
-                            "description": "Etichetta \"ISO_A3_N\"",
-                            "pos": {
-                                "x": 2.9024,
-                                "y": 5.4619
-                            },
-                            "uuid": "c8c83afe-6025-4323-8bf4-de4c9e6079cd"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Local and global labels have same name",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'ALED'",
-                            "pos": {
-                                "x": 11.6586,
-                                "y": 1.4986
-                            },
-                            "uuid": "5f19cecf-e67e-4e6e-aa0a-a089d9cbd070"
-                        },
-                        {
-                            "description": "Etichetta \"ALED\"",
-                            "pos": {
-                                "x": 3.3017,
-                                "y": 6.25
-                            },
-                            "uuid": "de44642c-e63f-4839-8f28-2ab64ae9915f"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "same_local_global_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Etichetta globale 'TERM_CTRL'",
-                            "pos": {
-                                "x": 11.6586,
-                                "y": 1.5494
-                            },
-                            "uuid": "eb35d89d-a68f-44e6-ba60-82750f1907f4"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
                 },
                 {
                     "description": "Symbol pin or wire end off connection grid",
@@ -5368,6 +5019,29 @@
                                 "y": 4.826
                             },
                             "uuid": "8570a03e-7cec-4c93-a4c5-ed5088b31372"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_A5'",
+                            "pos": {
+                                "x": 13.1445,
+                                "y": 2.8702
+                            },
+                            "uuid": "04785775-b893-4816-872e-18f8c38be2d9"
+                        },
+                        {
+                            "description": "Etichetta \"N_A5\"",
+                            "pos": {
+                                "x": 14.2875,
+                                "y": 4.8768
+                            },
+                            "uuid": "4ff61205-c191-4c30-a00e-c8aaeb87a539"
                         }
                     ],
                     "severity": "warning",

@@ -34,9 +34,9 @@ Physical_pin,Function,Net
 43,ESP_A5_43,A5
 69,BOOT_UART0_RX_69,AG_BOOT_UART_RX
 68,BOOT_UART0_TX_68,AG_BOOT_UART_TX
-7,LED_DATA_7,ALED
+7,LED_DATA_7,AG_LED_DATA
 93,CAN_RX_93,CAN_RX
-92,CAN_TX_92,CAN_TX
+92,CAN_TX_92,AG_CAN_TX
 86,SPI_CS_N_86,CTRL13
 87,SPI_SCLK_87,CTRL14
 85,DAC_BYPASS_N_85,DAC_BYPASS_N
@@ -51,39 +51,39 @@ Physical_pin,Function,Net
 97,ESP_IRQ_N_97,IO3
 95,EXT_I2C_SDA_95,IO4
 96,EXT_I2C_SCL_96,IO5
-64,ISO0_N_64,ISO_A0_N
-65,ISO1_N_65,ISO_A1_N
-66,ISO2_N_66,ISO_A2_N
-67,ISO3_N_67,ISO_A3_N
-35,ISO4_N_35,ISO_A4_N
-36,ISO5_N_36,ISO_A5_N
+64,SPARE_GPIO_64,NC / available after pin-mux validation
+65,SPARE_GPIO_65,NC / available after pin-mux validation
+66,SPARE_GPIO_66,NC / available after pin-mux validation
+67,SPARE_GPIO_67,NC / available after pin-mux validation
+35,ISO4_N_35,AG_ISO4_N
+36,ISO5_N_36,AG_ISO5_N
 44,DRIVE_A0_44,N_A0
 45,DRIVE_A1_45,N_A1
 46,DRIVE_A2_46,N_A2
 47,DRIVE_A3_47,N_A3
 48,DRIVE_A4_48,N_A4
 51,DRIVE_A5_51,N_A5
-53,N_GATE0_53,N_GATE_0
-55,N_GATE1_55,N_GATE_1
-57,N_GATE2_57,N_GATE_2
-59,N_GATE3_59,N_GATE_3
-61,N_GATE4_61,N_GATE_4
-63,N_GATE5_63,N_GATE_5
+53,SPARE_GPIO_53,NC / available after pin-mux validation
+55,SPARE_GPIO_55,NC / available after pin-mux validation
+57,SPARE_GPIO_57,NC / available after pin-mux validation
+59,SPARE_GPIO_59,NC / available after pin-mux validation
+61,SPARE_GPIO_61,NC / available after pin-mux validation
+63,SPARE_GPIO_63,NC / available after pin-mux validation
 23,ADC_A0/IN0_23,PORT_A0
 24,ADC_A1/IN1_24,PORT_A1
 25,ADC_A2/IN2_25,PORT_A2
 26,ADC_A3/IN3_26,PORT_A3
 31,ADC_A4/IN6_31,PORT_A4
 32,ADC_A5/IN7_32,PORT_A5
-52,P_GATE0_N_52,P_GATE_0
-54,P_GATE1_N_54,P_GATE_1
-56,P_GATE2_N_56,P_GATE_2
-58,P_GATE3_N_58,P_GATE_3
-60,P_GATE4_N_60,P_GATE_4
-62,P_GATE5_N_62,P_GATE_5
+52,AG_READY (peripheral ownership),AG_READY
+54,SPARE_GPIO_54,NC / available after pin-mux validation
+56,SPARE_GPIO_56,NC / available after pin-mux validation
+58,SPARE_GPIO_58,NC / available after pin-mux validation
+60,SPARE_GPIO_60,NC / available after pin-mux validation
+62,SPARE_GPIO_62,NC / available after pin-mux validation
 91,SPI_MISO_91,SPI_MISO
 88,SPI_MOSI_88,SPI_MOSI
-1,SPARE_CTRL_1,TERM_CTRL
+1,SPARE_CTRL_1,AG_TERM_CTRL
 100,VDD33_100,VCORE
 11,VDD33_11,VCORE
 21,VREFP_21,VCORE

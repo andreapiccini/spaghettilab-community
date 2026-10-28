@@ -1,3 +1,5 @@
+> Current peripheral ownership: [DUAL-CONTROLLER.md](DUAL-CONTROLLER.md) supersedes older direct AG gate drive and ESP-only bridge instructions.
+
 # ESP32 → AG32 programming provision
 
 Active target: AG32VF407VGT6, LQFP100. This change prepares the schematic, not the PCB routing or the ESP firmware.
