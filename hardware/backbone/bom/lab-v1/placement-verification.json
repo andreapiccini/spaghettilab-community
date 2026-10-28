@@ -1,0 +1,31 @@
+{
+  "review_only": true,
+  "pcb": "/Users/andreapiccini/dev/spaghettilab-community/hardware/backbone/backbone.kicad_pcb",
+  "main_pcb_unchanged": false,
+  "locked_preserved": [
+    "J2",
+    "J140",
+    "J3",
+    "J1",
+    "U1"
+  ],
+  "movable_top": 140,
+  "unplaced": [],
+  "tracks": 0,
+  "usb_pose": [
+    186.37499999999932,
+    115.12500000000021,
+    90.0
+  ],
+  "slot_mm": [
+    166.2,
+    77.8,
+    3,
+    2.5
+  ],
+  "notes": [
+    "Conservative 2D packing; no routing or manufacturability approval.",
+    "Fixed U1 is on B.Cu; all movable electronics on F.Cu.",
+    "Magnetic mating clearance and the custom LEDs still require mechanical verification."
+  ]
+}

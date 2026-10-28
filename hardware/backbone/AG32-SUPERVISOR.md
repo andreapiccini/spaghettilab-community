@@ -1,4 +1,57 @@
+# Current revision: internal ADC/DAC and assisted scan (2026-10-28)
+
+This section supersedes the historical external-converter descriptions below.
+- U20-U24 and their supply/reference/filter passives removed. Native ADC taps remain on the six post-shunt PORT_A0-A5 nets.
+- U14 pad29 DAC0 -> DAC_RAW; pad15 ADC_IN10 -> DAC_RAW; pad16 ADC_IN11 -> DAC_LIMITED. R77 4.7k0.1% connects RAW to LIMITED, with U13C as normally-open bypass.
+- U19 pad11/10/9 <- U14 pad78/79/80 independently; inhibit pad6 <- AG81 with R71 pull-up. R78 holds bypass disabled by default.
+- INA226 VBUS8 -> SHUNT_LOW_SELECTED (U18 common), shared with INA IN-9. Private INA I2C unchanged.
+- No new ICs. No dedicated occupancy detector. A known return path and weak excitation are necessary; high-impedance occupied contacts can look empty.
+- During scan: all MOSFETs off, digital GPIOs high-impedance, ESP switches open, R77 bypass open. Disable stimulus during selector changes. Native DAC loading/ADC settling must be tested; no analog rate or accuracy guarantee yet.
+- Main PCB synchronized and placed: 140 movable parts on F.Cu; J1/J140/J3, J2 and U1 locked poses retained, J9 magnetic position retained. USB faces right. Rear U1 remains B.Cu as locked. No tracks; 472 unconnected items. Prior Lab review is superseded. Placement is preliminary and must be routed and mechanically validated.
+- Current BOM/report: bom/lab-v1/index.html. Three assemblies retained; scan/INA/mux fitted in LAB, not AG_BASE or ESP_BASE.
+
+---
+
+## Current Base / Lab revision — 2026-10-28
+
+This section supersedes the historical controller, camera and instrument assignments below. The current schematic is the single-page backbone.kicad_sch. See [the Base/Lab report](bom/lab-v1/index.html), [assembly variants](bom/lab-v1/assembly-variants.csv), [current AG32 physical pin table](bom/lab-v1/AG32-pins.csv) and [verification](bom/lab-v1/verification.json).
+
+- Camera FPC J5, U9/U10 and their dedicated passives removed. Qwiic, ESP FlexyPin socket, all six A0–A5 paths, CAN transceiver, magnetic connectors, automatic termination and six RGB LEDs retained. Harwin footprints remain the mechanical reference, per user instruction; no recovered breadboard contacts have been qualified or substituted.
+- USB-C defaults directly to ESP32 through R17/R18. R81/R82 stay DNP. Never populate both USB paths.
+- Lab voltage acquisition: U20 ADC128S102CIMTX/NOPB, C179666; U22/U23 TLV9064IPWR, C779410; U24 REF3033AIDBZR, C36658. Six buffered post-shunt inputs, ADC IN6 monitors the buffered DAC through R97, IN7 is grounded for converter offset checks. All input voltages are single ended and within 0–3.3 V. VA/VD share the reference rail; ADC supply has its own 1uF and 100nF bypass, plus a separate digital 100nF. Buffer amplifiers run on 5 V for headroom.
+- Lab DAC: U21 DAC60501ZDGSR, C1852027, SPI mode with SPI2C grounded. Supply 5 V, internal 2.5 V reference with 1uF bypass. U23C gain 1 + 3.16k/10k = 1.316, nominal unloaded full scale about 3.29 V. U19 routes to one of six pre-shunt nodes; U13C bypasses R77 for normal mode. R77 remains available for later slow component experiments. The mux and bypass resistance remain in the output path: this is a signal stimulus, not a sensor power supply. U23D is terminated as a grounded follower, not left floating.
+- Dedicated Lab SPI: physical AG pins17=SCLK,33=MOSI,34=MISO,15=ADC_CS_N,16=DAC_CS_N. R103/R104 pull CS high and R105 holds SCLK low. These are intended fabric/peripheral assignments, not a compiled HDL design. ESP-facing SPI remains pins86/87/88/91; ESP programming UART/boot/reset and JTAG recovery pads retained.
+- INA226 U16 still has its private AG I2C82/83 and alert84. Two 4051 muxes select both shunt terminals. The Qwiic bus remains on AG95/96 and ESP GPIO4/5; firmware must establish one bus owner. 4051 exposed pad17 remains VCORE, never GND.
+- Physical automatic termination is independent of AG: J9 contact4 senses the next board through Q2/R4. The old TERM_CTRL/R30/FPC_CLK chain did not operate the relay and was camera-only; R30 was removed. AG pin1 is spare.
+
+### Assembly variants
+
+ESP_BASE: U25 TCA9535PWR(UMW), C22396388, C119 and R98–R102 fitted; U14, its clock/start-up/programming passives and all Lab components DNP. U25 address0x20 controls twelve MOS gates and ISO0–3. ESP GPIO13/14 control ISO4/5 through R98/R99; GPIO43/44 become CAN TX/RX through R100/R101; GPIO47 drives the RGB chain through R102. ESP is required on every board. Use 0R C17888 in R56–R61.
+
+AG_BASE: U14 fitted; U25/C119/R98–R102 DNP; Lab components DNP. ESP optional. Use 0R C17888 in R56–R61. R78 remains FIT in every variant so the spare DAC bypass channel is held off. All six analog isolation enables retain their pullups.
+
+LAB: U14 and Lab group fitted; U25/C119/R98–R102 DNP; six 0.1R 1% shunts C5123673 fitted. ESP optional for CAN slaves, required for the current USB/Wi-Fi path. ADC/DAC/INA/MUX parts and associated passives are omitted as a group in Base, not independently removed without a bias review.
+
+### Firmware requirements before hardware use
+
+1. Keep both MOSFETs off and the GPIO switches open before each mode change. Never enable both MOSFETs of one port. In ESP_BASE, keep GPIO13/14 high and write U25 output latches0x55/0xF5 before changing configuration registers to outputs.
+2. Keep DAC mux inhibited and DAC bypass off during boot. Wait for DAC POR, configure GAIN for a 2.5 V DAC range (reference divide1, output buffer gain1), write a known safe code, verify the DAC monitor, then enable a selected destination. The default DAC gain is2 and must not be used blindly. At 5 V the default full scale would exceed the port domain after the external gain stage.
+3. ADC128S102 uses 16 clock cycles per conversion; configure clocks within the datasheet range, validate the command/result pipeline and timestamp each channel. Six channels are sequential, not simultaneous. Characterize source impedance, settling, offset, noise and gain before advertising precision or bandwidth. Converter nominal 1 MS/s is not a validated USB/CAN streaming rate.
+4. INA scan: inhibit muxes, select, enable, settle, trigger one shunt-only conversion, wait ready, read and timestamp, then change channel. Do not switch channels mid-conversion. Store per-port offset/gain calibration. Its 25uA nominal current LSB with0.1R is not system accuracy; shunt1%, mux errors, offset and temperature apply. Budget600mA is shared across the board, not available independently per port.
+5. CAN slaves run locally; ESP communicates measurements/configuration over SPI. Coordinate Qwiic bus ownership before accessing external modules. No acquisition, protocol emulator, MCP server or HDL engine was implemented by this CAD revision.
+
+### Validation and PCB status
+
+151 connectivity checks pass and ERC has zero errors; remaining warnings are preserved in bom/lab-v1/erc.json and require library/drawing review. The update also repaired pre-existing opens in USB CC resistors, buck bootstrap/feedback and RGB chaining; original retained connected-net partitions were regression checked.
+
+The user-saved main backbone.kicad_pcb is untouched. A separate backbone-lab-placement-review.kicad_pcb contains a preliminary top arrangement within the expanded47.9x78.3mm outer outline, side-access USB and a small3x2.5mm internal extraction opening under ESP. Locked J2/J1/J140/J3/U1 poses retained; locked U1 remains B.Cu, all movable electronics are F.Cu. Four unlocked mounting holes moved inside the outline. No tracks, routing, production approval or validated 3D mating clearances. Magnetic mating, FlexyPin spring geometry, custom LEDs, extraction access, analog layout, power and firmware still require physical validation. Historical reports below are not the current BOM.
+
+---
+
 # AG32 universal backbone — branch hardware/ag32-supervisor
+
+## Single-page layout
+The active schematic is now entirely in `backbone.kicad_sch`, on one custom-size page with 19 dashed functional blocks and plain-English captions. The former child `ports-ag32.kicad_sch` is retained only as an inactive historical source; it is no longer in the sheet hierarchy. The connections, references, values and footprints are unchanged. No tester components were added. PCB positions, routing and locks were not edited. The PDF at `bom/ag32-supervisor/review.pdf` reflects this layout. Earlier descriptions below of a root/child split refer to the previous layout.
 
 ## Scope
 AG32VF407VGT6 (LCSC C5336269, LQFP100) replaces MSPM0G3507 U14, standalone FPGA U15 and XL9535 U11. U14 is now the combined MCU/programmable-logic/ADC/DAC supervisor. The six A0–A5 native ESP32 nets and J3/J1/J140 assignments are preserved. The optional ESP32 remains on the existing FlexyPin socket. No firmware or HDL has been built by this schematic change.
@@ -42,3 +95,9 @@ KiCad netlist and ERC verified; child has zero ERC violations. Root retains10 pr
 - https://www.agm-micro.com/upload/userfiles/files/AG32_DATASHEET_202303.pdf
 - https://www.agm-micro.com/upload/userfiles/files/AGRV2K_Rev_3_0.pdf
 - https://www.ag32mcu.com/dev-docs/doc_ag32_fpga_cpld_start/
+
+## Readability update
+The single-page layout now groups current measurement, adjustable test output and spare analog access into compact separate dashed blocks. Eighteen IC/clock sections have plain-English role captions, including an explicit note that U14A–U14G are parts of one AG32 package. Programming and spare local signals have explicit names. The page width is reduced from 1700 to 1590 mm. Electrical pin partitions were checked before/after; PCB unchanged. Removed one isolated, unconnected GND marker below the port block.
+
+## ESP32 programming provision — current assignment
+See `ESP32-AG32-PROGRAMMING.md`. ESP GPIO47/48 connect through R85/R86 to fixed AG UART0 RX69/TX68; GPIO15/16 command BOOT0/NRST through R87/R88. GPIO16 must be open-drain. ISO4/ISO5 move from AG68/69 to AG35/36. Existing SPI and JTAG are preserved. USB assembly now defaults to direct ESP (R17/R18 FIT; R81/R82 DNP), superseding the earlier AG-default description. Schematic and BOM updated; programming firmware and PCB routing are not implemented.

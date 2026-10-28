@@ -1,0 +1,499 @@
+{
+  "passed": 115,
+  "erc_errors": 0,
+  "erc_warnings": 267,
+  "checks": [
+    {
+      "check": "Independent mux control AG78",
+      "pass": true
+    },
+    {
+      "check": "Independent mux control AG79",
+      "pass": true
+    },
+    {
+      "check": "Independent mux control AG80",
+      "pass": true
+    },
+    {
+      "check": "Independent mux control AG81",
+      "pass": true
+    },
+    {
+      "check": "Raw DAC and raw ADC tap",
+      "pass": true
+    },
+    {
+      "check": "Limited ADC and mux common",
+      "pass": true
+    },
+    {
+      "check": "INA VBUS selected output",
+      "pass": true
+    },
+    {
+      "check": "Post-shunt native ADC 0",
+      "pass": true
+    },
+    {
+      "check": "DAC selectable path 0",
+      "pass": true
+    },
+    {
+      "check": "Post-shunt native ADC 1",
+      "pass": true
+    },
+    {
+      "check": "DAC selectable path 1",
+      "pass": true
+    },
+    {
+      "check": "Post-shunt native ADC 2",
+      "pass": true
+    },
+    {
+      "check": "DAC selectable path 2",
+      "pass": true
+    },
+    {
+      "check": "Post-shunt native ADC 3",
+      "pass": true
+    },
+    {
+      "check": "DAC selectable path 3",
+      "pass": true
+    },
+    {
+      "check": "Post-shunt native ADC 4",
+      "pass": true
+    },
+    {
+      "check": "DAC selectable path 4",
+      "pass": true
+    },
+    {
+      "check": "Post-shunt native ADC 5",
+      "pass": true
+    },
+    {
+      "check": "DAC selectable path 5",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '27')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '8')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '9')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '25')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '24')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J2', '4')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J2', '1')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J9', '1')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '7')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '3')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '12')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '4')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '7')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '17')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '8')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '18')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '11')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '39')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '38')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '12')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J2', '2')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J9', '2')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U2', '7')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J2', '3')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J9', '3')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U2', '6')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U2', '4')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U2', '1')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '21')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '22')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '1')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '40')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U2', '2')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '6')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U2', '8')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J9', '5')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '2')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J2', '5')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '10')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '15')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '4')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '5')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '6')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '19')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '20')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '10')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '11')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '23')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '28')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '29')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '30')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '31')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '32')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '33')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '34')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '35')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '26')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '16')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '14')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '13')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '1')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '2')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '1')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '2')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '4')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '3')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '4')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '3')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '6')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '5')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '6')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '5')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '7')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '8')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '7')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '8')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '9')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '10')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '9')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '10')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '12')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '12')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J140', '11')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J1', '11')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '36')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '37')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J9', '4')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '9')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '2')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U2', '3')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '1')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('J3', '5')",
+      "pass": true
+    },
+    {
+      "check": "Preserved external net ('U1', '3')",
+      "pass": true
+    },
+    {
+      "check": "No external converter components",
+      "pass": true
+    },
+    {
+      "check": "Main PCB unchanged incl locked positions",
+      "pass": true
+    },
+    {
+      "check": "Zero ERC errors",
+      "pass": true
+    }
+  ],
+  "pcb": "Main PCB synchronized and placed; see placement-verification.json and placement-drc.json. Not routed.",
+  "placement": {
+    "review_only": true,
+    "pcb": "/Users/andreapiccini/dev/spaghettilab-community/hardware/backbone/backbone.kicad_pcb",
+    "main_pcb_unchanged": false,
+    "locked_preserved": [
+      "J2",
+      "J140",
+      "J3",
+      "J1",
+      "U1"
+    ],
+    "movable_top": 140,
+    "unplaced": [],
+    "tracks": 0,
+    "usb_pose": [
+      186.37499999999932,
+      115.12500000000021,
+      90.0
+    ],
+    "slot_mm": [
+      166.2,
+      77.8,
+      3,
+      2.5
+    ],
+    "notes": [
+      "Conservative 2D packing; no routing or manufacturability approval.",
+      "Fixed U1 is on B.Cu; all movable electronics on F.Cu.",
+      "Magnetic mating clearance and the custom LEDs still require mechanical verification."
+    ]
+  }
+}
