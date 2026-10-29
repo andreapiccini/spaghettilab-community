@@ -1,3 +1,5 @@
+> Clarification: automatic CAN termination uses the physical J9/Q2/U8 circuit. U30 TERM_CTRL currently ends at R106 and does not control that relay. Earlier descriptions of software termination control are superseded. See [architecture map](ARCHITECTURE-MAP.md).
+
 > Current INA226/current-mux ownership and revised FPC SPI: [SHARED-INA-EXTERNAL-BUSES.md](SHARED-INA-EXTERNAL-BUSES.md). This supersedes the earlier dedicated INA I2C and spare FPC19–21 mapping.
 
 # Dual-controller peripheral control — 2026-10-29
@@ -22,7 +24,7 @@ U26–U30 are TI SN74LVC1G3157DCKR (LCSC C38663), SC70-6. Datasheet pinout check
 | RGB chain | GPIO21 / 23 | 7 | U27 / ALED |
 | Port P5 isolation | GPIO39 / 32 | 35 | U28 / ISO_A4_N |
 | Port P6 isolation | GPIO40 / 33 | 36 | U29 / ISO_A5_N |
-| CAN automatic termination command | GPIO38 / 31 | 1 | U30 / TERM_CTRL |
+| Reserved TERM_CTRL; not connected to termination relay | GPIO38 / 31 | 1 | U30 / TERM_CTRL |
 | Ownership | input via existing SPI protocol; no extra ESP pin | 52 | AG_READY, R103 100k pulldown |
 | MOSFET gates + P1–P4 isolation | GPIO4 SDA / GPIO5 SCL | 95 SDA / 96 SCL | U25 shared I2C, address 0x20 |
 

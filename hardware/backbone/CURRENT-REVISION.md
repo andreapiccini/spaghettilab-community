@@ -2,6 +2,10 @@
 
 This is the authoritative status summary for the main-branch CAD snapshot. Earlier placement, cost and external-converter reports are historical. The board is not routed or production-qualified.
 
+## Architecture overview
+
+[Visual map](bom/lab-v1/architecture-map.html) / [pin and activation reference](ARCHITECTURE-MAP.md): assembly modes, port routing, shared versus independent buses, and FPGA objectives. FPGA peripheral routing remains unvalidated. Correction: U30 TERM_CTRL has no connection to Q2/U8; automatic CAN termination is physical via TERM_CTRL_OUT. No software relay command is implemented.
+
 ## Shared current sensing and external buses
 
 [Shared INA and external buses](SHARED-INA-EXTERNAL-BUSES.md): INA226 joins IO4/IO5, accessible from both CPUs and external I2C. Current mux controls shared open-drain with ESP GPIO6/12/41/42, so populated current sensing works without AG32. External SPI exported on FPC19/20/21 with separate CS on4; shares AG SPI bus. AG spare FPC19–21 reassigned; spare signals remain on TP42–44. Added only R107/R108; reused R70/R79/R80. Firmware ownership required. Latest checks: 909 assertions, 648 pad matches, zero ERC errors/262 warnings; existing DRC count remains 611.
