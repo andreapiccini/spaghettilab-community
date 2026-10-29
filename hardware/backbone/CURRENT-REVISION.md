@@ -2,6 +2,10 @@
 
 This is the authoritative status summary for the main-branch CAD snapshot. Earlier placement, cost and external-converter reports are historical. The board is not routed or production-qualified.
 
+## Shared current sensing and external buses
+
+[Shared INA and external buses](SHARED-INA-EXTERNAL-BUSES.md): INA226 joins IO4/IO5, accessible from both CPUs and external I2C. Current mux controls shared open-drain with ESP GPIO6/12/41/42, so populated current sensing works without AG32. External SPI exported on FPC19/20/21 with separate CS on4; shares AG SPI bus. AG spare FPC19–21 reassigned; spare signals remain on TP42–44. Added only R107/R108; reused R70/R79/R80. Firmware ownership required. Latest checks: 909 assertions, 648 pad matches, zero ERC errors/262 warnings; existing DRC count remains 611.
+
 ## Dual-controller update
 
 [Dual-controller control](DUAL-CONTROLLER.md): LED chain, MOSFET configuration and CAN/termination now have ESP-only, AG-only and combined assembly paths. U25 is mandatory in every automatic variant; U26–U30 select five signals using AG_READY. Firmware handshake and bench validation remain open. Six ESP FPC signals are now shared control lines; see the updated FPC table. No independently unpowered-chip isolation.
@@ -14,7 +18,7 @@ This is the authoritative status summary for the main-branch CAD snapshot. Earli
 - Magnetic contact arrays and side-relief median centered at Y=101.15 mm. Relief nominal transitions at Y=89.15/113.15; rounded maximum outline 41.5×77.7 mm. Internal FPC and ESP extraction openings retained.
 - FPC J5 center (154.9,123.175) mm, matching slot Y=115.925–130.425 mm. Nearby unlocked components repacked; 0.65 mm reserved around FlexyPin pad envelopes. No mechanical qualification claimed.
 - Bottom silkscreen uses rounded frames, curved LED guides, P1–P6 repeated between connectors, 0.30 mm common-net guide lines and 1.05 mm port text. Mounting-hole rings and FPC border added. LED optical B.Mask apertures rounded; no physical hole or copper added under the optical windows.
-- Project contains 16 netclasses including Default, with 133 explicit net assignments; the intentionally unconnected INT net remains Default. Track, via and differential presets are in backbone.kicad_pro; custom rules in backbone.kicad_dru. USB geometry is preliminary pending fabrication stackup impedance calculation. CAN_H/L remain manually co-routed nets.
+- Project contains 16 netclasses including Default, with 127 explicit net assignments; the intentionally unconnected INT net remains Default. Track, via and differential presets are in backbone.kicad_pro; custom rules in backbone.kicad_dru. USB geometry is preliminary pending fabrication stackup impedance calculation. CAN_H/L remain manually co-routed nets.
 
 ## J3 electrically updated pinout
 

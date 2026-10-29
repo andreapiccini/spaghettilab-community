@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-29",
+  "checks_passed": 909,
+  "PCB_pad_matches": 648,
+  "all_existing_positions_preserved": true,
+  "ADC_ports_A0_A5_preserved": true,
+  "new_IC_count": 0,
+  "new_resistor_count": 2,
+  "ERC_errors": 0,
+  "ERC_warnings": 262,
+  "DRC_counts": {
+    "annular_width": 40,
+    "copper_edge_clearance": 20,
+    "missing_courtyard": 23,
+    "silk_edge_clearance": 8,
+    "lib_footprint_mismatch": 6,
+    "text_height": 116,
+    "silk_overlap": 199,
+    "silk_over_copper": 199
+  },
+  "unconnected": 499,
+  "tracks_and_vias": 0,
+  "firmware_and_physical_tests": false
+}

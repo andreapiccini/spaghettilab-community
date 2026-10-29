@@ -1,9 +1,9 @@
 J5_pin,Signal,Note
 1,GND,ESP GPIO / 3.3V domain
 2,VCORE,ESP GPIO / 3.3V domain
-3,IO6,ESP GPIO / 3.3V domain
-4,IO11,ESP GPIO / 3.3V domain
-5,IO12,ESP GPIO / 3.3V domain
+3,MEAS_S0,ESP GPIO6; shared open-drain current mux select0
+4,EXT_SPI_CS_N,"ESP GPIO11; external SPI chip-select, 100k pull-up"
+5,MEAS_S1,ESP GPIO12; shared open-drain current mux select1
 6,GND,ESP GPIO / 3.3V domain
 7,ESP_CAN_TX,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
 8,CAN_RX,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
@@ -13,13 +13,13 @@ J5_pin,Signal,Note
 12,ESP_ISO4_N,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
 13,ESP_ISO5_N,Shared with onboard controller-selection/CAN/LED function; not unrestricted expansion GPIO
 14,GND,ESP GPIO / 3.3V domain
-15,IO41,ESP GPIO / 3.3V domain
-16,IO42,ESP GPIO / 3.3V domain
-17,IO4,Shared Qwiic bus
-18,IO5,Shared Qwiic bus
-19,SPARE_IO_17,AG32 pin17; TP42; digital IO / ADC12
-20,SPARE_IO_33,AG32 pin33; TP43; digital IO / ADC14
-21,SPARE_IO_34,AG32 pin34; TP44; digital IO / ADC15
+15,MEAS_S2,ESP GPIO41; shared open-drain current mux select2
+16,MEAS_INHIBIT,ESP GPIO42; shared open-drain current mux inhibit; HIGH disables
+17,IO4,SDA: shared INA226 / U25 / Qwiic bus; ESP GPIO4
+18,IO5,SCL: shared INA226 / U25 / Qwiic bus; ESP GPIO5
+19,CTRL14,"SCLK: ESP GPIO14; SPI bus shared with AG32, separate CS"
+20,SPI_MOSI,MOSI: ESP GPIO43; SPI bus shared with AG32
+21,SPI_MISO,MISO: ESP GPIO44; inactive slaves must release MISO
 22,DAC1_SPARE,AG32 pin30; TP41; digital IO OR DAC1 / ADC5
 23,VCORE,ESP GPIO / 3.3V domain
 24,GND,ESP GPIO / 3.3V domain

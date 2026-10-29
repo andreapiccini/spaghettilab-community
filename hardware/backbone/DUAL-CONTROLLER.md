@@ -1,3 +1,5 @@
+> Current INA226/current-mux ownership and revised FPC SPI: [SHARED-INA-EXTERNAL-BUSES.md](SHARED-INA-EXTERNAL-BUSES.md). This supersedes the earlier dedicated INA I2C and spare FPC19–21 mapping.
+
 # Dual-controller peripheral control — 2026-10-29
 
 Implemented in schematic and unrouted PCB; firmware still required.

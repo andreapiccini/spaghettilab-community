@@ -930,14 +930,6 @@
         "pattern": "/INA_ALERT_N"
       },
       {
-        "netclass": "CONTROL",
-        "pattern": "/INA_SCL"
-      },
-      {
-        "netclass": "CONTROL",
-        "pattern": "/INA_SDA"
-      },
-      {
         "netclass": "FAST_DIGITAL",
         "pattern": "/LED_CHAIN_1"
       },
@@ -956,22 +948,6 @@
       {
         "netclass": "FAST_DIGITAL",
         "pattern": "/LED_CHAIN_5"
-      },
-      {
-        "netclass": "CONTROL",
-        "pattern": "/MEAS_INHIBIT"
-      },
-      {
-        "netclass": "CONTROL",
-        "pattern": "/MEAS_S0"
-      },
-      {
-        "netclass": "CONTROL",
-        "pattern": "/MEAS_S1"
-      },
-      {
-        "netclass": "CONTROL",
-        "pattern": "/MEAS_S2"
       },
       {
         "netclass": "ANALOG_SENSE",
@@ -1091,11 +1067,11 @@
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO11"
+        "pattern": "EXT_SPI_CS_N"
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO12"
+        "pattern": "MEAS_S1"
       },
       {
         "netclass": "FAST_DIGITAL",
@@ -1143,11 +1119,11 @@
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO41"
+        "pattern": "MEAS_S2"
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO42"
+        "pattern": "MEAS_INHIBIT"
       },
       {
         "netclass": "FAST_DIGITAL",
@@ -1163,7 +1139,7 @@
       },
       {
         "netclass": "FAST_DIGITAL",
-        "pattern": "IO6"
+        "pattern": "MEAS_S0"
       },
       {
         "netclass": "CONTROL",
