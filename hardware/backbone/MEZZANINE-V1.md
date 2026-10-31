@@ -1,10 +1,10 @@
-# Mezzanina AG32-LAB — revisione schematica 31 ottobre 2026
+# Mezzanina Expansion — revisione schematica 31 ottobre 2026
 
 **Stato aggiornato: schematici e disposizione dei due PCB aggiornati, nessuno sbroglio. Vedere [layout mezzanina](MEZZANINE-LAYOUT.md).** Il progetto carrier e la nuova scheda modulo sono due progetti elettrici separati; i contatti J10/J11 si accoppiano 1:1. La ripartizione elettrica seguente è quella del primo passaggio schematico. Il passaggio PCB successivo è documentato in MEZZANINE-LAYOUT.md e prevale sui riferimenti meccanici ancora pendenti riportati qui sotto.
 
 ## Ripartizione
 
-| Carrier | Mezzanina AG32-LAB |
+| Carrier | Mezzanina Expansion |
 |---|---|
 | FlexyPin ESP32, J1/J140/J3 e connettori magnetici | AG32VF407VGT6 e clock X1 |
 | Alimentazione 5V/3V3 e USB-C | ADC e DAC interni AG32, ingressi delle sei porte |
@@ -96,10 +96,19 @@ Moduli futuri possono riusare la stessa interfaccia per connettori, elaborazione
 4. Senza modulo, firmware ESP abilita i bypass desiderati. Con modulo, prima di usare inline FPGA aprire i bypass e verificare che gli altri driver siano Hi-Z.
 5. Configurare USB e CAN dopo alimentazione/clock; i collegamenti non sostituiscono stack USB, firmware CAN o bitstream.
 
-Schematici KiCad: `backbone.kicad_sch` (carrier), `mezzanine/ag32-lab/ag32-lab.kicad_sch` (modulo). PDF in `bom/mezzanine-v1/`. Nel modulo è creato il progetto autonomo `ag32-lab.kicad_pro`; nessuna PCB del modulo è stata creata. Anche il layout carrier esistente è deliberatamente ancora quello precedente.
+Schematici KiCad: `backbone.kicad_sch` (carrier), `mezzanine/expansion/expansion.kicad_sch` (modulo). PDF in `bom/mezzanine-v1/`. Nel modulo è creato il progetto autonomo `expansion.kicad_pro`; nessuna PCB del modulo è stata creata. Anche il layout carrier esistente è deliberatamente ancora quello precedente.
 
 ## Verifiche e fonti
 
 733 confronti net/pin e contatti accoppiati passati; tutti i nodi originali controllati con le modifiche intenzionali esplicite. ERC finale: carrier zero errori/201avvisi; modulo zero errori/77avvisi. Gli avvisi includono librerie legacy, etichette e griglia: non è un sign-off di produzione. Nessun DRC meccanico aggiornato perché il PCB non è stato modificato; nessun HDL compilato o test hardware eseguito. Footprint U31 e connettori mezzanina ancora da validare/assegnare. Vecchie BOM e mappe lab-v1 sono storiche e non descrivono più la ripartizione attiva.
 
 Fonti consultate31ottobre2026: [TI TS3USB221A](https://www.ti.com/lit/ds/symlink/ts3usb221a.pdf), [LCSC C128396](https://www.lcsc.com/product-detail/C128396.html), [BergStak C254696](https://www.lcsc.com/product-detail/C254696.html), [coppia Amphenol](https://www.tti.com/content/dam/ttiinc/manufacturers/amphenol/icc/products/pdf/amphenol_icc_basics.pdf). Associazioni funzionali e pin verificati anche contro la netlist precedente e i due schematici esportati. Nessun plugin specializzato per schemi a blocchi era disponibile: il diagramma è fornito in Mermaid e SVG modificabile.
+
+### Correzione distinta U25/C119
+Il vecchio attributo ESP_BASE_ONLY/DNP su U25 TCA9535 e C119 è stato corretto in COMMON/montato: l’expander pilota gate MOSFET e ISO0–3 anche con Expansion presente. La sua omissione non è una variante funzionale dell’architettura attuale. Collegamenti elettrici invariati.
+
+## 2026-10-31 — Universal interface update
+The previous57signal-net/25NCcontract is superseded by [Expansion interfaceV2](EXPANSION-INTERFACE-V2.md):22additionalnets,79signalnetsin total,3reservedcontacts. These added contacts are unused by AG32 and available for future modules. See updatedinterface-pinout.csv.
+
+## 2026-10-31 — Passives0603
+All carrier andExpansion resistors/capacitors now0603imperial/1608metricfor manual assembly. Prior0402/0805/1206selections are superseded by [PASSIVES-0603.md](PASSIVES-0603.md). Updated active BOMs govern purchasing.

@@ -38,8 +38,8 @@ R85,1k,Resistor_SMD:R_0603_1608Metric,C21190,False,module
 R86,1k,Resistor_SMD:R_0603_1608Metric,C21190,False,module
 R87,1k,Resistor_SMD:R_0603_1608Metric,C21190,False,module
 R88,1k,Resistor_SMD:R_0603_1608Metric,C21190,False,module
-R107,10k,Resistor_SMD:R_0402_1005Metric,C25744,False,module
-R108,100k,Resistor_SMD:R_0402_1005Metric,C25741,False,module
+R107,10k,Resistor_SMD:R_0603_1608Metric,C25804,False,module
+R108,100k,Resistor_SMD:R_0603_1608Metric,C25803,False,module
 R109,10k,Resistor_SMD:R_0603_1608Metric,C25804,False,module
 R116,0R,Resistor_SMD:R_0603_1608Metric,C21189,False,module
 TP18,SMD/0.6mm,TestPoint:TestPoint_Pad_D1.0mm,,False,module

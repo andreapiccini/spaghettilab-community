@@ -1,3 +1,5 @@
+> **Package update2026-10-31:** all R/Care now0603. Earlier0402selections and the initial RGBcap placement below are superseded by [PASSIVES-0603.md](PASSIVES-0603.md). The11RGBcourtyard overlaps were resolved.
+
 > Superseded for the active schematic split on2026-10-31: see [MEZZANINE-V1.md](MEZZANINE-V1.md). This file describes the previous integrated-board revision; its placement and ownership details are historical.
 
 > Clarification: automatic CAN termination uses the physical J9/Q2/U8 circuit. U30 TERM_CTRL currently ends at R106 and does not control that relay. Earlier descriptions of software termination control are superseded. See [architecture map](ARCHITECTURE-MAP.md).

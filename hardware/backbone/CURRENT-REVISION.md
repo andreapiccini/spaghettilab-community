@@ -1,9 +1,11 @@
+> **Assembly requirement:** all resistors and capacitors0603imperial/1608metric. See [PASSIVES-0603.md](PASSIVES-0603.md). No0402parts in the current carrier/Expansion R/CBOMs.
+
 ## Aggiornamento PCB mezzanina —31 ottobre2026
 Disposizione carrier/modulo aggiornata localmente, senza sbroglio. [Layout, ingombri e limiti](MEZZANINE-LAYOUT.md). Preservati bloccati, contorno esterno carrier, fissaggi, RGB e magnetici; rimossa la vecchia asola FPC.
 
-# Current schematic revision — mezzanine AG32-LAB, 2026-10-31
+# Current schematic revision — mezzanine Expansion, 2026-10-31
 
-The active schematic is now split into carrier `backbone.kicad_sch` and independent module `mezzanine/ag32-lab/ag32-lab.kicad_sch`. See [mezzanine block map](bom/mezzanine-v1/index.html) and [interface/behavior contract](MEZZANINE-V1.md).
+The active schematic is now split into carrier `backbone.kicad_sch` and independent module `mezzanine/expansion/expansion.kicad_sch`. See [mezzanine block map](bom/mezzanine-v1/index.html) and [interface/behavior contract](MEZZANINE-V1.md).
 
 AG32, clock, INA/mux/ADC/DAC functions and FPC move to the module. Carrier retains shunts, ESP buffers, MOSFETs, U25 and physical services. USB U31 and CAN selection follow module claim; presence is separate. Two60-contact connector pairs are assigned electrically; footprints/mechanics remain pending. FPGA pin access/HDL/USB firmware remain unqualified.
 

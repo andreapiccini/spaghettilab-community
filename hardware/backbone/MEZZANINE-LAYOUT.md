@@ -1,11 +1,11 @@
-# Carrier + AG32-LAB — disposizione PCB, 31 ottobre 2026
+# Carrier + Expansion — disposizione PCB, 31 ottobre 2026
 
 **Disposizione aggiornata, PCB ancora senza piste. Non è un rilascio per produzione.** Revisione sul branch `hardware/mezzanine-ag32`.
 
 ## File attivi
 
 - Carrier: `backbone.kicad_pcb`.
-- Modulo: `mezzanine/ag32-lab/ag32-lab.kicad_pcb`, progetto autonomo.
+- Modulo: `mezzanine/expansion/expansion.kicad_pcb`, progetto autonomo.
 - [Render e controlli](bom/mezzanine-v1/layout.html), [contratto elettrico](MEZZANINE-V1.md).
 
 ## Ingombri e accesso

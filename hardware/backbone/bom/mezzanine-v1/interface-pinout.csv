@@ -84,33 +84,33 @@ J11,22,USB_SW_AG_P,receptacle 61082-061402LF,plug 61083-061402LF,
 J11,23,USB_VBUS_SENSE,receptacle 61082-061402LF,plug 61083-061402LF,
 J11,24,~{RESET},receptacle 61082-061402LF,plug 61083-061402LF,
 J11,25,GND,receptacle 61082-061402LF,plug 61083-061402LF,
-J11,26,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,27,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,28,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,29,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
+J11,26,P_GATE_0,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,27,N_GATE_0,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,28,P_GATE_1,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,29,N_GATE_1,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
 J11,30,GND,receptacle 61082-061402LF,plug 61083-061402LF,
-J11,31,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,32,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,33,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,34,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
+J11,31,P_GATE_2,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,32,N_GATE_2,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,33,P_GATE_3,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,34,N_GATE_3,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
 J11,35,GND,receptacle 61082-061402LF,plug 61083-061402LF,
-J11,36,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,37,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,38,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,39,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
+J11,36,P_GATE_4,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,37,N_GATE_4,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,38,P_GATE_5,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,39,N_GATE_5,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
 J11,40,GND,receptacle 61082-061402LF,plug 61083-061402LF,
-J11,41,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,42,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,43,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,44,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
+J11,41,ISO_A0_N,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,42,ISO_A1_N,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,43,ISO_A2_N,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
+J11,44,ISO_A3_N,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. Shared gate/ISO: release U25 before drive.
 J11,45,GND,receptacle 61082-061402LF,plug 61083-061402LF,
-J11,46,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,47,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,48,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,49,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
+J11,46,CAN_H,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion.
+J11,47,CAN_L,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion.
+J11,48,TERM_CTRL_IN,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion.
+J11,49,TERM_CTRL_OUT,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion.
 J11,50,GND,receptacle 61082-061402LF,plug 61083-061402LF,
-J11,51,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,52,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
+J11,51,VBUS,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. VBUS is USB voltage.
+J11,52,LED_EXP_DATA,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion.
 J11,53,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
 J11,54,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
 J11,55,GND,receptacle 61082-061402LF,plug 61083-061402LF,

@@ -1,0 +1,51 @@
+{
+  "carrier": {
+    "passives_0603": 70,
+    "converted": 23,
+    "pin_net_nodes_identical": 533,
+    "erc_errors": 0,
+    "erc_warnings": 184,
+    "drc_before": {
+      "annular_width": 40,
+      "courtyards_overlap": 11,
+      "copper_edge_clearance": 20,
+      "missing_courtyard": 13,
+      "silk_edge_clearance": 88,
+      "lib_footprint_mismatch": 6,
+      "text_height": 6,
+      "silk_overlap": 199,
+      "silk_over_copper": 199
+    },
+    "drc_after": {
+      "annular_width": 40,
+      "copper_edge_clearance": 20,
+      "missing_courtyard": 13,
+      "silk_edge_clearance": 88,
+      "lib_footprint_mismatch": 6,
+      "text_height": 6,
+      "silk_overlap": 199,
+      "silk_over_copper": 199
+    },
+    "new_drc_findings": 0,
+    "locked_components_connectors_leds_outline_tracks_unchanged": true,
+    "project_settings_unchanged": true
+  },
+  "expansion": {
+    "passives_0603": 39,
+    "converted": 2,
+    "pin_net_nodes_identical": 435,
+    "erc_errors": 0,
+    "erc_warnings": 107,
+    "drc_before": {
+      "npth_inside_courtyard": 2,
+      "lib_footprint_mismatch": 3
+    },
+    "drc_after": {
+      "npth_inside_courtyard": 2,
+      "lib_footprint_mismatch": 3
+    },
+    "new_drc_findings": 0,
+    "locked_components_connectors_leds_outline_tracks_unchanged": true,
+    "project_settings_unchanged": true
+  }
+}
