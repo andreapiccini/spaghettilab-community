@@ -76,6 +76,8 @@ export class CoreSession {
     return [...this.latestRecords.values()];
   }
 
+  private readonly reportedObserverErrors = new WeakSet<object>();
+
   private readonly recordListeners = new Set<(payload: RecordEventPayload) => void>();
   private readonly discoveryListeners = new Set<(payload: DiscoveryEventPayload) => void>();
 
@@ -160,6 +162,22 @@ export class CoreSession {
     return this.bootId;
   }
 
+  /** UI observers cannot terminate the shared record/discovery stream. */
+  private notifyObservers<T>(listeners: ReadonlySet<(payload: T) => void>, payload: T): void {
+    for (const listener of listeners) {
+      try {
+        listener(payload);
+      } catch (error) {
+        // Report once per subscriber: retry it on later events without flooding
+        // the console or preventing healthy viewers from receiving readings.
+        if (!this.reportedObserverErrors.has(listener)) {
+          this.reportedObserverErrors.add(listener);
+          console.error("CoreSession event observer failed", error);
+        }
+      }
+    }
+  }
+
   private async consumeEvents(): Promise<void> {
     try {
       for await (const event of this.eventStream) {
@@ -169,11 +187,11 @@ export class CoreSession {
           this.latestRecords.delete(key);
           this.latestRecords.set(key, { payload: event.payload, at: Date.now() });
           if (this.latestRecords.size > 128) this.latestRecords.delete(this.latestRecords.keys().next().value!);
-          for (const listener of this.recordListeners) listener(event.payload);
+          this.notifyObservers(this.recordListeners, event.payload);
           continue;
         }
         if (event.kind === "discovery") {
-          for (const listener of this.discoveryListeners) listener(event.payload);
+          this.notifyObservers(this.discoveryListeners, event.payload);
           continue;
         }
         if (event.kind !== "status") continue;

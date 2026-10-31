@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   canonicalProjectHash,
   coreBindingId,
@@ -656,4 +656,46 @@ describe("latest viewer records", () => {
     session.disconnect();
     expect(session.getRecentRecords()).toEqual([]);
   });
+});
+
+
+it("keeps temperature events flowing after an observer throws", async () => {
+  const { session, responder, transport } = makeSession();
+  await runToCompletion(() => session.connect(), responder);
+  const report = vi.spyOn(console, "error").mockImplementation(() => {});
+  try {
+    const received: number[] = [];
+    let fail = true;
+    session.onRecordEvent(() => { if (fail) throw new Error("Canvas observer failed"); });
+    session.onRecordEvent(payload => received.push(payload.sequence));
+    transport.deliverEvent(fakeRecordEvent(1, 7, "sensor.temperature", 1));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    fail = false;
+    transport.deliverEvent(fakeRecordEvent(2, 7, "sensor.temperature", 1));
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    expect(received).toEqual([1, 2]);
+    expect(session.getRecentRecords().at(-1)?.payload.sequence).toBe(2);
+    expect(session.state).toBe("READY");
+    expect(report).toHaveBeenCalledTimes(1);
+  } finally { session.dispose(); report.mockRestore(); }
+});
+
+it("isolates discovery observer failures from later temperature records", async () => {
+  const { session, responder, transport } = makeSession();
+  await runToCompletion(() => session.connect(), responder);
+  const report = vi.spyOn(console, "error").mockImplementation(() => {});
+  try {
+    const received: number[] = [], discoveries: number[] = [];
+    session.onDiscoveryEvent(() => { throw new Error("Discovery observer failed"); });
+    session.onDiscoveryEvent(payload => discoveries.push(payload.candidateId));
+    session.onRecordEvent(payload => received.push(payload.sequence));
+    for (let n = 1; n <= 2; n++) {
+      transport.deliverEvent(fakeDiscoveryEvent(n, n, 2, n));
+      transport.deliverEvent(fakeRecordEvent(n, 7, "sensor.temperature", 1));
+    }
+    for (let i = 0; i < 30; i++) await Promise.resolve();
+    expect(discoveries).toEqual([1, 2]);
+    expect(received).toEqual([1, 2]);
+    expect(report).toHaveBeenCalledTimes(1);
+  } finally { session.dispose(); report.mockRestore(); }
 });
