@@ -1,0 +1,1352 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-31T12:02:36",
+    "ignored_checks": [
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "10.0.3",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/6246b1db-f4fd-4e0d-a4cd-582cd8c08be0",
+            "violations": [
+                {
+                    "description": "La configurazione corrente non include la libreria di simboli 'STMICRO'",
+                    "items": [
+                        {
+                            "description": "Simbolo TP21 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
+                            "pos": {
+                                "x": 1.587216,
+                                "y": 1.8669
+                            },
+                            "uuid": "4f8bbb33-03d7-489f-bb9c-5bec56612e7c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol TP21 Pin 1 [1, Passivo, Linea]",
+                            "pos": {
+                                "x": 1.587216,
+                                "y": 1.8923
+                            },
+                            "uuid": "407bde87-f7f2-41c6-9b03-d06e07a82528"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0003 mm",
+                            "pos": {
+                                "x": 1.587216,
+                                "y": 1.8923
+                            },
+                            "uuid": "a880b839-eb56-45cc-97e7-b1e900604659"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0886 mm",
+                            "pos": {
+                                "x": 1.4986,
+                                "y": 1.8923
+                            },
+                            "uuid": "d6cea5d0-33a6-4a0d-8b00-75dc928c7b1a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "La configurazione corrente non include la libreria di simboli 'STMICRO'",
+                    "items": [
+                        {
+                            "description": "Simbolo TP18 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
+                            "pos": {
+                                "x": 1.5875,
+                                "y": 1.8161
+                            },
+                            "uuid": "fe559076-9708-44cd-ab7f-af8209ec3c76"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "La configurazione corrente non include la libreria di simboli 'STMICRO'",
+                    "items": [
+                        {
+                            "description": "Simbolo TP19 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
+                            "pos": {
+                                "x": 1.5875,
+                                "y": 1.8415
+                            },
+                            "uuid": "cf77e783-84c7-4d5e-beb9-beb5b98d703f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Capo filo non connesso",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0003 mm",
+                            "pos": {
+                                "x": 1.587216,
+                                "y": 1.8923
+                            },
+                            "uuid": "a880b839-eb56-45cc-97e7-b1e900604659"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "unconnected_wire_endpoint"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ISO_A5_N'",
+                            "pos": {
+                                "x": 5.334,
+                                "y": 9.4488
+                            },
+                            "uuid": "32c32646-cd16-44d0-942f-fd55b1862230"
+                        },
+                        {
+                            "description": "Etichetta \"ISO_A5_N\"",
+                            "pos": {
+                                "x": 8.2008,
+                                "y": 6.2
+                            },
+                            "uuid": "9a0f2195-a4d1-4451-bf47-720a7bfeb5de"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ISO_A5_N'",
+                            "pos": {
+                                "x": 5.334,
+                                "y": 9.4488
+                            },
+                            "uuid": "32c32646-cd16-44d0-942f-fd55b1862230"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol J5 Pin 1 [1, Passivo, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8001
+                            },
+                            "uuid": "3996cded-57e2-432c-ad0d-7a3d7e9b8355"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9801 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8001
+                            },
+                            "uuid": "bd09a9a7-0c9a-4824-971c-f87d55253cde"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9802 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8255
+                            },
+                            "uuid": "a8f3312e-3af9-43ef-8fe7-f5a3f2f42e8c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8509
+                            },
+                            "uuid": "e37a6eed-4bff-4401-8c01-94b98a0bdb3d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.8763
+                            },
+                            "uuid": "39be501b-ee01-4a69-b6c2-e96bea23a15c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.9017
+                            },
+                            "uuid": "45c3284f-83f1-4d9d-9e4d-338875567bb8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9803 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.9271
+                            },
+                            "uuid": "4cdb13a6-f4fb-48a1-b8f5-d0fea666def3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.9525
+                            },
+                            "uuid": "6f544576-ad58-4a4d-a664-1a98243a7394"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 0.9779
+                            },
+                            "uuid": "030f082f-e0db-42d2-b1bf-da175777dfe7"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.0033
+                            },
+                            "uuid": "2e69c711-4d22-45da-9471-d5363a64e52d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9804 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.0287
+                            },
+                            "uuid": "5be28626-568a-464e-94bb-2c331832e90f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.0541
+                            },
+                            "uuid": "4d7018ca-a41f-4c2b-bb31-14be71c94080"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.0795
+                            },
+                            "uuid": "4d0cf6af-a69a-44d4-96fb-ad9251e00274"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.1049
+                            },
+                            "uuid": "287a5bbd-3df8-49f9-9108-e7c79a1f97ae"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9805 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.1303
+                            },
+                            "uuid": "44ff4b02-c0ad-4022-a0b5-89ff22a74b72"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.1557
+                            },
+                            "uuid": "df587d0e-d2a2-46b8-af0b-66d07550e834"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.1811
+                            },
+                            "uuid": "0eac80dd-c0df-4a34-a26c-5654a275883d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.2065
+                            },
+                            "uuid": "b15a9d8e-3cd7-44d8-9b6c-21a8fca857d4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.2319
+                            },
+                            "uuid": "b0b65e05-5e1c-4bfd-95fb-443720316228"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.2573
+                            },
+                            "uuid": "df0bed6c-03a3-40f8-9759-7c334ceba033"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.2827
+                            },
+                            "uuid": "4d8e344b-06f2-46ed-a6c4-d35eee8860ca"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.3081
+                            },
+                            "uuid": "de63ab48-0da2-4232-ad10-3b317f8c8450"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.3335
+                            },
+                            "uuid": "b0e805fd-26d7-4770-ad91-0423162e103a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9810 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.3589
+                            },
+                            "uuid": "d66ae2b5-8c9c-4981-be11-44d010752b9d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9811 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 5.4992,
+                                "y": 1.3843
+                            },
+                            "uuid": "1bfac52f-4c76-454b-a268-9505cd8e6a7f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ISO_A4_N'",
+                            "pos": {
+                                "x": 5.6134,
+                                "y": 9.4234
+                            },
+                            "uuid": "dadfdc4f-24fb-4b7d-a9cf-a3a2e4fe6e65"
+                        },
+                        {
+                            "description": "Etichetta \"ISO_A4_N\"",
+                            "pos": {
+                                "x": 7.8508,
+                                "y": 6.2
+                            },
+                            "uuid": "fc9e00b2-cf10-4bc5-94f9-920d6eb88925"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ISO_A4_N'",
+                            "pos": {
+                                "x": 5.6134,
+                                "y": 9.4234
+                            },
+                            "uuid": "dadfdc4f-24fb-4b7d-a9cf-a3a2e4fe6e65"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 7.8,
+                                "y": 6.2
+                            },
+                            "uuid": "2f41182a-d014-4175-9810-94ab4a69ade3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol TP45 Pin 1 [1, Passivo, Linea]",
+                            "pos": {
+                                "x": 7.8,
+                                "y": 6.2
+                            },
+                            "uuid": "3d104b34-f016-4aca-adaa-30ecc656596c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol TP46 Pin 1 [1, Passivo, Linea]",
+                            "pos": {
+                                "x": 8.15,
+                                "y": 6.2
+                            },
+                            "uuid": "04fa0fb0-2df1-4278-8675-660af4b820c1"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 8.15,
+                                "y": 6.2
+                            },
+                            "uuid": "95f7bab8-318a-4803-9f7a-b23c797bd899"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG990 Pin 1 [Uscita potenza, Linea]",
+                            "pos": {
+                                "x": 9.5,
+                                "y": 10.35
+                            },
+                            "uuid": "6d374296-b7d5-4fa4-842b-c8c69728803c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR11095 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 9.5,
+                                "y": 10.35
+                            },
+                            "uuid": "7c0da353-1257-4cdb-8b93-66ea9ad6239e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'CAN_RX'",
+                            "pos": {
+                                "x": 9.7409,
+                                "y": 2.9972
+                            },
+                            "uuid": "9954641d-c32d-437c-8e22-4e669fb8da61"
+                        },
+                        {
+                            "description": "Etichetta \"CAN_RX\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 0.9779
+                            },
+                            "uuid": "0fd52bf5-0f46-4236-9d6c-9c9c80b88b2c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG991 Pin 1 [Uscita potenza, Linea]",
+                            "pos": {
+                                "x": 10.3,
+                                "y": 10.35
+                            },
+                            "uuid": "9ffa3ef6-288e-46c8-accc-65b8d8d8e099"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR11096 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 10.3,
+                                "y": 10.35
+                            },
+                            "uuid": "bcd2ff02-91ff-4fb0-9e68-91a7f37e263b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ESP_PROG_TX'",
+                            "pos": {
+                                "x": 10.9474,
+                                "y": 1.2954
+                            },
+                            "uuid": "b7d9f390-3b4f-4b46-be4a-1c24b6a85a50"
+                        },
+                        {
+                            "description": "Etichetta \"ESP_PROG_TX\"",
+                            "pos": {
+                                "x": 9.8806,
+                                "y": 5.4356
+                            },
+                            "uuid": "48514375-81e2-44aa-aa64-739b9d733e0e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ESP_CAN_TX'",
+                            "pos": {
+                                "x": 10.9474,
+                                "y": 1.3462
+                            },
+                            "uuid": "743d766e-b83b-4826-b7c5-cbd3f5645512"
+                        },
+                        {
+                            "description": "Etichetta \"ESP_CAN_TX\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 0.9525
+                            },
+                            "uuid": "d686a609-481c-4e9a-a023-d749b1ba1e0f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ESP_ISO4_N'",
+                            "pos": {
+                                "x": 10.9474,
+                                "y": 1.397
+                            },
+                            "uuid": "251eaad4-cfe9-4efc-bed2-cd1b42368399"
+                        },
+                        {
+                            "description": "Etichetta \"ESP_ISO4_N\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.0795
+                            },
+                            "uuid": "ae001fda-e9b4-4a31-9f32-d04ed61b17be"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ESP_ISO5_N'",
+                            "pos": {
+                                "x": 10.9474,
+                                "y": 1.4478
+                            },
+                            "uuid": "96206407-c015-4920-a666-87770977d94a"
+                        },
+                        {
+                            "description": "Etichetta \"ESP_ISO5_N\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.1049
+                            },
+                            "uuid": "c112a3d3-d4f6-4d8f-97aa-0886cb579542"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ESP_LED_DATA'",
+                            "pos": {
+                                "x": 10.9474,
+                                "y": 1.4986
+                            },
+                            "uuid": "4d229cd3-f641-4605-b289-d09029404208"
+                        },
+                        {
+                            "description": "Etichetta \"ESP_LED_DATA\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.0033
+                            },
+                            "uuid": "12305d07-796a-41a6-8b17-35bcfa5a907f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'MEZZ_PRESENT_N'",
+                            "pos": {
+                                "x": 10.9474,
+                                "y": 1.5494
+                            },
+                            "uuid": "9d809a1f-0388-4708-b292-1fbd07f77628"
+                        },
+                        {
+                            "description": "Etichetta \"MEZZ_PRESENT_N\"",
+                            "pos": {
+                                "x": 5.4484,
+                                "y": 1.0541
+                            },
+                            "uuid": "07249cf1-5e58-4d3c-b588-e5a3165def7b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR11097 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 11.1,
+                                "y": 10.35
+                            },
+                            "uuid": "359c033b-eeed-410c-842e-e971790bcdde"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG992 Pin 1 [Uscita potenza, Linea]",
+                            "pos": {
+                                "x": 11.1,
+                                "y": 10.35
+                            },
+                            "uuid": "8a9d735e-52b7-4918-9e45-dadf564427a9"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ESP_AG_BOOT0'",
+                            "pos": {
+                                "x": 11.6586,
+                                "y": 1.3462
+                            },
+                            "uuid": "0557760d-38a8-4c70-beda-22940f368e04"
+                        },
+                        {
+                            "description": "Etichetta \"ESP_AG_BOOT0\"",
+                            "pos": {
+                                "x": 9.8806,
+                                "y": 5.7912
+                            },
+                            "uuid": "e27e833a-69f2-47b3-a325-5d6c1347b681"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9023 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 11.9,
+                                "y": 3.7619
+                            },
+                            "uuid": "3a0eae54-d99e-4731-a07d-3bea23d3ba22"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol C121 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 11.9,
+                                "y": 3.7619
+                            },
+                            "uuid": "c49d112b-301f-4ee9-9dc9-373e252efcb9"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9024 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 11.9,
+                                "y": 3.8381
+                            },
+                            "uuid": "f3f41223-ac63-4fb3-89ee-e559d898bda9"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol C122 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 12.2,
+                                "y": 3.7619
+                            },
+                            "uuid": "57ed8e72-880e-44ac-91a1-71f97b75ddc4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9025 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 12.2,
+                                "y": 3.7619
+                            },
+                            "uuid": "b46f62ca-29e9-4b23-abce-0da65ee5106a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9026 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 12.2,
+                                "y": 3.8381
+                            },
+                            "uuid": "c4013c21-e5cc-4b4c-8da0-7f43bfd903b0"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ESP_AG_RESET_N'",
+                            "pos": {
+                                "x": 12.3571,
+                                "y": 2.8194
+                            },
+                            "uuid": "51701da1-d984-47bd-8263-3196622dd284"
+                        },
+                        {
+                            "description": "Etichetta \"ESP_AG_RESET_N\"",
+                            "pos": {
+                                "x": 9.8806,
+                                "y": 5.9436
+                            },
+                            "uuid": "a4bf5995-9bdb-4d74-ac1e-7c8ea28f6585"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'ESP_PROG_RX'",
+                            "pos": {
+                                "x": 12.3571,
+                                "y": 2.8702
+                            },
+                            "uuid": "8a812443-890f-4823-80d0-6787d92abd99"
+                        },
+                        {
+                            "description": "Etichetta \"ESP_PROG_RX\"",
+                            "pos": {
+                                "x": 10.2362,
+                                "y": 5.588
+                            },
+                            "uuid": "5cca3478-c5ea-48ad-9b47-ab54f85ebe07"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol C123 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 12.5,
+                                "y": 3.7619
+                            },
+                            "uuid": "7e1b3d73-0eea-4595-a5a6-c1d94d2f7102"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9027 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 12.5,
+                                "y": 3.7619
+                            },
+                            "uuid": "dbf072b1-e3e3-46ab-8c5d-bb3d160c14ec"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9028 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 12.5,
+                                "y": 3.8381
+                            },
+                            "uuid": "a69f9d2a-e51e-4ce4-a864-1130936e0711"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_A0'",
+                            "pos": {
+                                "x": 13.1445,
+                                "y": 2.6162
+                            },
+                            "uuid": "caca3a3f-13be-4828-a05a-d6b887673756"
+                        },
+                        {
+                            "description": "Etichetta \"N_A0\"",
+                            "pos": {
+                                "x": 14.2875,
+                                "y": 4.6228
+                            },
+                            "uuid": "e4763bd3-fe05-4d26-a845-ef4b866d93e8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_A1'",
+                            "pos": {
+                                "x": 13.1445,
+                                "y": 2.667
+                            },
+                            "uuid": "84ec9345-a59d-425f-a36f-70a99457e381"
+                        },
+                        {
+                            "description": "Etichetta \"N_A1\"",
+                            "pos": {
+                                "x": 14.2875,
+                                "y": 4.6736
+                            },
+                            "uuid": "fde01d69-aab5-46c4-a103-63a8f1349c7b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_A2'",
+                            "pos": {
+                                "x": 13.1445,
+                                "y": 2.7178
+                            },
+                            "uuid": "45a3b23b-160c-45b3-87ac-e21c69804a97"
+                        },
+                        {
+                            "description": "Etichetta \"N_A2\"",
+                            "pos": {
+                                "x": 14.2875,
+                                "y": 4.7244
+                            },
+                            "uuid": "00546a65-e1e3-48db-a5d5-f5a1fd912185"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_A3'",
+                            "pos": {
+                                "x": 13.1445,
+                                "y": 2.7686
+                            },
+                            "uuid": "d4352743-336f-4d1f-8e9c-220f384c8902"
+                        },
+                        {
+                            "description": "Etichetta \"N_A3\"",
+                            "pos": {
+                                "x": 14.2875,
+                                "y": 4.7752
+                            },
+                            "uuid": "071a84c1-883e-45de-9a49-df201c02f9eb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_A4'",
+                            "pos": {
+                                "x": 13.1445,
+                                "y": 2.8194
+                            },
+                            "uuid": "1850ad43-008a-4f52-b72e-06ea1554095b"
+                        },
+                        {
+                            "description": "Etichetta \"N_A4\"",
+                            "pos": {
+                                "x": 14.2875,
+                                "y": 4.826
+                            },
+                            "uuid": "8570a03e-7cec-4c93-a4c5-ed5088b31372"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'N_A5'",
+                            "pos": {
+                                "x": 13.1445,
+                                "y": 2.8702
+                            },
+                            "uuid": "04785775-b893-4816-872e-18f8c38be2d9"
+                        },
+                        {
+                            "description": "Etichetta \"N_A5\"",
+                            "pos": {
+                                "x": 14.2875,
+                                "y": 4.8768
+                            },
+                            "uuid": "4ff61205-c191-4c30-a00e-c8aaeb87a539"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'DAC_RAW'",
+                            "pos": {
+                                "x": 14.1478,
+                                "y": 6.4516
+                            },
+                            "uuid": "a098f2c1-25c9-4046-ab1d-50223eadfe94"
+                        },
+                        {
+                            "description": "Etichetta \"DAC_RAW\"",
+                            "pos": {
+                                "x": 12.3317,
+                                "y": 4.5974
+                            },
+                            "uuid": "0600c6a0-1c4d-4675-804e-2d1248b581b7"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'DAC_RAW'",
+                            "pos": {
+                                "x": 14.1478,
+                                "y": 6.4516
+                            },
+                            "uuid": "a098f2c1-25c9-4046-ab1d-50223eadfe94"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'DAC_BYPASS_N'",
+                            "pos": {
+                                "x": 14.351,
+                                "y": 6.6802
+                            },
+                            "uuid": "4310b3fc-5072-4a84-86af-dca3f8a7edbe"
+                        },
+                        {
+                            "description": "Etichetta \"DAC_BYPASS_N\"",
+                            "pos": {
+                                "x": 11.6713,
+                                "y": 4.7498
+                            },
+                            "uuid": "c979a8da-96e0-4caa-951a-f5a9c8dfbec2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'DAC_BYPASS_N'",
+                            "pos": {
+                                "x": 14.351,
+                                "y": 6.6802
+                            },
+                            "uuid": "4310b3fc-5072-4a84-86af-dca3f8a7edbe"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'DAC_LIMITED'",
+                            "pos": {
+                                "x": 14.5542,
+                                "y": 6.477
+                            },
+                            "uuid": "b8762d1a-fef7-4870-99af-d303ee656d0e"
+                        },
+                        {
+                            "description": "Etichetta \"DAC_LIMITED\"",
+                            "pos": {
+                                "x": 12.3317,
+                                "y": 4.6482
+                            },
+                            "uuid": "3124101d-a549-45ab-8b94-7fbc2616241a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'DAC_LIMITED'",
+                            "pos": {
+                                "x": 14.5542,
+                                "y": 6.477
+                            },
+                            "uuid": "b8762d1a-fef7-4870-99af-d303ee656d0e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                }
+            ]
+        }
+    ],
+    "source": "ag32-lab.kicad_sch"
+}

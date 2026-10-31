@@ -1,3 +1,5 @@
+> Superseded for the active schematic split on2026-10-31: see [MEZZANINE-V1.md](MEZZANINE-V1.md). This file describes the previous integrated-board revision; its placement and ownership details are historical.
+
 > Clarification: automatic CAN termination uses the physical J9/Q2/U8 circuit. U30 TERM_CTRL currently ends at R106 and does not control that relay. Earlier descriptions of software termination control are superseded. See [architecture map](ARCHITECTURE-MAP.md).
 
 > Current INA226/current-mux ownership and revised FPC SPI: [SHARED-INA-EXTERNAL-BUSES.md](SHARED-INA-EXTERNAL-BUSES.md). This supersedes the earlier dedicated INA I2C and spare FPC19–21 mapping.

@@ -1,3 +1,5 @@
+> Superseded for the active schematic split on2026-10-31: see [MEZZANINE-V1.md](MEZZANINE-V1.md). This file describes the previous integrated-board revision; its placement and ownership details are historical.
+
 # Backbone — mappa di collegamenti e modalità
 
 Aggiornamento 29 ottobre 2026. Baseline elettrica: `706c39d`. Questo documento descrive lo schema salvato, non un firmware già funzionante. PCB ancora non instradato. Nessuna modifica elettrica in questa revisione documentale.

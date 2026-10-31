@@ -1,3 +1,5 @@
+> Superseded for the active schematic split on2026-10-31: see [MEZZANINE-V1.md](MEZZANINE-V1.md). This file describes the previous integrated-board revision; its placement and ownership details are historical.
+
 # Shared INA226 and external buses — 2026-10-29
 
 ## Implemented hardware

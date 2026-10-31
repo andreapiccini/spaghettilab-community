@@ -1,0 +1,17 @@
+AG32_physical_pin,Net,Use,Qualification
+54,ESP_PROG_TX,INPUT / Hi-Z only,Fabric access and sampling timing pending
+55,ESP_CAN_TX,INPUT / Hi-Z only,Fabric access and sampling timing pending
+56,ESP_ISO4_N,INPUT / Hi-Z only,Fabric access and sampling timing pending
+57,ESP_ISO5_N,INPUT / Hi-Z only,Fabric access and sampling timing pending
+58,ESP_LED_DATA,INPUT / Hi-Z only,Fabric access and sampling timing pending
+59,MEZZ_PRESENT_N,INPUT / Hi-Z only,Fabric access and sampling timing pending
+60,EXT_SPI_CS_N,INPUT / Hi-Z only,Fabric access and sampling timing pending
+61,BOOT,INPUT / Hi-Z only,Fabric access and sampling timing pending
+62,IO45,INPUT / Hi-Z only,Fabric access and sampling timing pending
+63,IO46,INPUT / Hi-Z only,Fabric access and sampling timing pending
+64,ESP35_AUX,INPUT / Hi-Z only,Fabric access and sampling timing pending
+65,ESP36_AUX,INPUT / Hi-Z only,Fabric access and sampling timing pending
+66,ESP37_AUX,INPUT / Hi-Z only,Fabric access and sampling timing pending
+67,ESP_AG_BOOT0,INPUT / Hi-Z only,Fabric access and sampling timing pending
+82,ESP_AG_RESET_N,INPUT / Hi-Z only,Fabric access and sampling timing pending
+83,ESP_PROG_RX,INPUT / Hi-Z only,Fabric access and sampling timing pending

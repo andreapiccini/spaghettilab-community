@@ -1,3 +1,13 @@
+# Current schematic revision — mezzanine AG32-LAB, 2026-10-31
+
+The active schematic is now split into carrier `backbone.kicad_sch` and independent module `mezzanine/ag32-lab/ag32-lab.kicad_sch`. See [mezzanine block map](bom/mezzanine-v1/index.html) and [interface/behavior contract](MEZZANINE-V1.md).
+
+AG32, clock, INA/mux/ADC/DAC functions and FPC move to the module. Carrier retains shunts, ESP buffers, MOSFETs, U25 and physical services. USB U31 and CAN selection follow module claim; presence is separate. Two60-contact connector pairs are assigned electrically; footprints/mechanics remain pending. FPGA pin access/HDL/USB firmware remain unqualified.
+
+**PCB NOT updated. Existing carrier PCB and project settings, including local user edits, were preserved. No module PCB exists yet. Older integrated-board placements, BOMs and reports below are historical.**
+
+## Previous integrated-board baseline
+
 # Current backbone revision — 2026-10-29
 
 This is the authoritative status summary for the main-branch CAD snapshot. Earlier placement, cost and external-converter reports are historical. The board is not routed or production-qualified.
