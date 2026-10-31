@@ -555,7 +555,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "ANALOG_DAC",
-        "pcb_color": "rgba(80, 210, 100, 1.000)",
+        "pcb_color": "rgb(80, 210, 100)",
         "priority": 8,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
@@ -574,7 +574,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "ANALOG_SENSE",
-        "pcb_color": "rgba(50, 200, 160, 1.000)",
+        "pcb_color": "rgb(50, 200, 160)",
         "priority": 7,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
@@ -631,7 +631,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "CAN_BUS",
-        "pcb_color": "rgba(70, 180, 250, 1.000)",
+        "pcb_color": "rgb(70, 180, 250)",
         "priority": 6,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.25,
@@ -726,7 +726,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "GROUND",
-        "pcb_color": "rgba(140, 150, 160, 1.000)",
+        "pcb_color": "rgb(140, 150, 160)",
         "priority": 3,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.6,
@@ -745,7 +745,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "PORT_IO_POWER",
-        "pcb_color": "rgba(245, 190, 40, 1.000)",
+        "pcb_color": "rgb(245, 190, 40)",
         "priority": 4,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.3,
@@ -764,7 +764,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "POWER_3V3",
-        "pcb_color": "rgba(240, 60, 60, 1.000)",
+        "pcb_color": "rgb(240, 60, 60)",
         "priority": 2,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.6,
@@ -783,7 +783,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "POWER_5V",
-        "pcb_color": "rgba(255, 130, 40, 1.000)",
+        "pcb_color": "rgb(255, 130, 40)",
         "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 1.0,
@@ -802,7 +802,7 @@
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
         "name": "USB_DIFF",
-        "pcb_color": "rgba(220, 70, 220, 1.000)",
+        "pcb_color": "rgb(220, 70, 220)",
         "priority": 5,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.18,
@@ -837,6 +837,18 @@
     "net_colors": null,
     "netclass_assignments": null,
     "netclass_patterns": [
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "USB_D-"
+      },
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "USB_D+"
+      },
+      {
+        "netclass": "USB_DIFF",
+        "pattern": "USB_SW_*"
+      },
       {
         "netclass": "DEBUG",
         "pattern": "/AG_BOOT0"
@@ -1404,8 +1416,8 @@
     "subpart_id_separator": 0,
     "top_level_sheets": [
       {
-        "filename": "backbone.kicad_sch",
-        "name": "Principale",
+        "filename": "ag32-lab.kicad_sch",
+        "name": "ag32-lab",
         "uuid": "9de6ddb4-2647-4876-90a9-c16e585eea03"
       }
     ],

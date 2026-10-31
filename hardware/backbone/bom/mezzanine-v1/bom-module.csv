@@ -16,9 +16,9 @@ C122,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,False,module
 C123,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,False,module
 C131,100nF,Capacitor_SMD:C_0603_1608Metric,C14663,False,module
 J5,FH12-24S-0.5SH(55),SpaghettiLAB:Hirose_FH12-24S-0.5SH_1x24-1MP_P0.50mm_Horizontal,C202112,False,module
-J10,61083-061402LF,PENDING: schematic only,C464610,False,module
-J11,61083-061402LF,PENDING: schematic only,C464610,False,module
-J12,ESP_AUX_24,Connector_PinHeader_2.54mm:PinHeader_2x12_P2.54mm_Vertical,,False,module
+J10,61083-061402LF,LCSC_Mezzanine:CONN-SMD_61083-061402LF,C464610,False,module
+J11,61083-061402LF,LCSC_Mezzanine:CONN-SMD_61083-061402LF,C464610,False,module
+J12,ESP_AUX_24,Connector_PinHeader_2.54mm:PinHeader_2x12_P2.54mm_Vertical_SMD,,False,module
 R70,10k,Resistor_SMD:R_0603_1608Metric,C25804,False,module
 R71,100k,Resistor_SMD:R_0603_1608Metric,C25803,False,module
 R72,10k,Resistor_SMD:R_0603_1608Metric,C25804,False,module

@@ -1,6 +1,6 @@
 # Mezzanina AG32-LAB — revisione schematica 31 ottobre 2026
 
-**Stato: schematici modificati, PCB non aggiornati.** Il progetto carrier e la nuova scheda modulo sono due progetti elettrici separati; i contatti J10/J11 si accoppiano 1:1. Il vecchio layout e le modifiche locali del progetto carrier sono stati preservati byte per byte. Non usare il PCB esistente per produrre questa revisione.
+**Stato aggiornato: schematici e disposizione dei due PCB aggiornati, nessuno sbroglio. Vedere [layout mezzanina](MEZZANINE-LAYOUT.md).** Il progetto carrier e la nuova scheda modulo sono due progetti elettrici separati; i contatti J10/J11 si accoppiano 1:1. La ripartizione elettrica seguente è quella del primo passaggio schematico. Il passaggio PCB successivo è documentato in MEZZANINE-LAYOUT.md e prevale sui riferimenti meccanici ancora pendenti riportati qui sotto.
 
 ## Ripartizione
 

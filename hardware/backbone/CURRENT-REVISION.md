@@ -1,3 +1,6 @@
+## Aggiornamento PCB mezzanina —31 ottobre2026
+Disposizione carrier/modulo aggiornata localmente, senza sbroglio. [Layout, ingombri e limiti](MEZZANINE-LAYOUT.md). Preservati bloccati, contorno esterno carrier, fissaggi, RGB e magnetici; rimossa la vecchia asola FPC.
+
 # Current schematic revision — mezzanine AG32-LAB, 2026-10-31
 
 The active schematic is now split into carrier `backbone.kicad_sch` and independent module `mezzanine/ag32-lab/ag32-lab.kicad_sch`. See [mezzanine block map](bom/mezzanine-v1/index.html) and [interface/behavior contract](MEZZANINE-V1.md).

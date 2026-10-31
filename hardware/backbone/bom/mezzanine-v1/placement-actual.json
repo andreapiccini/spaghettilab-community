@@ -1,0 +1,1329 @@
+{
+  "carrier": {
+    "U8": {
+      "x_mm": 153.0,
+      "y_mm": 77.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "H1": {
+      "x_mm": 150.3,
+      "y_mm": 65.6,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R18": {
+      "x_mm": 174.0,
+      "y_mm": 67.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C84": {
+      "x_mm": 167.0,
+      "y_mm": 68.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C89": {
+      "x_mm": 181.5,
+      "y_mm": 93.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R44": {
+      "x_mm": 177.25,
+      "y_mm": 83.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C74": {
+      "x_mm": 170.5,
+      "y_mm": 66.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R112": {
+      "x_mm": 167.0,
+      "y_mm": 98.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R104": {
+      "x_mm": 184.25,
+      "y_mm": 110.75,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R58": {
+      "x_mm": 161.0,
+      "y_mm": 106.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R60": {
+      "x_mm": 154.25,
+      "y_mm": 95.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "TP12": {
+      "x_mm": 183.75,
+      "y_mm": 69.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C119": {
+      "x_mm": 158.75,
+      "y_mm": 128.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R46": {
+      "x_mm": 184.5,
+      "y_mm": 75.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C9": {
+      "x_mm": 162.0,
+      "y_mm": 76.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R57": {
+      "x_mm": 161.0,
+      "y_mm": 103.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "H2": {
+      "x_mm": 185.2,
+      "y_mm": 65.6,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R22": {
+      "x_mm": 187.25,
+      "y_mm": 124.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R41": {
+      "x_mm": 148.5,
+      "y_mm": 78.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R56": {
+      "x_mm": 158.0,
+      "y_mm": 87.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R51": {
+      "x_mm": 186.5,
+      "y_mm": 74.75,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R110": {
+      "x_mm": 185.25,
+      "y_mm": 126.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J2": {
+      "x_mm": 184.59,
+      "y_mm": 106.23,
+      "rotation_deg": 180.0,
+      "layer": "F.Cu",
+      "locked": true
+    },
+    "R47": {
+      "x_mm": 184.5,
+      "y_mm": 74.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U27": {
+      "x_mm": 180.5,
+      "y_mm": 128.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R103": {
+      "x_mm": 172.5,
+      "y_mm": 106.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "TP15": {
+      "x_mm": 157.0,
+      "y_mm": 92.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U12": {
+      "x_mm": 163.0,
+      "y_mm": 110.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R48": {
+      "x_mm": 181.75,
+      "y_mm": 75.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C85": {
+      "x_mm": 170.25,
+      "y_mm": 69.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "Q5": {
+      "x_mm": 185.25,
+      "y_mm": 115.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U25": {
+      "x_mm": 167.75,
+      "y_mm": 103.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "Q8": {
+      "x_mm": 177.5,
+      "y_mm": 86.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R40": {
+      "x_mm": 148.5,
+      "y_mm": 75.75,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R61": {
+      "x_mm": 183.0,
+      "y_mm": 88.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R45": {
+      "x_mm": 186.25,
+      "y_mm": 68.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C127": {
+      "x_mm": 173.25,
+      "y_mm": 123.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C86": {
+      "x_mm": 162.0,
+      "y_mm": 66.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R52": {
+      "x_mm": 186.5,
+      "y_mm": 72.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R111": {
+      "x_mm": 180.25,
+      "y_mm": 132.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U13": {
+      "x_mm": 172.0,
+      "y_mm": 110.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R113": {
+      "x_mm": 162.75,
+      "y_mm": 100.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R39": {
+      "x_mm": 175.0,
+      "y_mm": 73.75,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "LED6": {
+      "x_mm": 158.75,
+      "y_mm": 136.1,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U2": {
+      "x_mm": 153.25,
+      "y_mm": 88.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C11": {
+      "x_mm": 164.5,
+      "y_mm": 78.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R24": {
+      "x_mm": 151.5,
+      "y_mm": 132.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J9": {
+      "x_mm": 150.45,
+      "y_mm": 106.23,
+      "rotation_deg": 180.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "TP9": {
+      "x_mm": 181.5,
+      "y_mm": 65.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C130": {
+      "x_mm": 179.5,
+      "y_mm": 82.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R43": {
+      "x_mm": 183.75,
+      "y_mm": 73.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "Q7": {
+      "x_mm": 183.0,
+      "y_mm": 91.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R50": {
+      "x_mm": 181.5,
+      "y_mm": 73.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "LED1": {
+      "x_mm": 176.75,
+      "y_mm": 136.1,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "H4": {
+      "x_mm": 184.425,
+      "y_mm": 130.025,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "Q3": {
+      "x_mm": 178.75,
+      "y_mm": 90.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C1": {
+      "x_mm": 158.5,
+      "y_mm": 83.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R36": {
+      "x_mm": 171.25,
+      "y_mm": 72.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R15": {
+      "x_mm": 174.25,
+      "y_mm": 65.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R5": {
+      "x_mm": 148.5,
+      "y_mm": 73.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U3": {
+      "x_mm": 184.725,
+      "y_mm": 81.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C124": {
+      "x_mm": 173.5,
+      "y_mm": 101.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J140": {
+      "x_mm": 167.75,
+      "y_mm": 128.305,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": true
+    },
+    "LED2": {
+      "x_mm": 173.15,
+      "y_mm": 136.1,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R27": {
+      "x_mm": 184.25,
+      "y_mm": 93.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J4": {
+      "x_mm": 183.075,
+      "y_mm": 136.675,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "Q2": {
+      "x_mm": 149.25,
+      "y_mm": 82.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "LED3": {
+      "x_mm": 169.55,
+      "y_mm": 136.1,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "LED5": {
+      "x_mm": 162.35,
+      "y_mm": 136.1,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "H3": {
+      "x_mm": 150.3,
+      "y_mm": 136.7,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "L1": {
+      "x_mm": 162.5,
+      "y_mm": 71.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "Q6": {
+      "x_mm": 173.75,
+      "y_mm": 79.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U4": {
+      "x_mm": 167.0,
+      "y_mm": 71.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U31": {
+      "x_mm": 180.25,
+      "y_mm": 85.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C126": {
+      "x_mm": 171.0,
+      "y_mm": 123.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R49": {
+      "x_mm": 174.25,
+      "y_mm": 71.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "TP13": {
+      "x_mm": 174.25,
+      "y_mm": 76.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "D6": {
+      "x_mm": 185.0,
+      "y_mm": 121.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R105": {
+      "x_mm": 187.25,
+      "y_mm": 118.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J10": {
+      "x_mm": 155.0,
+      "y_mm": 111.8,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R54": {
+      "x_mm": 174.25,
+      "y_mm": 70.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R53": {
+      "x_mm": 173.75,
+      "y_mm": 73.75,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C5": {
+      "x_mm": 167.0,
+      "y_mm": 75.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R16": {
+      "x_mm": 174.25,
+      "y_mm": 68.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J3": {
+      "x_mm": 167.75,
+      "y_mm": 90.205,
+      "rotation_deg": 180.0,
+      "layer": "F.Cu",
+      "locked": true
+    },
+    "R115": {
+      "x_mm": 163.5,
+      "y_mm": 97.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R8": {
+      "x_mm": 164.5,
+      "y_mm": 75.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R37": {
+      "x_mm": 171.25,
+      "y_mm": 74.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C128": {
+      "x_mm": 178.0,
+      "y_mm": 127.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R114": {
+      "x_mm": 170.5,
+      "y_mm": 98.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "LED4": {
+      "x_mm": 165.95,
+      "y_mm": 136.1,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J11": {
+      "x_mm": 179.9,
+      "y_mm": 111.8,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R25": {
+      "x_mm": 158.25,
+      "y_mm": 130.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J1": {
+      "x_mm": 167.75,
+      "y_mm": 118.145,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": true
+    },
+    "R55": {
+      "x_mm": 181.75,
+      "y_mm": 71.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U26": {
+      "x_mm": 174.75,
+      "y_mm": 106.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R42": {
+      "x_mm": 184.5,
+      "y_mm": 71.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R17": {
+      "x_mm": 181.5,
+      "y_mm": 68.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R38": {
+      "x_mm": 186.5,
+      "y_mm": 70.75,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C129": {
+      "x_mm": 182.0,
+      "y_mm": 94.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U29": {
+      "x_mm": 177.5,
+      "y_mm": 129.75,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R59": {
+      "x_mm": 155.25,
+      "y_mm": 83.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "TP8": {
+      "x_mm": 153.75,
+      "y_mm": 69.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C88": {
+      "x_mm": 180.5,
+      "y_mm": 96.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R4": {
+      "x_mm": 164.5,
+      "y_mm": 67.5,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C125": {
+      "x_mm": 184.5,
+      "y_mm": 113.25,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U28": {
+      "x_mm": 174.75,
+      "y_mm": 103.5,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "Q4": {
+      "x_mm": 161.75,
+      "y_mm": 79.25,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF2B8": {
+      "x_mm": 187.5,
+      "y_mm": 87.75,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF2D1": {
+      "x_mm": 187.5,
+      "y_mm": 87.25,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF308": {
+      "x_mm": 187.5,
+      "y_mm": 84.75,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF2F3": {
+      "x_mm": 187.0,
+      "y_mm": 87.75,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF30E": {
+      "x_mm": 187.5,
+      "y_mm": 84.25,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF2E9": {
+      "x_mm": 185.25,
+      "y_mm": 91.75,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF312": {
+      "x_mm": 187.5,
+      "y_mm": 83.75,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "U1": {
+      "x_mm": 167.725,
+      "y_mm": 64.059,
+      "rotation_deg": 180.0,
+      "layer": "B.Cu",
+      "locked": true
+    },
+    "kobee-studio-6ACCF303": {
+      "x_mm": 187.5,
+      "y_mm": 86.75,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF2C6": {
+      "x_mm": 187.0,
+      "y_mm": 87.25,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF2F9": {
+      "x_mm": 187.5,
+      "y_mm": 83.25,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF2FE": {
+      "x_mm": 187.5,
+      "y_mm": 82.75,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "kobee-studio-6ACCF2D6": {
+      "x_mm": 186.5,
+      "y_mm": 87.75,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    }
+  },
+  "module": {
+    "C123": {
+      "x_mm": 178.8,
+      "y_mm": 103.8,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R116": {
+      "x_mm": 157.4,
+      "y_mm": 132.2,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R71": {
+      "x_mm": 179.4,
+      "y_mm": 129.8,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R80": {
+      "x_mm": 183.6,
+      "y_mm": 118.6,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J12": {
+      "x_mm": 154.9,
+      "y_mm": 112.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U19": {
+      "x_mm": 180.9,
+      "y_mm": 122.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R109": {
+      "x_mm": 158.2,
+      "y_mm": 129.6,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R83": {
+      "x_mm": 182.6,
+      "y_mm": 126.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R76": {
+      "x_mm": 182.8,
+      "y_mm": 134.2,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R88": {
+      "x_mm": 181.0,
+      "y_mm": 119.4,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C122": {
+      "x_mm": 178.0,
+      "y_mm": 97.6,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R77": {
+      "x_mm": 181.0,
+      "y_mm": 117.6,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R72": {
+      "x_mm": 177.8,
+      "y_mm": 122.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U16": {
+      "x_mm": 180.6,
+      "y_mm": 101.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R82": {
+      "x_mm": 179.4,
+      "y_mm": 128.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R108": {
+      "x_mm": 184.0,
+      "y_mm": 124.0,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U18": {
+      "x_mm": 180.9,
+      "y_mm": 113.8,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R75": {
+      "x_mm": 181.0,
+      "y_mm": 111.2,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C121": {
+      "x_mm": 178.0,
+      "y_mm": 110.4,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R74": {
+      "x_mm": 178.4,
+      "y_mm": 118.6,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "C131": {
+      "x_mm": 182.2,
+      "y_mm": 103.8,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R85": {
+      "x_mm": 179.4,
+      "y_mm": 135.2,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U14": {
+      "x_mm": 168.3,
+      "y_mm": 104.05,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R70": {
+      "x_mm": 179.4,
+      "y_mm": 133.4,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R73": {
+      "x_mm": 182.8,
+      "y_mm": 136.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R78": {
+      "x_mm": 179.4,
+      "y_mm": 137.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R79": {
+      "x_mm": 177.8,
+      "y_mm": 125.4,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U32": {
+      "x_mm": 154.6,
+      "y_mm": 130.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "U17": {
+      "x_mm": 180.9,
+      "y_mm": 107.0,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R86": {
+      "x_mm": 177.8,
+      "y_mm": 115.2,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R81": {
+      "x_mm": 179.4,
+      "y_mm": 131.6,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R107": {
+      "x_mm": 182.2,
+      "y_mm": 124.4,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R84": {
+      "x_mm": 183.6,
+      "y_mm": 110.4,
+      "rotation_deg": 90.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "J5": {
+      "x_mm": 167.75,
+      "y_mm": 136.3,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "R87": {
+      "x_mm": 182.8,
+      "y_mm": 137.8,
+      "rotation_deg": 0.0,
+      "layer": "F.Cu",
+      "locked": false
+    },
+    "TP44": {
+      "x_mm": 164.4,
+      "y_mm": 137.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP24": {
+      "x_mm": 154.8,
+      "y_mm": 132.4,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C95": {
+      "x_mm": 167.8,
+      "y_mm": 100.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP19": {
+      "x_mm": 157.2,
+      "y_mm": 132.4,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP27": {
+      "x_mm": 154.8,
+      "y_mm": 134.8,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "X1": {
+      "x_mm": 162.0,
+      "y_mm": 104.0,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP45": {
+      "x_mm": 157.2,
+      "y_mm": 134.8,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP49": {
+      "x_mm": 154.8,
+      "y_mm": 137.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP46": {
+      "x_mm": 159.6,
+      "y_mm": 134.8,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C97": {
+      "x_mm": 167.8,
+      "y_mm": 103.8,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP23": {
+      "x_mm": 157.2,
+      "y_mm": 137.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP22": {
+      "x_mm": 166.8,
+      "y_mm": 137.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP25": {
+      "x_mm": 154.0,
+      "y_mm": 130.0,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP18": {
+      "x_mm": 156.4,
+      "y_mm": 130.0,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C99": {
+      "x_mm": 167.8,
+      "y_mm": 105.6,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP43": {
+      "x_mm": 159.6,
+      "y_mm": 137.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP41": {
+      "x_mm": 162.0,
+      "y_mm": 134.8,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP42": {
+      "x_mm": 169.2,
+      "y_mm": 134.8,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C98": {
+      "x_mm": 167.8,
+      "y_mm": 102.0,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP21": {
+      "x_mm": 166.8,
+      "y_mm": 134.8,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C96": {
+      "x_mm": 164.4,
+      "y_mm": 101.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C90": {
+      "x_mm": 165.2,
+      "y_mm": 103.8,
+      "rotation_deg": 90.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C92": {
+      "x_mm": 165.2,
+      "y_mm": 107.2,
+      "rotation_deg": 90.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "J11": {
+      "x_mm": 179.9,
+      "y_mm": 111.8,
+      "rotation_deg": -90.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP48": {
+      "x_mm": 151.6,
+      "y_mm": 130.0,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C101": {
+      "x_mm": 170.4,
+      "y_mm": 103.8,
+      "rotation_deg": 90.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C91": {
+      "x_mm": 170.4,
+      "y_mm": 107.2,
+      "rotation_deg": 90.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C93": {
+      "x_mm": 167.8,
+      "y_mm": 107.4,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP47": {
+      "x_mm": 162.0,
+      "y_mm": 137.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C100": {
+      "x_mm": 171.2,
+      "y_mm": 101.2,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "J10": {
+      "x_mm": 155.0,
+      "y_mm": 111.8,
+      "rotation_deg": -90.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "TP26": {
+      "x_mm": 164.4,
+      "y_mm": 134.8,
+      "rotation_deg": 0.0,
+      "layer": "B.Cu",
+      "locked": false
+    },
+    "C94": {
+      "x_mm": 172.2,
+      "y_mm": 103.8,
+      "rotation_deg": 90.0,
+      "layer": "B.Cu",
+      "locked": false
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "carrier": {
+    "pad_net_checks": 542,
+    "footprints": 121,
+    "tracks": 0
+  },
+  "module": {
+    "pad_net_checks": 437,
+    "footprints": 68,
+    "tracks": 0
+  },
+  "mounting_holes_RGB_Qwiic_and_magnetic_centers_preserved": true,
+  "carrier_outline_unchanged": false,
+  "locked_preserved": [
+    "J2",
+    "J140",
+    "J3",
+    "J1",
+    "U1"
+  ],
+  "aligned_mating_contacts": 120,
+  "header_window_body_xy_margin_mm": {
+    "J1": 0.63,
+    "J140": 0.63
+  },
+  "J3_to_module_top_body_gap_mm": 1.095,
+  "nominal_stack_gap_mm": 5,
+  "minimum_clearance_to_Harwin_top_if_overlapping_mm": 1.25,
+  "physical_fit_not_tested": true,
+  "DRC": {
+    "carrier": {
+      "violations": {
+        "annular_width": 40,
+        "copper_edge_clearance": 20,
+        "missing_courtyard": 13,
+        "silk_edge_clearance": 91,
+        "lib_footprint_mismatch": 6,
+        "text_height": 6,
+        "silk_overlap": 199,
+        "silk_over_copper": 199
+      },
+      "unconnected_items": 402
+    },
+    "module": {
+      "violations": {
+        "npth_inside_courtyard": 2,
+        "lib_footprint_mismatch": 3
+      },
+      "unconnected_items": 308
+    }
+  },
+  "carrier_user_project_preserved_byte_for_byte": true,
+  "module_netclasses_restored": 16,
+  "carrier_outer_outline_unchanged": true,
+  "obsolete_FPC_slot_removed": {
+    "B.SilkS": 74,
+    "Edge.Cuts": 4
+  },
+  "all_other_PCB_nodes_identical_during_slot_removal": true
+}
