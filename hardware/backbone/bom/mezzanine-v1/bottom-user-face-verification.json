@@ -1,0 +1,10 @@
+{
+  "change": "B.SilkS graphics only",
+  "all_footprints_tracks_zones_and_outline_unchanged": true,
+  "sections": [
+    "DIRECT ESP",
+    "CONFIGURABLE PORTS",
+    "RGB = PORT MODE"
+  ],
+  "no_firmware_colour_mapping_assumed": true
+}

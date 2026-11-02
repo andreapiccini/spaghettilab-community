@@ -1,0 +1,44 @@
+{
+  "headers_top": [
+    "J17",
+    "J18",
+    "J19"
+  ],
+  "holes_and_net_positions_preserved": true,
+  "locked_parts_and_carrier_outline_preserved": true,
+  "nearby_parts_relocated": [
+    [
+      "C119",
+      167.0,
+      113.2,
+      0
+    ],
+    [
+      "TP15",
+      155.6,
+      92.2,
+      0
+    ],
+    [
+      "C140",
+      155.6,
+      89.2,
+      90
+    ],
+    [
+      "C135",
+      160.4,
+      106.3,
+      0
+    ],
+    [
+      "U29",
+      180.5,
+      91.6,
+      0
+    ]
+  ],
+  "expansion_unchanged": true,
+  "mechanical_status": "PROTOTYPE ONLY: conflicts with mezzanine header end housings; expansion window too narrow for top-mounted 2x8 bodies. Full compatible assembly not qualified.",
+  "rejected_attempt": "Moving mezzanine headers outwards conflicts with locked magnetic connectors; candidates not applied."
+}

@@ -1,0 +1,102 @@
+{
+  "ports": 8,
+  "physical_bottom_order": [
+    "P7",
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P8"
+  ],
+  "GPIO_P7": 3,
+  "GPIO_P8": 11,
+  "notes": [
+    "GPIO3 is a JTAG strap: buffer disabled at boot.",
+    "GPIO11 shares the already exported EXT_SPI_CS_N net.",
+    "Never enable both MOSFETs together. Disable MOSFETs before connecting MCU or DAC.",
+    "U32 address 0x21; U25 remains 0x20. Configure unused U32 outputs low.",
+    "J10.55 changed from GND to PORT_A7: update both carrier and expansion, incompatible with older expansion pinout."
+  ],
+  "added_parts": {
+    "Q9": {
+      "2": "VCORE",
+      "3": "P_GATE_6",
+      "4": "N_A6",
+      "6": "N_A6",
+      "1": "N_GATE_6",
+      "5": "GND"
+    },
+    "R116": {
+      "1": "VCORE",
+      "2": "P_GATE_6"
+    },
+    "R117": {
+      "1": "N_GATE_6",
+      "2": "GND"
+    },
+    "R118": {
+      "1": "N_A6",
+      "2": "PORT_A6"
+    },
+    "R122": {
+      "1": "VCORE",
+      "2": "ISO_A6_N"
+    },
+    "Q10": {
+      "2": "VCORE",
+      "3": "P_GATE_7",
+      "4": "N_A7",
+      "6": "N_A7",
+      "1": "N_GATE_7",
+      "5": "GND"
+    },
+    "R119": {
+      "1": "VCORE",
+      "2": "P_GATE_7"
+    },
+    "R120": {
+      "1": "N_GATE_7",
+      "2": "GND"
+    },
+    "R121": {
+      "1": "N_A7",
+      "2": "PORT_A7"
+    },
+    "R123": {
+      "1": "VCORE",
+      "2": "ISO_A7_N"
+    },
+    "U32": {
+      "23": "GND",
+      "24": "GND",
+      "9": "GND",
+      "18": "VCORE",
+      "19": "IO5",
+      "20": "IO4",
+      "21": "VCORE",
+      "1": "P_GATE_6",
+      "2": "N_GATE_6",
+      "3": "ISO_A6_N",
+      "4": "P_GATE_7",
+      "5": "N_GATE_7",
+      "6": "ISO_A7_N",
+      "25": "GND"
+    },
+    "C140": {
+      "1": "VCORE",
+      "2": "GND"
+    }
+  },
+  "TCA9535RGER_LCSC": "C527428",
+  "carrier_and_expansion_pad_checks": 1078,
+  "all_120_interface_pins_match": true,
+  "locked_parts_outline_tracks_preserved": true,
+  "ERC_errors_carrier": 0,
+  "ERC_errors_expansion": 0,
+  "new_footprint_clearance_short_hole_edge_courtyard_issues": 0,
+  "routing_added": false,
+  "physical_qualification": false,
+  "firmware_updated": false
+}

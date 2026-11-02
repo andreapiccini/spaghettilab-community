@@ -1,0 +1,17 @@
+{
+  "connector": "C42380985 1x8; C42380984 is 1x6 same family",
+  "headers": [
+    "J17",
+    "J18",
+    "J19"
+  ],
+  "NPTH_per_header": 8,
+  "NPTH_diameter_mm": 1.1,
+  "SMD_pads_shifted_outward_mm": 0.2,
+  "minimum_local_pad_to_hole_gap_mm": 0.35,
+  "all_other_footprints_unchanged": true,
+  "electrical_nets_unchanged": true,
+  "qualification": "Bottom insertion experimental, needs sample; expansion interference remains",
+  "applied_to_primary": true,
+  "remaining_blocker": "J18 NPTH at158.86,118.145 intersects J10 pad46 ESP37_AUX"
+}

@@ -1,0 +1,7 @@
+{
+  "header_contacts_in_order": 32,
+  "other_schematic_pin_connections_unchanged": true,
+  "unrelated_components_and_outline_unchanged": true,
+  "LED_order": "LED1-P1 through LED8-P8",
+  "routing_added": false
+}

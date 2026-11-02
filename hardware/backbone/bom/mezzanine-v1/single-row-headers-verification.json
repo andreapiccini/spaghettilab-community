@@ -1,0 +1,40 @@
+{
+  "other_component_connections_unchanged": true,
+  "verified_other_pins": 620,
+  "ERC_errors": 0,
+  "ERC_warnings": 214,
+  "connector_pinout": {
+    "J17": [
+      "GND",
+      "VCORE",
+      "A0",
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5"
+    ],
+    "J18": [
+      "PORT_A0",
+      "PORT_A1",
+      "PORT_A2",
+      "PORT_A3",
+      "PORT_A4",
+      "PORT_A5",
+      "PORT_A6",
+      "PORT_A7"
+    ],
+    "J19": [
+      "PORT_A0",
+      "PORT_A1",
+      "PORT_A2",
+      "PORT_A3",
+      "PORT_A4",
+      "PORT_A5",
+      "PORT_A6",
+      "PORT_A7"
+    ]
+  },
+  "other_footprints_and_outline_unchanged": true,
+  "mechanical_qualification": "Not qualified: expansion window and mezzanine housing interference remains"
+}

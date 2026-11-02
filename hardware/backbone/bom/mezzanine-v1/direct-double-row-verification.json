@@ -1,0 +1,38 @@
+{
+  "added": "J20, same C42380984 1x6",
+  "J17_pinout": [
+    "GND",
+    "VCORE",
+    "A0",
+    "A1",
+    "A2",
+    "A3"
+  ],
+  "J20_pinout": [
+    "A4",
+    "GND",
+    "VCORE",
+    "A5",
+    "VCORE",
+    "GND"
+  ],
+  "direct_rows_distance_mm": 5.08,
+  "existing_footprints_unchanged": false,
+  "bottom_silk": "continuous 0.38mm port-to-LED paths, ringed holes, LED windows and P1-P6 labels",
+  "moved_unlocked_resistors": {
+    "R114": [
+      165,
+      117,
+      0
+    ],
+    "R103": [
+      171,
+      117,
+      0
+    ]
+  },
+  "ERC_errors": 0,
+  "J20_and_relocated_resistors_hole_short_clearance_errors": 0,
+  "all_connected_pads_match_netlist": true,
+  "limits": "Courtyard overlap between adjacent header rows remains; assembly/bottom entry require sample verification. General DRC not clean."
+}

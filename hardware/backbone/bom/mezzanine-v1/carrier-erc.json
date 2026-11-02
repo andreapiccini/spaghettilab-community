@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/erc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-31T18:33:10",
+    "date": "2026-11-02T00:09:57",
     "ignored_checks": [
         {
             "description": "SPICE model issue",
@@ -22,36 +22,6 @@
             "path": "/",
             "uuid_path": "/9262d91e-b0ff-47b4-bf11-6f94636af855",
             "violations": [
-                {
-                    "description": "La configurazione corrente non include la libreria di simboli 'STMICRO'",
-                    "items": [
-                        {
-                            "description": "Simbolo TP8 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
-                            "pos": {
-                                "x": 0.2413,
-                                "y": 0.8763
-                            },
-                            "uuid": "23493601-2f0c-4be5-b41f-2cf4797a7fa5"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "lib_symbol_issues"
-                },
-                {
-                    "description": "La configurazione corrente non include la libreria di simboli 'STMICRO'",
-                    "items": [
-                        {
-                            "description": "Simbolo TP9 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
-                            "pos": {
-                                "x": 0.2921,
-                                "y": 0.9652
-                            },
-                            "uuid": "ba967590-81dc-48ba-b164-36a646cb336b"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "lib_symbol_issues"
-                },
                 {
                     "description": "Local and global labels have same name",
                     "items": [
@@ -180,8 +150,8 @@
                         {
                             "description": "Etichetta \"P_GATE_3\"",
                             "pos": {
-                                "x": 2.0007,
-                                "y": 1.9313
+                                "x": 2.032,
+                                "y": 2.032
                             },
                             "uuid": "c07c3fae-b8b0-47d2-ac90-ccac35ed493b"
                         }
@@ -203,8 +173,8 @@
                         {
                             "description": "Etichetta \"N_GATE_3\"",
                             "pos": {
-                                "x": 2.0007,
-                                "y": 1.9567
+                                "x": 2.032,
+                                "y": 2.0574
                             },
                             "uuid": "d3807896-3b9a-4f17-a1a0-9c879b813603"
                         }
@@ -254,20 +224,20 @@
                     "description": "Quattro elementi connessi a 495300,5219700",
                     "items": [
                         {
-                            "description": "Filo orizzontale. lung. 0.1905 mm",
+                            "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 0.4953,
                                 "y": 5.2197
                             },
-                            "uuid": "bd76ff15-f4f0-485f-b471-8b3ac26da1b7"
+                            "uuid": "45e3c2c8-f6f5-44e6-b446-4321937c28c5"
                         },
                         {
-                            "description": "Filo verticale, lung. 0.1016 mm",
+                            "description": "Filo orizzontale. lung. 0.2286 mm",
                             "pos": {
-                                "x": 0.4953,
-                                "y": 5.1181
+                                "x": 0.2667,
+                                "y": 5.2197
                             },
-                            "uuid": "90b698f4-4497-437f-ba60-cf9cffbd7f50"
+                            "uuid": "93d97d84-19df-4f34-81ba-e3337d3f3971"
                         }
                     ],
                     "severity": "warning",
@@ -287,7 +257,7 @@
                         {
                             "description": "Etichetta \"BOOT\"",
                             "pos": {
-                                "x": 0.4064,
+                                "x": 0.5461,
                                 "y": 0.9271
                             },
                             "uuid": "3da693cf-adab-416b-b173-8a973f0e7266"
@@ -453,8 +423,8 @@
                         {
                             "description": "Etichetta \"N_GATE_0\"",
                             "pos": {
-                                "x": 2.0007,
-                                "y": 1.8043
+                                "x": 2.032,
+                                "y": 1.905
                             },
                             "uuid": "b86f3e1d-d379-4866-8457-301b579af17c"
                         }
@@ -544,8 +514,8 @@
                         {
                             "description": "Etichetta \"P_GATE_0\"",
                             "pos": {
-                                "x": 2.0007,
-                                "y": 1.7789
+                                "x": 2.032,
+                                "y": 1.8796
                             },
                             "uuid": "9e89b4e1-8e8b-4b66-8f15-7ca6310ac480"
                         }
@@ -567,8 +537,8 @@
                         {
                             "description": "Etichetta \"N_GATE_2\"",
                             "pos": {
-                                "x": 2.0007,
-                                "y": 1.9059
+                                "x": 2.032,
+                                "y": 2.0066
                             },
                             "uuid": "fd4c3a48-d35a-47c5-ba43-cfdae1998c52"
                         }
@@ -590,8 +560,8 @@
                         {
                             "description": "Etichetta \"ISO_A1_N\"",
                             "pos": {
-                                "x": 2.3055,
-                                "y": 1.8551
+                                "x": 2.3368,
+                                "y": 1.9558
                             },
                             "uuid": "ae5ca585-c9b4-49ae-b060-8518a4fa7547"
                         }
@@ -645,34 +615,34 @@
                     "type": "single_global_label"
                 },
                 {
-                    "description": "La configurazione corrente non include la libreria di simboli 'STMICRO'",
+                    "description": "Symbol pin or wire end off connection grid",
                     "items": [
                         {
-                            "description": "Simbolo TP13 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
+                            "description": "Symbol #PWR9833 Pin 1 [Ingresso potenza, Linea]",
                             "pos": {
-                                "x": 1.5748,
-                                "y": 0.635
+                                "x": 1.8984,
+                                "y": 6.5
                             },
-                            "uuid": "08bb2ba5-6656-4340-952d-fbc027ef667a"
+                            "uuid": "7911c899-6fd5-4eaa-b733-e96f8692c9d4"
                         }
                     ],
                     "severity": "warning",
-                    "type": "lib_symbol_issues"
+                    "type": "endpoint_off_grid"
                 },
                 {
-                    "description": "La configurazione corrente non include la libreria di simboli 'STMICRO'",
+                    "description": "Symbol pin or wire end off connection grid",
                     "items": [
                         {
-                            "description": "Simbolo TP12 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
+                            "description": "Symbol #PWR9834 Pin 1 [Ingresso potenza, Linea]",
                             "pos": {
-                                "x": 1.6256,
-                                "y": 0.7239
+                                "x": 2.0,
+                                "y": 6.5762
                             },
-                            "uuid": "cfce6ac9-7e91-4d7e-90a5-0a1f421692c0"
+                            "uuid": "d30e9609-32bf-44ad-b293-6a04ae20c7d6"
                         }
                     ],
                     "severity": "warning",
-                    "type": "lib_symbol_issues"
+                    "type": "endpoint_off_grid"
                 },
                 {
                     "description": "Local and global labels have same name",
@@ -688,8 +658,8 @@
                         {
                             "description": "Etichetta \"ISO_A0_N\"",
                             "pos": {
-                                "x": 2.3055,
-                                "y": 1.8805
+                                "x": 2.3368,
+                                "y": 1.9812
                             },
                             "uuid": "56b4f463-cb47-4d8e-bcd9-6414772f5310"
                         }
@@ -698,19 +668,27 @@
                     "type": "same_local_global_label"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
+                    "description": "Local and global labels have same name",
                     "items": [
                         {
-                            "description": "Symbol #PWR9066 Pin 1 [Ingresso potenza, Linea]",
+                            "description": "Etichetta globale 'ISO_A3_N'",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.7281
+                                "x": 2.0701,
+                                "y": 5.1054
                             },
-                            "uuid": "35acd941-6ef3-4588-b0ad-8a804ce03f70"
+                            "uuid": "9f32b05d-6811-449f-8c79-5539308b97ad"
+                        },
+                        {
+                            "description": "Etichetta \"ISO_A3_N\"",
+                            "pos": {
+                                "x": 2.3368,
+                                "y": 1.905
+                            },
+                            "uuid": "c8c83afe-6025-4323-8bf4-de4c9e6079cd"
                         }
                     ],
                     "severity": "warning",
-                    "type": "endpoint_off_grid"
+                    "type": "same_local_global_label"
                 },
                 {
                     "description": "I pin di tipo Imprecisato e Ingresso potenza sono connessi",
@@ -718,16 +696,16 @@
                         {
                             "description": "Symbol U25 Pin 2 [A1, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.7281
+                                "x": 2.0828,
+                                "y": 1.8288
                             },
                             "uuid": "4e899bac-3914-47c9-b90e-110e5543f51e"
                         },
                         {
                             "description": "Symbol #PWR9066 Pin 1 [Ingresso potenza, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.7281
+                                "x": 2.0828,
+                                "y": 1.8288
                             },
                             "uuid": "35acd941-6ef3-4588-b0ad-8a804ce03f70"
                         }
@@ -736,36 +714,21 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol #PWR9067 Pin 1 [Ingresso potenza, Linea]",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.7535
-                            },
-                            "uuid": "f90db526-cfe8-476e-9797-9dfa2917b392"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Ingresso potenza sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 3 [A2, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.7535
+                                "x": 2.0828,
+                                "y": 1.8542
                             },
                             "uuid": "47ed34d3-ceb9-4ea7-9a50-0a4685873e56"
                         },
                         {
                             "description": "Symbol #PWR9067 Pin 1 [Ingresso potenza, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.7535
+                                "x": 2.0828,
+                                "y": 1.8542
                             },
                             "uuid": "f90db526-cfe8-476e-9797-9dfa2917b392"
                         }
@@ -774,28 +737,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.7789
-                            },
-                            "uuid": "cad24036-6a4b-4b6b-b8a9-9b31c6f85162"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 4 [P00, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.7789
+                                "x": 2.0828,
+                                "y": 1.8796
                             },
                             "uuid": "f7ec7342-a229-49fe-b433-8223d2f65cb9"
                         },
@@ -812,28 +760,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.8043
-                            },
-                            "uuid": "5049c328-6f6f-4525-ae0f-b0fe03a6e976"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 5 [P01, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.8043
+                                "x": 2.0828,
+                                "y": 1.905
                             },
                             "uuid": "7f8b4321-f8d7-4a79-93f7-8df0210351c0"
                         },
@@ -850,28 +783,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.8297
-                            },
-                            "uuid": "bd01c4d3-aa8f-4af0-b12d-b99fcd89e2d6"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 6 [P02, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.8297
+                                "x": 2.0828,
+                                "y": 1.9304
                             },
                             "uuid": "880fae77-57fb-49e2-9e70-9e6f929fc284"
                         },
@@ -888,28 +806,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.8551
-                            },
-                            "uuid": "fd4ee349-f2d3-46f0-8733-63f2c2b29c6a"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 7 [P03, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.8551
+                                "x": 2.0828,
+                                "y": 1.9558
                             },
                             "uuid": "dd5807cd-9d94-45cd-9492-11540503a7b7"
                         },
@@ -926,28 +829,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.8805
-                            },
-                            "uuid": "e06550a3-2dfd-486c-bd17-d53d70198bb8"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 8 [P04, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.8805
+                                "x": 2.0828,
+                                "y": 1.9812
                             },
                             "uuid": "945de899-8402-4134-bb0a-71f730524ea5"
                         },
@@ -964,28 +852,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.9059
-                            },
-                            "uuid": "4f0a6f3f-6716-472b-8bb7-efcc70dc809f"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 9 [P05, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.9059
+                                "x": 2.0828,
+                                "y": 2.0066
                             },
                             "uuid": "811053a1-7a71-4de1-9f11-cbe77142f5ee"
                         },
@@ -1002,28 +875,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.9313
-                            },
-                            "uuid": "faaa06c1-d296-48f6-b1f7-8a8bd181a510"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 10 [P06, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.9313
+                                "x": 2.0828,
+                                "y": 2.032
                             },
                             "uuid": "f0ee91af-db8a-4dc2-97eb-47844feb2ee8"
                         },
@@ -1040,28 +898,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.9567
-                            },
-                            "uuid": "1a76c7a7-0485-43e2-b73d-442708aafb9e"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 11 [P07, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.9567
+                                "x": 2.0828,
+                                "y": 2.0574
                             },
                             "uuid": "92a266f6-93cc-40cb-ae54-bfcb92b7a4d7"
                         },
@@ -1078,36 +921,21 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol #PWR9065 Pin 1 [Ingresso potenza, Linea]",
-                            "pos": {
-                                "x": 2.0515,
-                                "y": 1.9821
-                            },
-                            "uuid": "4564073f-3fd8-45ef-baf8-8b4dd6a22a1e"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Ingresso potenza sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 12 [GND, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.9821
+                                "x": 2.0828,
+                                "y": 2.0828
                             },
                             "uuid": "ccf68169-b707-4d82-a38d-c24c2672b513"
                         },
                         {
                             "description": "Symbol #PWR9065 Pin 1 [Ingresso potenza, Linea]",
                             "pos": {
-                                "x": 2.0515,
-                                "y": 1.9821
+                                "x": 2.0828,
+                                "y": 2.0828
                             },
                             "uuid": "4564073f-3fd8-45ef-baf8-8b4dd6a22a1e"
                         }
@@ -1116,110 +944,42 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Local and global labels have same name",
+                    "description": "Symbol pin or wire end off connection grid",
                     "items": [
                         {
-                            "description": "Etichetta globale 'ISO_A3_N'",
+                            "description": "Symbol U13 Pin 8 [B, Passivo, Linea]",
                             "pos": {
-                                "x": 2.0701,
-                                "y": 5.1054
+                                "x": 2.1016,
+                                "y": 6.5
                             },
-                            "uuid": "9f32b05d-6811-449f-8c79-5539308b97ad"
-                        },
-                        {
-                            "description": "Etichetta \"ISO_A3_N\"",
-                            "pos": {
-                                "x": 2.3055,
-                                "y": 1.8043
-                            },
-                            "uuid": "c8c83afe-6025-4323-8bf4-de4c9e6079cd"
+                            "uuid": "1ebb12b5-0592-40ba-8586-e2bac733b54f"
                         }
                     ],
                     "severity": "warning",
-                    "type": "same_local_global_label"
+                    "type": "endpoint_off_grid"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 24 [VCC, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.7027
-                            },
-                            "uuid": "345aaf4e-126b-4a90-94d2-cc5e035ab0f5"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.1329 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.7027
-                            },
-                            "uuid": "5453849c-10f8-4596-96d3-0b97c4457627"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol #PWR9064 Pin 1 [Ingresso potenza, Linea]",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.7027
-                            },
-                            "uuid": "94199c50-53eb-4800-b480-dce93b87a790"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
-                    "description": "I pin di tipo Imprecisato e Ingresso potenza sono connessi",
-                    "items": [
-                        {
-                            "description": "Symbol U25 Pin 24 [VCC, Imprecisato, Linea]",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.7027
+                                "x": 2.286,
+                                "y": 1.8034
                             },
                             "uuid": "345aaf4e-126b-4a90-94d2-cc5e035ab0f5"
                         },
                         {
-                            "description": "Symbol #PWR9064 Pin 1 [Ingresso potenza, Linea]",
+                            "description": "Symbol C129 Pin 1 [Passivo, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.7027
+                                "x": 2.2987,
+                                "y": 1.6002
                             },
-                            "uuid": "94199c50-53eb-4800-b480-dce93b87a790"
+                            "uuid": "b0bb14bd-b3d7-4cb9-bb75-88cbb4002e81"
                         }
                     ],
                     "severity": "warning",
                     "type": "pin_to_pin"
-                },
-                {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.7281
-                            },
-                            "uuid": "aaaeecf1-0b24-4c33-a03e-fbebe3434081"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
                 },
                 {
                     "description": "I pin di tipo Imprecisato e Bidirezionale sono connessi",
@@ -1227,8 +987,8 @@
                         {
                             "description": "Symbol U25 Pin 23 [SDA, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.7281
+                                "x": 2.286,
+                                "y": 1.8288
                             },
                             "uuid": "e3cab3c3-272f-4fb5-b9a6-f61a8be5f89d"
                         },
@@ -1245,28 +1005,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.7535
-                            },
-                            "uuid": "5f1572c0-6c2b-4b78-90fd-218b235d037e"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 22 [SCL, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.7535
+                                "x": 2.286,
+                                "y": 1.8542
                             },
                             "uuid": "04484dd2-04ea-4816-8580-adc85f1b9f7c"
                         },
@@ -1283,36 +1028,21 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Symbol #PWR9068 Pin 1 [Ingresso potenza, Linea]",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.7789
-                            },
-                            "uuid": "1bdc530d-1891-4d24-b80a-a2711e56244b"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Ingresso potenza sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 21 [A0, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.7789
+                                "x": 2.286,
+                                "y": 1.8796
                             },
                             "uuid": "74d4ce8f-399e-41fb-92f0-6b5bd7cc2871"
                         },
                         {
                             "description": "Symbol #PWR9068 Pin 1 [Ingresso potenza, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.7789
+                                "x": 2.286,
+                                "y": 1.8796
                             },
                             "uuid": "1bdc530d-1891-4d24-b80a-a2711e56244b"
                         }
@@ -1321,28 +1051,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.8043
-                            },
-                            "uuid": "11d5caba-be98-4765-83ef-4861e3d5b5f7"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 20 [P17, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.8043
+                                "x": 2.286,
+                                "y": 1.905
                             },
                             "uuid": "a1c18aa9-c544-4617-a8cf-588add8be010"
                         },
@@ -1359,28 +1074,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.8297
-                            },
-                            "uuid": "34c070ba-bd79-4298-9860-100bc7a5e82b"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 19 [P16, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.8297
+                                "x": 2.286,
+                                "y": 1.9304
                             },
                             "uuid": "249d3933-1b7a-4150-9d3e-7a4fb53af638"
                         },
@@ -1397,28 +1097,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.8551
-                            },
-                            "uuid": "dcc29c5b-0693-4dd6-b2b3-1db71d7815fb"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 18 [P15, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.8551
+                                "x": 2.286,
+                                "y": 1.9558
                             },
                             "uuid": "94ec104c-c344-41b1-b57c-60fcd99db102"
                         },
@@ -1435,28 +1120,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.8805
-                            },
-                            "uuid": "38dc8a3b-7f1a-4644-8bfe-bfdbb776ebf9"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 17 [P14, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.8805
+                                "x": 2.286,
+                                "y": 1.9812
                             },
                             "uuid": "2303f57b-41a8-4877-9988-b7556451449e"
                         },
@@ -1473,28 +1143,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.9059
-                            },
-                            "uuid": "cf9f57a3-f8c4-4516-94dc-69c89c46bedb"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 16 [P13, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.9059
+                                "x": 2.286,
+                                "y": 2.0066
                             },
                             "uuid": "8941372e-7359-46e1-b859-ec158742278e"
                         },
@@ -1511,28 +1166,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.9313
-                            },
-                            "uuid": "6062ab04-c533-4185-94f1-e5aea84db1ec"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 15 [P12, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.9313
+                                "x": 2.286,
+                                "y": 2.032
                             },
                             "uuid": "92b878a2-1f94-49df-9bd6-abe0e37d812e"
                         },
@@ -1549,28 +1189,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.9567
-                            },
-                            "uuid": "b49898f2-353e-4f09-85c3-be9a59ec4561"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 14 [P11, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.9567
+                                "x": 2.286,
+                                "y": 2.0574
                             },
                             "uuid": "b8e960bd-2de3-4622-87a3-c6ffaac1e7cb"
                         },
@@ -1587,28 +1212,13 @@
                     "type": "pin_to_pin"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.0508 mm",
-                            "pos": {
-                                "x": 2.2547,
-                                "y": 1.9821
-                            },
-                            "uuid": "19c3410f-bc6d-49a8-b416-aa307889a38a"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
                             "description": "Symbol U25 Pin 13 [P10, Imprecisato, Linea]",
                             "pos": {
-                                "x": 2.2547,
-                                "y": 1.9821
+                                "x": 2.286,
+                                "y": 2.0828
                             },
                             "uuid": "e0856433-db20-4fbc-af62-9c8cbabfa37b"
                         },
@@ -1648,21 +1258,6 @@
                     "type": "four_way_junction"
                 },
                 {
-                    "description": "Symbol pin or wire end off connection grid",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.2041 mm",
-                            "pos": {
-                                "x": 2.3876,
-                                "y": 1.7027
-                            },
-                            "uuid": "582af3ac-46fe-4473-8bc6-0dacd2d94dbb"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "endpoint_off_grid"
-                },
-                {
                     "description": "Local and global labels have same name",
                     "items": [
                         {
@@ -1676,8 +1271,8 @@
                         {
                             "description": "Etichetta \"P_GATE_1\"",
                             "pos": {
-                                "x": 2.0007,
-                                "y": 1.8297
+                                "x": 2.032,
+                                "y": 1.9304
                             },
                             "uuid": "4d75ffdd-f772-469e-976a-41f09b46c8df"
                         }
@@ -1699,8 +1294,8 @@
                         {
                             "description": "Etichetta \"N_GATE_1\"",
                             "pos": {
-                                "x": 2.0007,
-                                "y": 1.8551
+                                "x": 2.032,
+                                "y": 1.9558
                             },
                             "uuid": "743a82a1-502e-409c-8be6-161b183cb7d5"
                         }
@@ -1722,8 +1317,8 @@
                         {
                             "description": "Etichetta \"P_GATE_4\"",
                             "pos": {
-                                "x": 2.3055,
-                                "y": 1.9821
+                                "x": 2.3368,
+                                "y": 2.0828
                             },
                             "uuid": "a23e4397-59d9-470c-89df-77ee8c5644a1"
                         }
@@ -1745,8 +1340,8 @@
                         {
                             "description": "Etichetta \"N_GATE_4\"",
                             "pos": {
-                                "x": 2.3055,
-                                "y": 1.9567
+                                "x": 2.3368,
+                                "y": 2.0574
                             },
                             "uuid": "4c84102c-707e-49fc-936b-ce01a6709161"
                         }
@@ -1755,8 +1350,46 @@
                     "type": "same_local_global_label"
                 },
                 {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9831 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 2.4984,
+                                "y": 6.5
+                            },
+                            "uuid": "7911c899-6fd5-4eaa-b733-e96f8692c9d3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9832 Pin 1 [Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 2.6,
+                                "y": 6.5762
+                            },
+                            "uuid": "d30e9609-32bf-44ad-b293-6a04ae20c7d5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
                     "description": "Quattro elementi connessi a 2641600,4076700",
                     "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.1905 mm",
+                            "pos": {
+                                "x": 2.6416,
+                                "y": 4.0767
+                            },
+                            "uuid": "b0709bf2-c38d-473f-9333-b7151cd345ce"
+                        },
                         {
                             "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
@@ -1764,14 +1397,6 @@
                                 "y": 4.0767
                             },
                             "uuid": "5dd1a22e-8534-4740-8c05-e9cfb87cc405"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.1016 mm",
-                            "pos": {
-                                "x": 2.6416,
-                                "y": 3.9751
-                            },
-                            "uuid": "6d18ae1a-cfd6-4a60-9b12-77a42e14489b"
                         }
                     ],
                     "severity": "warning",
@@ -1781,12 +1406,12 @@
                     "description": "Quattro elementi connessi a 2641600,5219700",
                     "items": [
                         {
-                            "description": "Filo orizzontale. lung. 0.2286 mm",
+                            "description": "Filo orizzontale. lung. 0.1905 mm",
                             "pos": {
-                                "x": 2.413,
+                                "x": 2.6416,
                                 "y": 5.2197
                             },
-                            "uuid": "1972b443-df5b-47e1-9e82-8dc7dde4bc9a"
+                            "uuid": "b41cdbd5-fa3d-49bf-a374-c8360d94f544"
                         },
                         {
                             "description": "Filo verticale, lung. 0.1016 mm",
@@ -1801,6 +1426,21 @@
                     "type": "four_way_junction"
                 },
                 {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol U13 Pin 11 [B, Passivo, Linea]",
+                            "pos": {
+                                "x": 2.7016,
+                                "y": 6.5
+                            },
+                            "uuid": "21010114-1095-4703-b078-83220ed5858e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
                     "description": "Quattro elementi connessi a 2717800,3009900",
                     "items": [
                         {
@@ -1812,12 +1452,12 @@
                             "uuid": "79b24c1b-462e-43fd-a148-b90d2674282a"
                         },
                         {
-                            "description": "Filo orizzontale. lung. 0.0254 mm",
+                            "description": "Filo orizzontale. lung. 0.1016 mm",
                             "pos": {
-                                "x": 2.7178,
+                                "x": 2.6162,
                                 "y": 3.0099
                             },
-                            "uuid": "327666d3-f4cf-4c80-8693-51c16760d188"
+                            "uuid": "331b2dc7-b590-45a6-a168-224b9986300e"
                         }
                     ],
                     "severity": "warning",
@@ -2317,8 +1957,8 @@
                         {
                             "description": "Etichetta \"P_GATE_2\"",
                             "pos": {
-                                "x": 2.0007,
-                                "y": 1.8805
+                                "x": 2.032,
+                                "y": 1.9812
                             },
                             "uuid": "7cc1d924-0bd9-401c-8668-cf3211d314b7"
                         }
@@ -2340,8 +1980,8 @@
                         {
                             "description": "Etichetta \"P_GATE_5\"",
                             "pos": {
-                                "x": 2.3055,
-                                "y": 1.9313
+                                "x": 2.3368,
+                                "y": 2.032
                             },
                             "uuid": "dd47a7e3-a632-4dc1-b7a0-3d6cdf322709"
                         }
@@ -2363,8 +2003,8 @@
                         {
                             "description": "Etichetta \"N_GATE_5\"",
                             "pos": {
-                                "x": 2.3055,
-                                "y": 1.9059
+                                "x": 2.3368,
+                                "y": 2.0066
                             },
                             "uuid": "073747ee-34d4-4b18-bc35-7a94b32e3657"
                         }
@@ -2621,12 +2261,12 @@
                     "description": "Quattro elementi connessi a 4800600,4076700",
                     "items": [
                         {
-                            "description": "Filo orizzontale. lung. 0.1905 mm",
+                            "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 4.8006,
-                                "y": 4.0767
+                                "y": 3.9751
                             },
-                            "uuid": "7fde5db3-0a30-4d5e-aa37-4557f8954eac"
+                            "uuid": "f29637d4-9d71-44de-b1f6-b4bd0ed7e388"
                         },
                         {
                             "description": "Filo orizzontale. lung. 0.2286 mm",
@@ -2644,20 +2284,20 @@
                     "description": "Quattro elementi connessi a 4800600,5219700",
                     "items": [
                         {
+                            "description": "Filo orizzontale. lung. 0.1905 mm",
+                            "pos": {
+                                "x": 4.8006,
+                                "y": 5.2197
+                            },
+                            "uuid": "e9b1352e-5e60-4364-a822-f46e89cf369f"
+                        },
+                        {
                             "description": "Filo verticale, lung. 0.1016 mm",
                             "pos": {
                                 "x": 4.8006,
-                                "y": 5.1181
-                            },
-                            "uuid": "82caef82-9873-4778-a213-42ededb43441"
-                        },
-                        {
-                            "description": "Filo orizzontale. lung. 0.2286 mm",
-                            "pos": {
-                                "x": 4.572,
                                 "y": 5.2197
                             },
-                            "uuid": "528f2a74-5adb-4cfe-96e6-3e3959a06012"
+                            "uuid": "aeac447c-593e-42a4-8d69-f4c5628c1fa2"
                         }
                     ],
                     "severity": "warning",
@@ -2967,282 +2607,6 @@
                     "type": "lib_symbol_mismatch"
                 },
                 {
-                    "description": "Quattro elementi connessi a 6108700,1879600",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0508 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 1.8796
-                            },
-                            "uuid": "3e17d4fa-ca59-467a-a913-ccfcb9068124"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.0254 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 1.8542
-                            },
-                            "uuid": "b6da9600-914e-4bca-af67-b479b4ec2831"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,1930400",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0762 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.0066
-                            },
-                            "uuid": "a7631642-8341-43f4-8b5f-27d492c0dbab"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.0508 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 1.8796
-                            },
-                            "uuid": "3e17d4fa-ca59-467a-a913-ccfcb9068124"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2006600",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0508 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.0574
-                            },
-                            "uuid": "9801da60-40f4-4550-90f9-3b1bcbe70a9d"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.0762 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.0066
-                            },
-                            "uuid": "a7631642-8341-43f4-8b5f-27d492c0dbab"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2057400",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0508 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.0574
-                            },
-                            "uuid": "9801da60-40f4-4550-90f9-3b1bcbe70a9d"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.0508 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.0574
-                            },
-                            "uuid": "f2980fe9-49ee-412c-90e6-09a8758fbbf3"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2146300",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0889 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.0574
-                            },
-                            "uuid": "052fc7ed-10e1-4958-bbac-650153067729"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.0508 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.1971
-                            },
-                            "uuid": "d8fe9450-aefc-4912-a0a2-d15ebfe20ea8"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2197100",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0762 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.1971
-                            },
-                            "uuid": "ec80af54-e066-4cae-82a2-34f8ac0f881b"
-                        },
-                        {
-                            "description": "Filo orizzontale. lung. 0.1143 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.1971
-                            },
-                            "uuid": "ff02bde0-e8d5-4c09-b2be-8db0c6db10a0"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2273300",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0762 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.1971
-                            },
-                            "uuid": "ec80af54-e066-4cae-82a2-34f8ac0f881b"
-                        },
-                        {
-                            "description": "Filo orizzontale. lung. 0.5588 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.2733
-                            },
-                            "uuid": "c15b7b19-73d1-4bed-b30d-2ea65d98775e"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2324100",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0889 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.3241
-                            },
-                            "uuid": "588a1dde-6c82-46aa-ac39-bcbaa5bf80df"
-                        },
-                        {
-                            "description": "Filo orizzontale. lung. 0.1143 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.3241
-                            },
-                            "uuid": "d62b8502-3e21-4899-83d2-06d6566ebffd"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2413000",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0889 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.3241
-                            },
-                            "uuid": "588a1dde-6c82-46aa-ac39-bcbaa5bf80df"
-                        },
-                        {
-                            "description": "Filo orizzontale. lung. 0.5588 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.413
-                            },
-                            "uuid": "aaa4a513-cca4-4622-8dd4-a2dd7b49d64c"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2463800",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.1143 mm",
-                            "pos": {
-                                "x": 6.223,
-                                "y": 2.4638
-                            },
-                            "uuid": "da55852e-32bb-4117-98b6-cf1513acaeab"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.0762 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.4638
-                            },
-                            "uuid": "e9448dd6-82ab-4143-b4ea-cd4fa3f48b44"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2540000",
-                    "items": [
-                        {
-                            "description": "Filo verticale, lung. 0.0762 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.4638
-                            },
-                            "uuid": "e9448dd6-82ab-4143-b4ea-cd4fa3f48b44"
-                        },
-                        {
-                            "description": "Filo verticale, lung. 0.0508 mm",
-                            "pos": {
-                                "x": 6.1087,
-                                "y": 2.5908
-                            },
-                            "uuid": "5c24af6c-f190-484a-a7ef-288849aa500e"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
-                    "description": "Quattro elementi connessi a 6108700,2590800",
-                    "items": [
-                        {
-                            "description": "Filo orizzontale. lung. 0.1143 mm",
-                            "pos": {
-                                "x": 6.223,
-                                "y": 2.5908
-                            },
-                            "uuid": "0f930291-f57d-4584-8759-5e4f4b6b70e2"
-                        },
-                        {
-                            "description": "Filo orizzontale. lung. 0.1143 mm",
-                            "pos": {
-                                "x": 6.223,
-                                "y": 2.5908
-                            },
-                            "uuid": "2ace633e-7d95-48bc-b939-a51d82e5c0da"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "four_way_junction"
-                },
-                {
                     "description": "I pin di tipo Imprecisato e Passivo sono connessi",
                     "items": [
                         {
@@ -3417,8 +2781,8 @@
                         {
                             "description": "Etichetta \"ISO_A2_N\"",
                             "pos": {
-                                "x": 2.3055,
-                                "y": 1.8297
+                                "x": 2.3368,
+                                "y": 1.9304
                             },
                             "uuid": "46ec2609-66ce-4a4b-9588-9ee38d715a83"
                         }

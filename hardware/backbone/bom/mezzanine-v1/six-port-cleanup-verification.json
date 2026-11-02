@@ -1,0 +1,50 @@
+{
+  "removed_carrier_components": [
+    "C138",
+    "C139",
+    "C140",
+    "LED7",
+    "LED8",
+    "Q10",
+    "Q9",
+    "R116",
+    "R117",
+    "R118",
+    "R119",
+    "R120",
+    "R121",
+    "R122",
+    "R123",
+    "U32"
+  ],
+  "header_centres_y": [
+    89.375,
+    122.395,
+    127.475
+  ],
+  "row_spacing_mm": [
+    33.019999999999996,
+    5.079999999999998
+  ],
+  "pitch_multiples": [
+    13,
+    2
+  ],
+  "LED_centres_x": [
+    176.55,
+    172.95,
+    169.35,
+    165.75,
+    162.15,
+    158.55
+  ],
+  "unchanged_locked_parts": true,
+  "interface": "J10.55 restored GND; J11.53/54/56 unused; U17/U18/U19 Y6/Y7 unused",
+  "interface_pins_matched": 120,
+  "remaining_pad_nets_match_schematic": true,
+  "carrier_ERC_errors": 0,
+  "expansion_ERC_errors": 0,
+  "outline_and_locked_parts_unchanged": true,
+  "header_hole_or_short_DRC_errors": 0,
+  "limits": "Unrouted; whole-board DRC still has other violations. Bottom insertion and assembly require physical verification."
+}

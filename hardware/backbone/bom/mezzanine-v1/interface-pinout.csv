@@ -53,7 +53,7 @@ J10,51,ESP_LED_DATA,receptacle 61082-061402LF,plug 61083-061402LF,
 J10,52,EXT_SPI_CS_N,receptacle 61082-061402LF,plug 61083-061402LF,
 J10,53,IO3,receptacle 61082-061402LF,plug 61083-061402LF,
 J10,54,IO4,receptacle 61082-061402LF,plug 61083-061402LF,
-J10,55,GND,receptacle 61082-061402LF,plug 61083-061402LF,
+J10,55,GND,receptacle 61082-061402LF,plug 61083-061402LF,Ground restored after removal of P7/P8
 J10,56,IO45,receptacle 61082-061402LF,plug 61083-061402LF,
 J10,57,GND,receptacle 61082-061402LF,plug 61083-061402LF,
 J10,58,GND,receptacle 61082-061402LF,plug 61083-061402LF,
@@ -111,10 +111,10 @@ J11,49,TERM_CTRL_OUT,receptacle 61082-061402LF,plug 61083-061402LF,Future-module
 J11,50,GND,receptacle 61082-061402LF,plug 61083-061402LF,
 J11,51,VBUS,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion. VBUS is USB voltage.
 J11,52,LED_EXP_DATA,receptacle 61082-061402LF,plug 61083-061402LF,Future-module access; unused on current AG32 Expansion.
-J11,53,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
-J11,54,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
+J11,53,NC,receptacle 61082-061402LF,plug 61083-061402LF,Unused; P7/P8 circuitry removed
+J11,54,NC,receptacle 61082-061402LF,plug 61083-061402LF,Unused; P7/P8 circuitry removed
 J11,55,GND,receptacle 61082-061402LF,plug 61083-061402LF,
-J11,56,NC,receptacle 61082-061402LF,plug 61083-061402LF,NC reserved
+J11,56,NC,receptacle 61082-061402LF,plug 61083-061402LF,Unused; P7/P8 circuitry removed
 J11,57,GND,receptacle 61082-061402LF,plug 61083-061402LF,
 J11,58,GND,receptacle 61082-061402LF,plug 61083-061402LF,
 J11,59,GND,receptacle 61082-061402LF,plug 61083-061402LF,

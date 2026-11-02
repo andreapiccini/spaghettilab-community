@@ -1,0 +1,13 @@
+{
+  "LEDs": 8,
+  "added_bypass_0603": [
+    "C138",
+    "C139"
+  ],
+  "serial_output_preserved": "LED_EXP_DATA after LED8",
+  "ERC_errors": 0,
+  "ERC_warnings": 191,
+  "all_locked_components_unchanged": true,
+  "new_components_clearance_short_hole_edge_courtyard_issues": 0,
+  "routing_added": false
+}
