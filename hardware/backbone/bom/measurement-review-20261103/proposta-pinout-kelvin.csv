@@ -1,0 +1,13 @@
+﻿Connettore,Pin,Rete attuale,Rete proposta,Origine carrier,Destinazione esempio Expansion,Stato
+J11,26,P_GATE_0,SHUNT_H_0,R56.1 - prelievo locale Kelvin,U17 canale 0,PROPOSTA NON APPLICATA
+J11,27,N_GATE_0,SHUNT_L_0,R56.2 - prelievo locale Kelvin,U18 canale 0,PROPOSTA NON APPLICATA
+J11,28,P_GATE_1,SHUNT_H_1,R57.1 - prelievo locale Kelvin,U17 canale 1,PROPOSTA NON APPLICATA
+J11,29,N_GATE_1,SHUNT_L_1,R57.2 - prelievo locale Kelvin,U18 canale 1,PROPOSTA NON APPLICATA
+J11,31,P_GATE_2,SHUNT_H_2,R58.1 - prelievo locale Kelvin,U17 canale 2,PROPOSTA NON APPLICATA
+J11,32,N_GATE_2,SHUNT_L_2,R58.2 - prelievo locale Kelvin,U18 canale 2,PROPOSTA NON APPLICATA
+J11,33,P_GATE_3,SHUNT_H_3,R59.1 - prelievo locale Kelvin,U17 canale 3,PROPOSTA NON APPLICATA
+J11,34,N_GATE_3,SHUNT_L_3,R59.2 - prelievo locale Kelvin,U18 canale 3,PROPOSTA NON APPLICATA
+J11,36,P_GATE_4,SHUNT_H_4,R60.1 - prelievo locale Kelvin,U17 canale 4,PROPOSTA NON APPLICATA
+J11,37,N_GATE_4,SHUNT_L_4,R60.2 - prelievo locale Kelvin,U18 canale 4,PROPOSTA NON APPLICATA
+J11,38,P_GATE_5,SHUNT_H_5,R61.1 - prelievo locale Kelvin,U17 canale 5,PROPOSTA NON APPLICATA
+J11,39,N_GATE_5,SHUNT_L_5,R61.2 - prelievo locale Kelvin,U18 canale 5,PROPOSTA NON APPLICATA

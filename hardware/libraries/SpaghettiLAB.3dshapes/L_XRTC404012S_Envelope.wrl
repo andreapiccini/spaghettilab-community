@@ -1,0 +1,5 @@
+#VRML V2.0 utf8
+# Simplified envelope, not manufacturer CAD. XR XRTC404012S 4.1 x 4.1 x 1.2 mm.
+Transform { translation 0.0 0.0 0.2559055118110236 children [ Shape { appearance Appearance { material Material { diffuseColor .14 .14 .16 } } geometry Box { size 1.6141732283464565 1.6141732283464565 0.4330708661417323 } } ] }
+Transform { translation -0.531496062992126 0.0 0.01968503937007874 children [ Shape { appearance Appearance { material Material { diffuseColor .7 .7 .72 } } geometry Box { size 0.5511811023622046 1.3779527559055118 0.03937007874015748 } } ] }
+Transform { translation 0.531496062992126 0.0 0.01968503937007874 children [ Shape { appearance Appearance { material Material { diffuseColor .7 .7 .72 } } geometry Box { size 0.5511811023622046 1.3779527559055118 0.03937007874015748 } } ] }

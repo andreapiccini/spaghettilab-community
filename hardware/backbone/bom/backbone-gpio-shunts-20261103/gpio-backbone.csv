@@ -1,0 +1,32 @@
+﻿GPIO,Net,Contatto,Disponibilita hardware,Vincoli
+0,BOOT,J10.28,Condiviso con circuiti Backbone,Reset/strapping: verificare livelli al reset
+1,A4,J10.21,Condiviso con circuiti Backbone,
+2,A5,J10.24,Condiviso con circuiti Backbone,
+3,IO3,J10.53,Solo ESP e connettore,Reset/strapping: verificare livelli al reset
+4,IO4,J10.54,Condiviso con circuiti Backbone,
+5,IO5,J11.7,Condiviso con circuiti Backbone,
+6,MEAS_S0,J11.12,Solo ESP e connettore,
+7,A0,J10.6,Condiviso con circuiti Backbone,
+8,A1,J10.9,Condiviso con circuiti Backbone,
+9,A2,J10.13,Condiviso con circuiti Backbone,
+10,A3,J10.17,Condiviso con circuiti Backbone,
+11,EXT_SPI_CS_N,J10.52,Solo ESP e connettore,
+12,MEAS_S1,J11.13,Solo ESP e connettore,
+13,CTRL13,J10.41,Solo ESP e connettore,
+14,CTRL14,J10.42,Solo ESP e connettore,
+15,ESP_AG_BOOT0,J10.29,Solo ESP e connettore,
+16,ESP_AG_RESET_N,J10.31,Solo ESP e connettore,
+17,ESP_CAN_TX,J10.47,Condiviso con circuiti Backbone,
+18,CAN_RX,J10.39,Condiviso con circuiti Backbone,
+21,ESP_LED_DATA,J10.51,Condiviso con circuiti Backbone,
+38,MEZZ_PRESENT_N,J11.17,Condiviso con circuiti Backbone,
+39,ESP_ISO4_N,J10.48,Condiviso con circuiti Backbone,
+40,ESP_ISO5_N,J10.49,Condiviso con circuiti Backbone,
+41,MEAS_S2,J11.14,Solo ESP e connettore,
+42,MEAS_INHIBIT,J11.11,Solo ESP e connettore,
+43,SPI_MOSI,J11.19,Solo ESP e connettore,UART0: considerare messaggi di boot e firmware
+44,SPI_MISO,J11.18,Solo ESP e connettore,UART0: considerare messaggi di boot e firmware
+45,IO45,J10.56,Solo ESP e connettore,Reset/strapping: verificare livelli al reset
+46,IO46,J11.6,Solo ESP e connettore,Reset/strapping: verificare livelli al reset
+47,ESP_PROG_TX,J10.33,Solo ESP e connettore,
+48,ESP_PROG_RX,J10.32,Solo ESP e connettore,
