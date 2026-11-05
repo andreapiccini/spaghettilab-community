@@ -1,3 +1,5 @@
+> Current connector allocation: [Mezzanine interface V3](MEZZANINE-INTERFACE-V3.md), 2026-11-04. All 120 contacts assigned; dedicated shunt sense and reinforced power contacts. Earlier pin mappings below are historical.
+
 # Mezzanina Expansion — revisione schematica 31 ottobre 2026
 
 **Stato aggiornato: schematici e disposizione dei due PCB aggiornati, nessuno sbroglio. Vedere [layout mezzanina](MEZZANINE-LAYOUT.md).** Il progetto carrier e la nuova scheda modulo sono due progetti elettrici separati; i contatti J10/J11 si accoppiano 1:1. La ripartizione elettrica seguente è quella del primo passaggio schematico. Il passaggio PCB successivo è documentato in MEZZANINE-LAYOUT.md e prevale sui riferimenti meccanici ancora pendenti riportati qui sotto.
@@ -112,3 +114,8 @@ The previous57signal-net/25NCcontract is superseded by [Expansion interfaceV2](E
 
 ## 2026-10-31 — Passives0603
 All carrier andExpansion resistors/capacitors now0603imperial/1608metricfor manual assembly. Prior0402/0805/1206selections are superseded by [PASSIVES-0603.md](PASSIVES-0603.md). Updated active BOMs govern purchasing.
+
+
+## TERM aggiornato — 2026-11-05
+
+Supera le precedenti descrizioni del nodo NT1: NT1 rimosso. J11.48 TERM_CTRL_IN e J11.49 TERM_CTRL_OUT sono ora i contatti analogici di presenza sinistra/destra. Non pilotarli né caricarli con pull-up/pull-down sulla mezzanina. Nessun comando MCU/USB richiesto. Tutte le Backbone della catena devono adottare la nuova revisione. [Circuito, compatibilità e verifiche](CAN-TERMINATION-20261105.md).

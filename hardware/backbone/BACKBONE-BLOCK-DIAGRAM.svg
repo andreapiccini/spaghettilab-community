@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1200" viewBox="0 0 1400 1200">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 Z" fill="#64748b"/></marker></defs>
+<rect width="1400" height="1200" fill="#f5f7fb"/>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#172b45}.title{font-size:30px;font-weight:700}.sub{font-size:16px;fill:#506176}.head{font-size:19px;font-weight:650}.line{font-size:16px}.edge{fill:none;stroke:#64748b;stroke-width:2.5;marker-end:url(#arrow)}</style>
+<text x="40" y="48" class="title">Spaghetti LAB · Backbone</text>
+<text x="40" y="78" class="sub">Sistemi a bordo e interfacce • Bus 5 V comune ripristinato, 5 novembre 2026</text>
+<text x="40" y="120" class="head">ALIMENTAZIONE</text>
+<rect x="40" y="145" width="280" height="110" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="58" y="174" class="head">USB-C · U3 + D6</text>
+<text x="58" y="200" class="line">VBUS → diodo SS54 → bus 5 V</text>
+<text x="58" y="222" class="line">D6 limita il ritorno verso USB</text>
+<text x="58" y="244" class="line">VBUS grezzo anche su J11.51</text>
+<rect x="40" y="285" width="280" height="110" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="58" y="314" class="head">Magnetici · J2 / J9</text>
+<text x="58" y="340" class="line">5 V + GND comuni alla catena</text>
+<text x="58" y="362" class="line">CAN-H / CAN-L + terminazione</text>
+<text x="58" y="384" class="line">Nessun nuovo limitatore qui</text>
+<rect x="390" y="215" width="260" height="115" rx="12" fill="#e2efff" stroke="#ccd6e4"/>
+<text x="408" y="244" class="head">Bus interno 5 V</text>
+<text x="408" y="270" class="line">Alimenta il regolatore 3,3 V</text>
+<text x="408" y="292" class="line">Collegato ai connettori magnetici</text>
+<text x="408" y="314" class="line">GND comune, non isolato</text>
+<rect x="730" y="145" width="280" height="110" rx="12" fill="#fff1d8" stroke="#ccd6e4"/>
+<text x="748" y="174" class="head">Mezzanina · J11</text>
+<text x="748" y="200" class="line">J11.1 / 2 / 5 → bus interno</text>
+<text x="748" y="222" class="line">Alimentazione sul bus comune</text>
+<text x="748" y="244" class="line">Protezioni a carico della sorgente</text>
+<rect x="730" y="285" width="280" height="110" rx="12" fill="#dcf4e8" stroke="#ccd6e4"/>
+<text x="748" y="314" class="head">Collegamento diretto 5 V</text>
+<text x="748" y="340" class="line">Nessun limitatore aggiuntivo</text>
+<text x="748" y="362" class="line">Protezione attiva rimossa (storico)</text>
+<text x="748" y="384" class="line">Stessa rete elettrica su J10 / J11</text>
+<rect x="1070" y="285" width="290" height="110" rx="12" fill="#dcf4e8" stroke="#ccd6e4"/>
+<text x="1088" y="314" class="head">Mezzanina · J10</text>
+<text x="1088" y="340" class="line">J10.1 / 2 / 5</text>
+<text x="1088" y="362" class="line">Alimentazione sul bus comune</text>
+<text x="1088" y="384" class="line">Collegati anche a J11.1 / 2 / 5</text>
+<rect x="390" y="370" width="260" height="105" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="408" y="399" class="head">U4 · SY8089 + L1</text>
+<text x="408" y="425" class="line">Convertitore 5 V → VCORE</text>
+<text x="408" y="447" class="line">Circa 3,31 V: ESP, logica,</text>
+<text x="408" y="469" class="line">CAN, porte, QWIIC, mezzanina</text>
+<path class="edge" d="M320 200 H350 V250 H390"/>
+<path class="edge" d="M320 340 H350 V295 H390"/>
+<path class="edge" d="M730 200 H690 V250 H650"/>
+<path class="edge" d="M650 295 H690 V340 H730"/>
+<path class="edge" d="M1010 340 H1070"/>
+<path class="edge" d="M520 330 V370"/>
+<text x="730" y="433" class="sub">Sei contatti 5 V comuni: nessuna separazione ingresso / uscita.</text>
+<text x="730" y="456" class="sub">La portata complessiva richiede verifica di contatti, piste e temperatura.</text>
+<text x="40" y="520" class="head">CONTROLLO, COMUNICAZIONE E PORTE</text>
+<rect x="40" y="545" width="300" height="115" rx="12" fill="#e2efff" stroke="#ccd6e4"/>
+<text x="58" y="574" class="head">ESP32-S3 · U1</text>
+<text x="58" y="600" class="line">Processore, Wi-Fi e Bluetooth</text>
+<text x="58" y="622" class="line">GPIO, I²C, SPI, UART e USB</text>
+<text x="58" y="644" class="line">Montaggio tramite FlexyPin</text>
+<rect x="390" y="545" width="300" height="115" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="408" y="574" class="head">Selezione del controllore</text>
+<text x="408" y="600" class="line">U26–U29: ESP / mezzanina</text>
+<text x="408" y="622" class="line">MEZZ_OWNER + presenza modulo</text>
+<text x="408" y="644" class="line">U31: commutazione USB, non hub</text>
+<rect x="740" y="545" width="300" height="115" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="758" y="574" class="head">CAN · U2 + Q9/Q10 + Q2/U8</text>
+<text x="758" y="600" class="line">SN65HVD230, non isolato</text>
+<text x="758" y="622" class="line">120 Ω automatica ai due estremi</text>
+<text x="758" y="644" class="line">Bus condiviso sui magnetici</text>
+<rect x="1090" y="545" width="270" height="115" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="1108" y="574" class="head">Servizi e accessori</text>
+<text x="1108" y="600" class="line">J4: QWIIC / I²C a 3,3 V</text>
+<text x="1108" y="622" class="line">LED1–6: catena RGB</text>
+<text x="1108" y="644" class="line">J17 / J20: header ESP</text>
+<path class="edge" d="M340 600 H390"/>
+<path class="edge" d="M690 600 H740"/>
+<path class="edge" d="M190 660 V690 H1225 V660"/>
+<rect x="40" y="730" width="300" height="120" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="58" y="759" class="head">U25 · TCA9535</text>
+<text x="58" y="785" class="line">Espansore I²C</text>
+<text x="58" y="807" class="line">Comanda i MOSFET delle porte</text>
+<text x="58" y="829" class="line">e le abilitazioni di isolamento</text>
+<rect x="390" y="730" width="300" height="120" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="408" y="759" class="head">6 × selezione VCC / GND</text>
+<text x="408" y="785" class="line">Q3–Q8 + R117–R122 da 0 Ω</text>
+<text x="408" y="807" class="line">Porta pilotata a VCORE / GND</text>
+<text x="408" y="829" class="line">oppure ramo di potenza spento</text>
+<rect x="740" y="730" width="300" height="120" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="758" y="759" class="head">6 × canale configurabile</text>
+<text x="758" y="785" class="line">ESP ↔ U12/U13 ↔ N_Ax</text>
+<text x="758" y="807" class="line">N_Ax ↔ shunt 0,1 Ω ↔ PORT_Ax</text>
+<text x="758" y="829" class="line">J18 / J19: connessioni esterne</text>
+<rect x="1090" y="730" width="270" height="120" rx="12" fill="#fff" stroke="#ccd6e4"/>
+<text x="1108" y="759" class="head">Punti di misura</text>
+<text x="1108" y="785" class="line">12 prelievi Kelvin H/L</text>
+<text x="1108" y="807" class="line">Accesso ai nodi delle porte</text>
+<text x="1108" y="829" class="line">Mezzanina: acquisizione</text>
+<path class="edge" d="M190 660 V730"/>
+<path class="edge" d="M340 790 H390"/>
+<path class="edge" d="M690 790 H740"/>
+<path class="edge" d="M1040 790 H1090"/>
+<rect x="40" y="900" width="650" height="135" rx="12" fill="#fff1d8" stroke="#ccd6e4"/>
+<text x="58" y="929" class="head">J10 + J11 · Interfaccia mezzanina, 120 contatti</text>
+<text x="58" y="955" class="line">Alimentazioni, GND, GPIO condivisi, I²C, USB e controllo</text>
+<text x="58" y="977" class="line">Segnali delle porte, nodi degli shunt e 6 coppie Kelvin</text>
+<text x="58" y="999" class="line">Non sono 120 GPIO liberi. ADC, DAC, INA226 e FPGA</text>
+<text x="58" y="1021" class="line">non sono montati sulla Backbone.</text>
+<rect x="740" y="900" width="620" height="135" rx="12" fill="#fff1d8" stroke="#ccd6e4"/>
+<text x="758" y="929" class="head">Moduli opzionali · fuori dalla Backbone</text>
+<text x="758" y="955" class="line">Misura di corrente/tensione, stimolo DAC, elaborazione FPGA</text>
+<text x="758" y="977" class="line">Display, debug o alimentazione da batteria / USB-C</text>
+<text x="758" y="999" class="line">Le prestazioni dipendono anche dai percorsi sulla Backbone.</text>
+<text x="758" y="1021" class="line">Ripristinato il collegamento di alimentazione dell’interfaccia V3.</text>
+<path class="edge" d="M1225 850 V875 H365 V900"/>
+<path class="edge" d="M690 965 H740"/>
+<text x="40" y="1090" class="head">LIMITI DA TENERE PRESENTI</text>
+<text x="40" y="1120" class="line">Nessun limitatore dedicato sul bus 5 V, sui magnetici o verso la mezzanina; D6 blocca il ritorno verso USB.</text>
+<text x="40" y="1145" class="line">Restano verifiche di sbroglio, termiche e meccaniche; i LED a 3,3 V restano un punto elettrico da risolvere.</text>
+<text x="40" y="1170" class="line">Le frecce indicano i percorsi principali; non rappresentano tutti i collegamenti né un isolamento galvanico.</text>
+</svg>

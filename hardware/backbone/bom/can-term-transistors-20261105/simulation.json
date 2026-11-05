@@ -1,0 +1,74 @@
+{
+  "method": "ngspice generic BJT/diode engineering models; not vendor models or hardware qualification",
+  "dc_cases": 108,
+  "supplies": [
+    4,
+    5,
+    5.5
+  ],
+  "temperatures_C": [
+    -20,
+    25,
+    70
+  ],
+  "beta": [
+    20,
+    100,
+    300
+  ],
+  "resistor_tolerance": 0.015,
+  "imposed_collector_leakage_A": 1e-06,
+  "nominal_cases": [
+    {
+      "left": false,
+      "right": false,
+      "nominal": {
+        "gate": 0.045660191310162856,
+        "al": 4.291816862871849,
+        "ar": 4.291816862871849,
+        "bl": 9.299162106063477e-07,
+        "br": 4.999998499265848,
+        "vcc#branch": -0.000637070648339802
+      }
+    },
+    {
+      "left": false,
+      "right": true,
+      "nominal": {
+        "gate": 0.049022783220945554,
+        "al": 3.81191617979824,
+        "ar": 0.040105353405217876,
+        "bl": 8.819261566191768e-07,
+        "br": 4.356932524386552,
+        "vcc#branch": -0.001987088393875075
+      }
+    },
+    {
+      "left": true,
+      "right": false,
+      "nominal": {
+        "gate": 0.04904101439703745,
+        "al": 0.04103624526435782,
+        "ar": 3.811921757016214,
+        "bl": 0.6541919708177187,
+        "br": 4.9999984992658435,
+        "vcc#branch": -0.001520732082809752
+      }
+    },
+    {
+      "left": true,
+      "right": true,
+      "nominal": {
+        "gate": 4.999999899850973,
+        "al": 0.04103618065922624,
+        "ar": 0.040105290110246446,
+        "bl": 0.6541919097790234,
+        "br": 4.356932999529628,
+        "vcc#branch": -0.00228001071720196
+      }
+    }
+  ],
+  "worst_gate_on_V": 0.06299875489467022,
+  "worst_off_abs_Vgs_V": 0.010140534572198767,
+  "transient_right_connect_disconnect_pass": true
+}

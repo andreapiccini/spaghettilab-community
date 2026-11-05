@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820"><defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 Z" fill="#38657b"/></marker></defs><rect width="1200" height="820" fill="#f6f8fc"/><style>text{font-family:Arial;fill:#173448;font-size:20px}.title{font-size:29px;font-weight:bold}.small{font-size:17px}.bold{font-weight:bold}</style>
+<text x="30" y="45" class="title">Come la Backbone riconosce i due estremi</text>
+<text x="30" y="76" class="small">TERM è un contatto di presenza: non trasporta messaggi CAN.</text>
+<rect x="65" y="120" width="285" height="155" rx="12" fill="#e0f3e8" stroke="#9fb4c4"/>
+<text x="83" y="151" class="bold">PRIMA BACKBONE</text>
+<text x="83" y="180" class="small">Sinistra libera → corrente nulla</text>
+<text x="83" y="207" class="small">Destra collegata → corrente</text>
+<text x="83" y="234" class="small">120 Ω INSERITA</text>
+<rect x="460" y="120" width="285" height="155" rx="12" fill="#e6edf8" stroke="#9fb4c4"/>
+<text x="478" y="151" class="bold">BACKBONE CENTRALE</text>
+<text x="478" y="180" class="small">Sinistra collegata → corrente</text>
+<text x="478" y="207" class="small">Destra collegata → corrente</text>
+<text x="478" y="234" class="small">120 Ω DISINSERITA</text>
+<rect x="855" y="120" width="285" height="155" rx="12" fill="#e0f3e8" stroke="#9fb4c4"/>
+<text x="873" y="151" class="bold">ULTIMA BACKBONE</text>
+<text x="873" y="180" class="small">Sinistra collegata → corrente</text>
+<text x="873" y="207" class="small">Destra libera → corrente nulla</text>
+<text x="873" y="234" class="small">120 Ω INSERITA</text>
+<path d="M350 184 H460" fill="none" stroke="#38657b" stroke-width="3" marker-end="url(#arr)"/>
+<path d="M745 184 H855" fill="none" stroke="#38657b" stroke-width="3" marker-end="url(#arr)"/>
+<text x="365" y="167" class="small">TERM</text>
+<text x="760" y="167" class="small">TERM</text>
+<text x="30" y="310" class="small">Ogni collegamento unisce il TERM destro di una scheda al TERM sinistro della successiva.</text>
+<text x="30" y="337" class="small">Due transistor e due resistenze chiudono una piccola corrente quando le schede sono unite.</text>
+<text x="30" y="390" class="title">Dentro ogni Backbone</text>
+<rect x="30" y="420" width="325" height="100" rx="12" fill="#fff" stroke="#9fb4c4"/>
+<text x="48" y="451" class="bold">Contatto TERM sinistro</text>
+<text x="48" y="480" class="small">NPN Q9A + resistenza</text>
+<text x="48" y="507" class="small">Se libero: Q9A spento</text>
+<rect x="30" y="550" width="325" height="100" rx="12" fill="#fff" stroke="#9fb4c4"/>
+<text x="48" y="581" class="bold">Contatto TERM destro</text>
+<text x="48" y="610" class="small">PNP Q9B + resistenza</text>
+<text x="48" y="637" class="small">Se libero: Q9B spento</text>
+<rect x="405" y="420" width="300" height="100" rx="12" fill="#fff" stroke="#9fb4c4"/>
+<text x="423" y="451" class="bold">Q9A · rilevatore SX</text>
+<text x="423" y="480" class="small">Conduce se passa corrente</text>
+<text x="423" y="507" class="small">Rileva: manca il vicino sinistro</text>
+<rect x="405" y="550" width="300" height="100" rx="12" fill="#fff" stroke="#9fb4c4"/>
+<text x="423" y="581" class="bold">Q9B + Q10A · DX</text>
+<text x="423" y="610" class="small">Rilevamento e inversione</text>
+<text x="423" y="637" class="small">Rileva: manca il vicino destro</text>
+<path d="M355 470 H405" fill="none" stroke="#38657b" stroke-width="3" marker-end="url(#arr)"/>
+<path d="M355 600 H405" fill="none" stroke="#38657b" stroke-width="3" marker-end="url(#arr)"/>
+<path d="M705 470 H750 V527 H795" fill="none" stroke="#38657b" stroke-width="3" marker-end="url(#arr)"/>
+<path d="M705 600 H750 V555 H795" fill="none" stroke="#38657b" stroke-width="3" marker-end="url(#arr)"/>
+<rect x="795" y="460" width="375" height="165" rx="12" fill="#fff0d4" stroke="#9fb4c4"/>
+<text x="813" y="491" class="bold">Manca almeno un vicino?</text>
+<text x="813" y="520" class="small">SÌ → D7 / Q10B attivano Q2</text>
+<text x="813" y="547" class="small">U8 collega 120 Ω tra CAN_H e CAN_L</text>
+<text x="813" y="574" class="small">NO → la resistenza resta scollegata</text>
+<text x="30" y="710" class="small">D7 realizza l’OR dei due segnali di assenza. Q10B comanda Q2; C139/C140 filtrano gli ingressi.</text>
+<text x="30" y="747" class="bold">USB o batteria possono alimentare la catena anche dal centro: la posizione si rileva con TERM.</text>
+<text x="30" y="783" class="small">Richiede la nuova revisione su tutte le Backbone e la rail alimentata. Nessun comando dal micro.</text>
+</svg>

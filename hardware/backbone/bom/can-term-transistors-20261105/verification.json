@@ -1,0 +1,41 @@
+{
+  "removed": [
+    "C138",
+    "R133",
+    "U32"
+  ],
+  "added": [
+    "Q9",
+    "Q10",
+    "D7"
+  ],
+  "repurposed": [
+    "C139",
+    "C140",
+    "R123",
+    "R124",
+    "R125",
+    "R126",
+    "R127",
+    "R128",
+    "R129",
+    "R130",
+    "R131",
+    "R132"
+  ],
+  "unchanged_existing_pins_outside_detector": true,
+  "unchanged_other_footprints": true,
+  "all_new_parts_top": true,
+  "resistors_and_capacitors_0603": 86,
+  "passive_exception": [
+    "L1 power inductor 4x4mm"
+  ],
+  "ERC_errors": 0,
+  "ERC_warnings": 146,
+  "DRC_existing": 155,
+  "DRC_new": 0,
+  "existing_parity": 69,
+  "new_parity": 0,
+  "unrouted": 456,
+  "physical_qualification": false
+}

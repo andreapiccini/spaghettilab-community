@@ -1,0 +1,341 @@
+{
+  "R123": {
+    "value": "10k",
+    "pins": {
+      "1": "TERM_CTRL_IN",
+      "2": "TERM_BASE_L"
+    },
+    "xy": [
+      70,
+      710,
+      90
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C25804",
+    "mpn": "0603WAF1002T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "ffdb21fa-d2bc-4215-bdac-a78b3e4776c1",
+    "pcb": [
+      164.5,
+      75.5
+    ]
+  },
+  "R124": {
+    "value": "100k",
+    "pins": {
+      "1": "TERM_BASE_L",
+      "2": "GND"
+    },
+    "xy": [
+      95,
+      725,
+      0
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C25803",
+    "mpn": "0603WAF1003T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "395b07bb-e01d-4e24-bd24-b3f49124a383",
+    "pcb": [
+      171.5,
+      80.5
+    ]
+  },
+  "R125": {
+    "value": "10k",
+    "pins": {
+      "1": "5V",
+      "2": "TERM_ABSENT_L"
+    },
+    "xy": [
+      132.54,
+      690,
+      0
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C25804",
+    "mpn": "0603WAF1002T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "1af3c07d-af53-480b-a8dd-cdba35a47055",
+    "pcb": [
+      154.0,
+      81.5
+    ]
+  },
+  "R126": {
+    "value": "10k",
+    "pins": {
+      "1": "TERM_CTRL_OUT",
+      "2": "TERM_BASE_R"
+    },
+    "xy": [
+      70,
+      800,
+      90
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C25804",
+    "mpn": "0603WAF1002T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "16b0f7db-1e1b-486b-878a-fecf98b31bee",
+    "pcb": [
+      173.5,
+      69.0
+    ]
+  },
+  "R127": {
+    "value": "100k",
+    "pins": {
+      "1": "5V",
+      "2": "TERM_BASE_R"
+    },
+    "xy": [
+      95,
+      780,
+      0
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C25803",
+    "mpn": "0603WAF1003T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "692d626a-1335-43a6-a9b1-9a7408a0566b",
+    "pcb": [
+      181.5,
+      77.5
+    ]
+  },
+  "R128": {
+    "value": "22k",
+    "pins": {
+      "1": "TERM_PRESENT_R",
+      "2": "TERM_BASE_INV"
+    },
+    "xy": [
+      185,
+      825,
+      90
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C31850",
+    "mpn": "0603WAF2202T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "3ed19108-9ca8-4f6b-8161-79ff97d40d7b",
+    "pcb": [
+      154.0,
+      69.5
+    ]
+  },
+  "R129": {
+    "value": "100k",
+    "pins": {
+      "1": "TERM_BASE_INV",
+      "2": "GND"
+    },
+    "xy": [
+      210,
+      840,
+      0
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C25803",
+    "mpn": "0603WAF1003T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "e18e352e-944e-4b55-9e3f-70245abfe6b2",
+    "pcb": [
+      154.0,
+      67.5
+    ]
+  },
+  "R130": {
+    "value": "10k",
+    "pins": {
+      "1": "5V",
+      "2": "TERM_ABSENT_R"
+    },
+    "xy": [
+      252.54,
+      795,
+      0
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C25804",
+    "mpn": "0603WAF1002T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "1fe72bb2-92b4-4929-aea8-6de8f445bbeb",
+    "pcb": [
+      149.5,
+      73.5
+    ]
+  },
+  "R131": {
+    "value": "22k",
+    "pins": {
+      "1": "TERM_ABSENT_OR",
+      "2": "TERM_BASE_DRIVE"
+    },
+    "xy": [
+      380,
+      750,
+      90
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C31850",
+    "mpn": "0603WAF2202T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "3c74ef70-e9f8-4da8-bc57-88c3125a448d",
+    "pcb": [
+      149.5,
+      71.5
+    ]
+  },
+  "R132": {
+    "value": "100k",
+    "pins": {
+      "1": "TERM_BASE_DRIVE",
+      "2": "GND"
+    },
+    "xy": [
+      410,
+      770,
+      0
+    ],
+    "lib": "Device:R",
+    "fp": "Resistor_SMD:R_0603_1608Metric",
+    "code": "C25803",
+    "mpn": "0603WAF1003T5E",
+    "maker": "UNI-ROYAL",
+    "uuid": "072a044b-bb1d-4a05-9092-e1188656b577",
+    "pcb": [
+      150.5,
+      69.5
+    ]
+  },
+  "C139": {
+    "value": "10nF",
+    "pins": {
+      "1": "TERM_BASE_L",
+      "2": "GND"
+    },
+    "xy": [
+      110,
+      725,
+      0
+    ],
+    "lib": "Device:C",
+    "fp": "Capacitor_SMD:C_0603_1608Metric",
+    "code": "C1589",
+    "mpn": "CL10B103KB8NNNC",
+    "maker": "Samsung",
+    "uuid": "b2d53915-2bd9-4994-81dd-b03662b41299",
+    "pcb": [
+      164.0,
+      80.5
+    ]
+  },
+  "C140": {
+    "value": "10nF",
+    "pins": {
+      "1": "5V",
+      "2": "TERM_BASE_R"
+    },
+    "xy": [
+      110,
+      780,
+      0
+    ],
+    "lib": "Device:C",
+    "fp": "Capacitor_SMD:C_0603_1608Metric",
+    "code": "C1589",
+    "mpn": "CL10B103KB8NNNC",
+    "maker": "Samsung",
+    "uuid": "cd75cb25-7add-4df1-9a97-3c8d52a3da3e",
+    "pcb": [
+      154.0,
+      79.5
+    ]
+  },
+  "Q9": {
+    "value": "LMBT3946DW1T1G",
+    "pins": {
+      "1": "GND",
+      "2": "TERM_BASE_L",
+      "6": "TERM_ABSENT_L",
+      "4": "5V",
+      "5": "TERM_BASE_R",
+      "3": "TERM_PRESENT_R"
+    },
+    "xy": [
+      130,
+      710,
+      0
+    ],
+    "lib": "SpaghettiLAB_TERM:LMBT3946DW1T1G",
+    "fp": "Package_TO_SOT_SMD:SOT-363_SC-70-6",
+    "code": "C136169",
+    "mpn": "LMBT3946DW1T1G",
+    "maker": "LRC",
+    "uuid": "e17f1af2-6e68-42a6-814e-966f23f8b2ad",
+    "pcb": [
+      168.0,
+      76.0
+    ]
+  },
+  "Q10": {
+    "value": "LMBT3904DW1T1G",
+    "pins": {
+      "1": "GND",
+      "2": "TERM_BASE_INV",
+      "6": "TERM_ABSENT_R",
+      "4": "GND",
+      "5": "TERM_BASE_DRIVE",
+      "3": "TERM_GATE_N"
+    },
+    "xy": [
+      250,
+      825,
+      0
+    ],
+    "lib": "SpaghettiLAB_TERM:LMBT3904DW1T1G",
+    "fp": "Package_TO_SOT_SMD:SOT-363_SC-70-6",
+    "code": "C131781",
+    "mpn": "LMBT3904DW1T1G",
+    "maker": "LRC",
+    "uuid": "9ee7ab18-2518-433e-bf32-b54ae2b8236a",
+    "pcb": [
+      161.5,
+      78.0
+    ]
+  },
+  "D7": {
+    "value": "BAV70",
+    "pins": {
+      "1": "TERM_ABSENT_L",
+      "2": "TERM_ABSENT_R",
+      "3": "TERM_ABSENT_OR"
+    },
+    "xy": [
+      310,
+      700,
+      180
+    ],
+    "lib": "SpaghettiLAB_TERM:BAV70_SPLIT",
+    "fp": "Package_TO_SOT_SMD:SOT-23",
+    "code": "C68978",
+    "mpn": "BAV70",
+    "maker": "JSCJ",
+    "uuid": "a37ed70d-1726-4c7d-9b98-bf17eb0c19cd",
+    "pcb": [
+      153.5,
+      72.5
+    ]
+  }
+}

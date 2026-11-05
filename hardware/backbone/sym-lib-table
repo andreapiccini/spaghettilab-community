@@ -6,4 +6,4 @@
   (lib (name "LCSC_Ports")(type "KiCad")(uri "${KIPRJMOD}/../libraries/LCSC_Ports.kicad_sym")(options "")(descr "LCSC/EasyEDA CAD for AO6604 C47744 and TCA9535RGER C527428"))
 
 (lib (name "SpaghettiLAB_Mezzanine")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB_Mezzanine.kicad_sym")(options "")(descr "Mezzanine schematic USB switch and functional AG32 pin grouping"))
-)
+(lib (name "SpaghettiLAB_TERM")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB_TERM.kicad_sym")(options "")(descr "TERM dual BJTs and diode pair")))
