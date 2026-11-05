@@ -1,0 +1,155 @@
+Net,Class,Nominal_outer_width_mm,Circuit_design_envelope_A_NOT_certified_max,Legacy_IPC2221_outer_35um_10C_A_estimate,Legacy_IPC2221_inner_35um_10C_A_estimate,Meaning_and_limit
+/BUCK_BOOT,BUCK_BOOT,0.25,,0.875,0.438,"Pulsed bootstrap charging, not a DC power rail"
+/BUCK_FB,BUCK_FEEDBACK,0.2,,0.745,0.372,"AP63203 fixed-output sense via fitted R36=0R; R37 DNP. Input bias/sense current only, not the former 33k/10k divider."
+/BUCK_SW,BUCK_SWITCH,0.8,2,2.034,1.017,"AP63203 2A output target, estimated peak <=2.23A at VIN<=5.25V for stated inductance/spread assumptions; not a thermal qualification."
+/LED_CHAIN_1,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+/LED_CHAIN_2,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+/LED_CHAIN_3,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+/LED_CHAIN_4,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+/LED_CHAIN_5,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+/PWR_DRV_A0,DRIVER_BRANCH,0.5,0.5,1.447,0.723,"Per driver design ceiling; shared buck budget, no per-port current limiter"
+/PWR_DRV_A1,DRIVER_BRANCH,0.5,0.5,1.447,0.723,"Per driver design ceiling; shared buck budget, no per-port current limiter"
+/PWR_DRV_A2,DRIVER_BRANCH,0.5,0.5,1.447,0.723,"Per driver design ceiling; shared buck budget, no per-port current limiter"
+/PWR_DRV_A3,DRIVER_BRANCH,0.5,0.5,1.447,0.723,"Per driver design ceiling; shared buck budget, no per-port current limiter"
+/PWR_DRV_A4,DRIVER_BRANCH,0.5,0.5,1.447,0.723,"Per driver design ceiling; shared buck budget, no per-port current limiter"
+/PWR_DRV_A5,DRIVER_BRANCH,0.5,0.5,1.447,0.723,"Per driver design ceiling; shared buck budget, no per-port current limiter"
+/TERM_DRIVE,TERM_5V,0.2,0.005,0.745,0.372,"5V-domain termination controls; /TERM_LED about 4mA, TERM_CTRL_OUT about 11uA; TERM_CTRL_IN has missing PCB NT1"
+/TERM_LED,TERM_5V,0.2,0.005,0.745,0.372,"5V-domain termination controls; /TERM_LED about 4mA, TERM_CTRL_OUT about 11uA; TERM_CTRL_IN has missing PCB NT1"
+/TERM_R,CAN_BUS,0.25,0.06,0.875,0.438,"Bus-current design envelope, not power output; termination requires power check"
+/USB_CC1,USB_CC,0.2,0.0011,0.745,0.372,5.1k Rd detection; not USB current negotiation/PD controller
+/USB_CC2,USB_CC,0.2,0.0011,0.745,0.372,5.1k Rd detection; not USB current negotiation/PD controller
+5V,POWER_5V,2.0,3,3.953,1.977,COPPER target only; actual source/USB/magnetic contacts may be lower
+A0,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+A1,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+A2,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+A3,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+A4,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+A5,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+AG_CAN_TX,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+AG_ISO4_N,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+AG_ISO5_N,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+AG_LED_DATA,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+ALED,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+BOOT,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+CAN_H,CAN_BUS,0.25,0.06,0.875,0.438,"Bus-current design envelope, not power output; termination requires power check"
+CAN_L,CAN_BUS,0.25,0.06,0.875,0.438,"Bus-current design envelope, not power output; termination requires power check"
+CAN_RX,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+CAN_TX,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+CTRL13,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+CTRL14,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP35_AUX,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP36_AUX,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP37_AUX,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP_AG_BOOT0,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP_AG_RESET_N,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP_CAN_TX,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP_ISO4_N,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP_ISO5_N,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP_LED_DATA,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP_PROG_RX,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+ESP_PROG_TX,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+EXT_SPI_CS_N,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+GND,GROUND,0.5,,1.447,0.723,"Return equals sum of actual load currents; use continuous plane, not 0.5mm universal trunk"
+IO3,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+IO35,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+IO36,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+IO37,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+IO4,I2C,0.2,0.003,0.745,0.372,Pull-ups currently ~0.70mA at 3.3V/4.7k; total parallel pull-ups govern bus sink current
+IO45,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+IO46,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+IO5,I2C,0.2,0.003,0.745,0.372,Pull-ups currently ~0.70mA at 3.3V/4.7k; total parallel pull-ups govern bus sink current
+ISO_A0_N,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+ISO_A1_N,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+ISO_A2_N,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+ISO_A3_N,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+ISO_A4_N,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+ISO_A5_N,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+LED_EXP_DATA,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+MEAS_INHIBIT,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+MEAS_S0,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+MEAS_S1,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+MEAS_S2,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+MEZZ_OWNER,SIGNAL,0.2,0.008,0.745,0.372,"Signal only; planning allocation, verify driver/receiver and total GPIO budget"
+MEZZ_PRESENT_N,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+N_A0,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+N_A1,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+N_A2,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+N_A3,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+N_A4,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+N_A5,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+N_GATE_0,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+N_GATE_1,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+N_GATE_2,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+N_GATE_3,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+N_GATE_4,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+N_GATE_5,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+PORT_A0,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+PORT_A1,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+PORT_A2,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+PORT_A3,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+PORT_A4,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+PORT_A5,PORT_IO_POWER,0.5,0.5,1.447,0.723,"Per port design ceiling subject to shared 2A budget, connector and shunt derating"
+P_GATE_0,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+P_GATE_1,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+P_GATE_2,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+P_GATE_3,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+P_GATE_4,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+P_GATE_5,GATE_CTRL,0.2,0.000033,0.745,0.372,"Static 3.3V/100k per gate; transient gate charging governed by driver, not this DC number"
+SHUNT_SENSE_H0,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_H1,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_H2,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_H3,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_H4,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_H5,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_L0,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_L1,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_L2,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_L3,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_L4,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SHUNT_SENSE_L5,KELVIN_SENSE,0.15,0,0.604,0.302,No intentional load current; only front-end input bias/leakage
+SPI_MISO,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+SPI_MOSI,GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.
+TERM_CTRL_IN,TERM_5V,0.2,0.005,0.745,0.372,"5V-domain termination controls; /TERM_LED about 4mA, TERM_CTRL_OUT about 11uA; TERM_CTRL_IN has missing PCB NT1"
+TERM_CTRL_OUT,TERM_5V,0.2,0.005,0.745,0.372,"5V-domain termination controls; /TERM_LED about 4mA, TERM_CTRL_OUT about 11uA; TERM_CTRL_IN has missing PCB NT1"
+USB_D+,USB_DIFF,0.18,,0.69,0.345,"Data pair, impedance controls width; not a supply"
+USB_D-,USB_DIFF,0.18,,0.69,0.345,"Data pair, impedance controls width; not a supply"
+USB_ESP_D+,USB_DIFF,0.18,,0.69,0.345,"Data pair, impedance controls width; not a supply"
+USB_ESP_D-,USB_DIFF,0.18,,0.69,0.345,"Data pair, impedance controls width; not a supply"
+USB_SW_AG_N,USB_DIFF,0.18,,0.69,0.345,"Data pair, impedance controls width; not a supply"
+USB_SW_AG_P,USB_DIFF,0.18,,0.69,0.345,"Data pair, impedance controls width; not a supply"
+USB_SW_ESP_N,USB_DIFF,0.18,,0.69,0.345,"Data pair, impedance controls width; not a supply"
+USB_SW_ESP_P,USB_DIFF,0.18,,0.69,0.345,"Data pair, impedance controls width; not a supply"
+USB_VBUS_SENSE,ANALOG_SENSE,0.2,0.0000263,0.745,0.372,5.25V/(100k+100k)~26uA divider current; ADC loading and settling matter
+VBUS,USB_VBUS,2.0,3,3.953,1.977,USB trunk COPPER target only; J11.51 branch limited to 0.5A design target
+VCORE,POWER_3V3,1.2,2,2.73,1.365,"Buck total including carrier, ports and mezzanine; no external backfeed authorization"
+unconnected-(J15-Pad1),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad10),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad11),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad12),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad2),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad3),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad4),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad5),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad6),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad7),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad8),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J15-Pad9),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad1),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad10),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad11),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad12),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad2),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad3),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad4),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad5),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad6),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad7),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad8),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(J16-Pad9),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(U13C-B-Pad8),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(U13D-B-Pad11),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(U2-VREF-Pad5),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(U25-~{INT}-Pad1),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(U3-SBU1-PadA8),Default,0.2,,0.745,0.372,NC: do not route
+unconnected-(U3-SBU2-PadB8),Default,0.2,,0.745,0.372,NC: do not route
+~{RESET},GPIO_DIRECT,0.2,0.008,0.745,0.372,GPIO planning allocation only; never a supply. ESP supply current does not flow here.

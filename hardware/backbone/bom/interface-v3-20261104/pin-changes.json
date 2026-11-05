@@ -1,0 +1,82 @@
+[
+  {
+    "connector": "J10",
+    "pin": 5,
+    "net": "5V"
+  },
+  {
+    "connector": "J10",
+    "pin": 10,
+    "net": "VCORE"
+  },
+  {
+    "connector": "J11",
+    "pin": 5,
+    "net": "5V"
+  },
+  {
+    "connector": "J11",
+    "pin": 10,
+    "net": "VCORE"
+  },
+  {
+    "connector": "J10",
+    "pin": 57,
+    "net": "SHUNT_SENSE_H0"
+  },
+  {
+    "connector": "J10",
+    "pin": 58,
+    "net": "SHUNT_SENSE_L0"
+  },
+  {
+    "connector": "J10",
+    "pin": 59,
+    "net": "SHUNT_SENSE_H1"
+  },
+  {
+    "connector": "J10",
+    "pin": 60,
+    "net": "SHUNT_SENSE_L1"
+  },
+  {
+    "connector": "J11",
+    "pin": 53,
+    "net": "SHUNT_SENSE_H2"
+  },
+  {
+    "connector": "J11",
+    "pin": 54,
+    "net": "SHUNT_SENSE_L2"
+  },
+  {
+    "connector": "J11",
+    "pin": 55,
+    "net": "SHUNT_SENSE_H3"
+  },
+  {
+    "connector": "J11",
+    "pin": 56,
+    "net": "SHUNT_SENSE_L3"
+  },
+  {
+    "connector": "J11",
+    "pin": 57,
+    "net": "SHUNT_SENSE_H4"
+  },
+  {
+    "connector": "J11",
+    "pin": 58,
+    "net": "SHUNT_SENSE_L4"
+  },
+  {
+    "connector": "J11",
+    "pin": 59,
+    "net": "SHUNT_SENSE_H5"
+  },
+  {
+    "connector": "J11",
+    "pin": 60,
+    "net": "SHUNT_SENSE_L5"
+  }
+]

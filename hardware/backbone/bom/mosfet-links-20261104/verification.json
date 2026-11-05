@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-04",
+  "changed_pin_assignments": 24,
+  "new_components": [
+    "R117",
+    "R118",
+    "R119",
+    "R120",
+    "R121",
+    "R122"
+  ],
+  "existing_footprints_preserved": true,
+  "mezzanine_connectors_and_kelvin_unchanged": true,
+  "all_new_components_top": true,
+  "tracks": 0,
+  "vias": 0,
+  "erc_errors": 0,
+  "erc_warnings": 143,
+  "drc_physical": 155,
+  "new_physical_drc_violations": 0,
+  "schematic_parity": 69,
+  "new_parity_violations": 0,
+  "unconnected": 462,
+  "schematic_sha256": "31e45325c7d69f1a4844876a67954825183a65ad4a0d10148021e7fe6fb7a6c3",
+  "pcb_sha256": "7116853d6123f2f0dc3b1266679258a09a33af34ac409e26a160ef7698e28cb8",
+  "placement": [
+    [
+      150.5,
+      86.75,
+      0
+    ],
+    [
+      149.25,
+      76.75,
+      270
+    ],
+    [
+      186.0,
+      84.75,
+      180
+    ],
+    [
+      180.75,
+      130.65,
+      180
+    ],
+    [
+      185.0,
+      112.0,
+      270
+    ],
+    [
+      160.75,
+      108.75,
+      270
+    ]
+  ],
+  "qualification": "CAD checks only; unrouted; no physical bandwidth qualification"
+}

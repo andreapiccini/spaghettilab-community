@@ -16255,6 +16255,362 @@
 			)
 			(embedded_fonts no)
 		)
+(symbol "SpaghettiLAB:AP63203WU-7"
+			(pin_names
+				(offset 0.5)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Value" "AP63203WU-7"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Footprint" "SpaghettiLAB:TSOT-23-6_Power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.diodes.com/assets/Datasheets/AP63200-AP63201-AP63203-AP63205.pdf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Description" "3.3V fixed 2A buck; VIN >= 3.8V; R36=0R, R37=DNP. Not pin-compatible with TPS562201."
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "AP63203WU-7_0_1"
+				(rectangle
+					(start -7.62 7.62)
+					(end 7.62 -7.62)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "AP63203WU-7_1_1"
+				(pin power_in line
+					(at 0 -10.16 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "SW"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -10.16 2.54 0)
+					(length 2.54)
+					(name "VIN"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 -5.08 180)
+					(length 2.54)
+					(name "FB"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -10.16 -2.54 0)
+					(length 2.54)
+					(name "EN"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 10.16 270)
+					(length 2.54)
+					(name "BST"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		(property "LCSC Part" "C780769" (at 0 0 0)  (hide yes) (effects (font (size 1 1))))(property "LCSC" "C780769" (at 0 0 0)  (hide yes) (effects (font (size 1 1))))(property "MPN" "AP63203WU-7" (at 0 0 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Diodes Incorporated" (at 0 0 0)  (hide yes) (effects (font (size 1 1)))))
+(symbol "SpaghettiLAB:SY8089AAAC"
+			(pin_names
+				(offset 0.5)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Value" "SY8089AAAC"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.lcsc.com/product-detail/C78988.html"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Description" "Adjustable buck, 2.7-5.5V input only; 3.31V nominal. 2A IC rating subject to thermal/layout validation."
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SY8089AAAC_0_1"
+				(rectangle
+					(start -7.62 7.62)
+					(end 7.62 -7.62)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "SY8089AAAC_1_1"
+				(pin power_in line
+					(at 0 -10.16 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "2" (effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "LX"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "3" (effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -10.16 2.54 0)
+					(length 2.54)
+					(name "IN"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "4" (effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 -5.08 180)
+					(length 2.54)
+					(name "FB"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "5" (effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -10.16 -2.54 0)
+					(length 2.54)
+					(name "EN"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "1" (effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				
+			)
+			(embedded_fonts no)
+		(property "LCSC Part" "C78988" (at 0 0 0)  (hide yes) (effects (font (size 1 1))))(property "LCSC" "C78988" (at 0 0 0)  (hide yes) (effects (font (size 1 1))))(property "MPN" "SY8089AAAC" (at 0 0 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Silergy" (at 0 0 0)  (hide yes) (effects (font (size 1 1)))))
 		(symbol "SpaghettiLAB:XL9535QF24_6Ports"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -21779,7 +22135,150 @@
 			)
 			(embedded_fonts no)
 		)
-	)
+
+(symbol "SpaghettiLAB:R_2Terminal_Kelvin"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "R_2Terminal_Kelvin_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_2Terminal_Kelvin_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			(pin passive line (at -3.81 2.54 0) (length 3.81) (name "" (effects (font (size 0.8 0.8)))) (number "3" (effects (font (size 0.8 0.8)))))
+(pin passive line (at -3.81 -2.54 0) (length 3.81) (name "" (effects (font (size 0.8 0.8)))) (number "4" (effects (font (size 0.8 0.8)))))
+)
+			(embedded_fonts no)
+		)
+)
 	(rectangle
 		(start 568.2415 293.1142)
 		(end 655.2415 345.9467)
@@ -21792,8 +22291,8 @@
 		)
 		(uuid "112227aa-a544-4a01-a644-1130f37ac4ae")
 	)
-	
-	
+
+
 	(rectangle
 		(start 474.2415 263.6817)
 		(end 561.2415 342.9917)
@@ -21832,9 +22331,9 @@
 		)
 		(uuid "523c08fe-b1c3-4778-bd25-998b9ef86a28")
 	)
-	
-	
-	
+
+
+
 	(rectangle
 		(start 15 211.9792)
 		(end 130.6037 326.5393)
@@ -21919,8 +22418,8 @@
 		)
 		(uuid "b5107226-539c-4f49-b70c-54add343cfad")
 	)
-	
-	
+
+
 	(text "J3 | DIRECT ESP32 ACCESS"
 		(exclude_from_sim no)
 		(at 573.2415 298.1142 0)
@@ -21965,8 +22464,8 @@
 		)
 		(uuid "1ac41aca-97e8-4dc8-9ee9-7a5e773d3a6c")
 	)
-	
-	
+
+
 	(text "U25 | PORT CONFIGURATION" (at 270 169 0) (effects (font (size 1.25 1.25)) (justify left bottom)) (uuid "4d911d60-e3fe-4c2d-9f62-a0aa6441bebe"))
 	(text "Bottom insertion | 20.72 x 5 x 5 mm | land pattern requires physical qualification"
 		(exclude_from_sim no)
@@ -21990,7 +22489,7 @@
 		)
 		(uuid "43677c50-4b24-4000-b383-d3a17f116d88")
 	)
-	
+
 	(text "Powers the carrier and the removable Expansion module."
 		(exclude_from_sim no)
 		(at 193.2537 266.9925 0)
@@ -22002,7 +22501,7 @@
 		)
 		(uuid "4f7ab489-b313-4919-994d-fc9afb029b39")
 	)
-	
+
 	(text "Connects compatible sensors through a four-wire cable."
 		(exclude_from_sim no)
 		(at 479.2415 273.6817 0)
@@ -22025,7 +22524,7 @@
 		)
 		(uuid "683882be-3215-4492-85f2-48c99e50a656")
 	)
-	
+
 	(text "P1-P6 = external experiment rows | A0-A5 = ESP-side signals | J3 = separate direct access. Named arrows connect blocks."
 		(exclude_from_sim no)
 		(at 15 30 0)
@@ -22103,9 +22602,9 @@
 		)
 		(uuid "89ef39b2-e194-4f81-815b-ef4a3b392ccf")
 	)
-	
+
 	(text "READING GUIDE: Q3-Q8 = power stages | U12/U13 = signal isolation | J1/J140 = shared headers | R56-R61 = shunts" (at 15 35 0) (effects (font (size 1.1 1.1)) (justify left bottom)) (uuid "ec77687c-eabb-4eb9-9e97-7d79ea94e7f3"))
-	(text "120 contacts: existing services + 22 future-module signals; J11 pins 53 / 54 / 56 remain reserved."
+	(text "INTERFACE V3: 120/120 assigned | 17 GND | 6 x 5V | 6 x VCORE | 12 dedicated shunt sense | all services retained."
 		(exclude_from_sim no)
 		(at 20 221.9792 0)
 		(effects
@@ -22127,10 +22626,10 @@
 		)
 		(uuid "9469f3e3-3f64-4986-91f9-db2e10c912a1")
 	)
-	
+
 	(text "Physical IC groups | all units of each IC together | named nets preserve functional links" (at 15 23 0) (effects (font (size 1.2 1.2)) (justify left bottom)) (uuid "814b9088-f1b7-46ff-b08c-ba079aafbaee"))
-	
-	
+
+
 	(text "GPIO35/36/37 AUX links are DNP PSRAM guards. Fit only on compatible ESP32 variants. USB does not pass through FPGA logic."
 		(exclude_from_sim no)
 		(at 20 200.9792 0)
@@ -22142,7 +22641,7 @@
 		)
 		(uuid "a482e9e1-d20a-48ae-9f28-a0b0852604a8")
 	)
-	
+
 	(text "J9 / Q2 / U8 set CAN termination automatically from the physical link. This is independent of MEZZ_OWNER."
 		(exclude_from_sim no)
 		(at 436.8729 252.6817 0)
@@ -22176,7 +22675,7 @@
 		)
 		(uuid "ad547ee8-acc4-45b8-ab6a-ce807a59c1d5")
 	)
-	
+
 	(text "CJT CONNECTOR FIT TEST | J15 / J16"
 		(exclude_from_sim no)
 		(at 25.4 590.55 0)
@@ -22210,8 +22709,8 @@
 		)
 		(uuid "b6e1717a-77f7-4eac-9d48-0b342f295c7e")
 	)
-	
-	
+
+
 	(text "Shared I2C control of the six power stages." (at 270 176 0) (effects (font (size 1 1)) (justify left bottom)) (uuid "b22e0d88-27e7-4274-b399-451b973b136b"))
 	(text "Added gate / ISO signals are shared with U25: release its outputs before external drive. VBUS"
 		(exclude_from_sim no)
@@ -22235,7 +22734,7 @@
 		)
 		(uuid "c2a99f5d-dfb2-47e7-a246-1c7798a8c2f1")
 	)
-	
+
 	(text "Connects USB to the selected controller."
 		(exclude_from_sim no)
 		(at 436.8729 50 0)
@@ -22314,7 +22813,7 @@
 		(uuid "fabd6698-6d8f-4051-ad4d-e58892f2e9be")
 	)
 	(text "U25 + C129: common to all variants.\nOne active I2C master at a time.\nU12/U13 are grouped separately below." (at 270 208 0) (effects (font (size 1.05 1.05)) (justify left bottom)) (uuid "44faf24c-0d09-44de-a056-a08f2645ebb0"))
-	
+
 	(junction
 		(at 445.7700 477.5200)
 		(diameter 0)
@@ -22363,7 +22862,7 @@
 		(color 0 0 0 0)
 		(uuid "1787d92f-7302-4e91-868f-bb3cd3cf0dfc")
 	)
-	
+
 	(junction
 		(at 49.5300 439.4200)
 		(diameter 0)
@@ -22394,7 +22893,7 @@
 		(color 0 0 0 0)
 		(uuid "2a8995ac-db68-49e7-a2d8-0a9b69397c73")
 	)
-	
+
 	(junction
 		(at 49.5300 549.9100)
 		(diameter 0)
@@ -22431,9 +22930,9 @@
 		(color 0 0 0 0)
 		(uuid "357e379f-80ea-4dda-9536-7893a4e204a9")
 	)
-	
-	
-	
+
+
+
 	(junction
 		(at 90.17 82.55)
 		(diameter 0)
@@ -22446,7 +22945,7 @@
 		(color 0 0 0 0)
 		(uuid "4234f4b9-17c9-4da2-a2ab-487c5c026a94")
 	)
-	
+
 	(junction
 		(at 393.7 294.64)
 		(diameter 0)
@@ -22519,13 +23018,8 @@
 		(color 0 0 0 0)
 		(uuid "58ecea17-987c-46b2-8207-cd564bebf9b3")
 	)
+
 	
-	(junction
-		(at 248.92 281.94)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "5b796425-e94a-4321-bf72-942be1214db9")
-	)
 	(junction
 		(at 198.12 281.94)
 		(diameter 0)
@@ -22568,7 +23062,7 @@
 		(color 0 0 0 0)
 		(uuid "696bf67c-fb1a-4fca-9352-f7c49d87b451")
 	)
-	
+
 	(junction
 		(at 90.17 63.5)
 		(diameter 0)
@@ -22581,7 +23075,7 @@
 		(color 0 0 0 0)
 		(uuid "724edb96-368e-4f6c-a9dc-649797432203")
 	)
-	
+
 	(junction
 		(at 229.87 158.75)
 		(diameter 0)
@@ -22666,8 +23160,8 @@
 		(color 0 0 0 0)
 		(uuid "a2acf46c-c8fe-4977-ae92-8374d3cefd7e")
 	)
-	
-	
+
+
 	(junction
 		(at 496.57 90.17)
 		(diameter 0)
@@ -22710,14 +23204,14 @@
 		(color 0 0 0 0)
 		(uuid "c67c7745-5f4e-495b-a5f2-eb7fe98bdc01")
 	)
-	
+
 	(junction
 		(at 49.5300 411.4800)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "ccdf4dbf-665f-446a-9836-4e8c903a52f4")
 	)
-	
+
 	(junction
 		(at 228.6 317.5)
 		(diameter 0)
@@ -22742,7 +23236,7 @@
 		(color 0 0 0 0)
 		(uuid "dca97355-c044-42da-8fc3-b5860c4dfecd")
 	)
-	
+
 	(junction
 		(at 271.78 300.99)
 		(diameter 0)
@@ -22755,7 +23249,7 @@
 		(color 0 0 0 0)
 		(uuid "ddb0bdf0-3391-4e73-935e-3ea0827592a0")
 	)
-	
+
 	(junction
 		(at 610.87 219.71)
 		(diameter 0)
@@ -22780,8 +23274,8 @@
 		(color 0 0 0 0)
 		(uuid "f27607cf-04ec-4a09-b3d5-7e439ae6dc90")
 	)
-	
-	
+
+
 	(junction
 		(at 49.5300 494.0300)
 		(diameter 0)
@@ -22814,10 +23308,7 @@
 		(at 433.07 297.18)
 		(uuid "12a3f0e2-837e-47d9-be11-727477c58965")
 	)
-	(no_connect
-		(at 105.41 307.34)
-		(uuid "133d1708-4ae0-4f65-bd25-075e24a19d4b")
-	)
+
 	(no_connect
 		(at 580.3900 469.9000)
 		(uuid "33449c5d-4811-4138-ac57-7656ef3cf0f4")
@@ -22858,10 +23349,7 @@
 		(at 121.92 622.3)
 		(uuid "8ef1c8be-07c7-4f04-9d98-0d4be128e78d")
 	)
-	(no_connect
-		(at 92.71 304.8)
-		(uuid "900109a0-f414-4164-b32b-d2e923291a8d")
-	)
+
 	(no_connect
 		(at 58.42 614.68)
 		(uuid "937c740c-5c3b-45a3-a117-1ff751968aaa")
@@ -22906,10 +23394,7 @@
 		(at 43.18 617.22)
 		(uuid "d004874c-270b-4b2b-9d67-0d1f87d765ef")
 	)
-	(no_connect
-		(at 105.41 304.8)
-		(uuid "d015c0fe-bc52-4725-ae22-2a70aca9df18")
-	)
+
 	(no_connect
 		(at 121.92 614.68)
 		(uuid "de980f4f-7f3f-4ef3-abc0-4ffaf2f848b0")
@@ -22948,7 +23433,7 @@
 		)
 		(uuid "00cd2a33-d163-4349-a49a-ea9f04f6c577")
 	)
-	
+
 	(wire
 		(pts
 			(xy 389.8900 389.8900) (xy 400.0500 389.8900)
@@ -23119,7 +23604,7 @@
 		)
 		(uuid "0912ba2a-71bc-40fe-b24d-5a23d126d79a")
 	)
-	
+
 	(wire
 		(pts
 			(xy 31.7500 495.3000) (xy 31.7500 494.0300)
@@ -23140,7 +23625,7 @@
 		)
 		(uuid "0a237479-a79f-4450-9a31-cbd683fcadad")
 	)
-	
+
 	(wire
 		(pts
 			(xy 525.78 78.74) (xy 518.16 78.74)
@@ -23231,7 +23716,7 @@
 		)
 		(uuid "0f1e163c-f979-4f5e-a1d5-6b310aff7ca5")
 	)
-	
+
 	(wire
 		(pts
 			(xy 532.13 186.69) (xy 537.21 186.69)
@@ -23302,16 +23787,8 @@
 		)
 		(uuid "1143c736-81a3-4beb-a6f0-68dd2807a5d3")
 	)
-	(wire
-		(pts
-			(xy 49.5300 411.4800) (xy 68.5800 411.4800)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "11661dcc-6914-4526-ae24-e305ab2f25c6")
-	)
+	(wire (pts (xy 49.53 411.48) (xy 55.88 411.48)) (stroke (width 0) (type default)) (uuid "90349ecc-f0ba-424a-a8d8-ef6d8ba93e74"))
+(wire (pts (xy 63.5 411.48) (xy 68.58 411.48)) (stroke (width 0) (type default)) (uuid "85b65986-e03f-4432-884c-bf628b7f4662"))
 	(wire
 		(pts
 			(xy 228.6 190.5) (xy 233.68 190.5)
@@ -23452,7 +23929,7 @@
 		)
 		(uuid "190fc91f-7ae2-4318-ba3f-6234eb1814c9")
 	)
-	
+
 	(wire
 		(pts
 			(xy 140.9700 521.9700) (xy 163.8300 521.9700)
@@ -23563,7 +24040,7 @@
 		)
 		(uuid "1caec223-b739-4468-9c13-45b4636d57d8")
 	)
-	
+
 	(wire
 		(pts
 			(xy 455.93 59.69) (xy 455.93 60.96)
@@ -23604,7 +24081,7 @@
 		)
 		(uuid "1ee31b77-5261-46d0-9667-c9745d917975")
 	)
-	
+
 	(wire
 		(pts
 			(xy 541.02 93.98) (xy 541.02 101.6)
@@ -23705,7 +24182,7 @@
 		)
 		(uuid "226e644e-4df2-4897-827b-16c8bd780999")
 	)
-	
+
 	(wire
 		(pts
 			(xy 652.78 190.5) (xy 642.62 190.5)
@@ -23756,7 +24233,7 @@
 		)
 		(uuid "23df4f4f-0822-4298-b04d-a403bfbc8dd1")
 	)
-	
+
 	(wire
 		(pts
 			(xy 393.7 294.64) (xy 393.7 298.45)
@@ -23837,7 +24314,7 @@
 		)
 		(uuid "2a32a8d0-4439-4922-9d56-9bb872e5c632")
 	)
-	
+
 	(wire
 		(pts
 			(xy 574.04 186.69) (xy 579.12 186.69)
@@ -23918,8 +24395,8 @@
 		)
 		(uuid "2d445bc5-573f-4884-bf21-3d58f7b02eab")
 	)
-	
-	
+
+
 	(wire
 		(pts
 			(xy 38.1 251.46) (xy 30.48 251.46)
@@ -24152,7 +24629,7 @@
 	)
 	(wire
 		(pts
-			(xy 271.78 281.94) (xy 284.48 281.94)
+			(xy 271.78 281.94) (xy 279.4 281.94)
 		)
 		(stroke
 			(width 0)
@@ -24230,7 +24707,7 @@
 		)
 		(uuid "3a97a792-d68d-4853-a820-ac0b5d1987f6")
 	)
-	
+
 	(wire
 		(pts
 			(xy 566.42 64.77) (xy 566.42 67.31)
@@ -24251,7 +24728,7 @@
 		)
 		(uuid "3cad031f-6fd9-4e13-8c13-68ffdca30953")
 	)
-	
+
 	(wire
 		(pts
 			(xy 473.71 129.54) (xy 483.87 129.54)
@@ -24332,7 +24809,7 @@
 		)
 		(uuid "435be0ef-638b-459b-8c6d-d1052b6d9f9b")
 	)
-	
+
 	(wire
 		(pts
 			(xy 101.64 182.22) (xy 101.64 189.84)
@@ -24383,7 +24860,7 @@
 		)
 		(uuid "45e3c2c8-f6f5-44e6-b446-4321937c28c5")
 	)
-	
+
 	(wire
 		(pts
 			(xy 642.62 229.87) (xy 652.78 229.87)
@@ -24474,7 +24951,7 @@
 		)
 		(uuid "4c538f17-0109-4554-a97c-bdd9338cd370")
 	)
-	
+
 	(wire
 		(pts
 			(xy 49.5300 378.4600) (xy 49.5300 383.5400)
@@ -24585,8 +25062,8 @@
 		)
 		(uuid "528f2a74-5adb-4cfe-96e6-3e3959a06012")
 	)
-	
-	
+
+
 	(wire
 		(pts
 			(xy 92.71 279.4) (xy 85.09 279.4)
@@ -25267,8 +25744,8 @@
 		)
 		(uuid "6b2530c4-4320-4df0-910a-07c2a052746c")
 	)
-	
-	
+
+
 	(wire
 		(pts
 			(xy 163.8300 397.5100) (xy 163.8300 407.6700)
@@ -25489,17 +25966,8 @@
 		)
 		(uuid "769f9ec0-385d-4a44-9a37-7dfc38636662")
 	)
+
 	
-	(wire
-		(pts
-			(xy 271.78 300.99) (xy 271.78 306.07)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "79b24c1b-462e-43fd-a148-b90d2674282a")
-	)
 	(wire
 		(pts
 			(xy 92.71 248.92) (xy 85.09 248.92)
@@ -25560,16 +26028,7 @@
 		)
 		(uuid "7b234de3-c55a-42b5-9d20-3dfd80e28a2f")
 	)
-	(wire
-		(pts
-			(xy 233.68 271.78) (xy 233.68 274.32)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7b3b36d8-a894-4b58-ae69-a7c2650895c0")
-	)
+	
 	(wire
 		(pts
 			(xy 450.85 198.12) (xy 450.85 199.39)
@@ -25700,7 +26159,7 @@
 		)
 		(uuid "7e233268-e00f-4f80-9e48-2257c33bba65")
 	)
-	
+
 	(wire
 		(pts
 			(xy 494.03 284.48) (xy 494.03 290.83)
@@ -25731,16 +26190,8 @@
 		)
 		(uuid "7f50d225-5724-47e7-a7a8-9b4ff84eba40")
 	)
-	(wire
-		(pts
-			(xy 279.4000 407.6700) (xy 298.4500 407.6700)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7fde5db3-0a30-4d5e-aa37-4557f8954eac")
-	)
+	(wire (pts (xy 279.4 407.67) (xy 285.75 407.67)) (stroke (width 0) (type default)) (uuid "020545cd-ae84-4666-bd4c-9938768d8848"))
+(wire (pts (xy 293.37 407.67) (xy 298.45 407.67)) (stroke (width 0) (type default)) (uuid "dc8700c0-4bfa-444b-84df-2d30f20a88fa"))
 	(wire
 		(pts
 			(xy 455.93 67.31) (xy 467.36 67.31)
@@ -25781,7 +26232,7 @@
 		)
 		(uuid "80d27590-cc3f-48e5-a0c7-f4fd75b998cb")
 	)
-	
+
 	(wire
 		(pts
 			(xy 215.9 287.02) (xy 218.44 287.02)
@@ -25792,7 +26243,7 @@
 		)
 		(uuid "814a8981-ed97-4716-a409-65f5b9b47597")
 	)
-	
+
 	(wire
 		(pts
 			(xy 652.78 203.2) (xy 652.78 196.85)
@@ -25823,17 +26274,8 @@
 		)
 		(uuid "8300c7b4-c341-4234-b5b2-a282fbaea145")
 	)
+
 	
-	(wire
-		(pts
-			(xy 245.11 271.78) (xy 248.92 271.78)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "837996c8-8746-4350-86f6-da9e4ec546cf")
-	)
 	(wire
 		(pts
 			(xy 279.4000 542.2900) (xy 279.4000 549.9100)
@@ -25904,7 +26346,7 @@
 		)
 		(uuid "87689619-bd32-4976-9351-635ef5c9b368")
 	)
-	
+
 	(wire
 		(pts
 			(xy 92.71 297.18) (xy 85.09 297.18)
@@ -25965,7 +26407,7 @@
 		)
 		(uuid "89070fe3-3dbd-4c48-b86e-5d7a3d12c04b")
 	)
-	
+
 	(wire
 		(pts
 			(xy 50.8 279.4) (xy 58.42 279.4)
@@ -26016,7 +26458,7 @@
 		)
 		(uuid "8da59e4a-3b2d-4ebf-9205-d39ff66d4c6d")
 	)
-	
+
 	(wire
 		(pts
 			(xy 452.12 289.56) (xy 433.07 289.56)
@@ -26107,16 +26549,7 @@
 		)
 		(uuid "91c598b3-1e68-4465-8114-0ca0f1a3eee7")
 	)
-	(wire
-		(pts
-			(xy 248.92 271.78) (xy 248.92 281.94)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "92439f27-a9d2-47ba-b735-5692e6b5b77a")
-	)
+	
 	(wire
 		(pts
 			(xy 25.4 170.18) (xy 25.4 173.99)
@@ -26127,7 +26560,7 @@
 		)
 		(uuid "9246985b-169b-4683-b4c3-6679392e87fd")
 	)
-	
+
 	(wire
 		(pts
 			(xy 26.6700 521.9700) (xy 49.5300 521.9700)
@@ -26138,7 +26571,7 @@
 		)
 		(uuid "93d97d84-19df-4f34-81ba-e3337d3f3971")
 	)
-	
+
 	(wire
 		(pts
 			(xy 50.8 266.7) (xy 58.42 266.7)
@@ -26279,7 +26712,7 @@
 		)
 		(uuid "9a383f91-530d-4426-a0c6-8194f0c549e2")
 	)
-	
+
 	(wire
 		(pts
 			(xy 642.62 246.38) (xy 645.16 246.38)
@@ -26680,17 +27113,9 @@
 		)
 		(uuid "b029169b-04a9-44f9-921f-4aa053747dc0")
 	)
-	(wire
-		(pts
-			(xy 163.8300 407.6700) (xy 182.8800 407.6700)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b0709bf2-c38d-473f-9333-b7151cd345ce")
-	)
-	
+	(wire (pts (xy 163.83 407.67) (xy 170.18 407.67)) (stroke (width 0) (type default)) (uuid "75df7b8b-6119-4fcc-b04c-bccc13386043"))
+(wire (pts (xy 177.8 407.67) (xy 182.88 407.67)) (stroke (width 0) (type default)) (uuid "81aa75b8-7997-4207-8295-0e53dc3ccc91"))
+
 	(wire
 		(pts
 			(xy 105.41 284.48) (xy 113.03 284.48)
@@ -26761,16 +27186,8 @@
 		)
 		(uuid "b3a08dd7-ceb9-40e0-9789-27411f6c734a")
 	)
-	(wire
-		(pts
-			(xy 163.8300 521.9700) (xy 182.8800 521.9700)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b41cdbd5-fa3d-49bf-a374-c8360d94f544")
-	)
+	(wire (pts (xy 163.83 521.97) (xy 170.18 521.97)) (stroke (width 0) (type default)) (uuid "8bf613a2-2404-4bce-844d-15610f601363"))
+(wire (pts (xy 177.8 521.97) (xy 182.88 521.97)) (stroke (width 0) (type default)) (uuid "933c05c4-94d2-488c-a6fe-3a98ee6c58eb"))
 	(wire
 		(pts
 			(xy 228.6 205.74) (xy 233.68 205.74)
@@ -26951,7 +27368,7 @@
 		)
 		(uuid "baad0a24-1d93-48ce-a000-f0fdb9ce2e2e")
 	)
-	
+
 	(wire
 		(pts
 			(xy 445.7700 389.8900) (xy 445.7700 397.5100)
@@ -26982,17 +27399,9 @@
 		)
 		(uuid "bd4c652f-019b-4390-aaa1-4d3c27667593")
 	)
-	(wire
-		(pts
-			(xy 49.5300 521.9700) (xy 68.5800 521.9700)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "bd76ff15-f4f0-485f-b471-8b3ac26da1b7")
-	)
-	
+	(wire (pts (xy 49.53 521.97) (xy 55.88 521.97)) (stroke (width 0) (type default)) (uuid "e095454d-5a9d-441b-81d4-af8ef4f71435"))
+(wire (pts (xy 63.5 521.97) (xy 68.58 521.97)) (stroke (width 0) (type default)) (uuid "36fd129a-470a-4129-903c-7ac12d8b5264"))
+
 	(wire
 		(pts
 			(xy 441.96 191.77) (xy 441.96 193.04)
@@ -27323,7 +27732,7 @@
 		)
 		(uuid "cebc0214-d85e-419a-a2ef-450036e683f6")
 	)
-	
+
 	(wire
 		(pts
 			(xy 445.7700 379.7300) (xy 445.7700 382.2700)
@@ -27594,7 +28003,7 @@
 		)
 		(uuid "d88ec974-ca6b-4b9b-835f-5c391003b149")
 	)
-	
+
 	(wire
 		(pts
 			(xy 261.6200 549.9100) (xy 279.4000 549.9100)
@@ -27675,7 +28084,7 @@
 		)
 		(uuid "dbc8aa90-d843-4201-a27e-269330874361")
 	)
-	
+
 	(wire
 		(pts
 			(xy 652.78 262.89) (xy 652.78 256.54)
@@ -27916,16 +28325,7 @@
 		)
 		(uuid "e4de3504-60d9-44b8-ab37-d06b2de3d740")
 	)
-	(wire
-		(pts
-			(xy 237.49 271.78) (xy 233.68 271.78)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e542f9f3-924d-4f0f-91e3-0c9df34bfb4f")
-	)
+	
 	(wire
 		(pts
 			(xy 511.81 284.48) (xy 511.81 290.83)
@@ -28056,16 +28456,8 @@
 		)
 		(uuid "e98b3edc-911b-416e-9114-aa83d8d934fc")
 	)
-	(wire
-		(pts
-			(xy 279.4000 521.9700) (xy 298.4500 521.9700)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e9b1352e-5e60-4364-a822-f46e89cf369f")
-	)
+	(wire (pts (xy 279.4 521.97) (xy 285.75 521.97)) (stroke (width 0) (type default)) (uuid "49556bdb-cf4f-46dd-b607-4a9564bf42d4"))
+(wire (pts (xy 293.37 521.97) (xy 298.45 521.97)) (stroke (width 0) (type default)) (uuid "af422005-cc7e-4fc9-9fca-1621d8a782ab"))
 	(wire
 		(pts
 			(xy 458.47 80.01) (xy 467.36 80.01)
@@ -28256,7 +28648,7 @@
 		)
 		(uuid "f1045b10-4016-43be-bdda-40822c8ad08f")
 	)
-	
+
 	(wire
 		(pts
 			(xy 256.5400 407.6700) (xy 279.4000 407.6700)
@@ -28497,7 +28889,7 @@
 		)
 		(uuid "f8df0e4f-f3fa-4150-ab68-a62fa2769787")
 	)
-	
+
 	(wire
 		(pts
 			(xy 31.7500 386.0800) (xy 31.7500 383.5400)
@@ -28518,7 +28910,7 @@
 		)
 		(uuid "faaa06c1-d296-48f6-b1f7-8a8bd181a510")
 	)
-	
+
 	(wire
 		(pts
 			(xy 666.75 234.95) (xy 666.75 236.22)
@@ -28659,7 +29051,7 @@
 		)
 		(uuid "ffc9eb39-bb2d-446d-9902-388690fe89c0")
 	)
-	
+
 	(label "N_GATE_5"
 		(at 233.68 200.66 0)
 		(effects
@@ -28740,16 +29132,7 @@
 		)
 		(uuid "46ec2609-66ce-4a4b-9588-9ee38d715a83")
 	)
-	(label "BUCK_BOOT"
-		(at 233.68 271.78 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "49461c8c-5ac1-40bc-b9ca-5a0fe06bb97f")
-	)
+	
 	(label "N_GATE_4"
 		(at 233.68 205.74 0)
 		(effects
@@ -29234,28 +29617,7 @@
 			)
 		)
 	)
-	(global_label "N_A2"
-		(shape bidirectional)
-		(at 256.5400 407.6700 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "07160bf5-c7a0-4492-8159-0027de5bbaeb")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 254.0000 407.6700 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
+	(label "PWR_DRV_A2" (at 256.5400 407.6700 0) (effects (font (size 0.8 0.8)) (justify left bottom)) (uuid "07160bf5-c7a0-4492-8159-0027de5bbaeb"))
 	(global_label "ISO_A0_N"
 		(shape bidirectional)
 		(at 445.7700 389.8900 0)
@@ -29498,28 +29860,7 @@
 			)
 		)
 	)
-	(global_label "N_A1"
-		(shape bidirectional)
-		(at 140.9700 407.6700 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "0e61f4aa-3543-459a-a07f-fe5b7939f624")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 138.4300 407.6700 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
+	(label "PWR_DRV_A1" (at 140.9700 407.6700 0) (effects (font (size 0.8 0.8)) (justify left bottom)) (uuid "0e61f4aa-3543-459a-a07f-fe5b7939f624"))
 	(global_label "A5"
 		(shape passive)
 		(at 615.95 322.58 0)
@@ -29850,28 +30191,7 @@
 			)
 		)
 	)
-	(global_label "N_A5"
-		(shape bidirectional)
-		(at 256.5400 521.9700 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "1cf02bcf-1fbd-403f-a580-e881f157a005")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 254.0000 521.9700 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
+	(label "PWR_DRV_A5" (at 256.5400 521.9700 0) (effects (font (size 0.8 0.8)) (justify left bottom)) (uuid "1cf02bcf-1fbd-403f-a580-e881f157a005"))
 	(global_label "AG_ISO5_N"
 		(shape bidirectional)
 		(at 30.48 284.48 180)
@@ -32496,28 +32816,7 @@
 			)
 		)
 	)
-	(global_label "N_A3"
-		(shape bidirectional)
-		(at 26.6700 521.9700 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "aafab408-a13a-4e3d-a6e0-61cb510a6f61")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 24.1300 521.9700 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
+	(label "PWR_DRV_A3" (at 26.6700 521.9700 0) (effects (font (size 0.8 0.8)) (justify left bottom)) (uuid "aafab408-a13a-4e3d-a6e0-61cb510a6f61"))
 	(global_label "USB_ESP_D-"
 		(shape bidirectional)
 		(at 116.84 95.25 0)
@@ -33134,28 +33433,7 @@
 			)
 		)
 	)
-	(global_label "N_A0"
-		(shape bidirectional)
-		(at 26.6700 411.4800 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "cfd614e2-a745-4df1-ae97-0b1f39f33c76")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 24.1300 411.4800 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
+	(label "PWR_DRV_A0" (at 26.6700 411.4800 0) (effects (font (size 0.8 0.8)) (justify left bottom)) (uuid "cfd614e2-a745-4df1-ae97-0b1f39f33c76"))
 	(global_label "CAN_RX"
 		(shape bidirectional)
 		(at 105.41 95.25 0)
@@ -34194,28 +34472,7 @@
 			)
 		)
 	)
-	(global_label "N_A4"
-		(shape bidirectional)
-		(at 140.9700 521.9700 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "fed3c7ca-e6ee-477a-92ab-a4cf5c1c8f2e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 138.4300 521.9700 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
+	(label "PWR_DRV_A4" (at 140.9700 521.9700 0) (effects (font (size 0.8 0.8)) (justify left bottom)) (uuid "fed3c7ca-e6ee-477a-92ab-a4cf5c1c8f2e"))
 	(symbol
 		(lib_id "power:+5V")
 		(at 445.7700 420.3700 0)
@@ -34316,7 +34573,7 @@
 				)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 82.55 58.42 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -34337,7 +34594,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 82.55 63.5 0)
 			(hide yes)
 			(show_name no)
@@ -34348,7 +34605,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 82.55 63.5 0)
 			(hide yes)
 			(show_name no)
@@ -34384,7 +34641,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C1591" (at 82.55 63.5 90)  (hide yes) (effects (font (size 1 1))))(property "MPN" "CL10B104KB8NNNC" (at 82.55 63.5 90)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Samsung" (at 82.55 63.5 90)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "Device:R")
 		(at 445.7700 426.7200 0)
@@ -34805,92 +35062,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 92.71 312.42 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "07ee1b5b-fd57-4706-8d99-fecc5e929a8f")
-		(property "Reference" "#PWR11051"
-			(at 92.71 299.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 92.71 314.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 92.71 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 92.71 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "ea2c366c-98ee-4fb1-acfa-e5749e91abff")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11051")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "power:+5V")
 		(at 455.93 59.69 0)
@@ -34975,7 +35147,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "0ae04277-c20d-4c4b-a890-436434c541e0")
@@ -34999,7 +35171,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 565.1500 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -35021,7 +35193,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 565.1500 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -35422,92 +35594,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 105.41 312.42 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "12848ab6-bfd9-4959-91cf-0fa505cce5ea")
-		(property "Reference" "#PWR11052"
-			(at 105.41 299.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 105.41 314.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 105.41 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 105.41 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "3c3e87bd-6257-48a8-8649-ac0f031711a4")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11052")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "SpaghettiLAB:SN74CBTLV3125_4Switches")
 		(at 570.2300 510.5400 0)
@@ -36030,7 +36117,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "16693b12-67cc-4963-9aad-916a2914f836")
@@ -36054,7 +36141,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 400.0500 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -36076,7 +36163,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 400.0500 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -36154,7 +36241,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 669.29 193.04 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -36176,7 +36263,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -36187,7 +36274,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -36198,7 +36285,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -586.74 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -36220,7 +36307,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -36231,7 +36318,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -36242,7 +36329,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -36366,178 +36453,8 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 105.41 248.92 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "17722034-ffb8-420d-93e6-afeea5b32e33")
-		(property "Reference" "#PWR11039"
-			(at 105.41 236.22 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 105.41 251.46 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 105.41 248.92 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 105.41 248.92 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b5403dbb-abfb-4569-9ae2-682bf29a3cc8")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11039")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 50.8 248.92 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "179207de-3bb5-4dc7-b9f2-c07761084957")
-		(property "Reference" "#PWR11020"
-			(at 50.8 236.22 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 50.8 251.46 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 50.8 248.92 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 50.8 248.92 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "577f5720-9c5f-43e3-8b6b-9a471dcd2be9")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11020")
-					(unit 1)
-				)
-			)
-		)
-	)
+
+
 	(symbol
 		(lib_id "power:GND")
 		(at 441.96 118.11 0)
@@ -37250,7 +37167,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "20f71e7f-9ae2-48cf-b949-a750f5be7301")
@@ -37274,7 +37191,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 490.2200 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -37296,7 +37213,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 490.2200 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -38227,92 +38144,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 50.8 312.42 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "274f7f67-f232-4663-8069-28e887230130")
-		(property "Reference" "#PWR11033"
-			(at 50.8 299.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 50.8 314.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 50.8 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 50.8 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "f90b0ba5-a20d-42ff-9e15-f045426baa45")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11033")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "Device:C")
 		(at 247.65 55.88 0)
@@ -38335,7 +38167,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 250.19 57.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -38357,7 +38189,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 342.9 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -38368,7 +38200,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 342.9 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -38379,7 +38211,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -922.02 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -38401,7 +38233,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -38412,7 +38244,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -38423,7 +38255,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -38735,7 +38567,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 669.29 205.74 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -38757,7 +38589,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -38768,7 +38600,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -38779,7 +38611,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -586.74 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -38801,7 +38633,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -38812,7 +38644,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -38823,7 +38655,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -40323,7 +40155,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "3b1334fb-bc72-40ab-8525-ef11d4c1fb28")
@@ -40347,7 +40179,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 609.6000 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -40369,7 +40201,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 609.6000 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -40503,7 +40335,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
+		(lib_id "SpaghettiLAB:R_2Terminal_Kelvin")
 		(at 302.2600 407.6700 90)
 		(unit 1)
 		(body_style 1)
@@ -40514,7 +40346,7 @@
 		(dnp no)
 		(uuid "3ebf98f9-cee7-425c-b5fe-e498a8097fdd")
 		(property "Reference" "R58"
-			(at 302.2600 402.5900 0)
+			(at 302.2600 402.5900 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -40524,7 +40356,7 @@
 			)
 		)
 		(property "Value" "0.1R"
-			(at 302.2600 405.1300 0)
+			(at 302.2600 405.1300 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -40533,7 +40365,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "SpaghettiLAB:R_0603_2Terminal_Kelvin"
 			(at 302.2600 407.6700 0)
 			(hide yes)
 			(show_name no)
@@ -40555,7 +40387,7 @@
 				)
 			)
 		)
-		(property "Description" "All port current crosses this shunt. Use 0R in Base assemblies."
+		(property "Description" "Two-terminal 0.1R shunt; PCB Kelvin taps 3=1, 4=2. Sense carries no load current."
 			(at 302.2600 407.6700 0)
 			(hide yes)
 			(show_name no)
@@ -40577,7 +40409,7 @@
 				)
 			)
 		)
-		(property "Assembly" "LAB:0.1R / BASE:0R"
+		(property "Assembly" "0.1R; two-terminal part with dedicated PCB sense taps"
 			(at 302.2600 407.6700 0)
 			(hide yes)
 			(show_name no)
@@ -40635,7 +40467,7 @@
 				)
 			)
 		)
-	)
+	(pin "3" (uuid "7875e959-aee6-4079-b1be-4e067ab54bff")) (pin "4" (uuid "c6427716-cc54-4c5d-9fb6-6a1fe6b89969")))
 	(symbol
 		(lib_id "SpaghettiLAB:M20-7810645R_6Ports")
 		(at 655.3200 633.7300 0)
@@ -40643,7 +40475,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "3ed338e2-bceb-4109-97b0-876a65cf4997")
@@ -40667,7 +40499,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 655.3200 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -40689,7 +40521,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 655.3200 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -40871,7 +40703,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "40467885-3117-4b9b-ae88-fc8a8ce0e9c2")
@@ -40895,7 +40727,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 444.5000 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -40917,7 +40749,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 444.5000 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -41485,7 +41317,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 378.46 57.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -41507,7 +41339,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -41518,7 +41350,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -41529,7 +41361,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -586.74 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -41551,7 +41383,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -41562,7 +41394,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -41573,7 +41405,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -41798,7 +41630,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 669.29 232.41 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -41820,7 +41652,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -41831,7 +41663,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -41842,7 +41674,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -586.74 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -41864,7 +41696,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -41875,7 +41707,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -41886,7 +41718,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -42096,264 +41928,9 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 92.71 243.84 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "49ca6999-7a06-4154-9de1-310d4b70a5bc")
-		(property "Reference" "#PWR11038"
-			(at 92.71 231.14 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 92.71 246.38 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 92.71 243.84 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 92.71 243.84 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "2eaec35f-ce3c-48e8-8d44-c499fd2b232a")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11038")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 38.1 243.84 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "4a75e0fa-92b2-4167-a8af-6d0abca778c1")
-		(property "Reference" "#PWR11019"
-			(at 38.1 231.14 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 38.1 246.38 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 38.1 243.84 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 38.1 243.84 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "5196a32a-0749-4359-8d98-105b8b862702")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11019")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 50.8 309.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "4b1d9070-52f0-4624-abe9-501d56454eea")
-		(property "Reference" "#PWR11031"
-			(at 50.8 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 50.8 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 50.8 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 50.8 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "d5a32fb3-7837-407e-89ad-e90051762695")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11031")
-					(unit 1)
-				)
-			)
-		)
-	)
+
+
+
 	(symbol
 		(lib_id "power:+5V")
 		(at 605.7900 420.3700 0)
@@ -42600,92 +42177,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 92.71 309.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "4e21646f-5d7f-4892-9ab0-04d83c801434")
-		(property "Reference" "#PWR11049"
-			(at 92.71 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 92.71 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 92.71 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 92.71 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "578fb741-3be0-4fb2-993b-9c88d9e046ea")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11049")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "power:VCC")
 		(at 38.1 241.3 0)
@@ -42942,7 +42434,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 595.6300 551.1800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -42964,7 +42456,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 588.0100 549.9100 0)
 			(hide yes)
 			(show_name no)
@@ -42975,7 +42467,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 588.0100 549.9100 0)
 			(hide yes)
 			(show_name no)
@@ -43011,7 +42503,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC Part" "C1591" (at 588.0100 549.9100 0)  (hide yes) (effects (font (size 1 1))))(property "LCSC" "C1591" (at 588.0100 549.9100 0)  (hide yes) (effects (font (size 1 1))))(property "MPN" "CL10B104KB8NNNC" (at 588.0100 549.9100 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Samsung" (at 588.0100 549.9100 0)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "power:GND")
 		(at 50.8 287.02 0)
@@ -43120,7 +42612,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 314.96 57.15 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -43142,7 +42634,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 405.13 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -43153,7 +42645,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 405.13 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -43164,7 +42656,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -755.65 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -43186,7 +42678,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -43197,7 +42689,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -43208,7 +42700,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -43716,7 +43208,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 210.82 297.18 0)
 			(hide yes)
 			(show_name no)
@@ -43727,7 +43219,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 210.82 297.18 0)
 			(hide yes)
 			(show_name no)
@@ -43738,7 +43230,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 210.82 297.18 0)
 			(hide yes)
 			(show_name no)
@@ -43749,7 +43241,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 210.82 297.18 0)
 			(hide yes)
 			(show_name no)
@@ -43774,7 +43266,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C1591" (at 210.82 297.18 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Samsung" (at 210.82 297.18 0)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "SpaghettiLAB:AO6604_TP")
 		(at 276.8600 422.9100 0)
@@ -44112,7 +43604,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C23178.pdf"
 			(at 441.96 199.39 0)
 			(hide yes)
 			(show_name no)
@@ -44145,7 +43637,7 @@
 				)
 			)
 		)
-		(property "MPN" "RT0603FRE101KL"
+		(property "MPN" "0603WAF4703T5E"
 			(at 441.96 199.39 0)
 			(hide yes)
 			(show_name no)
@@ -44181,7 +43673,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C23178" (at 0 0 0) (hide yes) (effects (font (size 1 1))))(property "LCSC Part" "C23178" (at 0 0 0) (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "UNI-ROYAL" (at 0 0 0) (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "Device:R")
 		(at 292.1 110.49 0)
@@ -45397,7 +44889,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 241.3 271.78 90)
+		(at 279.4 294.64 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -45407,7 +44899,7 @@
 		(dnp no)
 		(uuid "634720d3-22b5-4996-b495-0467ca516ae9")
 		(property "Reference" "C84"
-			(at 246.38 265.24 90)
+			(at 275.59 285.75 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -45416,8 +44908,8 @@
 				)
 			)
 		)
-		(property "Value" "100nF/50V"
-			(at 246.38 267.34 90)
+		(property "Value" "22pF"
+			(at 275.59 287.65 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -45427,7 +44919,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 241.3 271.78 0)
+			(at 275.59 287.65 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -45437,8 +44929,8 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
-			(at 241.3 271.78 0)
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1653.html"
+			(at 275.59 287.65 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -45448,8 +44940,8 @@
 				)
 			)
 		)
-		(property "Description" ""
-			(at 241.3 271.78 0)
+		(property "Description" "C0G 5% feed-forward capacitor across R36; no bootstrap capacitor on SY8089."
+			(at 275.59 287.65 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -45459,8 +44951,8 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
-			(at 241.3 271.78 0)
+		(property "MPN" "CL10C220JB8NNNC"
+			(at 275.59 287.65 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -45470,8 +44962,8 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
-			(at 241.3 271.78 0)
+		(property "LCSC Part" "C1653"
+			(at 275.59 287.65 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -45495,7 +44987,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C1653" (at 275.59 287.65 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Samsung" (at 275.59 287.65 0)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "power:+5V")
 		(at 49.5300 490.2200 0)
@@ -45859,7 +45351,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
+		(lib_id "SpaghettiLAB:R_2Terminal_Kelvin")
 		(at 302.2600 521.9700 90)
 		(unit 1)
 		(body_style 1)
@@ -45880,7 +45372,7 @@
 			)
 		)
 		(property "Value" "0.1R"
-			(at 302.2600 519.4300 0)
+			(at 302.2600 519.4300 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -45889,7 +45381,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "SpaghettiLAB:R_0603_2Terminal_Kelvin"
 			(at 302.2600 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -45911,7 +45403,7 @@
 				)
 			)
 		)
-		(property "Description" "All port current crosses this shunt. Use 0R in Base assemblies."
+		(property "Description" "Two-terminal 0.1R shunt; PCB Kelvin taps 3=1, 4=2. Sense carries no load current."
 			(at 302.2600 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -45933,7 +45425,7 @@
 				)
 			)
 		)
-		(property "Assembly" "LAB:0.1R / BASE:0R"
+		(property "Assembly" "0.1R; two-terminal part with dedicated PCB sense taps"
 			(at 302.2600 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -45991,7 +45483,7 @@
 				)
 			)
 		)
-	)
+	(pin "3" (uuid "e83aa3cc-71c2-4247-b25b-ae58281953cc")) (pin "4" (uuid "4ba5da3e-a2ac-4e7d-b6de-2e5fe246b883")))
 	(symbol
 		(lib_id "power:GND")
 		(at 322.58 105.41 0)
@@ -46525,7 +46017,7 @@
 				)
 			)
 		)
-		(property "Value" "33k 1%"
+		(property "Value" "150k"
 			(at 274.88 295.54 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -46546,7 +46038,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C22807.html"
 			(at 271.78 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -46557,7 +46049,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "1% upper feedback divider; 3.31V nominal with R37=33.2k."
 			(at 271.78 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -46568,7 +46060,7 @@
 				)
 			)
 		)
-		(property "MPN" "0603WAF3302T5E"
+		(property "MPN" "0603WAF1503T5E"
 			(at 271.78 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -46579,7 +46071,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C4216"
+		(property "LCSC Part" "C22807"
 			(at 271.78 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -46604,7 +46096,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C22807" (at 271.78 294.64 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "UNI-ROYAL" (at 271.78 294.64 0)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "power:+5V")
 		(at 49.5300 378.4600 0)
@@ -46916,7 +46408,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C22787.pdf"
 			(at 485.14 217.17 0)
 			(hide yes)
 			(show_name no)
@@ -46949,7 +46441,7 @@
 				)
 			)
 		)
-		(property "MPN" "RT0603FRE101KL"
+		(property "MPN" "0603WAF1200T5E"
 			(at 485.14 217.17 0)
 			(hide yes)
 			(show_name no)
@@ -46985,7 +46477,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C22787" (at 0 0 0) (hide yes) (effects (font (size 1 1))))(property "LCSC Part" "C22787" (at 0 0 0) (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "UNI-ROYAL" (at 0 0 0) (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "SpaghettiLAB:SN74LVC1G3157DCKR")
 		(at 350.52 71.12 0)
@@ -47177,7 +46669,7 @@
 		)
 	)
 	(symbol
-		(lib_id "SpaghettiLAB:TPS562201DDCR")
+		(lib_id "SpaghettiLAB:SY8089AAAC")
 		(at 228.6 284.48 0)
 		(unit 1)
 		(body_style 1)
@@ -47197,7 +46689,7 @@
 				)
 			)
 		)
-		(property "Value" "TPS562201DDCR"
+		(property "Value" "SY8089AAAC"
 			(at 228.6 275.08 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -47207,7 +46699,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:TSOT-23-6_Power"
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
 			(at 228.6 284.48 0)
 			(hide yes)
 			(show_name no)
@@ -47218,7 +46710,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tps562201.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C78988.html"
 			(at 228.6 284.48 0)
 			(hide yes)
 			(show_name no)
@@ -47229,7 +46721,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Adjustable buck, 2.7-5.5V input only; 3.31V nominal. 2A IC rating subject to thermal/layout validation."
 			(at 228.6 284.48 0)
 			(hide yes)
 			(show_name no)
@@ -47240,7 +46732,7 @@
 				)
 			)
 		)
-		(property "MPN" "TPS562201DDCR"
+		(property "MPN" "SY8089AAAC"
 			(at 228.6 284.48 0)
 			(hide yes)
 			(show_name no)
@@ -47251,7 +46743,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C90061"
+		(property "LCSC Part" "C78988"
 			(at 228.6 284.48 0)
 			(hide yes)
 			(show_name no)
@@ -47261,25 +46753,23 @@
 					(size 1 1)
 				)
 			)
-		)
-		(pin "1"
-			(uuid "3378b59f-ab98-44a5-9109-c4c93468b7c6")
 		)
 		(pin "2"
-			(uuid "07b8e9bd-d2e4-4cc5-b8e4-4e7b08f6f0e8")
+			(uuid "3378b59f-ab98-44a5-9109-c4c93468b7c6")
 		)
 		(pin "3"
-			(uuid "0dd14211-9ae1-4d18-ab4f-25c722ce2426")
+			(uuid "07b8e9bd-d2e4-4cc5-b8e4-4e7b08f6f0e8")
 		)
 		(pin "4"
-			(uuid "e340895d-67cb-48e5-8e2b-9a8078e582a4")
+			(uuid "0dd14211-9ae1-4d18-ab4f-25c722ce2426")
 		)
 		(pin "5"
+			(uuid "e340895d-67cb-48e5-8e2b-9a8078e582a4")
+		)
+		(pin "1"
 			(uuid "741fcac1-50ed-4a1b-b939-a55217cc8cbd")
 		)
-		(pin "6"
-			(uuid "349380b2-1ebd-4064-98bc-0df536fc1c2d")
-		)
+		
 		(instances
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
@@ -47288,7 +46778,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C78988" (at 228.6 284.48 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Silergy" (at 228.6 284.48 0)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "Device:R")
 		(at 146.0500 499.1100 0)
@@ -47478,7 +46968,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 669.29 246.38 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -47500,7 +46990,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -47511,7 +47001,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -47522,7 +47012,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -586.74 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -47544,7 +47034,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -47555,7 +47045,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -47566,7 +47056,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -48122,7 +47612,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "7a6da81e-370d-4419-af76-3a3ad540f3d7")
@@ -48146,7 +47636,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 400.0500 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -48168,7 +47658,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 400.0500 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -48246,7 +47736,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 669.29 219.71 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -48268,7 +47758,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -48279,7 +47769,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -48290,7 +47780,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -586.74 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -48312,7 +47802,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -48323,7 +47813,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -48334,7 +47824,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -48760,7 +48250,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C25804.pdf"
 			(at 54.61 81.28 0)
 			(hide yes)
 			(show_name no)
@@ -48782,7 +48272,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C99782"
+		(property "LCSC Part" "C25804"
 			(at 54.61 81.28 0)
 			(hide yes)
 			(show_name no)
@@ -48818,7 +48308,7 @@
 				)
 			)
 		)
-	)
+	(property "MPN" "0603WAF1002T5E" (at 0 0 0) (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "UNI-ROYAL" (at 0 0 0) (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "STMICRO:root_3_PLAGE-CMS-DIAM-0.6mm_STMICRO.SchLib")
 		(at 40.64 171.45 90)
@@ -50421,7 +49911,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C25804.pdf"
 			(at 63.5 81.28 0)
 			(hide yes)
 			(show_name no)
@@ -50443,7 +49933,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C99782"
+		(property "LCSC Part" "C25804"
 			(at 63.5 81.28 0)
 			(hide yes)
 			(show_name no)
@@ -50479,7 +49969,7 @@
 				)
 			)
 		)
-	)
+	(property "MPN" "0603WAF1002T5E" (at 0 0 0) (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "UNI-ROYAL" (at 0 0 0) (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "Device:R")
 		(at 605.7900 386.0800 0)
@@ -51211,7 +50701,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "983644c1-2e92-4215-ad4b-cbb098defba1")
@@ -51235,7 +50725,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 655.3200 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -51257,7 +50747,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 655.3200 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -51391,7 +50881,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
+		(lib_id "SpaghettiLAB:R_2Terminal_Kelvin")
 		(at 186.6900 521.9700 90)
 		(unit 1)
 		(body_style 1)
@@ -51402,7 +50892,7 @@
 		(dnp no)
 		(uuid "99c44e42-aa3f-4d28-92ad-9a481ad23fba")
 		(property "Reference" "R60"
-			(at 186.6900 516.8900 0)
+			(at 186.6900 516.8900 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -51412,7 +50902,7 @@
 			)
 		)
 		(property "Value" "0.1R"
-			(at 186.6900 519.4300 0)
+			(at 186.6900 519.4300 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -51421,7 +50911,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "SpaghettiLAB:R_0603_2Terminal_Kelvin"
 			(at 186.6900 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -51443,7 +50933,7 @@
 				)
 			)
 		)
-		(property "Description" "All port current crosses this shunt. Use 0R in Base assemblies."
+		(property "Description" "Two-terminal 0.1R shunt; PCB Kelvin taps 3=1, 4=2. Sense carries no load current."
 			(at 186.6900 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -51465,7 +50955,7 @@
 				)
 			)
 		)
-		(property "Assembly" "LAB:0.1R / BASE:0R"
+		(property "Assembly" "0.1R; two-terminal part with dedicated PCB sense taps"
 			(at 186.6900 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -51523,7 +51013,7 @@
 				)
 			)
 		)
-	)
+	(pin "3" (uuid "49d5924e-9adb-4c9a-8f7c-4d55c706ee34")) (pin "4" (uuid "dcb4ab4a-7e07-458e-93a1-b8a7ad25e75d")))
 	(symbol
 		(lib_id "power:GND")
 		(at 292.1 83.82 0)
@@ -51621,92 +51111,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 38.1 312.42 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "9d48f56c-25a6-49dd-bddb-110388dea295")
-		(property "Reference" "#PWR11032"
-			(at 38.1 299.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 38.1 314.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 38.1 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 38.1 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "5b4f2a36-438c-46b5-91a1-8a0b74d60e07")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11032")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "power:+5V")
 		(at 441.96 59.69 0)
@@ -51805,7 +51210,7 @@
 				)
 			)
 		)
-		(property "Value" "10k 1%"
+		(property "Value" "33.2k"
 			(at 274.88 310.78 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -51826,7 +51231,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C23003.html"
 			(at 271.78 309.88 0)
 			(hide yes)
 			(show_name no)
@@ -51837,7 +51242,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "1% lower feedback divider; MUST be fitted."
 			(at 271.78 309.88 0)
 			(hide yes)
 			(show_name no)
@@ -51848,7 +51253,7 @@
 				)
 			)
 		)
-		(property "MPN" "0603WAF1002T5E"
+		(property "MPN" "0603WAF3322T5E"
 			(at 271.78 309.88 0)
 			(hide yes)
 			(show_name no)
@@ -51859,7 +51264,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C25804"
+		(property "LCSC Part" "C23003"
 			(at 271.78 309.88 0)
 			(hide yes)
 			(show_name no)
@@ -51884,7 +51289,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C23003" (at 271.78 309.88 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "UNI-ROYAL" (at 271.78 309.88 0)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "power:+5V")
 		(at 445.7700 379.7300 0)
@@ -52297,7 +51702,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
+		(lib_id "SpaghettiLAB:R_2Terminal_Kelvin")
 		(at 186.6900 407.6700 90)
 		(unit 1)
 		(body_style 1)
@@ -52308,7 +51713,7 @@
 		(dnp no)
 		(uuid "a068cfa9-fb1e-4a7f-be1d-77abb5423f61")
 		(property "Reference" "R57"
-			(at 186.6900 402.5900 0)
+			(at 186.6900 402.5900 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -52318,7 +51723,7 @@
 			)
 		)
 		(property "Value" "0.1R"
-			(at 186.6900 405.1300 0)
+			(at 186.6900 405.1300 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -52327,7 +51732,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "SpaghettiLAB:R_0603_2Terminal_Kelvin"
 			(at 186.6900 407.6700 0)
 			(hide yes)
 			(show_name no)
@@ -52349,7 +51754,7 @@
 				)
 			)
 		)
-		(property "Description" "All port current crosses this shunt. Use 0R in Base assemblies."
+		(property "Description" "Two-terminal 0.1R shunt; PCB Kelvin taps 3=1, 4=2. Sense carries no load current."
 			(at 186.6900 407.6700 0)
 			(hide yes)
 			(show_name no)
@@ -52371,7 +51776,7 @@
 				)
 			)
 		)
-		(property "Assembly" "LAB:0.1R / BASE:0R"
+		(property "Assembly" "0.1R; two-terminal part with dedicated PCB sense taps"
 			(at 186.6900 407.6700 0)
 			(hide yes)
 			(show_name no)
@@ -52429,7 +51834,7 @@
 				)
 			)
 		)
-	)
+	(pin "3" (uuid "bd597807-8092-428b-a332-c3fa52926005")) (pin "4" (uuid "03479d7e-cfd6-4679-8dc3-f3e05a57a9d7")))
 	(symbol
 		(lib_id "power:VCC")
 		(at 350.52 58.42 0)
@@ -52719,7 +52124,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "a5418963-d5d3-475a-bc4d-96f929fdefef")
@@ -52743,7 +52148,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 565.1500 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -52765,7 +52170,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 565.1500 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -54022,7 +53427,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "addde769-2432-4619-88df-bcd7ff9bfbe6")
@@ -54046,7 +53451,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 444.5000 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -54068,7 +53473,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 444.5000 633.7300 0)
 			(hide yes)
 			(show_name no)
@@ -54496,7 +53901,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
@@ -54521,7 +53926,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 598.17 325.12 0)
 			(hide yes)
 			(show_name no)
@@ -54544,7 +53949,7 @@
 				)
 			)
 		)
-		(property "Description" "2.54mm (0.1) Pitch DIL SMT Dual Entry Socket Assembly, with locating pegs, selective gold + tin, 6+6 contacts, with pick & place cap (Tape & Reel packing)"
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 598.17 325.12 0)
 			(hide yes)
 			(show_name no)
@@ -55273,7 +54678,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
+		(lib_id "SpaghettiLAB:R_2Terminal_Kelvin")
 		(at 72.3900 521.9700 90)
 		(unit 1)
 		(body_style 1)
@@ -55284,7 +54689,7 @@
 		(dnp no)
 		(uuid "b59074ff-e85c-49b3-afd9-7418a2934bb5")
 		(property "Reference" "R59"
-			(at 72.3900 516.8900 0)
+			(at 72.3900 516.8900 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -55294,7 +54699,7 @@
 			)
 		)
 		(property "Value" "0.1R"
-			(at 72.3900 519.4300 0)
+			(at 72.3900 519.4300 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -55303,7 +54708,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "SpaghettiLAB:R_0603_2Terminal_Kelvin"
 			(at 72.3900 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -55325,7 +54730,7 @@
 				)
 			)
 		)
-		(property "Description" "All port current crosses this shunt. Use 0R in Base assemblies."
+		(property "Description" "Two-terminal 0.1R shunt; PCB Kelvin taps 3=1, 4=2. Sense carries no load current."
 			(at 72.3900 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -55347,7 +54752,7 @@
 				)
 			)
 		)
-		(property "Assembly" "LAB:0.1R / BASE:0R"
+		(property "Assembly" "0.1R; two-terminal part with dedicated PCB sense taps"
 			(at 72.3900 521.9700 0)
 			(hide yes)
 			(show_name no)
@@ -55405,7 +54810,7 @@
 				)
 			)
 		)
-	)
+	(pin "3" (uuid "f67a31d3-612b-445a-bf50-99a3251f8d4c")) (pin "4" (uuid "7b278774-0c87-4a0d-b359-a6f56e724a63")))
 	(symbol
 		(lib_id "Device:C")
 		(at 294.64 297.18 0)
@@ -56951,7 +56356,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 251.46 99.06 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -56973,7 +56378,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 384.81 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -56984,7 +56389,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 384.81 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -56995,7 +56400,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -670.56 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -57017,7 +56422,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -57028,7 +56433,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -57039,7 +56444,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -57931,7 +57336,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 568.96 62.23 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -57953,7 +57358,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 519.43 129.54 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -57963,7 +57368,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 519.43 129.54 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -57973,7 +57378,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -648.97 -632.46 0)
 			(hide yes)
 			(show_name no)
@@ -57998,7 +57403,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC Part" "C1591" (at 566.42 60.96 0)  (hide yes) (effects (font (size 1 1))))(property "MPN" "CL10B104KB8NNNC" (at 566.42 60.96 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Samsung" (at 566.42 60.96 0)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "power:+5V")
 		(at 580.39 320.04 90)
@@ -58443,7 +57848,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 232.41 165.1 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -58465,7 +57870,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 308.61 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -58476,7 +57881,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 308.61 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -58487,7 +57892,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -1061.72 -388.62 0)
 			(hide yes)
 			(show_name no)
@@ -58509,7 +57914,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 3.81 6.35 0)
 			(hide yes)
 			(show_name no)
@@ -58520,7 +57925,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 3.81 6.35 0)
 			(hide yes)
 			(show_name no)
@@ -58531,7 +57936,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 3.81 6.35 0)
 			(hide yes)
 			(show_name no)
@@ -58564,7 +57969,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "dab6ab9d-b595-4ef5-99e9-1c56cce6bdee")
@@ -58588,7 +57993,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 490.2200 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -58610,7 +58015,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 490.2200 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -58842,92 +58247,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 38.1 309.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "db6ff991-782c-4962-b77f-e74bc7f8c6b2")
-		(property "Reference" "#PWR11030"
-			(at 38.1 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 38.1 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 38.1 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 38.1 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -172.72 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "c2e85ea7-ef4f-4636-83a0-5bca62bd5bda")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11030")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "power:+5V")
 		(at 25.4 170.18 0)
@@ -59265,7 +58585,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 397.51 303.5299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -59287,7 +58607,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 393.7 302.26 0)
 			(hide yes)
 			(show_name no)
@@ -59298,7 +58618,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 393.7 302.26 0)
 			(hide yes)
 			(show_name no)
@@ -59320,7 +58640,7 @@
 				)
 			)
 		)
-		(property "MPN" "CL05B104KA5NNNC"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 393.7 302.26 0)
 			(hide yes)
 			(show_name no)
@@ -59356,7 +58676,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC" "C1591" (at 0 0 0) (hide yes) (effects (font (size 1 1))))(property "LCSC Part" "C1591" (at 0 0 0) (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Samsung" (at 0 0 0) (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "power:VCC")
 		(at 483.87 284.48 0)
@@ -59553,7 +58873,7 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom no)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "df2b9b6e-0993-4cd7-b1c5-afc805e28f3a")
@@ -59577,7 +58897,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:HARWIN_M20-7810645R"
+		(property "Footprint" ""
 			(at 609.6000 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -59599,7 +58919,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "External Harwin sensor fixture, not mounted on Backbone PCB."
 			(at 609.6000 609.6000 0)
 			(hide yes)
 			(show_name no)
@@ -59901,92 +59221,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 105.41 309.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "e11cfb23-00b0-403b-88cb-c884ea7aac6d")
-		(property "Reference" "#PWR11050"
-			(at 105.41 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 105.41 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 105.41 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 105.41 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "619c3f71-8620-4db6-9e3d-4d453351ca92")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11050")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "Device:R")
 		(at 31.7500 389.8900 0)
@@ -60701,7 +59936,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 669.29 259.08 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -60723,7 +59958,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -60734,7 +59969,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 363.22 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -60745,7 +59980,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1591"
 			(at -586.74 -510.54 0)
 			(hide yes)
 			(show_name no)
@@ -60767,7 +60002,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1591"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -60778,7 +60013,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -60789,7 +60024,7 @@
 				)
 			)
 		)
-		(property "Manufacturer" "YAGEO"
+		(property "Manufacturer" "Samsung"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -61218,7 +60453,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
+		(lib_id "SpaghettiLAB:R_2Terminal_Kelvin")
 		(at 72.3900 411.4800 90)
 		(unit 1)
 		(body_style 1)
@@ -61229,7 +60464,7 @@
 		(dnp no)
 		(uuid "e5eb680d-d209-4616-a9ca-9a59a7a9730d")
 		(property "Reference" "R56"
-			(at 72.3900 406.4000 0)
+			(at 72.3900 406.4000 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -61239,7 +60474,7 @@
 			)
 		)
 		(property "Value" "0.1R"
-			(at 72.3900 408.9400 0)
+			(at 72.3900 408.9400 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -61248,7 +60483,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "SpaghettiLAB:R_0603_2Terminal_Kelvin"
 			(at 72.3900 411.4800 0)
 			(hide yes)
 			(show_name no)
@@ -61270,7 +60505,7 @@
 				)
 			)
 		)
-		(property "Description" "All port current crosses this shunt. Use 0R in Base assemblies."
+		(property "Description" "Two-terminal 0.1R shunt; PCB Kelvin taps 3=1, 4=2. Sense carries no load current."
 			(at 72.3900 411.4800 0)
 			(hide yes)
 			(show_name no)
@@ -61292,7 +60527,7 @@
 				)
 			)
 		)
-		(property "Assembly" "LAB:0.1R / BASE:0R"
+		(property "Assembly" "0.1R; two-terminal part with dedicated PCB sense taps"
 			(at 72.3900 411.4800 0)
 			(hide yes)
 			(show_name no)
@@ -61350,7 +60585,7 @@
 				)
 			)
 		)
-	)
+	(pin "3" (uuid "d1830cb4-40b9-4995-8fd0-f4f6bac9238d")) (pin "4" (uuid "0972dfe8-af82-4adb-88b6-60e9b6650597")))
 	(symbol
 		(lib_id "power:GND")
 		(at 228.6 187.96 0)
@@ -61471,7 +60706,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100nF"
+		(property "Value" "100nF/50V"
 			(at 435.6100 551.1800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -61493,7 +60728,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.lcsc.com/product-detail/C1591.html"
 			(at 427.9900 549.9100 0)
 			(hide yes)
 			(show_name no)
@@ -61504,7 +60739,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100nF 50V X7R +/-10%, 0603 decoupling."
 			(at 427.9900 549.9100 0)
 			(hide yes)
 			(show_name no)
@@ -61540,7 +60775,7 @@
 				)
 			)
 		)
-	)
+	(property "LCSC Part" "C1591" (at 427.9900 549.9100 0)  (hide yes) (effects (font (size 1 1))))(property "LCSC" "C1591" (at 427.9900 549.9100 0)  (hide yes) (effects (font (size 1 1))))(property "MPN" "CL10B104KB8NNNC" (at 427.9900 549.9100 0)  (hide yes) (effects (font (size 1 1))))(property "Manufacturer" "Samsung" (at 427.9900 549.9100 0)  (hide yes) (effects (font (size 1 1)))))
 	(symbol
 		(lib_id "power:GND")
 		(at 375.92 62.23 0)
@@ -62493,92 +61728,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 92.71 307.34 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "f71c9b97-81c3-4424-9de7-e8d66f55915b")
-		(property "Reference" "#PWR11048"
-			(at 92.71 294.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 92.71 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 92.71 307.34 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 92.71 307.34 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" ""
-			(at -448.31 -695.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.889 0.889)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "05bd4995-549a-41d6-9860-f93b0fb851dd")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR11048")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "Mechanical:MountingHole")
 		(at 480.06 241.3 0)
@@ -63032,4 +62182,82 @@
 (rectangle (start 530 584.2) (end 680 650) (stroke (width 0.254) (type dash)) (fill (type none)) (uuid "0ee8f633-fa92-4bd6-a0db-2c4dc4d0eaff"))
 (text "J140 | CONFIGURABLE ROW HEADER" (at 534 590 0) (effects (font (size 1.25 1.25)) (justify left bottom)) (uuid "96bf3941-a08f-45e4-a6e8-463598d980f6"))
 (text "All six units belong to this single connector." (at 534 596 0) (effects (font (size 1 1)) (justify left bottom)) (uuid "2220776d-12b6-4c2b-8359-e571f936dab1"))
-)
+
+(wire (pts (xy 38.1000 243.8400) (xy 30.4800 243.8400)) (stroke (width 0) (type default)) (uuid "f935d25b-36e6-4f7e-bc08-27de4844a12f"))
+(global_label "5V" (shape bidirectional) (at 30.4800 243.8400 180) (effects (font (size 0.8 0.8)) (justify right)) (uuid "515caec4-17c3-4d16-8e4e-c724524d5ba1"))
+(wire (pts (xy 50.8000 248.9200) (xy 58.4200 248.9200)) (stroke (width 0) (type default)) (uuid "d92b4b7f-a5f9-449a-9f81-53b80c3be915"))
+(global_label "VCORE" (shape bidirectional) (at 58.4200 248.9200 0) (effects (font (size 0.8 0.8)) (justify left)) (uuid "6d111172-2639-4a85-91f4-48600c06597e"))
+(wire (pts (xy 92.7100 243.8400) (xy 85.0900 243.8400)) (stroke (width 0) (type default)) (uuid "fed9b0f2-8ac3-447f-8723-eae5ef9c83eb"))
+(global_label "5V" (shape bidirectional) (at 85.0900 243.8400 180) (effects (font (size 0.8 0.8)) (justify right)) (uuid "57d09214-b184-4299-9735-b43aaa0d93ec"))
+(wire (pts (xy 105.4100 248.9200) (xy 113.0300 248.9200)) (stroke (width 0) (type default)) (uuid "82d614df-5493-4b73-8248-c5e39efde09d"))
+(global_label "VCORE" (shape bidirectional) (at 113.0300 248.9200 0) (effects (font (size 0.8 0.8)) (justify left)) (uuid "71801e07-c903-4544-86dc-7654463c7cfb"))
+(wire (pts (xy 38.1000 309.8800) (xy 30.4800 309.8800)) (stroke (width 0) (type default)) (uuid "15ab1660-d13a-4a44-9d57-128c4e9b3095"))
+(global_label "SHUNT_SENSE_H0" (shape bidirectional) (at 30.4800 309.8800 180) (effects (font (size 0.8 0.8)) (justify right)) (uuid "87024ea9-9dad-4f02-b69a-0269a2a3c3bd"))
+(wire (pts (xy 50.8000 309.8800) (xy 58.4200 309.8800)) (stroke (width 0) (type default)) (uuid "a2f9c511-fb56-4e7e-8be8-90f73b8c1aa4"))
+(global_label "SHUNT_SENSE_L0" (shape bidirectional) (at 58.4200 309.8800 0) (effects (font (size 0.8 0.8)) (justify left)) (uuid "56f44367-6569-4af1-8488-7783602621af"))
+(wire (pts (xy 38.1000 312.4200) (xy 30.4800 312.4200)) (stroke (width 0) (type default)) (uuid "3c490a5b-abe9-48df-bead-c8b57b3ad48e"))
+(global_label "SHUNT_SENSE_H1" (shape bidirectional) (at 30.4800 312.4200 180) (effects (font (size 0.8 0.8)) (justify right)) (uuid "81f7a1c3-d5da-4d8d-8324-2fa231a180e6"))
+(wire (pts (xy 50.8000 312.4200) (xy 58.4200 312.4200)) (stroke (width 0) (type default)) (uuid "36b9625e-be56-43ba-8565-90f54475d7ac"))
+(global_label "SHUNT_SENSE_L1" (shape bidirectional) (at 58.4200 312.4200 0) (effects (font (size 0.8 0.8)) (justify left)) (uuid "ffb1e23c-b56b-4346-acb6-a75a4b9c2056"))
+(wire (pts (xy 92.7100 304.8000) (xy 85.0900 304.8000)) (stroke (width 0) (type default)) (uuid "da33069d-75fa-4163-862c-3505153df364"))
+(global_label "SHUNT_SENSE_H2" (shape bidirectional) (at 85.0900 304.8000 180) (effects (font (size 0.8 0.8)) (justify right)) (uuid "34e41b78-4460-419c-8660-0829acb5dfdc"))
+(wire (pts (xy 105.4100 304.8000) (xy 113.0300 304.8000)) (stroke (width 0) (type default)) (uuid "34bbf63f-5aea-44e8-8442-eb318cb8911c"))
+(global_label "SHUNT_SENSE_L2" (shape bidirectional) (at 113.0300 304.8000 0) (effects (font (size 0.8 0.8)) (justify left)) (uuid "798d92f6-f077-49f4-b429-48baa67f9339"))
+(wire (pts (xy 92.7100 307.3400) (xy 85.0900 307.3400)) (stroke (width 0) (type default)) (uuid "8db2add1-33d9-4592-88fa-67bb2194c0d1"))
+(global_label "SHUNT_SENSE_H3" (shape bidirectional) (at 85.0900 307.3400 180) (effects (font (size 0.8 0.8)) (justify right)) (uuid "2f1785f4-a462-4c35-a895-a46883676de8"))
+(wire (pts (xy 105.4100 307.3400) (xy 113.0300 307.3400)) (stroke (width 0) (type default)) (uuid "080ec9dd-6866-41a7-b8cc-d6b1fbcd316a"))
+(global_label "SHUNT_SENSE_L3" (shape bidirectional) (at 113.0300 307.3400 0) (effects (font (size 0.8 0.8)) (justify left)) (uuid "29b5fd6e-2629-439c-ad5b-2a2b54353430"))
+(wire (pts (xy 92.7100 309.8800) (xy 85.0900 309.8800)) (stroke (width 0) (type default)) (uuid "ae53e146-da64-42ed-8712-f6a825385c80"))
+(global_label "SHUNT_SENSE_H4" (shape bidirectional) (at 85.0900 309.8800 180) (effects (font (size 0.8 0.8)) (justify right)) (uuid "38fac7f6-264e-483c-a3c3-58fdce194614"))
+(wire (pts (xy 105.4100 309.8800) (xy 113.0300 309.8800)) (stroke (width 0) (type default)) (uuid "0e3850c0-5591-4616-b44d-29ec608f6a87"))
+(global_label "SHUNT_SENSE_L4" (shape bidirectional) (at 113.0300 309.8800 0) (effects (font (size 0.8 0.8)) (justify left)) (uuid "dc72f646-74f0-41e2-ad40-90fc3f9f72e1"))
+(wire (pts (xy 92.7100 312.4200) (xy 85.0900 312.4200)) (stroke (width 0) (type default)) (uuid "2663b1da-c0ee-4ff8-a2a5-c14b92494efc"))
+(global_label "SHUNT_SENSE_H5" (shape bidirectional) (at 85.0900 312.4200 180) (effects (font (size 0.8 0.8)) (justify right)) (uuid "63ff2952-5fef-49a8-8688-aad86cc1944a"))
+(wire (pts (xy 105.4100 312.4200) (xy 113.0300 312.4200)) (stroke (width 0) (type default)) (uuid "515a4baf-8464-48bc-a997-7c1a05241181"))
+(global_label "SHUNT_SENSE_L5" (shape bidirectional) (at 113.0300 312.4200 0) (effects (font (size 0.8 0.8)) (justify left)) (uuid "38788876-a627-44ac-be1f-3b26eed9dcf4"))
+(global_label "SHUNT_SENSE_H0" (shape bidirectional) (at 69.8500 415.2900 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "c84218fc-7c13-4ce6-b30c-716725b5af68"))
+(global_label "SHUNT_SENSE_L0" (shape bidirectional) (at 74.9300 415.2900 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "c014d576-0185-4628-91b0-c13ef3e11c7f"))
+(global_label "SHUNT_SENSE_H1" (shape bidirectional) (at 184.1500 411.4800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "da996723-aa13-4f24-a0d6-9dd5a63ec762"))
+(global_label "SHUNT_SENSE_L1" (shape bidirectional) (at 189.2300 411.4800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "de3bfc8a-b6ae-4a22-b697-f178db267b60"))
+(global_label "SHUNT_SENSE_H2" (shape bidirectional) (at 299.7200 411.4800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "fc736f9d-a4b6-4cd6-94b0-e5c46365102a"))
+(global_label "SHUNT_SENSE_L2" (shape bidirectional) (at 304.8000 411.4800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "fac5e574-fd53-4687-b155-d011c6f02910"))
+(global_label "SHUNT_SENSE_H3" (shape bidirectional) (at 69.8500 525.7800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "c5fbbb0f-dafc-42c5-b8ac-f9ac273c6d68"))
+(global_label "SHUNT_SENSE_L3" (shape bidirectional) (at 74.9300 525.7800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "51587bb4-eb1b-4322-bbab-462fd5e96de8"))
+(global_label "SHUNT_SENSE_H4" (shape bidirectional) (at 184.1500 525.7800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "c0089d8d-8b40-4c9f-9a0c-c3fe70df66de"))
+(global_label "SHUNT_SENSE_L4" (shape bidirectional) (at 189.2300 525.7800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "078060e8-4f73-43d7-8e29-03cae1536820"))
+(global_label "SHUNT_SENSE_H5" (shape bidirectional) (at 299.7200 525.7800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "8c1a8f25-79f8-482f-9b7d-b977321a5360"))
+(global_label "SHUNT_SENSE_L5" (shape bidirectional) (at 304.8000 525.7800 270) (effects (font (size 0.8 0.8)) (justify right)) (uuid "815b8dd3-da3b-4b62-8046-3e4fa13c8f15"))
+
+(wire (pts (xy 63.5 411.48) (xy 63.5 403.86)) (stroke (width 0) (type default)) (uuid "be52d45a-0130-45d2-8541-38d2220ef256"))
+(global_label "N_A0" (shape bidirectional) (at 63.5 403.86 90) (effects (font (size 0.8 0.8)) (justify left)) (uuid "e9872737-cf50-4649-9c4f-71bcde7b3dd4"))
+(junction (at 63.5 411.48) (diameter 0) (color 0 0 0 0) (uuid "a28f8e2e-f446-46c9-b209-1e7ad61c38f9"))
+(symbol (lib_id "Device:R") (at 59.69 411.48 90) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "b00971f6-2590-4596-a861-9d7eae55b7ed") (property "Reference" "R117" (at 59.69 416.56 90)  (effects (font (size 0.9 0.9))))(property "Value" "0R" (at 59.69 419.1 90)  (effects (font (size 0.9 0.9))))(property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 59.69 411.48 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Datasheet" "https://www.yageogroup.com/component-documentation/download/specsheet/RC0603JR-070RL" (at 59.69 411.48 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Description" "Removable driver link A0; remove to isolate both AO6604 drains from N_A0." (at 59.69 411.48 90) (hide yes) (effects (font (size 0.9 0.9))))(property "LCSC" "C95177" (at 59.69 411.48 90) (hide yes) (effects (font (size 0.9 0.9))))(property "MPN" "RC0603JR-070RL" (at 59.69 411.48 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Manufacturer" "YAGEO" (at 59.69 411.48 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Assembly" "FIT: driver enabled; REMOVE: driver isolated" (at 59.69 411.48 90) (hide yes) (effects (font (size 0.9 0.9))))(pin "1" (uuid "99b8be06-5d39-495d-9467-5775923017ad")) (pin "2" (uuid "dd8635f7-b49a-456f-b441-d6a80d65ea9d")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "R117") (unit 1)))))
+(wire (pts (xy 177.8 407.67) (xy 177.8 400.05)) (stroke (width 0) (type default)) (uuid "6d817deb-ac8d-4344-b8c4-c552d22d00b4"))
+(global_label "N_A1" (shape bidirectional) (at 177.8 400.05 90) (effects (font (size 0.8 0.8)) (justify left)) (uuid "cb6638c9-d106-4e00-98cb-72d1f5852886"))
+(junction (at 177.8 407.67) (diameter 0) (color 0 0 0 0) (uuid "fbfc19ba-5135-4e46-b280-8d29d52227d1"))
+(symbol (lib_id "Device:R") (at 173.99 407.67 90) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "b9127b2e-6646-404d-b688-b0a91a066277") (property "Reference" "R118" (at 173.99 412.75 90)  (effects (font (size 0.9 0.9))))(property "Value" "0R" (at 173.99 415.29 90)  (effects (font (size 0.9 0.9))))(property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 173.99 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Datasheet" "https://www.yageogroup.com/component-documentation/download/specsheet/RC0603JR-070RL" (at 173.99 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Description" "Removable driver link A1; remove to isolate both AO6604 drains from N_A1." (at 173.99 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "LCSC" "C95177" (at 173.99 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "MPN" "RC0603JR-070RL" (at 173.99 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Manufacturer" "YAGEO" (at 173.99 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Assembly" "FIT: driver enabled; REMOVE: driver isolated" (at 173.99 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(pin "1" (uuid "783141c5-b152-4f0b-b592-c8de51087115")) (pin "2" (uuid "bb8c9151-123c-490a-932a-5ab853bc6fa2")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "R118") (unit 1)))))
+(wire (pts (xy 293.37 407.67) (xy 293.37 400.05)) (stroke (width 0) (type default)) (uuid "7473a14d-5ce5-4826-85b7-07da6b05e512"))
+(global_label "N_A2" (shape bidirectional) (at 293.37 400.05 90) (effects (font (size 0.8 0.8)) (justify left)) (uuid "0c49c14f-bccc-4022-b43f-cfcdef7fc862"))
+(junction (at 293.37 407.67) (diameter 0) (color 0 0 0 0) (uuid "7b024251-ffe5-476b-8e48-4b7b564761a3"))
+(symbol (lib_id "Device:R") (at 289.56 407.67 90) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "47c306ef-dcc0-4258-9f66-2547b77f442d") (property "Reference" "R119" (at 289.56 412.75 90)  (effects (font (size 0.9 0.9))))(property "Value" "0R" (at 289.56 415.29 90)  (effects (font (size 0.9 0.9))))(property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 289.56 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Datasheet" "https://www.yageogroup.com/component-documentation/download/specsheet/RC0603JR-070RL" (at 289.56 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Description" "Removable driver link A2; remove to isolate both AO6604 drains from N_A2." (at 289.56 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "LCSC" "C95177" (at 289.56 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "MPN" "RC0603JR-070RL" (at 289.56 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Manufacturer" "YAGEO" (at 289.56 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Assembly" "FIT: driver enabled; REMOVE: driver isolated" (at 289.56 407.67 90) (hide yes) (effects (font (size 0.9 0.9))))(pin "1" (uuid "97a63fe9-538c-43cc-8886-816080826840")) (pin "2" (uuid "35c03fff-cf69-4fe2-9ea2-fc4c1a645fb3")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "R119") (unit 1)))))
+(wire (pts (xy 63.5 521.97) (xy 63.5 514.35)) (stroke (width 0) (type default)) (uuid "3ba3c737-ce8e-43c1-8efa-ff73d809fd07"))
+(global_label "N_A3" (shape bidirectional) (at 63.5 514.35 90) (effects (font (size 0.8 0.8)) (justify left)) (uuid "209d760d-3a86-4f73-839d-3795c9d86d2c"))
+(junction (at 63.5 521.97) (diameter 0) (color 0 0 0 0) (uuid "2bb7cab9-4839-4a62-8edf-9f01ed78a93c"))
+(symbol (lib_id "Device:R") (at 59.69 521.97 90) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "55e2e365-c1a6-451a-b303-3ec942b33984") (property "Reference" "R120" (at 59.69 527.0500000000001 90)  (effects (font (size 0.9 0.9))))(property "Value" "0R" (at 59.69 529.59 90)  (effects (font (size 0.9 0.9))))(property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 59.69 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Datasheet" "https://www.yageogroup.com/component-documentation/download/specsheet/RC0603JR-070RL" (at 59.69 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Description" "Removable driver link A3; remove to isolate both AO6604 drains from N_A3." (at 59.69 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "LCSC" "C95177" (at 59.69 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "MPN" "RC0603JR-070RL" (at 59.69 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Manufacturer" "YAGEO" (at 59.69 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Assembly" "FIT: driver enabled; REMOVE: driver isolated" (at 59.69 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(pin "1" (uuid "fa0e3ee2-57e0-49a1-bd9a-e0c6af41bdff")) (pin "2" (uuid "a3335387-ee34-43ef-a520-a6515b2d400c")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "R120") (unit 1)))))
+(wire (pts (xy 177.8 521.97) (xy 177.8 514.35)) (stroke (width 0) (type default)) (uuid "6ea8a79a-ada0-4318-a479-0f26379a83d4"))
+(global_label "N_A4" (shape bidirectional) (at 177.8 514.35 90) (effects (font (size 0.8 0.8)) (justify left)) (uuid "284ef2aa-159d-4ae3-b36c-6db31df05d22"))
+(junction (at 177.8 521.97) (diameter 0) (color 0 0 0 0) (uuid "80b92201-6e94-434c-a123-12629535d9ad"))
+(symbol (lib_id "Device:R") (at 173.99 521.97 90) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "d015767d-6b60-4ec4-9937-64d6a741fcc0") (property "Reference" "R121" (at 173.99 527.0500000000001 90)  (effects (font (size 0.9 0.9))))(property "Value" "0R" (at 173.99 529.59 90)  (effects (font (size 0.9 0.9))))(property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 173.99 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Datasheet" "https://www.yageogroup.com/component-documentation/download/specsheet/RC0603JR-070RL" (at 173.99 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Description" "Removable driver link A4; remove to isolate both AO6604 drains from N_A4." (at 173.99 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "LCSC" "C95177" (at 173.99 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "MPN" "RC0603JR-070RL" (at 173.99 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Manufacturer" "YAGEO" (at 173.99 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Assembly" "FIT: driver enabled; REMOVE: driver isolated" (at 173.99 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(pin "1" (uuid "97f3c9fa-4192-4100-94bc-5414ae85a4f5")) (pin "2" (uuid "9b5c1383-dfcf-4fb6-968f-de0fa25694a0")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "R121") (unit 1)))))
+(wire (pts (xy 293.37 521.97) (xy 293.37 514.35)) (stroke (width 0) (type default)) (uuid "3e166262-f17b-47a5-975a-2b48918d3f3b"))
+(global_label "N_A5" (shape bidirectional) (at 293.37 514.35 90) (effects (font (size 0.8 0.8)) (justify left)) (uuid "3975fd05-67ad-4c30-af7f-e728e5e2617c"))
+(junction (at 293.37 521.97) (diameter 0) (color 0 0 0 0) (uuid "fae8ab57-dd36-4db2-ba7b-e7c3e49d7cf3"))
+(symbol (lib_id "Device:R") (at 289.56 521.97 90) (unit 1) (in_bom yes) (on_board yes) (dnp no) (uuid "6281724f-038e-44f2-8794-1b994781d75d") (property "Reference" "R122" (at 289.56 527.0500000000001 90)  (effects (font (size 0.9 0.9))))(property "Value" "0R" (at 289.56 529.59 90)  (effects (font (size 0.9 0.9))))(property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 289.56 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Datasheet" "https://www.yageogroup.com/component-documentation/download/specsheet/RC0603JR-070RL" (at 289.56 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Description" "Removable driver link A5; remove to isolate both AO6604 drains from N_A5." (at 289.56 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "LCSC" "C95177" (at 289.56 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "MPN" "RC0603JR-070RL" (at 289.56 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Manufacturer" "YAGEO" (at 289.56 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(property "Assembly" "FIT: driver enabled; REMOVE: driver isolated" (at 289.56 521.97 90) (hide yes) (effects (font (size 0.9 0.9))))(pin "1" (uuid "df01a156-0841-4259-8fdf-099af72c0c2b")) (pin "2" (uuid "f9dcc335-c332-4c89-af07-9c8c99dc90b1")) (instances (project "backbone" (path "/9262d91e-b0ff-47b4-bf11-6f94636af855" (reference "R122") (unit 1)))))
+
+(wire (pts (xy 279.4 281.94) (xy 284.48 281.94)) (stroke (width 0) (type default)) (uuid "f70cff8c-5d24-4fae-a5d8-2c17040b0145"))
+(wire (pts (xy 279.4 281.94) (xy 279.4 290.83)) (stroke (width 0) (type default)) (uuid "16c223b0-1a2b-4900-bb56-2b4e3bd0f75e"))
+(wire (pts (xy 279.4 298.45) (xy 279.4 303.53)) (stroke (width 0) (type default)) (uuid "156b428d-d2ec-4d7a-9c80-932b3b68da2f"))
+(wire (pts (xy 279.4 303.53) (xy 271.78 303.53)) (stroke (width 0) (type default)) (uuid "ad6cbf6a-991a-4969-b970-76037c16af7d"))
+(wire (pts (xy 271.78 300.99) (xy 271.78 303.53)) (stroke (width 0) (type default)) (uuid "b4374b27-57fd-4b9a-b9a7-a3490d905b27"))
+(wire (pts (xy 271.78 303.53) (xy 271.78 306.07)) (stroke (width 0) (type default)) (uuid "b2990ed3-0632-49a5-a09a-2d342f4958c4"))
+(junction (at 279.4 281.94) (diameter 0) (color 0 0 0 0) (uuid "52fe029d-d072-402e-ac8e-a1296e1b887a"))
+(junction (at 271.78 303.53) (diameter 0) (color 0 0 0 0) (uuid "698eda74-9c27-47ee-819d-070b1ebd5854")))

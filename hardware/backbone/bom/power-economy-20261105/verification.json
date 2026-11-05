@@ -1,0 +1,31 @@
+{
+  "regulator": "SY8089AAAC C78988",
+  "output_nominal_V": 3.3108433734939755,
+  "recommended_input_V": [
+    2.7,
+    5.5
+  ],
+  "D6_reverse_blocking_retained": true,
+  "pin_nets": {
+    "1": "5V",
+    "2": "GND",
+    "3": "/BUCK_SW",
+    "4": "5V",
+    "5": "/BUCK_FB"
+  },
+  "updated_component_count": 21,
+  "removed_PCB": [
+    "J1",
+    "J3",
+    "J140"
+  ],
+  "ERC_errors": 0,
+  "ERC_warnings": 143,
+  "DRC_physical": 155,
+  "DRC_new_physical": 0,
+  "schematic_parity": 69,
+  "unconnected": 426,
+  "tracks": 0,
+  "vias": 0,
+  "thermal_and_transient_bench_qualification": false
+}

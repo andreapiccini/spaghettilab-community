@@ -1,0 +1,200 @@
+Net,Reference,Pad,Design_allocation_A_NOT_certified_max,Suggested_local_width_mm,Smallest_pad_dimension_mm,Meaning
+GND,U8,2,0.005,0.2,0.8,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,C137,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C137,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,C89,1,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+GND,C89,2,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,R44,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,C74,1,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,C74,2,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,R104,1,,0.2,0.8,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,R46,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,C9,1,,0.8,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C9,2,,0.8,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,C136,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C136,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,R22,2,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,R41,2,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,R51,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VBUS,R110,1,,0.2,0.8,Pull-up/divider current set by voltage and resistance; not a power feeder
+5V,J2,1,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+5V,J2,1,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+5V,J2,4,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+5V,J2,4,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+GND,J2,5,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+GND,J2,5,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+GND,R47,2,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,U27,2,0.005,0.2,0.35,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U27,5,0.005,0.2,0.35,Logic supply allocation; total logic/controls reserve 70mA
+GND,R103,2,,0.2,0.8,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,TP15,1,,0.3,1.0,External load/ground return depends on attached module; shared budget
+GND,U12,7,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U12,14,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,R48,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+5V,C85,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C85,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,Q5,2,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,Q5,5,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,U25,2,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+GND,U25,3,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+GND,U25,12,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+GND,U25,21,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U25,24,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,Q8,2,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,Q8,5,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+VCORE,R40,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,R45,2,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,C127,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C127,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,C86,1,,0.8,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C86,2,,0.8,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,R52,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,R111,2,,0.2,0.8,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,U13,7,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+GND,U13,9,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U13,10,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+GND,U13,12,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U13,13,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U13,14,0.005,0.2,0.4,Logic supply allocation; total logic/controls reserve 70mA
+GND,R39,2,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,LED6,1,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+VCORE,LED6,3,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+GND,U2,2,0.07,0.3,0.588,CAN supply reserve
+VCORE,U2,3,0.07,0.3,0.588,CAN supply reserve
+GND,U2,8,0.07,0.3,0.588,CAN supply reserve
+GND,C11,1,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,R24,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+5V,J9,1,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+5V,J9,1,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+GND,J9,5,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+GND,J9,5,,0.6,1.6,Magnetic-contact rating unknown; 3A is copper-trunk target only
+VCORE,C130,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C130,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,R43,2,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,Q7,2,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,Q7,5,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+VCORE,R50,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,LED1,1,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+VCORE,LED1,3,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+VCORE,Q3,2,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,Q3,5,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+VCORE,C1,1,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+GND,C1,2,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,R36,1,,0.2,0.8,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,R15,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,C134,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C134,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,U3,1,,0.6,1.0,"Each paired power pad share; 3A total is routing target, not USB entitlement"
+GND,U3,2,,0.6,1.0,"Each paired power pad share; 3A total is routing target, not USB entitlement"
+GND,U3,3,,0.6,1.0,"Each paired power pad share; 3A total is routing target, not USB entitlement"
+GND,U3,4,,0.6,1.0,"Each paired power pad share; 3A total is routing target, not USB entitlement"
+GND,U3,A1B12,1.5,0.6,0.6,"Each paired power pad share; 3A total is routing target, not USB entitlement"
+VBUS,U3,A4B9,1.5,0.6,0.6,"Each paired power pad share; 3A total is routing target, not USB entitlement"
+GND,U3,B1A12,1.5,0.6,0.6,"Each paired power pad share; 3A total is routing target, not USB entitlement"
+VBUS,U3,B4A9,1.5,0.6,0.6,"Each paired power pad share; 3A total is routing target, not USB entitlement"
+GND,LED2,1,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+VCORE,LED2,3,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+GND,R27,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,J4,1,,0.6,0.6,External load/ground return depends on attached module; shared budget
+VCORE,J4,2,,0.6,0.6,External load/ground return depends on attached module; shared budget
+5V,Q2,2,,0.3,0.8,External load/ground return depends on attached module; shared budget
+GND,LED3,1,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+VCORE,LED3,3,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+GND,LED5,1,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+VCORE,LED5,3,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+VCORE,L1,2,2,0.8,1.5,Buck output total
+VCORE,Q6,2,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,Q6,5,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,U4,1,2,0.6,0.6,VIN pulsed current/2A envelope; EN only control current
+5V,U4,3,2,0.6,0.6,VIN pulsed current/2A envelope; EN only control current
+5V,U4,5,2e-05,0.2,0.6,VIN pulsed current/2A envelope; EN only control current
+GND,U31,5,0.005,0.2,0.3,Logic supply allocation; total logic/controls reserve 70mA
+GND,U31,6,0.005,0.2,0.25,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U31,10,0.005,0.2,0.3,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,C126,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C126,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,R49,2,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VBUS,D6,1,3,0.8,1.539,Copper target; diode dissipation/USB source/headroom must be qualified
+5V,D6,2,3,0.8,1.539,Copper target; diode dissipation/USB source/headroom must be qualified
+GND,R105,2,,0.2,0.8,Pull-up/divider current set by voltage and resistance; not a power feeder
+5V,J10,1,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+5V,J10,2,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+VCORE,J10,3,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+VCORE,J10,4,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+5V,J10,5,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+VCORE,J10,10,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,15,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,20,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,25,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,30,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,35,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,40,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,45,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,50,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J10,55,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+VCORE,R54,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,C135,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C135,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,R53,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+5V,C5,1,,0.8,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C5,2,,0.8,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,R16,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,J3,2,,0.6,1.02,External load/ground return depends on attached module; shared budget
+VCORE,J3,3,,0.6,1.02,External load/ground return depends on attached module; shared budget
+GND,J3,4,,0.6,1.02,External load/ground return depends on attached module; shared budget
+GND,J3,5,,0.6,1.02,External load/ground return depends on attached module; shared budget
+GND,J3,9,,0.6,1.02,External load/ground return depends on attached module; shared budget
+VCORE,J3,11,,0.6,1.02,External load/ground return depends on attached module; shared budget
+VCORE,R115,1,,0.2,0.8,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,R37,2,,0.2,0.8,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,C133,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C133,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,C128,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C128,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,LED4,1,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+VCORE,LED4,3,0.06,0.3,0.82,"Conservative LED allocation, operation at 3.3V remains out of specification"
+5V,J11,1,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+5V,J11,2,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+VCORE,J11,3,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+VCORE,J11,4,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+5V,J11,5,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+VCORE,J11,10,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J11,15,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J11,20,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J11,25,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J11,30,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J11,35,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J11,40,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J11,45,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J11,50,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+VBUS,J11,51,0.5,0.4,0.5,Per-contact design target; 0.8A/contact nameplate is not a simultaneous-load qualification
+GND,J20,2,,0.6,1.02,External load/ground return depends on attached module; shared budget
+VCORE,J20,3,,0.6,1.02,External load/ground return depends on attached module; shared budget
+VCORE,J20,5,,0.6,1.02,External load/ground return depends on attached module; shared budget
+GND,J20,6,,0.6,1.02,External load/ground return depends on attached module; shared budget
+VCORE,R25,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,J17,1,,0.6,1.02,External load/ground return depends on attached module; shared budget
+VCORE,J17,2,,0.6,1.02,External load/ground return depends on attached module; shared budget
+VCORE,R55,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+GND,U26,2,0.005,0.2,0.35,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U26,5,0.005,0.2,0.35,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,R42,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,R38,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,C129,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C129,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,U29,2,0.005,0.2,0.35,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U29,5,0.005,0.2,0.35,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,C88,1,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+GND,C88,2,,0.3,0.8,AC decoupling current; DC consumption near zero; minimize loop
+GND,R4,1,,0.2,0.806,Pull-up/divider current set by voltage and resistance; not a power feeder
+VCORE,C125,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C125,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,U28,2,0.005,0.2,0.35,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,U28,5,0.005,0.2,0.35,Logic supply allocation; total logic/controls reserve 70mA
+VCORE,C132,1,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+GND,C132,2,,0.3,0.9,AC decoupling current; DC consumption near zero; minimize loop
+VCORE,Q4,2,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,Q4,5,0.5,0.4,0.532,"Port source/sink envelope, shared regulator budget"
+GND,U1,1,0.6,0.6,0.9,ESP supply/return reserve; not GPIO current
+VCORE,U1,2,0.6,0.6,0.9,ESP supply/return reserve; not GPIO current
+GND,U1,40,0.6,0.6,0.9,ESP supply/return reserve; not GPIO current

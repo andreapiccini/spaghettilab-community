@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-04",
+  "regulator": "AP63203WU-7",
+  "minimum_recommended_input_V": 3.8,
+  "D6_reverse_blocking_retained": true,
+  "expected_pin_nets": {
+    "1": "/BUCK_FB",
+    "2": "5V",
+    "3": "5V",
+    "4": "GND",
+    "5": "/BUCK_SW",
+    "6": "/BUCK_BOOT"
+  },
+  "only_four_U4_net_memberships_changed": true,
+  "R36": "0R fitted",
+  "R37": "10k DNP",
+  "placements_and_unrelated_footprints_preserved": true,
+  "ERC_errors": 0,
+  "ERC_warnings": 143,
+  "DRC_physical": 155,
+  "DRC_new_physical": 0,
+  "parity": 69,
+  "unconnected": 462,
+  "tracks": 0,
+  "vias": 0,
+  "inductor_ripple_estimates": {
+    "3.8": {
+      "ripple_A_conservative_L_minus20pct_f_minus6pct": 0.159,
+      "peak_at_2A": 2.08
+    },
+    "4.0": {
+      "ripple_A_conservative_L_minus20pct_f_minus6pct": 0.212,
+      "peak_at_2A": 2.106
+    },
+    "4.45": {
+      "ripple_A_conservative_L_minus20pct_f_minus6pct": 0.312,
+      "peak_at_2A": 2.156
+    },
+    "5.25": {
+      "ripple_A_conservative_L_minus20pct_f_minus6pct": 0.449,
+      "peak_at_2A": 2.225
+    }
+  },
+  "thermal_and_transient_bench_qualification": false,
+  "port_protection": "proposal only",
+  "CM5": "feasibility only"
+}

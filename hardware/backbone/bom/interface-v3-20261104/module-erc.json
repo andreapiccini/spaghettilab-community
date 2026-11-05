@@ -1,0 +1,1834 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-04T14:48:07",
+    "ignored_checks": [
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "10.0.3",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/6246b1db-f4fd-4e0d-a4cd-582cd8c08be0",
+            "violations": [
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 0.2689,
+                                "y": 2.5424
+                            },
+                            "uuid": "2f41182a-d014-4175-9810-94ab4a69ade3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol TP45 Pin 1 [1, Passive, Line]",
+                            "pos": {
+                                "x": 0.2689,
+                                "y": 2.5424
+                            },
+                            "uuid": "3d104b34-f016-4aca-adaa-30ecc656596c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'STMICRO'",
+                    "items": [
+                        {
+                            "description": "Symbol TP21 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
+                            "pos": {
+                                "x": 0.342616,
+                                "y": 3.0353
+                            },
+                            "uuid": "4f8bbb33-03d7-489f-bb9c-5bec56612e7c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol TP21 Pin 1 [1, Passive, Line]",
+                            "pos": {
+                                "x": 0.342616,
+                                "y": 3.0607
+                            },
+                            "uuid": "407bde87-f7f2-41c6-9b03-d06e07a82528"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0886 mm",
+                            "pos": {
+                                "x": 0.254,
+                                "y": 3.0607
+                            },
+                            "uuid": "d6cea5d0-33a6-4a0d-8b00-75dc928c7b1a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol TP46 Pin 1 [1, Passive, Line]",
+                            "pos": {
+                                "x": 0.5173,
+                                "y": 2.5424
+                            },
+                            "uuid": "04fa0fb0-2df1-4278-8675-660af4b820c1"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 0.5173,
+                                "y": 2.5424
+                            },
+                            "uuid": "95f7bab8-318a-4803-9f7a-b23c797bd899"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Four items connected at 533400, 609600",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR8007 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 0.5334,
+                                "y": 0.6096
+                            },
+                            "uuid": "d30e9609-32bf-44ad-b293-6a04ae20c7d6"
+                        },
+                        {
+                            "description": "Vertical Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 0.5334,
+                                "y": 0.6604
+                            },
+                            "uuid": "baac750f-a711-4dfd-8f51-de036310b2f8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                },
+                {
+                    "description": "Four items connected at 660400, 1600200",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR8011 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 0.6604,
+                                "y": 1.6002
+                            },
+                            "uuid": "d30e9609-32bf-44ad-b293-6a04ae20c7d8"
+                        },
+                        {
+                            "description": "Horizontal Wire, length 0,3048 mm",
+                            "pos": {
+                                "x": 0.6604,
+                                "y": 1.6002
+                            },
+                            "uuid": "271b56a4-1718-4512-a04d-fafd5c086b04"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_A0'",
+                            "pos": {
+                                "x": 0.9525,
+                                "y": 3.7846
+                            },
+                            "uuid": "f8dd2f54-5668-4536-af8c-067e348fe618"
+                        },
+                        {
+                            "description": "Label 'N_A0'",
+                            "pos": {
+                                "x": 2.921,
+                                "y": 0.7366
+                            },
+                            "uuid": "e4763bd3-fe05-4d26-a845-ef4b866d93e8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_A1'",
+                            "pos": {
+                                "x": 0.9525,
+                                "y": 3.8354
+                            },
+                            "uuid": "de665f4b-20a8-4933-87ac-94930defb635"
+                        },
+                        {
+                            "description": "Label 'N_A1'",
+                            "pos": {
+                                "x": 2.921,
+                                "y": 0.7874
+                            },
+                            "uuid": "fde01d69-aab5-46c4-a103-63a8f1349c7b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_A2'",
+                            "pos": {
+                                "x": 0.9525,
+                                "y": 3.8862
+                            },
+                            "uuid": "b83285af-66fe-4a92-9e45-33d12b5e5848"
+                        },
+                        {
+                            "description": "Label 'N_A2'",
+                            "pos": {
+                                "x": 2.921,
+                                "y": 0.8382
+                            },
+                            "uuid": "00546a65-e1e3-48db-a5d5-f5a1fd912185"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_A3'",
+                            "pos": {
+                                "x": 0.9525,
+                                "y": 3.937
+                            },
+                            "uuid": "478ff364-658c-4e57-98b2-919c777bb6f6"
+                        },
+                        {
+                            "description": "Label 'N_A3'",
+                            "pos": {
+                                "x": 2.921,
+                                "y": 0.889
+                            },
+                            "uuid": "071a84c1-883e-45de-9a49-df201c02f9eb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_A4'",
+                            "pos": {
+                                "x": 0.9525,
+                                "y": 3.9878
+                            },
+                            "uuid": "bd17c2c9-bf66-4e76-9b94-289ddecdc9aa"
+                        },
+                        {
+                            "description": "Label 'N_A4'",
+                            "pos": {
+                                "x": 2.921,
+                                "y": 0.9398
+                            },
+                            "uuid": "8570a03e-7cec-4c93-a4c5-ed5088b31372"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_A5'",
+                            "pos": {
+                                "x": 0.9525,
+                                "y": 4.0386
+                            },
+                            "uuid": "21d36be1-8ae7-43f4-8e6e-9ee2681b0cb4"
+                        },
+                        {
+                            "description": "Label 'N_A5'",
+                            "pos": {
+                                "x": 2.921,
+                                "y": 0.9906
+                            },
+                            "uuid": "4ff61205-c191-4c30-a00e-c8aaeb87a539"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'STMICRO'",
+                    "items": [
+                        {
+                            "description": "Symbol TP19 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
+                            "pos": {
+                                "x": 1.2446,
+                                "y": 3.0353
+                            },
+                            "uuid": "cf77e783-84c7-4d5e-beb9-beb5b98d703f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Four items connected at 1295400, 609600",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR8003 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 1.2954,
+                                "y": 0.6096
+                            },
+                            "uuid": "d30e9609-32bf-44ad-b293-6a04ae20c7d4"
+                        },
+                        {
+                            "description": "Vertical Wire, length 0,0635 mm",
+                            "pos": {
+                                "x": 1.2954,
+                                "y": 0.6096
+                            },
+                            "uuid": "3b096bb0-622f-4e9b-b94a-872daf6f2672"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'STMICRO'",
+                    "items": [
+                        {
+                            "description": "Symbol TP18 [root_3_PLAGE-CMS-DIAM-0.6mm_STMICR...]",
+                            "pos": {
+                                "x": 1.6129,
+                                "y": 3.0353
+                            },
+                            "uuid": "fe559076-9708-44cd-ab7f-af8209ec3c76"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ESP_AG_RESET_N'",
+                            "pos": {
+                                "x": 2.5654,
+                                "y": 0.6477
+                            },
+                            "uuid": "51701da1-d984-47bd-8263-3196622dd284"
+                        },
+                        {
+                            "description": "Label 'ESP_AG_RESET_N'",
+                            "pos": {
+                                "x": 1.4605,
+                                "y": 2.9464
+                            },
+                            "uuid": "a4bf5995-9bdb-4d74-ac1e-7c8ea28f6585"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ESP_PROG_RX'",
+                            "pos": {
+                                "x": 2.5654,
+                                "y": 0.6985
+                            },
+                            "uuid": "8a812443-890f-4823-80d0-6787d92abd99"
+                        },
+                        {
+                            "description": "Label 'ESP_PROG_RX'",
+                            "pos": {
+                                "x": 0.6096,
+                                "y": 2.9464
+                            },
+                            "uuid": "5cca3478-c5ea-48ad-9b47-ab54f85ebe07"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Four items connected at 3263900, 2298700",
+                    "items": [
+                        {
+                            "description": "Vertical Wire, length 0,0889 mm",
+                            "pos": {
+                                "x": 3.2639,
+                                "y": 2.2987
+                            },
+                            "uuid": "07cce8fa-36b2-4918-91b2-a42fcf9e5634"
+                        },
+                        {
+                            "description": "Vertical Wire, length 0,0889 mm",
+                            "pos": {
+                                "x": 3.2639,
+                                "y": 2.2098
+                            },
+                            "uuid": "f5c2bd5e-a5c3-407d-b6da-10aefe47ae71"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'CAN_RX'",
+                            "pos": {
+                                "x": 3.6576,
+                                "y": 3.5687
+                            },
+                            "uuid": "9954641d-c32d-437c-8e22-4e669fb8da61"
+                        },
+                        {
+                            "description": "Label 'CAN_RX'",
+                            "pos": {
+                                "x": 5.7532,
+                                "y": 0.7747
+                            },
+                            "uuid": "0fd52bf5-0f46-4236-9d6c-9c9c80b88b2c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Unconnected wire endpoint",
+                    "items": [
+                        {
+                            "description": "Vertical Wire, length 0,0381 mm",
+                            "pos": {
+                                "x": 4.0513,
+                                "y": 2.7432
+                            },
+                            "uuid": "999a9cce-4014-4b5c-ac8b-1b35adfcc673"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "unconnected_wire_endpoint"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'DAC_RAW'",
+                            "pos": {
+                                "x": 4.5593,
+                                "y": 0.6858
+                            },
+                            "uuid": "a098f2c1-25c9-4046-ab1d-50223eadfe94"
+                        },
+                        {
+                            "description": "Label 'DAC_RAW'",
+                            "pos": {
+                                "x": 4.3307,
+                                "y": 0.6477
+                            },
+                            "uuid": "3e440cb7-217f-4098-84c4-f99fd124e5cc"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'DAC_RAW'",
+                            "pos": {
+                                "x": 4.5593,
+                                "y": 0.6858
+                            },
+                            "uuid": "a098f2c1-25c9-4046-ab1d-50223eadfe94"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'DAC_BYPASS_N'",
+                            "pos": {
+                                "x": 4.7625,
+                                "y": 0.9144
+                            },
+                            "uuid": "4310b3fc-5072-4a84-86af-dca3f8a7edbe"
+                        },
+                        {
+                            "description": "Label 'DAC_BYPASS_N'",
+                            "pos": {
+                                "x": 3.6703,
+                                "y": 0.8509
+                            },
+                            "uuid": "c979a8da-96e0-4caa-951a-f5a9c8dfbec2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'DAC_BYPASS_N'",
+                            "pos": {
+                                "x": 4.7625,
+                                "y": 0.9144
+                            },
+                            "uuid": "4310b3fc-5072-4a84-86af-dca3f8a7edbe"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'DAC_LIMITED'",
+                            "pos": {
+                                "x": 4.9657,
+                                "y": 0.7112
+                            },
+                            "uuid": "b8762d1a-fef7-4870-99af-d303ee656d0e"
+                        },
+                        {
+                            "description": "Label 'DAC_LIMITED'",
+                            "pos": {
+                                "x": 4.3307,
+                                "y": 0.7493
+                            },
+                            "uuid": "3124101d-a549-45ab-8b94-7fbc2616241a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'DAC_LIMITED'",
+                            "pos": {
+                                "x": 4.9657,
+                                "y": 0.7112
+                            },
+                            "uuid": "b8762d1a-fef7-4870-99af-d303ee656d0e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ESP_PROG_TX'",
+                            "pos": {
+                                "x": 5.7277,
+                                "y": 2.9337
+                            },
+                            "uuid": "b7d9f390-3b4f-4b46-be4a-1c24b6a85a50"
+                        },
+                        {
+                            "description": "Label 'ESP_PROG_TX'",
+                            "pos": {
+                                "x": 0.8636,
+                                "y": 2.9464
+                            },
+                            "uuid": "48514375-81e2-44aa-aa64-739b9d733e0e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ESP_CAN_TX'",
+                            "pos": {
+                                "x": 5.7277,
+                                "y": 2.9845
+                            },
+                            "uuid": "743d766e-b83b-4826-b7c5-cbd3f5645512"
+                        },
+                        {
+                            "description": "Label 'ESP_CAN_TX'",
+                            "pos": {
+                                "x": 5.7532,
+                                "y": 0.7493
+                            },
+                            "uuid": "d686a609-481c-4e9a-a023-d749b1ba1e0f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ESP_ISO4_N'",
+                            "pos": {
+                                "x": 5.7277,
+                                "y": 3.0353
+                            },
+                            "uuid": "251eaad4-cfe9-4efc-bed2-cd1b42368399"
+                        },
+                        {
+                            "description": "Label 'ESP_ISO4_N'",
+                            "pos": {
+                                "x": 5.7532,
+                                "y": 0.8763
+                            },
+                            "uuid": "ae001fda-e9b4-4a31-9f32-d04ed61b17be"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ESP_ISO5_N'",
+                            "pos": {
+                                "x": 5.7277,
+                                "y": 3.0861
+                            },
+                            "uuid": "96206407-c015-4920-a666-87770977d94a"
+                        },
+                        {
+                            "description": "Label 'ESP_ISO5_N'",
+                            "pos": {
+                                "x": 5.7532,
+                                "y": 0.9017
+                            },
+                            "uuid": "c112a3d3-d4f6-4d8f-97aa-0886cb579542"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ESP_LED_DATA'",
+                            "pos": {
+                                "x": 5.7277,
+                                "y": 3.1369
+                            },
+                            "uuid": "4d229cd3-f641-4605-b289-d09029404208"
+                        },
+                        {
+                            "description": "Label 'ESP_LED_DATA'",
+                            "pos": {
+                                "x": 5.7532,
+                                "y": 0.8001
+                            },
+                            "uuid": "12305d07-796a-41a6-8b17-35bcfa5a907f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'MEZZ_PRESENT_N'",
+                            "pos": {
+                                "x": 5.7277,
+                                "y": 3.1877
+                            },
+                            "uuid": "9d809a1f-0388-4708-b292-1fbd07f77628"
+                        },
+                        {
+                            "description": "Label 'MEZZ_PRESENT_N'",
+                            "pos": {
+                                "x": 5.7532,
+                                "y": 0.8509
+                            },
+                            "uuid": "07249cf1-5e58-4d3c-b588-e5a3165def7b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol J5 Pin 1 [1, Passive, Line]",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.5969
+                            },
+                            "uuid": "3996cded-57e2-432c-ad0d-7a3d7e9b8355"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9801 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.5969
+                            },
+                            "uuid": "bd09a9a7-0c9a-4824-971c-f87d55253cde"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9802 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.6223
+                            },
+                            "uuid": "a8f3312e-3af9-43ef-8fe7-f5a3f2f42e8c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.6477
+                            },
+                            "uuid": "e37a6eed-4bff-4401-8c01-94b98a0bdb3d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.6731
+                            },
+                            "uuid": "39be501b-ee01-4a69-b6c2-e96bea23a15c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.6985
+                            },
+                            "uuid": "45c3284f-83f1-4d9d-9e4d-338875567bb8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9803 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.7239
+                            },
+                            "uuid": "4cdb13a6-f4fb-48a1-b8f5-d0fea666def3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.7493
+                            },
+                            "uuid": "6f544576-ad58-4a4d-a664-1a98243a7394"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.7747
+                            },
+                            "uuid": "030f082f-e0db-42d2-b1bf-da175777dfe7"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.8001
+                            },
+                            "uuid": "2e69c711-4d22-45da-9471-d5363a64e52d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9804 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.8255
+                            },
+                            "uuid": "5be28626-568a-464e-94bb-2c331832e90f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.8509
+                            },
+                            "uuid": "4d7018ca-a41f-4c2b-bb31-14be71c94080"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.8763
+                            },
+                            "uuid": "4d0cf6af-a69a-44d4-96fb-ad9251e00274"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.9017
+                            },
+                            "uuid": "287a5bbd-3df8-49f9-9108-e7c79a1f97ae"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9805 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.9271
+                            },
+                            "uuid": "44ff4b02-c0ad-4022-a0b5-89ff22a74b72"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.9525
+                            },
+                            "uuid": "df587d0e-d2a2-46b8-af0b-66d07550e834"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 0.9779
+                            },
+                            "uuid": "0eac80dd-c0df-4a34-a26c-5654a275883d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 1.0033
+                            },
+                            "uuid": "b15a9d8e-3cd7-44d8-9b6c-21a8fca857d4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 1.0287
+                            },
+                            "uuid": "b0b65e05-5e1c-4bfd-95fb-443720316228"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 1.0541
+                            },
+                            "uuid": "df0bed6c-03a3-40f8-9759-7c334ceba033"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 1.0795
+                            },
+                            "uuid": "4d8e344b-06f2-46ed-a6c4-d35eee8860ca"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 1.1049
+                            },
+                            "uuid": "de63ab48-0da2-4232-ad10-3b317f8c8450"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Horizontal Wire, length 0,0508 mm",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 1.1303
+                            },
+                            "uuid": "b0e805fd-26d7-4770-ad91-0423162e103a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9810 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 1.1557
+                            },
+                            "uuid": "d66ae2b5-8c9c-4981-be11-44d010752b9d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Symbol pin or wire end off connection grid",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR9811 Pin 1 [Power input, Line]",
+                            "pos": {
+                                "x": 5.804,
+                                "y": 1.1811
+                            },
+                            "uuid": "1bfac52f-4c76-454b-a268-9505cd8e6a7f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "endpoint_off_grid"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A5_N'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 1.8034
+                            },
+                            "uuid": "32c32646-cd16-44d0-942f-fd55b1862230"
+                        },
+                        {
+                            "description": "Label 'ISO_A5_N'",
+                            "pos": {
+                                "x": 0.5681,
+                                "y": 2.5424
+                            },
+                            "uuid": "9a0f2195-a4d1-4451-bf47-720a7bfeb5de"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A5_N'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 1.8034
+                            },
+                            "uuid": "32c32646-cd16-44d0-942f-fd55b1862230"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_0'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.032
+                            },
+                            "uuid": "5c6fd181-1445-41a1-82f7-12c8341b5577"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_0'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.032
+                            },
+                            "uuid": "5c6fd181-1445-41a1-82f7-12c8341b5577"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_1'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.0574
+                            },
+                            "uuid": "05421cb1-020c-4ba5-a443-6130279bd508"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_1'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.0574
+                            },
+                            "uuid": "05421cb1-020c-4ba5-a443-6130279bd508"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_2'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.0828
+                            },
+                            "uuid": "cbb144ea-9c88-4961-a693-0e7bec073bf2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_2'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.0828
+                            },
+                            "uuid": "cbb144ea-9c88-4961-a693-0e7bec073bf2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_3'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.1082
+                            },
+                            "uuid": "cee1fd3a-1410-47ca-8fdc-7ef0658d6031"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_3'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.1082
+                            },
+                            "uuid": "cee1fd3a-1410-47ca-8fdc-7ef0658d6031"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_4'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.159
+                            },
+                            "uuid": "00961025-aff5-4c33-938f-47685e78702f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_4'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.159
+                            },
+                            "uuid": "00961025-aff5-4c33-938f-47685e78702f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_5'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.1844
+                            },
+                            "uuid": "318d72e5-2162-4eae-b69d-0d960e634d0d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_5'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.1844
+                            },
+                            "uuid": "318d72e5-2162-4eae-b69d-0d960e634d0d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A0_N'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.2098
+                            },
+                            "uuid": "e84496ce-30de-415f-9ebb-edbb1529a201"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A0_N'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.2098
+                            },
+                            "uuid": "e84496ce-30de-415f-9ebb-edbb1529a201"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A2_N'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.2352
+                            },
+                            "uuid": "f2ecd515-0be5-482d-b524-ea1f709473d5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A2_N'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.2352
+                            },
+                            "uuid": "f2ecd515-0be5-482d-b524-ea1f709473d5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'CAN_L'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.286
+                            },
+                            "uuid": "83cd56f3-9a3f-4d01-95ad-43d21669c756"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'CAN_L'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.286
+                            },
+                            "uuid": "83cd56f3-9a3f-4d01-95ad-43d21669c756"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'TERM_CTRL_OUT'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.3114
+                            },
+                            "uuid": "6f4c4c70-d5bd-49cf-83b5-5542903242fb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'TERM_CTRL_OUT'",
+                            "pos": {
+                                "x": 6.2992,
+                                "y": 2.3114
+                            },
+                            "uuid": "6f4c4c70-d5bd-49cf-83b5-5542903242fb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ESP_AG_BOOT0'",
+                            "pos": {
+                                "x": 6.4389,
+                                "y": 2.9845
+                            },
+                            "uuid": "0557760d-38a8-4c70-beda-22940f368e04"
+                        },
+                        {
+                            "description": "Label 'ESP_AG_BOOT0'",
+                            "pos": {
+                                "x": 0.6731,
+                                "y": 3.1242
+                            },
+                            "uuid": "e27e833a-69f2-47b3-a325-5d6c1347b681"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Local and global labels have same name",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A4_N'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 1.778
+                            },
+                            "uuid": "dadfdc4f-24fb-4b7d-a9cf-a3a2e4fe6e65"
+                        },
+                        {
+                            "description": "Label 'ISO_A4_N'",
+                            "pos": {
+                                "x": 0.3197,
+                                "y": 2.5424
+                            },
+                            "uuid": "fc9e00b2-cf10-4bc5-94f9-920d6eb88925"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "same_local_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A4_N'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 1.778
+                            },
+                            "uuid": "dadfdc4f-24fb-4b7d-a9cf-a3a2e4fe6e65"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_0'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.0066
+                            },
+                            "uuid": "7a8b3baf-69da-4296-9ffa-c450b9b0ae42"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_0'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.0066
+                            },
+                            "uuid": "7a8b3baf-69da-4296-9ffa-c450b9b0ae42"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_1'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.032
+                            },
+                            "uuid": "a341f3b6-9a95-4fdf-9930-c633136bc439"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_1'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.032
+                            },
+                            "uuid": "a341f3b6-9a95-4fdf-9930-c633136bc439"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_2'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.0828
+                            },
+                            "uuid": "fd62fb9c-dee6-4917-b098-751de9981fa6"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_2'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.0828
+                            },
+                            "uuid": "fd62fb9c-dee6-4917-b098-751de9981fa6"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_3'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.1082
+                            },
+                            "uuid": "13a72fd1-926d-489f-b860-220ebd43a985"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'N_GATE_3'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.1082
+                            },
+                            "uuid": "13a72fd1-926d-489f-b860-220ebd43a985"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_4'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.1336
+                            },
+                            "uuid": "11d960c4-c675-4118-9d09-87bb7f89b37f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_4'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.1336
+                            },
+                            "uuid": "11d960c4-c675-4118-9d09-87bb7f89b37f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_5'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.159
+                            },
+                            "uuid": "c75a86ca-4d26-427b-b505-41a6b9dd0824"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'P_GATE_5'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.159
+                            },
+                            "uuid": "c75a86ca-4d26-427b-b505-41a6b9dd0824"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A1_N'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.2098
+                            },
+                            "uuid": "234ce081-5ec8-475b-af3d-61108dfe465a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A1_N'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.2098
+                            },
+                            "uuid": "234ce081-5ec8-475b-af3d-61108dfe465a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A3_N'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.2352
+                            },
+                            "uuid": "fb2b1e8d-80a5-4ccf-8bb6-32b1e3cf71de"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'ISO_A3_N'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.2352
+                            },
+                            "uuid": "fb2b1e8d-80a5-4ccf-8bb6-32b1e3cf71de"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'CAN_H'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.2606
+                            },
+                            "uuid": "a15f86b4-4654-493a-8f3c-200f3c87a32a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'CAN_H'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.2606
+                            },
+                            "uuid": "a15f86b4-4654-493a-8f3c-200f3c87a32a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'TERM_CTRL_IN'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.286
+                            },
+                            "uuid": "c2e5cb75-b119-4522-bc8c-d248d7702263"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'TERM_CTRL_IN'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.286
+                            },
+                            "uuid": "c2e5cb75-b119-4522-bc8c-d248d7702263"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'LED_EXP_DATA'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.3368
+                            },
+                            "uuid": "2ec505a1-72ac-4edf-90c2-fa5dbcf80127"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Global Label 'LED_EXP_DATA'",
+                            "pos": {
+                                "x": 6.5786,
+                                "y": 2.3368
+                            },
+                            "uuid": "2ec505a1-72ac-4edf-90c2-fa5dbcf80127"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                }
+            ]
+        }
+    ],
+    "source": "expansion.kicad_sch"
+}

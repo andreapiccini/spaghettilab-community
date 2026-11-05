@@ -1,0 +1,20 @@
+{
+  "carrier": {
+    "changed_pin_assignments": 28,
+    "connector_contacts": 120,
+    "GND": 17,
+    "5V": 6,
+    "VCORE": 6,
+    "sense": 12,
+    "placement_preserved": true
+  },
+  "module": {
+    "changed_pin_assignments": 28,
+    "connector_contacts": 120,
+    "GND": 17,
+    "5V": 6,
+    "VCORE": 6,
+    "sense": 12,
+    "placement_preserved": true
+  }
+}
