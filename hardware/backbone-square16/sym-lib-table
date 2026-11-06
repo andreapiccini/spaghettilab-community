@@ -1,0 +1,9 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "SpaghettiLAB")(type "KiCad")(uri "${KIPRJMOD}/SpaghettiLAB-variant.kicad_sym")(options "")(descr "Community hardware symbols"))
+  (lib (name "SpaghettiLab_FlexyPin")(type "KiCad")(uri "${KIPRJMOD}/../libraries/flexypin/SpaghettiLab_FlexyPin.kicad_sym")(options "")(descr "Solder Party FlexyPin"))
+
+  (lib (name "LCSC_Ports")(type "KiCad")(uri "${KIPRJMOD}/../libraries/LCSC_Ports.kicad_sym")(options "")(descr "LCSC/EasyEDA CAD for AO6604 C47744 and TCA9535RGER C527428"))
+
+(lib (name "SpaghettiLAB_Mezzanine")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB_Mezzanine.kicad_sym")(options "")(descr "Mezzanine schematic USB switch and functional AG32 pin grouping"))
+(lib (name "SpaghettiLAB_TERM")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB_TERM.kicad_sym")(options "")(descr "TERM dual BJTs and diode pair")))

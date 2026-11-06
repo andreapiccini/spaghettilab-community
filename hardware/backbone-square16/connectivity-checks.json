@@ -1,0 +1,99 @@
+{
+  "errors": [],
+  "original_pin_changes": [
+    {
+      "ref": "U1",
+      "pin": "8",
+      "old": "ESP_AG_BOOT0",
+      "new": "A9"
+    },
+    {
+      "ref": "U1",
+      "pin": "9",
+      "old": "ESP_AG_RESET_N",
+      "new": "A10"
+    },
+    {
+      "ref": "U1",
+      "pin": "32",
+      "old": "ESP_ISO4_N",
+      "new": "A12"
+    },
+    {
+      "ref": "U1",
+      "pin": "33",
+      "old": "ESP_ISO5_N",
+      "new": "A13"
+    },
+    {
+      "ref": "U1",
+      "pin": "19",
+      "old": "EXT_SPI_CS_N",
+      "new": "A7"
+    },
+    {
+      "ref": "U13",
+      "pin": "12",
+      "old": "GND",
+      "new": "A7"
+    },
+    {
+      "ref": "U13",
+      "pin": "9",
+      "old": "GND",
+      "new": "A6"
+    },
+    {
+      "ref": "U1",
+      "pin": "35",
+      "old": "MEAS_INHIBIT",
+      "new": "A15"
+    },
+    {
+      "ref": "U1",
+      "pin": "6",
+      "old": "MEAS_S0",
+      "new": "A6"
+    },
+    {
+      "ref": "U1",
+      "pin": "20",
+      "old": "MEAS_S1",
+      "new": "A8"
+    },
+    {
+      "ref": "U1",
+      "pin": "34",
+      "old": "MEAS_S2",
+      "new": "A14"
+    },
+    {
+      "ref": "U1",
+      "pin": "31",
+      "old": "MEZZ_PRESENT_N",
+      "new": "A11"
+    },
+    {
+      "ref": "U13",
+      "pin": "10",
+      "old": "VCORE",
+      "new": "ISO_A6_N"
+    },
+    {
+      "ref": "U13",
+      "pin": "13",
+      "old": "VCORE",
+      "new": "ISO_A7_N"
+    }
+  ],
+  "verified_board_pins": 930,
+  "unique_board_footprints": 212,
+  "original_files_unchanged": {
+    "backbone.kicad_dru": true,
+    "backbone.kicad_pcb": true,
+    "backbone.kicad_prl": true,
+    "backbone.kicad_pro": true,
+    "backbone.kicad_sch": true
+  },
+  "status": "Connectivity checks pass"
+}

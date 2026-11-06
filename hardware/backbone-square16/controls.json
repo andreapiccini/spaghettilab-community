@@ -1,0 +1,65 @@
+{
+  "U32": {
+    "address": "0x21",
+    "io_nets": [
+      "P_GATE_6",
+      "N_GATE_6",
+      "P_GATE_7",
+      "N_GATE_7",
+      "P_GATE_8",
+      "N_GATE_8",
+      "P_GATE_9",
+      "N_GATE_9",
+      "P_GATE_10",
+      "N_GATE_10",
+      "P_GATE_11",
+      "N_GATE_11",
+      "P_GATE_12",
+      "N_GATE_12",
+      "P_GATE_13",
+      "N_GATE_13"
+    ]
+  },
+  "U33": {
+    "address": "0x22",
+    "io_nets": [
+      "P_GATE_14",
+      "N_GATE_14",
+      "P_GATE_15",
+      "N_GATE_15",
+      "ISO_A6_N",
+      "ISO_A7_N",
+      "ISO_A8_N",
+      "ISO_A9_N",
+      "ISO_A10_N",
+      "ISO_A11_N",
+      "ISO_A12_N",
+      "ISO_A13_N",
+      "ISO_A14_N",
+      "ISO_A15_N",
+      "ESP_ISO4_N",
+      "ESP_ISO5_N"
+    ]
+  },
+  "U34": {
+    "address": "0x23",
+    "io_nets": [
+      "MEAS_S0",
+      "MEAS_S1",
+      "MEAS_S2",
+      "MEAS_INHIBIT",
+      "EXT_SPI_CS_N",
+      "ESP_AG_BOOT0",
+      "ESP_AG_RESET_N",
+      "MEZZ_PRESENT_N",
+      "GND",
+      "GND",
+      "GND",
+      "GND",
+      "GND",
+      "GND",
+      "GND",
+      "GND"
+    ]
+  }
+}

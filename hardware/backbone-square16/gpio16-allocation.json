@@ -1,0 +1,201 @@
+{
+  "status": "Applied to separate 16-row schematic and PCB variant; original Backbone unchanged.",
+  "ports": [
+    {
+      "row": "L1",
+      "gpio": 7,
+      "module_pad": 7,
+      "adc": "ADC1_CH6",
+      "current_net": "A0",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "L2",
+      "gpio": 8,
+      "module_pad": 12,
+      "adc": "ADC1_CH7",
+      "current_net": "A1",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "L3",
+      "gpio": 9,
+      "module_pad": 17,
+      "adc": "ADC1_CH8",
+      "current_net": "A2",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "L4",
+      "gpio": 10,
+      "module_pad": 18,
+      "adc": "ADC1_CH9",
+      "current_net": "A3",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "L5",
+      "gpio": 1,
+      "module_pad": 39,
+      "adc": "ADC1_CH0",
+      "current_net": "A4",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "L6",
+      "gpio": 2,
+      "module_pad": 38,
+      "adc": "ADC1_CH1",
+      "current_net": "A5",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "L7",
+      "gpio": 6,
+      "module_pad": 6,
+      "adc": "ADC1_CH5",
+      "current_net": "MEAS_S0",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "L8",
+      "gpio": 11,
+      "module_pad": 19,
+      "adc": "ADC2_CH0",
+      "current_net": "EXT_SPI_CS_N",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "R1",
+      "gpio": 12,
+      "module_pad": 20,
+      "adc": "ADC2_CH1",
+      "current_net": "MEAS_S1",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "R2",
+      "gpio": 15,
+      "module_pad": 8,
+      "adc": "ADC2_CH4",
+      "current_net": "ESP_AG_BOOT0",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "R3",
+      "gpio": 16,
+      "module_pad": 9,
+      "adc": "ADC2_CH5",
+      "current_net": "ESP_AG_RESET_N",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "R4",
+      "gpio": 38,
+      "module_pad": 31,
+      "adc": "none",
+      "current_net": "MEZZ_PRESENT_N",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "R5",
+      "gpio": 39,
+      "module_pad": 32,
+      "adc": "none",
+      "current_net": "ESP_ISO4_N",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "R6",
+      "gpio": 40,
+      "module_pad": 33,
+      "adc": "none",
+      "current_net": "ESP_ISO5_N",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "R7",
+      "gpio": 41,
+      "module_pad": 34,
+      "adc": "none",
+      "current_net": "MEAS_S2",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    },
+    {
+      "row": "R8",
+      "gpio": 42,
+      "module_pad": 35,
+      "adc": "none",
+      "current_net": "MEAS_INHIBIT",
+      "required_change": "Applied; update firmware and future mezzanine contract",
+      "status": "WIRED_IN_VARIANT"
+    }
+  ],
+  "preserved": {
+    "I2C": [
+      4,
+      5
+    ],
+    "CAN": [
+      17,
+      18
+    ],
+    "USB": [
+      19,
+      20
+    ],
+    "RGB": [
+      21
+    ],
+    "SPI_link": [
+      13,
+      14,
+      43,
+      44
+    ],
+    "AG_programming_UART": [
+      47,
+      48
+    ],
+    "boot": [
+      0
+    ]
+  },
+  "excluded": {
+    "memory_dependent": [
+      35,
+      36,
+      37
+    ],
+    "strapping": [
+      0,
+      3,
+      45,
+      46
+    ]
+  },
+  "unresolved": [
+    "Firmware implementation and ownership arbitration",
+    "Mezzanine export of the ten added ports and 20 sense leads",
+    "Final mechanical qualification, placement optimization and routing"
+  ],
+  "no_crosspoint_matrix": true,
+  "contacts_per_node": 3,
+  "independent_nodes": 16,
+  "reference": "https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf"
+}
