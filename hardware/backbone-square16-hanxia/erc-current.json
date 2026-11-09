@@ -1,0 +1,1498 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-10T00:14:41",
+    "ignored_checks": [
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "10.0.3",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f",
+            "violations": [
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'GPIO45'",
+                            "pos": {
+                                "x": 1.3335,
+                                "y": 1.1557
+                            },
+                            "uuid": "41529fcd-042a-4936-90ab-297cf082afd5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'GPIO46'",
+                            "pos": {
+                                "x": 1.3335,
+                                "y": 1.1811
+                            },
+                            "uuid": "b7379237-83ca-47cc-a317-d9086ea734cb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Quattro elementi connessi a 3200400,787400",
+                    "items": [
+                        {
+                            "description": "Symbol C11 Pin 2 [Passivo, Linea]",
+                            "pos": {
+                                "x": 3.2004,
+                                "y": 0.7874
+                            },
+                            "uuid": "d8f20849-8080-4921-b61f-54c18468081d"
+                        },
+                        {
+                            "description": "Filo orizzontale. lung. 0.5969 mm",
+                            "pos": {
+                                "x": 3.7973,
+                                "y": 0.7874
+                            },
+                            "uuid": "34b592c1-71c4-4e9d-9d76-58bd0a7093a8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                },
+                {
+                    "description": "Quattro elementi connessi a 927100,863600",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0381 mm",
+                            "pos": {
+                                "x": 0.9271,
+                                "y": 0.8636
+                            },
+                            "uuid": "5cf2b8d8-c503-4ce6-9120-53126df0379c"
+                        },
+                        {
+                            "description": "Filo verticale, lung. 0.0508 mm",
+                            "pos": {
+                                "x": 0.9271,
+                                "y": 0.8636
+                            },
+                            "uuid": "9ce4bdb7-c32d-4103-b4e5-0ddfaa050357"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                },
+                {
+                    "description": "Quattro elementi connessi a 939800,838200",
+                    "items": [
+                        {
+                            "description": "Filo orizzontale. lung. 0.0508 mm",
+                            "pos": {
+                                "x": 0.889,
+                                "y": 0.8382
+                            },
+                            "uuid": "84a2fcb2-0c57-4057-b1a7-cbf0711fdec8"
+                        },
+                        {
+                            "description": "Filo orizzontale. lung. 0.0254 mm",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.8382
+                            },
+                            "uuid": "9b80f59f-32a2-4bb6-bcbc-54c533ac56f9"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                },
+                {
+                    "description": "Quattro elementi connessi a 2794000,1028700",
+                    "items": [
+                        {
+                            "description": "Symbol U4 Pin 4 [IN, Ingresso potenza, Linea]",
+                            "pos": {
+                                "x": 2.794,
+                                "y": 1.0287
+                            },
+                            "uuid": "9b916cc7-ef08-4b7e-8d80-28d533daee4c"
+                        },
+                        {
+                            "description": "Filo verticale, lung. 0.0508 mm",
+                            "pos": {
+                                "x": 2.794,
+                                "y": 1.0287
+                            },
+                            "uuid": "296fae5e-4a06-4f37-802c-e22704a4fe79"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                },
+                {
+                    "description": "Quattro elementi connessi a 3302000,1943100",
+                    "items": [
+                        {
+                            "description": "Symbol R36 Pin 2 [Passivo, Linea]",
+                            "pos": {
+                                "x": 3.302,
+                                "y": 1.9431
+                            },
+                            "uuid": "e6f048db-3859-4044-970c-76165201bd9c"
+                        },
+                        {
+                            "description": "Filo verticale, lung. 0.2667 mm",
+                            "pos": {
+                                "x": 3.302,
+                                "y": 2.2098
+                            },
+                            "uuid": "4fb72e1b-22f6-4e6b-b99f-27952c7ba4cc"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "four_way_junction"
+                }
+            ]
+        },
+        {
+            "path": "/02 - Alimentazione e USB/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/5c309d56-48ed-43c9-a63c-92beb7ba7092",
+            "violations": [
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'USB_CC1'",
+                            "pos": {
+                                "x": 0.3937,
+                                "y": 0.5334
+                            },
+                            "uuid": "566b0ea1-aee6-449d-83b4-064f57880674"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'USB_D+'",
+                            "pos": {
+                                "x": 0.889,
+                                "y": 0.8382
+                            },
+                            "uuid": "3cae7423-b49c-44fb-8d0b-d060fb3016a6"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'USB_D-'",
+                            "pos": {
+                                "x": 0.889,
+                                "y": 0.8636
+                            },
+                            "uuid": "ee11b20e-00e2-4385-9d16-6aa70457f70e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'USB_CC2'",
+                            "pos": {
+                                "x": 0.889,
+                                "y": 0.9398
+                            },
+                            "uuid": "9f6ec17f-b625-408f-8751-73e6ede2ae46"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin A1B12 [GND, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.7112
+                            },
+                            "uuid": "715c319c-cabf-4a6e-8b5b-0ff38eb06b94"
+                        },
+                        {
+                            "description": "Symbol U3 Pin B1A12 [GND, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.9906
+                            },
+                            "uuid": "d2f71a7b-9c73-48b4-91bc-6b633014c689"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin A4B9 [VBUS, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.7366
+                            },
+                            "uuid": "210f4f1a-6f12-4cff-a29f-ce86bc4333bc"
+                        },
+                        {
+                            "description": "Symbol U3 Pin B4A9 [VBUS, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.9652
+                            },
+                            "uuid": "eb874f68-790b-4564-8949-298d1b5ec897"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin A5 [CC1, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.7874
+                            },
+                            "uuid": "0b07eba6-7072-4f80-95a1-49b7b1f9941d"
+                        },
+                        {
+                            "description": "Symbol R22 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 0.3937,
+                                "y": 0.6096
+                            },
+                            "uuid": "b1308caf-33fb-4eb8-85f2-3dc177f5c9a4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin B7 [D-, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.8128
+                            },
+                            "uuid": "b50fe93e-3901-4518-bdf8-680bca1a54be"
+                        },
+                        {
+                            "description": "Symbol R18 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 1.5621,
+                                "y": 1.0541
+                            },
+                            "uuid": "2fddbfde-f493-4853-956f-88e77f277477"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin A6 [D+, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.8382
+                            },
+                            "uuid": "a9f2fde4-75fa-4ffc-b002-6ecc11cc442c"
+                        },
+                        {
+                            "description": "Symbol U3 Pin B6 [D+, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.889
+                            },
+                            "uuid": "2e11b080-95ae-42ec-a8ed-9df6e7c0e5c0"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin A7 [D-, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.8636
+                            },
+                            "uuid": "4d08ce79-402d-4740-9fe7-b11836ad24b2"
+                        },
+                        {
+                            "description": "Symbol U3 Pin B7 [D-, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.8128
+                            },
+                            "uuid": "b50fe93e-3901-4518-bdf8-680bca1a54be"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin B6 [D+, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.889
+                            },
+                            "uuid": "2e11b080-95ae-42ec-a8ed-9df6e7c0e5c0"
+                        },
+                        {
+                            "description": "Symbol R17 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 1.5621,
+                                "y": 0.6985
+                            },
+                            "uuid": "064aef80-dff7-4d15-a2f1-24bf0b28979e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin B5 [CC2, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.9398
+                            },
+                            "uuid": "7ab40dca-df63-40d3-8bb3-4e123b395228"
+                        },
+                        {
+                            "description": "Symbol R27 Pin 2 [Passivo, Linea]",
+                            "pos": {
+                                "x": 0.3937,
+                                "y": 1.1938
+                            },
+                            "uuid": "4379c9fd-3149-409f-9a58-b1506491b065"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin B4A9 [VBUS, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.9652
+                            },
+                            "uuid": "eb874f68-790b-4564-8949-298d1b5ec897"
+                        },
+                        {
+                            "description": "Symbol R110 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 0.5969,
+                                "y": 2.2098
+                            },
+                            "uuid": "2ffad4e4-5d7c-40c9-a540-72becc6801af"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin B1A12 [GND, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.9906
+                            },
+                            "uuid": "d2f71a7b-9c73-48b4-91bc-6b633014c689"
+                        },
+                        {
+                            "description": "Symbol R27 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 0.3937,
+                                "y": 1.1176
+                            },
+                            "uuid": "5a7a0307-95e0-450a-bc79-7a91cd525860"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin 4 [SHELL, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.1938,
+                                "y": 0.7112
+                            },
+                            "uuid": "45103f7d-a630-40ea-b292-f4febd540700"
+                        },
+                        {
+                            "description": "Symbol U3 Pin A1B12 [GND, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.7112
+                            },
+                            "uuid": "715c319c-cabf-4a6e-8b5b-0ff38eb06b94"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin 3 [SHELL, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.1938,
+                                "y": 0.7366
+                            },
+                            "uuid": "aff93314-5f80-4467-88ac-1afe3fec051e"
+                        },
+                        {
+                            "description": "Symbol U3 Pin 4 [SHELL, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.1938,
+                                "y": 0.7112
+                            },
+                            "uuid": "45103f7d-a630-40ea-b292-f4febd540700"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin 2 [SHELL, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.1938,
+                                "y": 0.9652
+                            },
+                            "uuid": "4e895371-681f-4a43-a9f9-79d20052b431"
+                        },
+                        {
+                            "description": "Symbol U3 Pin 3 [SHELL, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.1938,
+                                "y": 0.7366
+                            },
+                            "uuid": "aff93314-5f80-4467-88ac-1afe3fec051e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U3 Pin 1 [SHELL, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.1938,
+                                "y": 0.9906
+                            },
+                            "uuid": "380a31a9-ef75-4998-9ab4-b8e50eabc502"
+                        },
+                        {
+                            "description": "Symbol U3 Pin 2 [SHELL, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.1938,
+                                "y": 0.9652
+                            },
+                            "uuid": "4e895371-681f-4a43-a9f9-79d20052b431"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol D6 Pin 1 [A, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.2446,
+                                "y": 1.4478
+                            },
+                            "uuid": "efcfc2b8-01b2-4e84-9f58-29312626c29e"
+                        },
+                        {
+                            "description": "Symbol U3 Pin B4A9 [VBUS, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 0.9652,
+                                "y": 0.9652
+                            },
+                            "uuid": "eb874f68-790b-4564-8949-298d1b5ec897"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Uscita potenza sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol D6 Pin 2 [K, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 1.2446,
+                                "y": 1.5494
+                            },
+                            "uuid": "5f7b1abc-4d3b-441b-99c0-926957c90828"
+                        },
+                        {
+                            "description": "Symbol #FLG03 Pin 1 [Uscita potenza, Linea]",
+                            "pos": {
+                                "x": 1.4478,
+                                "y": 2.5019
+                            },
+                            "uuid": "99a6108b-87bf-481c-b9d9-b6f710142a86"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'BUCK_FB'",
+                            "pos": {
+                                "x": 3.0734,
+                                "y": 1.1049
+                            },
+                            "uuid": "ff3df64a-73a0-4f78-95d4-2a87b8d6fadd"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'BUCK_SW'",
+                            "pos": {
+                                "x": 3.3401,
+                                "y": 1.0033
+                            },
+                            "uuid": "f4176849-2181-4590-a362-43a461ea8b78"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                }
+            ]
+        },
+        {
+            "path": "/03 - CAN e terminazione automatica/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/bac6abab-68ac-415c-9939-e8cd1e421344",
+            "violations": [
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TERM_BASE_L'",
+                            "pos": {
+                                "x": 1.0033,
+                                "y": 2.286
+                            },
+                            "uuid": "6fca67dc-923b-412a-a53e-d252d24ae2d4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TERM_BASE_R'",
+                            "pos": {
+                                "x": 1.0033,
+                                "y": 2.4003
+                            },
+                            "uuid": "8fd6be57-3efe-4bf9-b90b-b1f6b08a778c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TERM_ABSENT_R'",
+                            "pos": {
+                                "x": 2.3495,
+                                "y": 1.905
+                            },
+                            "uuid": "19644daf-e3b0-4006-8b01-ba216d095165"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TERM_ABSENT_OR'",
+                            "pos": {
+                                "x": 2.3495,
+                                "y": 1.9431
+                            },
+                            "uuid": "0a071211-66a6-4ff8-94ed-a8b5f51d45f5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 1 [D, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 2.794,
+                                "y": 0.762
+                            },
+                            "uuid": "576a9749-6420-4d4f-99c9-5780b48e5ef0"
+                        },
+                        {
+                            "description": "Symbol R104 Pin 2 [Passivo, Linea]",
+                            "pos": {
+                                "x": 2.4003,
+                                "y": 0.5842
+                            },
+                            "uuid": "80647d37-0ca9-425a-85b4-aa141ddab659"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Imprecisato sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 2 [GND, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 2.794,
+                                "y": 0.7874
+                            },
+                            "uuid": "5863545a-85c5-4228-a7dd-f819f248830c"
+                        },
+                        {
+                            "description": "Symbol U2 Pin 8 [RS, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 2.9972,
+                                "y": 0.762
+                            },
+                            "uuid": "ebe201d0-5f04-438f-be6a-fc932e61b293"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 3 [VCC, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 2.794,
+                                "y": 0.8128
+                            },
+                            "uuid": "bad1090c-332f-4c2e-8ba1-d0272ca30136"
+                        },
+                        {
+                            "description": "Symbol R104 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 2.4003,
+                                "y": 0.508
+                            },
+                            "uuid": "3a0b1eb3-40ec-46d0-b4de-d9776343fd7f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Bidirezionale sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 4 [R, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 2.794,
+                                "y": 0.8382
+                            },
+                            "uuid": "ca219fe7-d598-4f75-affc-74e129f1d121"
+                        },
+                        {
+                            "description": "Symbol U1 Pin 11 [IO18, Bidirezionale, Linea]",
+                            "pos": {
+                                "x": 1.2573,
+                                "y": 0.8509
+                            },
+                            "uuid": "e7d87e2a-92af-4953-afb5-be608b6f55fe"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TERM_BASE_DRIVE'",
+                            "pos": {
+                                "x": 2.9464,
+                                "y": 2.4511
+                            },
+                            "uuid": "96816441-ead3-4017-93ba-66c76af033bd"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 8 [RS, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 2.9972,
+                                "y": 0.762
+                            },
+                            "uuid": "ebe201d0-5f04-438f-be6a-fc932e61b293"
+                        },
+                        {
+                            "description": "Symbol C74 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 3.4036,
+                                "y": 0.9652
+                            },
+                            "uuid": "a9b774d7-72b8-4691-bb55-26da4ef25aca"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 7 [CANH, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 2.9972,
+                                "y": 0.7874
+                            },
+                            "uuid": "fb0d949a-5e55-469c-8492-23763cefe19f"
+                        },
+                        {
+                            "description": "Symbol J9 Pin 2 [Pin_2, Passivo, Linea]",
+                            "pos": {
+                                "x": 1.6002,
+                                "y": 0.7239
+                            },
+                            "uuid": "647a1dd6-5148-4c54-817c-ef32a68bc4b0"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U2 Pin 6 [CANL, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 2.9972,
+                                "y": 0.8128
+                            },
+                            "uuid": "f27aa1d0-1abd-42f2-938c-8eb5edd1fa38"
+                        },
+                        {
+                            "description": "Symbol J9 Pin 3 [Pin_3, Passivo, Linea]",
+                            "pos": {
+                                "x": 1.6002,
+                                "y": 0.7493
+                            },
+                            "uuid": "55a5dfb8-5fc9-4e61-af16-e27d21a86e75"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TERM_BASE_INV'",
+                            "pos": {
+                                "x": 3.0226,
+                                "y": 2.3368
+                            },
+                            "uuid": "52400071-8669-4264-9a2a-3318f6860d60"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol Q2 Pin 1 [G, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 4.6482,
+                                "y": 0.9525
+                            },
+                            "uuid": "74eab3ab-1a83-40a9-84cc-a6cb9e9fe66a"
+                        },
+                        {
+                            "description": "Symbol R4 Pin 2 [Passivo, Linea]",
+                            "pos": {
+                                "x": 4.3561,
+                                "y": 0.6858
+                            },
+                            "uuid": "ce2fd0f8-e218-49b0-b506-ba2837391888"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TERM_LED'",
+                            "pos": {
+                                "x": 4.699,
+                                "y": 1.4986
+                            },
+                            "uuid": "e0385b1f-80b3-4eef-91fc-8b9c82a90016"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol Q2 Pin 3 [D, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 4.7244,
+                                "y": 0.9017
+                            },
+                            "uuid": "9cea1e57-4bfe-427e-b669-26a2cfd33423"
+                        },
+                        {
+                            "description": "Symbol R5 Pin 2 [Passivo, Linea]",
+                            "pos": {
+                                "x": 4.699,
+                                "y": 1.6256
+                            },
+                            "uuid": "2d8579bd-22eb-443c-8ca3-3290562220f7"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol Q2 Pin 2 [S, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 4.7244,
+                                "y": 1.0033
+                            },
+                            "uuid": "c8a080a5-8ee9-4d8c-a404-5daed316761c"
+                        },
+                        {
+                            "description": "Symbol R4 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 4.3561,
+                                "y": 0.6096
+                            },
+                            "uuid": "02cd3cf2-302f-4279-82d0-41e0006fc497"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U8 Pin 1 [1, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 4.8768,
+                                "y": 2.1971
+                            },
+                            "uuid": "53b2d694-beb6-401e-ac53-fe36995a8a68"
+                        },
+                        {
+                            "description": "Symbol R5 Pin 1 [Passivo, Linea]",
+                            "pos": {
+                                "x": 4.699,
+                                "y": 1.5748
+                            },
+                            "uuid": "9b3f03a8-7bfe-401c-88bc-ef6f04426732"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U8 Pin 2 [2, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 4.8768,
+                                "y": 2.2987
+                            },
+                            "uuid": "032b5a02-781f-493e-acea-2dc9d4132e47"
+                        },
+                        {
+                            "description": "Symbol R132 Pin 2 [Passivo, Linea]",
+                            "pos": {
+                                "x": 3.4544,
+                                "y": 3.3401
+                            },
+                            "uuid": "cba366e0-a536-4caa-b299-854bed304d08"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U8 Pin 4 [4, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 5.1308,
+                                "y": 2.1971
+                            },
+                            "uuid": "be512067-fb98-4dd6-a5cb-289a7a4e2a86"
+                        },
+                        {
+                            "description": "Symbol J29 Pin 3 [Pin_3, Passivo, Linea]",
+                            "pos": {
+                                "x": 2.8448,
+                                "y": 4.5212
+                            },
+                            "uuid": "7c702f2b-2a25-471a-89d6-1485f0cf3049"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "I pin di tipo Imprecisato e Passivo sono connessi",
+                    "items": [
+                        {
+                            "description": "Symbol U8 Pin 3 [3, Imprecisato, Linea]",
+                            "pos": {
+                                "x": 5.1308,
+                                "y": 2.2987
+                            },
+                            "uuid": "edb10bc6-9000-419f-a681-6e03559894f0"
+                        },
+                        {
+                            "description": "Symbol R8 Pin 2 [Passivo, Linea]",
+                            "pos": {
+                                "x": 5.3975,
+                                "y": 3.0226
+                            },
+                            "uuid": "e7a0ab33-df2f-4c5a-87ce-9b3d029e1594"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TERM_R'",
+                            "pos": {
+                                "x": 5.207,
+                                "y": 2.2987
+                            },
+                            "uuid": "7583d8d6-baa8-4abd-8605-1414fbc199f9"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                }
+            ]
+        },
+        {
+            "path": "/04 - Controllo righe, reset sicuro e Qwiic/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa",
+            "violations": []
+        },
+        {
+            "path": "/05 - Sedici righe programmabili/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/6446e0af-b8b0-4123-a173-58f83d813d64",
+            "violations": []
+        },
+        {
+            "path": "/06 - Indicatori di configurazione retroilluminati/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab",
+            "violations": []
+        },
+        {
+            "path": "/07 - Mezzanina passiva/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/6eb13c30-cf4d-45c3-a925-af206044bf5c",
+            "violations": []
+        },
+        {
+            "path": "/08 - Selezione, comandi e logo/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90",
+            "violations": []
+        },
+        {
+            "path": "/09 - Row touch,16keys/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7bc6612b-8a01-4dc9-9638-64f158216589",
+            "violations": [
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_A1'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 0.8128
+                            },
+                            "uuid": "37d0ade9-5d31-474a-aa92-4aa6cc752f96"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_A2'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 0.8382
+                            },
+                            "uuid": "06fa2ae4-b428-4c7f-945a-0d2b17717718"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_A3'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 0.8636
+                            },
+                            "uuid": "f88e4872-49f9-4f9a-97ab-155c5840cd63"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_A4'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 0.889
+                            },
+                            "uuid": "cbbdcbb3-cde4-4793-a04a-8c628871bb4b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_A5'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 0.9144
+                            },
+                            "uuid": "27c4aed5-be92-4db4-b5ca-19298bf1931e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_A6'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 0.9398
+                            },
+                            "uuid": "f97e3a86-43da-4112-a1f1-59682b514b25"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_A7'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 0.9652
+                            },
+                            "uuid": "3cc98a44-da1a-489e-8e8f-322133c8ea3e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_A8'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 0.9906
+                            },
+                            "uuid": "82448196-8545-486f-9a7f-3f5d2934c24d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_B1'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 1.016
+                            },
+                            "uuid": "b9015eb0-ed24-40e8-a49d-128e22003d64"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_B2'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 1.0414
+                            },
+                            "uuid": "d0220266-3cdf-4a94-a882-9ff83d0e8aa8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_B3'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 1.0668
+                            },
+                            "uuid": "d1d3acdd-87ce-4636-99dc-861661affebf"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_B4'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 1.0922
+                            },
+                            "uuid": "d24e2efd-d0a2-4551-b9f2-3c0d9a555fca"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_B5'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 1.1176
+                            },
+                            "uuid": "dc4cc04f-2850-4c56-98fb-aae6533c7569"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_B6'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 1.143
+                            },
+                            "uuid": "53586d12-b541-4ac6-9a7e-1962f07577cd"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_B7'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 1.1684
+                            },
+                            "uuid": "97dae94c-7604-4153-88f6-e950b8134102"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_B8'",
+                            "pos": {
+                                "x": 0.9906,
+                                "y": 1.1938
+                            },
+                            "uuid": "612a736a-bb28-40f3-9f3e-53f66c81edfd"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                }
+            ]
+        },
+        {
+            "path": "/10 - Global touch commands/",
+            "uuid_path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/541ef39d-aa79-4655-ab48-ffa6ebe9126c",
+            "violations": [
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_PLAY_PAUSE'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.0033
+                            },
+                            "uuid": "b0ce863b-5f9f-44cf-82e2-2643964d8b0a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_DEBUG'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.0287
+                            },
+                            "uuid": "444147f1-2c4d-48f7-89e8-4b0124201497"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_LOAD'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.0541
+                            },
+                            "uuid": "5d51ac48-e1bf-43a6-bd5d-74e5cf150571"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_SAVE'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.0795
+                            },
+                            "uuid": "291cfcee-07fb-467e-974c-1f1493c07a95"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_DELETE'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.1049
+                            },
+                            "uuid": "b668d15c-cd30-468f-b4f8-aa5d53fa7622"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_SLOT1'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.1303
+                            },
+                            "uuid": "44b56a7b-7329-499c-ad6f-dafdb8a4bd54"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_SLOT2'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.1557
+                            },
+                            "uuid": "5fa58dca-1b9f-4312-a7dd-aa6665360ad6"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_SLOT3'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.1811
+                            },
+                            "uuid": "e0ccdd02-7b4f-4f27-aa79-7f8470c8f52c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                },
+                {
+                    "description": "Global label only appears once in the schematic",
+                    "items": [
+                        {
+                            "description": "Etichetta globale 'TOUCH_UI_SLOT4'",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.2065
+                            },
+                            "uuid": "07c597a9-c4d7-4a73-a0bf-a8dcb557b6c4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "single_global_label"
+                }
+            ]
+        }
+    ],
+    "source": "backbone.kicad_sch"
+}

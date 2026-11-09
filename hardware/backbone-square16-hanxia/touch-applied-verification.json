@@ -1,0 +1,26 @@
+{
+  "native_schematic_components": 241,
+  "native_PCB_footprints": 245,
+  "all_schematic_pad_nets_values_footprint_ids_match": true,
+  "SW1_SW2_absent": true,
+  "board_dimensions_mm": [
+    78.0,
+    57.2
+  ],
+  "row_LED_pitch_mm": 2.54,
+  "mode_LED_column_pitch_mm": 3,
+  "MCU_glyph_scale": 0.8,
+  "touch_controller_count": 2,
+  "row_touch_zones": 16,
+  "global_touch_zones": 9,
+  "LED_driver_channels_used": 65,
+  "LED_driver_channels_free": 79,
+  "ERC_errors": 0,
+  "ERC_warnings": 76,
+  "DRC_violations_total": 360,
+  "unrouted_connections": 499,
+  "new_touch_parts_clearance_or_courtyard_conflicts": 0,
+  "routing_complete": false,
+  "firmware_implemented": false,
+  "touch_and_optics_physically_qualified": false
+}

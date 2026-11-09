@@ -1,0 +1,85 @@
+(footprint "UI_TouchFrame_6"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "TE26"
+		(at 0 0 180)
+		(layer "B.SilkS")
+		(hide yes)
+		(uuid "e5cff22e-ae3f-47ed-a72c-6ae8111554f8")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify mirror)
+		)
+	)
+	(property "Value" "UI_TOUCH_SLOT1"
+		(at 0 0 180)
+		(layer "B.Fab")
+		(hide yes)
+		(uuid "14df5ad2-a6df-4bd9-b558-0534dfd60ffe")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify mirror)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 180)
+		(layer "B.Fab")
+		(hide yes)
+		(uuid "f3525e49-d19b-4add-b2c1-ed8977fc675f")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify mirror)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 180)
+		(layer "B.Fab")
+		(hide yes)
+		(uuid "834f5976-e536-4749-ba46-d4ea43a13b88")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify mirror)
+		)
+	)
+	(attr exclude_from_pos_files exclude_from_bom)
+	(duplicate_pad_numbers_are_jumpers no)
+	(pad "1" smd rect
+		(at -1.7 0)
+		(size 0.4 2.8)
+		(layers "F.Cu")
+		(thermal_bridge_angle 45)
+		(uuid "d71a3cf0-0604-40d7-8a8d-3363ea3fe544")
+	)
+	(pad "1" smd rect
+		(at 0 -1.6)
+		(size 3.8 0.4)
+		(layers "F.Cu")
+		(thermal_bridge_angle 45)
+		(uuid "1861d424-6649-47f3-8753-5989d282b6b4")
+	)
+	(pad "1" smd rect
+		(at 0 1.6)
+		(size 3.8 0.4)
+		(layers "F.Cu")
+		(thermal_bridge_angle 45)
+		(uuid "4723ada6-33e6-4337-a23a-6b6051f1255b")
+	)
+	(pad "1" smd rect
+		(at 1.7 0)
+		(size 0.4 2.8)
+		(layers "F.Cu")
+		(thermal_bridge_angle 45)
+		(uuid "2fbc491e-5eba-4f20-823a-b096a02d1a17")
+	)
+	(embedded_fonts no)
+)

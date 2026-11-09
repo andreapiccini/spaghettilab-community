@@ -1,3 +1,7 @@
+## Current main project — touch controls applied
+
+Open `backbone.kicad_pro` in this folder. SW1/SW2 are removed from the native schematic and PCB; U91 and nine global touch electrodes are present. See `CURRENT-REVIEW-STATE.md` and `touch-applied-verification.json` for the current status. Routing and firmware remain unfinished. Earlier sections below describe historical design stages.
+
 ## Revisione: quattro colonne per banco
 
 Aggiunti J30 eJ31, Hanxia HX PM2.54-1x8P TP-YQ C42380985: quattro connettori per banco, otto righe per banco e64contatti accessibili complessivi. I quattro contatti della stessa riga condividono la reteROW_Lxx oROW_Rxx; restano16righe programmabili e gli stessiGPIO/driver. Passo tra righe2,54mm; passo tra colonne dello stesso banco4mm, mantenuto per l’ingombro Hanxia. Separazione tra le due colonne interne7,62mm per gli integratiDIP.

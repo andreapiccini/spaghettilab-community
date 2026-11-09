@@ -1,0 +1,84 @@
+{
+  "controller": "U91 BS8116A-3",
+  "address": "0x50",
+  "interface": "separate software I2C",
+  "SCL_GPIO": 21,
+  "SDA_GPIO": 13,
+  "pullups": "R921/R922 4.7k to3V3",
+  "keys": [
+    {
+      "key": 1,
+      "pin": 19,
+      "label": "PLAY_PAUSE",
+      "x": 211.3,
+      "y": 113.5,
+      "ref": "TE21"
+    },
+    {
+      "key": 2,
+      "pin": 20,
+      "label": "DEBUG",
+      "x": 203.4,
+      "y": 113.5,
+      "ref": "TE22"
+    },
+    {
+      "key": 3,
+      "pin": 1,
+      "label": "LOAD",
+      "x": 170.7,
+      "y": 111.5,
+      "ref": "TE23"
+    },
+    {
+      "key": 4,
+      "pin": 2,
+      "label": "SAVE",
+      "x": 164.6,
+      "y": 111.5,
+      "ref": "TE24"
+    },
+    {
+      "key": 5,
+      "pin": 3,
+      "label": "DELETE",
+      "x": 158.5,
+      "y": 111.5,
+      "ref": "TE25"
+    },
+    {
+      "key": 6,
+      "pin": 4,
+      "label": "SLOT1",
+      "x": 171.0,
+      "y": 116,
+      "ref": "TE26"
+    },
+    {
+      "key": 7,
+      "pin": 5,
+      "label": "SLOT2",
+      "x": 166.8,
+      "y": 116,
+      "ref": "TE27"
+    },
+    {
+      "key": 8,
+      "pin": 6,
+      "label": "SLOT3",
+      "x": 162.6,
+      "y": 116,
+      "ref": "TE28"
+    },
+    {
+      "key": 9,
+      "pin": 7,
+      "label": "SLOT4",
+      "x": 158.4,
+      "y": 116,
+      "ref": "TE29"
+    }
+  ],
+  "routing_complete": false,
+  "firmware_implemented": false
+}

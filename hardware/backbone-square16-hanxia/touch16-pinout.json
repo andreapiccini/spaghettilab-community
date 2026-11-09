@@ -1,0 +1,263 @@
+{
+  "part": "BS8116A-3",
+  "lcsc": "C89208",
+  "pins": {
+    "16": "3V3",
+    "15": "GND",
+    "17": "I2C_INT_SCL",
+    "18": "I2C_INT_SDA",
+    "19": "TOUCH_A1",
+    "20": "TOUCH_A2",
+    "1": "TOUCH_A3",
+    "2": "TOUCH_A4",
+    "3": "TOUCH_A5",
+    "4": "TOUCH_A6",
+    "5": "TOUCH_A7",
+    "6": "TOUCH_A8",
+    "7": "TOUCH_B1",
+    "8": "TOUCH_B2",
+    "9": "TOUCH_B3",
+    "10": "TOUCH_B4",
+    "11": "TOUCH_B5",
+    "12": "TOUCH_B6",
+    "13": "TOUCH_B7",
+    "14": "TOUCH_B8"
+  },
+  "electrodes": [
+    {
+      "key": 1,
+      "pin": 19,
+      "bank": "A",
+      "row": 1,
+      "net": "TOUCH_A1",
+      "electrode_ref": "TE1",
+      "x": 201.325,
+      "y": 89.89,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 2,
+      "pin": 20,
+      "bank": "A",
+      "row": 2,
+      "net": "TOUCH_A2",
+      "electrode_ref": "TE2",
+      "x": 201.325,
+      "y": 92.43,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 3,
+      "pin": 1,
+      "bank": "A",
+      "row": 3,
+      "net": "TOUCH_A3",
+      "electrode_ref": "TE3",
+      "x": 201.325,
+      "y": 94.97,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 4,
+      "pin": 2,
+      "bank": "A",
+      "row": 4,
+      "net": "TOUCH_A4",
+      "electrode_ref": "TE4",
+      "x": 201.325,
+      "y": 97.51,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 5,
+      "pin": 3,
+      "bank": "A",
+      "row": 5,
+      "net": "TOUCH_A5",
+      "electrode_ref": "TE5",
+      "x": 201.325,
+      "y": 100.05,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 6,
+      "pin": 4,
+      "bank": "A",
+      "row": 6,
+      "net": "TOUCH_A6",
+      "electrode_ref": "TE6",
+      "x": 201.325,
+      "y": 102.59,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 7,
+      "pin": 5,
+      "bank": "A",
+      "row": 7,
+      "net": "TOUCH_A7",
+      "electrode_ref": "TE7",
+      "x": 201.325,
+      "y": 105.13,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 8,
+      "pin": 6,
+      "bank": "A",
+      "row": 8,
+      "net": "TOUCH_A8",
+      "electrode_ref": "TE8",
+      "x": 201.325,
+      "y": 107.67,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 9,
+      "pin": 7,
+      "bank": "B",
+      "row": 1,
+      "net": "TOUCH_B1",
+      "electrode_ref": "TE9",
+      "x": 169.175,
+      "y": 89.89,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 10,
+      "pin": 8,
+      "bank": "B",
+      "row": 2,
+      "net": "TOUCH_B2",
+      "electrode_ref": "TE10",
+      "x": 169.175,
+      "y": 92.43,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 11,
+      "pin": 9,
+      "bank": "B",
+      "row": 3,
+      "net": "TOUCH_B3",
+      "electrode_ref": "TE11",
+      "x": 169.175,
+      "y": 94.97,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 12,
+      "pin": 10,
+      "bank": "B",
+      "row": 4,
+      "net": "TOUCH_B4",
+      "electrode_ref": "TE12",
+      "x": 169.175,
+      "y": 97.51,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 13,
+      "pin": 11,
+      "bank": "B",
+      "row": 5,
+      "net": "TOUCH_B5",
+      "electrode_ref": "TE13",
+      "x": 169.175,
+      "y": 100.05,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 14,
+      "pin": 12,
+      "bank": "B",
+      "row": 6,
+      "net": "TOUCH_B6",
+      "electrode_ref": "TE14",
+      "x": 169.175,
+      "y": 102.59,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 15,
+      "pin": 13,
+      "bank": "B",
+      "row": 7,
+      "net": "TOUCH_B7",
+      "electrode_ref": "TE15",
+      "x": 169.175,
+      "y": 105.13,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    },
+    {
+      "key": 16,
+      "pin": 14,
+      "bank": "B",
+      "row": 8,
+      "net": "TOUCH_B8",
+      "electrode_ref": "TE16",
+      "x": 169.175,
+      "y": 107.67,
+      "size_mm": [
+        3.2,
+        1.8
+      ]
+    }
+  ],
+  "firmware": {
+    "i2c_address": "0x50",
+    "polling": true,
+    "K16_TH_address": "0xC4",
+    "K16_TH_bit6": 0,
+    "reason": "Key16 is IRQ by default; configure as key to obtain all16 keys",
+    "row_state_on_boot": "Hi-Z; do not restore power modes implicitly",
+    "supply_transition": "break-before-make: disable all row switches before enabling requested mode",
+    "ambiguous_multirow_touch": "ignore; require release before next transition"
+  },
+  "routing_complete": false
+}

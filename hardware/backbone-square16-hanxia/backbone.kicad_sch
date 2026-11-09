@@ -2,8 +2,8 @@
 (version 20260101)
 (generator "eeschema")
 (uuid "460fdb2a-c618-458b-86e1-1ca9e2381b4f")
-(paper "A3")
-(title_block(title "01 - ESP32 e boot")(date "2026-11-08")(rev "16R-READABLE"))
+(paper "User" 420 380)
+(title_block(title "01 - ESP32 e boot")(date "2026-11-09")(rev "16R-SELECTOK4"))
 (lib_symbols
 (symbol "Board28:Connector_Generic__Conn_01x08"
 		(pin_names
@@ -1781,4 +1781,10 @@
 
 (global_label "UI_BANK_N"(shape bidirectional)(at 133.35 92.71 0)(effects(font(size 1 1))(justify left))(uuid "7ca24c04-71eb-4391-8a82-eedc2e3d5e23")(property "Descrizione" "GPIO21 / pulsante banco, attivo basso; pull-up interno"(at 133.350000 92.710000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
 (sheet(at 275.59 266.7)(size 114.3 10.16)(stroke(width .254)(type dash))(fill(color 0 0 0 0))(uuid "7f7216fe-1061-42c8-9cb0-15ceb64c3f90")(property "Sheetname" "08 - Selezione, comandi e logo"(at 275.59 264.16 0)(effects(font(size 1 1))))(property "Sheetfile" "ui-indicators.kicad_sch"(at 275.59 279.4 0)(effects(font(size 1 1))))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f"(page "8")))))
+
+(sheet(at 15.24 302.26)(size 114.3 10.16)(stroke(width .254)(type dash))(fill(color 0 0 0 0))(uuid "7bc6612b-8a01-4dc9-9638-64f158216589")(property "Sheetname" "09 - Row touch,16keys"(at 15.24 299.72 0)(effects(font(size 1 1))(justify left)))(property "Sheetfile" "touch16.kicad_sch"(at 15.24 315 0)(effects(font(size 1 1))(justify left)))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f"(page "9")))))
+
+
+(sheet(at 15.24 332.74)(size 114.3 10.16)(stroke(width .254)(type dash))(fill(color 0 0 0 0))(uuid "541ef39d-aa79-4655-ab48-ffa6ebe9126c")(property "Sheetname" "10 - Global touch commands"(at 15.24 330.2 0)(effects(font(size 1 1))(justify left)))(property "Sheetfile" "touch-global.kicad_sch"(at 15.24 345.44 0)(effects(font(size 1 1))(justify left)))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f"(page "10")))))
+(text "Global commands: U91, independent software I2C on GPIO21/GPIO13. No physical buttons.\nRow touch: U90,16keys on internal I2C. Current PCB is an unrouted design checkpoint."(at 149.86 336.55 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "7251c01c-e482-412d-8f42-747c298b10cc"))
 )
