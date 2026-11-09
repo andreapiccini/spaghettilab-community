@@ -407,7 +407,7 @@
 		(uuid "088c044f-dbe8-49cc-9a5e-7cc331cef11e")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+	(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 		(offset
 			(xyz 0 0 0)
 		)

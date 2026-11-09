@@ -2795,7 +2795,7 @@
 			(uuid "c777aa12-701e-4872-b6ff-8068f8946f7d")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -10331,7 +10331,7 @@
 			(uuid "0c41b6e8-ad0b-4eba-95bc-0e45a1eb9078")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -12924,7 +12924,7 @@
 			(uuid "ea99f689-ca65-498f-83c0-60011aff2a2f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -13147,7 +13147,7 @@
 			(uuid "ea192ecd-745e-40c6-8db7-351bdfdd5c46")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -15389,7 +15389,7 @@
 			(uuid "5f0627f2-1ffa-4df5-aad7-bee1ae29b5e1")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -26792,7 +26792,7 @@
 			(uuid "6a51409f-9c8b-4f94-8e24-f77344711de0")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -41636,7 +41636,7 @@
 			(uuid "58bb93e6-e77c-4183-84a4-783f098721a9")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -42673,7 +42673,7 @@
 			(uuid "e021a5cd-a1e3-4583-9a03-bc80f9c0b940")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -50432,19 +50432,6 @@
 	)
 	(gr_poly
 		(pts
-			(xy 158.218603 70.704005) (xy 158.364808 70.794118) (xy 158.364808 70.861702) (xy 158.308576 70.906759)
-			(xy 158.218603 70.872965) (xy 158.117385 70.805382) (xy 158.117385 70.726534) (xy 158.173618 70.692742)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(fill yes)
-		(layer "B.Mask")
-		(uuid "af4b5e2d-3093-4999-8ed4-75840bf313c3")
-	)
-	(gr_poly
-		(pts
 			(xy 161.378866 74.781601) (xy 161.390112 74.837923) (xy 161.345127 74.905507) (xy 161.266401 74.916772)
 			(xy 161.210169 74.882979) (xy 161.198922 74.792866) (xy 161.221416 74.759074) (xy 161.266401 74.736546)
 			(xy 161.311387 74.736546)
@@ -52633,6 +52620,16 @@
 		(uuid "6e1ad959-a482-4d22-8bf0-7d5ac0b74af7")
 	)
 	(gr_line
+		(start 157.760649 71.457993)
+		(end 157.257875 71.457993)
+		(stroke
+			(width 0.18)
+			(type default)
+		)
+		(layer "B.Mask")
+		(uuid "065dc1f0-b35e-4525-b919-7693def2574b")
+	)
+	(gr_line
 		(start 157.765352 82.110804)
 		(end 157.739715 82.03811)
 		(stroke
@@ -53061,6 +53058,16 @@
 		)
 		(layer "B.Mask")
 		(uuid "1f329ca0-901f-437d-9838-e4c2b80ad9cc")
+	)
+	(gr_line
+		(start 157.976123 70.883395)
+		(end 157.616999 70.596095)
+		(stroke
+			(width 0.18)
+			(type default)
+		)
+		(layer "B.Mask")
+		(uuid "91f68796-91aa-425d-9dc2-a33c493d4cad")
 	)
 	(gr_line
 		(start 158.022862 84.469195)
@@ -53711,6 +53718,16 @@
 		)
 		(layer "B.Mask")
 		(uuid "968ef60d-039b-4941-a57c-9cd4e1ec08c1")
+	)
+	(gr_line
+		(start 158.478897 70.596095)
+		(end 158.335247 70.165146)
+		(stroke
+			(width 0.18)
+			(type default)
+		)
+		(layer "B.Mask")
+		(uuid "2019c5d5-23d7-400f-b191-e683da79c7ad")
 	)
 	(gr_line
 		(start 158.610402 89.764635)
@@ -61830,385 +61847,385 @@
 		(uuid "2f5dfcfc-58c4-497f-9025-c98b9a7621e8")
 	)
 	(gr_text "3.3V"
-		(at 165.75 89.89 0)
+		(at 165.75 89.89 45)
 		(layer "B.Mask")
 		(uuid "72bf169c-2c3b-44f6-a402-eee9382a66b6")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 165.75 92.43 0)
+		(at 165.75 92.43 45)
 		(layer "B.Mask")
 		(uuid "344fc478-ed14-4ee4-a3d1-5a71edb95096")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 165.75 94.97 0)
+		(at 165.75 94.97 45)
 		(layer "B.Mask")
 		(uuid "ceb9334a-686a-49cd-970c-74b9a0103169")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 165.75 97.51 0)
+		(at 165.75 97.51 45)
 		(layer "B.Mask")
 		(uuid "0d748d30-4830-4bd9-a90b-9f5221994bd3")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 165.75 100.05 0)
+		(at 165.75 100.05 45)
 		(layer "B.Mask")
 		(uuid "a54840ec-1f4b-45f5-96ad-023109c655d6")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 165.75 102.59 0)
+		(at 165.75 102.59 45)
 		(layer "B.Mask")
 		(uuid "c9860520-4b14-48de-bd2e-d95b1e43d3d2")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 165.75 105.13 0)
+		(at 165.75 105.13 45)
 		(layer "B.Mask")
 		(uuid "b9ebb219-6658-4289-9c00-adf2c561a143")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 165.75 107.67 0)
+		(at 165.75 107.67 45)
 		(layer "B.Mask")
 		(uuid "55c632f2-7591-4eda-a75b-3af39d80e3a8")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 204.75 89.89 0)
+		(at 204.75 89.89 45)
 		(layer "B.Mask")
 		(uuid "8fc16f6b-efea-4ae8-8c27-96f80ffe70af")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 204.75 92.43 0)
+		(at 204.75 92.43 45)
 		(layer "B.Mask")
 		(uuid "5c4a693f-b362-467a-8ec0-f893d38fa866")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 204.75 94.97 0)
+		(at 204.75 94.97 45)
 		(layer "B.Mask")
 		(uuid "0c6d9c77-3f5d-4624-a2c5-f0806529adda")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 204.75 97.51 0)
+		(at 204.75 97.51 45)
 		(layer "B.Mask")
 		(uuid "f51be0ce-84b5-43eb-8499-7accdff3cb02")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 204.75 100.05 0)
+		(at 204.75 100.05 45)
 		(layer "B.Mask")
 		(uuid "772aefcd-053e-4dcc-bc6c-426d5b8683ec")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 204.75 102.59 0)
+		(at 204.75 102.59 45)
 		(layer "B.Mask")
 		(uuid "fdf34d46-a49f-4200-aa55-c853329415f1")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 204.75 105.13 0)
+		(at 204.75 105.13 45)
 		(layer "B.Mask")
 		(uuid "7e0cc289-adfc-49d1-a2f2-cc5949565caa")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "3.3V"
-		(at 204.75 107.67 0)
+		(at 204.75 107.67 45)
 		(layer "B.Mask")
 		(uuid "c245e2be-0f4d-4bf1-bf4d-beb87277db48")
 		(effects
 			(font
-				(size 1.108743 0.739157)
-				(thickness 0.211517)
+				(size 0.710349 0.473562)
+				(thickness 0.135515)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 161.75 89.89 0)
+		(at 161.75 89.89 45)
 		(layer "B.Mask")
 		(uuid "92c0e902-dddc-40ad-9fcf-aec06b3d1c61")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 161.75 92.43 0)
+		(at 161.75 92.43 45)
 		(layer "B.Mask")
 		(uuid "368bcc46-3ae5-4a3c-9bcd-f3b15c886c75")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 161.75 94.97 0)
+		(at 161.75 94.97 45)
 		(layer "B.Mask")
 		(uuid "1213230d-580e-4583-ad95-94dc9505e1e3")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 161.75 97.51 0)
+		(at 161.75 97.51 45)
 		(layer "B.Mask")
 		(uuid "6247a0f2-66d1-4647-bb00-759991a05eb8")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 161.75 100.05 0)
+		(at 161.75 100.05 45)
 		(layer "B.Mask")
 		(uuid "f3023327-2995-4ce0-99cb-5b5a5614dfcf")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 161.75 102.59 0)
+		(at 161.75 102.59 45)
 		(layer "B.Mask")
 		(uuid "6d885845-4200-4242-bb2b-9572ac4595ec")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 161.75 105.13 0)
+		(at 161.75 105.13 45)
 		(layer "B.Mask")
 		(uuid "24001f15-133a-465a-a05f-45fa8baa9520")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 161.75 107.67 0)
+		(at 161.75 107.67 45)
 		(layer "B.Mask")
 		(uuid "5f63c776-c5cd-4738-aac9-a7c641e49b19")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 208.749999 89.89 0)
+		(at 208.749999 89.89 45)
 		(layer "B.Mask")
 		(uuid "7960804b-0294-4d2c-ad1d-69c606a7ee03")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 208.749999 92.43 0)
+		(at 208.749999 92.43 45)
 		(layer "B.Mask")
 		(uuid "a81974e4-c0ad-4c8a-a2ad-d514b4052e77")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 208.749999 94.97 0)
+		(at 208.749999 94.97 45)
 		(layer "B.Mask")
 		(uuid "b3f9b9dc-41d2-4bfe-a6ab-41455ed043ca")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 208.749999 97.51 0)
+		(at 208.749999 97.51 45)
 		(layer "B.Mask")
 		(uuid "edcc68b1-65a6-405c-a3ee-18a40de2e585")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 208.749999 100.05 0)
+		(at 208.749999 100.05 45)
 		(layer "B.Mask")
 		(uuid "5b881409-917c-41e0-9eaa-02109d9f35d3")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 208.749999 102.59 0)
+		(at 208.749999 102.59 45)
 		(layer "B.Mask")
 		(uuid "e63970cc-1232-4f43-96e6-4dbd09a82740")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 208.749999 105.13 0)
+		(at 208.749999 105.13 45)
 		(layer "B.Mask")
 		(uuid "0c94b2b9-cd04-4efc-9e8f-bfa722f12604")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)
 	)
 	(gr_text "GND"
-		(at 208.749999 107.67 0)
+		(at 208.749999 107.67 45)
 		(layer "B.Mask")
 		(uuid "6c322300-87d3-4fc1-a935-a3b915b5ec3f")
 		(effects
 			(font
-				(size 1.167439 0.778292)
-				(thickness 0.215952)
+				(size 0.732063 0.488042)
+				(thickness 0.135416)
 			)
 			(justify mirror)
 		)

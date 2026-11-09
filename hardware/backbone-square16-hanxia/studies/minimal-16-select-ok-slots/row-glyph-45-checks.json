@@ -1,0 +1,298 @@
+{
+  "text_count": 32,
+  "MCU_icon": "already diagonal 45 degrees; unchanged",
+  "max_aperture_height_mm": 2.150004,
+  "row_pitch_mm": 2.54,
+  "LED_positions_and_angles_unchanged": true,
+  "optical_uniformity_measured": false,
+  "items": [
+    {
+      "text": "3.3V",
+      "x": 165.75,
+      "y": 89.89,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 165.75,
+      "y": 92.43,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 165.75,
+      "y": 94.97,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 165.75,
+      "y": 97.51,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 165.75,
+      "y": 100.05,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 165.75,
+      "y": 102.59,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 165.75,
+      "y": 105.13,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 165.75,
+      "y": 107.67,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 204.75,
+      "y": 89.89,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 204.75,
+      "y": 92.43,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 204.75,
+      "y": 94.97,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 204.75,
+      "y": 97.51,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 204.75,
+      "y": 100.05,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 204.75,
+      "y": 102.59,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 204.75,
+      "y": 105.13,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "3.3V",
+      "x": 204.75,
+      "y": 107.67,
+      "angle": 45,
+      "height_mm": 2.150002,
+      "scale": 0.640679131799319,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 161.75,
+      "y": 89.89,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 161.75,
+      "y": 92.43,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 161.75,
+      "y": 94.97,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 161.75,
+      "y": 97.51,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 161.75,
+      "y": 100.05,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 161.75,
+      "y": 102.59,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 161.75,
+      "y": 105.13,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 161.75,
+      "y": 107.67,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 208.749999,
+      "y": 89.89,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 208.749999,
+      "y": 92.43,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 208.749999,
+      "y": 94.97,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 208.749999,
+      "y": 97.51,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 208.749999,
+      "y": 100.05,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 208.749999,
+      "y": 102.59,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 208.749999,
+      "y": 105.13,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    },
+    {
+      "text": "GND",
+      "x": 208.749999,
+      "y": 107.67,
+      "angle": 45,
+      "height_mm": 2.150004,
+      "scale": 0.6270674998789614,
+      "LED_center_unchanged": true
+    }
+  ]
+}

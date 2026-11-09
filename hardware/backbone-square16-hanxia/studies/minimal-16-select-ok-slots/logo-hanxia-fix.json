@@ -1,0 +1,7 @@
+{
+  "logo_LED_emission_rays": 3,
+  "scope": "minimal-16-select-ok-slots",
+  "model_source": "existing EasyEDA-converted LCSC model, not a newly downloaded manufacturer STEP",
+  "connector_model_paths_repaired": true,
+  "bottom_pin_insertion_qualified": false
+}

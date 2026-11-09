@@ -3321,7 +3321,7 @@
 			(uuid "e71054bf-1b16-4292-80b5-d0c826b5fd51")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -7087,7 +7087,7 @@
 			(uuid "53c7b904-8610-4b12-b560-b40aafcfdd4f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -16060,7 +16060,7 @@
 			(uuid "088c044f-dbe8-49cc-9a5e-7cc331cef11e")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -20160,7 +20160,7 @@
 			(uuid "ac125037-03a0-4fa2-af2f-33464ae457bd")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -25118,7 +25118,7 @@
 			(uuid "fc9df0b8-0c22-48eb-8db8-8d826fa95ae4")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -27618,7 +27618,7 @@
 			(uuid "4cdc3dee-ec47-4431-bf36-22cfe565becb")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -30976,7 +30976,7 @@
 			(uuid "8f974791-6eb8-4133-b033-8a5fb3c843c7")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -36200,7 +36200,7 @@
 			(uuid "60aca398-33d8-4bd0-8879-c24ab2baaf27")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -38776,7 +38776,7 @@
 			(uuid "381413fc-95e2-4838-b161-6fd00ad6c7ba")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -50586,7 +50586,7 @@
 			(uuid "225a6168-c739-4d7a-b2c6-eb2b223679b3")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
+		(model "${KIPRJMOD}/models/external/SpaghettiLAB.3dshapes/HDR-SMD_8P-P2.54-V-F-LS4.9.wrl"
 			(offset
 				(xyz 0 0 0)
 			)
