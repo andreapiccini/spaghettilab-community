@@ -1,0 +1,278 @@
+{
+  "rows": 16,
+  "matrix_replaced": false,
+  "digits": 0,
+  "LEDs_per_segment": 2,
+  "segment_LEDs": 0,
+  "decimal_LEDs": 0,
+  "row_number_LEDs": 0,
+  "bank_LEDs": 0,
+  "function_LEDs": 0,
+  "unit_LEDs": 0,
+  "total_new_LEDs": 0,
+  "total_driver_populated": 66,
+  "reserved_button_LEDs": 0,
+  "total_driver_channels": 144,
+  "free_LED_channels": 78,
+  "display_package_envelope_mm": null,
+  "display_window_mm": null,
+  "rowmode_pitch_mm": 4.0,
+  "ADC_rows": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8"
+  ],
+  "new_buttons": [],
+  "button_input_nets_unconnected_to_controller": false,
+  "touch_not_implemented": true,
+  "firmware_not_implemented": true,
+  "reverse_LED_optics_not_qualified": true,
+  "main_PCB_unchanged": true,
+  "logo_center": [
+    161.75,
+    74.5
+  ],
+  "button_input": null,
+  "free_ESP_GPIO": [
+    15,
+    16,
+    43,
+    44,
+    47,
+    48
+  ],
+  "removed_components": [
+    "SW3",
+    "SW4",
+    "SW5",
+    "R900",
+    "R901",
+    "R902",
+    "C900"
+  ],
+  "command_centres_y_mm": 83.2,
+  "voltage_ground_width_mm": 2.8,
+  "MCU_icon_mm": 2.15,
+  "mode_LED_x_mm": [
+    [
+      204.75,
+      208.75,
+      212.6
+    ],
+    [
+      165.75,
+      161.75,
+      157.9
+    ]
+  ],
+  "touch_controls": [
+    "ROW_A1..A8",
+    "ROW_B1..B8"
+  ],
+  "gamepad_removed": true,
+  "touch_electrodes_and_controller_implemented": false,
+  "mode_indicator_positions": "right of display",
+  "row_bank_indicator_positions": "left of display",
+  "H3": [
+    149.55,
+    110.8
+  ],
+  "load_save_clear_captions_removed": true,
+  "side_panel_style": null,
+  "rows_per_bank": 8,
+  "matrix": null,
+  "matrix_LEDs": 0,
+  "Hanxia_part": "HX PM2.54-1x8P TP-YQ",
+  "Hanxia_LCSC": "C42380985",
+  "breadboard_column_pitch_mm": 3,
+  "central_DIP_gap_mm": 7.62,
+  "row_pitch_mm": 2.54,
+  "matrix_pitch_mm": null,
+  "matrix_angle_deg": null,
+  "matrix_side": null,
+  "matrix_part": null,
+  "additional_GPIO": {},
+  "ADC2_rows": [],
+  "ADC2_WiFi_validation_pending": true,
+  "extra_row_control_chips": [],
+  "H4": [
+    220.95,
+    84.5
+  ],
+  "schematic_synchronization_complete": true,
+  "mezzanine_new_rows": {},
+  "new_control_initialize": {},
+  "display_replaces_four_digit_version": true,
+  "GPIO_free_on_south_header": {
+    "12": 47,
+    "13": 48
+  },
+  "driver_populated": 66,
+  "physical_LEDs": 67,
+  "touch_zones": 16,
+  "row_touch_zones": 16,
+  "global_touch_zones": 0,
+  "proposed_touch_controller_count": 1,
+  "proposed_I2C_selector_count": 0,
+  "body_dimensions_mm": [
+    78,
+    57.2
+  ],
+  "tongue_dimensions_mm": null,
+  "overall_dimensions_mm": [
+    78,
+    57.2
+  ],
+  "height_reduction_mm": 26.8,
+  "magnetic_contact_group_center_y_mm": 90.9,
+  "body_center_y_mm": 90.9,
+  "moved_magnetic_refs": [
+    "J2",
+    "J9",
+    "J28",
+    "J29"
+  ],
+  "moved_magnetic_tracks": 10,
+  "bottom_hole_y_mm": 115.52000000000001,
+  "rowmode_horizontal_pitch_mm": [
+    4,
+    3.85
+  ],
+  "rowmode_clearance_adjustment_mm": 0.15,
+  "height_excludes_future_touch_controller_placement": true,
+  "display_removed": true,
+  "current_global_commands": [
+    "PLAY",
+    "STOP",
+    "DEBUG",
+    "LOAD",
+    "SAVE",
+    "DELETE"
+  ],
+  "future_touch_placement_verified": false,
+  "touch_interaction_pending_user_clarification": false,
+  "global_commands_touch_not_assigned": true,
+  "new_rows_removed": true,
+  "touch_controller": "BS8116A-3",
+  "touch_controller_ref": "U90",
+  "touch_controller_LCSC": "C89208",
+  "touch_controller_address": "0x50",
+  "touch_controller_count": 1,
+  "touch_I2C_mux_count": 0,
+  "touch_controller_and_electrode_footprints_present": true,
+  "touch_routing_complete": false,
+  "touch_electrode_diameter_mm": null,
+  "touch_firmware_implemented": false,
+  "touch_requires_physical_qualification": true,
+  "touch_polling": true,
+  "Key16_IRQ_bit6_must_be_zero": true,
+  "global_command_decision_pending": false,
+  "row_mode_cycle": [
+    "Hi-Z",
+    "3.3V",
+    "GND",
+    "MCU"
+  ],
+  "touch_electrode_dimensions_mm": [
+    3.2,
+    1.8
+  ],
+  "touch_horizontal_area_increase_percent": null,
+  "touch_row_pitch_mm": 2.54,
+  "touch_x_mm": [
+    201.325,
+    169.175
+  ],
+  "width_increase_mm": 0,
+  "touch_revision": "Restored strict alignment of row touch, mode LEDs and breadboard holes; compact height retained",
+  "additional_height_reduction_mm": 5.1,
+  "touch_first_y_mm": 89.89,
+  "mode_first_y_mm": 89.89,
+  "mode_vertical_pitch_mm": 2.54,
+  "numbered_control_pods": false,
+  "serigraphy_fanout_to_physical_rows": false,
+  "touch_controller_placement_verified": true,
+  "service_placement_verified_for_shorter_body": true,
+  "expansion_tongue_removed": true,
+  "expansion_tongue_removed_height_mm": 9,
+  "overall_height_before_flat_mm": 66.2,
+  "south_expansion_reserved_area": null,
+  "bottom_edge": "straight, existing rounded outside corners retained",
+  "physical_buttons": [
+    {
+      "ref": "SW1",
+      "label": "SELECT",
+      "gpio": 21,
+      "net": "UI_BANK_N",
+      "x": 201.7,
+      "y": 114.4
+    },
+    {
+      "ref": "SW2",
+      "label": "OK",
+      "gpio": 13,
+      "net": "GPIO13",
+      "x": 168.8,
+      "y": 114.4
+    }
+  ],
+  "slot_indicators": [
+    {
+      "slot": 1,
+      "ref": "D700",
+      "x": 191.25,
+      "y": 113.5,
+      "anode": "LABEL_CA8",
+      "cathode": "LABEL_CA6",
+      "colour": "green",
+      "part": "XL-3216UGC-FB",
+      "lcsc": "C3646937"
+    },
+    {
+      "slot": 2,
+      "ref": "D701",
+      "x": 187.25,
+      "y": 113.5,
+      "anode": "LABEL_CA9",
+      "cathode": "LABEL_CA6",
+      "colour": "green",
+      "part": "XL-3216UGC-FB",
+      "lcsc": "C3646937"
+    },
+    {
+      "slot": 3,
+      "ref": "D702",
+      "x": 183.25,
+      "y": 113.5,
+      "anode": "LABEL_CA1",
+      "cathode": "LABEL_CA7",
+      "colour": "green",
+      "part": "XL-3216UGC-FB",
+      "lcsc": "C3646937"
+    },
+    {
+      "slot": 4,
+      "ref": "D703",
+      "x": 179.25,
+      "y": 113.5,
+      "anode": "LABEL_CA2",
+      "cathode": "LABEL_CA7",
+      "colour": "green",
+      "part": "XL-3216UGC-FB",
+      "lcsc": "C3646937"
+    }
+  ],
+  "configuration_slot_count": 4,
+  "button_pullups": "ESP32 internal pull-ups",
+  "button_debounce_ms": 25,
+  "button_chord": "SELECT+OK: immediate stop after debounce; suppress single-click actions until both released",
+  "delete_hold_ms": 2000,
+  "full_hierarchical_schematic_present": true,
+  "simulated_UI_logic_implemented": true,
+  "firmware_hardware_integration": false
+}

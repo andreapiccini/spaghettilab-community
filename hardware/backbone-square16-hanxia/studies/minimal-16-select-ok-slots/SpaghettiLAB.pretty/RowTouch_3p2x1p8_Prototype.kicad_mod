@@ -1,0 +1,1 @@
+(footprint "RowTouch_3p2x1p8_Prototype"(version 20260101)(generator "pcbnew")(layer "F.Cu")(attr smd exclude_from_bom exclude_from_pos_files)(pad "1" smd roundrect(at 0 0)(size 3.2 1.8)(layers "F.Cu")(roundrect_rratio .5)))

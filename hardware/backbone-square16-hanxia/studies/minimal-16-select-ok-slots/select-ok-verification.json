@@ -1,0 +1,45 @@
+{
+  "board_mm": [
+    78,
+    57.2
+  ],
+  "unchanged_dimensions": true,
+  "flat_bottom": true,
+  "closed_outline": true,
+  "physical_buttons": 2,
+  "button_GPIOs": {
+    "SELECT": 21,
+    "OK": 13
+  },
+  "internal_pullups_required": true,
+  "configuration_slots": 4,
+  "new_slot_LED_refs": [
+    "D700",
+    "D701",
+    "D702",
+    "D703"
+  ],
+  "LED_driver_channels_used": 66,
+  "LED_driver_channels_free": 78,
+  "physical_LEDs": 67,
+  "touch_controller_count": 1,
+  "row_alignment_mm": 2.54,
+  "parked_connectors_excluded_from_fit": [
+    "J25",
+    "J26",
+    "J27"
+  ],
+  "schematic_electrical_components": 231,
+  "all_pad_nets_values_footprints_match": true,
+  "ERC_errors": 0,
+  "ERC_warnings": 68,
+  "new_component_DRC_violations": 0,
+  "overall_DRC_violations": 364,
+  "unrouted_connections": 499,
+  "overall_production_DRC_passed": false,
+  "UI_state_machine_tests_passed": true,
+  "browser_UI_test": "pass",
+  "firmware_hardware_integration": false,
+  "real_touch_and_optics_verified": false,
+  "no_component_envelope_cut_by_bottom_edge": true
+}

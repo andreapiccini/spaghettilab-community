@@ -1,0 +1,11 @@
+# Proposta ottica: tasti e stato
+
+Rimossa la catena: tre indicatori riga spenti significano Hi-Z. Conservati 16 selettori A1–A8/B1–B8, logo blu e serigrafia breadboard. PCB70x66mm invariato. Finestre a U intorno ai due tasti con due sorgenti luminose ciascuna: ritorno luminoso alla pressione, doppio lampo alla conferma. Previste finestre5V,3.3V,CAN TERM,CAN ACT e icone play/stop. RUN e STOP sono alternativi. CAN TERM indica il comando di inserimento, non certifica primo/ultimo nodo né resistenza reale del bus. CAN ACT è traffico rilevato dal software. Le due spie di alimentazione vanno collegate ai rispettivi rail con resistenze dedicate, non al driver di stato. Posizionamento/cablaggio non implementati.
+
+Budget:48funzioni+16sigle+4logo+4tasti+4CAN/RUN/STOP=76canali matrice,68liberi. Altri2LED alimentazione esterni alla matrice. Nessun driver nuovo.
+
+UI proposta: SW1 scorre16righe; SW2 sceglie modo; doppio clic SW2 applica. Triplo clic SW1 apre menu: SW1 scorre voce, SW2 sceglie; pressione lunga SW2 conferma SAVE/LOAD/ALL_HIZ. Pressione lunga SW1 esce. Accumulare i clic prima di eseguire singolo/doppio/triplo per evitare azioni involontarie. Le modifiche sono in anteprima fino alla conferma, sempre break-before-make. All’accensione tutte le righe Hi-Z; caricamento manuale con conferma, nessuna applicazione automatica dei rail.
+
+Menu proposto, non implementato: LOAD e SAVE fino a8slot indicati daA1–A8; ALL_HIZ per scollegare tutte le righe; UNDO per ripristinare ultima configurazione; RUN/STOP per programma utente. STOP non significa alimentazioni disinserite: usare ALL_HIZ per questo. Usare le voci solo se supportate dal futuro firmware; non presupporre funzioni software esistenti. Grafica delle singole voci ancora da definire: non basta accendere icone di stato non correlate per rendere comprensibile un menu.
+
+Questa è una proposta ottica separata: LED aggiunti e resistenze delle spie non sono ancora nello schema/PCB principale. Finestre con FR4 integro e riserve rame su4strati, non fori. Restano interferenze con componenti di servizio da riposizionare e il DRC non passa; non produrre. LED reverse, diffusione lungo le U, isolamento ottico, uniformità logo e dettaglio minimo0.125mm da qualificare. L’anteprima accesa è una sovrapposizione grafica, non una simulazione fotometrica. Firmware non implementato.

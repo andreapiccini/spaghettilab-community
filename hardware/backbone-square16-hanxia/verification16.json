@@ -1,0 +1,1084 @@
+{
+  "revision": "70x66, two XKB UI buttons, MCU icons, compact headers",
+  "board_mm": [
+    70,
+    66
+  ],
+  "footprints": 195,
+  "RGB_count": 0,
+  "optical_windows": 48,
+  "schematic_pcb_mismatches": [],
+  "resistor_arrays": 12,
+  "reset_gate": "U60 SN74LVC1G97",
+  "TSSOP_switches_retained": 4,
+  "row_pitch_mm": 2.54,
+  "magnetics_exactly_half_height": true,
+  "magnetic_distance_to_ends_mm": 33,
+  "usb_side": "left in breadboard view, facing left",
+  "erc_errors": 0,
+  "erc_warnings": 52,
+  "drc": {
+    "violations": {
+      "courtyards_overlap": 89,
+      "pth_inside_courtyard": 10,
+      "copper_edge_clearance": 20
+    },
+    "unconnected_items": 499
+  },
+  "tracks": 10,
+  "routed": false,
+  "hardware_tested": false,
+  "firmware_implemented": false,
+  "free_esp_gpio": [
+    15,
+    16,
+    43,
+    44,
+    47,
+    48
+  ],
+  "south_expansion": {
+    "reference": "J25",
+    "pitch_mm": 2.54,
+    "pinout": {
+      "1": "GND",
+      "2": "GND",
+      "3": "3V3",
+      "4": "5V",
+      "5": "I2C_USER_SDA",
+      "6": "I2C_USER_SCL",
+      "7": "GPIO13",
+      "8": "GPIO15",
+      "9": "GPIO16",
+      "10": "GPIO43",
+      "11": "GPIO44",
+      "12": "GPIO47",
+      "13": "GPIO48",
+      "14": "GND",
+      "15": "I2C_USER_SDA",
+      "16": "I2C_USER_SCL"
+    },
+    "gpio_direct_3V3_only": true,
+    "row_protection": false,
+    "source_part_pending": false,
+    "position_mm": [
+      176.36,
+      125.8
+    ],
+    "rotation_deg": 0,
+    "side": "F.Cu",
+    "body_overhang_south_mm": 7.8,
+    "board_outline_unchanged": false,
+    "pins": 16,
+    "rows": 2,
+    "mpn": "2.54-2*8P Right Angle Female Header",
+    "lcsc": "C52105",
+    "mechanical_pdf_available": false,
+    "official_CAD_checked": true,
+    "physical_sample_verified": false,
+    "shared_I2C": [
+      "I2C_USER_SDA",
+      "I2C_USER_SCL"
+    ],
+    "position": {
+      "x_mm": 176.36,
+      "y_mm": 125.8,
+      "rotation_deg": 0.0,
+      "side": "F.Cu"
+    },
+    "I2C_internal_exposed": false,
+    "i2c_buses": {
+      "internal": {
+        "SDA": "I2C_INT_SDA",
+        "SCL": "I2C_INT_SCL",
+        "GPIO_SDA": 4,
+        "GPIO_SCL": 5,
+        "devices": [
+          "U40",
+          "U41",
+          "U42"
+        ],
+        "pullups": [
+          "R302",
+          "R303"
+        ],
+        "pullup_ohm": 4700
+      },
+      "user": {
+        "SDA": "I2C_USER_SDA",
+        "SCL": "I2C_USER_SCL",
+        "GPIO_SDA": 11,
+        "GPIO_SCL": 12,
+        "connectors": [
+          "J4",
+          "J25",
+          "J26",
+          "J27",
+          "J28",
+          "J29"
+        ],
+        "pullups": [
+          "R24",
+          "R25"
+        ],
+        "pullup_ohm": 4700,
+        "J25_duplicate_SDA_pins": [
+          5,
+          15
+        ],
+        "J25_duplicate_SCL_pins": [
+          6,
+          16
+        ]
+      },
+      "logic_voltage_V": 3.3,
+      "firmware_implemented": false,
+      "buses_electrically_separate": true,
+      "added_pullup_positions": {
+        "R302": {
+          "position_mm": [
+            166.3,
+            87.6
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "R303": {
+          "position_mm": [
+            166.3,
+            86.05
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        }
+      }
+    }
+  },
+  "mechanical_source": "official product-associated CAD, not dimensioned manufacturer PDF",
+  "physical_sample_verified": false,
+  "passive_mezzanine": {
+    "connectors": [
+      "J26",
+      "J27"
+    ],
+    "pitch_mm": 1.27,
+    "pins_per_connector": 32,
+    "added_components_only": [
+      "J26",
+      "J27"
+    ],
+    "side": "F.Cu",
+    "role": "passive direct access, no new switching/protection",
+    "board_mm": [
+      57,
+      66
+    ],
+    "pinout": {
+      "J26": {
+        "1": "ROW_L01",
+        "2": "GPIO1",
+        "3": "ROW_L02",
+        "4": "GPIO2",
+        "5": "ROW_L03",
+        "6": "GPIO3",
+        "7": "ROW_L04",
+        "8": "GPIO6",
+        "9": "ROW_L05",
+        "10": "GPIO7",
+        "11": "ROW_L06",
+        "12": "GPIO8",
+        "13": "ROW_L07",
+        "14": "GPIO9",
+        "15": "ROW_L08",
+        "16": "GPIO10",
+        "17": "GND",
+        "18": "I2C_USER_SDA",
+        "19": "GND",
+        "20": "I2C_USER_SCL",
+        "21": "GND",
+        "22": "GPIO13",
+        "23": "GND",
+        "24": "GPIO15",
+        "25": "GND",
+        "26": "GPIO16",
+        "27": "GND",
+        "28": "I2C_USER_SDA",
+        "29": "GND",
+        "30": "3V3",
+        "31": "GND",
+        "32": "ESP_EN"
+      },
+      "J27": {
+        "1": "ROW_R01",
+        "2": "GPIO35",
+        "3": "ROW_R02",
+        "4": "GPIO36",
+        "5": "ROW_R03",
+        "6": "GPIO37",
+        "7": "ROW_R04",
+        "8": "GPIO38",
+        "9": "ROW_R05",
+        "10": "GPIO39",
+        "11": "ROW_R06",
+        "12": "GPIO40",
+        "13": "ROW_R07",
+        "14": "GPIO41",
+        "15": "ROW_R08",
+        "16": "GPIO42",
+        "17": "GND",
+        "18": "GPIO43",
+        "19": "GND",
+        "20": "GPIO44",
+        "21": "GND",
+        "22": "GPIO47",
+        "23": "GND",
+        "24": "GPIO48",
+        "25": "GND",
+        "26": "I2C_USER_SCL",
+        "27": "GND",
+        "28": "3V3",
+        "29": "GND",
+        "30": "5V",
+        "31": "GND",
+        "32": "EXP_RESET_N"
+      }
+    },
+    "mating_height_mm": "TBD; elevated daughterboard required to clear existing components",
+    "mezzanine_firmware_implemented": false,
+    "no_dedicated_enable_or_sync_GPIO": true,
+    "positions": {
+      "J26": {
+        "x_mm": 163.6,
+        "y_mm": 119.2,
+        "rotation_deg": 90.0,
+        "side": "F.Cu"
+      },
+      "J27": {
+        "x_mm": 187.6,
+        "y_mm": 119.2,
+        "rotation_deg": 90.0,
+        "side": "F.Cu"
+      }
+    },
+    "mechanical": {
+      "socket_footprint": "KiCad PinSocket_2x16_P1.27mm_Vertical",
+      "drill_mm": 0.7,
+      "body_mm": [
+        3.05,
+        20.32
+      ],
+      "connector_envelope_mm": [
+        4.1,
+        21.37
+      ],
+      "contact_numbering": "pin1 square; odd/even pairs follow native KiCad socket footprint",
+      "source_part_pending": true,
+      "mating_socket_and_male_pair_to_verify": true,
+      "daughterboard_height": "to clear existing Hanxia, power and USB bodies; not validated; do not use generic low stacking height",
+      "two_connector_anchor_spacing_mm": 24.0,
+      "socket_orientation_deg": 90,
+      "positions_F_face": "both below breadboard, toward south; daughterboard may extend north with suitable height",
+      "no_daughterboard_designed": true
+    },
+    "signal_counts": {
+      "row_nodes": 16,
+      "raw_row_GPIO": 16,
+      "other_GPIO": 9,
+      "I2C": 2,
+      "reset_nets": 2,
+      "ground_contacts": 16,
+      "3V3_contacts": 2,
+      "5V_contacts": 1,
+      "total_contacts": 64
+    },
+    "user_bus_instead_of_internal": true,
+    "i2c_buses": {
+      "internal": {
+        "SDA": "I2C_INT_SDA",
+        "SCL": "I2C_INT_SCL",
+        "GPIO_SDA": 4,
+        "GPIO_SCL": 5,
+        "devices": [
+          "U40",
+          "U41",
+          "U42"
+        ],
+        "pullups": [
+          "R302",
+          "R303"
+        ],
+        "pullup_ohm": 4700
+      },
+      "user": {
+        "SDA": "I2C_USER_SDA",
+        "SCL": "I2C_USER_SCL",
+        "GPIO_SDA": 11,
+        "GPIO_SCL": 12,
+        "connectors": [
+          "J4",
+          "J25",
+          "J26",
+          "J27",
+          "J28",
+          "J29"
+        ],
+        "pullups": [
+          "R24",
+          "R25"
+        ],
+        "pullup_ohm": 4700,
+        "J25_duplicate_SDA_pins": [
+          5,
+          15
+        ],
+        "J25_duplicate_SCL_pins": [
+          6,
+          16
+        ]
+      },
+      "logic_voltage_V": 3.3,
+      "firmware_implemented": false,
+      "buses_electrically_separate": true,
+      "added_pullup_positions": {
+        "R302": {
+          "position_mm": [
+            166.3,
+            87.6
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "R303": {
+          "position_mm": [
+            166.3,
+            86.05
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        }
+      }
+    }
+  },
+  "all_original_pin_net_maps_unchanged": false,
+  "all_32_MOSFET_pin_mappings_verified": true,
+  "single_mosfet_revision": {
+    "p_channel": "AO3401A C15127",
+    "n_channel": "AO3400A C20917",
+    "pairs": 16,
+    "package": "SOT-23",
+    "row_rail_design_target_mA": 500,
+    "not_a_current_limiter": true,
+    "requires_routing_and_hardware_validation": true
+  },
+  "row_500mA_status": "component-selection checked; PCB unrouted; not hardware qualified",
+  "economy_revision": {
+    "switch_refs": [
+      "U50",
+      "U51",
+      "U53",
+      "U54"
+    ],
+    "switch": "Nexperia74CBTLV3125PW,118 C456149",
+    "RGB": "XINGLIGHT XL-1615RGBC-2812B C5349954",
+    "RGB_pinout": {
+      "1": "GND",
+      "2": "DIN",
+      "3": "VDD5V",
+      "4": "DOUT"
+    },
+    "RGB_body_mm": [
+      1.6,
+      1.5,
+      0.6
+    ],
+    "RGB_pad_mm": [
+      0.45,
+      0.65
+    ],
+    "RGB_pad_pitch_mm": [
+      1.25,
+      0.95
+    ],
+    "flexypins_retained": 40,
+    "functionality_and_reset_unchanged": true,
+    "datasheet_RGB_name_alias": "XL-1615RGBC-WS2812B",
+    "firmware_tested": false
+  },
+  "all_LED_logical_roles_preserved_with_pin_remap": true,
+  "added_components": [
+    "C300",
+    "C301",
+    "R300",
+    "R301",
+    "U63"
+  ],
+  "row_power_protection": {
+    "chip": "U63 SY6280AAAC C207620",
+    "input": "3V3",
+    "output": "3V3_ROWS",
+    "ground": "GND unchanged",
+    "enable": "EXP_RESET_N",
+    "enable_pulldown": "R301100k",
+    "limit_resistor": "R3006.8k1%",
+    "nominal_limit_A": 1.0,
+    "datasheet_test_limit_A": [
+      0.75,
+      1.25
+    ],
+    "datasheet_test_conditions": "VIN5V,TA25C",
+    "single_row_target_mA": 500,
+    "shared_across_rows": true,
+    "protected_mode": "3V3 source to GND short;16P sources and PG pullups downstream",
+    "not_protected": [
+      "GPIO shorts",
+      "external5V",
+      "direct3V3 onJ25/Qwiic/J26/J27",
+      "external supply into GND rows"
+    ],
+    "retry": "automatic thermal retry, no fault output",
+    "discharge": "none in SY6280A",
+    "hardware_validated": false,
+    "added_refs": [
+      "U63",
+      "R300",
+      "R301",
+      "C300",
+      "C301"
+    ]
+  },
+  "all_GPIO_GND_direct_connector_nets_unchanged": false,
+  "protected_P_sources": 16,
+  "protected_PG_arrays": 4,
+  "mechanics_and_LED_positions_preserved": false,
+  "aesthetic_revision": {
+    "name": "all-twelve-outer-corners-rounded",
+    "board_mm": [
+      57,
+      66
+    ],
+    "outer_bounds_mm": [
+      156.75,
+      62.3,
+      213.75,
+      128.3
+    ],
+    "top_corner_radius_mm": 2.2,
+    "bottom_corner_radius_mm": 3,
+    "magnetic_outer_shoulder_radius_mm": 1,
+    "magnetic_inner_radius_mm": 1,
+    "outer_corner_count": 12,
+    "outer_arcs": 12,
+    "all_junctions_tangent_verified": true,
+    "material_removed_only": true,
+    "functional_internal_slots_unchanged": true,
+    "silkscreen_unchanged": true,
+    "component_positions_adjusted": {
+      "R18": {
+        "position_mm": [
+          159.0,
+          80.8
+        ],
+        "rotation_deg": 0.0,
+        "side": "B.Cu"
+      },
+      "L1": {
+        "position_mm": [
+          159.675,
+          111.175
+        ],
+        "rotation_deg": 0.0,
+        "side": "B.Cu"
+      },
+      "Q45": {
+        "position_mm": [
+          161.8,
+          115.6
+        ],
+        "rotation_deg": 90.0,
+        "side": "B.Cu"
+      },
+      "U2": {
+        "position_mm": [
+          210.611305,
+          112.35
+        ],
+        "rotation_deg": 180.0,
+        "side": "B.Cu"
+      }
+    },
+    "electrical_changes": false,
+    "bill_of_materials_unchanged": true
+  },
+  "all_electrical_pin_net_maps_unchanged": false,
+  "components_added": 2,
+  "components_removed": 0,
+  "magnetic_expansion": {
+    "refs": [
+      "J28",
+      "J29"
+    ],
+    "part": "C42380985",
+    "side": "F.Cu electronics face, opposite the RGB/breadboard visible face",
+    "pinout": {
+      "1": "GND",
+      "2": "DET (respective existing termination sense net)",
+      "3": "CAN_L",
+      "4": "CAN_H",
+      "5": "5V",
+      "6": "3V3",
+      "7": "I2C_SDA",
+      "8": "I2C_SCL"
+    },
+    "shared_holes": "1..5 drilled by J9/J2; Hanxia footprint omits duplicate NPTH; pads connect to same net",
+    "protected": false,
+    "hardware_fit_validated": false,
+    "positions": {
+      "J28": {
+        "position_mm": [
+          163.38,
+          99.11
+        ],
+        "rotation_deg": -90.0,
+        "side": "F.Cu"
+      },
+      "J29": {
+        "position_mm": [
+          207.12,
+          99.11
+        ],
+        "rotation_deg": -90.0,
+        "side": "F.Cu"
+      }
+    },
+    "rgb_shift_inward_mm": 1.2,
+    "relocated_components": {
+      "D6": {
+        "position_mm": [
+          185.25,
+          87.7
+        ],
+        "rotation_deg": 0.0,
+        "side": "B.Cu"
+      },
+      "Q45": {
+        "position_mm": [
+          161.8,
+          113.5
+        ],
+        "rotation_deg": 90.0,
+        "side": "B.Cu"
+      },
+      "Q9": {
+        "position_mm": [
+          208.7,
+          114.0
+        ],
+        "rotation_deg": 90.0,
+        "side": "B.Cu"
+      },
+      "C86": {
+        "position_mm": [
+          208.7,
+          116.8
+        ],
+        "rotation_deg": 0.0,
+        "side": "B.Cu"
+      }
+    },
+    "local_magnetic_links_routed": 10,
+    "board_unrouted_except_local_links": true,
+    "mechanical_DRC_exceptions": {
+      "shared_PTH_inside_Hanxia_courtyard": 10,
+      "magnetic_and_Hanxia_shared_pad_courtyard": 2
+    },
+    "original_electrical_connections_unchanged": true,
+    "local_link_layer": "F.Cu",
+    "opposite_face_revision": {
+      "same_holes_and_physical_pin_order": true,
+      "no_parts_added_or_removed": true,
+      "changed_support_positions": {
+        "R204": {
+          "position_mm": [
+            163.904999,
+            86.68
+          ],
+          "rotation_deg": 90.0,
+          "side": "F.Cu"
+        },
+        "R128": {
+          "position_mm": [
+            203.9663,
+            89.185
+          ],
+          "rotation_deg": 180.0,
+          "side": "F.Cu"
+        },
+        "U60": {
+          "position_mm": [
+            166.529999,
+            87.65
+          ],
+          "rotation_deg": -90.0,
+          "side": "B.Cu"
+        },
+        "RN12": {
+          "position_mm": [
+            204.0363,
+            87.005
+          ],
+          "rotation_deg": 180.0,
+          "side": "B.Cu"
+        },
+        "U2": {
+          "position_mm": [
+            210.611305,
+            111.45
+          ],
+          "rotation_deg": 180.0,
+          "side": "B.Cu"
+        },
+        "L1": {
+          "position_mm": [
+            159.675,
+            110.375
+          ],
+          "rotation_deg": 0.0,
+          "side": "B.Cu"
+        },
+        "C84": {
+          "position_mm": [
+            159.7,
+            110.6
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "R15": {
+          "position_mm": [
+            162.8,
+            110.6
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "Q45": {
+          "position_mm": [
+            161.8,
+            115.0
+          ],
+          "rotation_deg": 90.0,
+          "side": "B.Cu"
+        },
+        "Q9": {
+          "position_mm": [
+            204.0,
+            114.0
+          ],
+          "rotation_deg": 90.0,
+          "side": "B.Cu"
+        },
+        "C225": {
+          "position_mm": [
+            166.8,
+            93.63
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "C227": {
+          "position_mm": [
+            166.8,
+            98.71
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "C229": {
+          "position_mm": [
+            166.8,
+            103.79
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "C210": {
+          "position_mm": [
+            203.7,
+            91.09
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "C212": {
+          "position_mm": [
+            203.7,
+            96.17
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "C214": {
+          "position_mm": [
+            203.7,
+            101.25
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        },
+        "C216": {
+          "position_mm": [
+            203.7,
+            106.33
+          ],
+          "rotation_deg": 0.0,
+          "side": "F.Cu"
+        }
+      },
+      "RGB_positions_unchanged": true,
+      "magnetic_positions_unchanged": true,
+      "board_mm": [
+        57,
+        66
+      ]
+    }
+  },
+  "footprint_count": 195,
+  "drc_counts": {
+    "courtyards_overlap": 89,
+    "pth_inside_courtyard": 10,
+    "copper_edge_clearance": 20
+  },
+  "ERC_errors": 0,
+  "ERC_warnings": 52,
+  "all_existing_pin_nets_unchanged": false,
+  "all_PCB_pads_match_exported_netlist": true,
+  "i2c_buses": {
+    "internal": {
+      "SDA": "I2C_INT_SDA",
+      "SCL": "I2C_INT_SCL",
+      "GPIO_SDA": 4,
+      "GPIO_SCL": 5,
+      "devices": [
+        "U40",
+        "U41",
+        "U42"
+      ],
+      "pullups": [
+        "R302",
+        "R303"
+      ],
+      "pullup_ohm": 4700
+    },
+    "user": {
+      "SDA": "I2C_USER_SDA",
+      "SCL": "I2C_USER_SCL",
+      "GPIO_SDA": 11,
+      "GPIO_SCL": 12,
+      "connectors": [
+        "J4",
+        "J25",
+        "J26",
+        "J27",
+        "J28",
+        "J29"
+      ],
+      "pullups": [
+        "R24",
+        "R25"
+      ],
+      "pullup_ohm": 4700,
+      "J25_duplicate_SDA_pins": [
+        5,
+        15
+      ],
+      "J25_duplicate_SCL_pins": [
+        6,
+        16
+      ]
+    },
+    "logic_voltage_V": 3.3,
+    "firmware_implemented": false,
+    "buses_electrically_separate": true,
+    "added_pullup_positions": {
+      "R302": {
+        "position_mm": [
+          166.3,
+          87.6
+        ],
+        "rotation_deg": 0.0,
+        "side": "F.Cu"
+      },
+      "R303": {
+        "position_mm": [
+          166.3,
+          86.05
+        ],
+        "rotation_deg": 0.0,
+        "side": "F.Cu"
+      }
+    }
+  },
+  "all_existing_component_positions_unchanged": false,
+  "I2C_expected_node_sets_verified": true,
+  "GPIO11_GPIO12_reserved_for_user_I2C": true,
+  "changes_limited_to_I2C_split_and_two_pullups": false,
+  "top_service_revision": {
+    "service_returned_to_top": [
+      "C86",
+      "U60",
+      "L1",
+      "R18",
+      "RN12",
+      "U2",
+      "Q45",
+      "Q9",
+      "D6"
+    ],
+    "bottom_only": [
+      "LED1",
+      "LED15",
+      "LED16",
+      "LED17",
+      "LED18",
+      "LED19",
+      "LED2",
+      "LED20",
+      "LED21",
+      "LED22",
+      "LED3",
+      "LED4",
+      "LED5",
+      "LED6",
+      "LED7",
+      "LED8",
+      "U1"
+    ],
+    "top_footprint_count": 160,
+    "bottom_footprint_count": 17,
+    "board_mm": [
+      57,
+      66
+    ],
+    "outline_unchanged": true,
+    "electrical_changes": false,
+    "cost_unchanged": true,
+    "functional_clusters": {
+      "buck": [
+        "U4",
+        "L1",
+        "C86",
+        "C5",
+        "R36",
+        "R37",
+        "C84"
+      ],
+      "row_protection": [
+        "U63",
+        "C300",
+        "C301",
+        "R300",
+        "R301"
+      ],
+      "reset": [
+        "U60",
+        "C200",
+        "R203"
+      ],
+      "CAN": [
+        "U2",
+        "C74"
+      ]
+    }
+  },
+  "all_service_electronics_on_F_Cu": true,
+  "bottom_contains_only_ESP32_and_16_RGB": false,
+  "monochrome_LED_count": 48,
+  "unconnected_items": 499,
+  "label_indicators": {
+    "count": 48,
+    "driver": "U70",
+    "driver_part": "C191206",
+    "I2C_bus": "internal",
+    "I2C_address": "0x74",
+    "labels": [
+      "3.3V",
+      "GND",
+      "SIG"
+    ],
+    "board_mm": [
+      70,
+      66
+    ],
+    "window_mm": [
+      1.85,
+      1.85
+    ],
+    "word_height_mm": 0.6,
+    "word_openings": "B.Mask horizontal text; F.Mask aperture rotated45; all4copper layers excluded",
+    "HiZ": "all off; cannot distinguish unpowered",
+    "orientation_deg": 45,
+    "optical_and_assembly_validation": "Required. FR4 transmission and raised/reverse assembly must be tested; window design is not optically qualified.",
+    "firmware": "Not implemented. Clear all frame enables/PWM while in software shutdown, then enable only active mode. GPIO14 freed but not added to connectors.",
+    "outer_bounds_mm": [
+      150.25,
+      62.3,
+      220.25,
+      128.3
+    ],
+    "magnetic_midpoint_y_mm": 95.3,
+    "magnetic_distance_to_north_south_mm": 33,
+    "rows_unchanged": true,
+    "central_hole_gap_mm": 7.62,
+    "Hanxia_columns_per_bank": 3,
+    "LED_model": "genericKiCad1206castellated, rotated; not manufacturer exact model",
+    "routed": false,
+    "local_magnetic_tracks": 10,
+    "new_holes": false,
+    "FW_implemented": false,
+    "optics_qualified": false,
+    "driver_supply_V": 5,
+    "driver_supply_net": "5V",
+    "I2C_pullups_V": 3.3,
+    "SDB_net": "ESP_EN",
+    "SDB_logic_V": 3.3,
+    "additional_components": 0,
+    "R_EXT_ohm": 47000,
+    "normal_16_active_LED_typical_mA": 24.19553191489362,
+    "all_48_active_LED_typical_mA": 68.24659574468086,
+    "colour_BOM_unchanged": true,
+    "source": "https://www.lumissil.com/assets/pdf/core/IS31FL3731_AN.pdf,page6,Q8; datasheetRevGpage5; C40050V,C40125V unchanged",
+    "qualification": "Values are calculations; PCB unrouted, optical and hardware tests pending",
+    "LED_angle_deg": 45,
+    "text_angle_deg": 0,
+    "word_width_mm": 0.4,
+    "word_stroke_mm": 0.1,
+    "colours": {
+      "3.3V": {
+        "mpn": "XL-3216SURC-FB",
+        "lcsc": "C3646938",
+        "colour": "red"
+      },
+      "GND": {
+        "mpn": "XL-3216UBC-FB",
+        "lcsc": "C3646941",
+        "colour": "blue"
+      },
+      "SIG": {
+        "mpn": "XL-3216UGC-FB",
+        "lcsc": "C3646937",
+        "colour": "green"
+      }
+    },
+    "matrix_groups": {
+      "CA": "16red",
+      "CB": "16blue+16green"
+    },
+    "assembly_clearance_status": "Nominal bodies fit; original courtyard margins overlap and general manufacturer +/-0.25mm tolerances are not qualified.",
+    "window_requirements": "1.85mm square copper keepout rotated45deg on all4layers; top mask1.8x1.4mm rotated with LED; bottom lettering horizontal, optical sample required.",
+    "nominal_body_clearance_mm": 0.196,
+    "assembly_courtyard_overlap_pairs": 74,
+    "SIG_display": "native MCU icon, 3 pins per side,0.14mm stroke"
+  },
+  "free_esp_gpio_south": {
+    "8": 15,
+    "9": 16,
+    "10": 43,
+    "11": 44,
+    "12": 47,
+    "13": 48
+  },
+  "GPIO14": "USB_VBUS_PRESENT; not free",
+  "all_pad_net_maps_verified": true,
+  "optical_window_keepouts_verified": true,
+  "mask_text_bounds_verified": true,
+  "service_F_Cu_count": 192,
+  "visible_B_Cu_count": 3,
+  "indicator_power_revision": {
+    "driver_supply_V": 5,
+    "driver_supply_net": "5V",
+    "I2C_pullups_V": 3.3,
+    "SDB_net": "ESP_EN",
+    "SDB_logic_V": 3.3,
+    "additional_components": 0,
+    "R_EXT_ohm": 47000,
+    "normal_16_active_LED_typical_mA": 24.19553191489362,
+    "all_48_active_LED_typical_mA": 68.24659574468086,
+    "colour_BOM_unchanged": true,
+    "source": "https://www.lumissil.com/assets/pdf/core/IS31FL3731_AN.pdf,page6,Q8; datasheetRevGpage5; C40050V,C40125V unchanged",
+    "qualification": "Values are calculations; PCB unrouted, optical and hardware tests pending"
+  },
+  "LED_colours": {
+    "red": 16,
+    "blue": 16,
+    "green": 16
+  },
+  "text_angle_deg": 0,
+  "LED_angle_deg": 45,
+  "assembly_qualified": false,
+  "label_silkscreen": {
+    "style": "16 horizontal rounded capsules around the three illuminated words, short dividers and leaders to row labels",
+    "side": "B.SilkS",
+    "groups": 16,
+    "frame_height_mm": 2.0,
+    "frame_width_mm": 8.8,
+    "frame_stroke_mm": 0.12,
+    "divider_stroke_mm": 0.1,
+    "new_silkscreen_text": false,
+    "optical_apertures_unchanged": true,
+    "electrical_and_component_placement_unchanged": true,
+    "added_graphic_shapes": 112
+  },
+  "GPIO21": "SW1 bank select",
+  "ui_buttons": {
+    "SW1": {
+      "gpio": 21,
+      "net": "UI_BANK_N",
+      "action": "select bank A/B"
+    },
+    "SW2": {
+      "gpio": 13,
+      "net": "GPIO13",
+      "action": "select row1..8",
+      "shared_south_pin": 7
+    },
+    "logic": "active low; internal pullups; debounce and simultaneous hold in firmware; boot safety reset unchanged",
+    "firmware_implemented": false,
+    "lcsc": "C318884",
+    "side": "B.Cu",
+    "drawing": "references/XKB-TS-1187A-B-A-B-C318884.pdf"
+  },
+  "all_existing_pin_nets_except_U1_23_unchanged": true,
+  "compact_ui_revision": {
+    "board_before_mm": [
+      74,
+      66
+    ],
+    "board_after_mm": [
+      70,
+      66
+    ],
+    "area_reduction_percent": 5.405405405405405,
+    "header_column_pitch_mm": 4,
+    "central_DIP_pitch_mm": 7.62,
+    "row_pitch_mm": 2.54,
+    "LED_horizontal_pitch_mm": 2.85,
+    "LED_rotation_deg": 45,
+    "assembly_qualified": false
+  },
+  "MCU_icon_bounds_verified": true,
+  "central_breadboard_channel": {
+    "restored": true,
+    "layer": "B.SilkS",
+    "bounds_mm": [
+      184.55,
+      91,
+      185.95,
+      110.6
+    ],
+    "radius_mm": 0.65,
+    "stroke_mm": 0.14,
+    "electrical_changes": false,
+    "component_changes": false,
+    "artwork_only": true
+  }
+}

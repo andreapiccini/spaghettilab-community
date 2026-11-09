@@ -1,0 +1,11 @@
+{
+  "source_pixels": [
+    1067,
+    799
+  ],
+  "vector_polygons": 27,
+  "vertices": 1075,
+  "pixel_rectangles": false,
+  "blue_LED_count": 16,
+  "optical_uniformity_measured": false
+}

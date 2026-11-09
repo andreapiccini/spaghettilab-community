@@ -1,0 +1,2039 @@
+{
+  "proposal_only": true,
+  "live_board_modified": false,
+  "rows": 5,
+  "cols": 40,
+  "LED_count": 200,
+  "pitch_mm": 1.3,
+  "angle_deg": 45,
+  "package_body_mm": [
+    1,
+    0.5,
+    0.4
+  ],
+  "copper_envelope_mm": [
+    52.256,
+    6.756
+  ],
+  "board_mm": [
+    70,
+    66
+  ],
+  "matrix_center_mm": [
+    185.25,
+    115.15
+  ],
+  "SW1_center_mm": [
+    216,
+    115
+  ],
+  "SW2_center_mm": [
+    154.5,
+    115
+  ],
+  "status_LED_driver": "unchanged IS31FL3731; display needs separate driver allocation; no display electrical connections added",
+  "source_LED": "https://www.lcsc.com/product-detail/C25503345.html",
+  "footprint": "generic KiCad0402, mechanical envelope only; vendor land pattern still to verify",
+  "display": [
+    {
+      "ref": "D500",
+      "row": 0,
+      "col": 0,
+      "x_mm": 159.9,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D501",
+      "row": 0,
+      "col": 1,
+      "x_mm": 161.2,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D502",
+      "row": 0,
+      "col": 2,
+      "x_mm": 162.5,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D503",
+      "row": 0,
+      "col": 3,
+      "x_mm": 163.8,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D504",
+      "row": 0,
+      "col": 4,
+      "x_mm": 165.1,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D505",
+      "row": 0,
+      "col": 5,
+      "x_mm": 166.4,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D506",
+      "row": 0,
+      "col": 6,
+      "x_mm": 167.7,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D507",
+      "row": 0,
+      "col": 7,
+      "x_mm": 169.0,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D508",
+      "row": 0,
+      "col": 8,
+      "x_mm": 170.3,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D509",
+      "row": 0,
+      "col": 9,
+      "x_mm": 171.6,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D510",
+      "row": 0,
+      "col": 10,
+      "x_mm": 172.9,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D511",
+      "row": 0,
+      "col": 11,
+      "x_mm": 174.2,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D512",
+      "row": 0,
+      "col": 12,
+      "x_mm": 175.5,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D513",
+      "row": 0,
+      "col": 13,
+      "x_mm": 176.8,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D514",
+      "row": 0,
+      "col": 14,
+      "x_mm": 178.1,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D515",
+      "row": 0,
+      "col": 15,
+      "x_mm": 179.4,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D516",
+      "row": 0,
+      "col": 16,
+      "x_mm": 180.7,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D517",
+      "row": 0,
+      "col": 17,
+      "x_mm": 182.0,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D518",
+      "row": 0,
+      "col": 18,
+      "x_mm": 183.3,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D519",
+      "row": 0,
+      "col": 19,
+      "x_mm": 184.6,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D520",
+      "row": 0,
+      "col": 20,
+      "x_mm": 185.9,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D521",
+      "row": 0,
+      "col": 21,
+      "x_mm": 187.2,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D522",
+      "row": 0,
+      "col": 22,
+      "x_mm": 188.5,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D523",
+      "row": 0,
+      "col": 23,
+      "x_mm": 189.8,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D524",
+      "row": 0,
+      "col": 24,
+      "x_mm": 191.1,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D525",
+      "row": 0,
+      "col": 25,
+      "x_mm": 192.4,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D526",
+      "row": 0,
+      "col": 26,
+      "x_mm": 193.7,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D527",
+      "row": 0,
+      "col": 27,
+      "x_mm": 195.0,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D528",
+      "row": 0,
+      "col": 28,
+      "x_mm": 196.3,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D529",
+      "row": 0,
+      "col": 29,
+      "x_mm": 197.6,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D530",
+      "row": 0,
+      "col": 30,
+      "x_mm": 198.9,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D531",
+      "row": 0,
+      "col": 31,
+      "x_mm": 200.2,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D532",
+      "row": 0,
+      "col": 32,
+      "x_mm": 201.5,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D533",
+      "row": 0,
+      "col": 33,
+      "x_mm": 202.8,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D534",
+      "row": 0,
+      "col": 34,
+      "x_mm": 204.1,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D535",
+      "row": 0,
+      "col": 35,
+      "x_mm": 205.4,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D536",
+      "row": 0,
+      "col": 36,
+      "x_mm": 206.7,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D537",
+      "row": 0,
+      "col": 37,
+      "x_mm": 208.0,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D538",
+      "row": 0,
+      "col": 38,
+      "x_mm": 209.3,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D539",
+      "row": 0,
+      "col": 39,
+      "x_mm": 210.6,
+      "y_mm": 112.55,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D540",
+      "row": 1,
+      "col": 0,
+      "x_mm": 159.9,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D541",
+      "row": 1,
+      "col": 1,
+      "x_mm": 161.2,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D542",
+      "row": 1,
+      "col": 2,
+      "x_mm": 162.5,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D543",
+      "row": 1,
+      "col": 3,
+      "x_mm": 163.8,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D544",
+      "row": 1,
+      "col": 4,
+      "x_mm": 165.1,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D545",
+      "row": 1,
+      "col": 5,
+      "x_mm": 166.4,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D546",
+      "row": 1,
+      "col": 6,
+      "x_mm": 167.7,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D547",
+      "row": 1,
+      "col": 7,
+      "x_mm": 169.0,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D548",
+      "row": 1,
+      "col": 8,
+      "x_mm": 170.3,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D549",
+      "row": 1,
+      "col": 9,
+      "x_mm": 171.6,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D550",
+      "row": 1,
+      "col": 10,
+      "x_mm": 172.9,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D551",
+      "row": 1,
+      "col": 11,
+      "x_mm": 174.2,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D552",
+      "row": 1,
+      "col": 12,
+      "x_mm": 175.5,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D553",
+      "row": 1,
+      "col": 13,
+      "x_mm": 176.8,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D554",
+      "row": 1,
+      "col": 14,
+      "x_mm": 178.1,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D555",
+      "row": 1,
+      "col": 15,
+      "x_mm": 179.4,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D556",
+      "row": 1,
+      "col": 16,
+      "x_mm": 180.7,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D557",
+      "row": 1,
+      "col": 17,
+      "x_mm": 182.0,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D558",
+      "row": 1,
+      "col": 18,
+      "x_mm": 183.3,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D559",
+      "row": 1,
+      "col": 19,
+      "x_mm": 184.6,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D560",
+      "row": 1,
+      "col": 20,
+      "x_mm": 185.9,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D561",
+      "row": 1,
+      "col": 21,
+      "x_mm": 187.2,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D562",
+      "row": 1,
+      "col": 22,
+      "x_mm": 188.5,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D563",
+      "row": 1,
+      "col": 23,
+      "x_mm": 189.8,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D564",
+      "row": 1,
+      "col": 24,
+      "x_mm": 191.1,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D565",
+      "row": 1,
+      "col": 25,
+      "x_mm": 192.4,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D566",
+      "row": 1,
+      "col": 26,
+      "x_mm": 193.7,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D567",
+      "row": 1,
+      "col": 27,
+      "x_mm": 195.0,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D568",
+      "row": 1,
+      "col": 28,
+      "x_mm": 196.3,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D569",
+      "row": 1,
+      "col": 29,
+      "x_mm": 197.6,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D570",
+      "row": 1,
+      "col": 30,
+      "x_mm": 198.9,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D571",
+      "row": 1,
+      "col": 31,
+      "x_mm": 200.2,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D572",
+      "row": 1,
+      "col": 32,
+      "x_mm": 201.5,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D573",
+      "row": 1,
+      "col": 33,
+      "x_mm": 202.8,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D574",
+      "row": 1,
+      "col": 34,
+      "x_mm": 204.1,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D575",
+      "row": 1,
+      "col": 35,
+      "x_mm": 205.4,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D576",
+      "row": 1,
+      "col": 36,
+      "x_mm": 206.7,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D577",
+      "row": 1,
+      "col": 37,
+      "x_mm": 208.0,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D578",
+      "row": 1,
+      "col": 38,
+      "x_mm": 209.3,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D579",
+      "row": 1,
+      "col": 39,
+      "x_mm": 210.6,
+      "y_mm": 113.85,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D580",
+      "row": 2,
+      "col": 0,
+      "x_mm": 159.9,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D581",
+      "row": 2,
+      "col": 1,
+      "x_mm": 161.2,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D582",
+      "row": 2,
+      "col": 2,
+      "x_mm": 162.5,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D583",
+      "row": 2,
+      "col": 3,
+      "x_mm": 163.8,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D584",
+      "row": 2,
+      "col": 4,
+      "x_mm": 165.1,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D585",
+      "row": 2,
+      "col": 5,
+      "x_mm": 166.4,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D586",
+      "row": 2,
+      "col": 6,
+      "x_mm": 167.7,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D587",
+      "row": 2,
+      "col": 7,
+      "x_mm": 169.0,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D588",
+      "row": 2,
+      "col": 8,
+      "x_mm": 170.3,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D589",
+      "row": 2,
+      "col": 9,
+      "x_mm": 171.6,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D590",
+      "row": 2,
+      "col": 10,
+      "x_mm": 172.9,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D591",
+      "row": 2,
+      "col": 11,
+      "x_mm": 174.2,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D592",
+      "row": 2,
+      "col": 12,
+      "x_mm": 175.5,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D593",
+      "row": 2,
+      "col": 13,
+      "x_mm": 176.8,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D594",
+      "row": 2,
+      "col": 14,
+      "x_mm": 178.1,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D595",
+      "row": 2,
+      "col": 15,
+      "x_mm": 179.4,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D596",
+      "row": 2,
+      "col": 16,
+      "x_mm": 180.7,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D597",
+      "row": 2,
+      "col": 17,
+      "x_mm": 182.0,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D598",
+      "row": 2,
+      "col": 18,
+      "x_mm": 183.3,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D599",
+      "row": 2,
+      "col": 19,
+      "x_mm": 184.6,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D600",
+      "row": 2,
+      "col": 20,
+      "x_mm": 185.9,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D601",
+      "row": 2,
+      "col": 21,
+      "x_mm": 187.2,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D602",
+      "row": 2,
+      "col": 22,
+      "x_mm": 188.5,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D603",
+      "row": 2,
+      "col": 23,
+      "x_mm": 189.8,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D604",
+      "row": 2,
+      "col": 24,
+      "x_mm": 191.1,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D605",
+      "row": 2,
+      "col": 25,
+      "x_mm": 192.4,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D606",
+      "row": 2,
+      "col": 26,
+      "x_mm": 193.7,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D607",
+      "row": 2,
+      "col": 27,
+      "x_mm": 195.0,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D608",
+      "row": 2,
+      "col": 28,
+      "x_mm": 196.3,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D609",
+      "row": 2,
+      "col": 29,
+      "x_mm": 197.6,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D610",
+      "row": 2,
+      "col": 30,
+      "x_mm": 198.9,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D611",
+      "row": 2,
+      "col": 31,
+      "x_mm": 200.2,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D612",
+      "row": 2,
+      "col": 32,
+      "x_mm": 201.5,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D613",
+      "row": 2,
+      "col": 33,
+      "x_mm": 202.8,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D614",
+      "row": 2,
+      "col": 34,
+      "x_mm": 204.1,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D615",
+      "row": 2,
+      "col": 35,
+      "x_mm": 205.4,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D616",
+      "row": 2,
+      "col": 36,
+      "x_mm": 206.7,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D617",
+      "row": 2,
+      "col": 37,
+      "x_mm": 208.0,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D618",
+      "row": 2,
+      "col": 38,
+      "x_mm": 209.3,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D619",
+      "row": 2,
+      "col": 39,
+      "x_mm": 210.6,
+      "y_mm": 115.14999999999999,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D620",
+      "row": 3,
+      "col": 0,
+      "x_mm": 159.9,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D621",
+      "row": 3,
+      "col": 1,
+      "x_mm": 161.2,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D622",
+      "row": 3,
+      "col": 2,
+      "x_mm": 162.5,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D623",
+      "row": 3,
+      "col": 3,
+      "x_mm": 163.8,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D624",
+      "row": 3,
+      "col": 4,
+      "x_mm": 165.1,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D625",
+      "row": 3,
+      "col": 5,
+      "x_mm": 166.4,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D626",
+      "row": 3,
+      "col": 6,
+      "x_mm": 167.7,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D627",
+      "row": 3,
+      "col": 7,
+      "x_mm": 169.0,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D628",
+      "row": 3,
+      "col": 8,
+      "x_mm": 170.3,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D629",
+      "row": 3,
+      "col": 9,
+      "x_mm": 171.6,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D630",
+      "row": 3,
+      "col": 10,
+      "x_mm": 172.9,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D631",
+      "row": 3,
+      "col": 11,
+      "x_mm": 174.2,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D632",
+      "row": 3,
+      "col": 12,
+      "x_mm": 175.5,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D633",
+      "row": 3,
+      "col": 13,
+      "x_mm": 176.8,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D634",
+      "row": 3,
+      "col": 14,
+      "x_mm": 178.1,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D635",
+      "row": 3,
+      "col": 15,
+      "x_mm": 179.4,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D636",
+      "row": 3,
+      "col": 16,
+      "x_mm": 180.7,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D637",
+      "row": 3,
+      "col": 17,
+      "x_mm": 182.0,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D638",
+      "row": 3,
+      "col": 18,
+      "x_mm": 183.3,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D639",
+      "row": 3,
+      "col": 19,
+      "x_mm": 184.6,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D640",
+      "row": 3,
+      "col": 20,
+      "x_mm": 185.9,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D641",
+      "row": 3,
+      "col": 21,
+      "x_mm": 187.2,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D642",
+      "row": 3,
+      "col": 22,
+      "x_mm": 188.5,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D643",
+      "row": 3,
+      "col": 23,
+      "x_mm": 189.8,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D644",
+      "row": 3,
+      "col": 24,
+      "x_mm": 191.1,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D645",
+      "row": 3,
+      "col": 25,
+      "x_mm": 192.4,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D646",
+      "row": 3,
+      "col": 26,
+      "x_mm": 193.7,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D647",
+      "row": 3,
+      "col": 27,
+      "x_mm": 195.0,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D648",
+      "row": 3,
+      "col": 28,
+      "x_mm": 196.3,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D649",
+      "row": 3,
+      "col": 29,
+      "x_mm": 197.6,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D650",
+      "row": 3,
+      "col": 30,
+      "x_mm": 198.9,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D651",
+      "row": 3,
+      "col": 31,
+      "x_mm": 200.2,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D652",
+      "row": 3,
+      "col": 32,
+      "x_mm": 201.5,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D653",
+      "row": 3,
+      "col": 33,
+      "x_mm": 202.8,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D654",
+      "row": 3,
+      "col": 34,
+      "x_mm": 204.1,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D655",
+      "row": 3,
+      "col": 35,
+      "x_mm": 205.4,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D656",
+      "row": 3,
+      "col": 36,
+      "x_mm": 206.7,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D657",
+      "row": 3,
+      "col": 37,
+      "x_mm": 208.0,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D658",
+      "row": 3,
+      "col": 38,
+      "x_mm": 209.3,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D659",
+      "row": 3,
+      "col": 39,
+      "x_mm": 210.6,
+      "y_mm": 116.45,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D660",
+      "row": 4,
+      "col": 0,
+      "x_mm": 159.9,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D661",
+      "row": 4,
+      "col": 1,
+      "x_mm": 161.2,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D662",
+      "row": 4,
+      "col": 2,
+      "x_mm": 162.5,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D663",
+      "row": 4,
+      "col": 3,
+      "x_mm": 163.8,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D664",
+      "row": 4,
+      "col": 4,
+      "x_mm": 165.1,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D665",
+      "row": 4,
+      "col": 5,
+      "x_mm": 166.4,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D666",
+      "row": 4,
+      "col": 6,
+      "x_mm": 167.7,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D667",
+      "row": 4,
+      "col": 7,
+      "x_mm": 169.0,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D668",
+      "row": 4,
+      "col": 8,
+      "x_mm": 170.3,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D669",
+      "row": 4,
+      "col": 9,
+      "x_mm": 171.6,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D670",
+      "row": 4,
+      "col": 10,
+      "x_mm": 172.9,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D671",
+      "row": 4,
+      "col": 11,
+      "x_mm": 174.2,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D672",
+      "row": 4,
+      "col": 12,
+      "x_mm": 175.5,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D673",
+      "row": 4,
+      "col": 13,
+      "x_mm": 176.8,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D674",
+      "row": 4,
+      "col": 14,
+      "x_mm": 178.1,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D675",
+      "row": 4,
+      "col": 15,
+      "x_mm": 179.4,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D676",
+      "row": 4,
+      "col": 16,
+      "x_mm": 180.7,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D677",
+      "row": 4,
+      "col": 17,
+      "x_mm": 182.0,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D678",
+      "row": 4,
+      "col": 18,
+      "x_mm": 183.3,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D679",
+      "row": 4,
+      "col": 19,
+      "x_mm": 184.6,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D680",
+      "row": 4,
+      "col": 20,
+      "x_mm": 185.9,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D681",
+      "row": 4,
+      "col": 21,
+      "x_mm": 187.2,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D682",
+      "row": 4,
+      "col": 22,
+      "x_mm": 188.5,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D683",
+      "row": 4,
+      "col": 23,
+      "x_mm": 189.8,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D684",
+      "row": 4,
+      "col": 24,
+      "x_mm": 191.1,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D685",
+      "row": 4,
+      "col": 25,
+      "x_mm": 192.4,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D686",
+      "row": 4,
+      "col": 26,
+      "x_mm": 193.7,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D687",
+      "row": 4,
+      "col": 27,
+      "x_mm": 195.0,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D688",
+      "row": 4,
+      "col": 28,
+      "x_mm": 196.3,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D689",
+      "row": 4,
+      "col": 29,
+      "x_mm": 197.6,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D690",
+      "row": 4,
+      "col": 30,
+      "x_mm": 198.9,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D691",
+      "row": 4,
+      "col": 31,
+      "x_mm": 200.2,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D692",
+      "row": 4,
+      "col": 32,
+      "x_mm": 201.5,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D693",
+      "row": 4,
+      "col": 33,
+      "x_mm": 202.8,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D694",
+      "row": 4,
+      "col": 34,
+      "x_mm": 204.1,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D695",
+      "row": 4,
+      "col": 35,
+      "x_mm": 205.4,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D696",
+      "row": 4,
+      "col": 36,
+      "x_mm": 206.7,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D697",
+      "row": 4,
+      "col": 37,
+      "x_mm": 208.0,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D698",
+      "row": 4,
+      "col": 38,
+      "x_mm": 209.3,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    },
+    {
+      "ref": "D699",
+      "row": 4,
+      "col": 39,
+      "x_mm": 210.6,
+      "y_mm": 117.75,
+      "angle": 45,
+      "side": "B.Cu",
+      "electrical": "unassigned mechanical study"
+    }
+  ]
+}

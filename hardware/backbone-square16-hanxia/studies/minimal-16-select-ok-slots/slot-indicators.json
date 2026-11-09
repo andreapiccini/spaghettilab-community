@@ -1,0 +1,46 @@
+[
+  {
+    "slot": 1,
+    "ref": "D700",
+    "x": 191.25,
+    "y": 113.5,
+    "anode": "LABEL_CA8",
+    "cathode": "LABEL_CA6",
+    "colour": "green",
+    "part": "XL-3216UGC-FB",
+    "lcsc": "C3646937"
+  },
+  {
+    "slot": 2,
+    "ref": "D701",
+    "x": 187.25,
+    "y": 113.5,
+    "anode": "LABEL_CA9",
+    "cathode": "LABEL_CA6",
+    "colour": "green",
+    "part": "XL-3216UGC-FB",
+    "lcsc": "C3646937"
+  },
+  {
+    "slot": 3,
+    "ref": "D702",
+    "x": 183.25,
+    "y": 113.5,
+    "anode": "LABEL_CA1",
+    "cathode": "LABEL_CA7",
+    "colour": "green",
+    "part": "XL-3216UGC-FB",
+    "lcsc": "C3646937"
+  },
+  {
+    "slot": 4,
+    "ref": "D703",
+    "x": 179.25,
+    "y": 113.5,
+    "anode": "LABEL_CA2",
+    "cathode": "LABEL_CA7",
+    "colour": "green",
+    "part": "XL-3216UGC-FB",
+    "lcsc": "C3646937"
+  }
+]

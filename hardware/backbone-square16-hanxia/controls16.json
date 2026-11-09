@@ -1,0 +1,1565 @@
+{
+  "family": "FCA9539",
+  "max_i2c_bus_hz": 400000,
+  "reset_interlock": {
+    "formula": "EXP_RESET_N = ESP_EN AND NOT ESP_BOOT",
+    "esp_boot_gpio": 0,
+    "hold_reset_level": 1,
+    "firmware_arm_level": 0,
+    "software_reset_requirement": "GPIO0 must return to input with pull-up; never enable GPIO hold on GPIO0; qualify software/watchdog/brownout behaviour on prototype",
+    "logic": [
+      "U60 SN74LVC1G97DBVR"
+    ],
+    "reset_pulldown": "R203 10k",
+    "datasheet_limit": "Logical interlock unchanged. Nyfea reset/POR/brownout limits remain to be qualified on prototype.",
+    "pin_mapping": {
+      "1": "ESP_EN",
+      "2": "GND",
+      "3": "GND",
+      "4": "EXP_RESET_N",
+      "5": "3V3",
+      "6": "GPIO0"
+    },
+    "also_enables": "U63 EN follows EXP_RESET_N with R301100k pulldown; shared reset/row-power enable"
+  },
+  "modes": {
+    "HiZ": {
+      "PG": 1,
+      "NG": 0,
+      "ISO_N": 1
+    },
+    "VCC_3V3": {
+      "PG": 0,
+      "NG": 0,
+      "ISO_N": 1
+    },
+    "GND": {
+      "PG": 1,
+      "NG": 1,
+      "ISO_N": 1
+    },
+    "GPIO": {
+      "PG": 1,
+      "NG": 0,
+      "ISO_N": 0
+    }
+  },
+  "expanders": [
+    {
+      "ref": "U40",
+      "address": "0x75",
+      "signals": [
+        "ROW_L01_PG",
+        "ROW_L01_NG",
+        "ROW_L02_PG",
+        "ROW_L02_NG",
+        "ROW_L03_PG",
+        "ROW_L03_NG",
+        "ROW_L04_PG",
+        "ROW_L04_NG",
+        "ROW_L05_PG",
+        "ROW_L05_NG",
+        "ROW_L06_PG",
+        "ROW_L06_NG",
+        "ROW_L07_PG",
+        "ROW_L07_NG",
+        "ROW_L08_PG",
+        "ROW_L08_NG"
+      ],
+      "output_safe": 21845,
+      "config_operational": 0,
+      "output_registers": [
+        2,
+        3
+      ],
+      "configuration_registers": [
+        6,
+        7
+      ],
+      "polarity_registers": [
+        4,
+        5
+      ],
+      "safe_bytes": [
+        85,
+        85
+      ],
+      "configuration_bytes": [
+        0,
+        0
+      ],
+      "decoupling": "C204",
+      "function": "bank A VCC/GND gates"
+    },
+    {
+      "ref": "U41",
+      "address": "0x76",
+      "signals": [
+        "ROW_R01_PG",
+        "ROW_R01_NG",
+        "ROW_R02_PG",
+        "ROW_R02_NG",
+        "ROW_R03_PG",
+        "ROW_R03_NG",
+        "ROW_R04_PG",
+        "ROW_R04_NG",
+        "ROW_R05_PG",
+        "ROW_R05_NG",
+        "ROW_R06_PG",
+        "ROW_R06_NG",
+        "ROW_R07_PG",
+        "ROW_R07_NG",
+        "ROW_R08_PG",
+        "ROW_R08_NG"
+      ],
+      "output_safe": 21845,
+      "config_operational": 0,
+      "output_registers": [
+        2,
+        3
+      ],
+      "configuration_registers": [
+        6,
+        7
+      ],
+      "polarity_registers": [
+        4,
+        5
+      ],
+      "safe_bytes": [
+        85,
+        85
+      ],
+      "configuration_bytes": [
+        0,
+        0
+      ],
+      "decoupling": "C205",
+      "function": "bank B VCC/GND gates"
+    },
+    {
+      "ref": "U42",
+      "address": "0x77",
+      "signals": [
+        "ROW_L01_ISO_N",
+        "ROW_L02_ISO_N",
+        "ROW_L03_ISO_N",
+        "ROW_L04_ISO_N",
+        "ROW_L05_ISO_N",
+        "ROW_L06_ISO_N",
+        "ROW_L07_ISO_N",
+        "ROW_L08_ISO_N",
+        "ROW_R01_ISO_N",
+        "ROW_R02_ISO_N",
+        "ROW_R03_ISO_N",
+        "ROW_R04_ISO_N",
+        "ROW_R05_ISO_N",
+        "ROW_R06_ISO_N",
+        "ROW_R07_ISO_N",
+        "ROW_R08_ISO_N"
+      ],
+      "output_safe": 65535,
+      "config_operational": 0,
+      "output_registers": [
+        2,
+        3
+      ],
+      "configuration_registers": [
+        6,
+        7
+      ],
+      "polarity_registers": [
+        4,
+        5
+      ],
+      "safe_bytes": [
+        255,
+        255
+      ],
+      "configuration_bytes": [
+        0,
+        0
+      ],
+      "decoupling": "C206",
+      "function": "bank A and B GPIO isolation"
+    }
+  ],
+  "usb_vbus_sense": {
+    "ref": "U1",
+    "port": "GPIO14",
+    "pin": 22,
+    "divider": [
+      "R110 56k",
+      "R111 100k"
+    ],
+    "filter": "C299 1nF",
+    "esp_gpio_cost": 1,
+    "firmware": "Configure GPIO14 as input only (no internal pulls). Read VBUS directly, including before MCP arming, and attach/detach USB as appropriate. Qualify ROM/bootloader and host-off behaviour."
+  },
+  "initialization_order": [
+    "Keep GPIO0 released/high so EXP_RESET_N stays low during boot",
+    "After boot, allow supply to settle; hardware timing must be qualified",
+    "Pull GPIO0 low in open-drain to release expander reset",
+    "Confirm all configuration registers 0x06/0x07 are 0xFF",
+    "Write polarity registers 0x04/0x05 =0x00",
+    "Write safe output registers 0x02/0x03 before changing direction",
+    "Write configuration registers 0x06/0x07 =0x00",
+    "For mode changes: open ISO_N first, disable old power path, then select target mode",
+    "Keep IS31FL3731 in software shutdown;clear all LED enable and PWM RAM",
+    "Enable only the selected configuration label per row;Hi-Z means all three off"
+  ],
+  "display": {
+    "enabled": true,
+    "type": "48singlecolour reverseLEDs,red/blue/green",
+    "map": "row-indicator-map.csv",
+    "firmware_implemented": false
+  },
+  "service_pads": {
+    "TP1": "ESP_BOOT",
+    "TP2": "ESP_EN",
+    "TP3": "GND"
+  },
+  "row_switch_map": [
+    {
+      "bank": "L",
+      "row": 1,
+      "net": "ROW_L01",
+      "raw": "GPIO1",
+      "switch": "U50",
+      "switch_channel": 0,
+      "mosfet_p": "Q30",
+      "mosfet_n": "Q100"
+    },
+    {
+      "bank": "L",
+      "row": 2,
+      "net": "ROW_L02",
+      "raw": "GPIO2",
+      "switch": "U50",
+      "switch_channel": 1,
+      "mosfet_p": "Q31",
+      "mosfet_n": "Q101"
+    },
+    {
+      "bank": "L",
+      "row": 3,
+      "net": "ROW_L03",
+      "raw": "GPIO3",
+      "switch": "U50",
+      "switch_channel": 2,
+      "mosfet_p": "Q32",
+      "mosfet_n": "Q102"
+    },
+    {
+      "bank": "L",
+      "row": 4,
+      "net": "ROW_L04",
+      "raw": "GPIO6",
+      "switch": "U50",
+      "switch_channel": 3,
+      "mosfet_p": "Q33",
+      "mosfet_n": "Q103"
+    },
+    {
+      "bank": "L",
+      "row": 5,
+      "net": "ROW_L05",
+      "raw": "GPIO7",
+      "switch": "U51",
+      "switch_channel": 0,
+      "mosfet_p": "Q34",
+      "mosfet_n": "Q104"
+    },
+    {
+      "bank": "L",
+      "row": 6,
+      "net": "ROW_L06",
+      "raw": "GPIO8",
+      "switch": "U51",
+      "switch_channel": 1,
+      "mosfet_p": "Q35",
+      "mosfet_n": "Q105"
+    },
+    {
+      "bank": "L",
+      "row": 7,
+      "net": "ROW_L07",
+      "raw": "GPIO9",
+      "switch": "U51",
+      "switch_channel": 2,
+      "mosfet_p": "Q36",
+      "mosfet_n": "Q106"
+    },
+    {
+      "bank": "L",
+      "row": 8,
+      "net": "ROW_L08",
+      "raw": "GPIO10",
+      "switch": "U51",
+      "switch_channel": 3,
+      "mosfet_p": "Q37",
+      "mosfet_n": "Q107"
+    },
+    {
+      "bank": "R",
+      "row": 1,
+      "net": "ROW_R01",
+      "raw": "GPIO35",
+      "switch": "U53",
+      "switch_channel": 0,
+      "mosfet_p": "Q44",
+      "mosfet_n": "Q108"
+    },
+    {
+      "bank": "R",
+      "row": 2,
+      "net": "ROW_R02",
+      "raw": "GPIO36",
+      "switch": "U53",
+      "switch_channel": 1,
+      "mosfet_p": "Q45",
+      "mosfet_n": "Q109"
+    },
+    {
+      "bank": "R",
+      "row": 3,
+      "net": "ROW_R03",
+      "raw": "GPIO37",
+      "switch": "U53",
+      "switch_channel": 2,
+      "mosfet_p": "Q46",
+      "mosfet_n": "Q110"
+    },
+    {
+      "bank": "R",
+      "row": 4,
+      "net": "ROW_R04",
+      "raw": "GPIO38",
+      "switch": "U53",
+      "switch_channel": 3,
+      "mosfet_p": "Q47",
+      "mosfet_n": "Q111"
+    },
+    {
+      "bank": "R",
+      "row": 5,
+      "net": "ROW_R05",
+      "raw": "GPIO39",
+      "switch": "U54",
+      "switch_channel": 0,
+      "mosfet_p": "Q48",
+      "mosfet_n": "Q112"
+    },
+    {
+      "bank": "R",
+      "row": 6,
+      "net": "ROW_R06",
+      "raw": "GPIO40",
+      "switch": "U54",
+      "switch_channel": 1,
+      "mosfet_p": "Q49",
+      "mosfet_n": "Q113"
+    },
+    {
+      "bank": "R",
+      "row": 7,
+      "net": "ROW_R07",
+      "raw": "GPIO41",
+      "switch": "U54",
+      "switch_channel": 2,
+      "mosfet_p": "Q50",
+      "mosfet_n": "Q114"
+    },
+    {
+      "bank": "R",
+      "row": 8,
+      "net": "ROW_R08",
+      "raw": "GPIO42",
+      "switch": "U54",
+      "switch_channel": 3,
+      "mosfet_p": "Q51",
+      "mosfet_n": "Q115"
+    }
+  ],
+  "core_optimization": {
+    "removed_refs": [
+      "U55",
+      "C243",
+      "R209",
+      "R213",
+      "R217",
+      "R221",
+      "R225",
+      "R229",
+      "R233",
+      "R237",
+      "R265",
+      "R269",
+      "R273",
+      "R277",
+      "R281",
+      "R285",
+      "R289",
+      "R293"
+    ],
+    "isolation_switch_ics": [
+      "U50",
+      "U51",
+      "U53",
+      "U54"
+    ],
+    "used_channels": 16,
+    "unused_channels": 0,
+    "zero_ohm_links_replaced_by_copper": 16,
+    "functions_removed": [],
+    "retained_safety": "48gate/OE bias resistors,3FCA9539,reset interlock,RGB bypass and regulator parts"
+  },
+  "direct_headers_removed": [
+    "J17",
+    "J20"
+  ],
+  "resistor_array_revision": {
+    "networks": [
+      {
+        "ref": "RN1",
+        "role": "pull_p",
+        "original_refs": [
+          "R206",
+          "R210",
+          "R214",
+          "R218"
+        ],
+        "nets": {
+          "1": "3V3",
+          "5": "ROW_L01_PG",
+          "2": "3V3",
+          "6": "ROW_L02_PG",
+          "3": "3V3",
+          "7": "ROW_L03_PG",
+          "4": "3V3",
+          "8": "ROW_L04_PG"
+        }
+      },
+      {
+        "ref": "RN2",
+        "role": "pull_p",
+        "original_refs": [
+          "R222",
+          "R226",
+          "R230",
+          "R234"
+        ],
+        "nets": {
+          "1": "3V3",
+          "5": "ROW_L05_PG",
+          "2": "3V3",
+          "6": "ROW_L06_PG",
+          "3": "3V3",
+          "7": "ROW_L07_PG",
+          "4": "3V3",
+          "8": "ROW_L08_PG"
+        }
+      },
+      {
+        "ref": "RN3",
+        "role": "pull_p",
+        "original_refs": [
+          "R262",
+          "R266",
+          "R270",
+          "R274"
+        ],
+        "nets": {
+          "1": "3V3",
+          "5": "ROW_R01_PG",
+          "2": "3V3",
+          "6": "ROW_R02_PG",
+          "3": "3V3",
+          "7": "ROW_R03_PG",
+          "4": "3V3",
+          "8": "ROW_R04_PG"
+        }
+      },
+      {
+        "ref": "RN4",
+        "role": "pull_p",
+        "original_refs": [
+          "R278",
+          "R282",
+          "R286",
+          "R290"
+        ],
+        "nets": {
+          "1": "3V3",
+          "5": "ROW_R05_PG",
+          "2": "3V3",
+          "6": "ROW_R06_PG",
+          "3": "3V3",
+          "7": "ROW_R07_PG",
+          "4": "3V3",
+          "8": "ROW_R08_PG"
+        }
+      },
+      {
+        "ref": "RN5",
+        "role": "pull_n",
+        "original_refs": [
+          "R207",
+          "R211",
+          "R215",
+          "R219"
+        ],
+        "nets": {
+          "1": "ROW_L01_NG",
+          "5": "GND",
+          "2": "ROW_L02_NG",
+          "6": "GND",
+          "3": "ROW_L03_NG",
+          "7": "GND",
+          "4": "ROW_L04_NG",
+          "8": "GND"
+        }
+      },
+      {
+        "ref": "RN6",
+        "role": "pull_n",
+        "original_refs": [
+          "R223",
+          "R227",
+          "R231",
+          "R235"
+        ],
+        "nets": {
+          "1": "ROW_L05_NG",
+          "5": "GND",
+          "2": "ROW_L06_NG",
+          "6": "GND",
+          "3": "ROW_L07_NG",
+          "7": "GND",
+          "4": "ROW_L08_NG",
+          "8": "GND"
+        }
+      },
+      {
+        "ref": "RN7",
+        "role": "pull_n",
+        "original_refs": [
+          "R263",
+          "R267",
+          "R271",
+          "R275"
+        ],
+        "nets": {
+          "1": "ROW_R01_NG",
+          "5": "GND",
+          "2": "ROW_R02_NG",
+          "6": "GND",
+          "3": "ROW_R03_NG",
+          "7": "GND",
+          "4": "ROW_R04_NG",
+          "8": "GND"
+        }
+      },
+      {
+        "ref": "RN8",
+        "role": "pull_n",
+        "original_refs": [
+          "R279",
+          "R283",
+          "R287",
+          "R291"
+        ],
+        "nets": {
+          "1": "ROW_R05_NG",
+          "5": "GND",
+          "2": "ROW_R06_NG",
+          "6": "GND",
+          "3": "ROW_R07_NG",
+          "7": "GND",
+          "4": "ROW_R08_NG",
+          "8": "GND"
+        }
+      },
+      {
+        "ref": "RN9",
+        "role": "pull_oe",
+        "original_refs": [
+          "R208",
+          "R212",
+          "R216",
+          "R220"
+        ],
+        "nets": {
+          "1": "3V3",
+          "5": "ROW_L01_ISO_N",
+          "2": "3V3",
+          "6": "ROW_L02_ISO_N",
+          "3": "3V3",
+          "7": "ROW_L03_ISO_N",
+          "4": "3V3",
+          "8": "ROW_L04_ISO_N"
+        }
+      },
+      {
+        "ref": "RN10",
+        "role": "pull_oe",
+        "original_refs": [
+          "R224",
+          "R228",
+          "R232",
+          "R236"
+        ],
+        "nets": {
+          "1": "3V3",
+          "5": "ROW_L05_ISO_N",
+          "2": "3V3",
+          "6": "ROW_L06_ISO_N",
+          "3": "3V3",
+          "7": "ROW_L07_ISO_N",
+          "4": "3V3",
+          "8": "ROW_L08_ISO_N"
+        }
+      },
+      {
+        "ref": "RN11",
+        "role": "pull_oe",
+        "original_refs": [
+          "R264",
+          "R268",
+          "R272",
+          "R276"
+        ],
+        "nets": {
+          "1": "3V3",
+          "5": "ROW_R01_ISO_N",
+          "2": "3V3",
+          "6": "ROW_R02_ISO_N",
+          "3": "3V3",
+          "7": "ROW_R03_ISO_N",
+          "4": "3V3",
+          "8": "ROW_R04_ISO_N"
+        }
+      },
+      {
+        "ref": "RN12",
+        "role": "pull_oe",
+        "original_refs": [
+          "R280",
+          "R284",
+          "R288",
+          "R292"
+        ],
+        "nets": {
+          "1": "3V3",
+          "5": "ROW_R05_ISO_N",
+          "2": "3V3",
+          "6": "ROW_R06_ISO_N",
+          "3": "3V3",
+          "7": "ROW_R07_ISO_N",
+          "4": "3V3",
+          "8": "ROW_R08_ISO_N"
+        }
+      }
+    ],
+    "mapping": {
+      "R206": {
+        "ref": "RN1",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R210": {
+        "ref": "RN1",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R214": {
+        "ref": "RN1",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R218": {
+        "ref": "RN1",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R222": {
+        "ref": "RN2",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R226": {
+        "ref": "RN2",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R230": {
+        "ref": "RN2",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R234": {
+        "ref": "RN2",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R262": {
+        "ref": "RN3",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R266": {
+        "ref": "RN3",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R270": {
+        "ref": "RN3",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R274": {
+        "ref": "RN3",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R278": {
+        "ref": "RN4",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R282": {
+        "ref": "RN4",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R286": {
+        "ref": "RN4",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R290": {
+        "ref": "RN4",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R207": {
+        "ref": "RN5",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R211": {
+        "ref": "RN5",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R215": {
+        "ref": "RN5",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R219": {
+        "ref": "RN5",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R223": {
+        "ref": "RN6",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R227": {
+        "ref": "RN6",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R231": {
+        "ref": "RN6",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R235": {
+        "ref": "RN6",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R263": {
+        "ref": "RN7",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R267": {
+        "ref": "RN7",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R271": {
+        "ref": "RN7",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R275": {
+        "ref": "RN7",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R279": {
+        "ref": "RN8",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R283": {
+        "ref": "RN8",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R287": {
+        "ref": "RN8",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R291": {
+        "ref": "RN8",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R208": {
+        "ref": "RN9",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R212": {
+        "ref": "RN9",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R216": {
+        "ref": "RN9",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R220": {
+        "ref": "RN9",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R224": {
+        "ref": "RN10",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R228": {
+        "ref": "RN10",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R232": {
+        "ref": "RN10",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R236": {
+        "ref": "RN10",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R264": {
+        "ref": "RN11",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R268": {
+        "ref": "RN11",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R272": {
+        "ref": "RN11",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R276": {
+        "ref": "RN11",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      },
+      "R280": {
+        "ref": "RN12",
+        "unit": 1,
+        "pins": {
+          "1": "1",
+          "2": "5"
+        }
+      },
+      "R284": {
+        "ref": "RN12",
+        "unit": 2,
+        "pins": {
+          "1": "2",
+          "2": "6"
+        }
+      },
+      "R288": {
+        "ref": "RN12",
+        "unit": 3,
+        "pins": {
+          "1": "3",
+          "2": "7"
+        }
+      },
+      "R292": {
+        "ref": "RN12",
+        "unit": 4,
+        "pins": {
+          "1": "4",
+          "2": "8"
+        }
+      }
+    },
+    "reset_formula": "EXP_RESET_N = ESP_EN AND NOT GPIO0",
+    "reset_ic": "U60 SN74LVC1G97DBVR",
+    "removed_refs": [
+      "R206",
+      "R210",
+      "R214",
+      "R218",
+      "R222",
+      "R226",
+      "R230",
+      "R234",
+      "R262",
+      "R266",
+      "R270",
+      "R274",
+      "R278",
+      "R282",
+      "R286",
+      "R290",
+      "R207",
+      "R211",
+      "R215",
+      "R219",
+      "R223",
+      "R227",
+      "R231",
+      "R235",
+      "R263",
+      "R267",
+      "R271",
+      "R275",
+      "R279",
+      "R283",
+      "R287",
+      "R291",
+      "R208",
+      "R212",
+      "R216",
+      "R220",
+      "R224",
+      "R228",
+      "R232",
+      "R236",
+      "R264",
+      "R268",
+      "R272",
+      "R276",
+      "R280",
+      "R284",
+      "R288",
+      "R292",
+      "U61",
+      "C201"
+    ],
+    "TSSOP_switches_retained": [
+      "U50",
+      "U51",
+      "U53",
+      "U54"
+    ],
+    "area_measurement": {
+      "footprints_before": 219,
+      "footprints_after": 181,
+      "removed_placements": 38,
+      "old_replaced_footprint_area_mm2": 252.79739999999984,
+      "new_replaced_footprint_area_mm2": 156.79375,
+      "saved_footprint_area_mm2": 96.00364999999985,
+      "area_method": "sum of native footprint bounding boxes excluding reference/value; placement/routing space not guaranteed",
+      "board_mm": [
+        57,
+        97
+      ],
+      "board_outline_unchanged": true,
+      "mechanical_optical_positions_unchanged": true,
+      "schematic_pcb_mismatches": [],
+      "48_resistor_endpoint_pairs_preserved": true,
+      "Yageo_pairs": "1-5;2-6;3-7;4-8",
+      "reset_truth_table_equivalent": true,
+      "TSSOP_switches_retained": true,
+      "erc_errors": 0,
+      "erc_warnings": 103,
+      "drc": {
+        "courtyards_overlap": 4,
+        "copper_edge_clearance": 20
+      },
+      "tracks": 0,
+      "routed": false
+    },
+    "array_pinout_source": "references/YC164-C110374.pdf page5",
+    "array_pin_pairs": [
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        7
+      ],
+      [
+        4,
+        8
+      ]
+    ]
+  },
+  "south_expansion": {
+    "reference": "J25",
+    "pitch_mm": 2.54,
+    "pinout": {
+      "1": "GND",
+      "2": "GND",
+      "3": "3V3",
+      "4": "5V",
+      "5": "GPIO11",
+      "6": "GPIO12",
+      "7": "GPIO13",
+      "8": "GPIO15",
+      "9": "GPIO16",
+      "10": "GPIO43",
+      "11": "GPIO44",
+      "12": "GPIO47",
+      "13": "GPIO48",
+      "14": "GND",
+      "15": "I2C_SDA",
+      "16": "I2C_SCL"
+    },
+    "gpio_direct_3V3_only": true,
+    "row_protection": false,
+    "source_part_pending": false,
+    "position_mm": [
+      176.36,
+      125.8
+    ],
+    "rotation_deg": 0,
+    "side": "F.Cu",
+    "body_overhang_south_mm": 7.8,
+    "board_outline_unchanged": false,
+    "pins": 16,
+    "rows": 2,
+    "mpn": "2.54-2*8P Right Angle Female Header",
+    "lcsc": "C52105",
+    "mechanical_pdf_available": false,
+    "official_CAD_checked": true,
+    "physical_sample_verified": false,
+    "shared_I2C": [
+      "I2C_SDA",
+      "I2C_SCL"
+    ],
+    "position": {
+      "x_mm": 176.36,
+      "y_mm": 125.8,
+      "rotation_deg": 0.0,
+      "side": "F.Cu"
+    }
+  },
+  "passive_mezzanine": {
+    "connectors": [
+      "J26",
+      "J27"
+    ],
+    "pitch_mm": 1.27,
+    "pins_per_connector": 32,
+    "added_components_only": [
+      "J26",
+      "J27"
+    ],
+    "side": "F.Cu",
+    "role": "passive direct access, no new switching/protection",
+    "board_mm": [
+      57,
+      60
+    ],
+    "pinout": {
+      "J26": {
+        "1": "ROW_L01",
+        "2": "GPIO1",
+        "3": "ROW_L02",
+        "4": "GPIO2",
+        "5": "ROW_L03",
+        "6": "GPIO3",
+        "7": "ROW_L04",
+        "8": "GPIO6",
+        "9": "ROW_L05",
+        "10": "GPIO7",
+        "11": "ROW_L06",
+        "12": "GPIO8",
+        "13": "ROW_L07",
+        "14": "GPIO9",
+        "15": "ROW_L08",
+        "16": "GPIO10",
+        "17": "GND",
+        "18": "GPIO11",
+        "19": "GND",
+        "20": "GPIO12",
+        "21": "GND",
+        "22": "GPIO13",
+        "23": "GND",
+        "24": "GPIO15",
+        "25": "GND",
+        "26": "GPIO16",
+        "27": "GND",
+        "28": "I2C_SDA",
+        "29": "GND",
+        "30": "3V3",
+        "31": "GND",
+        "32": "ESP_EN"
+      },
+      "J27": {
+        "1": "ROW_R01",
+        "2": "GPIO35",
+        "3": "ROW_R02",
+        "4": "GPIO36",
+        "5": "ROW_R03",
+        "6": "GPIO37",
+        "7": "ROW_R04",
+        "8": "GPIO38",
+        "9": "ROW_R05",
+        "10": "GPIO39",
+        "11": "ROW_R06",
+        "12": "GPIO40",
+        "13": "ROW_R07",
+        "14": "GPIO41",
+        "15": "ROW_R08",
+        "16": "GPIO42",
+        "17": "GND",
+        "18": "GPIO43",
+        "19": "GND",
+        "20": "GPIO44",
+        "21": "GND",
+        "22": "GPIO47",
+        "23": "GND",
+        "24": "GPIO48",
+        "25": "GND",
+        "26": "I2C_SCL",
+        "27": "GND",
+        "28": "3V3",
+        "29": "GND",
+        "30": "5V",
+        "31": "GND",
+        "32": "EXP_RESET_N"
+      }
+    },
+    "mating_height_mm": "TBD; elevated daughterboard required to clear existing components",
+    "mezzanine_firmware_implemented": false,
+    "no_dedicated_enable_or_sync_GPIO": true,
+    "positions": {
+      "J26": {
+        "x_mm": 163.6,
+        "y_mm": 119.2,
+        "rotation_deg": 90.0,
+        "side": "F.Cu"
+      },
+      "J27": {
+        "x_mm": 187.6,
+        "y_mm": 119.2,
+        "rotation_deg": 90.0,
+        "side": "F.Cu"
+      }
+    },
+    "mechanical": {
+      "socket_footprint": "KiCad PinSocket_2x16_P1.27mm_Vertical",
+      "drill_mm": 0.7,
+      "body_mm": [
+        3.05,
+        20.32
+      ],
+      "connector_envelope_mm": [
+        4.1,
+        21.37
+      ],
+      "contact_numbering": "pin1 square; odd/even pairs follow native KiCad socket footprint",
+      "source_part_pending": true,
+      "mating_socket_and_male_pair_to_verify": true,
+      "daughterboard_height": "to clear existing Hanxia, power and USB bodies; not validated; do not use generic low stacking height",
+      "two_connector_anchor_spacing_mm": 24.0,
+      "socket_orientation_deg": 90,
+      "positions_F_face": "both below breadboard, toward south; daughterboard may extend north with suitable height",
+      "no_daughterboard_designed": true
+    },
+    "signal_counts": {
+      "row_nodes": 16,
+      "raw_row_GPIO": 16,
+      "other_GPIO": 9,
+      "I2C": 2,
+      "reset_nets": 2,
+      "ground_contacts": 16,
+      "3V3_contacts": 2,
+      "5V_contacts": 1,
+      "total_contacts": 64
+    }
+  },
+  "single_mosfet_revision": {
+    "p_channel": "AO3401A C15127",
+    "n_channel": "AO3400A C20917",
+    "pairs": 16,
+    "package": "SOT-23",
+    "row_rail_design_target_mA": 500,
+    "not_a_current_limiter": true,
+    "requires_routing_and_hardware_validation": true
+  },
+  "economy_revision": {
+    "switch_refs": [
+      "U50",
+      "U51",
+      "U53",
+      "U54"
+    ],
+    "switch": "Nexperia74CBTLV3125PW,118 C456149",
+    "RGB": "XINGLIGHT XL-1615RGBC-2812B C5349954",
+    "RGB_pinout": {
+      "1": "GND",
+      "2": "DIN",
+      "3": "VDD5V",
+      "4": "DOUT"
+    },
+    "RGB_body_mm": [
+      1.6,
+      1.5,
+      0.6
+    ],
+    "RGB_pad_mm": [
+      0.45,
+      0.65
+    ],
+    "RGB_pad_pitch_mm": [
+      1.25,
+      0.95
+    ],
+    "flexypins_retained": 40,
+    "functionality_and_reset_unchanged": true,
+    "datasheet_RGB_name_alias": "XL-1615RGBC-WS2812B",
+    "firmware_tested": false
+  },
+  "row_power_protection": {
+    "chip": "U63 SY6280AAAC C207620",
+    "input": "3V3",
+    "output": "3V3_ROWS",
+    "ground": "GND unchanged",
+    "enable": "EXP_RESET_N",
+    "enable_pulldown": "R301100k",
+    "limit_resistor": "R3006.8k1%",
+    "nominal_limit_A": 1.0,
+    "datasheet_test_limit_A": [
+      0.75,
+      1.25
+    ],
+    "datasheet_test_conditions": "VIN5V,TA25C",
+    "single_row_target_mA": 500,
+    "shared_across_rows": true,
+    "protected_mode": "3V3 source to GND short;16P sources and PG pullups downstream",
+    "not_protected": [
+      "GPIO shorts",
+      "external5V",
+      "direct3V3 onJ25/Qwiic/J26/J27",
+      "external supply into GND rows"
+    ],
+    "retry": "automatic thermal retry, no fault output",
+    "discharge": "none in SY6280A",
+    "hardware_validated": false,
+    "added_refs": [
+      "U63",
+      "R300",
+      "R301",
+      "C300",
+      "C301"
+    ]
+  },
+  "indicators": {
+    "driver": "U70",
+    "map": "row-indicator-map.csv",
+    "hardware_shutdown": "ESP_EN",
+    "software_default": "shutdown",
+    "startup_sequence": [
+      "hold software shutdown",
+      "clear LED enable and PWM RAM",
+      "select picture frame",
+      "write one active label per row,or none forHiZ",
+      "release software shutdown"
+    ],
+    "configured_state_not_measurement": true,
+    "no_row_gate_load": true,
+    "firmware_implemented": false,
+    "driver_supply_V": 5,
+    "driver_supply_net": "5V",
+    "I2C_pullups_V": 3.3,
+    "SDB_net": "ESP_EN",
+    "SDB_logic_V": 3.3,
+    "additional_components": 0,
+    "R_EXT_ohm": 47000,
+    "normal_16_active_LED_typical_mA": 24.19553191489362,
+    "all_48_active_LED_typical_mA": 68.24659574468086,
+    "colour_BOM_unchanged": true,
+    "source": "https://www.lumissil.com/assets/pdf/core/IS31FL3731_AN.pdf,page6,Q8; datasheetRevGpage5; C40050V,C40125V unchanged",
+    "qualification": "Values are calculations; PCB unrouted, optical and hardware tests pending",
+    "count": 48,
+    "driver_part": "C191206",
+    "I2C_bus": "internal",
+    "I2C_address": "0x74",
+    "labels": [
+      "3.3V",
+      "GND",
+      "SIG"
+    ],
+    "board_mm": [
+      74,
+      66
+    ],
+    "window_mm": [
+      1.85,
+      1.85
+    ],
+    "word_height_mm": 0.6,
+    "word_openings": "B.Mask horizontal text; F.Mask aperture rotated45; all4copper layers excluded",
+    "HiZ": "all off; cannot distinguish unpowered",
+    "orientation_deg": 45,
+    "optical_and_assembly_validation": "Required. FR4 transmission and raised/reverse assembly must be tested; window design is not optically qualified.",
+    "firmware": "Not implemented. Clear all frame enables/PWM while in software shutdown, then enable only active mode. GPIO14 freed but not added to connectors.",
+    "outer_bounds_mm": [
+      148.25,
+      62.3,
+      222.25,
+      128.3
+    ],
+    "magnetic_midpoint_y_mm": 95.3,
+    "magnetic_distance_to_north_south_mm": 33,
+    "rows_unchanged": true,
+    "central_hole_gap_mm": 7.62,
+    "Hanxia_columns_per_bank": 3,
+    "LED_model": "genericKiCad1206castellated, rotated; not manufacturer exact model",
+    "routed": false,
+    "local_magnetic_tracks": 10,
+    "new_holes": false,
+    "FW_implemented": false,
+    "optics_qualified": false,
+    "LED_angle_deg": 45,
+    "text_angle_deg": 0,
+    "word_width_mm": 0.4,
+    "word_stroke_mm": 0.1,
+    "colours": {
+      "3.3V": {
+        "mpn": "XL-3216SURC-FB",
+        "lcsc": "C3646938",
+        "colour": "red"
+      },
+      "GND": {
+        "mpn": "XL-3216UBC-FB",
+        "lcsc": "C3646941",
+        "colour": "blue"
+      },
+      "SIG": {
+        "mpn": "XL-3216UGC-FB",
+        "lcsc": "C3646937",
+        "colour": "green"
+      }
+    },
+    "matrix_groups": {
+      "CA": "16red",
+      "CB": "16blue+16green"
+    },
+    "assembly_clearance_status": "Nominal bodies fit; original courtyard margins overlap and general manufacturer +/-0.25mm tolerances are not qualified.",
+    "window_requirements": "1.85mm square copper keepout rotated45deg on all4layers; top mask1.8x1.4mm rotated with LED; bottom lettering horizontal, optical sample required.",
+    "nominal_body_clearance_mm": 0.196,
+    "assembly_courtyard_overlap_pairs": 74
+  },
+  "indicator_power_revision": {
+    "driver_supply_V": 5,
+    "driver_supply_net": "5V",
+    "I2C_pullups_V": 3.3,
+    "SDB_net": "ESP_EN",
+    "SDB_logic_V": 3.3,
+    "additional_components": 0,
+    "R_EXT_ohm": 47000,
+    "normal_16_active_LED_typical_mA": 24.19553191489362,
+    "all_48_active_LED_typical_mA": 68.24659574468086,
+    "colour_BOM_unchanged": true,
+    "source": "https://www.lumissil.com/assets/pdf/core/IS31FL3731_AN.pdf,page6,Q8; datasheetRevGpage5; C40050V,C40125V unchanged",
+    "qualification": "Values are calculations; PCB unrouted, optical and hardware tests pending"
+  },
+  "ui_buttons": {
+    "SW1": {
+      "gpio": 21,
+      "net": "UI_BANK_N",
+      "action": "select bank A/B"
+    },
+    "SW2": {
+      "gpio": 13,
+      "net": "GPIO13",
+      "action": "select row1..8",
+      "shared_south_pin": 7
+    },
+    "logic": "active low; internal pullups; debounce and simultaneous hold in firmware; boot safety reset unchanged",
+    "firmware_implemented": false,
+    "lcsc": "C318884",
+    "side": "B.Cu",
+    "drawing": "references/XKB-TS-1187A-B-A-B-C318884.pdf"
+  },
+  "ui_navigation_firmware_spec": {
+    "debounce_ms": 30,
+    "both_hold_ms": 800,
+    "press_action": "single button action on release only after excluding both-button chord",
+    "cycle": [
+      "Hi-Z",
+      "MCU",
+      "3.3V",
+      "GND"
+    ],
+    "transition": "all outputs off; wait dead time validated against switch timing; then enable only desired mode",
+    "startup": "rows Hi-Z; buttons never bypass reset interlock",
+    "gpio_setup": "21 and13 input pullup; do not drive J25.7 externally",
+    "selected_indicator": "pulse selected mode; brief MCU pulse as navigation acknowledgement in Hi-Z only, never imply active mode",
+    "implementation_status": "specification only; no firmware change"
+  }
+}

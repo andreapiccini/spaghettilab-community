@@ -1,0 +1,35 @@
+{
+  "checked_date": "2026-11-07",
+  "manufacturer": "Microchip",
+  "mpn": "MCP23017T-E/ML",
+  "lcsc_part": "C629439",
+  "currency": "USD",
+  "indicative": true,
+  "quantity_unit": "individual components",
+  "per_board_quantity": 3,
+  "tiers": [
+    {
+      "minimum_quantity": 1,
+      "unit_price": 1.8721
+    },
+    {
+      "minimum_quantity": 10,
+      "unit_price": 1.5849
+    },
+    {
+      "minimum_quantity": 500,
+      "unit_price": 1.1639
+    },
+    {
+      "minimum_quantity": 1000,
+      "unit_price": 1.1276
+    }
+  ],
+  "price_source": "https://www.lcsc.com/brand/954-169.html",
+  "product_url": "https://www.lcsc.com/product-detail/C629439.html",
+  "excludes": [
+    "taxes",
+    "shipping",
+    "assembly"
+  ]
+}

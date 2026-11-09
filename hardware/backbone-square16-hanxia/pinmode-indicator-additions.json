@@ -1,0 +1,74 @@
+[
+  {
+    "ref": "D554",
+    "label": "MCU_ADC",
+    "display": "ADC",
+    "colour": "green",
+    "kind": "selected_pin_function",
+    "group": "A",
+    "cathode": "LABEL_CA8",
+    "anode": "LABEL_CA5",
+    "x_mm": 172.3,
+    "y_mm": 85.1
+  },
+  {
+    "ref": "D555",
+    "label": "MCU_PWM",
+    "display": "PWM",
+    "colour": "green",
+    "kind": "selected_pin_function",
+    "group": "A",
+    "cathode": "LABEL_CA8",
+    "anode": "LABEL_CA6",
+    "x_mm": 168.1,
+    "y_mm": 85.1
+  },
+  {
+    "ref": "D556",
+    "label": "MCU_IN",
+    "display": "IN",
+    "colour": "green",
+    "kind": "selected_pin_function",
+    "group": "A",
+    "cathode": "LABEL_CA8",
+    "anode": "LABEL_CA7",
+    "x_mm": 163.9,
+    "y_mm": 85.1
+  },
+  {
+    "ref": "D557",
+    "label": "MCU_OUT",
+    "display": "OUT",
+    "colour": "green",
+    "kind": "selected_pin_function",
+    "group": "A",
+    "cathode": "LABEL_CA8",
+    "anode": "LABEL_CA9",
+    "x_mm": 159.7,
+    "y_mm": 85.1
+  },
+  {
+    "ref": "D558",
+    "label": "MCU_PULL_UP",
+    "display": "UP",
+    "colour": "green",
+    "kind": "selected_pin_pull",
+    "group": "A",
+    "cathode": "LABEL_CA9",
+    "anode": "LABEL_CA1",
+    "x_mm": 169.25,
+    "y_mm": 88.5
+  },
+  {
+    "ref": "D559",
+    "label": "MCU_PULL_DOWN",
+    "display": "DOWN",
+    "colour": "green",
+    "kind": "selected_pin_pull",
+    "group": "A",
+    "cathode": "LABEL_CA9",
+    "anode": "LABEL_CA2",
+    "x_mm": 162.75,
+    "y_mm": 88.5
+  }
+]

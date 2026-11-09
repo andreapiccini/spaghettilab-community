@@ -1,0 +1,28 @@
+{
+  "footprints_before": 219,
+  "footprints_after": 181,
+  "removed_placements": 38,
+  "old_replaced_footprint_area_mm2": 252.79739999999984,
+  "new_replaced_footprint_area_mm2": 156.79375,
+  "saved_footprint_area_mm2": 96.00364999999985,
+  "area_method": "sum of native footprint bounding boxes excluding reference/value; placement/routing space not guaranteed",
+  "board_mm": [
+    57,
+    97
+  ],
+  "board_outline_unchanged": true,
+  "mechanical_optical_positions_unchanged": true,
+  "schematic_pcb_mismatches": [],
+  "48_resistor_endpoint_pairs_preserved": true,
+  "Yageo_pairs": "1-5;2-6;3-7;4-8",
+  "reset_truth_table_equivalent": true,
+  "TSSOP_switches_retained": true,
+  "erc_errors": 0,
+  "erc_warnings": 103,
+  "drc": {
+    "courtyards_overlap": 4,
+    "copper_edge_clearance": 20
+  },
+  "tracks": 0,
+  "routed": false
+}

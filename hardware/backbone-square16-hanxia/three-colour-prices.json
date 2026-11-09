@@ -1,0 +1,152 @@
+{
+  "C3646938": {
+    "title": "XL-3216SURC-FB | LED Indication - Discrete | XINGLIGHT | LCSC",
+    "prices": [
+      {
+        "qty": 50,
+        "usd": 0.0101
+      },
+      {
+        "qty": 500,
+        "usd": 0.0088
+      },
+      {
+        "qty": 3000,
+        "usd": 0.0076
+      },
+      {
+        "qty": 6000,
+        "usd": 0.0073
+      },
+      {
+        "qty": 24000,
+        "usd": 0.0069
+      },
+      {
+        "qty": 51000,
+        "usd": 0.0067
+      }
+    ],
+    "stock": 551900
+  },
+  "C3646937": {
+    "title": "XL-3216UGC-FB | LED Indication - Discrete | XINGLIGHT | LCSC",
+    "prices": [
+      {
+        "qty": 50,
+        "usd": 0.0097
+      },
+      {
+        "qty": 500,
+        "usd": 0.0085
+      },
+      {
+        "qty": 3000,
+        "usd": 0.0075
+      },
+      {
+        "qty": 6000,
+        "usd": 0.007
+      },
+      {
+        "qty": 24000,
+        "usd": 0.0066
+      },
+      {
+        "qty": 51000,
+        "usd": 0.0064
+      }
+    ],
+    "stock": 320800
+  },
+  "C3646939": {
+    "title": "XL-3216UYC-FB | LED Indication - Discrete | XINGLIGHT | LCSC",
+    "prices": [
+      {
+        "qty": 50,
+        "usd": 0.0153
+      },
+      {
+        "qty": 500,
+        "usd": 0.0119
+      },
+      {
+        "qty": 3000,
+        "usd": 0.0097
+      },
+      {
+        "qty": 6000,
+        "usd": 0.0086
+      },
+      {
+        "qty": 24000,
+        "usd": 0.0076
+      },
+      {
+        "qty": 51000,
+        "usd": 0.0071
+      }
+    ],
+    "stock": 29300
+  },
+  "C3646940": {
+    "title": "XL-3216SYGC-FB | LED Indication - Discrete | XINGLIGHT | LCSC",
+    "prices": [
+      {
+        "qty": 50,
+        "usd": 0.0146
+      },
+      {
+        "qty": 500,
+        "usd": 0.0115
+      },
+      {
+        "qty": 3000,
+        "usd": 0.0097
+      },
+      {
+        "qty": 6000,
+        "usd": 0.0088
+      },
+      {
+        "qty": 24000,
+        "usd": 0.0078
+      },
+      {
+        "qty": 51000,
+        "usd": 0.0073
+      }
+    ],
+    "stock": 4550
+  },
+  "C3646941": {
+    "title": "XL-3216UBC-FB | LED Indication - Discrete | XINGLIGHT | LCSC",
+    "prices": [
+      {
+        "qty": 50,
+        "usd": 0.0147
+      },
+      {
+        "qty": 500,
+        "usd": 0.0115
+      },
+      {
+        "qty": 3000,
+        "usd": 0.0094
+      },
+      {
+        "qty": 6000,
+        "usd": 0.0083
+      },
+      {
+        "qty": 24000,
+        "usd": 0.0074
+      },
+      {
+        "qty": 51000,
+        "usd": 0.0069
+      }
+    ],
+    "stock": 102300
+  }
+}

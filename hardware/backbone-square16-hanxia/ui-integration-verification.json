@@ -1,0 +1,92 @@
+{
+  "main_files_integrated": true,
+  "revision": "four-columns-per-bank",
+  "board_mm": [
+    78,
+    66
+  ],
+  "matrix_channels_used": 109,
+  "matrix_channels_free": 35,
+  "logo_LED_count": 9,
+  "UI_LED_count": 64,
+  "all_LED_count": 112,
+  "deleted_LED_refs": [
+    "D521",
+    "D524",
+    "D525",
+    "D526",
+    "D527",
+    "D528",
+    "D529"
+  ],
+  "added_LED_refs": [
+    "D532",
+    "D533",
+    "D534",
+    "D535",
+    "D536"
+  ],
+  "row_sigla_pitch_mm": 4.2,
+  "row_sigla_row_gap_mm": 2.8,
+  "mezzanine_offboard_DNP": [
+    "J26",
+    "J27"
+  ],
+  "schematic_PCB_pad_mismatches": [],
+  "erc": {
+    "warning": 54
+  },
+  "drc_counts": {
+    "courtyards_overlap": 199,
+    "pth_inside_courtyard": 10,
+    "copper_edge_clearance": 20,
+    "silk_edge_clearance": 1,
+    "silk_overlap": 29,
+    "silk_over_copper": 30
+  },
+  "no_new_GPIO": true,
+  "copper_routing_complete": false,
+  "physical_optical_tested": false,
+  "fabrication_ready": false,
+  "remaining_unconnected_reports": 499,
+  "debug_indicator_ref": "D537",
+  "debug_LED_LCSC": "C3646937",
+  "debug_LED_pair": {
+    "1": "LABEL_CA5",
+    "2": "LABEL_CA6"
+  },
+  "debug_functions_implemented": false,
+  "configuration_slot_count": 4,
+  "configuration_menu_implemented": false,
+  "configuration_LED_refs": [
+    "D538",
+    "D539",
+    "D540",
+    "D541",
+    "D542",
+    "D543"
+  ],
+  "connectivity_indicator_count": 5,
+  "progress_segment_count": 5,
+  "short_indicator_added": false,
+  "connectivity_firmware_implemented": false,
+  "pinmode_indicator_count": 6,
+  "pinmode_menu_implemented": false,
+  "ADC_banks": [
+    "A"
+  ],
+  "pinmode_LED_refs": [
+    "D554",
+    "D555",
+    "D556",
+    "D557",
+    "D558",
+    "D559"
+  ],
+  "breadboard_contacts": 64,
+  "breadboard_headers": 8,
+  "DIP_gap_mm": 7.62,
+  "row_pitch_mm": 2.54,
+  "column_pitch_mm": 4,
+  "main_copper_routing_complete": false
+}

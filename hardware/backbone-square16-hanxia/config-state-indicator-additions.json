@@ -1,0 +1,127 @@
+[
+  {
+    "ref": "D560",
+    "label": "LOGO10",
+    "colour": "blue",
+    "kind": "logo",
+    "group": "A",
+    "cathode": "LABEL_CA9",
+    "anode": "LABEL_CA3",
+    "x_mm": 162,
+    "y_mm": 78.1
+  },
+  {
+    "ref": "D561",
+    "label": "LOGO11",
+    "colour": "blue",
+    "kind": "logo",
+    "group": "A",
+    "cathode": "LABEL_CA9",
+    "anode": "LABEL_CA4",
+    "x_mm": 166,
+    "y_mm": 78.1
+  },
+  {
+    "ref": "D562",
+    "label": "LOGO12",
+    "colour": "blue",
+    "kind": "logo",
+    "group": "A",
+    "cathode": "LABEL_CA9",
+    "anode": "LABEL_CA5",
+    "x_mm": 170,
+    "y_mm": 78.1
+  },
+  {
+    "ref": "D563",
+    "label": "LOGO13",
+    "colour": "blue",
+    "kind": "logo",
+    "group": "A",
+    "cathode": "LABEL_CA9",
+    "anode": "LABEL_CA6",
+    "x_mm": 158,
+    "y_mm": 80.7
+  },
+  {
+    "ref": "D564",
+    "label": "LOGO14",
+    "colour": "blue",
+    "kind": "logo",
+    "group": "A",
+    "cathode": "LABEL_CA9",
+    "anode": "LABEL_CA7",
+    "x_mm": 162,
+    "y_mm": 80.7
+  },
+  {
+    "ref": "D565",
+    "label": "LOGO15",
+    "colour": "blue",
+    "kind": "logo",
+    "group": "A",
+    "cathode": "LABEL_CA9",
+    "anode": "LABEL_CA8",
+    "x_mm": 166,
+    "y_mm": 80.7
+  },
+  {
+    "ref": "D566",
+    "label": "LOGO16",
+    "colour": "blue",
+    "kind": "logo",
+    "group": "B",
+    "cathode": "LABEL_CB5",
+    "anode": "LABEL_CB1",
+    "x_mm": 170,
+    "y_mm": 80.7
+  },
+  {
+    "ref": "D567",
+    "label": "CONFIG_ON",
+    "colour": "green",
+    "kind": "configuration_state",
+    "group": "B",
+    "cathode": "LABEL_CB5",
+    "anode": "LABEL_CB2",
+    "x_mm": 166.5,
+    "y_mm": 114.75,
+    "display": "ON"
+  },
+  {
+    "ref": "D568",
+    "label": "CONFIG_OFF",
+    "colour": "red",
+    "kind": "configuration_state",
+    "group": "B",
+    "cathode": "LABEL_CB5",
+    "anode": "LABEL_CB3",
+    "x_mm": 162.0,
+    "y_mm": 114.75,
+    "display": "OFF"
+  },
+  {
+    "ref": "D569",
+    "label": "DELETE",
+    "colour": "red",
+    "kind": "configuration_action",
+    "group": "B",
+    "cathode": "LABEL_CB5",
+    "anode": "LABEL_CB4",
+    "x_mm": 186.6,
+    "y_mm": 121.0,
+    "display": "DELETE"
+  },
+  {
+    "ref": "D570",
+    "label": "SELECT_ALL",
+    "colour": "green",
+    "kind": "row_selection_all",
+    "group": "B",
+    "cathode": "LABEL_CB5",
+    "anode": "LABEL_CB6",
+    "x_mm": 206.9,
+    "y_mm": 114.75,
+    "display": "ALL"
+  }
+]

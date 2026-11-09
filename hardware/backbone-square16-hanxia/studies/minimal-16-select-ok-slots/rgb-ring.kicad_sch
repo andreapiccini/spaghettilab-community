@@ -1,0 +1,1285 @@
+(kicad_sch(version 20260101)(generator "eeschema")(uuid "5635ee72-705b-4096-a00d-5217983a2ad9")(paper "A2")(title_block(title "06 - Indicatori tre colori,5V,testi dritti")(date "2026-11-08")(rev "16R-READABLE"))(lib_symbols(symbol "Board28:Device__C"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Unpolarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "C_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Device__C_0_1"
+				(polyline
+					(pts
+						(xy -2.032 0.762) (xy 2.032 0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.032 -0.762) (xy 2.032 -0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Device__C_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)(symbol "Board28:Device__R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Device__R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Device__R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)(symbol "Board28:Driver_LED__IS31FL3731-QF"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "U"
+			(at -10.16 26.035 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "IS31FL3731-QF"
+			(at 2.54 -26.035 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(property "Footprint" "Breadboard28:IS31FL3731_QFN28_4x4"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "http://www.issi.com/WW/pdf/31FL3731.pdf"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "9x16 LED matrix driver with 8-bit PWM and breathing, QFN-28"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "led matrix pwm"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "QFN*1EP*4x4mm*P0.4mm*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "Driver_LED__IS31FL3731-QF_0_1"
+			(rectangle
+				(start -10.16 25.4)
+				(end 10.16 -25.4)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "Driver_LED__IS31FL3731-QF_1_1"
+			(pin bidirectional line
+				(at 12.7 2.54 180)
+				(length 2.54)
+				(name "CA9"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 27.94 270)
+				(length 2.54)
+				(name "VCC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -12.7 12.7 0)
+				(length 2.54)
+				(name "~{SDB}"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin open_collector line
+				(at -12.7 10.16 0)
+				(length 2.54)
+				(name "~{INTB}"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -27.94 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -12.7 -2.54 0)
+				(length 2.54)
+				(name "R_EXT"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -2.54 180)
+				(length 2.54)
+				(name "CB1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -5.08 180)
+				(length 2.54)
+				(name "CB2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -7.62 180)
+				(length 2.54)
+				(name "CB3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "9"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -10.16 180)
+				(length 2.54)
+				(name "CB4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "10"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -12.7 180)
+				(length 2.54)
+				(name "CB5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "11"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -15.24 180)
+				(length 2.54)
+				(name "CB6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "12"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -17.78 180)
+				(length 2.54)
+				(name "CB7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "13"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -20.32 180)
+				(length 2.54)
+				(name "CB8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "14"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -22.86 180)
+				(length 2.54)
+				(name "CB9"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "15"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -12.7 2.54 0)
+				(length 2.54)
+				(name "C_FILT"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "16"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -12.7 5.08 0)
+				(length 2.54)
+				(name "IN"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "17"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -12.7 17.78 0)
+				(length 2.54)
+				(name "AD"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "18"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 22.86 0)
+				(length 2.54)
+				(name "SDA"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "19"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -12.7 20.32 0)
+				(length 2.54)
+				(name "SCL"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "20"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 22.86 180)
+				(length 2.54)
+				(name "CA1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "21"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 20.32 180)
+				(length 2.54)
+				(name "CA2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "22"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 17.78 180)
+				(length 2.54)
+				(name "CA3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "23"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 15.24 180)
+				(length 2.54)
+				(name "CA4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "24"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 12.7 180)
+				(length 2.54)
+				(name "CA5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "25"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 10.16 180)
+				(length 2.54)
+				(name "CA6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "26"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 7.62 180)
+				(length 2.54)
+				(name "CA7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "27"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 5.08 180)
+				(length 2.54)
+				(name "CA8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "28"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -27.94 90)
+				(length 2.54)
+				(hide yes)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "29"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)(symbol "Board28:LED_Reverse_1206"(pin_names(hide yes))(in_bom yes)(on_board yes)(property "Reference" "D"(at 0 3.81 0)(effects(font(size 1 1))))(property "Value" "XL-3216SURC-FB"(at 0 -3.81 0)(effects(font(size 1 1))))(symbol "LED_Reverse_1206_0_1"(polyline(pts(xy -1.27 1.27)(xy 1.27 0)(xy -1.27 -1.27)(xy -1.27 1.27))(stroke(width .254)(type default))(fill(type none)))(polyline(pts(xy 1.27 1.27)(xy 1.27 -1.27))(stroke(width .254)(type default))(fill(type none))))(symbol "LED_Reverse_1206_1_1"(pin passive line(at 5.08 0 180)(length 3.81)(name "K"(effects(font(size 1 1))))(number "1"(effects(font(size 1 1)))))(pin passive line(at -5.08 0 0)(length 3.81)(name "A"(effects(font(size 1 1))))(number "2"(effects(font(size 1 1))))))))
+(rectangle(start 10.16 10.16)(end 570.23 125.73)(stroke(width .254)(type dash))(fill(type none))(uuid "1e9f0d85-e939-4f0d-a1e0-f43cfec5a7bf"))
+(text "DRIVER5V | I2C INTERNO3,3V |48LED"(at 13.97 13.97 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "e324da94-2dcf-4380-ba21-b64dbe6d21ea"))
+(text "IS31FL3731,0x74; SDB=ESP_EN3,3V. Nessun nuovo GPIO. R_EXT47k:1,38mAmedi/LED aPWM255.\nCA:16rossi, CB:16blu+16verdi. Avvio in software shutdown; azzerare enable/PWMprima di accendere."(at 13.97 20.32 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "1d9cca20-d10b-48bc-9634-bed58435b91f"))
+(symbol(lib_id "Board28:Driver_LED__IS31FL3731-QF")(at 95.25 68.58 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "1ee525f5-2cf0-45ed-97d2-04bcce2baaed")(property "Reference" "U70"(at 108.450000 32.520000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "IS31FL3731-QFLS2-TR"(at 108.450000 35.060000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:IS31FL3731_QFN28_4x4"(at 95.250000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "Lumissil Microsystems"(at 95.250000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "IS31FL3731-QFLS2-TR"(at 95.250000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lumissil.com/assets/pdf/core/IS31FL3731_DS.pdf"(at 95.250000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "I2C Address" "0x74"(at 95.250000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C191206"(at 95.250000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "7a4cc5a1-38f0-4ff6-b54e-28181e50fdfb"))(pin "2"(uuid "e27222df-5647-4920-a03a-51080db448ce"))(pin "3"(uuid "c5353919-8037-4726-a46a-61d2cbc1a26e"))(pin "4"(uuid "e5e78ef5-484a-4ff8-ac2a-ad7e9c2de017"))(pin "5"(uuid "4a951bc1-a494-4916-8858-baa2c9c6725e"))(pin "6"(uuid "3a54b62c-8a79-4b27-a9b4-279a7244c854"))(pin "7"(uuid "65675c96-bb2a-4a4f-ad6b-325923e13d51"))(pin "8"(uuid "efcd426b-13c4-47db-b25a-65a26a4e7f53"))(pin "9"(uuid "77169c84-c1ae-471b-a91c-b396f382597e"))(pin "10"(uuid "dd4e7f96-ecfe-4019-8edb-2217de5fe4d1"))(pin "11"(uuid "0345de23-90c4-4ba4-884f-04cce82991a6"))(pin "12"(uuid "54a098a2-6984-411e-a0d1-902e968ec4fe"))(pin "13"(uuid "a6676569-1a1c-4fa2-833e-9319bd3898e4"))(pin "14"(uuid "f773e5a4-ed1a-4ddb-a5c4-6722ca28ec61"))(pin "15"(uuid "eb55d84f-8c4e-4f8a-9d5e-cc4e4f2f5e3c"))(pin "16"(uuid "6499d0dd-949c-4126-9360-2344041efc95"))(pin "17"(uuid "3c7096a6-ad9e-43a1-b67c-f85645875e41"))(pin "18"(uuid "3c8cb7f0-1dcb-442c-bbb9-8c31a3b79534"))(pin "19"(uuid "661d1236-e463-42a2-aa4a-9b0b9d911d02"))(pin "20"(uuid "9d982fe7-9054-49ff-bc9a-96c39b68b584"))(pin "21"(uuid "a731eb1b-7f06-4b4f-9870-5eed34cd0634"))(pin "22"(uuid "615cece7-b46d-4d44-91a2-42c33b5186a3"))(pin "23"(uuid "d987fb0c-e94b-486c-b408-3577522a962c"))(pin "24"(uuid "77b74c81-9e28-44ce-ad57-100545e3267e"))(pin "25"(uuid "6cdac731-14c0-41ec-b43a-d11ceb00bbd8"))(pin "26"(uuid "598d2f7e-fc48-48cf-9bf5-24671e402837"))(pin "27"(uuid "bf1f079a-ef58-412a-b8c0-27d464824fb7"))(pin "28"(uuid "26076c9a-454a-47e5-b282-4003be5e57c4"))(pin "29"(uuid "b51184d7-d726-498d-9356-0ed23bf1a806"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "U70")(unit 1)))))
+(global_label "LABEL_CA9"(shape bidirectional)(at 115.57000000000001 66.04 0)(effects(font(size 1.0 1.0))(justify left))(uuid "861561de-17ef-4b31-ab18-d67a35c4a539")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 66.040000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "5V"(shape bidirectional)(at 95.25 33.02 0)(effects(font(size 1.0 1.0))(justify left))(uuid "55ad1ec9-8605-48c9-8dea-5e1672270ee6")(property "Descrizione" "Rail5V driverLED"(at 95.250000 33.020000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ESP_EN"(shape bidirectional)(at 74.93 55.88 180)(effects(font(size 1.0 1.0))(justify right))(uuid "b4a3aeca-ffb9-4299-91c4-6935f520a9b3")(property "Descrizione" "ESP_EN"(at 74.930000 55.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(no_connect(at 82.55 58.42)(uuid "6e34541a-8ee4-4778-8e7b-86e89fea00cf"))
+(global_label "GND"(shape bidirectional)(at 95.25 104.14 0)(effects(font(size 1.0 1.0))(justify left))(uuid "ce167982-1da6-4cef-b37a-f6246973c429")(property "Descrizione" "GND"(at 95.250000 104.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_R_EXT"(shape bidirectional)(at 74.93 71.12 180)(effects(font(size 1.0 1.0))(justify right))(uuid "9feb53f8-4868-4b02-8885-5af2d8008033")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 74.930000 71.120000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 115.57000000000001 71.12 0)(effects(font(size 1.0 1.0))(justify left))(uuid "9557a93f-0e38-4ef7-a458-984e8b7f13c4")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 71.120000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 115.57000000000001 73.66 0)(effects(font(size 1.0 1.0))(justify left))(uuid "6fc87e12-6ebe-4f3a-bb34-b442d1cf0a7c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 73.660000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 115.57000000000001 76.2 0)(effects(font(size 1.0 1.0))(justify left))(uuid "82cf8ba3-b651-4371-8ce6-6789b8b324e6")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 76.200000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 115.57000000000001 78.74 0)(effects(font(size 1.0 1.0))(justify left))(uuid "039e840c-0cf3-44e0-89ff-065a919170e4")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 78.740000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB5"(shape bidirectional)(at 115.57000000000001 81.28 0)(effects(font(size 1.0 1.0))(justify left))(uuid "eb0f9d42-9407-4911-9879-57645158784d")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 81.280000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB6"(shape bidirectional)(at 115.57000000000001 83.82000000000001 0)(effects(font(size 1.0 1.0))(justify left))(uuid "8cb894d6-0369-4fae-bb65-739aa3c0bcf0")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 83.820000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB7"(shape bidirectional)(at 115.57000000000001 86.36 0)(effects(font(size 1.0 1.0))(justify left))(uuid "ed249bf3-53db-441d-bb76-f952621cf40c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 86.360000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB8"(shape bidirectional)(at 115.57000000000001 88.9 0)(effects(font(size 1.0 1.0))(justify left))(uuid "e1ac1eb9-5334-472b-8a45-c59595f4872c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 88.900000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB9"(shape bidirectional)(at 115.57000000000001 91.44 0)(effects(font(size 1.0 1.0))(justify left))(uuid "9eb3d1f9-f67a-4d1c-a518-d0d75640d473")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_C_FILT"(shape bidirectional)(at 74.93 66.04 180)(effects(font(size 1.0 1.0))(justify right))(uuid "438c5184-299b-4711-ad51-74ab0b18a7a0")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 74.930000 66.040000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 74.93 63.5 180)(effects(font(size 1.0 1.0))(justify right))(uuid "95617a14-2b8a-493c-9c7f-2db0825bced6")(property "Descrizione" "GND"(at 74.930000 63.500000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 74.93 50.8 180)(effects(font(size 1.0 1.0))(justify right))(uuid "a5eedbae-17f2-4dba-baf3-56dc83d00e0b")(property "Descrizione" "GND"(at 74.930000 50.800000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SDA"(shape bidirectional)(at 74.93 45.72 180)(effects(font(size 1.0 1.0))(justify right))(uuid "d37edc30-4fea-4003-becd-74a1ce852553")(property "Descrizione" "Bus interno a3,3V; distinto da I2C utente"(at 74.930000 45.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SCL"(shape bidirectional)(at 74.93 48.26 180)(effects(font(size 1.0 1.0))(justify right))(uuid "e40801b6-7284-44e9-b5e5-aea0e52448de")(property "Descrizione" "Bus interno a3,3V; distinto da I2C utente"(at 74.930000 48.260000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 115.57000000000001 45.72 0)(effects(font(size 1.0 1.0))(justify left))(uuid "90d01193-88ee-40f3-9e8c-3ff2f465e653")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 45.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 115.57000000000001 48.26 0)(effects(font(size 1.0 1.0))(justify left))(uuid "515fd746-e6b8-4497-aa55-213196dd79fa")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 48.260000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA3"(shape bidirectional)(at 115.57000000000001 50.8 0)(effects(font(size 1.0 1.0))(justify left))(uuid "ae079ac5-6aa7-4919-a354-c290707e82a1")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 50.800000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA4"(shape bidirectional)(at 115.57000000000001 53.34 0)(effects(font(size 1.0 1.0))(justify left))(uuid "ff441cdb-6a6b-4e1d-9b10-a2cca6162e50")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 53.340000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA5"(shape bidirectional)(at 115.57000000000001 55.88 0)(effects(font(size 1.0 1.0))(justify left))(uuid "d9994161-c6f2-4ede-91f1-1518ab923bd4")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 55.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA6"(shape bidirectional)(at 115.57000000000001 58.42 0)(effects(font(size 1.0 1.0))(justify left))(uuid "43ebf9d1-1120-4cdf-97bb-35882ee7be1b")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 58.420000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA7"(shape bidirectional)(at 115.57000000000001 60.96 0)(effects(font(size 1.0 1.0))(justify left))(uuid "a83e079d-c039-4d8d-8dc1-24125ff0dea7")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 60.960000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA8"(shape bidirectional)(at 115.57000000000001 63.5 0)(effects(font(size 1.0 1.0))(justify left))(uuid "d295b733-558d-4f08-b665-337144f9ac15")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 115.570000 63.500000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 95.25 104.14 0)(effects(font(size 1.0 1.0))(justify left))(uuid "c244cb1f-594e-43b0-88e9-aea93cfa13f4")(property "Descrizione" "GND"(at 95.250000 104.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:Device__R")(at 215.9 68.58 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "46fe0538-484a-40e0-8f1d-0124d3dfef3f")(property "Reference" "R400"(at 219.956000 67.310000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "47k"(at 219.956000 69.850000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Resistor_SMD:R_0603_1608Metric"(at 215.900000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "UNI-ROYAL"(at 215.900000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "0603WAF4702T5E"(at 215.900000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C25819"(at 215.900000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "cea9d3dd-5dfe-4ee1-869f-88b42f36ac52"))(pin "2"(uuid "01257244-0f7e-49e2-91b8-a5786cc3f1a6"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "R400")(unit 1)))))
+(global_label "LABEL_R_EXT"(shape bidirectional)(at 215.9 57.15 0)(effects(font(size 1.0 1.0))(justify left))(uuid "800cad14-306e-40ea-825d-4f216078e2a9")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 215.900000 57.150000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 215.9 80.01 0)(effects(font(size 1.0 1.0))(justify left))(uuid "4f11e001-a18f-4edd-8439-e117cfd1993e")(property "Descrizione" "GND"(at 215.900000 80.010000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:Device__C")(at 285.75 68.58 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "57bfc049-ad12-461c-a288-b41f70cf273d")(property "Reference" "C400"(at 290.822000 67.310000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "100nF"(at 290.822000 69.850000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"(at 285.750000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C1591"(at 285.750000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "CL10B104KB8NNNC"(at 285.750000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "Samsung Electro-Mechanics"(at 285.750000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "f52c5599-cda8-4870-96e5-af5abcd9f32a"))(pin "2"(uuid "e14cb36d-77da-4dc1-af97-1479c71f442d"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "C400")(unit 1)))))
+(global_label "5V"(shape bidirectional)(at 285.75 57.15 0)(effects(font(size 1.0 1.0))(justify left))(uuid "dec3034d-f5dc-419c-bc7f-59b24b7a12fe")(property "Descrizione" "Rail5V driverLED"(at 285.750000 57.150000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 285.75 80.01 0)(effects(font(size 1.0 1.0))(justify left))(uuid "f35eabf5-521a-4213-b7bb-ed78fd2f3a8f")(property "Descrizione" "GND"(at 285.750000 80.010000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:Device__C")(at 355.6 68.58 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "75c24865-c54a-407f-99d9-6e66983ae1bd")(property "Reference" "C401"(at 360.672000 67.310000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "1uF"(at 360.672000 69.850000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"(at 355.600000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C15849"(at 355.600000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "CL10A105KB8NNNC"(at 355.600000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "Samsung"(at 355.600000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "43ca2025-ea81-4e64-840a-f015aa42d249"))(pin "2"(uuid "2007d480-e361-4593-bee3-d8f866157940"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "C401")(unit 1)))))
+(global_label "5V"(shape bidirectional)(at 355.6 57.15 0)(effects(font(size 1.0 1.0))(justify left))(uuid "20aa8145-3f7e-436f-8b39-ad4011c29fce")(property "Descrizione" "Rail5V driverLED"(at 355.600000 57.150000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 355.6 80.01 0)(effects(font(size 1.0 1.0))(justify left))(uuid "6a377c23-f42d-4da5-aa72-a382834e98bf")(property "Descrizione" "GND"(at 355.600000 80.010000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:Device__C")(at 425.45 68.58 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "7652fbb4-7f94-4df1-a0ce-4c7a7e1579ec")(property "Reference" "C402"(at 430.522000 67.310000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "100nF"(at 430.522000 69.850000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"(at 425.450000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C1591"(at 425.450000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "CL10B104KB8NNNC"(at 425.450000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "Samsung Electro-Mechanics"(at 425.450000 68.580000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "08f87f05-76bb-4564-9534-9838b39e1c75"))(pin "2"(uuid "0b35ee2f-38c3-49b5-b7a7-6afdfff46f1c"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "C402")(unit 1)))))
+(global_label "LABEL_C_FILT"(shape bidirectional)(at 425.45 57.15 0)(effects(font(size 1.0 1.0))(justify left))(uuid "e921a54e-6a5a-44a9-8a0b-77939e534aa3")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 57.150000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 425.45 80.01 0)(effects(font(size 1.0 1.0))(justify left))(uuid "157d94eb-474a-4a69-b55e-ca64ec8551a5")(property "Descrizione" "GND"(at 425.450000 80.010000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(rectangle(start 12.7 135.89000000000001)(end 281.94 163.83)(stroke(width .254)(type dash))(fill(type none))(uuid "f981630e-6f02-445d-846f-db895dd19cfe"))
+(text "A1 |3.3VROSSO /GNDBLU /MCU VERDE"(at 16.51 139.7 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "d01d7a66-7978-465c-a807-744dfd4a01a8"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 50.8 153.67000000000002 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "7807c98f-da1e-4783-a9a9-b42c25ad4bc2")(property "Reference" "D400"(at 55.110000 152.400000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 55.110000 154.940000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 50.800000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 50.800000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 50.800000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 50.800000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 50.800000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 50.800000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A1"(at 50.800000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 50.800000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "6c23205d-a2b8-4f96-a7b7-d033b3c548a4"))(pin "2"(uuid "113754de-1434-44a4-886f-fb42e9428fb1"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D400")(unit 1)))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 62.230000000000004 153.67000000000002 0)(effects(font(size 1.0 1.0))(justify left))(uuid "43fdd947-8abd-47c6-9916-aa0b383ce5a3")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 62.230000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 39.37 153.67000000000002 180)(effects(font(size 1.0 1.0))(justify right))(uuid "beef1b41-2bf8-4415-9a14-02aac750c23b")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 39.370000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 134.62 153.67000000000002 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "ed850bc8-2e10-4597-abf2-84fa762413c1")(property "Reference" "D401"(at 138.930000 152.400000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 138.930000 154.940000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 134.620000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 134.620000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 134.620000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 134.620000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 134.620000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 134.620000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A1"(at 134.620000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 134.620000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "d9646e00-2332-422c-a586-91a365d7e6ef"))(pin "2"(uuid "625d662a-b9ee-45d0-a7af-9a86a0909e81"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D401")(unit 1)))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 146.05 153.67000000000002 0)(effects(font(size 1.0 1.0))(justify left))(uuid "99f04b6d-981f-4458-95b4-4c188332ec8e")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 146.050000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 123.19 153.67000000000002 180)(effects(font(size 1.0 1.0))(justify right))(uuid "5bf06624-f083-4015-a790-8991ebfffe0b")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 123.190000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 218.44 153.67000000000002 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "0960e739-8d98-4f96-8858-3f5355274c42")(property "Reference" "D402"(at 222.750000 152.400000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 222.750000 154.940000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 218.440000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 218.440000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 218.440000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 218.440000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 218.440000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 218.440000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A1"(at 218.440000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 218.440000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "ee6ffa62-6226-4077-b52e-1897ded5c2cd"))(pin "2"(uuid "57d4436a-95a0-4501-aeac-17e91a788102"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D402")(unit 1)))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 229.87 153.67000000000002 0)(effects(font(size 1.0 1.0))(justify left))(uuid "379944f0-177a-45d9-95bc-92a9d31eb267")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 229.870000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 207.01 153.67000000000002 180)(effects(font(size 1.0 1.0))(justify right))(uuid "15297552-be10-428a-968d-e98970b5fa9c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 207.010000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 16.51 161.29 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "a569b14e-2bac-4001-b065-00220286d992"))
+(rectangle(start 12.7 165.1)(end 281.94 193.04)(stroke(width .254)(type dash))(fill(type none))(uuid "17bfa076-579c-4f46-ac19-01355d6b579d"))
+(text "A2 |3.3VROSSO /GNDBLU /MCU VERDE"(at 16.51 168.91 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "01f7959f-3da3-4e6a-b180-97b320e715be"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 50.8 182.88 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "6106a8d1-1ee2-452b-8f0e-7c78a201c9f6")(property "Reference" "D403"(at 55.110000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 55.110000 184.150000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 50.800000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 50.800000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 50.800000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 50.800000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 50.800000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 50.800000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A2"(at 50.800000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 50.800000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "740ad3c1-9fc6-4f7f-9bec-157e4d850705"))(pin "2"(uuid "5200fc73-cbff-41fb-9aaf-90838da17974"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D403")(unit 1)))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 62.230000000000004 182.88 0)(effects(font(size 1.0 1.0))(justify left))(uuid "3b08ec85-6927-4cc4-9d32-a2bd07fc6880")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 62.230000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA3"(shape bidirectional)(at 39.37 182.88 180)(effects(font(size 1.0 1.0))(justify right))(uuid "9b0c57c2-d8b4-481b-a437-568397598b95")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 39.370000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 134.62 182.88 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "eec0013d-5388-4182-b08e-de7b2f894c77")(property "Reference" "D404"(at 138.930000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 138.930000 184.150000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 134.620000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 134.620000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 134.620000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 134.620000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 134.620000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 134.620000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A2"(at 134.620000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 134.620000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "5e7b8327-05f1-41d1-bcd4-c48620f8439a"))(pin "2"(uuid "c0dfe9b1-33f6-44da-b6bd-328ddea257af"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D404")(unit 1)))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 146.05 182.88 0)(effects(font(size 1.0 1.0))(justify left))(uuid "6a03c788-54f6-4bcd-ae44-a2a1c93e54b1")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 146.050000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 123.19 182.88 180)(effects(font(size 1.0 1.0))(justify right))(uuid "f54d8704-eaa4-4b05-a3bf-333ade02a2c8")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 123.190000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 218.44 182.88 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "19d9321c-9196-4eb2-b9d7-1eae51dd8862")(property "Reference" "D405"(at 222.750000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 222.750000 184.150000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 218.440000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 218.440000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 218.440000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 218.440000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 218.440000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 218.440000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A2"(at 218.440000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 218.440000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "da4da975-68a2-40bb-aa44-ff615f332273"))(pin "2"(uuid "f6caeb99-2995-4e95-b208-64d8f538ea45"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D405")(unit 1)))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 229.87 182.88 0)(effects(font(size 1.0 1.0))(justify left))(uuid "1327f0e6-1fe9-4656-9535-12eb04f398ee")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 229.870000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB5"(shape bidirectional)(at 207.01 182.88 180)(effects(font(size 1.0 1.0))(justify right))(uuid "7a99e510-14bb-46ac-b6ab-bc5861811fda")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 207.010000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 16.51 190.5 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "09d05d84-259f-43d2-8f26-5d24f0c6312c"))
+(rectangle(start 12.7 194.31)(end 281.94 222.25)(stroke(width .254)(type dash))(fill(type none))(uuid "6e94a3a5-16cb-4d32-9292-b6986d79ee0a"))
+(text "A3 |3.3VROSSO /GNDBLU /MCU VERDE"(at 16.51 198.12 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "449efe63-a959-4b23-a3df-907c8ca42365"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 50.8 212.09 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "2d7bce03-66f1-4aae-ac82-c91b888e41ac")(property "Reference" "D406"(at 55.110000 210.820000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 55.110000 213.360000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 50.800000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 50.800000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 50.800000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 50.800000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 50.800000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 50.800000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A3"(at 50.800000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 50.800000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "d2b34117-33d1-4ef9-9139-e2321bc98ec3"))(pin "2"(uuid "c4cc0330-1816-4f21-8c08-63b05017d749"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D406")(unit 1)))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 62.230000000000004 212.09 0)(effects(font(size 1.0 1.0))(justify left))(uuid "797f7b06-6663-49fd-9a29-e3b970c6c949")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 62.230000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA4"(shape bidirectional)(at 39.37 212.09 180)(effects(font(size 1.0 1.0))(justify right))(uuid "d65a42b9-1ba5-4342-8f77-48af913c4971")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 39.370000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 134.62 212.09 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "71f62ee7-755b-49b0-a405-ed2c2ad28928")(property "Reference" "D407"(at 138.930000 210.820000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 138.930000 213.360000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 134.620000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 134.620000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 134.620000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 134.620000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 134.620000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 134.620000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A3"(at 134.620000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 134.620000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "24029db5-97da-4e70-85d0-aef391b65825"))(pin "2"(uuid "1bbdcd20-3717-456f-9994-f612570e635c"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D407")(unit 1)))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 146.05 212.09 0)(effects(font(size 1.0 1.0))(justify left))(uuid "5e1422c1-5a9a-464b-b646-0aa2d8a17076")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 146.050000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB6"(shape bidirectional)(at 123.19 212.09 180)(effects(font(size 1.0 1.0))(justify right))(uuid "143eeee9-2d40-49e4-a1f6-07aa908e5047")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 123.190000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 218.44 212.09 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "0aec8697-4e7a-44d4-bdd1-2f220f80853a")(property "Reference" "D408"(at 222.750000 210.820000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 222.750000 213.360000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 218.440000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 218.440000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 218.440000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 218.440000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 218.440000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 218.440000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A3"(at 218.440000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 218.440000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "b198d754-525f-471c-b5a2-7181a8dc875a"))(pin "2"(uuid "028772a9-464f-446f-98c3-0b5637cd873a"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D408")(unit 1)))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 229.87 212.09 0)(effects(font(size 1.0 1.0))(justify left))(uuid "730226e4-12d2-4849-80eb-3299a38bbfb7")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 229.870000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB7"(shape bidirectional)(at 207.01 212.09 180)(effects(font(size 1.0 1.0))(justify right))(uuid "214b9c2b-ab3a-4549-82cf-d0293362c877")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 207.010000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 16.51 219.71 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "88c0d252-f54d-4bd6-adaf-23069a7caacc"))
+(rectangle(start 12.7 223.52)(end 281.94 251.46)(stroke(width .254)(type dash))(fill(type none))(uuid "027b5372-2b06-4e81-a197-38a0e9df8ec1"))
+(text "A4 |3.3VROSSO /GNDBLU /MCU VERDE"(at 16.51 227.33 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "7a3717fe-11ae-4516-b856-99c9bb9bb02e"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 50.8 241.3 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "2ab2547d-3d45-4f8c-b226-0d680a6cdd36")(property "Reference" "D409"(at 55.110000 240.030000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 55.110000 242.570000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 50.800000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 50.800000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 50.800000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 50.800000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 50.800000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 50.800000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A4"(at 50.800000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 50.800000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "6c4f1ee4-8d67-470f-b02a-05f450ad7d6e"))(pin "2"(uuid "4ddaa565-ae6e-4ff8-9e87-9171a42d1f68"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D409")(unit 1)))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 62.230000000000004 241.3 0)(effects(font(size 1.0 1.0))(justify left))(uuid "b0014814-4b0e-44e9-84f5-847e3f66925d")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 62.230000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA5"(shape bidirectional)(at 39.37 241.3 180)(effects(font(size 1.0 1.0))(justify right))(uuid "db7647ff-86dc-48de-abda-49fad0a1cf86")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 39.370000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 134.62 241.3 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "f109aca4-dac9-449d-9de7-8488b2b5431a")(property "Reference" "D410"(at 138.930000 240.030000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 138.930000 242.570000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 134.620000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 134.620000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 134.620000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 134.620000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 134.620000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 134.620000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A4"(at 134.620000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 134.620000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "94e4083c-2d88-42b0-b443-f482c17d1cc2"))(pin "2"(uuid "79204574-9b5f-483e-814f-362d4769c4fe"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D410")(unit 1)))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 146.05 241.3 0)(effects(font(size 1.0 1.0))(justify left))(uuid "18076a0c-3eba-4499-8352-1ab63151c74f")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 146.050000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB8"(shape bidirectional)(at 123.19 241.3 180)(effects(font(size 1.0 1.0))(justify right))(uuid "0765c1ea-f874-4561-9454-2f8ccd7719ab")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 123.190000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 218.44 241.3 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "88c9a571-8017-4b5c-9c49-57b80c9d492c")(property "Reference" "D411"(at 222.750000 240.030000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 222.750000 242.570000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 218.440000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 218.440000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 218.440000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 218.440000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 218.440000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 218.440000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A4"(at 218.440000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 218.440000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "3f0de87b-9a75-4fbf-a365-f5c3222ca41f"))(pin "2"(uuid "aaad85ed-a7ba-478c-8388-0ada70e5f356"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D411")(unit 1)))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 229.87 241.3 0)(effects(font(size 1.0 1.0))(justify left))(uuid "fc01f5f9-37cf-4f1a-bb70-979847c77ee4")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 229.870000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB9"(shape bidirectional)(at 207.01 241.3 180)(effects(font(size 1.0 1.0))(justify right))(uuid "506ae55d-a712-4197-9656-719a9f2e55e1")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 207.010000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 16.51 248.92000000000002 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "47cd78f0-d887-408c-8ad7-e50244f64861"))
+(rectangle(start 12.7 252.73)(end 281.94 280.67)(stroke(width .254)(type dash))(fill(type none))(uuid "ae61d45a-c51d-4eb4-95bc-491817ff8da5"))
+(text "A5 |3.3VROSSO /GNDBLU /MCU VERDE"(at 16.51 256.54 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "89afe0cf-2fe7-4ced-9cb7-426d02aedbc3"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 50.8 270.51 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "ce671a02-85ad-4026-823e-df6059953543")(property "Reference" "D412"(at 55.110000 269.240000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 55.110000 271.780000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 50.800000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 50.800000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 50.800000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 50.800000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 50.800000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 50.800000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A5"(at 50.800000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 50.800000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "c5e57e2a-b4f6-43a4-a12c-b98ff62d4408"))(pin "2"(uuid "ee88f7f1-774e-4586-82d6-4f0bc9e997d7"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D412")(unit 1)))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 62.230000000000004 270.51 0)(effects(font(size 1.0 1.0))(justify left))(uuid "6884c1e3-7057-479c-a774-d935f649937c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 62.230000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA6"(shape bidirectional)(at 39.37 270.51 180)(effects(font(size 1.0 1.0))(justify right))(uuid "d6e1e8cf-6045-4f0b-9fb0-0ba85bd46afe")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 39.370000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 134.62 270.51 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "a0d4b42e-75c9-4a13-b4b5-dd4d1b7ea326")(property "Reference" "D413"(at 138.930000 269.240000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 138.930000 271.780000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 134.620000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 134.620000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 134.620000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 134.620000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 134.620000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 134.620000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A5"(at 134.620000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 134.620000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "a86370b1-0217-4138-8777-62eb8f9f19bd"))(pin "2"(uuid "9aa5c4aa-f869-44d1-abeb-61aa2dc71b92"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D413")(unit 1)))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 146.05 270.51 0)(effects(font(size 1.0 1.0))(justify left))(uuid "3e0bf759-1af0-429a-b791-e823bf33f05f")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 146.050000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 123.19 270.51 180)(effects(font(size 1.0 1.0))(justify right))(uuid "41ead8d2-8dd5-4324-897b-39fafd9de06b")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 123.190000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 218.44 270.51 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "8a9ae8cd-95d6-46c5-9caa-604617817962")(property "Reference" "D414"(at 222.750000 269.240000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 222.750000 271.780000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 218.440000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 218.440000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 218.440000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 218.440000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 218.440000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 218.440000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A5"(at 218.440000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 218.440000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "70fc2119-ceb2-48df-b7b6-5d4876e5b8bd"))(pin "2"(uuid "0b5c7b37-4ffd-4985-bc23-44174abee8c7"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D414")(unit 1)))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 229.87 270.51 0)(effects(font(size 1.0 1.0))(justify left))(uuid "85965a5d-3014-4425-a140-02ad0c0a976f")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 229.870000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 207.01 270.51 180)(effects(font(size 1.0 1.0))(justify right))(uuid "4a0058cf-a1d0-49aa-9c7f-b2565e954d36")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 207.010000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 16.51 278.13 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "435bf3c6-1a50-40f7-83cb-b7ed6e90c675"))
+(rectangle(start 12.7 281.94)(end 281.94 309.88)(stroke(width .254)(type dash))(fill(type none))(uuid "99e891c3-e191-4a00-86b8-f03d138e44bf"))
+(text "A6 |3.3VROSSO /GNDBLU /MCU VERDE"(at 16.51 285.75 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "3297d33c-adaf-4dcc-b647-6eb3513ecd41"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 50.8 299.72 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "630d1296-3b98-411a-bec2-7d7e4e0a8a80")(property "Reference" "D415"(at 55.110000 298.450000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 55.110000 300.990000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 50.800000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 50.800000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 50.800000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 50.800000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 50.800000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 50.800000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A6"(at 50.800000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 50.800000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "77a02e38-f978-4469-8ec8-9069b855776b"))(pin "2"(uuid "a8fc1319-eae5-4e1e-b578-14305a8e92dc"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D415")(unit 1)))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 62.230000000000004 299.72 0)(effects(font(size 1.0 1.0))(justify left))(uuid "b0b5257d-80c1-4f0b-92b7-994ff0ba9131")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 62.230000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA7"(shape bidirectional)(at 39.37 299.72 180)(effects(font(size 1.0 1.0))(justify right))(uuid "922acd78-5b47-4063-8157-a9737e699afe")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 39.370000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 134.62 299.72 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "f4c1a4a0-a7bd-4692-a700-d6672ddbf8d0")(property "Reference" "D416"(at 138.930000 298.450000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 138.930000 300.990000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 134.620000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 134.620000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 134.620000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 134.620000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 134.620000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 134.620000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A6"(at 134.620000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 134.620000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "8d5757c1-f760-4b05-9863-d57deabb77f3"))(pin "2"(uuid "64a49d7f-ac35-4796-9815-b9bbee4ad742"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D416")(unit 1)))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 146.05 299.72 0)(effects(font(size 1.0 1.0))(justify left))(uuid "334683a6-1791-4a71-b528-061e2a9fa2e4")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 146.050000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 123.19 299.72 180)(effects(font(size 1.0 1.0))(justify right))(uuid "c712f68b-afca-4b72-988d-d1d124c5896a")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 123.190000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 218.44 299.72 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "f7069a37-d1af-4b47-a05f-024c4a60b62f")(property "Reference" "D417"(at 222.750000 298.450000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 222.750000 300.990000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 218.440000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 218.440000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 218.440000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 218.440000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 218.440000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 218.440000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A6"(at 218.440000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 218.440000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "44b89265-9015-42b4-8671-77b710d49f99"))(pin "2"(uuid "6f8b16ff-c7e0-4756-9135-4bcfe0397a64"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D417")(unit 1)))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 229.87 299.72 0)(effects(font(size 1.0 1.0))(justify left))(uuid "84f56191-edf3-4390-9918-1aba15a89fe4")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 229.870000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB5"(shape bidirectional)(at 207.01 299.72 180)(effects(font(size 1.0 1.0))(justify right))(uuid "5777922b-bef2-410d-97fe-ca9c726c940b")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 207.010000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 16.51 307.34000000000003 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "b6baca57-8533-410f-a628-35958dbc14d9"))
+(rectangle(start 12.7 311.15)(end 281.94 339.09)(stroke(width .254)(type dash))(fill(type none))(uuid "9076cf21-f37d-472e-a2e0-49f99dd9de95"))
+(text "A7 |3.3VROSSO /GNDBLU /MCU VERDE"(at 16.51 314.96 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "266cf791-1193-4dab-9868-e50e5cfec57b"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 50.8 328.93 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "34743d83-602f-4293-857e-4a718dfd26c8")(property "Reference" "D418"(at 55.110000 327.660000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 55.110000 330.200000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 50.800000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 50.800000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 50.800000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 50.800000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 50.800000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 50.800000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A7"(at 50.800000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 50.800000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "90ebf02a-2d66-4098-b172-ef7af1d4b126"))(pin "2"(uuid "02097bd2-9e00-4e99-9077-2f89276ac269"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D418")(unit 1)))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 62.230000000000004 328.93 0)(effects(font(size 1.0 1.0))(justify left))(uuid "9103ff1e-dc92-4a72-8e61-78e906de1c0a")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 62.230000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA8"(shape bidirectional)(at 39.37 328.93 180)(effects(font(size 1.0 1.0))(justify right))(uuid "d9ad077a-72d2-4568-902f-248ec83d02b0")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 39.370000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 134.62 328.93 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "8fb9c61b-03e7-4b67-afc9-3461274f5fcc")(property "Reference" "D419"(at 138.930000 327.660000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 138.930000 330.200000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 134.620000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 134.620000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 134.620000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 134.620000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 134.620000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 134.620000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A7"(at 134.620000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 134.620000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "95095ad9-2d92-4312-8a4f-a4a3b4c7574d"))(pin "2"(uuid "321a0b28-54a2-415a-83be-718289e52c45"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D419")(unit 1)))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 146.05 328.93 0)(effects(font(size 1.0 1.0))(justify left))(uuid "ce2b76fb-44c6-4f81-b27c-d13462a35cc7")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 146.050000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB6"(shape bidirectional)(at 123.19 328.93 180)(effects(font(size 1.0 1.0))(justify right))(uuid "ec831c52-78c2-4531-86df-0c31014127da")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 123.190000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 218.44 328.93 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "bafb9c35-2b98-4148-8014-7769060fc9f5")(property "Reference" "D420"(at 222.750000 327.660000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 222.750000 330.200000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 218.440000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 218.440000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 218.440000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 218.440000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 218.440000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 218.440000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A7"(at 218.440000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 218.440000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "66b0a69a-f22e-4225-a0ef-ca311a193cf0"))(pin "2"(uuid "47c6d060-ede0-4f2b-8462-eb5ace27cddd"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D420")(unit 1)))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 229.87 328.93 0)(effects(font(size 1.0 1.0))(justify left))(uuid "ae8a8fb0-3179-42f2-bf02-8edb0c04993c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 229.870000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB7"(shape bidirectional)(at 207.01 328.93 180)(effects(font(size 1.0 1.0))(justify right))(uuid "f8e1dec0-edda-416f-b848-31a052b1e5ea")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 207.010000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 16.51 336.55 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "ff4bbc8d-9592-4ad9-a124-febe1640237c"))
+(rectangle(start 12.7 340.36)(end 281.94 368.3)(stroke(width .254)(type dash))(fill(type none))(uuid "a7368154-9376-4425-ba0f-67a910b928d7"))
+(text "A8 |3.3VROSSO /GNDBLU /MCU VERDE"(at 16.51 344.17 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "9a0ad804-7b5e-498d-95df-51bb9ef40e9c"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 50.8 358.14 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "9c6233e0-2061-4491-82a8-64ea46c9a3c5")(property "Reference" "D421"(at 55.110000 356.870000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 55.110000 359.410000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 50.800000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 50.800000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 50.800000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 50.800000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 50.800000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 50.800000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A8"(at 50.800000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 50.800000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "3b491d8e-ccbb-4c18-a91d-0b3c3d93b7e6"))(pin "2"(uuid "bf9b77ab-0665-4d13-b90f-945f45b575bf"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D421")(unit 1)))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 62.230000000000004 358.14 0)(effects(font(size 1.0 1.0))(justify left))(uuid "8d492885-9c32-423f-858b-d80a37e6cb2e")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 62.230000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA9"(shape bidirectional)(at 39.37 358.14 180)(effects(font(size 1.0 1.0))(justify right))(uuid "bccb81c4-1199-472e-a773-684aef1f40fb")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 39.370000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 134.62 358.14 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "4b01f58d-03d4-49d9-adb9-f05110af123b")(property "Reference" "D422"(at 138.930000 356.870000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 138.930000 359.410000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 134.620000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 134.620000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 134.620000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 134.620000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 134.620000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 134.620000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A8"(at 134.620000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 134.620000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "a22d6c04-1a3e-4859-97b2-865dd61bd1a2"))(pin "2"(uuid "23f97cc6-36d8-4639-a797-954f3ba50b57"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D422")(unit 1)))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 146.05 358.14 0)(effects(font(size 1.0 1.0))(justify left))(uuid "5e119391-3934-4f76-a3f7-43163b17822c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 146.050000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB8"(shape bidirectional)(at 123.19 358.14 180)(effects(font(size 1.0 1.0))(justify right))(uuid "3970329b-db6a-488c-83f3-ba57f1ae91dc")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 123.190000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 218.44 358.14 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "ae294a94-ed7a-4497-97a2-ca7b6b16599a")(property "Reference" "D423"(at 222.750000 356.870000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 222.750000 359.410000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 218.440000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 218.440000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 218.440000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 218.440000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 218.440000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 218.440000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "A8"(at 218.440000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 218.440000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "8c56fe12-1194-414c-8b79-56ab8741d06b"))(pin "2"(uuid "0fed20a0-178f-4989-b3f6-d5c1cac70c8b"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D423")(unit 1)))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 229.87 358.14 0)(effects(font(size 1.0 1.0))(justify left))(uuid "d85c9872-bd8f-4fbf-a28d-24c3a4257101")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 229.870000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB9"(shape bidirectional)(at 207.01 358.14 180)(effects(font(size 1.0 1.0))(justify right))(uuid "0112a73d-267f-4a7a-bc60-218263830233")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 207.010000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 16.51 365.76 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "6d983878-abf2-48e2-a4de-c309187dfa3a"))
+(rectangle(start 292.1 135.89000000000001)(end 561.34 163.83)(stroke(width .254)(type dash))(fill(type none))(uuid "7c9febef-4097-4c68-8a52-31baf45c9cb9"))
+(text "B1 |3.3VROSSO /GNDBLU /MCU VERDE"(at 295.91 139.7 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "c7b62864-7b8d-42e5-ac5e-852a2d166839"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 330.2 153.67000000000002 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "0cd17a8b-47d1-4e95-81ad-f6c723221e22")(property "Reference" "D424"(at 334.510000 152.400000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 334.510000 154.940000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 330.200000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 330.200000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 330.200000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 330.200000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 330.200000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 330.200000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B1"(at 330.200000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 330.200000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "f99c69ce-abeb-409f-9465-3d6600b98993"))(pin "2"(uuid "24f79a88-9c65-402b-ad65-a1dfbdb55fd3"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D424")(unit 1)))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 341.63 153.67000000000002 0)(effects(font(size 1.0 1.0))(justify left))(uuid "e353a049-ff04-4c6a-b208-0133f14a3a99")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 341.630000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 318.77 153.67000000000002 180)(effects(font(size 1.0 1.0))(justify right))(uuid "28c9e079-4c42-4734-86a0-fa79fa4d2d82")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 318.770000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 414.02 153.67000000000002 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "0cfa8973-5d81-4b57-9253-1099c32112d6")(property "Reference" "D425"(at 418.330000 152.400000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 418.330000 154.940000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 414.020000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 414.020000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 414.020000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 414.020000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 414.020000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 414.020000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B1"(at 414.020000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 414.020000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "340a891c-7387-4264-b7ad-e4a0a935ea3c"))(pin "2"(uuid "c3d9b354-2134-4c27-86c1-9f679a6cb07b"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D425")(unit 1)))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 425.45 153.67000000000002 0)(effects(font(size 1.0 1.0))(justify left))(uuid "d01e8c45-8816-4da1-b156-100632cb7b3a")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 402.59000000000003 153.67000000000002 180)(effects(font(size 1.0 1.0))(justify right))(uuid "4a39c3eb-24a7-4ab4-ade8-2821589fa541")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 402.590000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 497.84000000000003 153.67000000000002 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "a1909bed-bd01-47af-87f0-dc4113090c70")(property "Reference" "D426"(at 502.150000 152.400000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 502.150000 154.940000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 497.840000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 497.840000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 497.840000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 497.840000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 497.840000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 497.840000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B1"(at 497.840000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 497.840000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "0a68f7f9-73ce-4a66-8a3a-466fc388b39a"))(pin "2"(uuid "084487b9-9cef-43c4-ad7e-d959589356e0"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D426")(unit 1)))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 509.27 153.67000000000002 0)(effects(font(size 1.0 1.0))(justify left))(uuid "8b910cba-7470-430f-aeac-baa414409d9d")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 509.270000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 486.41 153.67000000000002 180)(effects(font(size 1.0 1.0))(justify right))(uuid "996c61ec-e5d6-43c7-a778-92e53d4a41b1")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 486.410000 153.670000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 295.91 161.29 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "0be68dc1-0f93-43ca-af32-3e5591b49fa5"))
+(rectangle(start 292.1 165.1)(end 561.34 193.04)(stroke(width .254)(type dash))(fill(type none))(uuid "628c4575-5e7c-41d9-8c94-cdb4c6173445"))
+(text "B2 |3.3VROSSO /GNDBLU /MCU VERDE"(at 295.91 168.91 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "fd47aff5-68a0-49ab-a467-eda07ff0a27e"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 330.2 182.88 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "9f7f76a6-71dd-4f22-b5a5-6cba5a286f4a")(property "Reference" "D427"(at 334.510000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 334.510000 184.150000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 330.200000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 330.200000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 330.200000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 330.200000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 330.200000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 330.200000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B2"(at 330.200000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 330.200000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "49996751-37c6-4398-b062-8e5029ee3e14"))(pin "2"(uuid "e7ce577b-6919-45ce-b01f-6a954279f84e"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D427")(unit 1)))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 341.63 182.88 0)(effects(font(size 1.0 1.0))(justify left))(uuid "45214022-bfeb-4d4c-9026-d51025b74a42")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 341.630000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA3"(shape bidirectional)(at 318.77 182.88 180)(effects(font(size 1.0 1.0))(justify right))(uuid "c1b4ce4e-f929-4e72-bb39-8342fa65eeca")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 318.770000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 414.02 182.88 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "6044c373-f1b2-4445-a948-d608ba3feb15")(property "Reference" "D428"(at 418.330000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 418.330000 184.150000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 414.020000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 414.020000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 414.020000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 414.020000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 414.020000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 414.020000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B2"(at 414.020000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 414.020000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "d7649c2d-c080-4968-bb93-107712013a0f"))(pin "2"(uuid "8fe4e667-d093-460e-92c8-f8352dcdb2b1"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D428")(unit 1)))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 425.45 182.88 0)(effects(font(size 1.0 1.0))(justify left))(uuid "5a136d9b-83e0-4a1a-803d-4a621bb3ef45")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 402.59000000000003 182.88 180)(effects(font(size 1.0 1.0))(justify right))(uuid "49f0a5b3-46c7-4c06-9b2b-104743253b7d")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 402.590000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 497.84000000000003 182.88 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "2e207049-03d1-4263-9407-56bf93c1a1f6")(property "Reference" "D429"(at 502.150000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 502.150000 184.150000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 497.840000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 497.840000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 497.840000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 497.840000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 497.840000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 497.840000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B2"(at 497.840000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 497.840000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "ac17b4a4-85ae-48e9-b6ca-703508c9e670"))(pin "2"(uuid "92f3721d-cd47-4cf0-aa9f-7abb4ea5f571"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D429")(unit 1)))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 509.27 182.88 0)(effects(font(size 1.0 1.0))(justify left))(uuid "30d9bcbd-f3d2-43b6-9054-04bf7da1040e")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 509.270000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB5"(shape bidirectional)(at 486.41 182.88 180)(effects(font(size 1.0 1.0))(justify right))(uuid "c1700837-5620-4648-8f1e-12a0d1fe6ea1")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 486.410000 182.880000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 295.91 190.5 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "268879ff-b171-45c6-8b47-e86ca0fa90d8"))
+(rectangle(start 292.1 194.31)(end 561.34 222.25)(stroke(width .254)(type dash))(fill(type none))(uuid "3ac835c3-ffb9-42ed-821f-ff11266f59ed"))
+(text "B3 |3.3VROSSO /GNDBLU /MCU VERDE"(at 295.91 198.12 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "f2d4b0d0-eba7-4ffd-a1a4-ce66b14df060"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 330.2 212.09 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "c9fa3af3-b210-4f9d-986a-88bd50eacd75")(property "Reference" "D430"(at 334.510000 210.820000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 334.510000 213.360000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 330.200000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 330.200000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 330.200000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 330.200000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 330.200000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 330.200000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B3"(at 330.200000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 330.200000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "60c0345d-c386-4c1e-b07b-44d4a2231781"))(pin "2"(uuid "188b7233-20ae-4fdd-b775-fabf07db35a6"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D430")(unit 1)))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 341.63 212.09 0)(effects(font(size 1.0 1.0))(justify left))(uuid "e435cf11-feff-469a-9dbe-2b667d1eda08")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 341.630000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA4"(shape bidirectional)(at 318.77 212.09 180)(effects(font(size 1.0 1.0))(justify right))(uuid "943b0ba8-be67-4b78-a6da-99b6032f0628")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 318.770000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 414.02 212.09 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "f2e8ae9c-c660-4716-af69-52d696e639d2")(property "Reference" "D431"(at 418.330000 210.820000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 418.330000 213.360000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 414.020000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 414.020000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 414.020000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 414.020000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 414.020000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 414.020000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B3"(at 414.020000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 414.020000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "c9a9c1bc-8e6d-49fa-8af8-49b05e43f5c0"))(pin "2"(uuid "1f84d587-4a7a-4448-8b25-d4f61a1e3905"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D431")(unit 1)))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 425.45 212.09 0)(effects(font(size 1.0 1.0))(justify left))(uuid "0aac86f1-9da9-4afc-a458-4e98f6697292")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB6"(shape bidirectional)(at 402.59000000000003 212.09 180)(effects(font(size 1.0 1.0))(justify right))(uuid "7f86e695-9d05-48b4-90eb-4939bf5be5bc")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 402.590000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 497.84000000000003 212.09 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "cb8d03dd-7103-463e-a0fe-74c60704019b")(property "Reference" "D432"(at 502.150000 210.820000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 502.150000 213.360000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 497.840000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 497.840000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 497.840000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 497.840000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 497.840000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 497.840000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B3"(at 497.840000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 497.840000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "0b9589b3-6220-4cbb-aaa9-7ee4aaaa432d"))(pin "2"(uuid "795ccaa4-2821-4717-95b3-cb0eef8b58bd"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D432")(unit 1)))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 509.27 212.09 0)(effects(font(size 1.0 1.0))(justify left))(uuid "0d78f9f0-5bd7-41b1-81a8-6f60558dd441")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 509.270000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB7"(shape bidirectional)(at 486.41 212.09 180)(effects(font(size 1.0 1.0))(justify right))(uuid "06e24a6c-e6e6-449a-bbc3-c375ee40d746")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 486.410000 212.090000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 295.91 219.71 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "31043255-f7de-46d5-8bc1-b7a460e25a50"))
+(rectangle(start 292.1 223.52)(end 561.34 251.46)(stroke(width .254)(type dash))(fill(type none))(uuid "b9e602e4-a559-4743-88e6-e84036079977"))
+(text "B4 |3.3VROSSO /GNDBLU /MCU VERDE"(at 295.91 227.33 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "33a53bc5-1f37-4ed9-b378-97bc02617469"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 330.2 241.3 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "8c4ec5bc-b91a-4c87-81fa-d12d54c6ee51")(property "Reference" "D433"(at 334.510000 240.030000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 334.510000 242.570000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 330.200000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 330.200000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 330.200000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 330.200000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 330.200000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 330.200000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B4"(at 330.200000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 330.200000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "ed2afbbd-1f17-410c-a77f-dd6e63f0485e"))(pin "2"(uuid "a4ddf470-684c-4513-a45d-c9b8218ef261"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D433")(unit 1)))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 341.63 241.3 0)(effects(font(size 1.0 1.0))(justify left))(uuid "3d745ab2-cabf-47c6-b9e7-e74649178f4c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 341.630000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA5"(shape bidirectional)(at 318.77 241.3 180)(effects(font(size 1.0 1.0))(justify right))(uuid "6f29830a-9193-4481-b94e-c3b15367464b")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 318.770000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 414.02 241.3 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "5052d5fd-d169-4416-8ca1-232cfe5c3673")(property "Reference" "D434"(at 418.330000 240.030000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 418.330000 242.570000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 414.020000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 414.020000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 414.020000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 414.020000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 414.020000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 414.020000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B4"(at 414.020000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 414.020000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "987e0d1c-fb41-405d-aed2-35a835369a7b"))(pin "2"(uuid "8f0b9cb0-25d7-474d-a2cc-751881c96321"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D434")(unit 1)))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 425.45 241.3 0)(effects(font(size 1.0 1.0))(justify left))(uuid "5c56ebc7-c5b2-41bb-83fd-15dde052de31")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB8"(shape bidirectional)(at 402.59000000000003 241.3 180)(effects(font(size 1.0 1.0))(justify right))(uuid "c847c76d-228e-4f07-94f9-9a4de13051fc")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 402.590000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 497.84000000000003 241.3 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "68979b18-809d-4428-9ae3-9ad80a10a787")(property "Reference" "D435"(at 502.150000 240.030000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 502.150000 242.570000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 497.840000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 497.840000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 497.840000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 497.840000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 497.840000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 497.840000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B4"(at 497.840000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 497.840000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "5e55870c-481e-46de-85c8-efc3718080fd"))(pin "2"(uuid "7cc99dc1-21d2-48c1-b33b-c31191356b5e"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D435")(unit 1)))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 509.27 241.3 0)(effects(font(size 1.0 1.0))(justify left))(uuid "5ad75913-600e-4675-b729-84bfb02b5219")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 509.270000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB9"(shape bidirectional)(at 486.41 241.3 180)(effects(font(size 1.0 1.0))(justify right))(uuid "c7bc13b0-fd52-462e-a067-67f6f38b0516")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 486.410000 241.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 295.91 248.92000000000002 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "35e0b628-2649-4368-a910-477e36ee13bf"))
+(rectangle(start 292.1 252.73)(end 561.34 280.67)(stroke(width .254)(type dash))(fill(type none))(uuid "2250b3fa-13f7-406e-a0e0-0e340e3b9575"))
+(text "B5 |3.3VROSSO /GNDBLU /MCU VERDE"(at 295.91 256.54 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "83b07005-d698-48eb-9345-49391cbccdb9"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 330.2 270.51 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "9e69935a-2571-4620-b9fd-547d113d1648")(property "Reference" "D436"(at 334.510000 269.240000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 334.510000 271.780000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 330.200000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 330.200000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 330.200000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 330.200000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 330.200000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 330.200000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B5"(at 330.200000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 330.200000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "9909f4fd-6db8-40a0-93fc-d314121b8312"))(pin "2"(uuid "81060afa-5788-4f8f-962d-bcc79665f159"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D436")(unit 1)))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 341.63 270.51 0)(effects(font(size 1.0 1.0))(justify left))(uuid "8f1f37a7-c7f7-45e9-8e0e-374f6b7c6fe3")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 341.630000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA6"(shape bidirectional)(at 318.77 270.51 180)(effects(font(size 1.0 1.0))(justify right))(uuid "a7987105-c559-49f8-84ae-8f161ce775aa")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 318.770000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 414.02 270.51 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "9dab1664-215a-4342-b109-f1adeb5a620d")(property "Reference" "D437"(at 418.330000 269.240000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 418.330000 271.780000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 414.020000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 414.020000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 414.020000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 414.020000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 414.020000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 414.020000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B5"(at 414.020000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 414.020000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "f0d6b987-2664-41aa-8b0e-e630d20ca563"))(pin "2"(uuid "0fb3a5af-d27a-4bbb-82f5-88c0de40d774"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D437")(unit 1)))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 425.45 270.51 0)(effects(font(size 1.0 1.0))(justify left))(uuid "11c6ed39-eaa3-4502-bfc5-384c3f4bd711")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB1"(shape bidirectional)(at 402.59000000000003 270.51 180)(effects(font(size 1.0 1.0))(justify right))(uuid "7d0828c5-f940-4f31-ae20-32ab8e6819fd")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 402.590000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 497.84000000000003 270.51 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "fc732f28-d0ba-40a1-a140-e8ce5369c139")(property "Reference" "D438"(at 502.150000 269.240000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 502.150000 271.780000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 497.840000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 497.840000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 497.840000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 497.840000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 497.840000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 497.840000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B5"(at 497.840000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 497.840000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "316d975d-61ed-4e9d-8a53-25cfcfbed8c4"))(pin "2"(uuid "79eb4d14-e95c-4f56-9fbd-77f6071f8f08"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D438")(unit 1)))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 509.27 270.51 0)(effects(font(size 1.0 1.0))(justify left))(uuid "ccc0b0c2-4e43-436b-bc6f-85f66841b210")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 509.270000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB2"(shape bidirectional)(at 486.41 270.51 180)(effects(font(size 1.0 1.0))(justify right))(uuid "b8df4f8d-4238-466f-8120-a82144061081")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 486.410000 270.510000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 295.91 278.13 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "9b5617c0-16e4-461b-a517-7fd0fa0faa16"))
+(rectangle(start 292.1 281.94)(end 561.34 309.88)(stroke(width .254)(type dash))(fill(type none))(uuid "14520e92-8f38-47be-a30b-8f8ceb851b4c"))
+(text "B6 |3.3VROSSO /GNDBLU /MCU VERDE"(at 295.91 285.75 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "5079c80d-08ba-40b8-9233-da1562ebc4fc"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 330.2 299.72 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "418b4c97-29b3-45b2-b846-168fa2367915")(property "Reference" "D439"(at 334.510000 298.450000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 334.510000 300.990000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 330.200000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 330.200000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 330.200000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 330.200000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 330.200000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 330.200000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B6"(at 330.200000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 330.200000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "f35af0e4-70e7-4ffe-a87a-8542f49d11d3"))(pin "2"(uuid "1f21c96f-c177-4156-a9a2-41ee172005e9"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D439")(unit 1)))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 341.63 299.72 0)(effects(font(size 1.0 1.0))(justify left))(uuid "b6ccf613-08e6-41e1-9f49-4b12ef4cba2c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 341.630000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA7"(shape bidirectional)(at 318.77 299.72 180)(effects(font(size 1.0 1.0))(justify right))(uuid "cd94e77f-dc1c-414b-af27-3281e1c4e5af")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 318.770000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 414.02 299.72 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "47e369ff-a0b2-4f2c-b2ad-e79de7e16361")(property "Reference" "D440"(at 418.330000 298.450000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 418.330000 300.990000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 414.020000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 414.020000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 414.020000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 414.020000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 414.020000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 414.020000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B6"(at 414.020000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 414.020000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "d9eb25ad-45c5-4e87-ace4-192e1da5da20"))(pin "2"(uuid "7d2c8fe2-ef15-4296-9434-8461c4cddd19"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D440")(unit 1)))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 425.45 299.72 0)(effects(font(size 1.0 1.0))(justify left))(uuid "7432e893-deb3-4ba8-9616-a16b831ec7ae")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 402.59000000000003 299.72 180)(effects(font(size 1.0 1.0))(justify right))(uuid "a116cf88-e593-4206-8dfd-f2c597455a0b")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 402.590000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 497.84000000000003 299.72 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "d0ef8e45-0508-4b6b-977b-a10d62e3a7c5")(property "Reference" "D441"(at 502.150000 298.450000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 502.150000 300.990000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 497.840000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 497.840000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 497.840000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 497.840000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 497.840000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 497.840000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B6"(at 497.840000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 497.840000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "7e09c62b-f472-4311-bc16-f7bbda836f34"))(pin "2"(uuid "81859159-e7b2-4725-a959-6906ca20e284"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D441")(unit 1)))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 509.27 299.72 0)(effects(font(size 1.0 1.0))(justify left))(uuid "86d7097f-b776-4459-b738-744f919ae8df")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 509.270000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB5"(shape bidirectional)(at 486.41 299.72 180)(effects(font(size 1.0 1.0))(justify right))(uuid "085113bc-5238-45de-a746-3c6f881f402c")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 486.410000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 295.91 307.34000000000003 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "f7760cbf-d71a-4360-a667-15437f91c4dc"))
+(rectangle(start 292.1 311.15)(end 561.34 339.09)(stroke(width .254)(type dash))(fill(type none))(uuid "d1b705c0-6b3b-44bf-96d7-b20622b8c456"))
+(text "B7 |3.3VROSSO /GNDBLU /MCU VERDE"(at 295.91 314.96 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "aef7402b-a9fc-4b2e-b1af-3bcb116aadcb"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 330.2 328.93 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "be588535-67dd-4c72-95d4-14a159a3a406")(property "Reference" "D442"(at 334.510000 327.660000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 334.510000 330.200000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 330.200000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 330.200000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 330.200000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 330.200000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 330.200000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 330.200000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B7"(at 330.200000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 330.200000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "994ce10a-2229-4d80-a672-390d94a8c75d"))(pin "2"(uuid "e2b5c37c-8bad-43de-8a67-db11c235d554"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D442")(unit 1)))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 341.63 328.93 0)(effects(font(size 1.0 1.0))(justify left))(uuid "af20f495-5ac3-466e-8c74-d042878925f1")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 341.630000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA8"(shape bidirectional)(at 318.77 328.93 180)(effects(font(size 1.0 1.0))(justify right))(uuid "affc791a-5503-4d88-a5b7-0e4ee58b6311")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 318.770000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 414.02 328.93 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "b72d2544-a255-420f-8d11-00fbcf0b8d82")(property "Reference" "D443"(at 418.330000 327.660000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 418.330000 330.200000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 414.020000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 414.020000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 414.020000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 414.020000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 414.020000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 414.020000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B7"(at 414.020000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 414.020000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "8ed4a8a3-aa5b-4ca2-9791-2bb0084d6814"))(pin "2"(uuid "e6590cf7-02ba-421a-af1a-9557c77eefd8"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D443")(unit 1)))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 425.45 328.93 0)(effects(font(size 1.0 1.0))(justify left))(uuid "0dcd4d5c-6db0-457a-9fd4-7972585fb5c1")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB6"(shape bidirectional)(at 402.59000000000003 328.93 180)(effects(font(size 1.0 1.0))(justify right))(uuid "9c51ba2f-8bdd-48ff-8618-6c5844dcb0bb")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 402.590000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 497.84000000000003 328.93 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "77a80010-9580-4a63-a350-88e67eed5849")(property "Reference" "D444"(at 502.150000 327.660000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 502.150000 330.200000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 497.840000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 497.840000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 497.840000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 497.840000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 497.840000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 497.840000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B7"(at 497.840000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 497.840000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "734d21f3-0aed-4562-a1b9-f3e5fcfe0fa4"))(pin "2"(uuid "445fa0de-2b50-49c0-8c59-cb32211049d1"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D444")(unit 1)))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 509.27 328.93 0)(effects(font(size 1.0 1.0))(justify left))(uuid "75bb80c0-80be-4b5e-ba33-13632dd37283")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 509.270000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB7"(shape bidirectional)(at 486.41 328.93 180)(effects(font(size 1.0 1.0))(justify right))(uuid "30933b80-39fa-4e8e-ad3e-8670773d034e")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 486.410000 328.930000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 295.91 336.55 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "ea2ab947-05b7-4572-86d4-22b0658d5545"))
+(rectangle(start 292.1 340.36)(end 561.34 368.3)(stroke(width .254)(type dash))(fill(type none))(uuid "eb94d608-686e-4f2a-82eb-7af6788dcf93"))
+(text "B8 |3.3VROSSO /GNDBLU /MCU VERDE"(at 295.91 344.17 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "4ebe8abb-2864-4003-94a2-0806604f2fea"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 330.2 358.14 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "9d4c27fc-a8d9-4fbe-a640-25222d543dd2")(property "Reference" "D445"(at 334.510000 356.870000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 334.510000 359.410000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 330.200000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 330.200000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 330.200000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 330.200000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 330.200000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "3.3V"(at 330.200000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B8"(at 330.200000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 330.200000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "333df097-6967-4148-adde-639244fe1f6b"))(pin "2"(uuid "002dc7e7-d36a-4992-bd0f-88c3829ee381"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D445")(unit 1)))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 341.63 358.14 0)(effects(font(size 1.0 1.0))(justify left))(uuid "16589331-4c02-4e57-954e-8ca345c0e63a")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 341.630000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA9"(shape bidirectional)(at 318.77 358.14 180)(effects(font(size 1.0 1.0))(justify right))(uuid "d31d1df5-ea90-429e-9d8c-17d78ff0b9e6")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 318.770000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 414.02 358.14 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "e642a904-4a1e-40af-9d64-6acd0ebe64c5")(property "Reference" "D446"(at 418.330000 356.870000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 418.330000 359.410000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 414.020000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 414.020000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 414.020000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 414.020000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 414.020000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "GND"(at 414.020000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B8"(at 414.020000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 414.020000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "f0900b31-75b8-49d4-90a2-98eb2689bcd5"))(pin "2"(uuid "cc4ce1d4-89bb-48a7-b934-c43c8b5ff495"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D446")(unit 1)))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 425.45 358.14 0)(effects(font(size 1.0 1.0))(justify left))(uuid "98c40f8e-c9e9-43a0-8c12-9810a3a719c0")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 425.450000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB8"(shape bidirectional)(at 402.59000000000003 358.14 180)(effects(font(size 1.0 1.0))(justify right))(uuid "8b3a90bb-56ed-471b-8fb3-45ad4275a61a")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 402.590000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 497.84000000000003 358.14 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "27826e2b-68dc-4bd1-9072-f7bae42d0ea9")(property "Reference" "D447"(at 502.150000 356.870000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 502.150000 359.410000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 497.840000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 497.840000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 497.840000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 497.840000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 497.840000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "SIG"(at 497.840000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" "B8"(at 497.840000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 497.840000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "71445e25-79dd-48bd-8579-a40e26281686"))(pin "2"(uuid "c8b52f19-076b-4543-a1ef-1d333a043db1"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/fcfdfe03-cd00-4138-9399-8869573506ab"(reference "D447")(unit 1)))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 509.27 358.14 0)(effects(font(size 1.0 1.0))(justify left))(uuid "6af214fd-b894-4bdc-8a8d-b9abbe507536")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 509.270000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB9"(shape bidirectional)(at 486.41 358.14 180)(effects(font(size 1.0 1.0))(justify right))(uuid "a354ccac-1f6a-4562-9a9f-b53afff53289")(property "Descrizione" "Matrice indicatori separata dai comandi di riga"(at 486.410000 358.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(text "LED45deg, scritte0deg. Icona MCU=pinESP32,ADCsolo righe compatibili. Hi-Z=tutto spento."(at 295.91 365.76 0)(effects(font(size 0.8 0.8))(justify left top))(uuid "cf0a5c3f-770c-454f-b775-d54e4aa151e8"))
+(wire(pts(xy 45.720000 358.140000)(xy 39.370000 358.140000))(stroke(width 0)(type default))(uuid "68b4eb63-4505-460c-8a29-d82810ee486c"))
+(wire(pts(xy 107.950000 66.040000)(xy 115.570000 66.040000))(stroke(width 0)(type default))(uuid "3e463d7d-e8d4-478a-b7f0-d0f0f62cc5d7"))
+(wire(pts(xy 318.770000 358.140000)(xy 325.120000 358.140000))(stroke(width 0)(type default))(uuid "be4e3dd3-4fdd-4936-873d-dad6117a62cc"))
+(wire(pts(xy 95.250000 33.020000)(xy 95.250000 40.640000))(stroke(width 0)(type default))(uuid "003175fd-560f-4c12-a84c-5f9e5c91c4dd"))
+(wire(pts(xy 285.750000 57.150000)(xy 285.750000 64.770000))(stroke(width 0)(type default))(uuid "a53b1570-6a0d-4c05-9914-d773fd0be767"))
+(wire(pts(xy 355.600000 57.150000)(xy 355.600000 64.770000))(stroke(width 0)(type default))(uuid "9120fdaf-164c-4f17-8686-35df4fccc346"))
+(wire(pts(xy 82.550000 55.880000)(xy 74.930000 55.880000))(stroke(width 0)(type default))(uuid "7601d8ec-4674-45db-a2e1-f197179e1a12"))
+(wire(pts(xy 82.550000 50.800000)(xy 74.930000 50.800000))(stroke(width 0)(type default))(uuid "da964688-35cc-4e90-bcb6-4e590921067b"))
+(wire(pts(xy 74.930000 63.500000)(xy 82.550000 63.500000))(stroke(width 0)(type default))(uuid "2b236084-49d4-4f7a-bf87-98419a51e7ba"))
+(wire(pts(xy 425.450000 72.390000)(xy 425.450000 80.010000))(stroke(width 0)(type default))(uuid "c9365333-1843-4d0a-8de5-cad3e22db2ab"))
+(wire(pts(xy 285.750000 72.390000)(xy 285.750000 80.010000))(stroke(width 0)(type default))(uuid "70ecbafd-dad5-4b2f-826e-5d4b877cf574"))
+(wire(pts(xy 95.250000 96.520000)(xy 95.250000 104.140000))(stroke(width 0)(type default))(uuid "c54d4f17-0ff1-40f4-baa7-ead92e3bdbb5"))
+(wire(pts(xy 355.600000 72.390000)(xy 355.600000 80.010000))(stroke(width 0)(type default))(uuid "d8f92d1d-6839-46a2-9d04-58efba8bb0bb"))
+(wire(pts(xy 215.900000 72.390000)(xy 215.900000 80.010000))(stroke(width 0)(type default))(uuid "50255b5d-d752-4e3a-bc04-a919daddec74"))
+(wire(pts(xy 82.550000 71.120000)(xy 74.930000 71.120000))(stroke(width 0)(type default))(uuid "1100b522-d07f-4e3d-a647-428dbb3a861b"))
+(wire(pts(xy 215.900000 57.150000)(xy 215.900000 64.770000))(stroke(width 0)(type default))(uuid "2b973f3d-d3d2-4408-a499-d7ef995e87bd"))
+(wire(pts(xy 115.570000 71.120000)(xy 107.950000 71.120000))(stroke(width 0)(type default))(uuid "7e81be15-e979-4c3a-bb8a-66633401fddd"))
+(wire(pts(xy 223.520000 212.090000)(xy 229.870000 212.090000))(stroke(width 0)(type default))(uuid "f8ff7fbb-0c41-4ca5-8f57-fab8317363f7"))
+(wire(pts(xy 402.590000 153.670000)(xy 408.940000 153.670000))(stroke(width 0)(type default))(uuid "cfb95394-6aae-4632-a4d6-dde6fe48e7bb"))
+(wire(pts(xy 223.520000 153.670000)(xy 229.870000 153.670000))(stroke(width 0)(type default))(uuid "8390dadf-4398-4392-8d68-dfc09aa57ca8"))
+(wire(pts(xy 229.870000 241.300000)(xy 223.520000 241.300000))(stroke(width 0)(type default))(uuid "0557899a-08da-4694-8514-8af8f9bb7cdc"))
+(wire(pts(xy 229.870000 182.880000)(xy 223.520000 182.880000))(stroke(width 0)(type default))(uuid "1cb2d18d-4626-4a52-a2a1-e1da8758f56d"))
+(wire(pts(xy 146.050000 241.300000)(xy 139.700000 241.300000))(stroke(width 0)(type default))(uuid "34823d01-e142-4361-8f3d-b62d8f17e7a3"))
+(wire(pts(xy 146.050000 182.880000)(xy 139.700000 182.880000))(stroke(width 0)(type default))(uuid "353fc7e4-ad9b-4b8f-9203-7b46fd63e4e7"))
+(wire(pts(xy 129.540000 270.510000)(xy 123.190000 270.510000))(stroke(width 0)(type default))(uuid "89c56232-b736-4844-bf3b-d17cdfff6572"))
+(wire(pts(xy 408.940000 270.510000)(xy 402.590000 270.510000))(stroke(width 0)(type default))(uuid "6f56ed4d-68d4-4148-89c0-7105dfec3227"))
+(wire(pts(xy 146.050000 212.090000)(xy 139.700000 212.090000))(stroke(width 0)(type default))(uuid "edc87c7d-17b1-49e8-93ed-d757455d2a94"))
+(wire(pts(xy 146.050000 153.670000)(xy 139.700000 153.670000))(stroke(width 0)(type default))(uuid "09b6a0b9-25a9-4fb0-9f9b-2d5fe0aa94f2"))
+(wire(pts(xy 223.520000 270.510000)(xy 229.870000 270.510000))(stroke(width 0)(type default))(uuid "eca8c48a-33e1-44a0-860b-584abf33e026"))
+(wire(pts(xy 229.870000 299.720000)(xy 223.520000 299.720000))(stroke(width 0)(type default))(uuid "64b4b36c-7c5b-440c-b007-d0c30ca1ac10"))
+(wire(pts(xy 107.950000 73.660000)(xy 115.570000 73.660000))(stroke(width 0)(type default))(uuid "ff534839-0832-45d4-a7a5-af4f66de24ec"))
+(wire(pts(xy 146.050000 358.140000)(xy 139.700000 358.140000))(stroke(width 0)(type default))(uuid "ec464a4c-f221-49b0-acf4-009b5a6381ef"))
+(wire(pts(xy 486.410000 153.670000)(xy 492.760000 153.670000))(stroke(width 0)(type default))(uuid "3fbce4d8-aedc-46cd-a09c-2e0d2d18675b"))
+(wire(pts(xy 146.050000 299.720000)(xy 139.700000 299.720000))(stroke(width 0)(type default))(uuid "eb19bec0-97a2-4b06-ac32-31ca025d8668"))
+(wire(pts(xy 223.520000 358.140000)(xy 229.870000 358.140000))(stroke(width 0)(type default))(uuid "1d5a2011-245e-4e77-b863-5090705d9301"))
+(wire(pts(xy 229.870000 328.930000)(xy 223.520000 328.930000))(stroke(width 0)(type default))(uuid "b3dad871-b6d6-4b2e-8a70-824339b3a0c7"))
+(wire(pts(xy 146.050000 328.930000)(xy 139.700000 328.930000))(stroke(width 0)(type default))(uuid "928f7cc8-ccf5-4807-ba7c-515976b2ff60"))
+(wire(pts(xy 492.760000 270.510000)(xy 486.410000 270.510000))(stroke(width 0)(type default))(uuid "11bdf19e-3475-4f60-afda-d881e01d9ad5"))
+(wire(pts(xy 129.540000 153.670000)(xy 123.190000 153.670000))(stroke(width 0)(type default))(uuid "49237586-8f94-49eb-8c2d-c155f90a4ca5"))
+(wire(pts(xy 146.050000 270.510000)(xy 139.700000 270.510000))(stroke(width 0)(type default))(uuid "09b7774a-9c14-4b77-a41b-966e8130f031"))
+(wire(pts(xy 419.100000 212.090000)(xy 425.450000 212.090000))(stroke(width 0)(type default))(uuid "f5cc96d8-ddc0-46a7-8e0a-6962dc73c175"))
+(wire(pts(xy 502.920000 212.090000)(xy 509.270000 212.090000))(stroke(width 0)(type default))(uuid "815b25df-03b6-41bf-9089-2678cfe6745f"))
+(wire(pts(xy 207.010000 153.670000)(xy 213.360000 153.670000))(stroke(width 0)(type default))(uuid "91cb4c6f-1a2c-4a27-aa23-c6fa8c87ad1a"))
+(wire(pts(xy 408.940000 299.720000)(xy 402.590000 299.720000))(stroke(width 0)(type default))(uuid "9af016c5-26e1-481e-9ea1-833efab30442"))
+(wire(pts(xy 425.450000 241.300000)(xy 419.100000 241.300000))(stroke(width 0)(type default))(uuid "23f04e66-d8e1-4b7c-aa71-a0964067a3a9"))
+(wire(pts(xy 419.100000 153.670000)(xy 425.450000 153.670000))(stroke(width 0)(type default))(uuid "9ff09368-ff0b-40df-a7bd-a49799d3993b"))
+(wire(pts(xy 502.920000 153.670000)(xy 509.270000 153.670000))(stroke(width 0)(type default))(uuid "57f23b2d-35a1-4cb4-8c71-5e37f5653e5d"))
+(wire(pts(xy 425.450000 182.880000)(xy 419.100000 182.880000))(stroke(width 0)(type default))(uuid "e7bea82c-27e1-48e6-9d0d-b06c67b6281f"))
+(wire(pts(xy 509.270000 241.300000)(xy 502.920000 241.300000))(stroke(width 0)(type default))(uuid "697ba5c4-81dc-4323-8b99-28436062082d"))
+(wire(pts(xy 509.270000 182.880000)(xy 502.920000 182.880000))(stroke(width 0)(type default))(uuid "42229566-5837-44e0-a458-7b325603a344"))
+(wire(pts(xy 107.950000 76.200000)(xy 115.570000 76.200000))(stroke(width 0)(type default))(uuid "bac2db4c-1787-4402-b8b0-3705cfeeeaea"))
+(wire(pts(xy 213.360000 270.510000)(xy 207.010000 270.510000))(stroke(width 0)(type default))(uuid "6059274f-a463-4c86-a077-d133fba3940a"))
+(wire(pts(xy 425.450000 358.140000)(xy 419.100000 358.140000))(stroke(width 0)(type default))(uuid "4a7efeec-69fa-484a-9dd6-509b1fdac181"))
+(wire(pts(xy 419.100000 270.510000)(xy 425.450000 270.510000))(stroke(width 0)(type default))(uuid "fbf4f318-5f12-4642-be48-67307a27367e"))
+(wire(pts(xy 129.540000 299.720000)(xy 123.190000 299.720000))(stroke(width 0)(type default))(uuid "6d877f4c-8642-4007-9377-ca0e1161c16d"))
+(wire(pts(xy 502.920000 270.510000)(xy 509.270000 270.510000))(stroke(width 0)(type default))(uuid "015dd09c-cad5-46bc-948e-646979d4d010"))
+(wire(pts(xy 425.450000 299.720000)(xy 419.100000 299.720000))(stroke(width 0)(type default))(uuid "fbc52935-18b0-4914-b36e-f89ae79b4227"))
+(wire(pts(xy 115.570000 78.740000)(xy 107.950000 78.740000))(stroke(width 0)(type default))(uuid "1fcd3478-0795-4df0-afca-bd49f0639519"))
+(wire(pts(xy 509.270000 358.140000)(xy 502.920000 358.140000))(stroke(width 0)(type default))(uuid "726f866a-16be-4ee8-a118-c127b419b8bb"))
+(wire(pts(xy 129.540000 182.880000)(xy 123.190000 182.880000))(stroke(width 0)(type default))(uuid "39c8cd30-17c1-4f22-ba61-0e3fd70ace24"))
+(wire(pts(xy 509.270000 299.720000)(xy 502.920000 299.720000))(stroke(width 0)(type default))(uuid "e7c1e66b-d1b6-4026-9568-e70e986c2e37"))
+(wire(pts(xy 408.940000 182.880000)(xy 402.590000 182.880000))(stroke(width 0)(type default))(uuid "2f13c52e-6e9c-4048-b51c-7f495ee94693"))
+(wire(pts(xy 425.450000 328.930000)(xy 419.100000 328.930000))(stroke(width 0)(type default))(uuid "27524fe8-78b5-47c4-b689-c56873ecbb56"))
+(wire(pts(xy 509.270000 328.930000)(xy 502.920000 328.930000))(stroke(width 0)(type default))(uuid "da1bb5fc-9346-42d6-b64c-14356cf26656"))
+(wire(pts(xy 213.360000 299.720000)(xy 207.010000 299.720000))(stroke(width 0)(type default))(uuid "5e2bcfd9-8bbb-42cf-8c93-4efc212e76df"))
+(wire(pts(xy 207.010000 182.880000)(xy 213.360000 182.880000))(stroke(width 0)(type default))(uuid "5d748160-2efd-47d2-ae44-761ff504d5a7"))
+(wire(pts(xy 486.410000 182.880000)(xy 492.760000 182.880000))(stroke(width 0)(type default))(uuid "9e84b4bf-1d57-400b-b87e-b212db561bfe"))
+(wire(pts(xy 107.950000 81.280000)(xy 115.570000 81.280000))(stroke(width 0)(type default))(uuid "cbedd8a4-d6ba-4852-b953-397316dc9321"))
+(wire(pts(xy 492.760000 299.720000)(xy 486.410000 299.720000))(stroke(width 0)(type default))(uuid "110b3494-89e6-4fba-a207-70d0c5aa3820"))
+(wire(pts(xy 402.590000 212.090000)(xy 408.940000 212.090000))(stroke(width 0)(type default))(uuid "31435dc5-a7cb-4508-9662-1c209d0f752c"))
+(wire(pts(xy 129.540000 212.090000)(xy 123.190000 212.090000))(stroke(width 0)(type default))(uuid "6e04d395-f304-44eb-ba93-605b01546e97"))
+(wire(pts(xy 408.940000 328.930000)(xy 402.590000 328.930000))(stroke(width 0)(type default))(uuid "5833ae5e-f251-4a62-960e-a074e473c582"))
+(wire(pts(xy 123.190000 328.930000)(xy 129.540000 328.930000))(stroke(width 0)(type default))(uuid "d38265fd-61ac-4a94-992e-029ab22e0a01"))
+(wire(pts(xy 115.570000 83.820000)(xy 107.950000 83.820000))(stroke(width 0)(type default))(uuid "9d14297f-69c2-49d1-8c02-7aa65d15749e"))
+(wire(pts(xy 207.010000 212.090000)(xy 213.360000 212.090000))(stroke(width 0)(type default))(uuid "2acbfd8d-42b2-4b7a-8a67-6626789ae62a"))
+(wire(pts(xy 486.410000 212.090000)(xy 492.760000 212.090000))(stroke(width 0)(type default))(uuid "8a955787-5344-4fb7-a773-559cda37686e"))
+(wire(pts(xy 115.570000 86.360000)(xy 107.950000 86.360000))(stroke(width 0)(type default))(uuid "bb3fcac7-d45b-4c2c-bbc8-41eeb4eec568"))
+(wire(pts(xy 492.760000 328.930000)(xy 486.410000 328.930000))(stroke(width 0)(type default))(uuid "342d09e4-c760-480a-aed4-28810d4b822f"))
+(wire(pts(xy 207.010000 328.930000)(xy 213.360000 328.930000))(stroke(width 0)(type default))(uuid "c420946b-42b2-4386-abac-f0dd3d2d8dfc"))
+(wire(pts(xy 402.590000 241.300000)(xy 408.940000 241.300000))(stroke(width 0)(type default))(uuid "4358d6ef-e799-4249-99eb-8513fbe9d130"))
+(wire(pts(xy 129.540000 241.300000)(xy 123.190000 241.300000))(stroke(width 0)(type default))(uuid "aece467f-5087-4394-bf1e-a604a81dcfb0"))
+(wire(pts(xy 408.940000 358.140000)(xy 402.590000 358.140000))(stroke(width 0)(type default))(uuid "5910559d-36b0-4938-8500-3e4f70868904"))
+(wire(pts(xy 107.950000 88.900000)(xy 115.570000 88.900000))(stroke(width 0)(type default))(uuid "98dc423c-c816-48cb-9848-f6316fbcca57"))
+(wire(pts(xy 123.190000 358.140000)(xy 129.540000 358.140000))(stroke(width 0)(type default))(uuid "94816605-f61a-4786-b21a-c76c62b4bde5"))
+(wire(pts(xy 486.410000 241.300000)(xy 492.760000 241.300000))(stroke(width 0)(type default))(uuid "4181ebee-c887-40ec-878a-77ebc6133b3e"))
+(wire(pts(xy 213.360000 241.300000)(xy 207.010000 241.300000))(stroke(width 0)(type default))(uuid "26367c3c-9dd7-4d84-9733-7953ea73edd7"))
+(wire(pts(xy 492.760000 358.140000)(xy 486.410000 358.140000))(stroke(width 0)(type default))(uuid "7abd983c-f3e0-4494-9a40-1b39da587fe3"))
+(wire(pts(xy 115.570000 91.440000)(xy 107.950000 91.440000))(stroke(width 0)(type default))(uuid "2b19e0be-f83d-485c-9f5d-9ab9e4c14045"))
+(wire(pts(xy 207.010000 358.140000)(xy 213.360000 358.140000))(stroke(width 0)(type default))(uuid "0d68aa6a-4383-4729-807d-2c6058779817"))
+(wire(pts(xy 82.550000 66.040000)(xy 74.930000 66.040000))(stroke(width 0)(type default))(uuid "932118e2-ec47-4551-a41f-f8ae0fd4e648"))
+(wire(pts(xy 425.450000 57.150000)(xy 425.450000 64.770000))(stroke(width 0)(type default))(uuid "18227293-96b9-45d7-9efa-a883a2855482"))
+(wire(pts(xy 74.930000 45.720000)(xy 82.550000 45.720000))(stroke(width 0)(type default))(uuid "c74b31f2-db8d-4428-a166-c35a3c79c794"))
+(wire(pts(xy 82.550000 48.260000)(xy 74.930000 48.260000))(stroke(width 0)(type default))(uuid "fa2b6224-910b-491d-9321-9a3825b2b458"))
+(wire(pts(xy 55.880000 212.090000)(xy 62.230000 212.090000))(stroke(width 0)(type default))(uuid "28922449-6328-4e0e-be55-eba5aaee5f07"))
+(wire(pts(xy 318.770000 153.670000)(xy 325.120000 153.670000))(stroke(width 0)(type default))(uuid "269aca59-af08-48fb-aac5-fc4d3b8725db"))
+(wire(pts(xy 62.230000 358.140000)(xy 55.880000 358.140000))(stroke(width 0)(type default))(uuid "504fb20e-52f3-49ad-8b7b-e65c7acdae77"))
+(wire(pts(xy 55.880000 153.670000)(xy 62.230000 153.670000))(stroke(width 0)(type default))(uuid "9947c6c5-2741-4fab-b12b-4209d843823c"))
+(wire(pts(xy 62.230000 299.720000)(xy 55.880000 299.720000))(stroke(width 0)(type default))(uuid "af73e6a0-6d71-47d8-b440-989dcf8751e4"))
+(wire(pts(xy 62.230000 241.300000)(xy 55.880000 241.300000))(stroke(width 0)(type default))(uuid "490df320-91ef-460d-aec7-f5255670d1f5"))
+(wire(pts(xy 107.950000 45.720000)(xy 115.570000 45.720000))(stroke(width 0)(type default))(uuid "02929437-4a55-4eb6-af0b-aa603284b443"))
+(wire(pts(xy 62.230000 182.880000)(xy 55.880000 182.880000))(stroke(width 0)(type default))(uuid "22a72797-da63-48c9-8a4f-8cf977ebfb73"))
+(wire(pts(xy 62.230000 328.930000)(xy 55.880000 328.930000))(stroke(width 0)(type default))(uuid "e404ed44-4711-4f5a-912c-6bbec05699b6"))
+(wire(pts(xy 62.230000 270.510000)(xy 55.880000 270.510000))(stroke(width 0)(type default))(uuid "8c8a9376-315a-4be1-8c3c-c24f0c0a69fd"))
+(wire(pts(xy 335.280000 153.670000)(xy 341.630000 153.670000))(stroke(width 0)(type default))(uuid "21aa8f2f-b782-4c91-8fee-84514125e4d9"))
+(wire(pts(xy 341.630000 358.140000)(xy 335.280000 358.140000))(stroke(width 0)(type default))(uuid "3756a97b-7fd7-433d-a429-4d826a54aa67"))
+(wire(pts(xy 341.630000 299.720000)(xy 335.280000 299.720000))(stroke(width 0)(type default))(uuid "c8ea7e68-c754-42cf-beac-9ed63f6990f8"))
+(wire(pts(xy 341.630000 241.300000)(xy 335.280000 241.300000))(stroke(width 0)(type default))(uuid "27d99500-0852-46b9-9a78-161a375b68e3"))
+(wire(pts(xy 341.630000 182.880000)(xy 335.280000 182.880000))(stroke(width 0)(type default))(uuid "fd2d58f7-3e9b-4579-97ec-868a4d4ad273"))
+(wire(pts(xy 107.950000 48.260000)(xy 115.570000 48.260000))(stroke(width 0)(type default))(uuid "956caf27-1b3d-44a3-b859-d69d64bd1b99"))
+(wire(pts(xy 341.630000 328.930000)(xy 335.280000 328.930000))(stroke(width 0)(type default))(uuid "6463a4e3-b225-4f06-bb74-b3d99fd3cc47"))
+(wire(pts(xy 45.720000 153.670000)(xy 39.370000 153.670000))(stroke(width 0)(type default))(uuid "824a6961-5001-40c5-94b9-84fc7fd4a9c9"))
+(wire(pts(xy 341.630000 270.510000)(xy 335.280000 270.510000))(stroke(width 0)(type default))(uuid "e739eec2-99e8-4e87-9556-6afd84c7a581"))
+(wire(pts(xy 341.630000 212.090000)(xy 335.280000 212.090000))(stroke(width 0)(type default))(uuid "397e2f03-9c14-4466-b44c-b9b0bb7c3e4b"))
+(wire(pts(xy 107.950000 50.800000)(xy 115.570000 50.800000))(stroke(width 0)(type default))(uuid "7a7ab781-32ac-48f5-8a43-f27b8b2b7ade"))
+(wire(pts(xy 318.770000 182.880000)(xy 325.120000 182.880000))(stroke(width 0)(type default))(uuid "844d7989-3e86-4273-a6c7-850d5cde5c92"))
+(wire(pts(xy 39.370000 182.880000)(xy 45.720000 182.880000))(stroke(width 0)(type default))(uuid "0da36e57-ff2e-40a4-8ce1-42fe35d43a35"))
+(wire(pts(xy 318.770000 212.090000)(xy 325.120000 212.090000))(stroke(width 0)(type default))(uuid "1ec44431-551b-4d5c-8b34-64c300f52bfa"))
+(wire(pts(xy 107.950000 53.340000)(xy 115.570000 53.340000))(stroke(width 0)(type default))(uuid "a872926d-2abb-4f24-a73a-63db7f8dc601"))
+(wire(pts(xy 45.720000 212.090000)(xy 39.370000 212.090000))(stroke(width 0)(type default))(uuid "2eb6501d-3dd2-4219-969e-47c46ea7e31d"))
+(wire(pts(xy 318.770000 241.300000)(xy 325.120000 241.300000))(stroke(width 0)(type default))(uuid "ef22eb7f-eeb5-4d71-b03e-9951d223f68a"))
+(wire(pts(xy 45.720000 241.300000)(xy 39.370000 241.300000))(stroke(width 0)(type default))(uuid "8e14ec4e-ff3b-4843-8795-9d1eb072df30"))
+(wire(pts(xy 107.950000 55.880000)(xy 115.570000 55.880000))(stroke(width 0)(type default))(uuid "842be85f-63df-4f16-8eb5-759111a1dd48"))
+(wire(pts(xy 107.950000 58.420000)(xy 115.570000 58.420000))(stroke(width 0)(type default))(uuid "5dc20c0e-f2cc-400a-ac16-0675f464511d"))
+(wire(pts(xy 325.120000 270.510000)(xy 318.770000 270.510000))(stroke(width 0)(type default))(uuid "28999c9a-7d1d-4504-8cd0-4a98b0f8082b"))
+(wire(pts(xy 39.370000 270.510000)(xy 45.720000 270.510000))(stroke(width 0)(type default))(uuid "29aa6a53-e1b9-4130-b3d9-5a8fc94db079"))
+(wire(pts(xy 45.720000 299.720000)(xy 39.370000 299.720000))(stroke(width 0)(type default))(uuid "3c938972-1ef1-4c06-9a9a-7ff8cac4263f"))
+(wire(pts(xy 325.120000 299.720000)(xy 318.770000 299.720000))(stroke(width 0)(type default))(uuid "24dd97aa-5b23-487f-ab5b-8b72f653b568"))
+(wire(pts(xy 115.570000 60.960000)(xy 107.950000 60.960000))(stroke(width 0)(type default))(uuid "37025c0d-f178-48e3-8c24-09c5b8c51c95"))
+(wire(pts(xy 45.720000 328.930000)(xy 39.370000 328.930000))(stroke(width 0)(type default))(uuid "16094817-bb32-4e79-aaae-3e2a180304b8"))
+(wire(pts(xy 325.120000 328.930000)(xy 318.770000 328.930000))(stroke(width 0)(type default))(uuid "07eb7af2-d534-4bfa-96f9-a7c19eb5be29"))
+(wire(pts(xy 115.570000 63.500000)(xy 107.950000 63.500000))(stroke(width 0)(type default))(uuid "2f8104f8-a3f0-46be-a280-fcaf17e98382"))
+)

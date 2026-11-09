@@ -1,0 +1,362 @@
+{
+  "proposal_only": true,
+  "main_PCB_modified": false,
+  "schematic_modified": false,
+  "new_LED_count": 30,
+  "sigla_LED_count": 16,
+  "matrix_LED_count": 0,
+  "screen_removed": true,
+  "driver_existing": "U70 IS31FL3731",
+  "new_drivers": 0,
+  "extra_GPIO": 0,
+  "used_channels": 76,
+  "free_channels": 68,
+  "groups": {
+    "A_used": 44,
+    "A_free": 28,
+    "B_used": 32,
+    "B_free": 40
+  },
+  "board_mm": [
+    70,
+    66
+  ],
+  "central_silkscreen_preserved": true,
+  "layout": "two centered horizontal rows,A1..A8 above,B1..B8 below",
+  "emitter_footprints_placed": false,
+  "optical_and_reverse_mount_qualified": false,
+  "mapping": [
+    {
+      "kind": "row_siglum",
+      "label": "A1",
+      "bank": "A",
+      "row": 1,
+      "x_mm": 205.55,
+      "y_mm": 113.35,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA3",
+      "anode": "LABEL_CA1",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "A2",
+      "bank": "A",
+      "row": 2,
+      "x_mm": 199.75,
+      "y_mm": 113.35,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA3",
+      "anode": "LABEL_CA2",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "A3",
+      "bank": "A",
+      "row": 3,
+      "x_mm": 193.95,
+      "y_mm": 113.35,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA3",
+      "anode": "LABEL_CA4",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "A4",
+      "bank": "A",
+      "row": 4,
+      "x_mm": 188.15,
+      "y_mm": 113.35,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA3",
+      "anode": "LABEL_CA5",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "A5",
+      "bank": "A",
+      "row": 5,
+      "x_mm": 182.35,
+      "y_mm": 113.35,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA3",
+      "anode": "LABEL_CA6",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "A6",
+      "bank": "A",
+      "row": 6,
+      "x_mm": 176.55,
+      "y_mm": 113.35,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA3",
+      "anode": "LABEL_CA7",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "A7",
+      "bank": "A",
+      "row": 7,
+      "x_mm": 170.75,
+      "y_mm": 113.35,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA3",
+      "anode": "LABEL_CA8",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "A8",
+      "bank": "A",
+      "row": 8,
+      "x_mm": 164.95,
+      "y_mm": 113.35,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA3",
+      "anode": "LABEL_CA9",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "B1",
+      "bank": "B",
+      "row": 1,
+      "x_mm": 205.55,
+      "y_mm": 116.85,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA4",
+      "anode": "LABEL_CA1",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "B2",
+      "bank": "B",
+      "row": 2,
+      "x_mm": 199.75,
+      "y_mm": 116.85,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA4",
+      "anode": "LABEL_CA2",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "B3",
+      "bank": "B",
+      "row": 3,
+      "x_mm": 193.95,
+      "y_mm": 116.85,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA4",
+      "anode": "LABEL_CA3",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "B4",
+      "bank": "B",
+      "row": 4,
+      "x_mm": 188.15,
+      "y_mm": 116.85,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA4",
+      "anode": "LABEL_CA5",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "B5",
+      "bank": "B",
+      "row": 5,
+      "x_mm": 182.35,
+      "y_mm": 116.85,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA4",
+      "anode": "LABEL_CA6",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "B6",
+      "bank": "B",
+      "row": 6,
+      "x_mm": 176.55,
+      "y_mm": 116.85,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA4",
+      "anode": "LABEL_CA7",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "B7",
+      "bank": "B",
+      "row": 7,
+      "x_mm": 170.75,
+      "y_mm": 116.85,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA4",
+      "anode": "LABEL_CA8",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    },
+    {
+      "kind": "row_siglum",
+      "label": "B8",
+      "bank": "B",
+      "row": 8,
+      "x_mm": 164.95,
+      "y_mm": 116.85,
+      "text_angle_deg": 0,
+      "LED_angle_requested_deg": 45,
+      "cathode": "LABEL_CA4",
+      "anode": "LABEL_CA9",
+      "driver": "U70 IS31FL3731",
+      "group": "A"
+    }
+  ],
+  "drc_counts": {
+    "items_not_allowed": 128,
+    "courtyards_overlap": 89,
+    "pth_inside_courtyard": 10,
+    "copper_edge_clearance": 20,
+    "solder_mask_bridge": 15,
+    "text_height": 5,
+    "silk_over_copper": 36,
+    "silk_overlap": 3
+  },
+  "fabrication_ready": false,
+  "logo_LED_count": 4,
+  "free_icon_LED_count": 0,
+  "status_LED_count": 6,
+  "logo_source": "spaghetti-logo-blu 2.png",
+  "firmware_implemented": false,
+  "ui": {
+    "SW1": "next A1..A8 then B1..B8",
+    "SW2": "preview next mode",
+    "SW2_double_click": "apply pending mode, break-before-make",
+    "SW1_triple_click": "open menu; defer single actions until click sequence resolved"
+  },
+  "extra_optical_mapping": [
+    {
+      "label": "LOGO1",
+      "group": "A",
+      "cathode": "LABEL_CA5",
+      "anode": "LABEL_CA1"
+    },
+    {
+      "label": "LOGO2",
+      "group": "A",
+      "cathode": "LABEL_CA5",
+      "anode": "LABEL_CA2"
+    },
+    {
+      "label": "LOGO3",
+      "group": "A",
+      "cathode": "LABEL_CA5",
+      "anode": "LABEL_CA3"
+    },
+    {
+      "label": "LOGO4",
+      "group": "A",
+      "cathode": "LABEL_CA5",
+      "anode": "LABEL_CA4"
+    },
+    {
+      "label": "CAN_TERM",
+      "group": "A",
+      "cathode": "LABEL_CA5",
+      "anode": "LABEL_CA6"
+    },
+    {
+      "label": "CAN_ACT",
+      "group": "A",
+      "cathode": "LABEL_CA5",
+      "anode": "LABEL_CA7"
+    },
+    {
+      "label": "RUN",
+      "group": "A",
+      "cathode": "LABEL_CA5",
+      "anode": "LABEL_CA8"
+    },
+    {
+      "label": "STOP",
+      "group": "A",
+      "cathode": "LABEL_CA5",
+      "anode": "LABEL_CA9"
+    },
+    {
+      "label": "KEY_ROW_L",
+      "group": "A",
+      "cathode": "LABEL_CA6",
+      "anode": "LABEL_CA1"
+    },
+    {
+      "label": "KEY_ROW_R",
+      "group": "A",
+      "cathode": "LABEL_CA6",
+      "anode": "LABEL_CA2"
+    },
+    {
+      "label": "KEY_MODE_L",
+      "group": "A",
+      "cathode": "LABEL_CA6",
+      "anode": "LABEL_CA3"
+    },
+    {
+      "label": "KEY_MODE_R",
+      "group": "A",
+      "cathode": "LABEL_CA6",
+      "anode": "LABEL_CA4"
+    }
+  ],
+  "button_LED_count": 4,
+  "rail_LED_count": 2,
+  "rail_LED_connection": "5V and 3V3 direct with individual series resistors, not matrix outputs; proposed, not wired",
+  "menu_proposal": [
+    "LOAD",
+    "SAVE",
+    "ALL_HIZ",
+    "UNDO",
+    "RUN_STOP"
+  ],
+  "menu_implemented": false,
+  "chain_removed": true
+}

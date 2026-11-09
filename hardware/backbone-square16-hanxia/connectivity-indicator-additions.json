@@ -1,0 +1,122 @@
+[
+  {
+    "ref": "D544",
+    "label": "MASTER",
+    "colour": "green",
+    "kind": "system_status",
+    "group": "A",
+    "cathode": "LABEL_CA7",
+    "anode": "LABEL_CA3",
+    "x_mm": 210,
+    "y_mm": 71.3,
+    "LED_angle_deg": 0
+  },
+  {
+    "ref": "D545",
+    "label": "WIFI",
+    "colour": "green",
+    "kind": "system_status",
+    "group": "A",
+    "cathode": "LABEL_CA7",
+    "anode": "LABEL_CA4",
+    "x_mm": 205,
+    "y_mm": 71.3,
+    "LED_angle_deg": 0
+  },
+  {
+    "ref": "D546",
+    "label": "BLUETOOTH",
+    "colour": "blue",
+    "kind": "system_status",
+    "group": "A",
+    "cathode": "LABEL_CA7",
+    "anode": "LABEL_CA5",
+    "x_mm": 200,
+    "y_mm": 71.3,
+    "LED_angle_deg": 0
+  },
+  {
+    "ref": "D547",
+    "label": "USB_LINK",
+    "colour": "blue",
+    "kind": "system_status",
+    "group": "A",
+    "cathode": "LABEL_CA7",
+    "anode": "LABEL_CA6",
+    "x_mm": 207.5,
+    "y_mm": 76,
+    "LED_angle_deg": 0
+  },
+  {
+    "ref": "D548",
+    "label": "AIRPLANE",
+    "colour": "green",
+    "kind": "system_status",
+    "group": "A",
+    "cathode": "LABEL_CA7",
+    "anode": "LABEL_CA8",
+    "x_mm": 202.5,
+    "y_mm": 76,
+    "LED_angle_deg": 0
+  },
+  {
+    "ref": "D549",
+    "label": "PROGRESS_1",
+    "colour": "blue",
+    "kind": "progress_segment",
+    "group": "A",
+    "cathode": "LABEL_CA7",
+    "anode": "LABEL_CA9",
+    "x_mm": 210.6,
+    "y_mm": 85.8,
+    "LED_angle_deg": 90
+  },
+  {
+    "ref": "D550",
+    "label": "PROGRESS_2",
+    "colour": "blue",
+    "kind": "progress_segment",
+    "group": "A",
+    "cathode": "LABEL_CA8",
+    "anode": "LABEL_CA1",
+    "x_mm": 207.8,
+    "y_mm": 85.8,
+    "LED_angle_deg": 90
+  },
+  {
+    "ref": "D551",
+    "label": "PROGRESS_3",
+    "colour": "blue",
+    "kind": "progress_segment",
+    "group": "A",
+    "cathode": "LABEL_CA8",
+    "anode": "LABEL_CA2",
+    "x_mm": 205.0,
+    "y_mm": 85.8,
+    "LED_angle_deg": 90
+  },
+  {
+    "ref": "D552",
+    "label": "PROGRESS_4",
+    "colour": "blue",
+    "kind": "progress_segment",
+    "group": "A",
+    "cathode": "LABEL_CA8",
+    "anode": "LABEL_CA3",
+    "x_mm": 202.2,
+    "y_mm": 85.8,
+    "LED_angle_deg": 90
+  },
+  {
+    "ref": "D553",
+    "label": "PROGRESS_5",
+    "colour": "blue",
+    "kind": "progress_segment",
+    "group": "A",
+    "cathode": "LABEL_CA8",
+    "anode": "LABEL_CA4",
+    "x_mm": 199.4,
+    "y_mm": 85.8,
+    "LED_angle_deg": 90
+  }
+]

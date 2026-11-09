@@ -1,0 +1,74 @@
+[
+  {
+    "ref": "D538",
+    "label": "LOAD",
+    "display": "LOAD",
+    "colour": "blue",
+    "kind": "configuration_action",
+    "group": "A",
+    "cathode": "LABEL_CA6",
+    "anode": "LABEL_CA5",
+    "x_mm": 197.1,
+    "y_mm": 120.2
+  },
+  {
+    "ref": "D539",
+    "label": "SAVE",
+    "display": "SAVE",
+    "colour": "green",
+    "kind": "configuration_action",
+    "group": "A",
+    "cathode": "LABEL_CA6",
+    "anode": "LABEL_CA7",
+    "x_mm": 190.25,
+    "y_mm": 120.2
+  },
+  {
+    "ref": "D540",
+    "label": "SLOT_1",
+    "display": "1",
+    "colour": "green",
+    "kind": "configuration_slot",
+    "group": "A",
+    "cathode": "LABEL_CA6",
+    "anode": "LABEL_CA8",
+    "x_mm": 184.7,
+    "y_mm": 120.2
+  },
+  {
+    "ref": "D541",
+    "label": "SLOT_2",
+    "display": "2",
+    "colour": "green",
+    "kind": "configuration_slot",
+    "group": "A",
+    "cathode": "LABEL_CA6",
+    "anode": "LABEL_CA9",
+    "x_mm": 180.5,
+    "y_mm": 120.2
+  },
+  {
+    "ref": "D542",
+    "label": "SLOT_3",
+    "display": "3",
+    "colour": "green",
+    "kind": "configuration_slot",
+    "group": "A",
+    "cathode": "LABEL_CA7",
+    "anode": "LABEL_CA1",
+    "x_mm": 176.3,
+    "y_mm": 120.2
+  },
+  {
+    "ref": "D543",
+    "label": "SLOT_4",
+    "display": "4",
+    "colour": "green",
+    "kind": "configuration_slot",
+    "group": "A",
+    "cathode": "LABEL_CA7",
+    "anode": "LABEL_CA2",
+    "x_mm": 172.1,
+    "y_mm": 120.2
+  }
+]

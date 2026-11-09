@@ -1,0 +1,1586 @@
+{
+  "D517": {
+    "x_mm": 158.0,
+    "y_mm": 72.9,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C86": {
+    "x_mm": 156.725,
+    "y_mm": 86.774999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D421": {
+    "x_mm": 206.45,
+    "y_mm": 109.67,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D503": {
+    "x_mm": 187.35,
+    "y_mm": 113.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D564": {
+    "x_mm": 158.0,
+    "y_mm": 80.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN6": {
+    "x_mm": 166.55,
+    "y_mm": 117.3,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "H1": {
+    "x_mm": 165.5,
+    "y_mm": 65.599999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q106": {
+    "x_mm": 215.375,
+    "y_mm": 78.6,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C206": {
+    "x_mm": 178.325,
+    "y_mm": 80.375,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D436": {
+    "x_mm": 164.05,
+    "y_mm": 102.05,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R400": {
+    "x_mm": 159.525,
+    "y_mm": 86.774999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R124": {
+    "x_mm": 162.325,
+    "y_mm": 86.774999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q33": {
+    "x_mm": 219.075,
+    "y_mm": 78.6,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R130": {
+    "x_mm": 165.125,
+    "y_mm": 86.774999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J21": {
+    "x_mm": 197.06,
+    "y_mm": 100.78,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C200": {
+    "x_mm": 220.275,
+    "y_mm": 84.425,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D400": {
+    "x_mm": 206.45,
+    "y_mm": 91.89,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D553": {
+    "x_mm": 203.4,
+    "y_mm": 85.8,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R37": {
+    "x_mm": 174.674999,
+    "y_mm": 87.325,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D407": {
+    "x_mm": 209.299999,
+    "y_mm": 96.97,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D438": {
+    "x_mm": 158.35,
+    "y_mm": 102.05,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q31": {
+    "x_mm": 204.475,
+    "y_mm": 78.9,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D547": {
+    "x_mm": 211.5,
+    "y_mm": 76.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D404": {
+    "x_mm": 209.299999,
+    "y_mm": 94.43,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U70": {
+    "x_mm": 188.25,
+    "y_mm": 73.75,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C300": {
+    "x_mm": 148.25,
+    "y_mm": 79.825,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R202": {
+    "x_mm": 188.424999,
+    "y_mm": 80.375,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C11": {
+    "x_mm": 215.04825,
+    "y_mm": 64.47738,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "H2": {
+    "x_mm": 205.0,
+    "y_mm": 65.599999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U60": {
+    "x_mm": 164.2,
+    "y_mm": 68.6,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J29": {
+    "x_mm": 217.62,
+    "y_mm": 99.11,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D511": {
+    "x_mm": 187.35,
+    "y_mm": 116.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN11": {
+    "x_mm": 222.4,
+    "y_mm": 75.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q48": {
+    "x_mm": 178.775,
+    "y_mm": 78.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R127": {
+    "x_mm": 192.575,
+    "y_mm": 64.925,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q44": {
+    "x_mm": 208.175,
+    "y_mm": 78.9,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q108": {
+    "x_mm": 199.374999,
+    "y_mm": 79.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D549": {
+    "x_mm": 214.6,
+    "y_mm": 85.8,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q36": {
+    "x_mm": 169.874999,
+    "y_mm": 79.7,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J27": {
+    "x_mm": 300.0,
+    "y_mm": 100.0,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q103": {
+    "x_mm": 216.675,
+    "y_mm": 82.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D508": {
+    "x_mm": 199.95,
+    "y_mm": 116.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C401": {
+    "x_mm": 192.125,
+    "y_mm": 73.75,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D538": {
+    "x_mm": 199.9,
+    "y_mm": 121.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D419": {
+    "x_mm": 209.299999,
+    "y_mm": 107.13,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q2": {
+    "x_mm": 203.05,
+    "y_mm": 68.449999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D552": {
+    "x_mm": 206.2,
+    "y_mm": 85.8,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C139": {
+    "x_mm": 208.625,
+    "y_mm": 88.475,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q112": {
+    "x_mm": 199.374999,
+    "y_mm": 82.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D430": {
+    "x_mm": 164.05,
+    "y_mm": 96.97,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D414": {
+    "x_mm": 212.149999,
+    "y_mm": 102.05,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q100": {
+    "x_mm": 173.575,
+    "y_mm": 82.9,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D554": {
+    "x_mm": 168.3,
+    "y_mm": 85.1,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D510": {
+    "x_mm": 191.55,
+    "y_mm": 116.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C301": {
+    "x_mm": 163.125,
+    "y_mm": 64.349999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R27": {
+    "x_mm": 215.04825,
+    "y_mm": 67.977381,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C238": {
+    "x_mm": 211.424999,
+    "y_mm": 88.475,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D418": {
+    "x_mm": 206.45,
+    "y_mm": 107.13,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R203": {
+    "x_mm": 192.575,
+    "y_mm": 67.725,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D514": {
+    "x_mm": 174.75,
+    "y_mm": 116.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C205": {
+    "x_mm": 175.424999,
+    "y_mm": 85.274999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D446": {
+    "x_mm": 161.2,
+    "y_mm": 109.67,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D424": {
+    "x_mm": 164.05,
+    "y_mm": 91.89,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN10": {
+    "x_mm": 206.749999,
+    "y_mm": 117.3,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q10": {
+    "x_mm": 202.45,
+    "y_mm": 65.05,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D540": {
+    "x_mm": 181.275,
+    "y_mm": 121.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C5": {
+    "x_mm": 171.625,
+    "y_mm": 88.675,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D551": {
+    "x_mm": 209.0,
+    "y_mm": 85.8,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D501": {
+    "x_mm": 195.75,
+    "y_mm": 113.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R129": {
+    "x_mm": 191.225,
+    "y_mm": 80.475,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R201": {
+    "x_mm": 147.375,
+    "y_mm": 65.524999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D546": {
+    "x_mm": 204.0,
+    "y_mm": 71.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R132": {
+    "x_mm": 147.275,
+    "y_mm": 68.324999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "TP2": {
+    "x_mm": 211.682143,
+    "y_mm": 79.89825,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J24": {
+    "x_mm": 173.44,
+    "y_mm": 100.78,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D425": {
+    "x_mm": 161.2,
+    "y_mm": 91.89,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C239": {
+    "x_mm": 154.225,
+    "y_mm": 70.075,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R510": {
+    "x_mm": 165.425,
+    "y_mm": 63.375,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R131": {
+    "x_mm": 201.875,
+    "y_mm": 81.825,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C84": {
+    "x_mm": 208.475,
+    "y_mm": 82.024999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R123": {
+    "x_mm": 195.375,
+    "y_mm": 87.324999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D431": {
+    "x_mm": 161.2,
+    "y_mm": 96.97,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J2": {
+    "x_mm": 220.34,
+    "y_mm": 100.38,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D512": {
+    "x_mm": 183.15,
+    "y_mm": 116.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D518": {
+    "x_mm": 162.0,
+    "y_mm": 72.9,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R300": {
+    "x_mm": 169.424999,
+    "y_mm": 82.075,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q49": {
+    "x_mm": 194.775,
+    "y_mm": 82.9,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D406": {
+    "x_mm": 206.45,
+    "y_mm": 96.97,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D427": {
+    "x_mm": 164.05,
+    "y_mm": 94.43,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U41": {
+    "x_mm": 149.175,
+    "y_mm": 72.975,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN5": {
+    "x_mm": 214.35,
+    "y_mm": 117.899999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D420": {
+    "x_mm": 212.149999,
+    "y_mm": 107.13,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D439": {
+    "x_mm": 164.05,
+    "y_mm": 104.59,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J22": {
+    "x_mm": 181.44,
+    "y_mm": 100.78,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q113": {
+    "x_mm": 150.674999,
+    "y_mm": 83.4,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R25": {
+    "x_mm": 204.377381,
+    "y_mm": 73.54825,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D548": {
+    "x_mm": 206.5,
+    "y_mm": 76.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D533": {
+    "x_mm": 158.0,
+    "y_mm": 75.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D570": {
+    "x_mm": 206.9,
+    "y_mm": 114.75,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D506": {
+    "x_mm": 174.75,
+    "y_mm": 113.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D434": {
+    "x_mm": 161.2,
+    "y_mm": 99.51,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D411": {
+    "x_mm": 212.149999,
+    "y_mm": 99.51,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q110": {
+    "x_mm": 217.775,
+    "y_mm": 85.4,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D516": {
+    "x_mm": 154.0,
+    "y_mm": 72.9,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C85": {
+    "x_mm": 217.025,
+    "y_mm": 87.774999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D428": {
+    "x_mm": 161.2,
+    "y_mm": 94.43,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q37": {
+    "x_mm": 198.475,
+    "y_mm": 86.1,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D537": {
+    "x_mm": 182.75,
+    "y_mm": 87.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R512": {
+    "x_mm": 176.075,
+    "y_mm": 82.625,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D410": {
+    "x_mm": 209.299999,
+    "y_mm": 99.51,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U40": {
+    "x_mm": 179.475,
+    "y_mm": 73.775,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN9": {
+    "x_mm": 162.85,
+    "y_mm": 117.3,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D523": {
+    "x_mm": 187.75,
+    "y_mm": 87.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "H4": {
+    "x_mm": 220.95,
+    "y_mm": 125.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R104": {
+    "x_mm": 153.924999,
+    "y_mm": 83.175,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D505": {
+    "x_mm": 178.95,
+    "y_mm": 113.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D566": {
+    "x_mm": 166.0,
+    "y_mm": 80.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J28": {
+    "x_mm": 152.88,
+    "y_mm": 99.11,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U3": {
+    "x_mm": 219.665,
+    "y_mm": 68.5,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R24": {
+    "x_mm": 183.777381,
+    "y_mm": 76.04825,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D7": {
+    "x_mm": 172.174999,
+    "y_mm": 86.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN3": {
+    "x_mm": 168.7,
+    "y_mm": 87.949999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D415": {
+    "x_mm": 206.45,
+    "y_mm": 104.59,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q34": {
+    "x_mm": 150.675,
+    "y_mm": 86.8,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J23": {
+    "x_mm": 177.44,
+    "y_mm": 100.78,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN7": {
+    "x_mm": 148.45,
+    "y_mm": 117.899999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R301": {
+    "x_mm": 156.725,
+    "y_mm": 83.175,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J4": {
+    "x_mm": 156.5,
+    "y_mm": 66.5,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R128": {
+    "x_mm": 219.825,
+    "y_mm": 87.774999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q35": {
+    "x_mm": 148.475,
+    "y_mm": 111.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q101": {
+    "x_mm": 215.375,
+    "y_mm": 75.2,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C74": {
+    "x_mm": 182.275,
+    "y_mm": 64.925,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U54": {
+    "x_mm": 150.45,
+    "y_mm": 66.549999,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q114": {
+    "x_mm": 152.174999,
+    "y_mm": 111.3,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J31": {
+    "x_mm": 169.44,
+    "y_mm": 100.78,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "H3": {
+    "x_mm": 149.55,
+    "y_mm": 125.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q107": {
+    "x_mm": 215.975,
+    "y_mm": 111.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R8": {
+    "x_mm": 150.94825,
+    "y_mm": 80.252999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D422": {
+    "x_mm": 209.299999,
+    "y_mm": 109.67,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q111": {
+    "x_mm": 219.674999,
+    "y_mm": 111.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D412": {
+    "x_mm": 206.45,
+    "y_mm": 102.05,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D444": {
+    "x_mm": 158.35,
+    "y_mm": 107.13,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D500": {
+    "x_mm": 199.95,
+    "y_mm": 113.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J9": {
+    "x_mm": 150.16,
+    "y_mm": 100.38,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D530": {
+    "x_mm": 212.5,
+    "y_mm": 82.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D522": {
+    "x_mm": 192.75,
+    "y_mm": 87.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D426": {
+    "x_mm": 158.35,
+    "y_mm": 91.89,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN1": {
+    "x_mm": 203.4,
+    "y_mm": 117.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U51": {
+    "x_mm": 210.15,
+    "y_mm": 65.05,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D555": {
+    "x_mm": 164.1,
+    "y_mm": 85.1,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C241": {
+    "x_mm": 194.225,
+    "y_mm": 85.274999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R15": {
+    "x_mm": 207.877381,
+    "y_mm": 73.54825,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q51": {
+    "x_mm": 155.874999,
+    "y_mm": 113.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "L1": {
+    "x_mm": 183.9,
+    "y_mm": 68.7,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D567": {
+    "x_mm": 166.5,
+    "y_mm": 114.75,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D569": {
+    "x_mm": 186.6,
+    "y_mm": 121.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J26": {
+    "x_mm": 270.0,
+    "y_mm": 100.0,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J18": {
+    "x_mm": 189.06,
+    "y_mm": 100.78,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C1": {
+    "x_mm": 212.54825,
+    "y_mm": 68.701191,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D532": {
+    "x_mm": 154.0,
+    "y_mm": 75.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D423": {
+    "x_mm": 212.149999,
+    "y_mm": 109.67,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R18": {
+    "x_mm": 209.777381,
+    "y_mm": 68.44825,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D435": {
+    "x_mm": 158.35,
+    "y_mm": 99.51,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D441": {
+    "x_mm": 158.35,
+    "y_mm": 104.59,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D445": {
+    "x_mm": 164.05,
+    "y_mm": 109.67,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q30": {
+    "x_mm": 210.775,
+    "y_mm": 113.3,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R110": {
+    "x_mm": 157.025,
+    "y_mm": 70.074999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D520": {
+    "x_mm": 177.75,
+    "y_mm": 87.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D561": {
+    "x_mm": 162.0,
+    "y_mm": 78.1,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J30": {
+    "x_mm": 201.06,
+    "y_mm": 100.78,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C140": {
+    "x_mm": 159.525,
+    "y_mm": 83.175,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D535": {
+    "x_mm": 166.0,
+    "y_mm": 75.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q50": {
+    "x_mm": 188.975,
+    "y_mm": 78.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D403": {
+    "x_mm": 206.45,
+    "y_mm": 94.43,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q115": {
+    "x_mm": 219.075,
+    "y_mm": 75.2,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D536": {
+    "x_mm": 154.0,
+    "y_mm": 78.1,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R22": {
+    "x_mm": 191.84825,
+    "y_mm": 78.077381,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R303": {
+    "x_mm": 197.424999,
+    "y_mm": 88.475,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN4": {
+    "x_mm": 221.75,
+    "y_mm": 117.899999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D544": {
+    "x_mm": 214.0,
+    "y_mm": 71.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "TP1": {
+    "x_mm": 211.598249,
+    "y_mm": 116.682143,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q109": {
+    "x_mm": 148.475,
+    "y_mm": 114.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D519": {
+    "x_mm": 166.0,
+    "y_mm": 72.9,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D515": {
+    "x_mm": 170.55,
+    "y_mm": 116.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D402": {
+    "x_mm": 212.149999,
+    "y_mm": 91.89,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q47": {
+    "x_mm": 214.475,
+    "y_mm": 114.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D560": {
+    "x_mm": 158.0,
+    "y_mm": 78.1,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q105": {
+    "x_mm": 218.175,
+    "y_mm": 114.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D433": {
+    "x_mm": 164.05,
+    "y_mm": 99.51,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U53": {
+    "x_mm": 179.249999,
+    "y_mm": 67.35,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D437": {
+    "x_mm": 161.2,
+    "y_mm": 102.05,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D440": {
+    "x_mm": 161.2,
+    "y_mm": 104.59,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R36": {
+    "x_mm": 162.325,
+    "y_mm": 83.175,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U50": {
+    "x_mm": 169.749999,
+    "y_mm": 67.35,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q102": {
+    "x_mm": 221.874999,
+    "y_mm": 114.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R125": {
+    "x_mm": 150.975,
+    "y_mm": 76.925,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D545": {
+    "x_mm": 209.0,
+    "y_mm": 71.3,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C9": {
+    "x_mm": 200.975,
+    "y_mm": 85.824999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D513": {
+    "x_mm": 178.95,
+    "y_mm": 116.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D543": {
+    "x_mm": 169.275,
+    "y_mm": 121.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R4": {
+    "x_mm": 200.225,
+    "y_mm": 88.475,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN12": {
+    "x_mm": 218.05,
+    "y_mm": 117.899999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U42": {
+    "x_mm": 200.075,
+    "y_mm": 75.075,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D417": {
+    "x_mm": 212.149999,
+    "y_mm": 104.59,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D539": {
+    "x_mm": 193.25,
+    "y_mm": 121.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D563": {
+    "x_mm": 154.0,
+    "y_mm": 80.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q32": {
+    "x_mm": 152.0,
+    "y_mm": 114.875,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D401": {
+    "x_mm": 209.299999,
+    "y_mm": 91.89,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q46": {
+    "x_mm": 169.875,
+    "y_mm": 76.3,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D550": {
+    "x_mm": 211.8,
+    "y_mm": 85.8,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D432": {
+    "x_mm": 158.35,
+    "y_mm": 96.97,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C299": {
+    "x_mm": 203.025,
+    "y_mm": 88.475,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R126": {
+    "x_mm": 205.825,
+    "y_mm": 88.475,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R511": {
+    "x_mm": 153.925,
+    "y_mm": 86.774999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D509": {
+    "x_mm": 195.75,
+    "y_mm": 116.15,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U4": {
+    "x_mm": 169.999999,
+    "y_mm": 72.9,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D542": {
+    "x_mm": 173.275,
+    "y_mm": 121.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D558": {
+    "x_mm": 165.25,
+    "y_mm": 88.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "TP3": {
+    "x_mm": 160.098249,
+    "y_mm": 117.482143,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D531": {
+    "x_mm": 205.5,
+    "y_mm": 82.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN2": {
+    "x_mm": 222.4,
+    "y_mm": 79.05,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U2": {
+    "x_mm": 189.494,
+    "y_mm": 67.2,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R16": {
+    "x_mm": 181.64825,
+    "y_mm": 78.877381,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D429": {
+    "x_mm": 158.35,
+    "y_mm": 94.43,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R111": {
+    "x_mm": 201.875,
+    "y_mm": 79.024999,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C242": {
+    "x_mm": 165.125,
+    "y_mm": 83.175,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D442": {
+    "x_mm": 164.05,
+    "y_mm": 107.13,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D541": {
+    "x_mm": 177.275,
+    "y_mm": 121.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J19": {
+    "x_mm": 193.06,
+    "y_mm": 100.78,
+    "angle_deg": -90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "J25": {
+    "x_mm": 176.36,
+    "y_mm": 125.8,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q45": {
+    "x_mm": 148.475,
+    "y_mm": 77.2,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R17": {
+    "x_mm": 211.377381,
+    "y_mm": 73.54825,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R302": {
+    "x_mm": 174.424999,
+    "y_mm": 89.375,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D504": {
+    "x_mm": 183.15,
+    "y_mm": 113.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "RN8": {
+    "x_mm": 203.399999,
+    "y_mm": 113.45,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D568": {
+    "x_mm": 162.0,
+    "y_mm": 114.75,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q9": {
+    "x_mm": 206.45,
+    "y_mm": 68.649999,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D405": {
+    "x_mm": 212.149999,
+    "y_mm": 94.43,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U8": {
+    "x_mm": 199.37,
+    "y_mm": 67.95,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R200": {
+    "x_mm": 167.924999,
+    "y_mm": 83.375,
+    "angle_deg": 180.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "Q104": {
+    "x_mm": 155.575,
+    "y_mm": 116.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D557": {
+    "x_mm": 155.7,
+    "y_mm": 85.1,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "U63": {
+    "x_mm": 183.7,
+    "y_mm": 73.0,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C400": {
+    "x_mm": 192.125,
+    "y_mm": 72.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D447": {
+    "x_mm": 158.35,
+    "y_mm": 109.67,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "R5": {
+    "x_mm": 219.54825,
+    "y_mm": 81.653,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D443": {
+    "x_mm": 161.2,
+    "y_mm": 107.13,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C204": {
+    "x_mm": 177.225,
+    "y_mm": 89.375,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D408": {
+    "x_mm": 212.149999,
+    "y_mm": 96.97,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D413": {
+    "x_mm": 209.299999,
+    "y_mm": 102.05,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D565": {
+    "x_mm": 162.0,
+    "y_mm": 80.7,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D502": {
+    "x_mm": 191.55,
+    "y_mm": 113.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D416": {
+    "x_mm": 209.299999,
+    "y_mm": 104.59,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "C402": {
+    "x_mm": 192.125,
+    "y_mm": 75.0,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D562": {
+    "x_mm": 166.0,
+    "y_mm": 78.1,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D559": {
+    "x_mm": 158.75,
+    "y_mm": 88.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D6": {
+    "x_mm": 161.14825,
+    "y_mm": 66.4315,
+    "angle_deg": 90.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D507": {
+    "x_mm": 170.55,
+    "y_mm": 113.35,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D556": {
+    "x_mm": 159.9,
+    "y_mm": 85.1,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D534": {
+    "x_mm": 162.0,
+    "y_mm": 75.5,
+    "angle_deg": 0.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "D409": {
+    "x_mm": 206.45,
+    "y_mm": 99.51,
+    "angle_deg": 45.0,
+    "layer": "L1_SIGNAL_TOP"
+  },
+  "SW1": {
+    "x_mm": 220.0,
+    "y_mm": 115.0,
+    "angle_deg": 0.0,
+    "layer": "L4_SIGNAL_BOTTOM"
+  },
+  "SW2": {
+    "x_mm": 150.5,
+    "y_mm": 115.0,
+    "angle_deg": 0.0,
+    "layer": "L4_SIGNAL_BOTTOM"
+  },
+  "U1": {
+    "x_mm": 185.25,
+    "y_mm": 64.059,
+    "angle_deg": 180.0,
+    "layer": "L4_SIGNAL_BOTTOM"
+  }
+}

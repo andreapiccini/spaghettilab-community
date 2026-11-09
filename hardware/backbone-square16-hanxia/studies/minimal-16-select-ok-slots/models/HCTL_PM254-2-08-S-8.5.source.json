@@ -1,0 +1,24 @@
+{
+  "manufacturer": "HCTL",
+  "part": "PM254-2-08-S-8.5",
+  "page": "https://www.hctldz.com/product-5-8/557.html",
+  "archive": "https://www.hctldz.com/static/upload/2026/09/30/202609303702.zip",
+  "sha256": "888acee11a541f86a8a30a6ea5bda6490d73a2c5274fe52ccf7c3eb7d6359267",
+  "offset_mm": [
+    -2.5,
+    -2.34,
+    0.6
+  ],
+  "rotation_degrees": [
+    270,
+    0,
+    90
+  ],
+  "references": [
+    "J19",
+    "J21",
+    "J22",
+    "J24"
+  ],
+  "limitations": "Manufacturer STEP has simplified closed underside; cannot verify reverse mating or contact spring deflection."
+}

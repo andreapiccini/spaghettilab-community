@@ -1,0 +1,2375 @@
+{
+  "date": "2026-11-08",
+  "scope": "74x66mm backbone;16red+16blue+16green reverse indicators;IS31FL3731on5V;40FlexyPins;excludesJ26/J27,fabrication,assembly",
+  "EUR_USD": 1.1165,
+  "FX_reference_date": "2026-11-06",
+  "FX_source": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.eu.html",
+  "excluded": [
+    "PCB fabrication",
+    "assembly",
+    "case",
+    "test",
+    "shipping",
+    "VAT",
+    "exchange fees",
+    "minimum-order and excess-stock cash outlay"
+  ],
+  "costing_basis": "consumed component quantities; explicit allowance covers unassigned passives and low-volume parts below seller MOQ; not a checkout quote; unchanged allowance from previous comparison;10board estimate adds0.0024+0.0030USD for the two new resistors below MOQ;1000board calculation pools shared100k part quantities; added R302/R303 below-MOQ20pieces for10boards allocated at100piece unit price; RGBparts removed; new indicator parts priced2026-11-08; previous passive allowance conservatively retained; totals are estimates,notcart quotes",
+  "FlexyPin_source": "https://lectronz.com/products/flexypin-pack-of-100",
+  "FlexyPin_pack100_USD": {
+    "lot10_boards_packqty4": 6.14,
+    "lot1000_boards_packqty400": 4.61
+  },
+  "estimates": {
+    "10": {
+      "priced_LCSC_USD_per_board": 18.205099999999998,
+      "estimated_passives_USD_per_board": 0.4066,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0.0054,
+      "FlexyPin_USD_per_board": 2.456,
+      "total_USD_per_board": 21.0731,
+      "total_EUR_per_board": 18.87424988804299,
+      "lot_USD": 210.731,
+      "lot_EUR": 188.74249888042988,
+      "row_protection_increment_USD_per_board": 0.16760000000000375,
+      "row_protection_increment_EUR_per_board": 0.15011195700851207,
+      "magnetic_expansion_increment_USD_per_board": 0.6468,
+      "magnetic_expansion_increment_EUR_per_board": 0.5793103448275863,
+      "i2c_resistors_below_MOQ_allowance_USD_per_board": 0.0056,
+      "i2c_split_increment_USD_per_board": 0.0056
+    },
+    "1000": {
+      "priced_LCSC_USD_per_board": 12.466,
+      "estimated_passives_USD_per_board": 0.1465,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0,
+      "FlexyPin_USD_per_board": 1.844,
+      "total_USD_per_board": 14.456499999999998,
+      "total_EUR_per_board": 12.948051948051946,
+      "lot_USD": 14456.499999999998,
+      "lot_EUR": 12948.051948051945,
+      "row_protection_increment_USD_per_board": 0.10049999999999848,
+      "row_protection_increment_EUR_per_board": 0.09001343484101969,
+      "magnetic_expansion_increment_USD_per_board": 0.3917999999999999,
+      "magnetic_expansion_increment_EUR_per_board": 0.3509180474697715,
+      "i2c_split_increment_USD_per_board": 0.0046
+    }
+  },
+  "live_LCSC_groups": [
+    {
+      "code": "C1591",
+      "value": "100nF/50V",
+      "per_board_qty": 4,
+      "refs": [
+        "C1",
+        "C85",
+        "C400",
+        "C402"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0072
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0055
+        },
+        {
+          "qty": 4000,
+          "usd": 0.0047
+        },
+        {
+          "qty": 8000,
+          "usd": 0.0042
+        },
+        {
+          "qty": 48000,
+          "usd": 0.0039
+        },
+        {
+          "qty": 100000,
+          "usd": 0.0038
+        }
+      ],
+      "stock": 2121000,
+      "per_board_USD": {
+        "10": 0.0288,
+        "1000": 0.0188
+      }
+    },
+    {
+      "code": "C1589",
+      "value": "10nF",
+      "per_board_qty": 2,
+      "refs": [
+        "C139",
+        "C140"
+      ],
+      "prices": [
+        {
+          "qty": 50,
+          "usd": 0.0075
+        },
+        {
+          "qty": 500,
+          "usd": 0.0058
+        },
+        {
+          "qty": 1500,
+          "usd": 0.0051
+        },
+        {
+          "qty": 4000,
+          "usd": 0.0037
+        },
+        {
+          "qty": 24000,
+          "usd": 0.0035
+        },
+        {
+          "qty": 48000,
+          "usd": 0.0034
+        }
+      ],
+      "stock": 1697250,
+      "per_board_USD": {
+        "10": 0.015,
+        "1000": 0.0102
+      }
+    },
+    {
+      "code": "C86295",
+      "value": "22uF",
+      "per_board_qty": 3,
+      "refs": [
+        "C5",
+        "C86",
+        "C9"
+      ],
+      "prices": [
+        {
+          "qty": 10,
+          "usd": 0.033
+        },
+        {
+          "qty": 100,
+          "usd": 0.0247
+        },
+        {
+          "qty": 300,
+          "usd": 0.021
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0183
+        },
+        {
+          "qty": 6000,
+          "usd": 0.0172
+        },
+        {
+          "qty": 9000,
+          "usd": 0.0164
+        }
+      ],
+      "stock": 89850,
+      "per_board_USD": {
+        "10": 0.099,
+        "1000": 0.054900000000000004
+      }
+    },
+    {
+      "code": "C1653",
+      "value": "22pF",
+      "per_board_qty": 1,
+      "refs": [
+        "C84"
+      ],
+      "prices": [
+        {
+          "qty": 50,
+          "usd": 0.009
+        },
+        {
+          "qty": 500,
+          "usd": 0.0069
+        },
+        {
+          "qty": 1500,
+          "usd": 0.006
+        },
+        {
+          "qty": 4000,
+          "usd": 0.0053
+        },
+        {
+          "qty": 24000,
+          "usd": 0.005
+        },
+        {
+          "qty": 48000,
+          "usd": 0.0048
+        }
+      ],
+      "stock": 705100,
+      "per_board_USD": {
+        "10": 0.009,
+        "1000": 0.0069
+      }
+    },
+    {
+      "code": "C22452",
+      "value": "SS54_C22452",
+      "per_board_qty": 1,
+      "refs": [
+        "D6"
+      ],
+      "prices": [
+        {
+          "qty": 10,
+          "usd": 0.0428
+        },
+        {
+          "qty": 100,
+          "usd": 0.0349
+        },
+        {
+          "qty": 300,
+          "usd": 0.0309
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0275
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0236
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0228
+        }
+      ],
+      "stock": 1416470,
+      "per_board_USD": {
+        "10": 0.0428,
+        "1000": 0.0275
+      }
+    },
+    {
+      "code": "C68978",
+      "value": "BAV70",
+      "per_board_qty": 1,
+      "refs": [
+        "D7"
+      ],
+      "prices": [
+        {
+          "qty": 50,
+          "usd": 0.0154
+        },
+        {
+          "qty": 500,
+          "usd": 0.0118
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0102
+        },
+        {
+          "qty": 6000,
+          "usd": 0.009
+        },
+        {
+          "qty": 24000,
+          "usd": 0.0085
+        },
+        {
+          "qty": 51000,
+          "usd": 0.0082
+        }
+      ],
+      "stock": 461150,
+      "per_board_USD": {
+        "10": 0.0154,
+        "1000": 0.0118
+      }
+    },
+    {
+      "code": "C42380985",
+      "value": "HX PM2.54-1x8P TP-YQ",
+      "per_board_qty": 8,
+      "refs": [
+        "J18",
+        "J19",
+        "J21",
+        "J22",
+        "J23",
+        "J24",
+        "J28",
+        "J29"
+      ],
+      "prices": [
+        {
+          "qty": 29,
+          "usd": 0.3234
+        },
+        {
+          "qty": 290,
+          "usd": 0.2585
+        },
+        {
+          "qty": 870,
+          "usd": 0.2307
+        },
+        {
+          "qty": 2900,
+          "usd": 0.1959
+        },
+        {
+          "qty": 14500,
+          "usd": 0.1805
+        },
+        {
+          "qty": 29000,
+          "usd": 0.1712
+        }
+      ],
+      "stock": 2320,
+      "per_board_USD": {
+        "10": 2.5872,
+        "1000": 1.5672
+      }
+    },
+    {
+      "code": "C41361292",
+      "value": "FROM_PREVIOUS",
+      "per_board_qty": 1,
+      "refs": [
+        "J2"
+      ],
+      "prices": [
+        {
+          "qty": 1,
+          "usd": 1.3265
+        },
+        {
+          "qty": 10,
+          "usd": 1.1023
+        },
+        {
+          "qty": 30,
+          "usd": 0.9794
+        },
+        {
+          "qty": 200,
+          "usd": 0.8035
+        },
+        {
+          "qty": 400,
+          "usd": 0.7411
+        },
+        {
+          "qty": 1000,
+          "usd": 0.7131
+        }
+      ],
+      "stock": 0,
+      "per_board_USD": {
+        "10": 1.1023,
+        "1000": 0.7131
+      }
+    },
+    {
+      "code": "C160404",
+      "value": "SM04B-SRSS-TB(LF)(SN)",
+      "per_board_qty": 1,
+      "refs": [
+        "J4"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.2168
+        },
+        {
+          "qty": 50,
+          "usd": 0.1753
+        },
+        {
+          "qty": 150,
+          "usd": 0.1551
+        },
+        {
+          "qty": 500,
+          "usd": 0.1371
+        },
+        {
+          "qty": 3000,
+          "usd": 0.1285
+        },
+        {
+          "qty": 6000,
+          "usd": 0.1255
+        }
+      ],
+      "stock": 45025,
+      "per_board_USD": {
+        "10": 0.2168,
+        "1000": 0.1371
+      }
+    },
+    {
+      "code": "C41361293",
+      "value": "TO NEXT",
+      "per_board_qty": 1,
+      "refs": [
+        "J9"
+      ],
+      "prices": [
+        {
+          "qty": 1,
+          "usd": 1.8355
+        },
+        {
+          "qty": 10,
+          "usd": 1.5511
+        },
+        {
+          "qty": 30,
+          "usd": 1.3736
+        },
+        {
+          "qty": 200,
+          "usd": 1.1347
+        },
+        {
+          "qty": 400,
+          "usd": 1.053
+        },
+        {
+          "qty": 1000,
+          "usd": 1.0168
+        }
+      ],
+      "stock": 435,
+      "per_board_USD": {
+        "10": 1.5511,
+        "1000": 1.0168
+      }
+    },
+    {
+      "code": "C39846848",
+      "value": "3.3uH",
+      "per_board_qty": 1,
+      "refs": [
+        "L1"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.1483
+        },
+        {
+          "qty": 50,
+          "usd": 0.1304
+        },
+        {
+          "qty": 150,
+          "usd": 0.1227
+        },
+        {
+          "qty": 500,
+          "usd": 0.1131
+        },
+        {
+          "qty": 2500,
+          "usd": 0.1089
+        },
+        {
+          "qty": 5000,
+          "usd": 0.1063
+        }
+      ],
+      "stock": 1390,
+      "per_board_USD": {
+        "10": 0.1483,
+        "1000": 0.1131
+      }
+    },
+    {
+      "code": "C131781",
+      "value": "LMBT3904DW1T1G",
+      "per_board_qty": 1,
+      "refs": [
+        "Q10"
+      ],
+      "prices": [
+        {
+          "qty": 20,
+          "usd": 0.0263
+        },
+        {
+          "qty": 200,
+          "usd": 0.0205
+        },
+        {
+          "qty": 600,
+          "usd": 0.0172
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0142
+        },
+        {
+          "qty": 9000,
+          "usd": 0.0125
+        },
+        {
+          "qty": 21000,
+          "usd": 0.0115
+        }
+      ],
+      "stock": 120200,
+      "per_board_USD": {
+        "10": 0.0263,
+        "1000": 0.0172
+      }
+    },
+    {
+      "code": "C15127",
+      "value": "AO3401A",
+      "per_board_qty": 17,
+      "refs": [
+        "Q2",
+        "Q30",
+        "Q31",
+        "Q32",
+        "Q33",
+        "Q34",
+        "Q35",
+        "Q36",
+        "Q37",
+        "Q44",
+        "Q45",
+        "Q46",
+        "Q47",
+        "Q48",
+        "Q49",
+        "Q50",
+        "Q51"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.0835
+        },
+        {
+          "qty": 50,
+          "usd": 0.0661
+        },
+        {
+          "qty": 150,
+          "usd": 0.0572
+        },
+        {
+          "qty": 500,
+          "usd": 0.0498
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0473
+        },
+        {
+          "qty": 6000,
+          "usd": 0.0455
+        }
+      ],
+      "stock": 1293080,
+      "per_board_USD": {
+        "10": 0.9724,
+        "1000": 0.7735
+      }
+    },
+    {
+      "code": "C136169",
+      "value": "LMBT3946DW1T1G",
+      "per_board_qty": 1,
+      "refs": [
+        "Q9"
+      ],
+      "prices": [
+        {
+          "qty": 20,
+          "usd": 0.0263
+        },
+        {
+          "qty": 200,
+          "usd": 0.0205
+        },
+        {
+          "qty": 600,
+          "usd": 0.0172
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0152
+        },
+        {
+          "qty": 9000,
+          "usd": 0.0135
+        },
+        {
+          "qty": 21000,
+          "usd": 0.0127
+        }
+      ],
+      "stock": 167340,
+      "per_board_USD": {
+        "10": 0.0263,
+        "1000": 0.0172
+      }
+    },
+    {
+      "code": "C25819",
+      "value": "47k",
+      "per_board_qty": 2,
+      "refs": [
+        "R104",
+        "R400"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0016
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0013
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0011
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0009
+        },
+        {
+          "qty": 50000,
+          "usd": 0.0008
+        }
+      ],
+      "stock": 368200,
+      "per_board_USD": {
+        "10": 0.0032,
+        "1000": 0.0026
+      }
+    },
+    {
+      "code": "C25804",
+      "value": "10k",
+      "per_board_qty": 6,
+      "refs": [
+        "R123",
+        "R125",
+        "R126",
+        "R130",
+        "R15",
+        "R16"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0022
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0019
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0017
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0015
+        }
+      ],
+      "stock": 7696200,
+      "per_board_USD": {
+        "10": 0.0132,
+        "1000": 0.010199999999999999
+      }
+    },
+    {
+      "code": "C25803",
+      "value": "100k",
+      "per_board_qty": 5,
+      "refs": [
+        "R124",
+        "R127",
+        "R129",
+        "R132",
+        "R301"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.003
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0023
+        },
+        {
+          "qty": 5000,
+          "usd": 0.002
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0016
+        },
+        {
+          "qty": 50000,
+          "usd": 0.0015
+        }
+      ],
+      "stock": 7291800,
+      "per_board_USD": {
+        "10": 0.015,
+        "1000": 0.01
+      }
+    },
+    {
+      "code": "C31850",
+      "value": "22k",
+      "per_board_qty": 2,
+      "refs": [
+        "R128",
+        "R131"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0042
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0032
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0027
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0023
+        },
+        {
+          "qty": 50000,
+          "usd": 0.002
+        }
+      ],
+      "stock": 1462300,
+      "per_board_USD": {
+        "10": 0.0084,
+        "1000": 0.0064
+      }
+    },
+    {
+      "code": "C2909394",
+      "value": "33R",
+      "per_board_qty": 2,
+      "refs": [
+        "R17",
+        "R18"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0017
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0014
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0012
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0011
+        },
+        {
+          "qty": 50000,
+          "usd": 0.001
+        }
+      ],
+      "stock": 2255800,
+      "per_board_USD": {
+        "10": 0.0034,
+        "1000": 0.0028
+      }
+    },
+    {
+      "code": "C2907044",
+      "value": "5.1k",
+      "per_board_qty": 2,
+      "refs": [
+        "R22",
+        "R27"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0015
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0011
+        },
+        {
+          "qty": 5000,
+          "usd": 0.001
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0007
+        }
+      ],
+      "stock": 9054100,
+      "per_board_USD": {
+        "10": 0.003,
+        "1000": 0.0022
+      }
+    },
+    {
+      "code": "C22807",
+      "value": "150k",
+      "per_board_qty": 1,
+      "refs": [
+        "R36"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0017
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0013
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0011
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0009
+        },
+        {
+          "qty": 50000,
+          "usd": 0.0008
+        }
+      ],
+      "stock": 185500,
+      "per_board_USD": {
+        "10": 0.0017,
+        "1000": 0.0013
+      }
+    },
+    {
+      "code": "C23003",
+      "value": "33.2k",
+      "per_board_qty": 1,
+      "refs": [
+        "R37"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0019
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0015
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0013
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0012
+        },
+        {
+          "qty": 50000,
+          "usd": 0.001
+        }
+      ],
+      "stock": 194800,
+      "per_board_USD": {
+        "10": 0.0019,
+        "1000": 0.0015
+      }
+    },
+    {
+      "code": "C23179",
+      "value": "470R",
+      "per_board_qty": 1,
+      "refs": [
+        "R5"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0023
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0018
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0016
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0013
+        },
+        {
+          "qty": 50000,
+          "usd": 0.0011
+        }
+      ],
+      "stock": 1512600,
+      "per_board_USD": {
+        "10": 0.0023,
+        "1000": 0.0018
+      }
+    },
+    {
+      "code": "C22787",
+      "value": "120R",
+      "per_board_qty": 1,
+      "refs": [
+        "R8"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0017
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0013
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0011
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0009
+        },
+        {
+          "qty": 50000,
+          "usd": 0.0008
+        }
+      ],
+      "stock": 869300,
+      "per_board_USD": {
+        "10": 0.0017,
+        "1000": 0.0013
+      }
+    },
+    {
+      "code": "C110374",
+      "value": "4x100k 1%",
+      "per_board_qty": 12,
+      "refs": [
+        "RN1",
+        "RN10",
+        "RN11",
+        "RN12",
+        "RN2",
+        "RN3",
+        "RN4",
+        "RN5",
+        "RN6",
+        "RN7",
+        "RN8",
+        "RN9"
+      ],
+      "prices": [
+        {
+          "qty": 50,
+          "usd": 0.0199
+        },
+        {
+          "qty": 500,
+          "usd": 0.0162
+        },
+        {
+          "qty": 1500,
+          "usd": 0.0141
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0129
+        },
+        {
+          "qty": 25000,
+          "usd": 0.0118
+        },
+        {
+          "qty": 50000,
+          "usd": 0.0113
+        }
+      ],
+      "stock": 6800,
+      "per_board_USD": {
+        "10": 0.2388,
+        "1000": 0.1548
+      }
+    },
+    {
+      "code": "C2913204",
+      "value": "ESP32-S3-WROOM-1-N8R2",
+      "per_board_qty": 1,
+      "refs": [
+        "U1"
+      ],
+      "prices": [
+        {
+          "qty": 1,
+          "usd": 4.6459
+        },
+        {
+          "qty": 10,
+          "usd": 4.0482
+        },
+        {
+          "qty": 30,
+          "usd": 3.6078
+        },
+        {
+          "qty": 100,
+          "usd": 3.1988
+        },
+        {
+          "qty": 650,
+          "usd": 3.0515
+        },
+        {
+          "qty": 1300,
+          "usd": 2.9886
+        }
+      ],
+      "stock": 6329,
+      "per_board_USD": {
+        "10": 4.0482,
+        "1000": 3.0515
+      }
+    },
+    {
+      "code": "C12084",
+      "value": "SN65HVD230DR",
+      "per_board_qty": 1,
+      "refs": [
+        "U2"
+      ],
+      "prices": [
+        {
+          "qty": 1,
+          "usd": 0.5616
+        },
+        {
+          "qty": 10,
+          "usd": 0.4658
+        },
+        {
+          "qty": 30,
+          "usd": 0.3981
+        },
+        {
+          "qty": 100,
+          "usd": 0.342
+        },
+        {
+          "qty": 500,
+          "usd": 0.3238
+        },
+        {
+          "qty": 1000,
+          "usd": 0.3139
+        }
+      ],
+      "stock": 60468,
+      "per_board_USD": {
+        "10": 0.4658,
+        "1000": 0.3139
+      }
+    },
+    {
+      "code": "C2894897",
+      "value": "HC-TYPE-C-16P-01A",
+      "per_board_qty": 1,
+      "refs": [
+        "U3"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.0848
+        },
+        {
+          "qty": 50,
+          "usd": 0.0687
+        },
+        {
+          "qty": 150,
+          "usd": 0.0598
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0544
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0473
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0466
+        }
+      ],
+      "stock": 36965,
+      "per_board_USD": {
+        "10": 0.0848,
+        "1000": 0.0544
+      }
+    },
+    {
+      "code": "C78988",
+      "value": "SY8089AAAC",
+      "per_board_qty": 1,
+      "refs": [
+        "U4"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.1509
+        },
+        {
+          "qty": 50,
+          "usd": 0.1179
+        },
+        {
+          "qty": 150,
+          "usd": 0.1019
+        },
+        {
+          "qty": 500,
+          "usd": 0.0875
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0791
+        },
+        {
+          "qty": 6000,
+          "usd": 0.0767
+        }
+      ],
+      "stock": 68965,
+      "per_board_USD": {
+        "10": 0.1509,
+        "1000": 0.0875
+      }
+    },
+    {
+      "code": "C55318342",
+      "value": "FCA9539Q",
+      "per_board_qty": 3,
+      "refs": [
+        "U40",
+        "U41",
+        "U42"
+      ],
+      "prices": [
+        {
+          "qty": 1,
+          "usd": 0.4144
+        },
+        {
+          "qty": 10,
+          "usd": 0.3272
+        },
+        {
+          "qty": 30,
+          "usd": 0.2894
+        },
+        {
+          "qty": 100,
+          "usd": 0.2434
+        },
+        {
+          "qty": 500,
+          "usd": 0.222
+        },
+        {
+          "qty": 1000,
+          "usd": 0.2105
+        }
+      ],
+      "stock": 3979,
+      "per_board_USD": {
+        "10": 0.8682,
+        "1000": 0.6315
+      }
+    },
+    {
+      "code": "C456149",
+      "value": "74CBTLV3125PW,118",
+      "per_board_qty": 4,
+      "refs": [
+        "U50",
+        "U51",
+        "U53",
+        "U54"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.3214
+        },
+        {
+          "qty": 50,
+          "usd": 0.2522
+        },
+        {
+          "qty": 150,
+          "usd": 0.2226
+        },
+        {
+          "qty": 500,
+          "usd": 0.1856
+        },
+        {
+          "qty": 2500,
+          "usd": 0.1691
+        },
+        {
+          "qty": 5000,
+          "usd": 0.1592
+        }
+      ],
+      "stock": 20000,
+      "per_board_USD": {
+        "10": 1.2856,
+        "1000": 0.6764
+      }
+    },
+    {
+      "code": "C128411",
+      "value": "SN74LVC1G97DBVR",
+      "per_board_qty": 1,
+      "refs": [
+        "U60"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.1274
+        },
+        {
+          "qty": 50,
+          "usd": 0.1001
+        },
+        {
+          "qty": 150,
+          "usd": 0.0865
+        },
+        {
+          "qty": 500,
+          "usd": 0.0763
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0681
+        },
+        {
+          "qty": 6000,
+          "usd": 0.064
+        }
+      ],
+      "stock": 18925,
+      "per_board_USD": {
+        "10": 0.1274,
+        "1000": 0.0763
+      }
+    },
+    {
+      "code": "C2152318",
+      "value": "G3VM-61VY3",
+      "per_board_qty": 1,
+      "refs": [
+        "U8"
+      ],
+      "prices": [
+        {
+          "qty": 1,
+          "usd": 0.946
+        },
+        {
+          "qty": 10,
+          "usd": 0.8057
+        },
+        {
+          "qty": 30,
+          "usd": 0.7066
+        },
+        {
+          "qty": 100,
+          "usd": 0.6257
+        },
+        {
+          "qty": 500,
+          "usd": 0.5745
+        },
+        {
+          "qty": 1000,
+          "usd": 0.558
+        }
+      ],
+      "stock": 8911,
+      "per_board_USD": {
+        "10": 0.8057,
+        "1000": 0.558
+      }
+    },
+    {
+      "code": "C52105",
+      "value": "BOOMELE 2x8 RA C52105",
+      "per_board_qty": 1,
+      "refs": [
+        "J25"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.2497
+        },
+        {
+          "qty": 50,
+          "usd": 0.1956
+        },
+        {
+          "qty": 200,
+          "usd": 0.167
+        },
+        {
+          "qty": 400,
+          "usd": 0.138
+        },
+        {
+          "qty": 2000,
+          "usd": 0.1251
+        },
+        {
+          "qty": 5000,
+          "usd": 0.1174
+        }
+      ],
+      "stock": 400,
+      "per_board_USD": {
+        "10": 0.2497,
+        "1000": 0.138
+      }
+    },
+    {
+      "code": "C20917",
+      "value": "AO3400A",
+      "per_board_qty": 16,
+      "refs": [
+        "Q100",
+        "Q101",
+        "Q102",
+        "Q103",
+        "Q104",
+        "Q105",
+        "Q106",
+        "Q107",
+        "Q108",
+        "Q109",
+        "Q110",
+        "Q111",
+        "Q112",
+        "Q113",
+        "Q114",
+        "Q115"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.0899
+        },
+        {
+          "qty": 50,
+          "usd": 0.0725
+        },
+        {
+          "qty": 150,
+          "usd": 0.0636
+        },
+        {
+          "qty": 500,
+          "usd": 0.0562
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0536
+        },
+        {
+          "qty": 6000,
+          "usd": 0.0519
+        }
+      ],
+      "stock": 483595,
+      "per_board_USD": {
+        "10": 1.0176,
+        "1000": 0.8304
+      }
+    },
+    {
+      "code": "C207620",
+      "value": "SY6280AAAC",
+      "per_board_qty": 1,
+      "refs": [
+        "U63"
+      ],
+      "prices": [
+        {
+          "qty": 5,
+          "usd": 0.0898
+        },
+        {
+          "qty": 50,
+          "usd": 0.0712
+        },
+        {
+          "qty": 150,
+          "usd": 0.0616
+        },
+        {
+          "qty": 500,
+          "usd": 0.0537
+        },
+        {
+          "qty": 3000,
+          "usd": 0.051
+        },
+        {
+          "qty": 6000,
+          "usd": 0.0491
+        }
+      ],
+      "stock": 23945,
+      "per_board_USD": {
+        "10": 0.0898,
+        "1000": 0.0537
+      }
+    },
+    {
+      "code": "C23212",
+      "value": "6.8k 1%",
+      "per_board_qty": 1,
+      "refs": [
+        "R300"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0024
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0018
+        },
+        {
+          "qty": 5000,
+          "usd": 0.0015
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0013
+        },
+        {
+          "qty": 50000,
+          "usd": 0.0012
+        }
+      ],
+      "stock": 385100,
+      "per_board_USD": {
+        "10": 0.0024,
+        "1000": 0.0018
+      }
+    },
+    {
+      "code": "C15850",
+      "value": "10uF 25V",
+      "per_board_qty": 2,
+      "refs": [
+        "C300",
+        "C301"
+      ],
+      "prices": [
+        {
+          "qty": 20,
+          "usd": 0.0362
+        },
+        {
+          "qty": 200,
+          "usd": 0.0283
+        },
+        {
+          "qty": 600,
+          "usd": 0.0248
+        },
+        {
+          "qty": 2000,
+          "usd": 0.0221
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0211
+        },
+        {
+          "qty": 20000,
+          "usd": 0.0204
+        }
+      ],
+      "stock": 1997160,
+      "per_board_USD": {
+        "10": 0.0724,
+        "1000": 0.0442
+      }
+    },
+    {
+      "code": "C23162",
+      "value": "4.7k",
+      "per_board_qty": 2,
+      "refs": [
+        "R302",
+        "R303"
+      ],
+      "prices": [
+        {
+          "qty": 100,
+          "usd": 0.0028
+        },
+        {
+          "qty": 1000,
+          "usd": 0.0023
+        },
+        {
+          "qty": 5000,
+          "usd": 0.002
+        },
+        {
+          "qty": 10000,
+          "usd": 0.0016
+        },
+        {
+          "qty": 50000,
+          "usd": 0.0015
+        }
+      ],
+      "stock": 3677600,
+      "per_board_USD": {
+        "10": 0.0056,
+        "1000": 0.0046
+      }
+    },
+    {
+      "code": "C191206",
+      "refs": [
+        "U70"
+      ],
+      "per_board_qty": 1,
+      "value": "IS31FL3731",
+      "prices": [
+        {
+          "qty": 1,
+          "usd": 1.375
+        },
+        {
+          "qty": 10,
+          "usd": 1.1931
+        },
+        {
+          "qty": 30,
+          "usd": 1.0931
+        },
+        {
+          "qty": 100,
+          "usd": 0.9801
+        },
+        {
+          "qty": 500,
+          "usd": 0.8883
+        },
+        {
+          "qty": 1000,
+          "usd": 0.8653
+        }
+      ],
+      "stock": 1521,
+      "per_board_USD": {
+        "10": 1.1931,
+        "1000": 0.8653
+      }
+    },
+    {
+      "code": "C15849",
+      "refs": [
+        "C401"
+      ],
+      "per_board_qty": 1,
+      "value": "1uF",
+      "prices": [
+        {
+          "qty": 50,
+          "usd": 0.011
+        },
+        {
+          "qty": 500,
+          "usd": 0.0085
+        },
+        {
+          "qty": 1500,
+          "usd": 0.0074
+        },
+        {
+          "qty": 4000,
+          "usd": 0.0065
+        },
+        {
+          "qty": 24000,
+          "usd": 0.0062
+        },
+        {
+          "qty": 48000,
+          "usd": 0.006
+        }
+      ],
+      "stock": 563850,
+      "per_board_USD": {
+        "10": 0.011,
+        "1000": 0.0085
+      }
+    },
+    {
+      "code": "C3646938",
+      "value": "XL-3216SURC-FB",
+      "refs": [
+        "D400",
+        "D403",
+        "D406",
+        "D409",
+        "D412",
+        "D415",
+        "D418",
+        "D421",
+        "D424",
+        "D427",
+        "D430",
+        "D433",
+        "D436",
+        "D439",
+        "D442",
+        "D445"
+      ],
+      "per_board_qty": 16,
+      "prices": [
+        {
+          "qty": 50,
+          "usd": 0.0101
+        },
+        {
+          "qty": 500,
+          "usd": 0.0088
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0076
+        },
+        {
+          "qty": 6000,
+          "usd": 0.0073
+        },
+        {
+          "qty": 24000,
+          "usd": 0.0069
+        },
+        {
+          "qty": 51000,
+          "usd": 0.0067
+        }
+      ],
+      "stock": 551900,
+      "per_board_USD": {
+        "10": 0.1616,
+        "1000": 0.1168
+      }
+    },
+    {
+      "code": "C3646941",
+      "value": "XL-3216UBC-FB",
+      "refs": [
+        "D401",
+        "D404",
+        "D407",
+        "D410",
+        "D413",
+        "D416",
+        "D419",
+        "D422",
+        "D425",
+        "D428",
+        "D431",
+        "D434",
+        "D437",
+        "D440",
+        "D443",
+        "D446"
+      ],
+      "per_board_qty": 16,
+      "prices": [
+        {
+          "qty": 50,
+          "usd": 0.0147
+        },
+        {
+          "qty": 500,
+          "usd": 0.0115
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0094
+        },
+        {
+          "qty": 6000,
+          "usd": 0.0083
+        },
+        {
+          "qty": 24000,
+          "usd": 0.0074
+        },
+        {
+          "qty": 51000,
+          "usd": 0.0069
+        }
+      ],
+      "stock": 102300,
+      "per_board_USD": {
+        "10": 0.2352,
+        "1000": 0.1328
+      }
+    },
+    {
+      "code": "C3646937",
+      "value": "XL-3216UGC-FB",
+      "refs": [
+        "D402",
+        "D405",
+        "D408",
+        "D411",
+        "D414",
+        "D417",
+        "D420",
+        "D423",
+        "D426",
+        "D429",
+        "D432",
+        "D435",
+        "D438",
+        "D441",
+        "D444",
+        "D447"
+      ],
+      "per_board_qty": 16,
+      "prices": [
+        {
+          "qty": 50,
+          "usd": 0.0097
+        },
+        {
+          "qty": 500,
+          "usd": 0.0085
+        },
+        {
+          "qty": 3000,
+          "usd": 0.0075
+        },
+        {
+          "qty": 6000,
+          "usd": 0.007
+        },
+        {
+          "qty": 24000,
+          "usd": 0.0066
+        },
+        {
+          "qty": 51000,
+          "usd": 0.0064
+        }
+      ],
+      "stock": 320800,
+      "per_board_USD": {
+        "10": 0.1552,
+        "1000": 0.112
+      }
+    }
+  ],
+  "unassigned_passives": [
+    {
+      "Reference": "C11",
+      "Value": "1uF",
+      "Footprint": "SpaghettiLAB:C0603",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C200",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C202",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C203",
+      "Value": "10uF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C204",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C205",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C206",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C210",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C211",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C212",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C213",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C214",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C215",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C216",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C217",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C224",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C225",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C226",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C227",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C228",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C229",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C230",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C231",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C238",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C239",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C241",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C242",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C299",
+      "Value": "1nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "C74",
+      "Value": "100nF",
+      "Footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R110",
+      "Value": "56k",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R111",
+      "Value": "100k",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R200",
+      "Value": "100k",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R201",
+      "Value": "100k",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R202",
+      "Value": "100k",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R203",
+      "Value": "10k",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R204",
+      "Value": "330R",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R205",
+      "Value": "100k",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R24",
+      "Value": "4.7k",
+      "Footprint": "SpaghettiLAB:R0603",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R25",
+      "Value": "4.7k",
+      "Footprint": "SpaghettiLAB:R0603",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    },
+    {
+      "Reference": "R4",
+      "Value": "10k",
+      "Footprint": "Resistor_SMD:R_0603_1608Metric",
+      "Manufacturer": "",
+      "MPN": "",
+      "LCSC Part": ""
+    }
+  ],
+  "previous_revision_estimates": {
+    "10": {
+      "priced_LCSC_USD_per_board": 16.3695,
+      "estimated_passives_USD_per_board": 0.3956,
+      "FlexyPin_USD_per_board": 2.456,
+      "total_USD_per_board": 19.2211,
+      "total_EUR_per_board": 17.215494849977606,
+      "lot_USD": 192.211,
+      "lot_EUR": 172.15494849977608,
+      "saving_vs_previous_USD_per_board": 0.38640000000000185,
+      "saving_vs_previous_EUR_per_board": 0.346081504702196
+    },
+    "1000": {
+      "priced_LCSC_USD_per_board": 11.3748,
+      "estimated_passives_USD_per_board": 0.1465,
+      "FlexyPin_USD_per_board": 1.844,
+      "total_USD_per_board": 13.3653,
+      "total_EUR_per_board": 11.970712046574114,
+      "lot_USD": 13365.3,
+      "lot_EUR": 11970.712046574114,
+      "saving_vs_previous_USD_per_board": 0.5679999999999996,
+      "saving_vs_previous_EUR_per_board": 0.5087326466636808
+    }
+  },
+  "protection_components": [
+    "U63 C207620",
+    "R300 C23212",
+    "R301 C25803",
+    "C300/C301 C15850"
+  ],
+  "before_magnetic_expansion_estimates": {
+    "10": {
+      "priced_LCSC_USD_per_board": 16.5317,
+      "estimated_passives_USD_per_board": 0.401,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0.0054,
+      "FlexyPin_USD_per_board": 2.456,
+      "total_USD_per_board": 19.388700000000004,
+      "total_EUR_per_board": 17.36560680698612,
+      "lot_USD": 193.88700000000003,
+      "lot_EUR": 173.6560680698612,
+      "row_protection_increment_USD_per_board": 0.16760000000000375,
+      "row_protection_increment_EUR_per_board": 0.15011195700851207
+    },
+    "1000": {
+      "priced_LCSC_USD_per_board": 11.475299999999999,
+      "estimated_passives_USD_per_board": 0.1465,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0,
+      "FlexyPin_USD_per_board": 1.844,
+      "total_USD_per_board": 13.465799999999998,
+      "total_EUR_per_board": 12.060725481415135,
+      "lot_USD": 13465.799999999997,
+      "lot_EUR": 12060.725481415133,
+      "row_protection_increment_USD_per_board": 0.10049999999999848,
+      "row_protection_increment_EUR_per_board": 0.09001343484101969
+    }
+  },
+  "latest_price_check": "XKB C318884 buttons checked2026-11-08; other estimates retained",
+  "before_i2c_split_estimates": {
+    "10": {
+      "priced_LCSC_USD_per_board": 17.1785,
+      "estimated_passives_USD_per_board": 0.401,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0.0054,
+      "FlexyPin_USD_per_board": 2.456,
+      "total_USD_per_board": 20.035500000000003,
+      "total_EUR_per_board": 17.944917151813705,
+      "lot_USD": 200.35500000000002,
+      "lot_EUR": 179.44917151813706,
+      "row_protection_increment_USD_per_board": 0.16760000000000375,
+      "row_protection_increment_EUR_per_board": 0.15011195700851207,
+      "magnetic_expansion_increment_USD_per_board": 0.6468,
+      "magnetic_expansion_increment_EUR_per_board": 0.5793103448275863
+    },
+    "1000": {
+      "priced_LCSC_USD_per_board": 11.867099999999999,
+      "estimated_passives_USD_per_board": 0.1465,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0,
+      "FlexyPin_USD_per_board": 1.844,
+      "total_USD_per_board": 13.857599999999998,
+      "total_EUR_per_board": 12.411643528884905,
+      "lot_USD": 13857.599999999999,
+      "lot_EUR": 12411.643528884906,
+      "row_protection_increment_USD_per_board": 0.10049999999999848,
+      "row_protection_increment_EUR_per_board": 0.09001343484101969,
+      "magnetic_expansion_increment_USD_per_board": 0.3917999999999999,
+      "magnetic_expansion_increment_EUR_per_board": 0.3509180474697715
+    }
+  },
+  "before_word_indicators_estimates": {
+    "10": {
+      "priced_LCSC_USD_per_board": 17.1785,
+      "estimated_passives_USD_per_board": 0.4066,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0.0054,
+      "FlexyPin_USD_per_board": 2.456,
+      "total_USD_per_board": 20.041100000000004,
+      "total_EUR_per_board": 17.949932825794896,
+      "lot_USD": 200.41100000000003,
+      "lot_EUR": 179.49932825794895,
+      "row_protection_increment_USD_per_board": 0.16760000000000375,
+      "row_protection_increment_EUR_per_board": 0.15011195700851207,
+      "magnetic_expansion_increment_USD_per_board": 0.6468,
+      "magnetic_expansion_increment_EUR_per_board": 0.5793103448275863,
+      "i2c_resistors_below_MOQ_allowance_USD_per_board": 0.0056,
+      "i2c_split_increment_USD_per_board": 0.0056
+    },
+    "1000": {
+      "priced_LCSC_USD_per_board": 11.871699999999999,
+      "estimated_passives_USD_per_board": 0.1465,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0,
+      "FlexyPin_USD_per_board": 1.844,
+      "total_USD_per_board": 13.862199999999998,
+      "total_EUR_per_board": 12.415763546798027,
+      "lot_USD": 13862.199999999997,
+      "lot_EUR": 12415.763546798027,
+      "row_protection_increment_USD_per_board": 0.10049999999999848,
+      "row_protection_increment_EUR_per_board": 0.09001343484101969,
+      "magnetic_expansion_increment_USD_per_board": 0.3917999999999999,
+      "magnetic_expansion_increment_EUR_per_board": 0.3509180474697715,
+      "i2c_split_increment_USD_per_board": 0.0046
+    }
+  },
+  "new_indicator_parts_prices": "label-prices.json",
+  "before_three_colours_estimates": {
+    "10": {
+      "priced_LCSC_USD_per_board": 18.0963,
+      "estimated_passives_USD_per_board": 0.4066,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0.0054,
+      "FlexyPin_USD_per_board": 2.456,
+      "total_USD_per_board": 20.9643,
+      "total_EUR_per_board": 18.77680250783699,
+      "lot_USD": 209.64300000000003,
+      "lot_EUR": 187.76802507836993,
+      "row_protection_increment_USD_per_board": 0.16760000000000375,
+      "row_protection_increment_EUR_per_board": 0.15011195700851207,
+      "magnetic_expansion_increment_USD_per_board": 0.6468,
+      "magnetic_expansion_increment_EUR_per_board": 0.5793103448275863,
+      "i2c_resistors_below_MOQ_allowance_USD_per_board": 0.0056,
+      "i2c_split_increment_USD_per_board": 0.0056
+    },
+    "1000": {
+      "priced_LCSC_USD_per_board": 12.407399999999999,
+      "estimated_passives_USD_per_board": 0.1465,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0,
+      "FlexyPin_USD_per_board": 1.844,
+      "total_USD_per_board": 14.397899999999998,
+      "total_EUR_per_board": 12.895566502463051,
+      "lot_USD": 14397.899999999998,
+      "lot_EUR": 12895.566502463053,
+      "row_protection_increment_USD_per_board": 0.10049999999999848,
+      "row_protection_increment_EUR_per_board": 0.09001343484101969,
+      "magnetic_expansion_increment_USD_per_board": 0.3917999999999999,
+      "magnetic_expansion_increment_EUR_per_board": 0.3509180474697715,
+      "i2c_split_increment_USD_per_board": 0.0046
+    }
+  },
+  "before_ui_buttons_estimates": {
+    "10": {
+      "priced_LCSC_USD_per_board": 18.1635,
+      "estimated_passives_USD_per_board": 0.4066,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0.0054,
+      "FlexyPin_USD_per_board": 2.456,
+      "total_USD_per_board": 21.0315,
+      "total_EUR_per_board": 18.836990595611287,
+      "lot_USD": 210.315,
+      "lot_EUR": 188.36990595611283,
+      "row_protection_increment_USD_per_board": 0.16760000000000375,
+      "row_protection_increment_EUR_per_board": 0.15011195700851207,
+      "magnetic_expansion_increment_USD_per_board": 0.6468,
+      "magnetic_expansion_increment_EUR_per_board": 0.5793103448275863,
+      "i2c_resistors_below_MOQ_allowance_USD_per_board": 0.0056,
+      "i2c_split_increment_USD_per_board": 0.0056
+    },
+    "1000": {
+      "priced_LCSC_USD_per_board": 12.4378,
+      "estimated_passives_USD_per_board": 0.1465,
+      "new_resistors_below_MOQ_allocated_USD_per_board": 0,
+      "FlexyPin_USD_per_board": 1.844,
+      "total_USD_per_board": 14.428299999999998,
+      "total_EUR_per_board": 12.922794446932375,
+      "lot_USD": 14428.299999999997,
+      "lot_EUR": 12922.794446932376,
+      "row_protection_increment_USD_per_board": 0.10049999999999848,
+      "row_protection_increment_EUR_per_board": 0.09001343484101969,
+      "magnetic_expansion_increment_USD_per_board": 0.3917999999999999,
+      "magnetic_expansion_increment_EUR_per_board": 0.3509180474697715,
+      "i2c_split_increment_USD_per_board": 0.0046
+    }
+  },
+  "ui_button_increment": {
+    "10": {
+      "unit_USD": 0.0208,
+      "two_per_board_USD": 0.0416,
+      "two_per_board_EUR": 0.03725929243170622
+    },
+    "1000": {
+      "unit_USD": 0.0141,
+      "two_per_board_USD": 0.0282,
+      "two_per_board_EUR": 0.025257501119570085
+    }
+  },
+  "ui_revision_pricing_pending": {
+    "UI_LED_count": 64,
+    "UI_resistor_count": 3,
+    "excluded_mezzanine": [
+      "J26",
+      "J27"
+    ],
+    "note": "Historical totals need repricing for current UI."
+  },
+  "four_column_revision_pricing_pending": {
+    "additional_parts": {
+      "J30": "C42380985",
+      "J31": "C42380985"
+    },
+    "note": "Two additional Hanxia per board; board area increased from70x66 to78x66. Total price requires recalculation."
+  }
+}

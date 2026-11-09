@@ -1,0 +1,1126 @@
+(kicad_sch
+(version 20260101)
+(generator "eeschema")
+(uuid "054a9cd3-490d-4a70-9061-83296f24dcab")
+(paper "User" 594 590)
+(title_block(title "04 - Controllo righe, reset sicuro e Qwiic")(date "2026-11-08")(rev "16R-READABLE"))
+(lib_symbols(symbol "Board28:74xGxx__74LVC1G04"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "U"
+			(at 0 7.62 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "74LVC1G04"
+			(at 5.08 -7.62 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74lvc1g04.pdf"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Single NOT Gate, Low-Voltage CMOS"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "Single Gate NOT LVC CMOS"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "SOT?23* Texas?R-PDSO-G5?DCK* Texas?R-PDSO-N5?DRL* Texas?X2SON*0.8x0.8mm*P0.48mm*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "74xGxx__74LVC1G04_0_1"
+			(polyline
+				(pts
+					(xy -7.62 6.35) (xy -7.62 -6.35) (xy 5.08 0) (xy -7.62 6.35)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "74xGxx__74LVC1G04_1_1"
+			(pin no_connect line
+				(at -7.62 2.54 0)
+				(length 2.54)
+				(hide yes)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -15.24 0 0)
+				(length 7.62)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -5.08 -10.16 90)
+				(length 5.08)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output inverted
+				(at 12.7 0 180)
+				(length 7.62)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -5.08 10.16 270)
+				(length 5.08)
+				(name "VCC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)(symbol "Board28:74xGxx__74LVC1G08"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "U"
+			(at -5.08 7.62 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "74LVC1G08"
+			(at 7.62 -7.62 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74lvc1g08.pdf"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Single AND Gate, Low-Voltage CMOS"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "Single Gate AND LVC CMOS"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "SOT?23* Texas?R-PDSO-G5?DCK* Texas?R-PDSO-N5?DRL* Texas?X2SON*0.8x0.8mm*P0.48mm*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "74xGxx__74LVC1G08_0_1"
+			(arc
+				(start 0 5.08)
+				(mid 5.0579 0)
+				(end 0 -5.08)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -5.08) (xy -7.62 -5.08) (xy -7.62 5.08) (xy 0 5.08)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "74xGxx__74LVC1G08_1_1"
+			(pin input line
+				(at -15.24 2.54 0)
+				(length 7.62)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -15.24 -2.54 0)
+				(length 7.62)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -10.16 90)
+				(length 5.08)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 12.7 0 180)
+				(length 7.62)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 10.16 270)
+				(length 5.08)
+				(name "VCC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)(symbol "Board28:Device__C"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Unpolarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "C_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Device__C_0_1"
+				(polyline
+					(pts
+						(xy -2.032 0.762) (xy 2.032 0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.032 -0.762) (xy 2.032 -0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Device__C_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)(symbol "Board28:Device__R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Device__R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Device__R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)(symbol "Board28:FCA9539Q_Functional"(pin_names(offset .5))(in_bom yes)(on_board yes)(property "Reference" "U"(at 0.000000 0.000000 0)(effects(font(size 0.95 0.95))(justify left)))(property "Value" "FCA9539Q_Functional"(at 0.000000 0.000000 0)(effects(font(size 0.95 0.95))(justify left)))(symbol "FCA9539Q_Functional_1_1"(rectangle(start -10.16 25.4)(end 10.16 -25.4)(stroke(width .254)(type default))(fill(type background)))(pin power_in line(at 0 30.48 270)(length 5.08)(name "VCC"(effects(font(size .9 .9))))(number "21"(effects(font(size .8 .8)))))(pin power_in line(at 0 -30.48 90)(length 5.08)(name "GND"(effects(font(size .9 .9))))(number "9"(effects(font(size .8 .8)))))(pin power_in line(at 0 -30.48 90)(length 5.08)(name "EP / GND"(effects(font(size .9 .9))))(number "25"(effects(font(size .8 .8)))))(pin input line(at -15.24 17.78 0)(length 5.08)(name "SCL"(effects(font(size .9 .9))))(number "19"(effects(font(size .8 .8)))))(pin bidirectional line(at -15.24 12.7 0)(length 5.08)(name "SDA"(effects(font(size .9 .9))))(number "20"(effects(font(size .8 .8)))))(pin input line(at -15.24 7.62 0)(length 5.08)(name "RESET_N"(effects(font(size .9 .9))))(number "24"(effects(font(size .8 .8)))))(pin input line(at -15.24 0 0)(length 5.08)(name "A0"(effects(font(size .9 .9))))(number "18"(effects(font(size .8 .8)))))(pin input line(at -15.24 -5.08 0)(length 5.08)(name "A1"(effects(font(size .9 .9))))(number "23"(effects(font(size .8 .8)))))(pin open_collector line(at -15.24 -17.78 0)(length 5.08)(name "INT_N"(effects(font(size .9 .9))))(number "22"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 20.32 180)(length 5.08)(name "P0.0"(effects(font(size .9 .9))))(number "1"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 17.78 180)(length 5.08)(name "P0.1"(effects(font(size .9 .9))))(number "2"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 15.24 180)(length 5.08)(name "P0.2"(effects(font(size .9 .9))))(number "3"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 12.7 180)(length 5.08)(name "P0.3"(effects(font(size .9 .9))))(number "4"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 10.16 180)(length 5.08)(name "P0.4"(effects(font(size .9 .9))))(number "5"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 7.620000000000001 180)(length 5.08)(name "P0.5"(effects(font(size .9 .9))))(number "6"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 5.08 180)(length 5.08)(name "P0.6"(effects(font(size .9 .9))))(number "7"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 2.539999999999999 180)(length 5.08)(name "P0.7"(effects(font(size .9 .9))))(number "8"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 0.0 180)(length 5.08)(name "P1.0"(effects(font(size .9 .9))))(number "10"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 -2.539999999999999 180)(length 5.08)(name "P1.1"(effects(font(size .9 .9))))(number "11"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 -5.079999999999998 180)(length 5.08)(name "P1.2"(effects(font(size .9 .9))))(number "12"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 -7.620000000000001 180)(length 5.08)(name "P1.3"(effects(font(size .9 .9))))(number "13"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 -10.16 180)(length 5.08)(name "P1.4"(effects(font(size .9 .9))))(number "14"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 -12.700000000000003 180)(length 5.08)(name "P1.5"(effects(font(size .9 .9))))(number "15"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 -15.240000000000002 180)(length 5.08)(name "P1.6"(effects(font(size .9 .9))))(number "16"(effects(font(size .8 .8)))))(pin bidirectional line(at 15.24 -17.78 180)(length 5.08)(name "P1.7"(effects(font(size .9 .9))))(number "17"(effects(font(size .8 .8)))))))(symbol "Board28:SpaghettiLAB__Qwiic_JST_SH_4"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 2.54 8.89 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "SM04B-SRSS-TB(LF)(SN)"
+				(at 2.54 6.35 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "SpaghettiLAB:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal"
+				(at 2.54 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.lcsc.com/product-detail/C160404.html"
+				(at 2.54 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Qwiic: 1 GND, 2 +3V3, 3 SDA, 4 SCL"
+				(at 2.54 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Manufacturer" "JST"
+				(at 2.54 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "MPN" "SM04B-SRSS-TB(LF)(SN)"
+				(at 2.54 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "LCSC" "C160404"
+				(at 2.54 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SpaghettiLAB__Qwiic_JST_SH_4_0_1"
+				(rectangle
+					(start 0 -5.08)
+					(end 5.08 5.08)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "SpaghettiLAB__Qwiic_JST_SH_4_1_1"
+				(pin passive line
+					(at -5.08 3.81 0)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 1.27 0)
+					(length 5.08)
+					(name "+3V3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -1.27 0)
+					(length 5.08)
+					(name "SDA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -3.81 0)
+					(length 5.08)
+					(name "SCL"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)(symbol "Board28:SN74LVC1G97_AND_NOT"(pin_names(offset .5))(in_bom yes)(on_board yes)(property "Reference" "U"(at 0.000000 0.000000 0)(effects(font(size 0.95 0.95))(justify left)))(property "Value" "SN74LVC1G97_AND_NOT"(at 0.000000 0.000000 0)(effects(font(size 0.95 0.95))(justify left)))(symbol "SN74LVC1G97_AND_NOT_1_1"(rectangle(start -5.08 7.62)(end 5.08 -7.62)(stroke(width .254)(type default))(fill(type background)))(pin input inverted(at -10.16 5.08 0)(length 5.08)(name "IN2 / BOOT"(effects(font(size .9 .9))))(number "6"(effects(font(size .8 .8)))))(pin input line(at -10.16 0 0)(length 5.08)(name "IN1 / EN"(effects(font(size .9 .9))))(number "1"(effects(font(size .8 .8)))))(pin input line(at -10.16 -5.08 0)(length 5.08)(name "IN0 = 0"(effects(font(size .9 .9))))(number "3"(effects(font(size .8 .8)))))(pin output line(at 10.16 0 180)(length 5.08)(name "Y"(effects(font(size .9 .9))))(number "4"(effects(font(size .8 .8)))))(pin power_in line(at 0 12.7 270)(length 5.08)(name "VCC"(effects(font(size .9 .9))))(number "5"(effects(font(size .8 .8)))))(pin power_in line(at 0 -12.7 90)(length 5.08)(name "GND"(effects(font(size .9 .9))))(number "2"(effects(font(size .8 .8)))))))(symbol "Board28:UI_SPST_XKB"(pin_names(hide yes))(in_bom yes)(on_board yes)(property "Reference" "SW"(at 0.000000 0.000000 0)(effects(font(size 0.95 0.95))(justify left)))(property "Value" "TS-1187A-B-A-B"(at 0.000000 0.000000 0)(effects(font(size 0.95 0.95))(justify left)))(symbol "UI_SPST_XKB_0_1"(polyline(pts(xy -5.08 0)(xy -2.54 0))(stroke(width .254)(type default))(fill(type none)))(polyline(pts(xy 2.54 0)(xy 5.08 0))(stroke(width .254)(type default))(fill(type none)))(polyline(pts(xy -2.54 0)(xy 2.54 2))(stroke(width .254)(type default))(fill(type none)))(polyline(pts(xy -1.27 3)(xy 1.27 3))(stroke(width .254)(type default))(fill(type none))))(symbol "UI_SPST_XKB_1_1"(pin passive line(at -7.62 0 0)(length 2.54)(name "A/B"(effects(font(size .9 .9))))(number "1"(effects(font(size .8 .8)))))(pin passive line(at 7.62 0 180)(length 2.54)(name "C/D"(effects(font(size .9 .9))))(number "2"(effects(font(size .8 .8))))))))
+(text "CONTROLLO48SEGNALI / RESET SICURO / I2C"(at 15.24 15.24 0)(effects(font(size 1.8 1.8))(justify left top))(uuid "7754b391-955a-4d0d-b388-4b9a19a9943b"))
+(rectangle(start 15.24 25.4)(end 195.58 215.9)(stroke(width .254)(type dash))(fill(type none))(uuid "3ef0e653-a4fe-4bea-9877-51e536010060"))
+(text "U40 | FCA9539Q | 0x75"(at 19.05 29.21 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "5b81b09f-22d4-4c03-b748-ecf7485a2a68"))
+(text "PG/NG banco A: comandi di alimentazione.\nSCL/SDA: I2C; A0/A1: indirizzo; INT_N non usato."(at 19.05 35.56 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "0e9255ab-168c-4ab1-bcaf-7e5f38156759"))
+(symbol(lib_id "Board28:FCA9539Q_Functional")(at 105.41 119.38 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "fffbd41b-7773-497d-a4e9-8bbd7d2ea8a5")(property "Reference" "U40"(at 118.610000 83.320000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "FCA9539Q"(at 118.610000 85.860000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:FCA9539Q_WQFN24_4x4"(at 105.410000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "Nyfea"(at 105.410000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "FCA9539Q"(at 105.410000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C55318342"(at 105.410000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "I2C Address" "0x75"(at 105.410000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C55318342.pdf"(at 105.410000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "21"(uuid "dd311447-5a1e-48e3-a92d-bb97149a731a"))(pin "9"(uuid "fbed3924-b995-4797-afef-1fb05df0a5c6"))(pin "25"(uuid "f83d570e-81eb-4ae8-926b-d5b72decd467"))(pin "19"(uuid "ff7fc71e-ff6e-467d-acf5-466678e16096"))(pin "20"(uuid "de5bd181-31ea-406a-b210-fb47fb74ada1"))(pin "24"(uuid "49881087-fb14-4026-92b2-b5d6a2d6fba0"))(pin "18"(uuid "017b4f39-a52d-4a2a-a874-dc0ec8f14a6c"))(pin "23"(uuid "1f8f8746-e911-496b-89ca-3194dcbf5492"))(pin "22"(uuid "09427e39-13a6-454a-a538-960303b8aeec"))(pin "1"(uuid "ea87bc08-51bc-498a-bcb9-26af8e943c12"))(pin "2"(uuid "937b5718-a5af-4ac6-a388-5832943c0c75"))(pin "3"(uuid "b68f4c48-3597-42d2-8e2c-1ce1a2d8667b"))(pin "4"(uuid "7bc3d5b7-1016-4177-a3b6-319eb6c9133e"))(pin "5"(uuid "4930cd81-f2d2-4548-a36a-7e2febaeed68"))(pin "6"(uuid "23f9efc8-6013-435c-a631-3785bb0c280a"))(pin "7"(uuid "d0d989c9-7aa4-4e1d-83e7-af79d0b34460"))(pin "8"(uuid "83c5deea-85ca-459e-8e0a-925adf5f48bb"))(pin "10"(uuid "a89f5884-7a4c-45cd-8bc5-aa4870dde851"))(pin "11"(uuid "d4fc00bb-d392-46bf-bf7a-a89df6f07ab6"))(pin "12"(uuid "f0c5811a-0b79-4bbb-98bb-90934f84e3c8"))(pin "13"(uuid "e67d2639-c188-449f-8d1f-7fdfd2c6d397"))(pin "14"(uuid "ab819853-0075-48f8-8d94-2c779a72083f"))(pin "15"(uuid "5a2894ed-33ed-4e29-88bf-83732ed2c57c"))(pin "16"(uuid "f193f413-4186-4b8a-89f8-1ff6d74e4d47"))(pin "17"(uuid "a20f98c2-8566-4e5d-a4d0-0c04c02b43b0"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "U40")(unit 1)))))
+(symbol(lib_id "Board28:Device__C")(at 64.77 180.34 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "7d6aa031-0d59-4cd4-8e9a-e05d9d0ab370")(property "Reference" "C204"(at 69.842000 179.070000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "100nF"(at 69.842000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"(at 64.770000 180.340000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "756033a4-c849-4df4-9eaa-d0763a809949"))(pin "2"(uuid "e0c4c1c5-f2ed-4a98-a39e-b8202db745f5"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "C204")(unit 1)))))
+(no_connect(at 90.17 137.16)(uuid "801a5097-6aa3-491e-961f-5c93485217c8"))
+(global_label "GND"(shape bidirectional)(at 105.41 157.48 270.0)(effects(font(size 1.0 1.0))(justify right))(uuid "6ee731b3-6be6-4709-9a7a-25ceefd9d8a6")(property "Descrizione" "Riferimento comune e ritorno alimentazioni"(at 105.410000 157.480000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "3V3"(shape bidirectional)(at 105.41 81.28 90.0)(effects(font(size 1.0 1.0))(justify left))(uuid "e53ce432-0605-4f36-8d43-fa8d200f42b4")(property "Descrizione" "Rail regolata3.3V; VCC delle righe e logicaESP"(at 105.410000 81.280000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SCL"(shape bidirectional)(at 82.55 101.6 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "a6475738-bdbd-4945-8381-b896d10768b6")(property "Descrizione" "Bus interno dedicato ai soli FCA9539Q; ESP GPIO4 SDA / GPIO5 SCL; pull-up R302/R303 4,7k a3V3"(at 82.550000 101.600000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SDA"(shape bidirectional)(at 82.55 106.68 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "fbaa4141-5c90-4cd2-8f88-1497162daa1d")(property "Descrizione" "Bus interno dedicato ai soli FCA9539Q; ESP GPIO4 SDA / GPIO5 SCL; pull-up R302/R303 4,7k a3V3"(at 82.550000 106.680000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "EXP_RESET_N"(shape bidirectional)(at 82.55 111.76 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "23adda15-87a2-4152-960c-efdcddf07726")(property "Descrizione" "Reset FCA9539, basso forza ingressi ad alta impedenza"(at 82.550000 111.760000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L01_PG"(shape bidirectional)(at 128.27 99.06 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "acb4f790-7fba-41a5-9bad-75c49f797a69")(property "Descrizione" "A1: gatePMOS,0 collega la riga a3V3"(at 128.270000 99.060000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L01_NG"(shape bidirectional)(at 128.27 101.6 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "ccfba97c-082a-4fe9-8c3d-d5932b70918b")(property "Descrizione" "A1: gateNMOS,1 collega la riga aGND"(at 128.270000 101.600000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L02_PG"(shape bidirectional)(at 128.27 104.14 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "c1bd133a-1b53-40b5-b185-b9218f58f3d8")(property "Descrizione" "A2: gatePMOS,0 collega la riga a3V3"(at 128.270000 104.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L02_NG"(shape bidirectional)(at 128.27 106.68 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "5fa75292-983e-40d8-9270-9c46963beeae")(property "Descrizione" "A2: gateNMOS,1 collega la riga aGND"(at 128.270000 106.680000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L03_PG"(shape bidirectional)(at 128.27 109.22 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "cb61c21d-e1bc-4ccc-b9d7-c7a1e2398c15")(property "Descrizione" "A3: gatePMOS,0 collega la riga a3V3"(at 128.270000 109.220000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L03_NG"(shape bidirectional)(at 128.27 111.76 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "51c81ceb-cf3a-4fbd-b2a1-9fa006f2b3cd")(property "Descrizione" "A3: gateNMOS,1 collega la riga aGND"(at 128.270000 111.760000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L04_PG"(shape bidirectional)(at 128.27 114.3 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "55634c95-cd8a-4883-8196-1c69658b5ab6")(property "Descrizione" "A4: gatePMOS,0 collega la riga a3V3"(at 128.270000 114.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L04_NG"(shape bidirectional)(at 128.27 116.84 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "5e230199-1f65-40e1-ab0d-c9b68f9b7446")(property "Descrizione" "A4: gateNMOS,1 collega la riga aGND"(at 128.270000 116.840000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L05_PG"(shape bidirectional)(at 128.27 119.38 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "e683ab71-d262-4877-9d4f-4e15d4a1b192")(property "Descrizione" "A5: gatePMOS,0 collega la riga a3V3"(at 128.270000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L05_NG"(shape bidirectional)(at 128.27 121.92 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "bb086920-ff2f-43e7-b1e1-3be23893408e")(property "Descrizione" "A5: gateNMOS,1 collega la riga aGND"(at 128.270000 121.920000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L06_PG"(shape bidirectional)(at 128.27 124.46000000000001 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "67db6e02-1f14-41d7-8014-bcef751f0518")(property "Descrizione" "A6: gatePMOS,0 collega la riga a3V3"(at 128.270000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L06_NG"(shape bidirectional)(at 128.27 127.0 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "4f8d1b7e-d04f-4c02-b0cf-799781ddc0b9")(property "Descrizione" "A6: gateNMOS,1 collega la riga aGND"(at 128.270000 127.000000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L07_PG"(shape bidirectional)(at 128.27 129.54 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "6958a5f4-c902-421a-99aa-c05ab94b76b1")(property "Descrizione" "A7: gatePMOS,0 collega la riga a3V3"(at 128.270000 129.540000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L07_NG"(shape bidirectional)(at 128.27 132.08 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "de8720bf-691e-4022-88a1-6822ad57e671")(property "Descrizione" "A7: gateNMOS,1 collega la riga aGND"(at 128.270000 132.080000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L08_PG"(shape bidirectional)(at 128.27 134.62 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "65a90b80-aab0-4380-b2ea-a4c9cd5384f8")(property "Descrizione" "A8: gatePMOS,0 collega la riga a3V3"(at 128.270000 134.620000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L08_NG"(shape bidirectional)(at 128.27 137.16 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "d038faa3-3459-4f6d-8602-b5b386a604fe")(property "Descrizione" "A8: gateNMOS,1 collega la riga aGND"(at 128.270000 137.160000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(rectangle(start 204.47 25.4)(end 384.81 215.9)(stroke(width .254)(type dash))(fill(type none))(uuid "a0ee609a-adb3-420e-8749-017d71d7184f"))
+(text "U41 | FCA9539Q | 0x76"(at 208.28 29.21 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "a0adad75-a139-416a-9973-fc2b4652b872"))
+(text "PG/NG banco B: comandi di alimentazione.\nSCL/SDA: I2C; A0/A1: indirizzo; INT_N non usato."(at 208.28 35.56 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "e9ce83e5-ac81-4a9b-bd70-ccd6b715e778"))
+(symbol(lib_id "Board28:FCA9539Q_Functional")(at 294.64 119.38 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "5f0bf276-6979-4dcf-9d96-edd8ad6a99f9")(property "Reference" "U41"(at 307.840000 83.320000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "FCA9539Q"(at 307.840000 85.860000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:FCA9539Q_WQFN24_4x4"(at 294.640000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "Nyfea"(at 294.640000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "FCA9539Q"(at 294.640000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C55318342"(at 294.640000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "I2C Address" "0x76"(at 294.640000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C55318342.pdf"(at 294.640000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "21"(uuid "80bc9607-30f8-432e-a247-336ef7c73d64"))(pin "9"(uuid "d8859c7a-b723-4e26-b3db-d2332d07b2fe"))(pin "25"(uuid "3afc9066-484c-4049-bd62-bc8aa8e3c1c7"))(pin "19"(uuid "bcae5f53-754b-412b-bba3-8fd1c08887b8"))(pin "20"(uuid "77d28629-3fbc-4564-86cc-211836466473"))(pin "24"(uuid "a5a9802f-53d5-457d-b008-bb0c4972553e"))(pin "18"(uuid "d2253693-8cdb-4133-a19e-3ef4a2120d2c"))(pin "23"(uuid "ab2a4350-9a9d-418b-a50a-364fa9db3e51"))(pin "22"(uuid "aebba79c-9880-429c-986c-fa32d7ea390d"))(pin "1"(uuid "3f6a71e5-6cb4-41bd-8417-7904acc99560"))(pin "2"(uuid "60861267-69ac-420b-9531-621afd18cf1a"))(pin "3"(uuid "12b4f12c-69c8-4988-bf7a-7657c70b0083"))(pin "4"(uuid "53d99934-041d-4919-a0f9-2fd8788d8499"))(pin "5"(uuid "8d164ebb-7c2d-45e1-a57a-c998fa733f5f"))(pin "6"(uuid "64cfda28-e142-423f-b920-89463407c558"))(pin "7"(uuid "707ee6ca-452f-4a69-9119-b8530fef31aa"))(pin "8"(uuid "b720ede9-edfb-486a-84e1-8c5abf7ba99b"))(pin "10"(uuid "c8a51e71-a4ae-421c-97d2-893174e8e6e4"))(pin "11"(uuid "d1c2dffc-c8e7-4968-9d3b-0cf4caf276c0"))(pin "12"(uuid "7d5926b8-929a-4747-b523-211424fa08fd"))(pin "13"(uuid "cab3f020-a71d-4545-b832-652514b90730"))(pin "14"(uuid "07c08b26-4dd1-4e0a-bbbc-5eb17af7edfa"))(pin "15"(uuid "a97c59c1-08b9-44fb-8ac5-9637813012a4"))(pin "16"(uuid "64944cdb-efd2-4907-87d7-5e03805bedd3"))(pin "17"(uuid "6103d847-9ebd-4761-83e1-80b9242da983"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "U41")(unit 1)))))
+(symbol(lib_id "Board28:Device__C")(at 255.27 180.34 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "b507313d-9ae7-4ec9-8ed3-7b0739b3e93c")(property "Reference" "C205"(at 260.342000 179.070000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "100nF"(at 260.342000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"(at 255.270000 180.340000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "82b501b9-0e33-4fb4-8c08-46f3130f412c"))(pin "2"(uuid "bb6a6201-7408-4339-9c92-f75a5d0b1bc6"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "C205")(unit 1)))))
+(no_connect(at 279.4 137.16)(uuid "905323d7-e7b8-4ce5-b61f-c97b24db5127"))
+(global_label "GND"(shape bidirectional)(at 294.64 157.48 270.0)(effects(font(size 1.0 1.0))(justify right))(uuid "3d34dd99-7f79-43ec-8f75-b7ab618c6873")(property "Descrizione" "Riferimento comune e ritorno alimentazioni"(at 294.640000 157.480000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "3V3"(shape bidirectional)(at 294.64 81.28 90.0)(effects(font(size 1.0 1.0))(justify left))(uuid "cf6755c3-d455-4dd1-9f8b-0aeb1123f626")(property "Descrizione" "Rail regolata3.3V; VCC delle righe e logicaESP"(at 294.640000 81.280000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SCL"(shape bidirectional)(at 271.78000000000003 101.6 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "e4d309b3-6a75-4304-9332-ff0eaa3bdc20")(property "Descrizione" "Bus interno dedicato ai soli FCA9539Q; ESP GPIO4 SDA / GPIO5 SCL; pull-up R302/R303 4,7k a3V3"(at 271.780000 101.600000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SDA"(shape bidirectional)(at 271.78000000000003 106.68 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "75195846-a447-4c61-b2c9-8a714f9b697d")(property "Descrizione" "Bus interno dedicato ai soli FCA9539Q; ESP GPIO4 SDA / GPIO5 SCL; pull-up R302/R303 4,7k a3V3"(at 271.780000 106.680000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "EXP_RESET_N"(shape bidirectional)(at 271.78000000000003 111.76 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "073cfbd6-705f-4cc4-a2b0-7780a4812fac")(property "Descrizione" "Reset FCA9539, basso forza ingressi ad alta impedenza"(at 271.780000 111.760000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R01_PG"(shape bidirectional)(at 317.5 99.06 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "25ccd98f-7e0a-47a3-b0d9-3d6e942d59e4")(property "Descrizione" "B1: gatePMOS,0 collega la riga a3V3"(at 317.500000 99.060000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R01_NG"(shape bidirectional)(at 317.5 101.6 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "5a9d2427-ee64-46a5-86b0-3cea42d72acd")(property "Descrizione" "B1: gateNMOS,1 collega la riga aGND"(at 317.500000 101.600000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R02_PG"(shape bidirectional)(at 317.5 104.14 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "3a4b1ef4-5dfe-4318-b56e-a95bfe610b70")(property "Descrizione" "B2: gatePMOS,0 collega la riga a3V3"(at 317.500000 104.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R02_NG"(shape bidirectional)(at 317.5 106.68 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "18bf8847-b7b0-4543-a93f-0b820a881305")(property "Descrizione" "B2: gateNMOS,1 collega la riga aGND"(at 317.500000 106.680000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R03_PG"(shape bidirectional)(at 317.5 109.22 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "5bd688f0-807f-45d2-a9d2-0889adff93f8")(property "Descrizione" "B3: gatePMOS,0 collega la riga a3V3"(at 317.500000 109.220000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R03_NG"(shape bidirectional)(at 317.5 111.76 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "0ee5ee1f-e92e-4caa-8709-8cc470cb5260")(property "Descrizione" "B3: gateNMOS,1 collega la riga aGND"(at 317.500000 111.760000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R04_PG"(shape bidirectional)(at 317.5 114.3 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "1d94d116-9c80-458f-9b93-75f97cbfeb1c")(property "Descrizione" "B4: gatePMOS,0 collega la riga a3V3"(at 317.500000 114.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R04_NG"(shape bidirectional)(at 317.5 116.84 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "eb0e33ab-8cb4-43bf-a6ea-b2026f392cb5")(property "Descrizione" "B4: gateNMOS,1 collega la riga aGND"(at 317.500000 116.840000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R05_PG"(shape bidirectional)(at 317.5 119.38 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "8c51dac6-59eb-48df-a750-721f0797ee0d")(property "Descrizione" "B5: gatePMOS,0 collega la riga a3V3"(at 317.500000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R05_NG"(shape bidirectional)(at 317.5 121.92 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "988e7932-0ff2-4052-b07e-556012948ed7")(property "Descrizione" "B5: gateNMOS,1 collega la riga aGND"(at 317.500000 121.920000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R06_PG"(shape bidirectional)(at 317.5 124.46000000000001 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "2174e17b-df26-4f67-8eeb-650d674bd6f7")(property "Descrizione" "B6: gatePMOS,0 collega la riga a3V3"(at 317.500000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R06_NG"(shape bidirectional)(at 317.5 127.0 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "7d556ae9-d0b3-48d3-97db-29998c799238")(property "Descrizione" "B6: gateNMOS,1 collega la riga aGND"(at 317.500000 127.000000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R07_PG"(shape bidirectional)(at 317.5 129.54 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "5ed75d73-ddc3-4c40-b0d9-79c75eb89408")(property "Descrizione" "B7: gatePMOS,0 collega la riga a3V3"(at 317.500000 129.540000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R07_NG"(shape bidirectional)(at 317.5 132.08 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "9c017f98-b4ca-43f1-ab72-ee757bad617b")(property "Descrizione" "B7: gateNMOS,1 collega la riga aGND"(at 317.500000 132.080000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R08_PG"(shape bidirectional)(at 317.5 134.62 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "4c338fbe-fc42-4714-bd4a-b1ea5b70e8d6")(property "Descrizione" "B8: gatePMOS,0 collega la riga a3V3"(at 317.500000 134.620000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R08_NG"(shape bidirectional)(at 317.5 137.16 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "026a158b-3a44-4bdf-ba0e-77b56fcc087b")(property "Descrizione" "B8: gateNMOS,1 collega la riga aGND"(at 317.500000 137.160000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(rectangle(start 394.97 25.4)(end 575.3100000000001 215.9)(stroke(width .254)(type dash))(fill(type none))(uuid "6033678d-2f77-475f-b71f-870834ecb718"))
+(text "U42 | FCA9539Q | 0x77"(at 398.78000000000003 29.21 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "c80729bf-b96c-4072-91a4-b8275d74a347"))
+(text "ISO_N A/B: isolamento GPIO, attivo basso.\nSCL/SDA: I2C; A0/A1: indirizzo; INT_N non usato."(at 398.78000000000003 35.56 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "85bf66cd-0202-4282-af70-b65aa8c3801c"))
+(symbol(lib_id "Board28:FCA9539Q_Functional")(at 485.14 119.38 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "4c4b61c5-886a-43b7-9c7c-925681040c8f")(property "Reference" "U42"(at 498.340000 83.320000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "FCA9539Q"(at 498.340000 85.860000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:FCA9539Q_WQFN24_4x4"(at 485.140000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "Nyfea"(at 485.140000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "FCA9539Q"(at 485.140000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C55318342"(at 485.140000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "I2C Address" "0x77"(at 485.140000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C55318342.pdf"(at 485.140000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "21"(uuid "e29138b9-3765-474b-b297-76f6739b2697"))(pin "9"(uuid "e87cea23-caec-4df0-a238-cf4f562a122a"))(pin "25"(uuid "d04d99dd-8c0f-46c4-8322-8b0252de5f09"))(pin "19"(uuid "552bbc6f-e947-479d-9d7e-d4a3c062a274"))(pin "20"(uuid "a6e33bef-1dd0-436f-9294-82a13d121d00"))(pin "24"(uuid "2ffee24b-db50-4229-99c3-4d28e723dd16"))(pin "18"(uuid "20e4e22c-3750-4b23-abe0-a30703f0e321"))(pin "23"(uuid "bf36fe3f-99dc-4d1a-8388-60515ff0590d"))(pin "22"(uuid "fa6d44f3-fe38-4e30-9f19-e0bf13f1ddcd"))(pin "1"(uuid "0ce65faa-783b-4af6-a2e4-978cdcba47b6"))(pin "2"(uuid "ef8fde06-507c-402f-90c5-e8f7d3320475"))(pin "3"(uuid "dee637f0-a1d6-49b9-ad3c-a359ca1d6ded"))(pin "4"(uuid "928afd33-3bdd-4f44-8964-3a447a03ff23"))(pin "5"(uuid "9a3c9084-bb81-4fbb-a4d8-82a762f7560b"))(pin "6"(uuid "0741f39a-a26b-417a-883e-652aab790cd6"))(pin "7"(uuid "850ba95f-6e1a-4897-801c-373b2a739ede"))(pin "8"(uuid "5dada09d-969b-4e68-9c62-7a232d0c0806"))(pin "10"(uuid "8c02a8e8-e4c5-4ddd-b865-89c5c4ded09e"))(pin "11"(uuid "9453fe41-19a2-4308-94a7-4ca3c6cf49fe"))(pin "12"(uuid "ed91e683-206f-4719-a7ca-89ac83874cf0"))(pin "13"(uuid "ecb6a466-1c79-47e5-99e9-5284f8a45537"))(pin "14"(uuid "49fffb50-3ce3-445e-8669-222889c092f1"))(pin "15"(uuid "1fbb6193-6c79-4762-86fe-fc45e2edbef5"))(pin "16"(uuid "7efe2f36-1f9f-4cb5-a75d-2156490c88b0"))(pin "17"(uuid "78721579-e298-4ac8-90d9-5801568577fd"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "U42")(unit 1)))))
+(symbol(lib_id "Board28:Device__C")(at 444.5 180.34 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "31af7209-91da-476a-ac5f-bd6ead298fd0")(property "Reference" "C206"(at 449.572000 179.070000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "100nF"(at 449.572000 181.610000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"(at 444.500000 180.340000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "438301b6-f651-4a62-9d6b-c32eb41c24fa"))(pin "2"(uuid "34a2615c-a09b-4a39-9ceb-c5d66de83e7a"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "C206")(unit 1)))))
+(no_connect(at 469.90000000000003 137.16)(uuid "30272636-686f-478c-bb85-380ccd099b94"))
+(global_label "3V3"(shape bidirectional)(at 485.14 81.28 90.0)(effects(font(size 1.0 1.0))(justify left))(uuid "1c2914eb-0fb0-4fba-a0f4-8e32cc9fea67")(property "Descrizione" "Rail regolata3.3V; VCC delle righe e logicaESP"(at 485.140000 81.280000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 444.5 191.77 270.0)(effects(font(size 1.0 1.0))(justify right))(uuid "185644c1-3b70-4e4c-860f-487bcbe83b45")(property "Descrizione" "Riferimento comune e ritorno alimentazioni"(at 444.500000 191.770000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SCL"(shape bidirectional)(at 462.28000000000003 101.6 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "a537511c-c7b1-4639-9898-6de6c679a6a4")(property "Descrizione" "Bus interno dedicato ai soli FCA9539Q; ESP GPIO4 SDA / GPIO5 SCL; pull-up R302/R303 4,7k a3V3"(at 462.280000 101.600000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SDA"(shape bidirectional)(at 462.28000000000003 106.68 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "33ffc1ed-955d-4aae-bc47-980f94f948d2")(property "Descrizione" "Bus interno dedicato ai soli FCA9539Q; ESP GPIO4 SDA / GPIO5 SCL; pull-up R302/R303 4,7k a3V3"(at 462.280000 106.680000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "EXP_RESET_N"(shape bidirectional)(at 462.28000000000003 111.76 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "248cf6c9-e502-4ea2-93c5-9c2b9b5723ef")(property "Descrizione" "Reset FCA9539, basso forza ingressi ad alta impedenza"(at 462.280000 111.760000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L01_ISO_N"(shape bidirectional)(at 508.0 99.06 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "17f6675d-ce89-4740-a454-395ccc14a27a")(property "Descrizione" "A1: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 99.060000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L02_ISO_N"(shape bidirectional)(at 508.0 101.6 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "202af602-4f1a-4de0-9bbf-a34ca6ed9942")(property "Descrizione" "A2: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 101.600000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L03_ISO_N"(shape bidirectional)(at 508.0 104.14 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "9df3b35c-69e8-45da-be0b-7225a98c9e7e")(property "Descrizione" "A3: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 104.140000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L04_ISO_N"(shape bidirectional)(at 508.0 106.68 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "4226a6a7-2341-414e-b92d-85267434e3be")(property "Descrizione" "A4: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 106.680000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L05_ISO_N"(shape bidirectional)(at 508.0 109.22 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "ff6ef25b-bbc7-4e37-bda2-ba98c7daa697")(property "Descrizione" "A5: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 109.220000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L06_ISO_N"(shape bidirectional)(at 508.0 111.76 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "268f44bc-0c43-46a0-a7b8-182a6061c613")(property "Descrizione" "A6: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 111.760000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L07_ISO_N"(shape bidirectional)(at 508.0 114.3 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "658983ba-9e33-4b98-891c-899e0ae7b5b8")(property "Descrizione" "A7: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 114.300000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_L08_ISO_N"(shape bidirectional)(at 508.0 116.84 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "dab58420-c053-4b5b-9c88-bf52deae951a")(property "Descrizione" "A8: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 116.840000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R01_ISO_N"(shape bidirectional)(at 508.0 119.38 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "09d2c520-06e4-4222-bd7a-2b019c6266f0")(property "Descrizione" "B1: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 119.380000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R02_ISO_N"(shape bidirectional)(at 508.0 121.92 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "48634187-5841-45ae-b01a-b37a4ea97b8b")(property "Descrizione" "B2: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 121.920000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R03_ISO_N"(shape bidirectional)(at 508.0 124.46000000000001 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "74b2ebaf-bd31-4b4e-bc08-3ba3bb893ba0")(property "Descrizione" "B3: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R04_ISO_N"(shape bidirectional)(at 508.0 127.0 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "b44aa1a0-42fd-49ea-a7d5-a7dbf9bca1cf")(property "Descrizione" "B4: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 127.000000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R05_ISO_N"(shape bidirectional)(at 508.0 129.54 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "63fa398a-a657-45cd-a98c-ee0faa98cf20")(property "Descrizione" "B5: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 129.540000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R06_ISO_N"(shape bidirectional)(at 508.0 132.08 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "dae2d9f1-949b-41af-a64f-fc30fd3ac0c9")(property "Descrizione" "B6: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 132.080000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R07_ISO_N"(shape bidirectional)(at 508.0 134.62 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "bbd59c2f-35fc-4989-8c7c-42d195e97746")(property "Descrizione" "B7: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 134.620000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ROW_R08_ISO_N"(shape bidirectional)(at 508.0 137.16 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "23b5eeaa-1875-45e0-bdca-83a61a45e255")(property "Descrizione" "B8: OE attivo basso,0 abilita il collegamento bidirezionale alGPIO"(at 508.000000 137.160000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(rectangle(start 325.12 234.95000000000002)(end 575.31 384.81000000000006)(stroke(width .254)(type dash))(fill(type none))(uuid "583b0273-6d97-47b5-a77c-ab461d006a92"))
+(text "BUS UTENTE GPIO11/12 / QWIIC / PULL-UP"(at 328.93 238.76 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "085da931-3f5b-4e8e-8f1a-34ccd87455d0"))
+(text "I2C_USER indipendente dai3expander: SDA GPIO11 / SCL GPIO12. Pull-up4,7k a3V3.\n3V3/GND: alimentazione del moduloQwiic."(at 328.93 245.11 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "da102e79-7b38-49e1-b8bd-2e98c4c9a88b"))
+(symbol(lib_id "Board28:SpaghettiLAB__Qwiic_JST_SH_4")(at 510.54 299.72 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "9ee747f1-22db-42f4-bdc2-4a5cd895fb0c")(property "Reference" "J4"(at 518.660000 283.980000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "SM04B-SRSS-TB(LF)(SN)"(at 518.660000 286.520000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "SpaghettiLAB:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal"(at 510.540000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "JST"(at 510.540000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "SM04B-SRSS-TB(LF)(SN)"(at 510.540000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC" "C160404"(at 510.540000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/product-detail/C160404.html"(at 510.540000 299.720000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "544abb11-2290-479e-a893-99cd8a84e003"))(pin "2"(uuid "65dd2b10-61fb-4e00-a2ae-82301ed2f071"))(pin "3"(uuid "baf26703-e277-435f-aa41-de6b263ba061"))(pin "4"(uuid "bb0b8684-054c-42b6-9362-1aff4867d067"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "J4")(unit 1)))))
+(symbol(lib_id "Board28:Device__R")(at 384.81 284.48 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "11a0ddc5-5ffb-490c-87e1-3369991c4a93")(property "Reference" "R24"(at 388.866000 283.210000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "4.7k"(at 388.866000 285.750000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "SpaghettiLAB:R0603"(at 384.810000 284.480000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" ""(at 384.810000 284.480000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "389d9ef5-cd11-40c4-aac6-e1084acc23ff"))(pin "2"(uuid "7583f958-e463-45e4-8707-221ec83c6f1f"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "R24")(unit 1)))))
+(symbol(lib_id "Board28:Device__R")(at 425.45 284.48 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "6ce25b49-17ff-4e66-b950-b6040a9aff22")(property "Reference" "R25"(at 429.506000 283.210000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "4.7k"(at 429.506000 285.750000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "SpaghettiLAB:R0603"(at 425.450000 284.480000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" ""(at 425.450000 284.480000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "903788eb-f8f8-4b20-a52f-bc7ad2aa98e8"))(pin "2"(uuid "13d26863-10c3-4a24-bb5d-83b9993b8175"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "R25")(unit 1)))))
+(global_label "3V3"(shape bidirectional)(at 497.84000000000003 298.45 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "644ec469-31c0-4d93-9934-6f27ec8af237")(property "Descrizione" "Rail regolata3.3V; VCC delle righe e logicaESP"(at 497.840000 298.450000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 497.84000000000003 295.91 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "effdfe42-7aa4-46b1-ad60-0fdf81fda26d")(property "Descrizione" "Riferimento comune e ritorno alimentazioni"(at 497.840000 295.910000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_USER_SDA"(shape bidirectional)(at 505.46 300.99 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "5e320c12-3d17-40a8-a5a4-71ee9234804f")(property "Descrizione" "Bus utente indipendente: GPIO11 SDA / GPIO12 SCL; Qwiic, Hanxia, J25 e mezzanina; pull-up R24/R25 4,7k a3V3"(at 505.460000 300.990000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_USER_SCL"(shape bidirectional)(at 505.46 303.53000000000003 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "ba994904-e213-4e09-b500-8d76fb66f21a")(property "Descrizione" "Bus utente indipendente: GPIO11 SDA / GPIO12 SCL; Qwiic, Hanxia, J25 e mezzanina; pull-up R24/R25 4,7k a3V3"(at 505.460000 303.530000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(wire(pts(xy 279.400000 119.380000)(xy 283.210000 119.380000))(stroke(width 0)(type default))(uuid "f567fe41-4809-4e7b-af69-ed9460d97cfc"))
+(wire(pts(xy 90.170000 184.150000)(xy 64.770000 184.150000))(stroke(width 0)(type default))(uuid "fe91c182-ee7d-4de6-b77b-9b1833bc2f03"))
+(wire(pts(xy 90.170000 184.150000)(xy 90.170000 149.860000))(stroke(width 0)(type default))(uuid "fb98b6a4-2bc1-48fd-9ad3-f4bf4cc15131"))
+(wire(pts(xy 497.840000 295.910000)(xy 505.460000 295.910000))(stroke(width 0)(type default))(uuid "b1b08fce-1c75-4c13-a968-1b7ad56a3cc9"))
+(wire(pts(xy 444.500000 184.150000)(xy 444.500000 191.770000))(stroke(width 0)(type default))(uuid "12f72dd8-ed1b-48f7-8da5-6d6b2e778728"))
+(wire(pts(xy 444.500000 184.150000)(xy 485.140000 184.150000))(stroke(width 0)(type default))(uuid "7a65f616-a7e6-44bf-80c3-ae177fcdf9df"))
+(wire(pts(xy 105.410000 149.860000)(xy 90.170000 149.860000))(stroke(width 0)(type default))(uuid "37ebfa0c-378a-4083-955c-0e0ef71e1ab4"))
+(wire(pts(xy 105.410000 149.860000)(xy 105.410000 157.480000))(stroke(width 0)(type default))(uuid "da390ccd-54a0-4510-9179-bedcd614a2b8"))
+(wire(pts(xy 485.140000 149.860000)(xy 485.140000 184.150000))(stroke(width 0)(type default))(uuid "197ee237-3066-4bda-87ca-75135eb7ef4a"))
+(wire(pts(xy 90.170000 124.460000)(xy 90.170000 149.860000))(stroke(width 0)(type default))(uuid "e2eeed0e-15bf-42e5-928d-e779d356a5c0"))
+(wire(pts(xy 283.210000 119.380000)(xy 283.210000 149.860000))(stroke(width 0)(type default))(uuid "a5234491-39be-4f09-b2a0-58df2e548e4a"))
+(wire(pts(xy 294.640000 149.860000)(xy 294.640000 157.480000))(stroke(width 0)(type default))(uuid "6aff716b-87ad-4e02-9f83-eaf21586e476"))
+(wire(pts(xy 294.640000 149.860000)(xy 283.210000 149.860000))(stroke(width 0)(type default))(uuid "d8d78852-c367-410d-8877-bd9a70c02945"))
+(wire(pts(xy 283.210000 149.860000)(xy 283.210000 184.150000))(stroke(width 0)(type default))(uuid "febe184e-faf6-4357-b082-d4909bcdb6a3"))
+(wire(pts(xy 283.210000 184.150000)(xy 255.270000 184.150000))(stroke(width 0)(type default))(uuid "e6c7f64f-b142-4091-87c0-b628a65099b9"))
+(junction(at 283.210000 149.860000)(diameter 0)(color 0 0 0 0)(uuid "9ad1b016-5012-4e67-b937-8559d5ee4101"))
+(junction(at 90.170000 149.860000)(diameter 0)(color 0 0 0 0)(uuid "1ac6922e-62de-45f2-b5d8-5e5a30b605f8"))
+(wire(pts(xy 504.190000 280.670000)(xy 425.450000 280.670000))(stroke(width 0)(type default))(uuid "370d3635-659f-4cdb-bcd6-db9f11556cb0"))
+(wire(pts(xy 504.190000 280.670000)(xy 504.190000 298.450000))(stroke(width 0)(type default))(uuid "800719e4-2500-4c1e-b9d9-a169ba4facc8"))
+(wire(pts(xy 105.410000 81.280000)(xy 105.410000 88.900000))(stroke(width 0)(type default))(uuid "b4d7ebff-9868-4bad-b840-a877c120e80d"))
+(wire(pts(xy 105.410000 88.900000)(xy 93.980000 88.900000))(stroke(width 0)(type default))(uuid "8f2b4620-0ff5-4a64-85a8-dabc468b04d7"))
+(wire(pts(xy 93.980000 88.900000)(xy 93.980000 119.380000))(stroke(width 0)(type default))(uuid "4027919e-9834-4372-9f8d-7fd07fedaafb"))
+(wire(pts(xy 485.140000 81.280000)(xy 485.140000 88.900000))(stroke(width 0)(type default))(uuid "53070cb8-f011-4ff9-8210-5a20f0c2b9ba"))
+(wire(pts(xy 485.140000 88.900000)(xy 473.710000 88.900000))(stroke(width 0)(type default))(uuid "530a7b6e-b0c2-4902-84aa-a3eac82b69cb"))
+(wire(pts(xy 473.710000 88.900000)(xy 473.710000 119.380000))(stroke(width 0)(type default))(uuid "f74d66f8-61d4-470b-8252-b0dc456c13fe"))
+(wire(pts(xy 444.500000 176.530000)(xy 444.500000 124.460000))(stroke(width 0)(type default))(uuid "f500faf4-a4ee-4b4d-9e5c-cff405233c00"))
+(wire(pts(xy 93.980000 119.380000)(xy 90.170000 119.380000))(stroke(width 0)(type default))(uuid "f82eddae-cfa0-407b-a451-8a5f2be213e8"))
+(wire(pts(xy 294.640000 81.280000)(xy 294.640000 88.900000))(stroke(width 0)(type default))(uuid "dcb050f6-09f4-4811-8b60-950ea49cb4f8"))
+(wire(pts(xy 473.710000 119.380000)(xy 469.900000 119.380000))(stroke(width 0)(type default))(uuid "83aee7bf-e147-4879-9c66-bb6a0f93ff0d"))
+(wire(pts(xy 255.270000 124.460000)(xy 279.400000 124.460000))(stroke(width 0)(type default))(uuid "714d785e-fbd0-4bd7-b1a5-93b8fc09f7d4"))
+(wire(pts(xy 255.270000 124.460000)(xy 255.270000 176.530000))(stroke(width 0)(type default))(uuid "9af78e89-d275-4088-8a42-f056111bad07"))
+(wire(pts(xy 294.640000 88.900000)(xy 281.940000 88.900000))(stroke(width 0)(type default))(uuid "e0999c62-317d-45be-82a4-621f7ae7833f"))
+(wire(pts(xy 469.900000 124.460000)(xy 444.500000 124.460000))(stroke(width 0)(type default))(uuid "d9cebddd-5e7b-4d41-addf-7996f714ea7f"))
+(wire(pts(xy 469.900000 124.460000)(xy 469.900000 119.380000))(stroke(width 0)(type default))(uuid "ad122175-22b5-4ceb-a5ef-18e202d9f12c"))
+(wire(pts(xy 504.190000 298.450000)(xy 505.460000 298.450000))(stroke(width 0)(type default))(uuid "a346ad84-dadb-45de-aa72-414f29061d9d"))
+(wire(pts(xy 504.190000 298.450000)(xy 497.840000 298.450000))(stroke(width 0)(type default))(uuid "3b393c05-0cb3-493f-85be-4b456624ea92"))
+(wire(pts(xy 64.770000 119.380000)(xy 64.770000 176.530000))(stroke(width 0)(type default))(uuid "d4b4d23d-0621-484d-8bd8-28356896c936"))
+(wire(pts(xy 64.770000 119.380000)(xy 90.170000 119.380000))(stroke(width 0)(type default))(uuid "b7d3b7ba-566a-4d3a-84f8-04a359dacddb"))
+(wire(pts(xy 384.810000 280.670000)(xy 425.450000 280.670000))(stroke(width 0)(type default))(uuid "cbadbcb8-59d0-42ba-b3d5-60004d560e4f"))
+(wire(pts(xy 279.400000 124.460000)(xy 281.940000 124.460000))(stroke(width 0)(type default))(uuid "58bf4ec2-4a1c-440d-9889-aa47a49ca3b1"))
+(wire(pts(xy 281.940000 124.460000)(xy 281.940000 88.900000))(stroke(width 0)(type default))(uuid "3e68e7fe-e947-4fba-a583-b65ff7118ea0"))
+(junction(at 504.190000 298.450000)(diameter 0)(color 0 0 0 0)(uuid "e07a86a3-5cd3-4c96-9e69-882557c6dd6a"))
+(wire(pts(xy 425.450000 288.290000)(xy 425.450000 303.530000))(stroke(width 0)(type default))(uuid "1319677b-6b14-420c-8307-6eb9613f8b95"))
+(wire(pts(xy 505.460000 303.530000)(xy 425.450000 303.530000))(stroke(width 0)(type default))(uuid "7d7c25a8-ef53-4650-9195-9755f86f926b"))
+(wire(pts(xy 90.170000 101.600000)(xy 82.550000 101.600000))(stroke(width 0)(type default))(uuid "4ec16b44-f335-49bf-b234-ca50bfda29d8"))
+(wire(pts(xy 279.400000 101.600000)(xy 271.780000 101.600000))(stroke(width 0)(type default))(uuid "2d3a7b44-be6b-4cdd-b0b6-b561647f6112"))
+(wire(pts(xy 462.280000 101.600000)(xy 469.900000 101.600000))(stroke(width 0)(type default))(uuid "db08ca4a-0254-4a99-9a14-5d58a9065e77"))
+(wire(pts(xy 90.170000 106.680000)(xy 82.550000 106.680000))(stroke(width 0)(type default))(uuid "ae859ac7-4f02-4824-9721-94179e350718"))
+(wire(pts(xy 279.400000 106.680000)(xy 271.780000 106.680000))(stroke(width 0)(type default))(uuid "fa58a968-4519-4496-b175-e963e665535a"))
+(wire(pts(xy 462.280000 106.680000)(xy 469.900000 106.680000))(stroke(width 0)(type default))(uuid "4558855a-8cde-4c80-bcea-607e61d4d17c"))
+(wire(pts(xy 384.810000 300.990000)(xy 384.810000 288.290000))(stroke(width 0)(type default))(uuid "2aae9c16-a229-4457-930d-9055fc0c7045"))
+(wire(pts(xy 384.810000 300.990000)(xy 505.460000 300.990000))(stroke(width 0)(type default))(uuid "b8b4b0ad-26a4-42a8-bff4-4e5c2dc2bd0a"))
+(wire(pts(xy 462.280000 111.760000)(xy 469.900000 111.760000))(stroke(width 0)(type default))(uuid "2be1e279-72cf-4b26-976f-fb19399bf65b"))
+(wire(pts(xy 271.780000 111.760000)(xy 279.400000 111.760000))(stroke(width 0)(type default))(uuid "70fc0c24-98f3-4be8-98c5-227d69477f26"))
+(wire(pts(xy 82.550000 111.760000)(xy 90.170000 111.760000))(stroke(width 0)(type default))(uuid "da898ad9-f096-4d9c-9508-b548e5ae54ec"))
+(wire(pts(xy 120.650000 99.060000)(xy 128.270000 99.060000))(stroke(width 0)(type default))(uuid "71e20b5a-1e99-4a80-aae8-1b4c3762e8d6"))
+(wire(pts(xy 120.650000 101.600000)(xy 128.270000 101.600000))(stroke(width 0)(type default))(uuid "e1559897-ecff-4964-87bb-eac8ec00ead4"))
+(wire(pts(xy 120.650000 104.140000)(xy 128.270000 104.140000))(stroke(width 0)(type default))(uuid "42b52fce-e893-4ae2-a70b-867aa753793e"))
+(wire(pts(xy 120.650000 106.680000)(xy 128.270000 106.680000))(stroke(width 0)(type default))(uuid "8e4fca30-f305-4d26-ace8-42138b716a96"))
+(wire(pts(xy 120.650000 109.220000)(xy 128.270000 109.220000))(stroke(width 0)(type default))(uuid "3f63ef7e-7c95-4a24-a382-fd940ff6932e"))
+(wire(pts(xy 120.650000 111.760000)(xy 128.270000 111.760000))(stroke(width 0)(type default))(uuid "a70e34d9-00ba-4012-92d2-157aabdda8f2"))
+(wire(pts(xy 120.650000 114.300000)(xy 128.270000 114.300000))(stroke(width 0)(type default))(uuid "5852f85e-c3ef-49f9-b943-25dfc79abb8c"))
+(wire(pts(xy 120.650000 116.840000)(xy 128.270000 116.840000))(stroke(width 0)(type default))(uuid "43d99b9c-c0f4-473a-a0eb-0133629fd571"))
+(wire(pts(xy 120.650000 119.380000)(xy 128.270000 119.380000))(stroke(width 0)(type default))(uuid "3cf79278-295e-466b-9392-e5376d4e1b78"))
+(wire(pts(xy 128.270000 121.920000)(xy 120.650000 121.920000))(stroke(width 0)(type default))(uuid "825fc857-80c7-4a6d-812c-c97e41aad81d"))
+(wire(pts(xy 120.650000 124.460000)(xy 128.270000 124.460000))(stroke(width 0)(type default))(uuid "8477791b-0d44-4738-beba-2b2bf52ea5ee"))
+(wire(pts(xy 120.650000 127.000000)(xy 128.270000 127.000000))(stroke(width 0)(type default))(uuid "bd2c986a-4a98-4e35-a68a-7e2b2c701fab"))
+(wire(pts(xy 128.270000 129.540000)(xy 120.650000 129.540000))(stroke(width 0)(type default))(uuid "e2016094-fd6d-4fb7-994e-19fec26f88fc"))
+(wire(pts(xy 120.650000 132.080000)(xy 128.270000 132.080000))(stroke(width 0)(type default))(uuid "9de92bb7-efe9-4f40-9640-5bc5883eb5aa"))
+(wire(pts(xy 120.650000 134.620000)(xy 128.270000 134.620000))(stroke(width 0)(type default))(uuid "0acb22e7-8455-40c9-b392-56e0c4e06377"))
+(wire(pts(xy 120.650000 137.160000)(xy 128.270000 137.160000))(stroke(width 0)(type default))(uuid "3929bc5d-1122-4e5c-8b42-7cd2f189a020"))
+(wire(pts(xy 309.880000 99.060000)(xy 317.500000 99.060000))(stroke(width 0)(type default))(uuid "5be98f6f-6a1f-43c4-ad86-b0faf24f5217"))
+(wire(pts(xy 317.500000 101.600000)(xy 309.880000 101.600000))(stroke(width 0)(type default))(uuid "2661a1a3-eee5-4719-b9f8-9633297980a5"))
+(wire(pts(xy 309.880000 104.140000)(xy 317.500000 104.140000))(stroke(width 0)(type default))(uuid "18ce6b48-4680-42eb-838b-a29138c04c41"))
+(wire(pts(xy 309.880000 106.680000)(xy 317.500000 106.680000))(stroke(width 0)(type default))(uuid "a4e74930-2b8c-4eb5-8f3f-3e04d94b4256"))
+(wire(pts(xy 317.500000 109.220000)(xy 309.880000 109.220000))(stroke(width 0)(type default))(uuid "59f1495a-2086-465d-b563-65cb240a1081"))
+(wire(pts(xy 309.880000 111.760000)(xy 317.500000 111.760000))(stroke(width 0)(type default))(uuid "fb729d2a-26cc-44ba-a691-92493c00aa75"))
+(wire(pts(xy 317.500000 114.300000)(xy 309.880000 114.300000))(stroke(width 0)(type default))(uuid "b639d28c-ec65-48c6-a85c-c0d4bcc3a6ab"))
+(wire(pts(xy 309.880000 116.840000)(xy 317.500000 116.840000))(stroke(width 0)(type default))(uuid "de8d3cc0-fce1-42c9-bb1d-6a03b9000ce3"))
+(wire(pts(xy 309.880000 119.380000)(xy 317.500000 119.380000))(stroke(width 0)(type default))(uuid "3183a672-83ab-469b-89cd-77604510da1a"))
+(wire(pts(xy 317.500000 121.920000)(xy 309.880000 121.920000))(stroke(width 0)(type default))(uuid "cd2afb90-69bb-476e-a1e3-d45d46c60a52"))
+(wire(pts(xy 309.880000 124.460000)(xy 317.500000 124.460000))(stroke(width 0)(type default))(uuid "8911e205-4f57-40e6-803d-100e210379fa"))
+(wire(pts(xy 309.880000 127.000000)(xy 317.500000 127.000000))(stroke(width 0)(type default))(uuid "e46efbf5-e404-4fd5-bc70-57348b38a869"))
+(wire(pts(xy 317.500000 129.540000)(xy 309.880000 129.540000))(stroke(width 0)(type default))(uuid "1e01712e-bffb-4694-b0db-92bf3bcee4b3"))
+(wire(pts(xy 309.880000 132.080000)(xy 317.500000 132.080000))(stroke(width 0)(type default))(uuid "94b17617-98fb-4a5b-8764-d10eb0b5a24b"))
+(wire(pts(xy 309.880000 134.620000)(xy 317.500000 134.620000))(stroke(width 0)(type default))(uuid "7ad90295-2765-45b3-a8a4-d8ed66545f84"))
+(wire(pts(xy 317.500000 137.160000)(xy 309.880000 137.160000))(stroke(width 0)(type default))(uuid "2f256457-4f2b-4d6b-839b-33366d61d6cb"))
+(wire(pts(xy 508.000000 99.060000)(xy 500.380000 99.060000))(stroke(width 0)(type default))(uuid "444bcbe1-e662-48c1-9cd6-e8433f7c3c22"))
+(wire(pts(xy 500.380000 101.600000)(xy 508.000000 101.600000))(stroke(width 0)(type default))(uuid "c74c9ea5-30cf-4db9-9e5e-81a839ef954e"))
+(wire(pts(xy 500.380000 104.140000)(xy 508.000000 104.140000))(stroke(width 0)(type default))(uuid "51c812c3-b4c8-4bb0-b179-22747fad771a"))
+(wire(pts(xy 508.000000 106.680000)(xy 500.380000 106.680000))(stroke(width 0)(type default))(uuid "f8323690-e203-48f4-814c-78e39b9479ec"))
+(wire(pts(xy 500.380000 109.220000)(xy 508.000000 109.220000))(stroke(width 0)(type default))(uuid "cf8461f6-685e-458e-a3fa-34ad042a8e62"))
+(wire(pts(xy 500.380000 111.760000)(xy 508.000000 111.760000))(stroke(width 0)(type default))(uuid "7bab4835-4eea-4d13-8445-f95da081379b"))
+(wire(pts(xy 508.000000 114.300000)(xy 500.380000 114.300000))(stroke(width 0)(type default))(uuid "7b67cd43-825d-43dc-b2d4-cfa913a42ec0"))
+(wire(pts(xy 500.380000 116.840000)(xy 508.000000 116.840000))(stroke(width 0)(type default))(uuid "bbf3e73a-b977-4f03-b9f6-b99db468a709"))
+(wire(pts(xy 500.380000 119.380000)(xy 508.000000 119.380000))(stroke(width 0)(type default))(uuid "3b08755d-04a0-4b10-9f2f-c4cb7384c95e"))
+(wire(pts(xy 508.000000 121.920000)(xy 500.380000 121.920000))(stroke(width 0)(type default))(uuid "9800596c-4f81-4d75-80c7-a91b0177e4a5"))
+(wire(pts(xy 500.380000 124.460000)(xy 508.000000 124.460000))(stroke(width 0)(type default))(uuid "f295056d-d006-4455-aeeb-ca2711f8cd16"))
+(wire(pts(xy 500.380000 127.000000)(xy 508.000000 127.000000))(stroke(width 0)(type default))(uuid "f94afbbd-700c-4834-8714-9ad8cfc69aff"))
+(wire(pts(xy 508.000000 129.540000)(xy 500.380000 129.540000))(stroke(width 0)(type default))(uuid "7a823aaf-a76f-4815-9344-4b341d590686"))
+(wire(pts(xy 500.380000 132.080000)(xy 508.000000 132.080000))(stroke(width 0)(type default))(uuid "764258db-bca0-4d01-b6dc-b4e9f1478539"))
+(wire(pts(xy 508.000000 134.620000)(xy 500.380000 134.620000))(stroke(width 0)(type default))(uuid "ea971f99-3a32-4b8c-b670-1e0327086b98"))
+(wire(pts(xy 500.380000 137.160000)(xy 508.000000 137.160000))(stroke(width 0)(type default))(uuid "8ec04b07-0333-4779-852e-405c3c154702"))
+(rectangle(start 15.24 234.95000000000002)(end 304.8 384.81000000000006)(stroke(width .254)(type dash))(fill(type none))(uuid "5edf58dc-8bd9-4c1f-96ab-84c72f274c88"))
+(text "INTERBLOCCO RESET / UNA SOLA PORTA"(at 19.05 238.76 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "c8e88556-619e-43a5-8ec2-9e4219b95ea0"))
+(text "EXP_RESET_N = ESP_EN AND NOT GPIO0. IN0 aGND.\nR203 mantiene reset basso se non pilotato; C200 bypass100nF."(at 19.05 245.11 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "50ef36fb-ed65-47e5-80cd-bee8a282bea1"))
+(symbol(lib_id "Board28:SN74LVC1G97_AND_NOT")(at 120.65 295.91 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "a9adbb6f-1078-4d13-8fe6-489cf8606f3a")(property "Reference" "U60"(at 128.770000 277.630000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "SN74LVC1G97DBVR"(at 128.770000 280.170000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"(at 120.650000 295.910000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "Texas Instruments"(at 120.650000 295.910000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "SN74LVC1G97DBVR"(at 120.650000 295.910000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C128411"(at 120.650000 295.910000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74lvc1g97.pdf"(at 120.650000 295.910000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "6"(uuid "c9e3cb10-e4cc-4ca8-8d59-bce5e142c034"))(pin "1"(uuid "cafc5e4e-b34d-4d7b-b6fd-86d4bd41c989"))(pin "3"(uuid "ef98afd2-39ac-4387-90c0-44d896941133"))(pin "4"(uuid "af0ff867-3506-431f-bd92-8c3e7a97dd62"))(pin "5"(uuid "aa07f99c-d257-4920-b281-71497501eb85"))(pin "2"(uuid "8e64e8a6-3f86-4c1a-ac38-b4dec8f73ef6"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "U60")(unit 1)))))
+(symbol(lib_id "Board28:Device__R")(at 255.27 330.2 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "f310864a-b383-40c1-ac30-ee4513c88c5c")(property "Reference" "R203"(at 259.326000 328.930000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "10k"(at 259.326000 331.470000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Resistor_SMD:R_0603_1608Metric"(at 255.270000 330.200000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "b9c9b5f4-7243-4fec-bb89-76d27e6b9f36"))(pin "2"(uuid "7a864650-53e8-4b3c-a8f5-b2a192ea390f"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "R203")(unit 1)))))
+(symbol(lib_id "Board28:Device__C")(at 85.09 350.52 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "e2f2c993-528d-44ea-8890-be87354746a1")(property "Reference" "C200"(at 90.162000 349.250000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "100nF"(at 90.162000 351.790000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"(at 85.090000 350.520000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "9d229fe5-323f-4efa-b73a-9e20fa87b9b0"))(pin "2"(uuid "cf395bc1-ec9c-4438-bed3-662952a914cc"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "C200")(unit 1)))))
+(global_label "GND"(shape bidirectional)(at 102.87 300.99 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "60a98009-aead-447a-bf2d-8fee0ab2afb4")(property "Descrizione" "Riferimento comune e ritorno alimentazioni"(at 102.870000 300.990000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "3V3"(shape bidirectional)(at 120.65 275.59000000000003 90.0)(effects(font(size 1.0 1.0))(justify left))(uuid "803adc2f-0709-40a6-be48-59c86efee3f3")(property "Descrizione" "Rail regolata3.3V; VCC delle righe e logicaESP"(at 120.650000 275.590000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "EXP_RESET_N"(shape bidirectional)(at 130.81 295.91 0.0)(effects(font(size 1.0 1.0))(justify left))(uuid "7014f62c-268d-4c8a-9e18-cabcd828e57b")(property "Descrizione" "Reset FCA9539, basso forza ingressi ad alta impedenza"(at 130.810000 295.910000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ESP_BOOT"(shape bidirectional)(at 102.87 290.83 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "cbf893f1-90af-4523-aab1-a742a50ce730")(property "Descrizione" "GPIO0/strap: alto mantiene gli expander in reset"(at 102.870000 290.830000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "ESP_EN"(shape bidirectional)(at 102.87 295.91 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "6495c17e-a6d9-4b1c-a239-f79e73bfd7ed")(property "Descrizione" "Enable/reset ESP32, attivo basso"(at 102.870000 295.910000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(wire(pts(xy 255.270000 334.010000)(xy 120.650000 334.010000))(stroke(width 0)(type default))(uuid "96f4866b-e54f-4cc8-8215-ac3e8d73ea5f"))
+(wire(pts(xy 110.490000 300.990000)(xy 110.490000 308.610000))(stroke(width 0)(type default))(uuid "4a3ed133-af0b-479b-9948-3b220e1ada70"))
+(wire(pts(xy 110.490000 300.990000)(xy 102.870000 300.990000))(stroke(width 0)(type default))(uuid "bb1c3861-f9b4-456a-a824-64eedab871de"))
+(wire(pts(xy 85.090000 354.330000)(xy 120.650000 354.330000))(stroke(width 0)(type default))(uuid "4cbd46c4-5a7e-4c5e-a873-847782b6f95f"))
+(wire(pts(xy 110.490000 308.610000)(xy 120.650000 308.610000))(stroke(width 0)(type default))(uuid "4d821480-65c0-45e5-85e1-e93942138bee"))
+(wire(pts(xy 120.650000 354.330000)(xy 120.650000 334.010000))(stroke(width 0)(type default))(uuid "43d065a9-c202-454c-8297-035a9df207ce"))
+(wire(pts(xy 120.650000 334.010000)(xy 120.650000 308.610000))(stroke(width 0)(type default))(uuid "87bf1d86-4804-4bf8-97cb-075ddcfe8674"))
+(junction(at 120.650000 334.010000)(diameter 0)(color 0 0 0 0)(uuid "ce815c8d-7db1-4489-b25a-adcbc52a89b8"))
+(wire(pts(xy 85.090000 346.710000)(xy 85.090000 283.210000))(stroke(width 0)(type default))(uuid "7b0a0b9e-c2bb-491b-a9df-ec64905e7394"))
+(wire(pts(xy 85.090000 283.210000)(xy 120.650000 283.210000))(stroke(width 0)(type default))(uuid "e818dbdc-39d3-4983-976f-6e69537ab0e9"))
+(wire(pts(xy 120.650000 283.210000)(xy 120.650000 275.590000))(stroke(width 0)(type default))(uuid "ed804ebe-5019-4924-a032-6fa84b9a86ab"))
+(wire(pts(xy 130.810000 295.910000)(xy 255.270000 295.910000))(stroke(width 0)(type default))(uuid "167f9bb0-5bdc-4384-be0c-50677c1a821a"))
+(wire(pts(xy 255.270000 295.910000)(xy 255.270000 326.390000))(stroke(width 0)(type default))(uuid "24f5bcdc-1e13-4b75-8c7d-54a0bbd55919"))
+(wire(pts(xy 102.870000 290.830000)(xy 110.490000 290.830000))(stroke(width 0)(type default))(uuid "dc9ec911-31b8-4b06-9cca-a1a96b3bf569"))
+(wire(pts(xy 102.870000 295.910000)(xy 110.490000 295.910000))(stroke(width 0)(type default))(uuid "e891b158-3fb4-43e9-8139-5c44c9c25e4a"))
+
+(rectangle(start 15.24 405.13)(end 430.53 477.52)(stroke(width .254)(type dash))(fill(type none))(uuid "683332ec-2f2c-471b-b746-bc0a291b14ec"))
+(text "BUS INTERNO DEDICATO / GPIO4 SDA / GPIO5 SCL"(at 20.32 410.21 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "035a3c0b-1f08-42ce-b3f8-e8ab9262b8f0"))
+(symbol(lib_id "Board28:Device__R")(at 100.33 441.96 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "86af9fd7-ff01-451c-941b-d249ad01bdff")(property "Reference" "R302"(at 105.41 439.41999999999996 0)(effects(font(size 1 1))(justify left)))(property "Value" "4.7k"(at 105.41 441.96 0)(effects(font(size 1 1))(justify left)))(property "Footprint" "Resistor_SMD:R_0603_1608Metric"(at 105.41 444.5 0)(hide yes)(effects(font(size 1 1))(justify left)))(property "Manufacturer" "UNI-ROYAL"(at 105.41 447.03999999999996 0)(hide yes)(effects(font(size 1 1))(justify left)))(property "MPN" "0603WAF4701T5E"(at 105.41 449.58 0)(hide yes)(effects(font(size 1 1))(justify left)))(property "LCSC Part" "C23162"(at 105.41 452.12 0)(hide yes)(effects(font(size 1 1))(justify left)))(pin "1"(uuid "27500ffd-3bd1-422b-abfc-9b8b4f554925"))(pin "2"(uuid "402f211e-68ac-41a3-974a-c41c3811df9b"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "R302")(unit 1)))))
+(wire(pts(xy 100.33 438.15)(xy 100.33 429.26))(stroke(width 0)(type default))(uuid "52bbe02d-2614-4074-bb89-21ed9524bc00"))
+(wire(pts(xy 100.33 429.26)(xy 125.72999999999999 429.26))(stroke(width 0)(type default))(uuid "6dfd0ede-1d42-4004-ba54-8a657c6a087f"))
+(global_label "3V3"(shape bidirectional)(at 125.72999999999999 429.26 0)(effects(font(size 1 1))(justify left))(uuid "a7a98ef6-978c-4d37-a836-8d53c763e60a")(property "Descrizione" "Rail logica3,3V, non3V3_ROWS"(at 125.72999999999999 429.26 0)(hide yes)(effects(font(size 1 1)))))
+(wire(pts(xy 100.33 445.77)(xy 100.33 457.2))(stroke(width 0)(type default))(uuid "32cc990b-013c-47f2-9cf1-d1bae3619ce6"))
+(wire(pts(xy 100.33 457.2)(xy 125.72999999999999 457.2))(stroke(width 0)(type default))(uuid "6e9f255a-dec7-4be2-835a-d4ec0ce4c9be"))
+(global_label "I2C_INT_SDA"(shape bidirectional)(at 125.72999999999999 457.2 0)(effects(font(size 1 1))(justify left))(uuid "16301862-221f-400f-9bbd-2e7cd587246c")(property "Descrizione" "Bus interno: solo ESP32 GPIO4/5 e FCA9539Q"(at 125.72999999999999 457.2 0)(hide yes)(effects(font(size 1 1)))))
+(symbol(lib_id "Board28:Device__R")(at 212.09 441.96 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "fd2d7d8f-b263-498c-9cf5-6b5d1691cf75")(property "Reference" "R303"(at 217.17000000000002 439.41999999999996 0)(effects(font(size 1 1))(justify left)))(property "Value" "4.7k"(at 217.17000000000002 441.96 0)(effects(font(size 1 1))(justify left)))(property "Footprint" "Resistor_SMD:R_0603_1608Metric"(at 217.17000000000002 444.5 0)(hide yes)(effects(font(size 1 1))(justify left)))(property "Manufacturer" "UNI-ROYAL"(at 217.17000000000002 447.03999999999996 0)(hide yes)(effects(font(size 1 1))(justify left)))(property "MPN" "0603WAF4701T5E"(at 217.17000000000002 449.58 0)(hide yes)(effects(font(size 1 1))(justify left)))(property "LCSC Part" "C23162"(at 217.17000000000002 452.12 0)(hide yes)(effects(font(size 1 1))(justify left)))(pin "1"(uuid "8faffc1e-0225-4c87-8350-5d827b379535"))(pin "2"(uuid "8ef89820-055e-4485-9884-8c97ede4331b"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "R303")(unit 1)))))
+(wire(pts(xy 212.09 438.15)(xy 212.09 429.26))(stroke(width 0)(type default))(uuid "d894b793-2d94-48a2-9d8f-cdbd3b49e34e"))
+(wire(pts(xy 212.09 429.26)(xy 237.49 429.26))(stroke(width 0)(type default))(uuid "8b927a24-f56a-4bd8-8c77-d9cf7af361cc"))
+(global_label "3V3"(shape bidirectional)(at 237.49 429.26 0)(effects(font(size 1 1))(justify left))(uuid "82418790-6343-4e42-ab15-56e782c2c074")(property "Descrizione" "Rail logica3,3V, non3V3_ROWS"(at 237.49 429.26 0)(hide yes)(effects(font(size 1 1)))))
+(wire(pts(xy 212.09 445.77)(xy 212.09 457.2))(stroke(width 0)(type default))(uuid "11b32cb2-788a-4eee-b3ae-ba3cbb55c735"))
+(wire(pts(xy 212.09 457.2)(xy 237.49 457.2))(stroke(width 0)(type default))(uuid "762c8090-c4e8-46a1-9ebd-df87149e6288"))
+(global_label "I2C_INT_SCL"(shape bidirectional)(at 237.49 457.2 0)(effects(font(size 1 1))(justify left))(uuid "2c2d57ab-e49b-45f0-88bd-b4a2903f5359")(property "Descrizione" "Bus interno: solo ESP32 GPIO4/5 e FCA9539Q"(at 237.49 457.2 0)(hide yes)(effects(font(size 1 1)))))
+(text "R302/R303: pull-up4,7k del solo bus interno.\nR24/R25: pull-up4,7k del bus utente, nel blocco Qwiic.\nNessun collegamento SDA/SCL tra i due bus.\nEntrambi usano livelli3,3V; firmware: due controller distinti."(at 340.36 425.45 0)(effects(font(size 1.15 1.15))(justify left top))(uuid "e7d26bfd-c8df-4f68-b1f4-6bd9a4efbd42"))
+
+(rectangle(start 15.24 490.22)(end 455.93 576.58)(stroke(width .254)(type dash))(fill(type none))(uuid "05e0b7da-e0eb-435c-91c7-871731f99b57"))
+(text "INTERFACCIA LOCALE | DUE PULSANTI XKB"(at 19.05 494.03000000000003 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "78b887b2-0880-41dc-a31d-2bf840c23b85"))
+(text "SW1: scorre A1..A8/B1..B8; triplo clic apre menu. SW2: anteprima modo; doppio clic applica.\nFirmware richiesto: input con pull-up interno, debounce, discriminazione clic singolo/doppio/triplo prima delle azioni; sempre break-before-make.\nGPIO21=pad23 ESP32; GPIO14=pad22 resta USB_VBUS_PRESENT. GPIO13 e condiviso con J25.7 e ora riservato al pulsante."(at 19.05 500.38 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "9b9d0b23-ab03-4b29-9a16-6000c4fef78b"))
+(symbol(lib_id "Board28:UI_SPST_XKB")(at 110.49 543.5600000000001 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "83755259-7fe5-45c1-b5af-8fc226abd108")(property "Reference" "SW1"(at 118.610000 542.290000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "TS-1187A-B-A-B"(at 118.610000 544.830000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XKB_TS1187A_5.1x5.1_H1.5"(at 110.490000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XKB Connection"(at 110.490000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "TS-1187A-B-A-B"(at 110.490000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C318884"(at 110.490000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C318884.pdf"(at 110.490000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "select bank A/B"(at 110.490000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "1b33c1bf-b531-46bf-ac72-4ef9ebb7d2a5"))(pin "2"(uuid "e7e92cae-6c97-481b-bba9-59009e1843f6"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "SW1")(unit 1)))))
+(global_label "UI_BANK_N"(shape bidirectional)(at 87.63 543.5600000000001 180)(effects(font(size 1.0 1.0))(justify right))(uuid "f93fbfa0-9ded-4ab9-b79f-a2fcd5cd03e0")(property "Descrizione" "Pulsante banco A/B, attivo basso su GPIO21; pull-up interno, nessun ruolo nel reset"(at 87.630000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 133.35 543.5600000000001 0)(effects(font(size 1.0 1.0))(justify left))(uuid "d31c5300-f3c0-46f3-9b44-ac88f3fee131")(property "Descrizione" "Massa comune"(at 133.350000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:UI_SPST_XKB")(at 350.52 543.5600000000001 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "ed155700-a2d3-4556-a7ff-c472062d6eee")(property "Reference" "SW2"(at 358.640000 542.290000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "TS-1187A-B-A-B"(at 358.640000 544.830000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XKB_TS1187A_5.1x5.1_H1.5"(at 350.520000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XKB Connection"(at 350.520000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "TS-1187A-B-A-B"(at 350.520000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C318884"(at 350.520000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C318884.pdf"(at 350.520000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "select row1..8"(at 350.520000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "fed6786a-60d2-41ad-ae80-05822cf6d043"))(pin "2"(uuid "ff7e10a7-7b43-42b0-aa94-6900bb748508"))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/1c265fd6-6cad-4042-af50-0240d2edb4fa"(reference "SW2")(unit 1)))))
+(global_label "GPIO13"(shape bidirectional)(at 327.66 543.5600000000001 180)(effects(font(size 1.0 1.0))(justify right))(uuid "45e8c845-f13a-42eb-9bf3-e208b8f0f1d2")(property "Descrizione" "Pulsante riga1..8 su GPIO13, attivo basso; condiviso con J25.7, non piu GPIO libero"(at 327.660000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "GND"(shape bidirectional)(at 373.38 543.5600000000001 0)(effects(font(size 1.0 1.0))(justify left))(uuid "8ea0181e-c76d-46e4-ba4a-ae91276abea1")(property "Descrizione" "Massa comune"(at 373.380000 543.560000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(wire(pts(xy 87.630000 543.560000)(xy 102.870000 543.560000))(stroke(width 0)(type default))(uuid "e9bd2afe-17de-48d6-9810-8eeea7e1edcb"))
+(wire(pts(xy 133.350000 543.560000)(xy 118.110000 543.560000))(stroke(width 0)(type default))(uuid "17ef26ea-849a-48fe-b7de-dacee5925bcb"))
+(wire(pts(xy 358.140000 543.560000)(xy 373.380000 543.560000))(stroke(width 0)(type default))(uuid "7a1d286f-3e13-4112-b3dd-444b04ab3097"))
+(wire(pts(xy 342.900000 543.560000)(xy 327.660000 543.560000))(stroke(width 0)(type default))(uuid "8ce77ce4-28d4-4644-836f-833d75619474"))
+)

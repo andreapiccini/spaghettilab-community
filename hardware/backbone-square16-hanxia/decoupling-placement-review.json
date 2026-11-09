@@ -1,0 +1,17 @@
+[
+  {
+    "ref": "C400",
+    "parent": "U70",
+    "centre_distance_mm": 4.072
+  },
+  {
+    "ref": "C401",
+    "parent": "U70",
+    "centre_distance_mm": 3.875
+  },
+  {
+    "ref": "C402",
+    "parent": "U70",
+    "centre_distance_mm": 4.072
+  }
+]
