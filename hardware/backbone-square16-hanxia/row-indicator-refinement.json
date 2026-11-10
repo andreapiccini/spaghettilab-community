@@ -1,0 +1,36 @@
+{
+  "columns_old_mm": [
+    [
+      204.1,
+      207.1,
+      210.1
+    ],
+    [
+      166.4,
+      163.4,
+      160.4
+    ]
+  ],
+  "columns_new_mm": [
+    [
+      204.1,
+      207.0,
+      209.9
+    ],
+    [
+      166.4,
+      163.5,
+      160.6
+    ]
+  ],
+  "LED_pitch_mm": 2.9,
+  "MCU_scale_relative_to_original": 0.72,
+  "text_scale_relative_to_previous": 0.9,
+  "row_pitch_mm": 2.54,
+  "capsule_height_mm": 2.2,
+  "capsule_width_mm": 8.0,
+  "counts": {
+    "moved_graphics": 390,
+    "capsule_elements_removed": 160
+  }
+}

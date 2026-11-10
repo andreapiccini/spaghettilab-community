@@ -1,0 +1,268 @@
+{
+  "source": "/Users/andreapiccini/dev/spaghetti-lab-launch/logo_sfondo_bianco copia.png",
+  "source_crop_pixels": [
+    214,
+    298,
+    839,
+    724
+  ],
+  "width_mm": 14.0,
+  "height_mm": 12.081048867699643,
+  "centre_mm": [
+    161.75,
+    76.8
+  ],
+  "vector_polygons": 27,
+  "vertices": 1686,
+  "logo_LED_count": 16,
+  "additional_LED_count": 12,
+  "LED_pitch_mm": 3.0,
+  "LED_angle_deg": 45,
+  "LED_driver_channels_used": 77,
+  "LED_driver_channels_free": 67,
+  "new_driver_count": 0,
+  "emitters": [
+    {
+      "ref": "D516",
+      "x": 157.25,
+      "y": 72.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "6a9984b4-a80d-49bf-a542-3f9ed0bd44f5",
+      "nets": {
+        "1": "LABEL_CA5",
+        "2": "LABEL_CA1"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D517",
+      "x": 160.25,
+      "y": 72.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "003152d7-2931-479b-96d4-01d1011caca6",
+      "nets": {
+        "1": "LABEL_CA5",
+        "2": "LABEL_CA2"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D518",
+      "x": 163.25,
+      "y": 72.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "5e3e4539-ef0d-4550-85da-6328735e97c1",
+      "nets": {
+        "1": "LABEL_CA5",
+        "2": "LABEL_CA3"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D519",
+      "x": 166.25,
+      "y": 72.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "ac0a318b-d8a3-4a04-945e-471e7814d751",
+      "nets": {
+        "1": "LABEL_CA5",
+        "2": "LABEL_CA4"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D720",
+      "x": 157.25,
+      "y": 75.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "b2d2c351-0f01-4778-af5a-62f32798cef0",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA1"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D721",
+      "x": 160.25,
+      "y": 75.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "db91b158-04e3-422a-9d97-96dbfda7d2bc",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA2"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D722",
+      "x": 163.25,
+      "y": 75.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "ce071c54-74bd-4bbf-9c5f-bd27956c0ed8",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA4"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D723",
+      "x": 166.25,
+      "y": 75.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "dd1122bf-79fa-49c2-8b20-096dc9284260",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA5"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D724",
+      "x": 157.25,
+      "y": 78.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "3767be75-469c-4816-ac56-172c178547fa",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA6"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D725",
+      "x": 160.25,
+      "y": 78.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "eaf37b40-b159-4d2b-acd6-8b69d6397b7e",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA7"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D726",
+      "x": 163.25,
+      "y": 78.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "f3e45531-e34c-4e96-a5ff-ec2b11504e74",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA1"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D727",
+      "x": 166.25,
+      "y": 78.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "2b61fa5c-8141-456b-8a68-b191d3ef3d12",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA2"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D728",
+      "x": 157.25,
+      "y": 81.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "e811d119-59a2-44ea-b9bf-25e9e9336577",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA3"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D729",
+      "x": 160.25,
+      "y": 81.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "0186251a-2f22-413d-9dec-db0eb3c70cef",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA5"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D730",
+      "x": 163.25,
+      "y": 81.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "ce936230-4fee-414c-94fc-200e55c01de4",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA6"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    },
+    {
+      "ref": "D731",
+      "x": 166.25,
+      "y": 81.3,
+      "angle_deg": 45,
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "uuid": "ed22b3a7-9aca-4ffe-8662-271f80378f97",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA7"
+      },
+      "colour": "blue",
+      "lcsc": "C3646941"
+    }
+  ],
+  "optical_uniformity_measured": false,
+  "routing_complete": false
+}

@@ -77,8 +77,127 @@
       "x": 158.4,
       "y": 116,
       "ref": "TE29"
+    },
+    {
+      "key": 10,
+      "pin": 8,
+      "label": "T1",
+      "x": 213.2,
+      "y": 74.6,
+      "ref": "TE30",
+      "net": "TOUCH_USER_T1",
+      "pad_diameter_mm": 4.4,
+      "pitch_mm": 5.8,
+      "default_action": null,
+      "sch_pin_xy": [
+        152.4,
+        123.19
+      ]
+    },
+    {
+      "key": 11,
+      "pin": 9,
+      "label": "T2",
+      "x": 207.4,
+      "y": 74.6,
+      "ref": "TE31",
+      "net": "TOUCH_USER_T2",
+      "pad_diameter_mm": 4.4,
+      "pitch_mm": 5.8,
+      "default_action": null,
+      "sch_pin_xy": [
+        152.4,
+        125.72999999999999
+      ]
+    },
+    {
+      "key": 12,
+      "pin": 10,
+      "label": "T3",
+      "x": 201.6,
+      "y": 74.6,
+      "ref": "TE32",
+      "net": "TOUCH_USER_T3",
+      "pad_diameter_mm": 4.4,
+      "pitch_mm": 5.8,
+      "default_action": null,
+      "sch_pin_xy": [
+        152.4,
+        128.26999999999998
+      ]
+    },
+    {
+      "key": 13,
+      "pin": 11,
+      "label": "T4",
+      "x": 219,
+      "y": 80.4,
+      "ref": "TE33",
+      "net": "TOUCH_USER_T4",
+      "pad_diameter_mm": 4.4,
+      "pitch_mm": 5.8,
+      "default_action": null,
+      "sch_pin_xy": [
+        152.4,
+        130.81
+      ]
+    },
+    {
+      "key": 14,
+      "pin": 12,
+      "label": "T5",
+      "x": 213.2,
+      "y": 80.4,
+      "ref": "TE34",
+      "net": "TOUCH_USER_T5",
+      "pad_diameter_mm": 4.4,
+      "pitch_mm": 5.8,
+      "default_action": null,
+      "sch_pin_xy": [
+        152.4,
+        133.35
+      ]
+    },
+    {
+      "key": 15,
+      "pin": 13,
+      "label": "T6",
+      "x": 207.4,
+      "y": 80.4,
+      "ref": "TE35",
+      "net": "TOUCH_USER_T6",
+      "pad_diameter_mm": 4.4,
+      "pitch_mm": 5.8,
+      "default_action": null,
+      "sch_pin_xy": [
+        152.4,
+        135.89
+      ]
+    },
+    {
+      "key": 16,
+      "pin": 14,
+      "label": "CLEAR_ALL",
+      "x": 201.6,
+      "y": 80.4,
+      "ref": "TE36",
+      "net": "TOUCH_CLEAR_ALL",
+      "pad_diameter_mm": 4.4,
+      "pitch_mm": 5.8,
+      "default_action": "clear_working_configuration_to_HiZ",
+      "sch_pin_xy": [
+        152.4,
+        138.43
+      ],
+      "role": "system_command",
+      "hold_ms": 2000,
+      "preserves_saved_slots": true
     }
   ],
   "routing_complete": false,
-  "firmware_implemented": false
+  "firmware_implemented": false,
+  "user_touch_keys": 6,
+  "free_touch_keys": 0,
+  "key16_IRQ_disabled_required": true,
+  "global_command_touch_keys": 10
 }

@@ -1,11 +1,20 @@
 {
   "source_pixels": [
-    1067,
-    799
+    1254,
+    1254
   ],
+  "source_crop_pixels": [
+    214,
+    298,
+    839,
+    724
+  ],
+  "source": "/Users/andreapiccini/dev/spaghetti-lab-launch/logo_sfondo_bianco copia.png",
   "vector_polygons": 27,
-  "vertices": 1075,
+  "vertices": 1686,
   "pixel_rectangles": false,
   "blue_LED_count": 16,
+  "LED_angle_deg": 45,
+  "aspect_ratio_preserved": true,
   "optical_uniformity_measured": false
 }

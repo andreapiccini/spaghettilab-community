@@ -1787,4 +1787,6 @@
 
 (sheet(at 15.24 332.74)(size 114.3 10.16)(stroke(width .254)(type dash))(fill(color 0 0 0 0))(uuid "541ef39d-aa79-4655-ab48-ffa6ebe9126c")(property "Sheetname" "10 - Global touch commands"(at 15.24 330.2 0)(effects(font(size 1 1))(justify left)))(property "Sheetfile" "touch-global.kicad_sch"(at 15.24 345.44 0)(effects(font(size 1 1))(justify left)))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f"(page "10")))))
 (text "Global commands: U91, independent software I2C on GPIO21/GPIO13. No physical buttons.\nRow touch: U90,16keys on internal I2C. Current PCB is an unrouted design checkpoint."(at 149.86 336.55 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "7251c01c-e482-412d-8f42-747c298b10cc"))
+
+(sheet(at 15.24 360.68)(size 114.3 10.16)(stroke(width .254)(type dash))(fill(color 0 0 0 0))(uuid "8d534b26-0fc2-4582-9349-ed9582e126fb")(property "Sheetname" "11 - Blue logo,16 LEDs"(at 15.24 358.14 0)(effects(font(size 1 1))(justify left)))(property "Sheetfile" "logo16.kicad_sch"(at 15.24 373.38 0)(effects(font(size 1 1))(justify left)))(instances(project "backbone"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f"(page "11")))))
 )

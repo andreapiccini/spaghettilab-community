@@ -10,13 +10,13 @@
   "function_LEDs": 0,
   "unit_LEDs": 0,
   "total_new_LEDs": 0,
-  "total_driver_populated": 65,
+  "total_driver_populated": 77,
   "reserved_button_LEDs": 0,
   "total_driver_channels": 144,
-  "free_LED_channels": 79,
+  "free_LED_channels": 67,
   "display_package_envelope_mm": null,
   "display_window_mm": null,
-  "rowmode_pitch_mm": 4.0,
+  "rowmode_pitch_mm": 2.9,
   "ADC_rows": [
     "A1",
     "A2",
@@ -35,7 +35,7 @@
   "main_PCB_unchanged": true,
   "logo_center": [
     161.75,
-    74.5
+    76.8
   ],
   "button_input": null,
   "free_ESP_GPIO": [
@@ -61,13 +61,13 @@
   "mode_LED_x_mm": [
     [
       204.1,
-      207.1,
-      210.1
+      207.0,
+      209.9
     ],
     [
       166.4,
-      163.4,
-      160.4
+      163.5,
+      160.6
     ]
   ],
   "touch_controls": [
@@ -114,9 +114,9 @@
   },
   "driver_populated": 66,
   "physical_LEDs": 67,
-  "touch_zones": 16,
+  "touch_zones": 32,
   "row_touch_zones": 16,
-  "global_touch_zones": 9,
+  "global_touch_zones": 10,
   "proposed_touch_controller_count": 1,
   "proposed_I2C_selector_count": 0,
   "body_dimensions_mm": [
@@ -258,6 +258,30 @@
   "full_hierarchical_schematic_present": true,
   "simulated_UI_logic_implemented": true,
   "firmware_hardware_integration": false,
-  "total_physical_LEDs": 66,
-  "global_touch_controller_ref": "U91"
+  "total_physical_LEDs": 78,
+  "global_touch_controller_ref": "U91",
+  "user_touch_zones": 6,
+  "user_touch_labels": [
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6"
+  ],
+  "total_touch_inputs_used": 32,
+  "free_touch_inputs": 0,
+  "logo_LED_count": 16,
+  "logo_LED_angle_deg": 45,
+  "clear_all_touch": {
+    "controller": "U91",
+    "key": 16,
+    "pin": 14,
+    "ref": "TE36",
+    "net": "TOUCH_CLEAR_ALL",
+    "hold_ms": 2000,
+    "clears_working_configuration": true,
+    "preserves_saved_slots": true,
+    "firmware_implemented": false
+  }
 }

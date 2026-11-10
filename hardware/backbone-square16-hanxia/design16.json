@@ -5089,7 +5089,7 @@
         "2": "LABEL_CA1"
       },
       "uuid": "6a9984b4-a80d-49bf-a542-3f9ed0bd44f5",
-      "sheet": "ui-indicators.kicad_sch",
+      "sheet": "logo16.kicad_sch",
       "extras": {
         "Manufacturer": "XINGLIGHT",
         "MPN": "XL-3216UBC-FB",
@@ -5098,9 +5098,9 @@
         "Indicator": "LOGO1",
         "Row": "",
         "Colour": "blue",
-        "Function": "Logo blue1"
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
       },
-      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90/6a9984b4-a80d-49bf-a542-3f9ed0bd44f5",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/6a9984b4-a80d-49bf-a542-3f9ed0bd44f5",
       "symbol_units": {
         "1": "6a9984b4-a80d-49bf-a542-3f9ed0bd44f5"
       }
@@ -5114,7 +5114,7 @@
         "2": "LABEL_CA2"
       },
       "uuid": "003152d7-2931-479b-96d4-01d1011caca6",
-      "sheet": "ui-indicators.kicad_sch",
+      "sheet": "logo16.kicad_sch",
       "extras": {
         "Manufacturer": "XINGLIGHT",
         "MPN": "XL-3216UBC-FB",
@@ -5123,9 +5123,9 @@
         "Indicator": "LOGO2",
         "Row": "",
         "Colour": "blue",
-        "Function": "Logo blue2"
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
       },
-      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90/003152d7-2931-479b-96d4-01d1011caca6",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/003152d7-2931-479b-96d4-01d1011caca6",
       "symbol_units": {
         "1": "003152d7-2931-479b-96d4-01d1011caca6"
       }
@@ -5139,7 +5139,7 @@
         "2": "LABEL_CA3"
       },
       "uuid": "5e3e4539-ef0d-4550-85da-6328735e97c1",
-      "sheet": "ui-indicators.kicad_sch",
+      "sheet": "logo16.kicad_sch",
       "extras": {
         "Manufacturer": "XINGLIGHT",
         "MPN": "XL-3216UBC-FB",
@@ -5148,9 +5148,9 @@
         "Indicator": "LOGO3",
         "Row": "",
         "Colour": "blue",
-        "Function": "Logo blue3"
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
       },
-      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90/5e3e4539-ef0d-4550-85da-6328735e97c1",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/5e3e4539-ef0d-4550-85da-6328735e97c1",
       "symbol_units": {
         "1": "5e3e4539-ef0d-4550-85da-6328735e97c1"
       }
@@ -5164,7 +5164,7 @@
         "2": "LABEL_CA4"
       },
       "uuid": "ac0a318b-d8a3-4a04-945e-471e7814d751",
-      "sheet": "ui-indicators.kicad_sch",
+      "sheet": "logo16.kicad_sch",
       "extras": {
         "Manufacturer": "XINGLIGHT",
         "MPN": "XL-3216UBC-FB",
@@ -5173,9 +5173,9 @@
         "Indicator": "LOGO4",
         "Row": "",
         "Colour": "blue",
-        "Function": "Logo blue4"
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
       },
-      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90/ac0a318b-d8a3-4a04-945e-471e7814d751",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/ac0a318b-d8a3-4a04-945e-471e7814d751",
       "symbol_units": {
         "1": "ac0a318b-d8a3-4a04-945e-471e7814d751"
       }
@@ -6971,13 +6971,13 @@
         "5": "TOUCH_UI_SLOT2",
         "6": "TOUCH_UI_SLOT3",
         "7": "TOUCH_UI_SLOT4",
-        "8": null,
-        "9": null,
-        "10": null,
-        "11": null,
-        "12": null,
-        "13": null,
-        "14": null,
+        "8": "TOUCH_USER_T1",
+        "9": "TOUCH_USER_T2",
+        "10": "TOUCH_USER_T3",
+        "11": "TOUCH_USER_T4",
+        "12": "TOUCH_USER_T5",
+        "13": "TOUCH_USER_T6",
+        "14": "TOUCH_CLEAR_ALL",
         "15": "GND",
         "16": "3V3",
         "17": "UI_BANK_N",
@@ -7047,6 +7047,390 @@
       },
       "symbol_units": {
         "1": "b0e1edaf-b0ef-4dfc-8d10-3f6a9aa9920f"
+      }
+    },
+    "TE30": {
+      "value": "USER_TOUCH_T1",
+      "footprint": "SpaghettiLAB:UserTouch_4p4_Covered",
+      "lib_id": "SpaghettiLAB:TouchElectrode",
+      "uuid": "d1371ec6-5e12-4e8d-837b-a94f2855a01e",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/541ef39d-aa79-4655-ab48-ffa6ebe9126c/d1371ec6-5e12-4e8d-837b-a94f2855a01e",
+      "nets": {
+        "1": "TOUCH_USER_T1"
+      },
+      "extras": {},
+      "sheet": "touch-global.kicad_sch"
+    },
+    "TE31": {
+      "value": "USER_TOUCH_T2",
+      "footprint": "SpaghettiLAB:UserTouch_4p4_Covered",
+      "lib_id": "SpaghettiLAB:TouchElectrode",
+      "uuid": "782d7d49-0e33-4249-9d53-d8ed005eb819",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/541ef39d-aa79-4655-ab48-ffa6ebe9126c/782d7d49-0e33-4249-9d53-d8ed005eb819",
+      "nets": {
+        "1": "TOUCH_USER_T2"
+      },
+      "extras": {},
+      "sheet": "touch-global.kicad_sch"
+    },
+    "TE32": {
+      "value": "USER_TOUCH_T3",
+      "footprint": "SpaghettiLAB:UserTouch_4p4_Covered",
+      "lib_id": "SpaghettiLAB:TouchElectrode",
+      "uuid": "4a8d891a-3868-4962-ac14-78657180ca0c",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/541ef39d-aa79-4655-ab48-ffa6ebe9126c/4a8d891a-3868-4962-ac14-78657180ca0c",
+      "nets": {
+        "1": "TOUCH_USER_T3"
+      },
+      "extras": {},
+      "sheet": "touch-global.kicad_sch"
+    },
+    "TE33": {
+      "value": "USER_TOUCH_T4",
+      "footprint": "SpaghettiLAB:UserTouch_4p4_Covered",
+      "lib_id": "SpaghettiLAB:TouchElectrode",
+      "uuid": "b0f719ef-79cb-4cfa-bc6e-7525f74d9c50",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/541ef39d-aa79-4655-ab48-ffa6ebe9126c/b0f719ef-79cb-4cfa-bc6e-7525f74d9c50",
+      "nets": {
+        "1": "TOUCH_USER_T4"
+      },
+      "extras": {},
+      "sheet": "touch-global.kicad_sch"
+    },
+    "TE34": {
+      "value": "USER_TOUCH_T5",
+      "footprint": "SpaghettiLAB:UserTouch_4p4_Covered",
+      "lib_id": "SpaghettiLAB:TouchElectrode",
+      "uuid": "475f2097-56a5-4183-891a-944a290f5a33",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/541ef39d-aa79-4655-ab48-ffa6ebe9126c/475f2097-56a5-4183-891a-944a290f5a33",
+      "nets": {
+        "1": "TOUCH_USER_T5"
+      },
+      "extras": {},
+      "sheet": "touch-global.kicad_sch"
+    },
+    "TE35": {
+      "value": "USER_TOUCH_T6",
+      "footprint": "SpaghettiLAB:UserTouch_4p4_Covered",
+      "lib_id": "SpaghettiLAB:TouchElectrode",
+      "uuid": "589cfda5-577c-48c8-8be6-c843b2125a38",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/541ef39d-aa79-4655-ab48-ffa6ebe9126c/589cfda5-577c-48c8-8be6-c843b2125a38",
+      "nets": {
+        "1": "TOUCH_USER_T6"
+      },
+      "extras": {},
+      "sheet": "touch-global.kicad_sch"
+    },
+    "TE36": {
+      "value": "CLEAR_ALL_TOUCH",
+      "footprint": "SpaghettiLAB:UserTouch_4p4_Covered",
+      "lib_id": "SpaghettiLAB:TouchElectrode",
+      "uuid": "61a44661-9a64-406c-a0cd-2c69720eafab",
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/541ef39d-aa79-4655-ab48-ffa6ebe9126c/61a44661-9a64-406c-a0cd-2c69720eafab",
+      "nets": {
+        "1": "TOUCH_CLEAR_ALL"
+      },
+      "extras": {},
+      "sheet": "touch-global.kicad_sch"
+    },
+    "D720": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA1"
+      },
+      "uuid": "b2d2c351-0f01-4778-af5a-62f32798cef0",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO5",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/b2d2c351-0f01-4778-af5a-62f32798cef0",
+      "symbol_units": {
+        "1": "b2d2c351-0f01-4778-af5a-62f32798cef0"
+      }
+    },
+    "D721": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA2"
+      },
+      "uuid": "db91b158-04e3-422a-9d97-96dbfda7d2bc",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO6",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/db91b158-04e3-422a-9d97-96dbfda7d2bc",
+      "symbol_units": {
+        "1": "db91b158-04e3-422a-9d97-96dbfda7d2bc"
+      }
+    },
+    "D722": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA4"
+      },
+      "uuid": "ce071c54-74bd-4bbf-9c5f-bd27956c0ed8",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO7",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/ce071c54-74bd-4bbf-9c5f-bd27956c0ed8",
+      "symbol_units": {
+        "1": "ce071c54-74bd-4bbf-9c5f-bd27956c0ed8"
+      }
+    },
+    "D723": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA5"
+      },
+      "uuid": "dd1122bf-79fa-49c2-8b20-096dc9284260",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO8",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/dd1122bf-79fa-49c2-8b20-096dc9284260",
+      "symbol_units": {
+        "1": "dd1122bf-79fa-49c2-8b20-096dc9284260"
+      }
+    },
+    "D724": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA6"
+      },
+      "uuid": "3767be75-469c-4816-ac56-172c178547fa",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO9",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/3767be75-469c-4816-ac56-172c178547fa",
+      "symbol_units": {
+        "1": "3767be75-469c-4816-ac56-172c178547fa"
+      }
+    },
+    "D725": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA3",
+        "2": "LABEL_CA7"
+      },
+      "uuid": "eaf37b40-b159-4d2b-acd6-8b69d6397b7e",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO10",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/eaf37b40-b159-4d2b-acd6-8b69d6397b7e",
+      "symbol_units": {
+        "1": "eaf37b40-b159-4d2b-acd6-8b69d6397b7e"
+      }
+    },
+    "D726": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA1"
+      },
+      "uuid": "f3e45531-e34c-4e96-a5ff-ec2b11504e74",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO11",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/f3e45531-e34c-4e96-a5ff-ec2b11504e74",
+      "symbol_units": {
+        "1": "f3e45531-e34c-4e96-a5ff-ec2b11504e74"
+      }
+    },
+    "D727": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA2"
+      },
+      "uuid": "2b61fa5c-8141-456b-8a68-b191d3ef3d12",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO12",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/2b61fa5c-8141-456b-8a68-b191d3ef3d12",
+      "symbol_units": {
+        "1": "2b61fa5c-8141-456b-8a68-b191d3ef3d12"
+      }
+    },
+    "D728": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA3"
+      },
+      "uuid": "e811d119-59a2-44ea-b9bf-25e9e9336577",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO13",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/e811d119-59a2-44ea-b9bf-25e9e9336577",
+      "symbol_units": {
+        "1": "e811d119-59a2-44ea-b9bf-25e9e9336577"
+      }
+    },
+    "D729": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA5"
+      },
+      "uuid": "0186251a-2f22-413d-9dec-db0eb3c70cef",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO14",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/0186251a-2f22-413d-9dec-db0eb3c70cef",
+      "symbol_units": {
+        "1": "0186251a-2f22-413d-9dec-db0eb3c70cef"
+      }
+    },
+    "D730": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA6"
+      },
+      "uuid": "ce936230-4fee-414c-94fc-200e55c01de4",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO15",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/ce936230-4fee-414c-94fc-200e55c01de4",
+      "symbol_units": {
+        "1": "ce936230-4fee-414c-94fc-200e55c01de4"
+      }
+    },
+    "D731": {
+      "lib_id": "Board28:LED_Reverse_1206",
+      "value": "XL-3216UBC-FB",
+      "footprint": "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window",
+      "nets": {
+        "1": "LABEL_CA4",
+        "2": "LABEL_CA7"
+      },
+      "uuid": "ed22b3a7-9aca-4ffe-8662-271f80378f97",
+      "sheet": "logo16.kicad_sch",
+      "extras": {
+        "Manufacturer": "XINGLIGHT",
+        "MPN": "XL-3216UBC-FB",
+        "LCSC Part": "C3646941",
+        "Datasheet": "https://www.lcsc.com/datasheet/C3646941.pdf",
+        "Indicator": "LOGO16",
+        "Row": "",
+        "Colour": "blue",
+        "Function": "Blue logo emitter, uniform4x4distribution,45deg"
+      },
+      "path": "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/8d534b26-0fc2-4582-9349-ed9582e126fb/ed22b3a7-9aca-4ffe-8662-271f80378f97",
+      "symbol_units": {
+        "1": "ed22b3a7-9aca-4ffe-8662-271f80378f97"
       }
     }
   },

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <export version="E">
   <design>
-    <source>/Users/andreapiccini/dev/spaghettilab-community/hardware/backbone-square16-hanxia/backbone.kicad_sch</source>
-    <date>2026-11-10T00:21:43</date>
+    <source>/tmp/six-user-clear/backbone.kicad_sch</source>
+    <date>2026-11-10T00:59:03</date>
     <tool>Eeschema 10.0.3</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -168,11 +168,29 @@
     </sheet>
     <sheet number="10" name="/10 - Global touch commands/" tstamps="/541ef39d-aa79-4655-ab48-ffa6ebe9126c/">
       <title_block>
-        <title>10 - Global touch controls, dedicated software I2C</title>
+        <title>10 - Global and programmable user touch controls</title>
         <company/>
         <rev>16R-READABLE</rev>
         <date>2026-11-07</date>
         <source>touch-global.kicad_sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+    <sheet number="11" name="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/">
+      <title_block>
+        <title>11 - Blue logo,16 emitters on existing LED driver</title>
+        <company/>
+        <rev>16R-READABLE</rev>
+        <date>2026-11-07</date>
+        <source>logo16.kicad_sch</source>
         <comment number="1" value=""/>
         <comment number="2" value=""/>
         <comment number="3" value=""/>
@@ -6638,154 +6656,6 @@
         </unit>
       </units>
     </comp>
-    <comp ref="D516">
-      <value>XL-3216UBC-FB</value>
-      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
-      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
-      <fields>
-        <field name="Manufacturer">XINGLIGHT</field>
-        <field name="MPN">XL-3216UBC-FB</field>
-        <field name="LCSC Part">C3646941</field>
-        <field name="Indicator">LOGO1</field>
-        <field name="Row"/>
-        <field name="Colour">blue</field>
-        <field name="Function">Logo blue1</field>
-        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
-        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
-        <field name="Description"/>
-      </fields>
-      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
-      <property name="Manufacturer" value="XINGLIGHT"/>
-      <property name="MPN" value="XL-3216UBC-FB"/>
-      <property name="LCSC Part" value="C3646941"/>
-      <property name="Indicator" value="LOGO1"/>
-      <property name="Row" value=""/>
-      <property name="Colour" value="blue"/>
-      <property name="Function" value="Logo blue1"/>
-      <property name="Sheetname" value="08 - Selezione, comandi e logo"/>
-      <property name="Sheetfile" value="ui-indicators.kicad_sch"/>
-      <sheetpath names="/08 - Selezione, comandi e logo/" tstamps="/7f7216fe-1061-42c8-9cb0-15ceb64c3f90/"/>
-      <tstamps>6a9984b4-a80d-49bf-a542-3f9ed0bd44f5</tstamps>
-      <units>
-        <unit name="A">
-          <pins>
-            <pin num="2"/>
-            <pin num="1"/>
-          </pins>
-        </unit>
-      </units>
-    </comp>
-    <comp ref="D517">
-      <value>XL-3216UBC-FB</value>
-      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
-      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
-      <fields>
-        <field name="Manufacturer">XINGLIGHT</field>
-        <field name="MPN">XL-3216UBC-FB</field>
-        <field name="LCSC Part">C3646941</field>
-        <field name="Indicator">LOGO2</field>
-        <field name="Row"/>
-        <field name="Colour">blue</field>
-        <field name="Function">Logo blue2</field>
-        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
-        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
-        <field name="Description"/>
-      </fields>
-      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
-      <property name="Manufacturer" value="XINGLIGHT"/>
-      <property name="MPN" value="XL-3216UBC-FB"/>
-      <property name="LCSC Part" value="C3646941"/>
-      <property name="Indicator" value="LOGO2"/>
-      <property name="Row" value=""/>
-      <property name="Colour" value="blue"/>
-      <property name="Function" value="Logo blue2"/>
-      <property name="Sheetname" value="08 - Selezione, comandi e logo"/>
-      <property name="Sheetfile" value="ui-indicators.kicad_sch"/>
-      <sheetpath names="/08 - Selezione, comandi e logo/" tstamps="/7f7216fe-1061-42c8-9cb0-15ceb64c3f90/"/>
-      <tstamps>003152d7-2931-479b-96d4-01d1011caca6</tstamps>
-      <units>
-        <unit name="A">
-          <pins>
-            <pin num="2"/>
-            <pin num="1"/>
-          </pins>
-        </unit>
-      </units>
-    </comp>
-    <comp ref="D518">
-      <value>XL-3216UBC-FB</value>
-      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
-      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
-      <fields>
-        <field name="Manufacturer">XINGLIGHT</field>
-        <field name="MPN">XL-3216UBC-FB</field>
-        <field name="LCSC Part">C3646941</field>
-        <field name="Indicator">LOGO3</field>
-        <field name="Row"/>
-        <field name="Colour">blue</field>
-        <field name="Function">Logo blue3</field>
-        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
-        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
-        <field name="Description"/>
-      </fields>
-      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
-      <property name="Manufacturer" value="XINGLIGHT"/>
-      <property name="MPN" value="XL-3216UBC-FB"/>
-      <property name="LCSC Part" value="C3646941"/>
-      <property name="Indicator" value="LOGO3"/>
-      <property name="Row" value=""/>
-      <property name="Colour" value="blue"/>
-      <property name="Function" value="Logo blue3"/>
-      <property name="Sheetname" value="08 - Selezione, comandi e logo"/>
-      <property name="Sheetfile" value="ui-indicators.kicad_sch"/>
-      <sheetpath names="/08 - Selezione, comandi e logo/" tstamps="/7f7216fe-1061-42c8-9cb0-15ceb64c3f90/"/>
-      <tstamps>5e3e4539-ef0d-4550-85da-6328735e97c1</tstamps>
-      <units>
-        <unit name="A">
-          <pins>
-            <pin num="2"/>
-            <pin num="1"/>
-          </pins>
-        </unit>
-      </units>
-    </comp>
-    <comp ref="D519">
-      <value>XL-3216UBC-FB</value>
-      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
-      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
-      <fields>
-        <field name="Manufacturer">XINGLIGHT</field>
-        <field name="MPN">XL-3216UBC-FB</field>
-        <field name="LCSC Part">C3646941</field>
-        <field name="Indicator">LOGO4</field>
-        <field name="Row"/>
-        <field name="Colour">blue</field>
-        <field name="Function">Logo blue4</field>
-        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
-        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
-        <field name="Description"/>
-      </fields>
-      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
-      <property name="Manufacturer" value="XINGLIGHT"/>
-      <property name="MPN" value="XL-3216UBC-FB"/>
-      <property name="LCSC Part" value="C3646941"/>
-      <property name="Indicator" value="LOGO4"/>
-      <property name="Row" value=""/>
-      <property name="Colour" value="blue"/>
-      <property name="Function" value="Logo blue4"/>
-      <property name="Sheetname" value="08 - Selezione, comandi e logo"/>
-      <property name="Sheetfile" value="ui-indicators.kicad_sch"/>
-      <sheetpath names="/08 - Selezione, comandi e logo/" tstamps="/7f7216fe-1061-42c8-9cb0-15ceb64c3f90/"/>
-      <tstamps>ac0a318b-d8a3-4a04-945e-471e7814d751</tstamps>
-      <units>
-        <unit name="A">
-          <pins>
-            <pin num="2"/>
-            <pin num="1"/>
-          </pins>
-        </unit>
-      </units>
-    </comp>
     <comp ref="D520">
       <value>XL-3216UGC-FB</value>
       <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
@@ -7958,6 +7828,160 @@
         </unit>
       </units>
     </comp>
+    <comp ref="TE30">
+      <value>USER_TOUCH_T1</value>
+      <footprint>SpaghettiLAB:UserTouch_4p4_Covered</footprint>
+      <fields>
+        <field name="Footprint">SpaghettiLAB:UserTouch_4p4_Covered</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SpaghettiLAB" part="TouchElectrode" description=""/>
+      <property name="Sheetname" value="10 - Global touch commands"/>
+      <property name="Sheetfile" value="touch-global.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/10 - Global touch commands/" tstamps="/541ef39d-aa79-4655-ab48-ffa6ebe9126c/"/>
+      <tstamps>d1371ec6-5e12-4e8d-837b-a94f2855a01e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TE31">
+      <value>USER_TOUCH_T2</value>
+      <footprint>SpaghettiLAB:UserTouch_4p4_Covered</footprint>
+      <fields>
+        <field name="Footprint">SpaghettiLAB:UserTouch_4p4_Covered</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SpaghettiLAB" part="TouchElectrode" description=""/>
+      <property name="Sheetname" value="10 - Global touch commands"/>
+      <property name="Sheetfile" value="touch-global.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/10 - Global touch commands/" tstamps="/541ef39d-aa79-4655-ab48-ffa6ebe9126c/"/>
+      <tstamps>782d7d49-0e33-4249-9d53-d8ed005eb819</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TE32">
+      <value>USER_TOUCH_T3</value>
+      <footprint>SpaghettiLAB:UserTouch_4p4_Covered</footprint>
+      <fields>
+        <field name="Footprint">SpaghettiLAB:UserTouch_4p4_Covered</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SpaghettiLAB" part="TouchElectrode" description=""/>
+      <property name="Sheetname" value="10 - Global touch commands"/>
+      <property name="Sheetfile" value="touch-global.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/10 - Global touch commands/" tstamps="/541ef39d-aa79-4655-ab48-ffa6ebe9126c/"/>
+      <tstamps>4a8d891a-3868-4962-ac14-78657180ca0c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TE33">
+      <value>USER_TOUCH_T4</value>
+      <footprint>SpaghettiLAB:UserTouch_4p4_Covered</footprint>
+      <fields>
+        <field name="Footprint">SpaghettiLAB:UserTouch_4p4_Covered</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SpaghettiLAB" part="TouchElectrode" description=""/>
+      <property name="Sheetname" value="10 - Global touch commands"/>
+      <property name="Sheetfile" value="touch-global.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/10 - Global touch commands/" tstamps="/541ef39d-aa79-4655-ab48-ffa6ebe9126c/"/>
+      <tstamps>b0f719ef-79cb-4cfa-bc6e-7525f74d9c50</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TE34">
+      <value>USER_TOUCH_T5</value>
+      <footprint>SpaghettiLAB:UserTouch_4p4_Covered</footprint>
+      <fields>
+        <field name="Footprint">SpaghettiLAB:UserTouch_4p4_Covered</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SpaghettiLAB" part="TouchElectrode" description=""/>
+      <property name="Sheetname" value="10 - Global touch commands"/>
+      <property name="Sheetfile" value="touch-global.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/10 - Global touch commands/" tstamps="/541ef39d-aa79-4655-ab48-ffa6ebe9126c/"/>
+      <tstamps>475f2097-56a5-4183-891a-944a290f5a33</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TE35">
+      <value>USER_TOUCH_T6</value>
+      <footprint>SpaghettiLAB:UserTouch_4p4_Covered</footprint>
+      <fields>
+        <field name="Footprint">SpaghettiLAB:UserTouch_4p4_Covered</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SpaghettiLAB" part="TouchElectrode" description=""/>
+      <property name="Sheetname" value="10 - Global touch commands"/>
+      <property name="Sheetfile" value="touch-global.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/10 - Global touch commands/" tstamps="/541ef39d-aa79-4655-ab48-ffa6ebe9126c/"/>
+      <tstamps>589cfda5-577c-48c8-8be6-c843b2125a38</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TE36">
+      <value>CLEAR_ALL_TOUCH</value>
+      <footprint>SpaghettiLAB:UserTouch_4p4_Covered</footprint>
+      <fields>
+        <field name="Footprint">SpaghettiLAB:UserTouch_4p4_Covered</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SpaghettiLAB" part="TouchElectrode" description=""/>
+      <property name="Sheetname" value="10 - Global touch commands"/>
+      <property name="Sheetfile" value="touch-global.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/10 - Global touch commands/" tstamps="/541ef39d-aa79-4655-ab48-ffa6ebe9126c/"/>
+      <tstamps>61a44661-9a64-406c-a0cd-2c69720eafab</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
     <comp ref="U91">
       <value>BS8116A-3</value>
       <footprint>Package_SO:SSOP-20_3.9x8.7mm_P0.635mm</footprint>
@@ -7994,6 +8018,598 @@
             <pin num="17"/>
             <pin num="18"/>
             <pin num="15"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D516">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO1</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO1"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>6a9984b4-a80d-49bf-a542-3f9ed0bd44f5</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D517">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO2</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO2"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>003152d7-2931-479b-96d4-01d1011caca6</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D518">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO3</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO3"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>5e3e4539-ef0d-4550-85da-6328735e97c1</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D519">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO4</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO4"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>ac0a318b-d8a3-4a04-945e-471e7814d751</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D720">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO5</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO5"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>b2d2c351-0f01-4778-af5a-62f32798cef0</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D721">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO6</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO6"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>db91b158-04e3-422a-9d97-96dbfda7d2bc</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D722">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO7</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO7"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>ce071c54-74bd-4bbf-9c5f-bd27956c0ed8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D723">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO8</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO8"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>dd1122bf-79fa-49c2-8b20-096dc9284260</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D724">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO9</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO9"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>3767be75-469c-4816-ac56-172c178547fa</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D725">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO10</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO10"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>eaf37b40-b159-4d2b-acd6-8b69d6397b7e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D726">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO11</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO11"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>f3e45531-e34c-4e96-a5ff-ec2b11504e74</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D727">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO12</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO12"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>2b61fa5c-8141-456b-8a68-b191d3ef3d12</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D728">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO13</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO13"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>e811d119-59a2-44ea-b9bf-25e9e9336577</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D729">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO14</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO14"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>0186251a-2f22-413d-9dec-db0eb3c70cef</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D730">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO15</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO15"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>ce936230-4fee-414c-94fc-200e55c01de4</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D731">
+      <value>XL-3216UBC-FB</value>
+      <footprint>Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/C3646941.pdf</datasheet>
+      <fields>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="MPN">XL-3216UBC-FB</field>
+        <field name="LCSC Part">C3646941</field>
+        <field name="Indicator">LOGO16</field>
+        <field name="Row"/>
+        <field name="Colour">blue</field>
+        <field name="Function">Blue logo emitter, uniform4x4distribution,45deg</field>
+        <field name="Footprint">Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/C3646941.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Board28" part="LED_Reverse_1206" description=""/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="MPN" value="XL-3216UBC-FB"/>
+      <property name="LCSC Part" value="C3646941"/>
+      <property name="Indicator" value="LOGO16"/>
+      <property name="Row" value=""/>
+      <property name="Colour" value="blue"/>
+      <property name="Function" value="Blue logo emitter, uniform4x4distribution,45deg"/>
+      <property name="Sheetname" value="11 - Blue logo,16 LEDs"/>
+      <property name="Sheetfile" value="logo16.kicad_sch"/>
+      <sheetpath names="/11 - Blue logo,16 LEDs/" tstamps="/8d534b26-0fc2-4582-9349-ed9582e126fb/"/>
+      <tstamps>ed22b3a7-9aca-4ffe-8662-271f80378f97</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
           </pins>
         </unit>
       </units>
@@ -9234,6 +9850,8 @@
       <node ref="D424" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="D516" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="D702" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D720" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D726" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="U70" pin="21" pinfunction="CA1_21" pintype="bidirectional"/>
     </net>
     <net code="44" name="LABEL_CA2" class="Default">
@@ -9248,6 +9866,8 @@
       <node ref="D445" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="D517" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="D703" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D721" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D727" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="U70" pin="22" pinfunction="CA2_22" pintype="bidirectional"/>
     </net>
     <net code="45" name="LABEL_CA3" class="Default">
@@ -9256,6 +9876,13 @@
       <node ref="D518" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="D680" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="D681" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D720" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D721" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D722" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D723" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D724" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D725" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D728" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="U70" pin="23" pinfunction="CA3_23" pintype="bidirectional"/>
     </net>
     <net code="46" name="LABEL_CA4" class="Default">
@@ -9263,6 +9890,13 @@
       <node ref="D430" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="D519" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="D545" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D722" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D726" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D727" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D728" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D729" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D730" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D731" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="U70" pin="24" pinfunction="CA4_24" pintype="bidirectional"/>
     </net>
     <net code="47" name="LABEL_CA5" class="Default">
@@ -9274,6 +9908,8 @@
       <node ref="D519" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="D522" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="D546" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D723" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D729" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="U70" pin="25" pinfunction="CA5_25" pintype="bidirectional"/>
     </net>
     <net code="48" name="LABEL_CA6" class="Default">
@@ -9282,6 +9918,8 @@
       <node ref="D547" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="D700" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="D701" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D724" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D730" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="U70" pin="26" pinfunction="CA6_26" pintype="bidirectional"/>
     </net>
     <net code="49" name="LABEL_CA7" class="Default">
@@ -9292,6 +9930,8 @@
       <node ref="D547" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="D702" pin="1" pinfunction="K_1" pintype="passive"/>
       <node ref="D703" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D725" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="D731" pin="2" pinfunction="A_2" pintype="passive"/>
       <node ref="U70" pin="27" pinfunction="CA7_27" pintype="bidirectional"/>
     </net>
     <net code="50" name="LABEL_CA8" class="Default">
@@ -9954,126 +10594,133 @@
       <node ref="TE16" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U90" pin="14" pinfunction="KEY16/IRQ_14" pintype="input"/>
     </net>
-    <net code="159" name="TOUCH_UI_DEBUG" class="Default">
+    <net code="159" name="TOUCH_CLEAR_ALL" class="Default">
+      <node ref="TE36" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
+      <node ref="U91" pin="14" pinfunction="KEY16/IRQ_14" pintype="input"/>
+    </net>
+    <net code="160" name="TOUCH_UI_DEBUG" class="Default">
       <node ref="TE22" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="20" pinfunction="KEY2_20" pintype="input"/>
     </net>
-    <net code="160" name="TOUCH_UI_DELETE" class="Default">
+    <net code="161" name="TOUCH_UI_DELETE" class="Default">
       <node ref="TE25" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="3" pinfunction="KEY5_3" pintype="input"/>
     </net>
-    <net code="161" name="TOUCH_UI_LOAD" class="Default">
+    <net code="162" name="TOUCH_UI_LOAD" class="Default">
       <node ref="TE23" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="1" pinfunction="KEY3_1" pintype="input"/>
     </net>
-    <net code="162" name="TOUCH_UI_PLAY_PAUSE" class="Default">
+    <net code="163" name="TOUCH_UI_PLAY_PAUSE" class="Default">
       <node ref="TE21" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="19" pinfunction="KEY1_19" pintype="input"/>
     </net>
-    <net code="163" name="TOUCH_UI_SAVE" class="Default">
+    <net code="164" name="TOUCH_UI_SAVE" class="Default">
       <node ref="TE24" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="2" pinfunction="KEY4_2" pintype="input"/>
     </net>
-    <net code="164" name="TOUCH_UI_SLOT1" class="Default">
+    <net code="165" name="TOUCH_UI_SLOT1" class="Default">
       <node ref="TE26" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="4" pinfunction="KEY6_4" pintype="input"/>
     </net>
-    <net code="165" name="TOUCH_UI_SLOT2" class="Default">
+    <net code="166" name="TOUCH_UI_SLOT2" class="Default">
       <node ref="TE27" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="5" pinfunction="KEY7_5" pintype="input"/>
     </net>
-    <net code="166" name="TOUCH_UI_SLOT3" class="Default">
+    <net code="167" name="TOUCH_UI_SLOT3" class="Default">
       <node ref="TE28" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="6" pinfunction="KEY8_6" pintype="input"/>
     </net>
-    <net code="167" name="TOUCH_UI_SLOT4" class="Default">
+    <net code="168" name="TOUCH_UI_SLOT4" class="Default">
       <node ref="TE29" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
       <node ref="U91" pin="7" pinfunction="KEY9_7" pintype="input"/>
     </net>
-    <net code="168" name="UI_BANK_N" class="Default">
+    <net code="169" name="TOUCH_USER_T1" class="Default">
+      <node ref="TE30" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
+      <node ref="U91" pin="8" pinfunction="KEY10_8" pintype="input"/>
+    </net>
+    <net code="170" name="TOUCH_USER_T2" class="Default">
+      <node ref="TE31" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
+      <node ref="U91" pin="9" pinfunction="KEY11_9" pintype="input"/>
+    </net>
+    <net code="171" name="TOUCH_USER_T3" class="Default">
+      <node ref="TE32" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
+      <node ref="U91" pin="10" pinfunction="KEY12_10" pintype="input"/>
+    </net>
+    <net code="172" name="TOUCH_USER_T4" class="Default">
+      <node ref="TE33" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
+      <node ref="U91" pin="11" pinfunction="KEY13_11" pintype="input"/>
+    </net>
+    <net code="173" name="TOUCH_USER_T5" class="Default">
+      <node ref="TE34" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
+      <node ref="U91" pin="12" pinfunction="KEY14_12" pintype="input"/>
+    </net>
+    <net code="174" name="TOUCH_USER_T6" class="Default">
+      <node ref="TE35" pin="1" pinfunction="TOUCH_1" pintype="passive"/>
+      <node ref="U91" pin="13" pinfunction="KEY15_13" pintype="input"/>
+    </net>
+    <net code="175" name="UI_BANK_N" class="Default">
       <node ref="R921" pin="2" pintype="passive"/>
       <node ref="U1" pin="23" pinfunction="IO21_23" pintype="bidirectional"/>
       <node ref="U91" pin="17" pinfunction="SCL_17" pintype="bidirectional"/>
     </net>
-    <net code="169" name="USB_CC1" class="Default">
+    <net code="176" name="USB_CC1" class="Default">
       <node ref="R22" pin="1" pintype="passive"/>
       <node ref="U3" pin="A5" pinfunction="CC1_A5" pintype="unspecified"/>
     </net>
-    <net code="170" name="USB_CC2" class="Default">
+    <net code="177" name="USB_CC2" class="Default">
       <node ref="R27" pin="2" pintype="passive"/>
       <node ref="U3" pin="B5" pinfunction="CC2_B5" pintype="unspecified"/>
     </net>
-    <net code="171" name="USB_D+" class="Default">
+    <net code="178" name="USB_D+" class="Default">
       <node ref="R17" pin="1" pintype="passive"/>
       <node ref="U3" pin="A6" pinfunction="D+_A6" pintype="unspecified"/>
       <node ref="U3" pin="B6" pinfunction="D+_B6" pintype="unspecified"/>
     </net>
-    <net code="172" name="USB_D-" class="Default">
+    <net code="179" name="USB_D-" class="Default">
       <node ref="R18" pin="1" pintype="passive"/>
       <node ref="U3" pin="A7" pinfunction="D-_A7" pintype="unspecified"/>
       <node ref="U3" pin="B7" pinfunction="D-_B7" pintype="unspecified"/>
     </net>
-    <net code="173" name="USB_ESP_D+" class="USB_DIFF">
+    <net code="180" name="USB_ESP_D+" class="USB_DIFF">
       <node ref="R17" pin="2" pintype="passive"/>
       <node ref="U1" pin="14" pinfunction="USB_D+_14" pintype="bidirectional"/>
     </net>
-    <net code="174" name="USB_ESP_D-" class="USB_DIFF">
+    <net code="181" name="USB_ESP_D-" class="USB_DIFF">
       <node ref="R18" pin="2" pintype="passive"/>
       <node ref="U1" pin="13" pinfunction="USB_D-_13" pintype="bidirectional"/>
     </net>
-    <net code="175" name="USB_VBUS_PRESENT" class="USB_DIFF">
+    <net code="182" name="USB_VBUS_PRESENT" class="USB_DIFF">
       <node ref="C299" pin="1" pintype="passive"/>
       <node ref="R110" pin="2" pintype="passive"/>
       <node ref="R111" pin="1" pintype="passive"/>
       <node ref="U1" pin="22" pinfunction="IO14_22" pintype="bidirectional"/>
     </net>
-    <net code="176" name="VBUS" class="Default">
+    <net code="183" name="VBUS" class="Default">
       <node ref="D6" pin="1" pinfunction="A_1" pintype="unspecified"/>
       <node ref="R110" pin="1" pintype="passive"/>
       <node ref="U3" pin="A4B9" pinfunction="VBUS_A4B9" pintype="unspecified"/>
       <node ref="U3" pin="B4A9" pinfunction="VBUS_B4A9" pintype="unspecified"/>
     </net>
-    <net code="177" name="unconnected-(U2-VREF-Pad5)" class="Default">
+    <net code="184" name="unconnected-(U2-VREF-Pad5)" class="Default">
       <node ref="U2" pin="5" pinfunction="VREF_5" pintype="unspecified+no_connect"/>
     </net>
-    <net code="178" name="unconnected-(U3-SBU1-PadA8)" class="Default">
+    <net code="185" name="unconnected-(U3-SBU1-PadA8)" class="Default">
       <node ref="U3" pin="A8" pinfunction="SBU1_A8" pintype="unspecified+no_connect"/>
     </net>
-    <net code="179" name="unconnected-(U3-SBU2-PadB8)" class="Default">
+    <net code="186" name="unconnected-(U3-SBU2-PadB8)" class="Default">
       <node ref="U3" pin="B8" pinfunction="SBU2_B8" pintype="unspecified+no_connect"/>
     </net>
-    <net code="180" name="unconnected-(U40-INT_N-Pad22)" class="Default">
+    <net code="187" name="unconnected-(U40-INT_N-Pad22)" class="Default">
       <node ref="U40" pin="22" pinfunction="INT_N_22" pintype="open_collector+no_connect"/>
     </net>
-    <net code="181" name="unconnected-(U41-INT_N-Pad22)" class="Default">
+    <net code="188" name="unconnected-(U41-INT_N-Pad22)" class="Default">
       <node ref="U41" pin="22" pinfunction="INT_N_22" pintype="open_collector+no_connect"/>
     </net>
-    <net code="182" name="unconnected-(U42-INT_N-Pad22)" class="Default">
+    <net code="189" name="unconnected-(U42-INT_N-Pad22)" class="Default">
       <node ref="U42" pin="22" pinfunction="INT_N_22" pintype="open_collector+no_connect"/>
     </net>
-    <net code="183" name="unconnected-(U70-~{INTB}-Pad4)" class="Default">
+    <net code="190" name="unconnected-(U70-~{INTB}-Pad4)" class="Default">
       <node ref="U70" pin="4" pinfunction="~{INTB}_4" pintype="open_collector+no_connect"/>
-    </net>
-    <net code="184" name="unconnected-(U91-KEY10-Pad8)" class="Default">
-      <node ref="U91" pin="8" pinfunction="KEY10_8" pintype="input+no_connect"/>
-    </net>
-    <net code="185" name="unconnected-(U91-KEY11-Pad9)" class="Default">
-      <node ref="U91" pin="9" pinfunction="KEY11_9" pintype="input+no_connect"/>
-    </net>
-    <net code="186" name="unconnected-(U91-KEY12-Pad10)" class="Default">
-      <node ref="U91" pin="10" pinfunction="KEY12_10" pintype="input+no_connect"/>
-    </net>
-    <net code="187" name="unconnected-(U91-KEY13-Pad11)" class="Default">
-      <node ref="U91" pin="11" pinfunction="KEY13_11" pintype="input+no_connect"/>
-    </net>
-    <net code="188" name="unconnected-(U91-KEY14-Pad12)" class="Default">
-      <node ref="U91" pin="12" pinfunction="KEY14_12" pintype="input+no_connect"/>
-    </net>
-    <net code="189" name="unconnected-(U91-KEY15-Pad13)" class="Default">
-      <node ref="U91" pin="13" pinfunction="KEY15_13" pintype="input+no_connect"/>
-    </net>
-    <net code="190" name="unconnected-(U91-KEY16/IRQ-Pad14)" class="Default">
-      <node ref="U91" pin="14" pinfunction="KEY16/IRQ_14" pintype="input+no_connect"/>
     </net>
   </nets>
 </export>

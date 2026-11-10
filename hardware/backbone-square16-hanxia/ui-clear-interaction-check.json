@@ -1,0 +1,9 @@
+{
+  "environment": "browser UI simulation only, not hardware or firmware",
+  "user_touch_count": 6,
+  "short_clear_does_not_modify_working_configuration": true,
+  "held_clear_2seconds_sets_all16_rows_to_HiZ": true,
+  "held_clear_stops_execution": true,
+  "saved_slot_preserved": true,
+  "result": "pass"
+}
