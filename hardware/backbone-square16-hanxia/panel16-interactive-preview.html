@@ -1,0 +1,184 @@
+<div id="breadboard-ui">
+<style>
+#breadboard-ui .pcb{--pcb:light-dark(#e2eee7,#14352b);--ink:light-dark(#18392c,#e2efe7);--dim:light-dark(#536e60,#8aa79a);--off:light-dark(#bfcec4,#35584a);--lit:light-dark(#006d49,#76ffd1);background:var(--pcb);color:var(--ink);padding:22px 16px;border-radius:24px;font:14px system-ui,sans-serif}
+#breadboard-ui .board-title{text-align:center;letter-spacing:2px;margin:4px 0 20px;font-weight:600}
+#breadboard-ui .top-controls{display:flex;justify-content:space-between;gap:20px;margin:0 0 20px}
+#breadboard-ui .top-touch{min-width:110px;min-height:64px;padding:10px 16px;border:1px solid var(--dim);border-radius:18px;background:transparent;color:var(--ink);font:13px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+#breadboard-ui .top-touch[aria-pressed="true"]{color:var(--lit);border-color:var(--lit);background:color-mix(in srgb,var(--lit) 12%,transparent)}
+#breadboard-ui .banks{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+#breadboard-ui .bank-title{text-align:center;margin-bottom:8px}
+#breadboard-ui .row{display:grid;grid-template-columns:38px 48px 1fr;align-items:center;gap:5px;min-height:28px}
+#breadboard-ui .selected{background:color-mix(in srgb,var(--lit) 17%,transparent);border-radius:5px}
+#breadboard-ui .holes{display:flex;justify-content:space-between}
+#breadboard-ui .hole{width:7px;height:7px;background:var(--ink);border:2px solid var(--dim);border-radius:50%}
+#breadboard-ui .indicators{display:flex;justify-content:space-around;gap:3px;font-size:11px}
+#breadboard-ui .indicator{color:var(--dim);white-space:nowrap}
+#breadboard-ui .indicator.on{color:var(--lit);text-shadow:0 0 5px color-mix(in srgb,var(--lit) 45%,transparent);font-weight:700}
+#breadboard-ui .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--off)}
+#breadboard-ui .on .dot{background:var(--lit);box-shadow:0 0 5px var(--lit)}
+#breadboard-ui .page-lights{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:22px 0 14px;font-size:12px}
+#breadboard-ui .page-light{color:var(--dim)}#breadboard-ui .page-light.active{color:var(--lit)}
+#breadboard-ui .keys{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+#breadboard-ui .key{background:transparent;border:1px solid var(--dim);color:var(--ink);border-radius:9px;min-height:96px;padding:6px 2px;touch-action:none;user-select:none;font:12px system-ui,sans-serif}
+#breadboard-ui .key:active{background:color-mix(in srgb,var(--lit) 15%,transparent)}
+#breadboard-ui .legend{display:block;line-height:20px;color:var(--dim)}#breadboard-ui .legend.active{color:var(--lit);font-weight:700;text-shadow:0 0 5px color-mix(in srgb,var(--lit) 35%,transparent)}
+#breadboard-ui .status{margin-top:17px;min-height:40px;text-align:center;color:var(--ink);font-size:13px}
+#breadboard-ui .page-label{margin-top:12px;text-align:center;font-size:12px;color:var(--dim)}
+#breadboard-ui .dot-legend{display:flex;justify-content:center;gap:18px;font-size:12px;margin:12px 0;color:var(--dim);min-height:18px}
+@media(max-width:540px){#breadboard-ui .banks{grid-template-columns:1fr;gap:12px}#breadboard-ui .keys{grid-template-columns:repeat(4,minmax(0,1fr))}#breadboard-ui .pcb{padding:14px 10px}#breadboard-ui .row{grid-template-columns:42px 70px 1fr}#breadboard-ui .indicators{font-size:12px}}
+
+#breadboard-ui .apply-lamp{align-self:center;color:var(--dim);font-size:13px;white-space:nowrap}
+#breadboard-ui .apply-lamp.on{color:var(--lit);font-weight:700}
+#breadboard-ui .changed{animation:pending-flash 1.2s steps(1,end) infinite}
+@keyframes pending-flash{0%,100%{opacity:1}50%{opacity:.2}}
+@media(prefers-reduced-motion:reduce){#breadboard-ui .changed{animation:none;text-decoration:underline double}}
+#breadboard-ui .key{min-height:120px;font-size:11px}
+#breadboard-ui .top-controls{gap:6px;flex-wrap:wrap}
+#breadboard-ui .top-touch{min-width:100px;padding:8px}
+#breadboard-ui .state-summary{text-align:center;font-size:12px;color:var(--dim);margin:10px 0}
+#breadboard-ui .indicator.hiz{font-size:10px}
+
+#breadboard-ui .lock-row{text-align:center;margin:-6px 0 14px}
+#breadboard-ui .lock-key{font:12px system-ui;color:var(--ink);background:transparent;border:1px solid var(--dim);border-radius:20px;min-height:44px;padding:6px 16px;touch-action:none;user-select:none}
+#breadboard-ui .lock-key[aria-pressed="true"]{color:var(--lit);border-color:var(--lit)}
+#breadboard-ui .page-light{font:12px system-ui;background:transparent;border:0;border-bottom:2px solid transparent;padding:10px 4px;min-height:44px}
+#breadboard-ui .page-light.active{border-bottom-color:var(--lit)}
+#breadboard-ui button:disabled{opacity:.45}
+
+#breadboard-ui .row{grid-template-columns:58px 48px 1fr}
+#breadboard-ui .row-id{display:flex;align-items:center;justify-content:space-between;padding-right:5px}
+#breadboard-ui .selection-led{display:inline-block;font-size:19px;line-height:24px;color:var(--off);opacity:.45;text-shadow:none}
+#breadboard-ui .selection-led.lit{color:light-dark(#008149,#9affca);opacity:1;text-shadow:0 0 3px light-dark(#36c780,#8affbd),0 0 9px light-dark(#45da8c,#55ff9a);filter:drop-shadow(0 0 2px light-dark(#7cdeb0,#66ffaa))}
+@media(max-width:540px){#breadboard-ui .row{grid-template-columns:58px 70px 1fr}}
+#breadboard-ui .pcb{--pcb:#103d36;--ink:#edf2e9;--dim:#93aaa1;--off:#3b5b50;--lit:#83e8ff;background:var(--pcb);color:var(--ink);border:3px solid #638479;border-radius:22px;padding:22px 18px;box-shadow:inset 0 0 0 2px #1c5247}
+#breadboard-ui .board-title{font-size:17px;letter-spacing:4px;color:var(--ink)}
+#breadboard-ui .banks{gap:28px;position:relative;padding:14px 8px;border-top:1px solid #d6e4da;border-bottom:1px solid #d6e4da}
+#breadboard-ui .banks:after{content:'';position:absolute;left:50%;top:40px;bottom:12px;width:8px;background:#09261f;border-radius:4px;transform:translateX(-50%)}
+#breadboard-ui .bank-title{letter-spacing:3px;font-size:13px}
+#breadboard-ui .row{min-height:32px;grid-template-columns:57px 66px 1fr;gap:7px}
+#breadboard-ui .holes{background:#dce3d7;padding:8px 5px;border-left:1px solid #fff;border-right:1px solid #fff}
+#breadboard-ui .hole{border-radius:2px;width:7px;height:7px;background:#0b1713;border:1px solid #6e7d71;box-shadow:inset 0 1px 2px #000}
+#breadboard-ui .selected{background:transparent}
+#breadboard-ui .selection-led.lit{color:var(--led-selection);text-shadow:0 0 7px var(--led-selection);filter:none}
+#breadboard-ui .indicator.on{color:var(--row-light,var(--led-controls));text-shadow:0 0 7px var(--row-light,var(--led-controls))}
+#breadboard-ui .indicator[data-mode="3.3 V"]{--row-light:var(--led-power)}
+#breadboard-ui .indicator[data-mode="GND"]{--row-light:var(--led-ground)}
+#breadboard-ui .indicator[data-mode="MCU"]{--row-light:var(--led-mcu)}
+#breadboard-ui .indicator:not(.on){color:#708e80}
+#breadboard-ui .top-touch,#breadboard-ui .lock-key{flex-direction:column;display:flex;align-items:center;justify-content:center;gap:9px;color:var(--ink);border:1px solid #b0c6b8;background:transparent;border-radius:50%;width:86px;height:86px;min-width:0;padding:8px;box-sizing:border-box;font-size:11px}
+#breadboard-ui .top-touch[aria-pressed="true"],#breadboard-ui .lock-key[aria-pressed="true"]{color:var(--ink);border-color:#b0c6b8;background:transparent}
+#breadboard-ui .top-touch svg,#breadboard-ui .lock-key svg{color:#557465;filter:none}
+#breadboard-ui [data-top="play"][aria-pressed="true"] svg{color:var(--led-selection);filter:drop-shadow(0 0 5px var(--led-selection))}
+#breadboard-ui [data-top="debug"][aria-pressed="true"] svg{color:var(--led-mcu);filter:drop-shadow(0 0 5px var(--led-mcu))}
+#breadboard-ui .lock-key[aria-pressed="true"] svg{color:var(--led-power);filter:drop-shadow(0 0 5px var(--led-power))}
+#breadboard-ui .lock-row{display:flex;justify-content:center;margin:-72px 0 18px;pointer-events:none}
+#breadboard-ui .lock-key{width:63px;height:63px;pointer-events:auto}
+#breadboard-ui .apply-lamp{margin-top:80px;color:#668777}#breadboard-ui .apply-lamp.on{color:var(--led-power);text-shadow:0 0 5px var(--led-power)}
+#breadboard-ui .top-controls{margin-bottom:16px;align-items:flex-start;flex-wrap:nowrap}
+#breadboard-ui .page-lights{gap:9px;margin:18px 0 14px}
+#breadboard-ui .page-light,#breadboard-ui .page-light.active{color:var(--ink);border:1px solid #8fa99a;border-radius:7px;font-size:11px;min-width:65px}
+#breadboard-ui .page-dot{display:block;color:#486b5b;margin-bottom:4px}
+#breadboard-ui .page-light.active .page-dot{color:var(--led-controls);text-shadow:0 0 6px var(--led-controls)}
+#breadboard-ui .key{border-color:#a9c0b3;border-radius:12px;background:#0c3029;min-height:124px}
+#breadboard-ui .legend{color:#718d7f;font-size:10px}
+#breadboard-ui .legend.active{color:var(--led-controls);text-shadow:0 0 5px var(--led-controls)}
+#breadboard-ui .page-label{color:var(--ink);font-size:10px;letter-spacing:1px}
+#breadboard-ui .status,#breadboard-ui .state-summary{color:light-dark(#18392c,#deebe4);font:13px system-ui;margin:12px 0;text-align:center}
+@media(max-width:600px){#breadboard-ui .banks{grid-template-columns:1fr}#breadboard-ui .banks:after{display:none}#breadboard-ui .row{grid-template-columns:57px 75px 1fr}#breadboard-ui .keys{grid-template-columns:repeat(4,minmax(0,1fr))}#breadboard-ui .legend{font-size:11px}}
+#breadboard-ui .lock-row{display:none}
+#breadboard-ui .top-controls{position:relative;align-items:center;padding-bottom:30px;gap:8px}
+#breadboard-ui .apply-lamp{position:absolute;bottom:0;left:50%;transform:translateX(-50%);margin:0}
+#breadboard-ui .stop-key svg{color:#ff6a65;fill:currentColor;filter:drop-shadow(0 0 5px #ff6a65)}
+#breadboard-ui .touch-locked button:disabled{opacity:1}
+#breadboard-ui .touch-locked .top-touch[data-top] svg{color:#557465;filter:none}
+#breadboard-ui .touch-locked .key{animation:none}
+#breadboard-ui .top-controls{flex-wrap:wrap;justify-content:space-around}
+#breadboard-ui .top-touch,#breadboard-ui .lock-key{width:72px;height:72px;flex:0 0 72px}
+@media(max-width:390px){#breadboard-ui .top-touch,#breadboard-ui .lock-key{width:56px;height:64px;flex:0 0 56px;padding:3px;font-size:10px}#breadboard-ui .top-controls{gap:2px}}
+
+</style>
+<div aria-label="Breadboard control panel preview">
+<div class="pcb" data-style="words"></div>
+</div>
+<script>
+(function(){
+const root=document.getElementById('breadboard-ui');
+const labels=[['A/B','↑','↓','3.3 V','GND','MCU','Hi-Z'],['LOAD','SAVE','DELETE','1','2','3','4'],['YES','SELECT ALL','CLEAR ALL','UNDO','REVERT','BACK','NO'],['U1','U2','U3','U4','U5','U6','U7'],['U8','U9','U10','U11','U12','U13','U14']];
+const names=['ROWS','CONFIG','SYSTEM','USER A','USER B'];
+const initial=['3.3 V','GND','MCU','Hi-Z','MCU','GND','3.3 V','Hi-Z','GND','MCU','3.3 V','Hi-Z','MCU','GND','MCU','Hi-Z'];
+let state={page:0,bank:1,row:6,draft:initial.slice(),applied:initial.slice(),playing:true,debug:false,locked:false,all:true,pending:false,slots:[null,null,null,null],op:null};
+let history=[],message='';
+function restore(v){if(v&&v.version===2&&Array.isArray(v.draft)&&v.draft.length===16&&Array.isArray(v.applied)&&v.applied.length===16)state={...state,...v};}
+restore(window.openai?.widgetState?.modelContent);
+function save(){window.openai?.setWidgetState?.({modelContent:{...state,version:2}})?.catch(()=>{});}
+const p=root.querySelector('.pcb');
+const palette={selection:'#70ffab',power:'#ffc65c',ground:'#65baff',mcu:'#cf9bff',controls:'#e3fff6'};
+function paint(){Object.entries(palette).forEach(([k,v])=>p.style.setProperty('--led-'+k,v));}
+paint();
+p.setAttribute('aria-label','Breadboard LED colours');
+if(globalThis.Tweak){const tweak=new Tweak({container:p,onChange:paint});[['selection','Selection / Play'],['power','3.3 V / Lock / Apply'],['ground','GND'],['mcu','MCU / Debug'],['controls','Pages / Key legends']].forEach(([k,label])=>tweak.addColorPicker(palette,k,{label}));}
+
+p.innerHTML='<div class="board-title">SPAGHETTI LAB</div><div class="top-controls"><button type="button" class="top-touch cursor-interaction" data-top="play"><i data-lucide="play-pause" aria-hidden="true"></i><span>PLAY / PAUSE</span></button><span class="apply-lamp">○ APPLY?</span><button type="button" class="top-touch cursor-interaction" data-top="debug"><i data-lucide="bug" aria-hidden="true"></i><span>DEBUG</span></button></div><div class="lock-row"><button type="button" class="lock-key cursor-interaction"><i data-lucide="lock-keyhole" aria-hidden="true"></i><span>LOCK</span></button></div><div class="banks"></div><div class="state-summary"></div><div class="page-lights"></div><div class="keys"></div><div class="page-label">TOUCH PAGE TO SELECT · HOLD LOCK 2 s TO UNLOCK</div><div class="status" aria-live="polite"></div>';
+for(let i=0;i<7;i++){const b=document.createElement('button');b.type='button';b.className='key cursor-interaction';b.dataset.key=i;labels.forEach((a,j)=>{let l=document.createElement('span');l.className='legend';l.dataset.page=j;l.textContent=a[i];b.append(l);});p.querySelector('.keys').append(b);}
+p.querySelector('.top-controls').insertBefore(p.querySelector('.lock-key'),p.querySelector('.apply-lamp'));
+const stopButton=document.createElement('button');
+stopButton.type='button';stopButton.className='top-touch stop-key cursor-interaction';
+stopButton.setAttribute('aria-label','STOP: disconnect every row');
+const stopIcon=document.createElement('i');stopIcon.dataset.lucide='square';stopIcon.setAttribute('aria-hidden','true');
+const stopText=document.createElement('span');stopText.textContent='STOP';stopButton.append(stopIcon,stopText);
+p.querySelector('.top-controls').insertBefore(stopButton,p.querySelector('.apply-lamp'));
+stopButton.addEventListener('click',stop);
+root.append(root.querySelector('.state-summary'),root.querySelector('.status'));
+function dirty(){return state.draft.filter((m,i)=>m!==state.applied[i]).length;}
+function edit(fn){history.push(state.draft.slice());fn();if(state.pending){state.pending=false;message='Draft updated: press PLAY / PAUSE to request APPLY';}}
+function finish(){render();save();}
+function render(){p.classList.toggle('touch-locked',state.locked);let html='';for(let b=0;b<2;b++){html+=`<div><div class="bank-title">BANK ${b?'B':'A'}</div>`;for(let r=0;r<8;r++){const i=b*8+r,selected=state.all||(b===state.bank&&r===state.row),changed=state.draft[i]!==state.applied[i];html+=`<div class="row ${selected?'selected':''}"><span class="row-id">${b?'B':'A'}${r+1}<span class="selection-led ${selected?'lit':''}" role="img" aria-label="${selected?'Selected row':'Unselected row'}">◀</span></span><span class="holes">${'<i class="hole"></i>'.repeat(4)}</span><span class="indicators">`;
+['3.3 V','GND','MCU'].forEach(m=>html+=`<span data-mode="${m}" class="indicator ${state.draft[i]===m?'on':''} ${changed&&!state.pending&&state.draft[i]===m?'changed':''}">${m}</span>`);
+if(state.draft[i]==='Hi-Z')html+=`<span class="indicator hiz on ${changed&&!state.pending?'changed':''}">Hi-Z</span>`;
+html+='</span></div>'; }html+='</div>';}
+p.querySelector('.banks').innerHTML=html;
+p.querySelector('[data-top="play"]').setAttribute('aria-pressed',String(state.playing&&!state.locked));p.querySelector('[data-top="debug"]').setAttribute('aria-pressed',String(state.debug&&!state.locked));
+p.querySelector('.apply-lamp').classList.toggle('on',state.pending&&!state.locked);p.querySelector('.apply-lamp').textContent=(state.pending?'●':'○')+' APPLY?';
+p.querySelector('.page-lights').innerHTML=names.map((name,i)=>`<button type="button" class="page-light cursor-interaction ${state.page===i&&!state.locked?'active':''}" data-page="${i}" ${state.locked||state.pending?'disabled':''}><span class="page-dot">●</span>${name}</button>`).join('');
+p.querySelectorAll('.legend').forEach(l=>l.classList.toggle('active',!state.locked&&Number(l.dataset.page)===state.page&&(!state.pending||l.textContent==='YES'||l.textContent==='NO')));
+p.querySelectorAll('.key').forEach(k=>{const i=Number(k.dataset.key);k.setAttribute('aria-label',labels[state.page][i]);k.disabled=state.locked||(state.pending&&i!==0&&i!==6);k.classList.toggle('changed',state.pending&&!state.locked&&(i===0||i===6));});
+root.querySelector('.state-summary').textContent=`${state.playing?'RUN':'PAUSE'}${state.debug?' · DEBUG':''} · ${dirty()} modified rows · outputs ${state.applied.every(x=>x==='Hi-Z')?'ALL Hi-Z':'configured'} · selection ${state.all?'ALL':(state.bank?'B':'A')+(state.row+1)}`;
+p.querySelector('.lock-key').setAttribute('aria-pressed',String(state.locked));p.querySelectorAll('[data-top]').forEach(b=>b.disabled=state.locked||state.pending);root.querySelector('.status').textContent=state.locked?message||'Touch locked · only LOCK and STOP enabled':message||(state.pending?'APPLY? · YES applies and runs; NO keeps the draft':'Blinking = pending change · steady = confirmed setting');
+if(globalThis.lucide)lucide.createIcons({attrs:{width:18,height:18}});
+}
+function stop(){
+state.applied=Array(16).fill('Hi-Z');state.playing=false;state.pending=false;state.op=null;
+history=[];message='STOP · all rows Hi-Z · configuration retained · PLAY requests APPLY';finish();
+}
+function play(){if(state.locked)return;message='';if(state.pending){message='Confirm with YES or cancel with NO';}
+else if(dirty()){state.pending=true;state.page=2;state.op=null;}
+else {state.playing=!state.playing;message=state.playing?'Running':'Paused';}finish();}
+p.querySelector('[data-top="play"]').addEventListener('click',play);
+p.querySelector('[data-top="debug"]').addEventListener('click',()=>{if(state.locked||state.pending)return;state.debug=!state.debug;message=state.debug?'Debug enabled (simulation)':'Debug disabled';finish();});
+function action(i){if(state.locked||(state.pending&&(state.page!==2||(i!==0&&i!==6))))return;message='';const s=state;
+if(s.page===0){if(i===0){s.bank=1-s.bank;s.all=false;}else if(i===1||i===2){s.row=(s.row+(i===1?7:1))%8;s.all=false;}else edit(()=>{if(s.all)s.draft.fill(labels[0][i]);else s.draft[s.bank*8+s.row]=labels[0][i];});}
+else if(s.page===1){if(i<3){s.op=['LOAD','SAVE','DELETE'][i];message=s.op+' · select slot 1–4';}else{const n=i-3;if(!s.op)message='Choose LOAD, SAVE or DELETE first';else if(s.op==='SAVE'){s.slots[n]=s.draft.slice();message='Draft saved in slot '+(n+1)+'; not applied';s.op=null;}else if(s.op==='LOAD'){if(s.slots[n]){edit(()=>s.draft=s.slots[n].slice());message='Slot '+(n+1)+' loaded into draft; press PLAY / PAUSE to apply';}else message='Empty slot';s.op=null;}else{s.slots[n]=null;message='Slot '+(n+1)+' deleted in simulation';s.op=null;}}}
+else if(s.page===2){
+if(i===0){if(s.pending){s.applied=s.draft.slice();s.pending=false;s.playing=true;history=[];s.page=0;message='Configuration applied · running';}else message='No pending APPLY request';}
+if(i===6){s.pending=false;s.page=0;message='Request cancelled · draft retained';}
+if(i===1){s.all=true;s.page=0;s.pending=false;message='All 16 rows selected · choose a mode';}
+if(i===2){s.draft.fill('Hi-Z');s.applied.fill('Hi-Z');s.pending=false;s.playing=false;s.all=false;history=[];message='CLEAR ALL · all rows disconnected immediately';}
+if(i===3){if(history.length){s.draft=history.pop();s.pending=false;message='Last draft edit undone';}else message='Nothing to undo';}
+if(i===4){s.draft=s.applied.slice();s.pending=false;history=[];message='Draft reverted to applied configuration';}
+if(i===5){s.page=0;s.pending=false;message='Back to rows · draft retained';}
+}else message=labels[s.page][i]+' · user function not assigned';finish();}
+p.querySelectorAll('.key').forEach(b=>b.addEventListener('click',()=>action(Number(b.dataset.key))));
+p.querySelector('.page-lights').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(!b||state.locked||state.pending)return;state.page=Number(b.dataset.page);state.op=null;message='';finish();});
+const lock=p.querySelector('.lock-key');let timer=null,suppress=false;
+function stopUnlock(){clearTimeout(timer);timer=null;}
+function startUnlock(){if(!state.locked)return;stopUnlock();timer=setTimeout(()=>{state.locked=false;suppress=true;message='Touch unlocked';finish();},2000);}
+lock.addEventListener('pointerdown',e=>{lock.setPointerCapture(e.pointerId);startUnlock();});
+lock.addEventListener('pointerup',stopUnlock);lock.addEventListener('pointercancel',stopUnlock);lock.addEventListener('blur',stopUnlock);
+lock.addEventListener('click',()=>{if(suppress){suppress=false;return;}if(!state.locked){state.locked=true;message='';finish();}});
+lock.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();if(!e.repeat){if(state.locked)startUnlock();else{state.locked=true;suppress=true;finish();}}}});
+lock.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();stopUnlock();suppress=false;}});
+
+window.addEventListener('openai:set_globals',e=>{restore(e.detail?.globals?.widgetState?.modelContent);render();});render();
+})();
+</script>
+</div>

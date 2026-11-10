@@ -1,3 +1,33 @@
+# Revisione attuale PANEL16 / FFC60 — 10 novembre 2026
+
+Schema e PCB aggiornati:78×78mm,16touch su U91,STOP/LOCK,61LED pannello,FFC60 J32 e asola. Leggere [PANEL16-FFC60.md](PANEL16-FFC60.md) e panel16-ffc60-verification.json. Firmware non portato; routing,DRC e ottica ancora da completare. Le sezioni precedenti sul pannello32touch/U90 non descrivono più il circuito attivo. Mappa dual-MCU aggiornata a 9/9 ADC: vedere ADC99-WIRING.md.
+
+---
+
+# Revisione dual MCU — 10 novembre 2026
+
+Riferimento: backbone-square16-hanxia salvato su disco. Questa revisione conserva le posizioni di tutti i componenti preesistenti, tutte le 16 righe, piste e zone; aggiunge R923 10k 0603. Schema e PCB sono sincronizzati. Nessun MEZZ_PRESENT_N esiste in questa versione: il pad31 è ora la riga R05.
+
+Moduli previsti: ESP32-S3-WROOM-1-N8R2 e ESP32-S31-WROOM-1-N16R16V, antenna PCB, socket perimetrale a40contatti. Altre varianti richiedono revisione: in particolare S3 con PSRAM octal usa i pad28–30 e non garantisce le16righe. Nomi rete GPIOxx e pin del simbolo sono alias S3, non numeri S31. Usare dual-mcu-pinout.csv e dual-mcu-profiles.json.
+
+ADC sulle righe: S3 A1-A5 e B1-B4 (9 ADC1); S31 A1/A6-A8 e B1/B5-B8 (6 ADC1 + 3 ADC2). Comuni A1 e B1. Banco A: 5/4; banco B: 4/5 (S3/S31). DAC S31 su A3/A4. I2C_INT_SDA spostato al pad35 (S3 GPIO42 / S31 GPIO55); il pad4 diventa A5. Vedere dual-mcu-rows.csv. I GPIO delle derivazioni J26/J27 e FFC60 J32 seguono le nuove righe.
+
+Correzioni: R201 diventa10k tra3V3 e pad21/STRAP_SPI_VOLTAGE; nessun pull esterno sul pad26, che segue i diversi default interni dei due moduli. U91 SDA passa al pad8, VBUS sense al pad24. ROW_ARM_N usa pad22 con nuovo pull-upR923 e pilota U60. BOOT pad27 non abilita più le righe. Non usare GPIO hold su ROW_ARM_N; rispettare almeno3ms dopo il rilascio EN prima di modificare gli strap.
+
+J25.7/.8/.12, J26.22/.24 e J27.22 sono NC riservati: rimosso l'accesso esterno a strap flash e segnali riservati. Restano quattroGPIO ausiliari sui pad9/25/36/37; TX UART0 può emettere log al boot. Connettori aggiornati in dual-mcu-connectors.csv. Non collegare mai direttamente GPIO eROW sulla mezzanina.
+
+USB: programmazione e seriale/JTAG comuni sui pad13/14. USB OTG/host applicativo disponibile sul socket solo conS3; S31 High-Speed richiede pad54/55 inferiori non contattati. CAN resta classico con SN65HVD230; non attivare CAN-FD bitrate switching. I2C interno ed esterno restano separati; U91 resta su softwareI2C dedicato.
+
+Alimentazione: SY8089AAAC nominale2A, 3,31V circa (150k/33,2k), bypass22uF e EN10k/1uF presenti. Budget condiviso: riservare almeno600mA al moduloS31, oltre a transceiver, logica e carichi; non considerare1A delle righe sommabile senza limiti ai carichi dei connettori. Termica, transitori e contatti FlexyPin da misurare.
+
+Firmware: i profili JSON sono il contratto della nuova scheda, non un firmware funzionante. Il firmware presente nel repository usa una precedente mappa di scheda; non è stato portato su Hanxia/S31. Implementare inizializzazione controls16.json, selezione capacità per riga, USB host disabilitato su S31, ADC calibrato secondo SDK per target e reset fail-safe. Nessuna prova su hardware fisico eseguita.
+
+NON PRONTA PER PRODUZIONE: zero errori ERC, 66avvisi; 1207pad verificati senza differenze di rete schema/PCB. Restano499connessioni da sbrogliare e problemi DRC preesistenti (incluse sovrapposizioni, fori/maschera/clearance, keepout). R923 non introduce rilievi DRC. Le variazioni nel numero di coppie di fori segnalate non derivano da spostamenti: la geometria originale è stata verificata identica. Completare sbroglio, DRC, controllo meccanico del socket e prove di alimentazione/reset/USB/ADC prima di ordinare PCB assemblati.
+
+Le sezioni storiche seguenti non prevalgono su questa revisione; studi e immagini precedenti non rappresentano la mappa attuale. Vedere dual-mcu-review.html e dual-mcu-verification.json.
+
+---
+
 ## Revisione: quattro colonne per banco
 
 Aggiunti J30 eJ31, Hanxia HX PM2.54-1x8P TP-YQ C42380985: quattro connettori per banco, otto righe per banco e64contatti accessibili complessivi. I quattro contatti della stessa riga condividono la reteROW_Lxx oROW_Rxx; restano16righe programmabili e gli stessiGPIO/driver. Passo tra righe2,54mm; passo tra colonne dello stesso banco4mm, mantenuto per l’ingombro Hanxia. Separazione tra le due colonne interne7,62mm per gli integratiDIP.
@@ -24,7 +54,7 @@ Aggiunti D554..D559, sei LED verdi XINGLIGHT XL-3216UGC-FB C3646937 sul driver e
 
 ADC, PWM, IN eOUT sono quattro scelte dirette mutuamente esclusive: nessun ulteriore LED o sottomenu GPIO. Con IN, UP eDOWN sono opzionali e alternativi; entrambi spenti significa ingresso flottante, ma IN e chip restano accesi. Questo NON e la riga fisicamente scollegata inHi-Z. Con ADC/PWM/OUT le spie pull sono spente. Per impostazione di questa interfaccia i pull sono modificabili soltanto in IN; eventuale open-drain e altre opzioni avanzate sono fuori da questa revisione. I pull sono quelli interni all’ESP32: nessun resistore di pull esterno aggiunto. Sono polarizzazioni deboli, non alimentazioni per moduli.
 
-L’ADC interno è disponibile soltanto sul bancoA: GPIO1,2,3,6,7,8,9,10 corrispondono adADC1_CH0,1,2,5,6,7,8,9. BancoB GPIO35..42 non ha ADC interno; il firmware deve saltare/rifiutare ADC per quelle righe. Le misure attraverso un futuro ADC esterno della mezzanina sono una funzione DEBUG distinta e non trasformano iGPIO del bancoB in ingressiADC del micro. La tabella completa è in pin-function-capabilities.csv. GPIO3 è uno strap: nessuna configurazione riga prima del completamento del boot e del rilascio sicuro dei controlli.
+ADC sulle righe: S3 A1-A5 e B1-B4 (9 ADC1); S31 A1/A6-A8 e B1/B5-B8 (6 ADC1 + 3 ADC2). Comuni A1 e B1. Banco A: 5/4; banco B: 4/5 (S3/S31). DAC S31 su A3/A4. I2C_INT_SDA spostato al pad35 (S3 GPIO42 / S31 GPIO55); il pad4 diventa A5. Vedere dual-mcu-rows.csv. I GPIO delle derivazioni J26/J27 e FFC60 J32 seguono le nuove righe. GPIO3 resta uno strap: nessuna configurazione riga prima del boot sicuro.
 
 PWM è un profilo di uscita assegnato da software. Con la perifericaLEDC dell’ESP32-S3 sono disponibili8canali, con allocazione di canali/timer/frequenze da progettare senza alterare le altre righe. Non è una dichiarazione del limite totale di tutte le altre periferiche PWM possibili del chip. Parametri di frequenza e duty, livello inizialeOUT, scala/attenuazione e calibrazioneADC restano da implementare e qualificare. OUT è un GPIO logico dell’ESP32, NON la modalità alimentazione a500mA: il percorso di potenza3V3/GND esistente resta separato.
 

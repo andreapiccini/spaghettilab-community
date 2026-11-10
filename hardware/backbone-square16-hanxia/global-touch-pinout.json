@@ -1,203 +1,212 @@
 {
   "controller": "U91 BS8116A-3",
   "address": "0x50",
-  "interface": "separate software I2C",
-  "SCL_GPIO": 21,
-  "SDA_GPIO": 13,
-  "pullups": "R921/R922 4.7k to3V3",
+  "interface": "dedicated software I2C",
+  "SDA_module_pad": 8,
+  "SCL_module_pad": 23,
+  "SDA_GPIO_by_target": {
+    "s3": 15,
+    "s31": 0
+  },
+  "SCL_GPIO_by_target": {
+    "s3": 21,
+    "s31": 38
+  },
   "keys": [
     {
+      "ref": "TE21",
+      "role": "PLAY_PAUSE",
+      "x": 213.2,
+      "y": 71.0,
+      "width": 5.2,
+      "height": 4.8,
       "key": 1,
       "pin": 19,
-      "label": "PLAY_PAUSE",
-      "x": 211.3,
-      "y": 113.5,
-      "ref": "TE21"
+      "net": "TOUCH_PANEL_PLAY_PAUSE",
+      "uuid": "7b4d5b94-62ed-46b3-b3e2-3a8665e134c3"
     },
     {
+      "ref": "TE22",
+      "role": "DEBUG",
+      "x": 207.4,
+      "y": 80.4,
+      "width": 5.2,
+      "height": 4.8,
       "key": 2,
       "pin": 20,
-      "label": "DEBUG",
-      "x": 203.4,
-      "y": 113.5,
-      "ref": "TE22"
+      "net": "TOUCH_PANEL_DEBUG",
+      "uuid": "a420f191-83d2-480e-bcab-d982837eabce"
     },
     {
+      "ref": "TE23",
+      "role": "LOCK",
+      "x": 207.4,
+      "y": 71.0,
+      "width": 5.2,
+      "height": 4.8,
       "key": 3,
       "pin": 1,
-      "label": "LOAD",
-      "x": 173.4,
-      "y": 112,
-      "ref": "TE23"
+      "net": "TOUCH_PANEL_LOCK",
+      "uuid": "f372ddca-0563-4897-b126-aeae24ee21ef"
     },
     {
+      "ref": "TE24",
+      "role": "STOP",
+      "x": 213.2,
+      "y": 80.4,
+      "width": 5.2,
+      "height": 4.8,
       "key": 4,
       "pin": 2,
-      "label": "SAVE",
-      "x": 167.6,
-      "y": 112,
-      "ref": "TE24"
+      "net": "TOUCH_PANEL_STOP",
+      "uuid": "5c4c5334-7459-4be2-bebb-6343ff2c60c1"
     },
     {
+      "ref": "TE25",
+      "role": "PAGE_ROWS",
+      "x": 210.25,
+      "y": 113.5,
+      "width": 9.8,
+      "height": 4.6,
       "key": 5,
       "pin": 3,
-      "label": "DELETE",
-      "x": 161.8,
-      "y": 112,
-      "ref": "TE25"
+      "net": "TOUCH_PANEL_PAGE_ROWS",
+      "uuid": "090bd422-57a8-4135-9114-959c93dedd0e"
     },
     {
+      "ref": "TE26",
+      "role": "PAGE_CONFIG",
+      "x": 197.75,
+      "y": 113.5,
+      "width": 9.8,
+      "height": 4.6,
       "key": 6,
       "pin": 4,
-      "label": "SLOT1",
-      "x": 173.4,
-      "y": 117,
-      "ref": "TE26"
+      "net": "TOUCH_PANEL_PAGE_CONFIG",
+      "uuid": "e4170978-fd24-43bc-979e-244b9b3baf09"
     },
     {
+      "ref": "TE27",
+      "role": "PAGE_SYSTEM",
+      "x": 185.25,
+      "y": 113.5,
+      "width": 9.8,
+      "height": 4.6,
       "key": 7,
       "pin": 5,
-      "label": "SLOT2",
-      "x": 167.6,
-      "y": 117,
-      "ref": "TE27"
+      "net": "TOUCH_PANEL_PAGE_SYSTEM",
+      "uuid": "a96865bc-3f30-4672-993c-6547d659c840"
     },
     {
+      "ref": "TE28",
+      "role": "PAGE_USER_A",
+      "x": 172.75,
+      "y": 113.5,
+      "width": 9.8,
+      "height": 4.6,
       "key": 8,
       "pin": 6,
-      "label": "SLOT3",
-      "x": 161.8,
-      "y": 117,
-      "ref": "TE28"
+      "net": "TOUCH_PANEL_PAGE_USER_A",
+      "uuid": "af0ac99b-381f-4efd-9710-9decac45869f"
     },
     {
+      "ref": "TE29",
+      "role": "PAGE_USER_B",
+      "x": 160.25,
+      "y": 113.5,
+      "width": 9.8,
+      "height": 4.6,
       "key": 9,
       "pin": 7,
-      "label": "SLOT4",
-      "x": 156,
-      "y": 117,
-      "ref": "TE29"
+      "net": "TOUCH_PANEL_PAGE_USER_B",
+      "uuid": "3802d341-4b82-4815-80c6-49ffb066d866"
     },
     {
+      "ref": "TE30",
+      "role": "KEY_1",
+      "x": 214.05,
+      "y": 123.0,
+      "width": 8.2,
+      "height": 12.4,
       "key": 10,
       "pin": 8,
-      "label": "T1",
-      "x": 213.2,
-      "y": 74.6,
-      "ref": "TE30",
-      "net": "TOUCH_USER_T1",
-      "pad_diameter_mm": 4.4,
-      "pitch_mm": 5.8,
-      "default_action": null,
-      "sch_pin_xy": [
-        152.4,
-        123.19
-      ]
+      "net": "TOUCH_PANEL_KEY_1",
+      "uuid": "d1371ec6-5e12-4e8d-837b-a94f2855a01e"
     },
     {
+      "ref": "TE31",
+      "role": "KEY_2",
+      "x": 204.45000000000002,
+      "y": 123.0,
+      "width": 8.2,
+      "height": 12.4,
       "key": 11,
       "pin": 9,
-      "label": "T2",
-      "x": 207.4,
-      "y": 74.6,
-      "ref": "TE31",
-      "net": "TOUCH_USER_T2",
-      "pad_diameter_mm": 4.4,
-      "pitch_mm": 5.8,
-      "default_action": null,
-      "sch_pin_xy": [
-        152.4,
-        125.72999999999999
-      ]
+      "net": "TOUCH_PANEL_KEY_2",
+      "uuid": "782d7d49-0e33-4249-9d53-d8ed005eb819"
     },
     {
+      "ref": "TE32",
+      "role": "KEY_3",
+      "x": 194.85000000000002,
+      "y": 123.0,
+      "width": 8.2,
+      "height": 12.4,
       "key": 12,
       "pin": 10,
-      "label": "T3",
-      "x": 201.6,
-      "y": 74.6,
-      "ref": "TE32",
-      "net": "TOUCH_USER_T3",
-      "pad_diameter_mm": 4.4,
-      "pitch_mm": 5.8,
-      "default_action": null,
-      "sch_pin_xy": [
-        152.4,
-        128.26999999999998
-      ]
+      "net": "TOUCH_PANEL_KEY_3",
+      "uuid": "4a8d891a-3868-4962-ac14-78657180ca0c"
     },
     {
+      "ref": "TE33",
+      "role": "KEY_4",
+      "x": 185.25,
+      "y": 123.0,
+      "width": 8.2,
+      "height": 12.4,
       "key": 13,
       "pin": 11,
-      "label": "T4",
-      "x": 213.2,
-      "y": 80.4,
-      "ref": "TE33",
-      "net": "TOUCH_USER_T4",
-      "pad_diameter_mm": 4.4,
-      "pitch_mm": 5.8,
-      "default_action": null,
-      "sch_pin_xy": [
-        152.4,
-        130.81
-      ]
+      "net": "TOUCH_PANEL_KEY_4",
+      "uuid": "b0f719ef-79cb-4cfa-bc6e-7525f74d9c50"
     },
     {
+      "ref": "TE34",
+      "role": "KEY_5",
+      "x": 175.65,
+      "y": 123.0,
+      "width": 8.2,
+      "height": 12.4,
       "key": 14,
       "pin": 12,
-      "label": "T5",
-      "x": 207.4,
-      "y": 80.4,
-      "ref": "TE34",
-      "net": "TOUCH_USER_T5",
-      "pad_diameter_mm": 4.4,
-      "pitch_mm": 5.8,
-      "default_action": null,
-      "sch_pin_xy": [
-        152.4,
-        133.35
-      ]
+      "net": "TOUCH_PANEL_KEY_5",
+      "uuid": "475f2097-56a5-4183-891a-944a290f5a33"
     },
     {
+      "ref": "TE35",
+      "role": "KEY_6",
+      "x": 166.05,
+      "y": 123.0,
+      "width": 8.2,
+      "height": 12.4,
       "key": 15,
       "pin": 13,
-      "label": "T6",
-      "x": 201.6,
-      "y": 80.4,
-      "ref": "TE35",
-      "net": "TOUCH_USER_T6",
-      "pad_diameter_mm": 4.4,
-      "pitch_mm": 5.8,
-      "default_action": null,
-      "sch_pin_xy": [
-        152.4,
-        135.89
-      ]
+      "net": "TOUCH_PANEL_KEY_6",
+      "uuid": "589cfda5-577c-48c8-8be6-c843b2125a38"
     },
     {
+      "ref": "TE36",
+      "role": "KEY_7",
+      "x": 156.45000000000002,
+      "y": 123.0,
+      "width": 8.2,
+      "height": 12.4,
       "key": 16,
       "pin": 14,
-      "label": "CLEAR_ALL",
-      "x": 156,
-      "y": 112,
-      "ref": "TE36",
-      "net": "TOUCH_CLEAR_ALL",
-      "pad_diameter_mm": 4.4,
-      "pitch_mm": 5.8,
-      "default_action": "clear_working_configuration_to_HiZ",
-      "sch_pin_xy": [
-        152.4,
-        138.43
-      ],
-      "role": "system_command",
-      "hold_ms": 2000,
-      "preserves_saved_slots": true
+      "net": "TOUCH_PANEL_KEY_7",
+      "uuid": "61a44661-9a64-406c-a0cd-2c69720eafab"
     }
   ],
-  "routing_complete": false,
-  "firmware_implemented": false,
-  "user_touch_keys": 6,
-  "free_touch_keys": 0,
   "key16_IRQ_disabled_required": true,
-  "global_command_touch_keys": 10
+  "free_touch_keys": 0,
+  "firmware_implemented": false
 }

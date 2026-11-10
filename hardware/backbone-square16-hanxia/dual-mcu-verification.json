@@ -1,0 +1,28 @@
+{
+  "revision": "ADC99-wired",
+  "schematic_pcb_pad_instances_checked": 1207,
+  "intentional_changed_pins": 48,
+  "s3_adc": 9,
+  "s31_adc": 9,
+  "bank_A": [
+    5,
+    4
+  ],
+  "bank_B": [
+    4,
+    5
+  ],
+  "common_rows": [
+    "ROW_L01",
+    "ROW_R01"
+  ],
+  "row_contact_pins_verified": 64,
+  "mezzanine_and_ffc_pairs_verified": true,
+  "existing_tracks_unchanged": true,
+  "hardware_tested": false,
+  "production_ready": false,
+  "erc_errors": 0,
+  "erc_warnings": 66,
+  "drc_violations": 416,
+  "unconnected_items": 499
+}

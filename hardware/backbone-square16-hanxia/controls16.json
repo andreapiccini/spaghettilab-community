@@ -2,25 +2,30 @@
   "family": "FCA9539",
   "max_i2c_bus_hz": 400000,
   "reset_interlock": {
-    "formula": "EXP_RESET_N = ESP_EN AND NOT ESP_BOOT",
-    "esp_boot_gpio": 0,
+    "formula": "EXP_RESET_N = ESP_EN AND NOT ROW_ARM_N",
+    "module_pad": 22,
+    "gpio_by_target": {
+      "s3": 14,
+      "s31": 37
+    },
     "hold_reset_level": 1,
     "firmware_arm_level": 0,
-    "software_reset_requirement": "GPIO0 must return to input with pull-up; never enable GPIO hold on GPIO0; qualify software/watchdog/brownout behaviour on prototype",
-    "logic": [
-      "U60 SN74LVC1G97DBVR"
-    ],
-    "reset_pulldown": "R203 10k",
-    "datasheet_limit": "Logical interlock unchanged. Nyfea reset/POR/brownout limits remain to be qualified on prototype.",
+    "pull_up": "R923 10k to 3V3",
+    "reset_pulldown": "R203 10k to GND",
+    "boot_independent": true,
     "pin_mapping": {
       "1": "ESP_EN",
       "2": "GND",
       "3": "GND",
       "4": "EXP_RESET_N",
       "5": "3V3",
-      "6": "GPIO0"
+      "6": "ROW_ARM_N"
     },
-    "also_enables": "U63 EN follows EXP_RESET_N with R301100k pulldown; shared reset/row-power enable"
+    "logic": [
+      "U60 SN74LVC1G97DBVR"
+    ],
+    "also_enables": "U63 EN; 3V3_ROWS current-limited supply",
+    "software_reset_requirement": "Never GPIO-hold ROW_ARM_N; keep high/input for at least 3ms after EN release, then release reset only after MCU initialization. Qualify watchdog/software/brownout reset on prototype."
   },
   "modes": {
     "HiZ": {
@@ -185,28 +190,25 @@
     }
   ],
   "usb_vbus_sense": {
-    "ref": "U1",
-    "port": "GPIO14",
-    "pin": 22,
+    "module_pad": 24,
+    "gpio_by_target": {
+      "s3": 47,
+      "s31": 39
+    },
     "divider": [
       "R110 56k",
       "R111 100k"
     ],
     "filter": "C299 1nF",
-    "esp_gpio_cost": 1,
-    "firmware": "Configure GPIO14 as input only (no internal pulls). Read VBUS directly, including before MCP arming, and attach/detach USB as appropriate. Qualify ROM/bootloader and host-off behaviour."
+    "not_a_strap": true
   },
   "initialization_order": [
-    "Keep GPIO0 released/high so EXP_RESET_N stays low during boot",
-    "After boot, allow supply to settle; hardware timing must be qualified",
-    "Pull GPIO0 low in open-drain to release expander reset",
-    "Confirm all configuration registers 0x06/0x07 are 0xFF",
-    "Write polarity registers 0x04/0x05 =0x00",
-    "Write safe output registers 0x02/0x03 before changing direction",
-    "Write configuration registers 0x06/0x07 =0x00",
-    "For mode changes: open ISO_N first, disable old power path, then select target mode",
-    "Keep IS31FL3731 in software shutdown;clear all LED enable and PWM RAM",
-    "Enable only the selected configuration label per row;Hi-Z means all three off"
+    "Keep ROW_ARM_N high/input; no output arm during ROM or download.",
+    "Initialize I2C_INT and MCU row GPIOs as inputs; satisfy 3ms strap hold.",
+    "Drive ROW_ARM_N low open-drain; this releases expander reset and enables row supply, while gate defaults keep all rows disconnected.",
+    "Verify CONFIG=FF/FF; write POLARITY=00/00 and OUTPUT=55/55 to U40/U41, FF/FF to U42.",
+    "Only then write CONFIG=00/00; all rows remain Hi-Z.",
+    "On NACK/error/shutdown release ROW_ARM_N high/input. Before each mode transition open ISO_N, remove old PG/NG drive, then apply new mode."
   ],
   "display": {
     "enabled": true,
@@ -234,7 +236,7 @@
       "bank": "L",
       "row": 2,
       "net": "ROW_L02",
-      "raw": "GPIO2",
+      "raw": "GPIO3",
       "switch": "U50",
       "switch_channel": 1,
       "mosfet_p": "Q31",
@@ -244,7 +246,7 @@
       "bank": "L",
       "row": 3,
       "net": "ROW_L03",
-      "raw": "GPIO3",
+      "raw": "GPIO6",
       "switch": "U50",
       "switch_channel": 2,
       "mosfet_p": "Q32",
@@ -254,7 +256,7 @@
       "bank": "L",
       "row": 4,
       "net": "ROW_L04",
-      "raw": "GPIO6",
+      "raw": "GPIO7",
       "switch": "U50",
       "switch_channel": 3,
       "mosfet_p": "Q33",
@@ -264,7 +266,7 @@
       "bank": "L",
       "row": 5,
       "net": "ROW_L05",
-      "raw": "GPIO7",
+      "raw": "GPIO4",
       "switch": "U51",
       "switch_channel": 0,
       "mosfet_p": "Q34",
@@ -274,7 +276,7 @@
       "bank": "L",
       "row": 6,
       "net": "ROW_L06",
-      "raw": "GPIO8",
+      "raw": "GPIO35",
       "switch": "U51",
       "switch_channel": 1,
       "mosfet_p": "Q35",
@@ -284,7 +286,7 @@
       "bank": "L",
       "row": 7,
       "net": "ROW_L07",
-      "raw": "GPIO9",
+      "raw": "GPIO36",
       "switch": "U51",
       "switch_channel": 2,
       "mosfet_p": "Q36",
@@ -294,7 +296,7 @@
       "bank": "L",
       "row": 8,
       "net": "ROW_L08",
-      "raw": "GPIO10",
+      "raw": "GPIO37",
       "switch": "U51",
       "switch_channel": 3,
       "mosfet_p": "Q37",
@@ -304,7 +306,7 @@
       "bank": "R",
       "row": 1,
       "net": "ROW_R01",
-      "raw": "GPIO35",
+      "raw": "GPIO2",
       "switch": "U53",
       "switch_channel": 0,
       "mosfet_p": "Q44",
@@ -314,7 +316,7 @@
       "bank": "R",
       "row": 2,
       "net": "ROW_R02",
-      "raw": "GPIO36",
+      "raw": "GPIO8",
       "switch": "U53",
       "switch_channel": 1,
       "mosfet_p": "Q45",
@@ -324,7 +326,7 @@
       "bank": "R",
       "row": 3,
       "net": "ROW_R03",
-      "raw": "GPIO37",
+      "raw": "GPIO9",
       "switch": "U53",
       "switch_channel": 2,
       "mosfet_p": "Q46",
@@ -334,7 +336,7 @@
       "bank": "R",
       "row": 4,
       "net": "ROW_R04",
-      "raw": "GPIO38",
+      "raw": "GPIO10",
       "switch": "U53",
       "switch_channel": 3,
       "mosfet_p": "Q47",
@@ -344,7 +346,7 @@
       "bank": "R",
       "row": 5,
       "net": "ROW_R05",
-      "raw": "GPIO39",
+      "raw": "GPIO38",
       "switch": "U54",
       "switch_channel": 0,
       "mosfet_p": "Q48",
@@ -354,7 +356,7 @@
       "bank": "R",
       "row": 6,
       "net": "ROW_R06",
-      "raw": "GPIO40",
+      "raw": "GPIO39",
       "switch": "U54",
       "switch_channel": 1,
       "mosfet_p": "Q49",
@@ -364,7 +366,7 @@
       "bank": "R",
       "row": 7,
       "net": "ROW_R07",
-      "raw": "GPIO41",
+      "raw": "GPIO40",
       "switch": "U54",
       "switch_channel": 2,
       "mosfet_p": "Q50",
@@ -374,7 +376,7 @@
       "bank": "R",
       "row": 8,
       "net": "ROW_R08",
-      "raw": "GPIO42",
+      "raw": "GPIO41",
       "switch": "U54",
       "switch_channel": 3,
       "mosfet_p": "Q51",
@@ -1047,7 +1049,7 @@
         }
       }
     },
-    "reset_formula": "EXP_RESET_N = ESP_EN AND NOT GPIO0",
+    "reset_formula": "EXP_RESET_N = ESP_EN AND NOT ROW_ARM_N",
     "reset_ic": "U60 SN74LVC1G97DBVR",
     "removed_refs": [
       "R206",
@@ -1156,190 +1158,33 @@
     ]
   },
   "south_expansion": {
-    "reference": "J25",
-    "pitch_mm": 2.54,
-    "pinout": {
-      "1": "GND",
-      "2": "GND",
-      "3": "3V3",
-      "4": "5V",
-      "5": "GPIO11",
-      "6": "GPIO12",
-      "7": "GPIO13",
-      "8": "GPIO15",
-      "9": "GPIO16",
-      "10": "GPIO43",
-      "11": "GPIO44",
-      "12": "GPIO47",
-      "13": "GPIO48",
-      "14": "GND",
-      "15": "I2C_SDA",
-      "16": "I2C_SCL"
-    },
-    "gpio_direct_3V3_only": true,
-    "row_protection": false,
-    "source_part_pending": false,
-    "position_mm": [
-      176.36,
-      125.8
+    "source": "dual-mcu-connectors.csv",
+    "reserved_nc_pins": [
+      7,
+      8,
+      12
     ],
-    "rotation_deg": 0,
-    "side": "F.Cu",
-    "body_overhang_south_mm": 7.8,
-    "board_outline_unchanged": false,
-    "pins": 16,
-    "rows": 2,
-    "mpn": "2.54-2*8P Right Angle Female Header",
-    "lcsc": "C52105",
-    "mechanical_pdf_available": false,
-    "official_CAD_checked": true,
-    "physical_sample_verified": false,
-    "shared_I2C": [
-      "I2C_SDA",
-      "I2C_SCL"
+    "free_gpio_module_pads": [
+      9,
+      25,
+      36,
+      37
     ],
-    "position": {
-      "x_mm": 176.36,
-      "y_mm": 125.8,
-      "rotation_deg": 0.0,
-      "side": "F.Cu"
-    }
+    "legacy_gpio_names": "S3 aliases; not S31 GPIO numbers"
   },
   "passive_mezzanine": {
-    "connectors": [
-      "J26",
-      "J27"
-    ],
-    "pitch_mm": 1.27,
-    "pins_per_connector": 32,
-    "added_components_only": [
-      "J26",
-      "J27"
-    ],
-    "side": "F.Cu",
-    "role": "passive direct access, no new switching/protection",
-    "board_mm": [
-      57,
-      60
-    ],
-    "pinout": {
-      "J26": {
-        "1": "ROW_L01",
-        "2": "GPIO1",
-        "3": "ROW_L02",
-        "4": "GPIO2",
-        "5": "ROW_L03",
-        "6": "GPIO3",
-        "7": "ROW_L04",
-        "8": "GPIO6",
-        "9": "ROW_L05",
-        "10": "GPIO7",
-        "11": "ROW_L06",
-        "12": "GPIO8",
-        "13": "ROW_L07",
-        "14": "GPIO9",
-        "15": "ROW_L08",
-        "16": "GPIO10",
-        "17": "GND",
-        "18": "GPIO11",
-        "19": "GND",
-        "20": "GPIO12",
-        "21": "GND",
-        "22": "GPIO13",
-        "23": "GND",
-        "24": "GPIO15",
-        "25": "GND",
-        "26": "GPIO16",
-        "27": "GND",
-        "28": "I2C_SDA",
-        "29": "GND",
-        "30": "3V3",
-        "31": "GND",
-        "32": "ESP_EN"
-      },
-      "J27": {
-        "1": "ROW_R01",
-        "2": "GPIO35",
-        "3": "ROW_R02",
-        "4": "GPIO36",
-        "5": "ROW_R03",
-        "6": "GPIO37",
-        "7": "ROW_R04",
-        "8": "GPIO38",
-        "9": "ROW_R05",
-        "10": "GPIO39",
-        "11": "ROW_R06",
-        "12": "GPIO40",
-        "13": "ROW_R07",
-        "14": "GPIO41",
-        "15": "ROW_R08",
-        "16": "GPIO42",
-        "17": "GND",
-        "18": "GPIO43",
-        "19": "GND",
-        "20": "GPIO44",
-        "21": "GND",
-        "22": "GPIO47",
-        "23": "GND",
-        "24": "GPIO48",
-        "25": "GND",
-        "26": "I2C_SCL",
-        "27": "GND",
-        "28": "3V3",
-        "29": "GND",
-        "30": "5V",
-        "31": "GND",
-        "32": "EXP_RESET_N"
-      }
-    },
-    "mating_height_mm": "TBD; elevated daughterboard required to clear existing components",
-    "mezzanine_firmware_implemented": false,
-    "no_dedicated_enable_or_sync_GPIO": true,
-    "positions": {
-      "J26": {
-        "x_mm": 163.6,
-        "y_mm": 119.2,
-        "rotation_deg": 90.0,
-        "side": "F.Cu"
-      },
-      "J27": {
-        "x_mm": 187.6,
-        "y_mm": 119.2,
-        "rotation_deg": 90.0,
-        "side": "F.Cu"
-      }
-    },
-    "mechanical": {
-      "socket_footprint": "KiCad PinSocket_2x16_P1.27mm_Vertical",
-      "drill_mm": 0.7,
-      "body_mm": [
-        3.05,
-        20.32
+    "source": "dual-mcu-connectors.csv",
+    "reserved_nc": {
+      "J26": [
+        22,
+        24
       ],
-      "connector_envelope_mm": [
-        4.1,
-        21.37
-      ],
-      "contact_numbering": "pin1 square; odd/even pairs follow native KiCad socket footprint",
-      "source_part_pending": true,
-      "mating_socket_and_male_pair_to_verify": true,
-      "daughterboard_height": "to clear existing Hanxia, power and USB bodies; not validated; do not use generic low stacking height",
-      "two_connector_anchor_spacing_mm": 24.0,
-      "socket_orientation_deg": 90,
-      "positions_F_face": "both below breadboard, toward south; daughterboard may extend north with suitable height",
-      "no_daughterboard_designed": true
+      "J27": [
+        22
+      ]
     },
-    "signal_counts": {
-      "row_nodes": 16,
-      "raw_row_GPIO": 16,
-      "other_GPIO": 9,
-      "I2C": 2,
-      "reset_nets": 2,
-      "ground_contacts": 16,
-      "3V3_contacts": 2,
-      "5V_contacts": 1,
-      "total_contacts": 64
-    }
+    "no_presence_signal": true,
+    "row_and_gpio_paths_preserved": true
   },
   "single_mosfet_revision": {
     "p_channel": "AO3401A C15127",
@@ -1466,7 +1311,7 @@
     "HiZ": "all off; cannot distinguish unpowered",
     "orientation_deg": 45,
     "optical_and_assembly_validation": "Required. FR4 transmission and raised/reverse assembly must be tested; window design is not optically qualified.",
-    "firmware": "Not implemented. Clear all frame enables/PWM while in software shutdown, then enable only active mode. GPIO14 freed but not added to connectors.",
+    "firmware": "Not implemented. Clear all frame enables/PWM while in software shutdown, then enable only active mode. Pad22 is ROW_ARM_N; not a free GPIO.",
     "outer_bounds_mm": [
       148.25,
       62.3,
@@ -1529,37 +1374,30 @@
     "qualification": "Values are calculations; PCB unrouted, optical and hardware tests pending"
   },
   "ui_buttons": {
-    "SW1": {
-      "gpio": 21,
-      "net": "UI_BANK_N",
-      "action": "select bank A/B"
+    "physical_buttons": false,
+    "U90": "internal I2C,16row keys",
+    "U91": {
+      "sda_module_pad": 8,
+      "scl_module_pad": 23,
+      "software_i2c": true
     },
-    "SW2": {
-      "gpio": 13,
-      "net": "GPIO13",
-      "action": "select row1..8",
-      "shared_south_pin": 7
-    },
-    "logic": "active low; internal pullups; debounce and simultaneous hold in firmware; boot safety reset unchanged",
-    "firmware_implemented": false,
-    "lcsc": "C318884",
-    "side": "B.Cu",
-    "drawing": "references/XKB-TS-1187A-B-A-B-C318884.pdf"
+    "source": "dual-mcu-profiles.json"
   },
   "ui_navigation_firmware_spec": {
-    "debounce_ms": 30,
-    "both_hold_ms": 800,
-    "press_action": "single button action on release only after excluding both-button chord",
-    "cycle": [
-      "Hi-Z",
-      "MCU",
-      "3.3V",
-      "GND"
+    "source": "UI-INTEGRATION.md",
+    "adc_selection": "Use target profile. S3: L01-L05,R01-R04 (9 ADC1). S31: L01,L06-L08,R01,R05-R08 (6 ADC1 + 3 ADC2). Common: L01,R01. USB host unavailable on S31."
+  },
+  "dual_mcu_profiles": "dual-mcu-profiles.json",
+  "internal_i2c_mapping": {
+    "sda_module_pad": 35,
+    "scl_module_pad": 5,
+    "s3_gpio": [
+      42,
+      5
     ],
-    "transition": "all outputs off; wait dead time validated against switch timing; then enable only desired mode",
-    "startup": "rows Hi-Z; buttons never bypass reset interlock",
-    "gpio_setup": "21 and13 input pullup; do not drive J25.7 externally",
-    "selected_indicator": "pulse selected mode; brief MCU pulse as navigation acknowledgement in Hi-Z only, never imply active mode",
-    "implementation_status": "specification only; no firmware change"
+    "s31_gpio": [
+      55,
+      3
+    ]
   }
 }

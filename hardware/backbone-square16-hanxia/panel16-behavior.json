@@ -1,0 +1,93 @@
+{
+  "version": 3,
+  "pages": [
+    "ROWS",
+    "CONFIG",
+    "SYSTEM",
+    "USER A",
+    "USER B"
+  ],
+  "keys": [
+    [
+      "A/B",
+      "UP",
+      "DOWN",
+      "3.3V",
+      "GND",
+      "MCU",
+      "Hi-Z"
+    ],
+    [
+      "LOAD",
+      "SAVE",
+      "DELETE",
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    [
+      "YES",
+      "SELECT ALL",
+      "CLEAR ALL",
+      "UNDO",
+      "REVERT",
+      "BACK",
+      "NO"
+    ],
+    [
+      "U1",
+      "U2",
+      "U3",
+      "U4",
+      "U5",
+      "U6",
+      "U7"
+    ],
+    [
+      "U8",
+      "U9",
+      "U10",
+      "U11",
+      "U12",
+      "U13",
+      "U14"
+    ]
+  ],
+  "lock": {
+    "unlock_hold_ms": 2000,
+    "enabled_keys": [
+      "LOCK",
+      "STOP"
+    ],
+    "illuminated_control_roles": [
+      "LOCK",
+      "STOP"
+    ],
+    "row_and_status_leds_unchanged": true
+  },
+  "stop": {
+    "priority": "highest",
+    "works_while_locked": true,
+    "works_while_apply_pending": true,
+    "first_action": "drive ROW_ARM_N HIGH; no GPIO hold",
+    "accessory_enable": "EXP_RESET_N must become LOW; accessory OE must be gated with it",
+    "all_rows": "Hi-Z",
+    "preserve_draft": true,
+    "preserve_slots": true,
+    "cancel_pending_apply": true,
+    "restart": "PLAY then YES; configure expander safe output latches before enabling outputs; break before make"
+  },
+  "apply": {
+    "steady_lamp": true,
+    "blink_keys": [
+      1,
+      7
+    ],
+    "other_page_keys_disabled": true,
+    "yes": "apply and run",
+    "no": "retain draft and return to ROWS"
+  },
+  "select_all": "illuminate all 16 selection arrows; never electrically tie rows",
+  "implementation": "contract and interactive preview; target firmware not ported"
+}

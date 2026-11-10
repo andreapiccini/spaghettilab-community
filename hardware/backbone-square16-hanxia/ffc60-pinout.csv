@@ -1,0 +1,61 @@
+﻿Pin,Net,Role
+1,ROW_L01,physical breadboard row
+2,GPIO1,"direct MCU alias,3.3V only"
+3,GND,shared service / return / supply
+4,ROW_L02,physical breadboard row
+5,GPIO3,"direct MCU alias,3.3V only"
+6,GND,shared service / return / supply
+7,ROW_L03,physical breadboard row
+8,GPIO6,"direct MCU alias,3.3V only"
+9,GND,shared service / return / supply
+10,ROW_L04,physical breadboard row
+11,GPIO7,"direct MCU alias,3.3V only"
+12,GND,shared service / return / supply
+13,ROW_L05,physical breadboard row
+14,GPIO4,"direct MCU alias,3.3V only"
+15,GND,shared service / return / supply
+16,ROW_L06,physical breadboard row
+17,GPIO35,"direct MCU alias,3.3V only"
+18,GND,shared service / return / supply
+19,ROW_L07,physical breadboard row
+20,GPIO36,"direct MCU alias,3.3V only"
+21,GND,shared service / return / supply
+22,ROW_L08,physical breadboard row
+23,GPIO37,"direct MCU alias,3.3V only"
+24,GND,shared service / return / supply
+25,ROW_R01,physical breadboard row
+26,GPIO2,"direct MCU alias,3.3V only"
+27,GND,shared service / return / supply
+28,ROW_R02,physical breadboard row
+29,GPIO8,"direct MCU alias,3.3V only"
+30,GND,shared service / return / supply
+31,ROW_R03,physical breadboard row
+32,GPIO9,"direct MCU alias,3.3V only"
+33,GND,shared service / return / supply
+34,ROW_R04,physical breadboard row
+35,GPIO10,"direct MCU alias,3.3V only"
+36,GND,shared service / return / supply
+37,ROW_R05,physical breadboard row
+38,GPIO38,"direct MCU alias,3.3V only"
+39,GND,shared service / return / supply
+40,ROW_R06,physical breadboard row
+41,GPIO39,"direct MCU alias,3.3V only"
+42,GND,shared service / return / supply
+43,ROW_R07,physical breadboard row
+44,GPIO40,"direct MCU alias,3.3V only"
+45,GND,shared service / return / supply
+46,ROW_R08,physical breadboard row
+47,GPIO41,"direct MCU alias,3.3V only"
+48,GND,shared service / return / supply
+49,GPIO16,"direct MCU alias,3.3V only"
+50,GPIO48,"direct MCU alias,3.3V only"
+51,GPIO44,"direct MCU alias,3.3V only"
+52,GPIO43,"direct MCU alias,3.3V only"
+53,I2C_USER_SDA,shared service / return / supply
+54,I2C_USER_SCL,shared service / return / supply
+55,GND,shared service / return / supply
+56,GND,shared service / return / supply
+57,3V3,shared service / return / supply
+58,EXP_RESET_N,LOW disables accessory outputs; input only on accessory
+59,5V,shared service / return / supply
+60,5V,shared service / return / supply

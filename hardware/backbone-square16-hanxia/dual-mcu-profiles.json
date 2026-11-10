@@ -1,0 +1,246 @@
+{
+  "s3": {
+    "module": "ESP32-S3-WROOM-1-N8R2",
+    "rows": [
+      {
+        "row": "ROW_L01",
+        "gpio": 1,
+        "adc_unit": 1,
+        "adc_channel": 0
+      },
+      {
+        "row": "ROW_L02",
+        "gpio": 3,
+        "adc_unit": 1,
+        "adc_channel": 2
+      },
+      {
+        "row": "ROW_L03",
+        "gpio": 6,
+        "adc_unit": 1,
+        "adc_channel": 5
+      },
+      {
+        "row": "ROW_L04",
+        "gpio": 7,
+        "adc_unit": 1,
+        "adc_channel": 6
+      },
+      {
+        "row": "ROW_L05",
+        "gpio": 4,
+        "adc_unit": 1,
+        "adc_channel": 3
+      },
+      {
+        "row": "ROW_L06",
+        "gpio": 35,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_L07",
+        "gpio": 36,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_L08",
+        "gpio": 37,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_R01",
+        "gpio": 2,
+        "adc_unit": 1,
+        "adc_channel": 1
+      },
+      {
+        "row": "ROW_R02",
+        "gpio": 8,
+        "adc_unit": 1,
+        "adc_channel": 7
+      },
+      {
+        "row": "ROW_R03",
+        "gpio": 9,
+        "adc_unit": 1,
+        "adc_channel": 8
+      },
+      {
+        "row": "ROW_R04",
+        "gpio": 10,
+        "adc_unit": 1,
+        "adc_channel": 9
+      },
+      {
+        "row": "ROW_R05",
+        "gpio": 38,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_R06",
+        "gpio": 39,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_R07",
+        "gpio": 40,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_R08",
+        "gpio": 41,
+        "adc_unit": null,
+        "adc_channel": null
+      }
+    ],
+    "services": {
+      "I2C_INT_SDA": 42,
+      "I2C_INT_SCL": 5,
+      "TOUCH_SYS_SDA": 15,
+      "CAN_TX": 17,
+      "CAN_RX": 18,
+      "USB_ESP_D-": 19,
+      "USB_ESP_D+": 20,
+      "I2C_USER_SDA": 11,
+      "I2C_USER_SCL": 12,
+      "STRAP_SPI_VOLTAGE": 13,
+      "ROW_ARM_N": 14,
+      "TOUCH_SYS_SCL": 21,
+      "USB_VBUS_PRESENT": 47,
+      "ESP_BOOT": 0
+    },
+    "usb_serial_jtag": true,
+    "usb_otg_on_socket": true,
+    "can_mode": "classic CAN through SN65HVD230; do not enable CAN FD data-rate switching",
+    "strap_hold_min_ms": 3,
+    "firmware_status": "mapping contract only; not integrated into legacy firmware"
+  },
+  "s31": {
+    "module": "ESP32-S31-WROOM-1-N16R16V",
+    "rows": [
+      {
+        "row": "ROW_L01",
+        "gpio": 57,
+        "adc_unit": 2,
+        "adc_channel": 7
+      },
+      {
+        "row": "ROW_L02",
+        "gpio": 20,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_L03",
+        "gpio": 4,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_L04",
+        "gpio": 5,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_L05",
+        "gpio": 2,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_L06",
+        "gpio": 42,
+        "adc_unit": 1,
+        "adc_channel": 0
+      },
+      {
+        "row": "ROW_L07",
+        "gpio": 43,
+        "adc_unit": 1,
+        "adc_channel": 1
+      },
+      {
+        "row": "ROW_L08",
+        "gpio": 44,
+        "adc_unit": 1,
+        "adc_channel": 2
+      },
+      {
+        "row": "ROW_R01",
+        "gpio": 56,
+        "adc_unit": 2,
+        "adc_channel": 6
+      },
+      {
+        "row": "ROW_R02",
+        "gpio": 35,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_R03",
+        "gpio": 22,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_R04",
+        "gpio": 23,
+        "adc_unit": null,
+        "adc_channel": null
+      },
+      {
+        "row": "ROW_R05",
+        "gpio": 45,
+        "adc_unit": 1,
+        "adc_channel": 3
+      },
+      {
+        "row": "ROW_R06",
+        "gpio": 46,
+        "adc_unit": 1,
+        "adc_channel": 4
+      },
+      {
+        "row": "ROW_R07",
+        "gpio": 47,
+        "adc_unit": 1,
+        "adc_channel": 5
+      },
+      {
+        "row": "ROW_R08",
+        "gpio": 54,
+        "adc_unit": 2,
+        "adc_channel": 4
+      }
+    ],
+    "services": {
+      "I2C_INT_SDA": 55,
+      "I2C_INT_SCL": 3,
+      "TOUCH_SYS_SDA": 0,
+      "CAN_TX": 6,
+      "CAN_RX": 7,
+      "USB_ESP_D-": 33,
+      "USB_ESP_D+": 34,
+      "I2C_USER_SDA": 24,
+      "I2C_USER_SCL": 25,
+      "STRAP_SPI_VOLTAGE": 36,
+      "ROW_ARM_N": 37,
+      "TOUCH_SYS_SCL": 38,
+      "USB_VBUS_PRESENT": 39,
+      "ESP_BOOT": 61
+    },
+    "usb_serial_jtag": true,
+    "usb_otg_on_socket": false,
+    "can_mode": "classic CAN through SN65HVD230; do not enable CAN FD data-rate switching",
+    "strap_hold_min_ms": 3,
+    "firmware_status": "mapping contract only; not integrated into legacy firmware"
+  }
+}

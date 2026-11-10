@@ -1,0 +1,26 @@
+{
+  "schematic_errors": 0,
+  "schematic_warnings": 66,
+  "pcb_pads_checked": 1209,
+  "schematic_pcb_mismatches": [],
+  "unrelated_net_changes": [],
+  "touch_keys": 16,
+  "led_channels_used": 129,
+  "led_channels_free": 15,
+  "ffc_pins": 60,
+  "board_mm": [
+    78,
+    78
+  ],
+  "drc_violations": 416,
+  "baseline_drc_violations": 410,
+  "drc_new_by_type": {
+    "courtyards_overlap": 43,
+    "missing_courtyard": 7,
+    "text_height": 45,
+    "silk_over_copper": 3
+  },
+  "unrouted_items": 499,
+  "production_ready": false,
+  "firmware_implemented": false
+}

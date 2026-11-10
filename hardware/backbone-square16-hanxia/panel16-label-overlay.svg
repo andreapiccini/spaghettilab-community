@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="67mm" height="11.5mm" viewBox="152 117.25 67 11.5">
+<title>Panel legend optical insert — black opaque, white translucent; prototype template</title>
+<rect x="152" y="117.25" width="67" height="11.5" fill="black"/>
+<text x="156.45" y="118.8" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">A/B</text>
+<text x="156.45" y="121.0" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">LOAD</text>
+<text x="156.45" y="123.2" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">YES</text>
+<text x="156.45" y="125.39999999999999" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U1</text>
+<text x="156.45" y="127.6" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U8</text>
+<text x="166.04999999999998" y="118.8" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">UP</text>
+<text x="166.04999999999998" y="121.0" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">SAVE</text>
+<text x="166.04999999999998" y="123.2" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">SELECT ALL</text>
+<text x="166.04999999999998" y="125.39999999999999" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U2</text>
+<text x="166.04999999999998" y="127.6" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U9</text>
+<text x="175.64999999999998" y="118.8" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">DOWN</text>
+<text x="175.64999999999998" y="121.0" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">DELETE</text>
+<text x="175.64999999999998" y="123.2" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">CLEAR ALL</text>
+<text x="175.64999999999998" y="125.39999999999999" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U3</text>
+<text x="175.64999999999998" y="127.6" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U10</text>
+<text x="185.25" y="118.8" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">3.3V</text>
+<text x="185.25" y="121.0" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">1</text>
+<text x="185.25" y="123.2" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">UNDO</text>
+<text x="185.25" y="125.39999999999999" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U4</text>
+<text x="185.25" y="127.6" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U11</text>
+<text x="194.85" y="118.8" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">GND</text>
+<text x="194.85" y="121.0" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">2</text>
+<text x="194.85" y="123.2" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">REVERT</text>
+<text x="194.85" y="125.39999999999999" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U5</text>
+<text x="194.85" y="127.6" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U12</text>
+<text x="204.45" y="118.8" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">MCU</text>
+<text x="204.45" y="121.0" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">3</text>
+<text x="204.45" y="123.2" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">BACK</text>
+<text x="204.45" y="125.39999999999999" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U6</text>
+<text x="204.45" y="127.6" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U13</text>
+<text x="214.04999999999998" y="118.8" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">Hi-Z</text>
+<text x="214.04999999999998" y="121.0" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">4</text>
+<text x="214.04999999999998" y="123.2" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">NO</text>
+<text x="214.04999999999998" y="125.39999999999999" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U7</text>
+<text x="214.04999999999998" y="127.6" text-anchor="middle" font-family="sans-serif" font-size=".65" fill="white">U14</text>
+</svg>
