@@ -283,5 +283,40 @@
     "clears_working_configuration": true,
     "preserves_saved_slots": true,
     "firmware_implemented": false
+  },
+  "user_touch_grid": {
+    "columns": 3,
+    "rows": 2,
+    "column_x_mm": [
+      213.2,
+      207.4,
+      201.6
+    ],
+    "row_y_mm": [
+      74.6,
+      80.4
+    ]
+  },
+  "configuration_command_layout": {
+    "labels": [
+      "LOAD",
+      "SAVE",
+      "DELETE",
+      "CLEAR ALL"
+    ],
+    "x_mm": [
+      173.4,
+      167.6,
+      161.8,
+      156
+    ],
+    "y_mm": 112,
+    "slot_y_mm": 117,
+    "slot_x_mm": [
+      173.4,
+      167.6,
+      161.8,
+      156
+    ]
   }
 }

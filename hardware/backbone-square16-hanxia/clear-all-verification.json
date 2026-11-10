@@ -13,7 +13,7 @@
   "ERC_errors": 0,
   "ERC_warnings": 83,
   "logo_clearance_keepout_and_courtyard_errors": 0,
-  "DRC_violations_total": 411,
+  "DRC_violations_total": 409,
   "unrouted_connections": 499,
   "logo_source": "user-supplied white-background PNG",
   "artwork_aspect_ratio_preserved": true,
@@ -23,5 +23,11 @@
   "user_touch_count": 6,
   "clear_all_touch_count": 1,
   "clear_all_hold_ms": 2000,
-  "clear_all_preserves_saved_slots": true
+  "clear_all_preserves_saved_slots": true,
+  "user_touch_grid": [
+    3,
+    2
+  ],
+  "clear_in_configuration_group": true,
+  "configuration_slot_columns_aligned": true
 }

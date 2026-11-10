@@ -387,4 +387,6 @@
 (global_label "TOUCH_CLEAR_ALL"(shape bidirectional)(at 127 138.430000 0)(effects(font(size 1 1))(justify left))(uuid "5abb0f4a-454d-4a94-8b0f-5a1aa6507fe4"))
 
 (text "CLEAR ALL: hold2seconds. Disconnect every row (Hi-Z), clear working configuration, cancel execution. Saved slots are retained. KEY16/IRQ must be configured as a touch key."(at 25.4 278.13 0)(effects(font(size .95 .95))(justify left top))(uuid "c0371a85-1245-4400-8c74-384bd4fc380e"))
+
+(text "Physical layout: user T1..T6 in an aligned3x2 grid at upper left. LOAD / SAVE / DELETE / CLEAR at bottom right, with slots1..4 aligned below."(at 25.4 286.0 0)(effects(font(size .9 .9))(justify left top))(uuid "5e9ece89-919d-4e9c-8b1f-aaa8d090bd14"))
 )

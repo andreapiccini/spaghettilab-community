@@ -14,7 +14,7 @@ Row-indicator refinement preserves all components and pad nets. A2.7mm trial fai
 
 ## Six programmable user touch keys and CLEAR ALL
 
-T1–T6 and CLEAR now occupy the upper-left user-facing area, in a3+4 grid avoiding the existing connector contacts. Covered4.4mm copper electrodes,5.8mm pitch, no additional ICs or LEDs. U91 keys10–16 (pins8–14) are connected to TE30–TE36. All32 touch inputs across U90/U91 are occupied. No default actions are assigned to T1–T6; CLEAR ALL is reserved for clearing the working row configuration. Firmware must configure U91 key16 as touch rather than IRQ, using the documented complete configuration protocol.
+T1–T6 occupy the upper-left user-facing area in an aligned3x2 grid. CLEAR is grouped with LOAD/SAVE/DELETE at bottom right. Covered4.4mm copper electrodes,5.8mm pitch, no additional ICs or LEDs. U91 keys10–16 (pins8–14) are connected to TE30–TE36. All32 touch inputs across U90/U91 are occupied. No default actions are assigned to T1–T6; CLEAR ALL is reserved for clearing the working row configuration. Firmware must configure U91 key16 as touch rather than IRQ, using the documented complete configuration protocol.
 
 See user-touch-verification.json: zero ERC errors, no DRC violations involving the seven new electrodes. Full board routing and touch sensitivity remain unqualified.
 
@@ -27,3 +27,7 @@ Logo geometry traced directly from logo_sfondo_bianco copia.png supplied by the 
 TE36 / U91 key16 pin14 is reserved for CLEAR ALL (net TOUCH_CLEAR_ALL), not user T7. The PCB is labelled CLEAR. Hold2seconds: stop execution, disable all row connections to Hi-Z, clear the working configuration; do not erase stored slots. The earlier long Play/Pause gesture only stops/disconnects while retaining the working configuration. IRQ must be disabled on key16 during initialization as already documented. Firmware remains to be implemented.
 
 Browser simulation verified: short Clear does not clear; held Clear disarms all16 rows and preserves a populated saved slot. See clear-all-verification.json for native schematic/PCB checks; these checks are not physical hardware qualification.
+
+## Configuration-control grouping
+
+LOAD, SAVE, DELETE and CLEAR share the same row at native y112mm. Slots1–4 are directly beneath their columns at y117mm; x positions173.4/167.6/161.8/156mm. User T1–T6 form an aligned3x2 grid; the USER caption is centred. No circuit, GPIO, component count, board dimensions or gesture behavior changed. Schema/PCB net parity verified; moved controls have no clearance/shorting/courtyard conflicts. Routing and firmware remain incomplete.
