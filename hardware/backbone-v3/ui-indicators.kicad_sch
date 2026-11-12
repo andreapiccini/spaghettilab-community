@@ -1,0 +1,256 @@
+(kicad_sch(version 20260101)(generator "eeschema")(uuid "e344927e-72f0-4bbc-b1e0-c730b5cff307")(paper "A2")(title_block(title "08 - LED status and touch command indicators")(date "2026-11-07")(rev "16R-READABLE"))(lib_symbols(symbol "Board28:Device__R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Device__R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Device__R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)(symbol "Board28:LED_Reverse_1206"(pin_names(hide yes))(in_bom yes)(on_board yes)(property "Reference" "D"(at 0 3.81 0)(effects(font(size 1 1))))(property "Value" "XL-3216SURC-FB"(at 0 -3.81 0)(effects(font(size 1 1))))(symbol "LED_Reverse_1206_0_1"(polyline(pts(xy -1.27 1.27)(xy 1.27 0)(xy -1.27 -1.27)(xy -1.27 1.27))(stroke(width .254)(type default))(fill(type none)))(polyline(pts(xy 1.27 1.27)(xy 1.27 -1.27))(stroke(width .254)(type default))(fill(type none))))(symbol "LED_Reverse_1206_1_1"(pin passive line(at 5.08 0 180)(length 3.81)(name "K"(effects(font(size 1 1))))(number "1"(effects(font(size 1 1)))))(pin passive line(at -5.08 0 0)(length 3.81)(name "A"(effects(font(size 1 1))))(number "2"(effects(font(size 1 1))))))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(rectangle(start 199.39000000000001 20.32)(end 364.49 195.57999999999998)(stroke(width .254)(type dash))(fill(type none))(uuid "0d41a7ff-cfb7-49bb-a255-b2524fbcdef2"))
+(text "PLAY/PAUSE AND DEBUG"(at 203.2 24.13 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "08a58295-a65b-4316-ad27-9e02617386ca"))
+(text "Driven by existing IS31FL3731; global touch inputs are on sheet10."(at 203.2 30.48 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "5c85092f-74e9-4106-aadc-3eeb24eb0a62"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 270.51 59.69 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "903c4338-4516-4bf0-b089-1d1d5dcc1a07")(property "Reference" "D522"(at 274.820000 58.420000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 274.820000 60.960000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "RUN"(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" ""(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "PLAY / PAUSE"(at 270.510000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "5f9e8eec-dedc-4726-bd03-ae1fe3f71de2"))(pin "2"(uuid "0e88d35f-8cfe-4aff-bea5-3b1db3327523"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D522")(unit 1)))))
+(global_label "LABEL_CA5"(shape bidirectional)(at 255.27 59.69 180)(effects(font(size 1.0 1.0))(justify right))(uuid "52956376-8745-4d55-ae56-593ab11905df")(property "Descrizione" "Shared LED driver bus"(at 255.270000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA8"(shape bidirectional)(at 285.75 59.69 0)(effects(font(size 1.0 1.0))(justify left))(uuid "e6fafad0-6f59-4924-a4c2-e497c43a6837")(property "Descrizione" "Shared LED driver bus"(at 285.750000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 270.51 91.44 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "81e97135-742e-4801-ac1c-c9fc1aaf427b")(property "Reference" "D537"(at 274.820000 90.170000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 274.820000 92.710000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "DEBUG"(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" ""(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "DEBUG"(at 270.510000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "5658aca4-704c-453a-baa8-109bfb2c3b23"))(pin "2"(uuid "98ee7bb3-01bd-4a18-9893-9e1fe761624e"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D537")(unit 1)))))
+(global_label "LABEL_CB8"(shape bidirectional)(at 255.27 91.44 180)(effects(font(size 1.0 1.0))(justify right))(uuid "280b4171-e088-44bb-af42-db300aec8f32")(property "Descrizione" "Shared LED driver bus"(at 255.270000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 285.75 91.44 0)(effects(font(size 1.0 1.0))(justify left))(uuid "5ab71fd5-fa03-45a6-b6a2-cba34487d686")(property "Descrizione" "Shared LED driver bus"(at 285.750000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(rectangle(start 389.89 20.32)(end 554.99 195.57999999999998)(stroke(width .254)(type dash))(fill(type none))(uuid "dccf3242-7f86-4a31-843b-2b5e978a38c1"))
+(text "LOCK / STOP / ROWS PAGE"(at 393.7 24.13 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "42109e61-93bc-4a33-8ac6-1c2f4897b8c2"))
+(text "Driven by existing IS31FL3731; global touch inputs are on sheet10."(at 393.7 30.48 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "a43195ad-c3b5-4819-b87d-fd1794b16ca6"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 459.74 59.69 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "a6ee5c0d-bfbd-48da-900d-2388f5ae6366")(property "Reference" "D680"(at 464.050000 58.420000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 464.050000 60.960000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 459.740000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "LOAD"(at 459.740000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "d96d9741-162c-4615-9e7d-cb769483fd63"))(pin "2"(uuid "f01bfe19-c8aa-49ae-9788-de13afc67b22"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D680")(unit 1)))))
+(global_label "LABEL_CA3"(shape bidirectional)(at 444.5 59.69 180)(effects(font(size 1.0 1.0))(justify right))(uuid "796ccf8a-fce1-4c51-9ecd-bc8debc9e569")(property "Descrizione" "Shared LED driver bus"(at 444.500000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA8"(shape bidirectional)(at 474.98 59.69 0)(effects(font(size 1.0 1.0))(justify left))(uuid "59d09438-62c6-4769-bc46-d25217e63287")(property "Descrizione" "Shared LED driver bus"(at 474.980000 59.690000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 459.74 91.44 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "c54a1178-36f5-4565-9662-775dd95b565d")(property "Reference" "D681"(at 464.050000 90.170000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 464.050000 92.710000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 459.740000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "SAVE"(at 459.740000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "2002e138-c1a3-4db0-9a29-41fd33404be6"))(pin "2"(uuid "f50078aa-dbd0-4511-971c-0fba955025eb"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D681")(unit 1)))))
+(global_label "LABEL_CA3"(shape bidirectional)(at 444.5 91.44 180)(effects(font(size 1.0 1.0))(justify right))(uuid "c52fa233-a64d-4749-9a77-c9e46fcc177d")(property "Descrizione" "Shared LED driver bus"(at 444.500000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA9"(shape bidirectional)(at 474.98 91.44 0)(effects(font(size 1.0 1.0))(justify left))(uuid "d7c98c8e-1bf9-4a97-a14b-f27498bf85df")(property "Descrizione" "Shared LED driver bus"(at 474.980000 91.440000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 459.74 124.46000000000001 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "9621d196-b90d-4f6a-a969-a69b0f8c0619")(property "Reference" "D569"(at 464.050000 123.190000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216SURC-FB"(at 464.050000 125.730000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216SURC-FB"(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646938"(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646938.pdf"(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "DELETE"(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" ""(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "red"(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "DELETE"(at 459.740000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "5b1dabfb-9265-4cbc-be6f-8438407b8288"))(pin "2"(uuid "3c4ec336-9078-48f1-be14-35ec29b629a5"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D569")(unit 1)))))
+(global_label "LABEL_CB5"(shape bidirectional)(at 444.5 124.46000000000001 180)(effects(font(size 1.0 1.0))(justify right))(uuid "5e10ac67-415d-4660-8ebf-e257b4973634")(property "Descrizione" "Shared LED driver bus"(at 444.500000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB4"(shape bidirectional)(at 474.98 124.46000000000001 0)(effects(font(size 1.0 1.0))(justify left))(uuid "df94c4e2-8dfe-4eb9-9866-c1a5995d1bbb")(property "Descrizione" "Shared LED driver bus"(at 474.980000 124.460000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(rectangle(start 20.32 204.47)(end 185.42 379.73)(stroke(width .254)(type dash))(fill(type none))(uuid "d2ec54ec-94af-4f2e-bb90-43738f1f6000"))
+(text "CONFIG / SYSTEM / USER A / USER B PAGES"(at 24.13 208.28 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "4e719d3a-f6c8-4776-88bb-f69f942db6ed"))
+(text "Driven by existing IS31FL3731; global touch inputs are on sheet10."(at 24.13 214.63 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "82c39e71-e514-4ce4-b4ab-6c1fdbd376d7"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 90.17 245.11 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "c96cec5e-3ead-4722-9107-af862ef573a1")(property "Reference" "D700"(at 94.480000 243.840000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 94.480000 246.380000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 90.170000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "SLOT1"(at 90.170000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "cc709b15-7b58-47e8-9189-905d7fab37eb"))(pin "2"(uuid "224b8619-bb9d-40d8-9a37-63d2782eb044"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D700")(unit 1)))))
+(global_label "LABEL_CA6"(shape bidirectional)(at 74.93 245.11 180)(effects(font(size 1.0 1.0))(justify right))(uuid "d7dcafc1-6573-4459-848c-e7515e7b14eb")(property "Descrizione" "Shared LED driver bus"(at 74.930000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA8"(shape bidirectional)(at 105.41 245.11 0)(effects(font(size 1.0 1.0))(justify left))(uuid "f48a7559-d3e3-483c-a23a-09fe123f1f8d")(property "Descrizione" "Shared LED driver bus"(at 105.410000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 90.17 276.86 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "952da06e-fb48-4298-a068-51fc948a0a8d")(property "Reference" "D701"(at 94.480000 275.590000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 94.480000 278.130000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 90.170000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "SLOT2"(at 90.170000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "8c5fd259-0b4f-4c64-95d9-95eaf99a7296"))(pin "2"(uuid "71db455a-a625-45d4-b845-16132d008bd1"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D701")(unit 1)))))
+(global_label "LABEL_CA6"(shape bidirectional)(at 74.93 276.86 180)(effects(font(size 1.0 1.0))(justify right))(uuid "a289149e-32cc-4aaa-b24e-a2ed16ffd24c")(property "Descrizione" "Shared LED driver bus"(at 74.930000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA9"(shape bidirectional)(at 105.41 276.86 0)(effects(font(size 1.0 1.0))(justify left))(uuid "e73c52c5-ca41-466c-9068-7c6ff8f868d4")(property "Descrizione" "Shared LED driver bus"(at 105.410000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 90.17 308.61 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "74d58d6e-921a-4658-b1bc-72407dd0f3cd")(property "Reference" "D702"(at 94.480000 307.340000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 94.480000 309.880000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 90.170000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "SLOT3"(at 90.170000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "d9423640-0e26-49ad-9264-4efdc86caa19"))(pin "2"(uuid "bfad33b9-6367-40ad-b0ff-340807c2e3b8"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D702")(unit 1)))))
+(global_label "LABEL_CA7"(shape bidirectional)(at 74.93 308.61 180)(effects(font(size 1.0 1.0))(justify right))(uuid "0df7ae5b-e7cc-426c-967f-eb32dd52e6e9")(property "Descrizione" "Shared LED driver bus"(at 74.930000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA1"(shape bidirectional)(at 105.41 308.61 0)(effects(font(size 1.0 1.0))(justify left))(uuid "4380efe6-d08a-4d3b-9e45-a41c211465c8")(property "Descrizione" "Shared LED driver bus"(at 105.410000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 90.17 341.63 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "b80fc6c8-db9a-4f1d-a316-72f3f8f4c30e")(property "Reference" "D703"(at 94.480000 340.360000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 94.480000 342.900000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 90.170000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "SLOT4"(at 90.170000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "0d58ed19-7d4f-4eff-af84-4019f6b33a70"))(pin "2"(uuid "356333fe-0073-427e-9285-e9ccbd631216"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D703")(unit 1)))))
+(global_label "LABEL_CA7"(shape bidirectional)(at 74.93 341.63 180)(effects(font(size 1.0 1.0))(justify right))(uuid "ff3d78d0-fa87-497d-b769-a72fa6444a82")(property "Descrizione" "Shared LED driver bus"(at 74.930000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA2"(shape bidirectional)(at 105.41 341.63 0)(effects(font(size 1.0 1.0))(justify left))(uuid "71a5e6b0-a601-46ea-920f-34da785cf3ad")(property "Descrizione" "Shared LED driver bus"(at 105.410000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(rectangle(start 199.39000000000001 204.47)(end 364.49 379.73)(stroke(width .254)(type dash))(fill(type none))(uuid "a7d6aafa-8933-48df-92fd-e6d50fa0bfb6"))
+(text "CONNECTION STATUS"(at 203.2 208.28 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "7fcb96d6-fa6d-40de-9edf-24300b7a4441"))
+(text "Driven by existing IS31FL3731; global touch inputs are on sheet10."(at 203.2 214.63 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "42ebd1b0-481e-48cc-a3c9-d00a77bfeb47"))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 270.51 245.11 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "1b16bdea-b2b7-4766-a5f2-520771158592")(property "Reference" "D547"(at 274.820000 243.840000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 274.820000 246.380000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "USB_LINK"(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" ""(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "USB"(at 270.510000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "35c68de7-5bad-4e65-8f01-fc7b37df831b"))(pin "2"(uuid "814c3720-ac5f-4b0f-8be3-a562aa6fc99c"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D547")(unit 1)))))
+(global_label "LABEL_CA7"(shape bidirectional)(at 255.27 245.11 180)(effects(font(size 1.0 1.0))(justify right))(uuid "322bdb38-1fb8-4ea0-bb9a-a38fe504a1f5")(property "Descrizione" "Shared LED driver bus"(at 255.270000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA6"(shape bidirectional)(at 285.75 245.11 0)(effects(font(size 1.0 1.0))(justify left))(uuid "9979311e-987a-4e77-ae6c-8494e55519ac")(property "Descrizione" "Shared LED driver bus"(at 285.750000 245.110000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 270.51 276.86 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "bf5d5e19-4d4a-49ae-9283-b3c9394d18fe")(property "Reference" "D545"(at 274.820000 275.590000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 274.820000 278.130000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "WIFI"(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" ""(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "WI-FI"(at 270.510000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "44db232b-9e7e-4fce-97e1-67edba396df2"))(pin "2"(uuid "b433dbf5-37f8-417b-a87c-6ffa09b4367c"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D545")(unit 1)))))
+(global_label "LABEL_CA7"(shape bidirectional)(at 255.27 276.86 180)(effects(font(size 1.0 1.0))(justify right))(uuid "53a51582-53e7-4135-b036-e9cbd124015a")(property "Descrizione" "Shared LED driver bus"(at 255.270000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA4"(shape bidirectional)(at 285.75 276.86 0)(effects(font(size 1.0 1.0))(justify left))(uuid "db9fe949-2aee-442f-8bb6-af9d849971a2")(property "Descrizione" "Shared LED driver bus"(at 285.750000 276.860000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 270.51 308.61 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "4ae87be9-8d79-4b38-9f15-c0c9d2512a25")(property "Reference" "D546"(at 274.820000 307.340000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UBC-FB"(at 274.820000 309.880000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UBC-FB"(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646941"(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646941.pdf"(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "BLUETOOTH"(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" ""(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "blue"(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "BLUETOOTH"(at 270.510000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "377dbaca-b030-4e18-a0a9-6913ad873de0"))(pin "2"(uuid "1530b7cc-accf-485d-aa59-4b9a0673a6f4"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D546")(unit 1)))))
+(global_label "LABEL_CA7"(shape bidirectional)(at 255.27 308.61 180)(effects(font(size 1.0 1.0))(justify right))(uuid "fce35539-9b6e-46fc-b992-daf0025c07b3")(property "Descrizione" "Shared LED driver bus"(at 255.270000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CA5"(shape bidirectional)(at 285.75 308.61 0)(effects(font(size 1.0 1.0))(justify left))(uuid "1bb0a14d-b519-42de-b806-276555b33df3")(property "Descrizione" "Shared LED driver bus"(at 285.750000 308.610000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 270.51 341.63 0)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "b1f32581-786b-426d-863f-c4baf5dbf969")(property "Reference" "D544"(at 274.820000 340.360000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 274.820000 342.900000 0)(hide yes)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "MASTER"(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" ""(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "MASTER"(at 270.510000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "81d5a682-60ec-49e4-a4c9-41a66875bd6d"))(pin "2"(uuid "50fab687-4ecb-4f0e-97a3-1fcc19d16a6b"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D544")(unit 1)))))
+(global_label "LABEL_CB8"(shape bidirectional)(at 255.27 341.63 180)(effects(font(size 1.0 1.0))(justify right))(uuid "d6a20113-8524-4345-861e-79317b0aca6b")(property "Descrizione" "Shared LED driver bus"(at 255.270000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LABEL_CB3"(shape bidirectional)(at 285.75 341.63 0)(effects(font(size 1.0 1.0))(justify left))(uuid "98e49041-285b-4392-9ae9-521eefdef6c6")(property "Descrizione" "Shared LED driver bus"(at 285.750000 341.630000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(rectangle(start 389.89 204.47)(end 554.99 379.73)(stroke(width .254)(type dash))(fill(type none))(uuid "fe9b0b34-87da-4491-94e4-7537d8cc6831"))
+(text "CAN TERMINATION"(at 393.7 208.28 0)(effects(font(size 1.4 1.4))(justify left top))(uuid "261c5d03-6e96-45c8-9429-8e90143ad5e0"))
+(text "Existing direct-drive LED retained."(at 393.7 214.63 0)(effects(font(size 0.95 0.95))(justify left top))(uuid "b6b3da36-e762-4684-91b7-6e2ecdbee32c"))
+(symbol(lib_id "Board28:Device__R")(at 430.53000000000003 265.43 90)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "6ebe2132-7088-4fe0-b826-29df3af5f322")(property "Reference" "R512"(at 436.110000 264.160000 90)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "2.2k"(at 436.110000 266.700000 90)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Resistor_SMD:R_0603_1608Metric"(at 430.530000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "UNI-ROYAL"(at 430.530000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "0603WAF2201T5E"(at 430.530000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C4190"(at 430.530000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Function" "Spia terminazione reale: nodo che alimenta il LED PhotoMOS automatico"(at 430.530000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "9380d540-d698-4a43-9ef4-2fe8b115d987"))(pin "2"(uuid "b62b76e4-cb18-48ad-85b7-906a9e69cc8f"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "R512")(unit 1)))))
+(global_label "TERM_DRIVE"(shape bidirectional)(at 414.02 265.43 180)(effects(font(size 1.0 1.0))(justify right))(uuid "25868466-2ec0-4c69-b6e8-732c65b086d6")(property "Descrizione" "Board signal TERM_DRIVE"(at 414.020000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LED_TERM_A"(shape bidirectional)(at 447.04 265.43 0)(effects(font(size 1.0 1.0))(justify left))(uuid "1c603e59-d916-4844-bc29-28591f16adc7")(property "Descrizione" "Board signal LED_TERM_A"(at 447.040000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(symbol(lib_id "Board28:LED_Reverse_1206")(at 500.38 265.43 180)(unit 1)(in_bom yes)(on_board yes)(dnp no)(uuid "a40aea95-4906-424a-b7bc-a6ecb60e46db")(property "Reference" "D520"(at 504.690000 264.160000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Value" "XL-3216UGC-FB"(at 504.690000 266.700000 0)(effects(font(size 1.0 1.0))(justify left)))(property "Footprint" "Breadboard28:XINGLIGHT_XL3216_Reverse_Word_Window"(at 500.380000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Manufacturer" "XINGLIGHT"(at 500.380000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "MPN" "XL-3216UGC-FB"(at 500.380000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "LCSC Part" "C3646937"(at 500.380000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Datasheet" "https://www.lcsc.com/datasheet/C3646937.pdf"(at 500.380000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Indicator" "CAN_TERM"(at 500.380000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Row" ""(at 500.380000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(property "Colour" "green"(at 500.380000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left)))(pin "1"(uuid "fc34694a-0f21-4646-8e2b-7fd7307eb512"))(pin "2"(uuid "5f35196d-623e-44f7-905b-c2f28de85ac3"))(instances(project "backbone-v3"(path "/460fdb2a-c618-458b-86e1-1ca9e2381b4f/7f7216fe-1061-42c8-9cb0-15ceb64c3f90"(reference "D520")(unit 1)))))
+(global_label "GND"(shape bidirectional)(at 482.6 265.43 180)(effects(font(size 1.0 1.0))(justify right))(uuid "2155672a-6f58-4cf9-8e54-261fd01fc429")(property "Descrizione" "Board signal GND"(at 482.600000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "LED_TERM_A"(shape bidirectional)(at 518.16 265.43 0)(effects(font(size 1.0 1.0))(justify left))(uuid "c9194d97-0c01-4bf7-8e96-cc4c5319ba85")(property "Descrizione" "Board signal LED_TERM_A"(at 518.160000 265.430000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+
+(wire(pts(xy 255.270000 59.690000)(xy 275.590000 59.690000))(stroke(width 0)(type default))(uuid "d02f75d1-acf1-469e-a933-e8d7ab1354ac"))
+
+(wire(pts(xy 265.430000 308.610000)(xy 285.750000 308.610000))(stroke(width 0)(type default))(uuid "bfdc93b6-f09d-475f-8763-a0b6c0ebc036"))
+
+
+
+(wire(pts(xy 105.410000 308.610000)(xy 85.090000 308.610000))(stroke(width 0)(type default))(uuid "74e1f49a-5b10-471b-9780-2fb3538ad553"))
+
+(wire(pts(xy 105.410000 341.630000)(xy 85.090000 341.630000))(stroke(width 0)(type default))(uuid "6f1fb4c9-fb0f-4439-a316-8ec18569d571"))
+(wire(pts(xy 464.820000 91.440000)(xy 444.500000 91.440000))(stroke(width 0)(type default))(uuid "4159e12e-bc56-4e7c-81ec-37dde062b52d"))
+
+(wire(pts(xy 444.500000 59.690000)(xy 464.820000 59.690000))(stroke(width 0)(type default))(uuid "0eeb6a8a-d313-4e66-8dd2-bca1853afc45"))
+
+(wire(pts(xy 285.750000 276.860000)(xy 265.430000 276.860000))(stroke(width 0)(type default))(uuid "9e2e9f6f-a284-4fed-9e46-a23b9ceb953a"))
+(wire(pts(xy 285.750000 59.690000)(xy 265.430000 59.690000))(stroke(width 0)(type default))(uuid "e91f0532-f05c-4e91-aad7-1f0fa860b145"))
+(wire(pts(xy 105.410000 245.110000)(xy 85.090000 245.110000))(stroke(width 0)(type default))(uuid "f117cd29-297a-40ae-90cd-8c1d0a53de75"))
+(wire(pts(xy 474.980000 59.690000)(xy 454.660000 59.690000))(stroke(width 0)(type default))(uuid "c19697db-49c6-482d-a563-0993dc89feb4"))
+(wire(pts(xy 275.590000 341.630000)(xy 255.270000 341.630000))(stroke(width 0)(type default))(uuid "0d68b273-4630-41de-9871-1dc56c389d78"))
+(wire(pts(xy 275.590000 91.440000)(xy 255.270000 91.440000))(stroke(width 0)(type default))(uuid "1a3a2e97-361e-4c54-b664-593765ddfa14"))
+(wire(pts(xy 474.980000 124.460000)(xy 454.660000 124.460000))(stroke(width 0)(type default))(uuid "64b283d9-8c30-422a-8144-8c9c5c608bab"))
+(wire(pts(xy 285.750000 91.440000)(xy 265.430000 91.440000))(stroke(width 0)(type default))(uuid "cc11b1b7-545a-4552-b41d-e692b542e125"))
+(wire(pts(xy 105.410000 276.860000)(xy 85.090000 276.860000))(stroke(width 0)(type default))(uuid "d3c6a179-e4b8-49a9-834f-e0ce00bd6ddc"))
+(wire(pts(xy 474.980000 91.440000)(xy 454.660000 91.440000))(stroke(width 0)(type default))(uuid "4a22b36e-0c52-4da1-8687-8f88dcc8d009"))
+(wire(pts(xy 464.820000 124.460000)(xy 444.500000 124.460000))(stroke(width 0)(type default))(uuid "5d6189c6-667d-4f5f-8f35-61895bd33163"))
+(wire(pts(xy 95.250000 245.110000)(xy 74.930000 245.110000))(stroke(width 0)(type default))(uuid "ecd58dd8-ef9c-4fc0-b42f-54cfa4187555"))
+(wire(pts(xy 285.750000 245.110000)(xy 265.430000 245.110000))(stroke(width 0)(type default))(uuid "01370914-caed-48b3-b573-d201574b0bd1"))
+(wire(pts(xy 95.250000 276.860000)(xy 74.930000 276.860000))(stroke(width 0)(type default))(uuid "9799f010-7fc5-4071-8b88-58a98a3e79bb"))
+(wire(pts(xy 275.590000 245.110000)(xy 255.270000 245.110000))(stroke(width 0)(type default))(uuid "7fc4fef8-5e8b-49d4-b39e-8304a291998a"))
+(wire(pts(xy 95.250000 341.630000)(xy 74.930000 341.630000))(stroke(width 0)(type default))(uuid "cb7c3322-7dc9-4cbe-b367-6f468783be9e"))
+(wire(pts(xy 255.270000 276.860000)(xy 275.590000 276.860000))(stroke(width 0)(type default))(uuid "27639362-0a10-4881-bb36-c6792ad5b087"))
+(wire(pts(xy 95.250000 308.610000)(xy 74.930000 308.610000))(stroke(width 0)(type default))(uuid "9b93a11f-0cbe-4ec9-b127-fea698de74d1"))
+(wire(pts(xy 275.590000 308.610000)(xy 255.270000 308.610000))(stroke(width 0)(type default))(uuid "0f2befdf-09eb-45d6-bc70-d86dbbcc1c44"))
+(wire(pts(xy 285.750000 341.630000)(xy 265.430000 341.630000))(stroke(width 0)(type default))(uuid "d5a4126a-ba5d-4b5d-a669-1c59f1cdfd0f"))
+(wire(pts(xy 414.020000 265.430000)(xy 426.720000 265.430000))(stroke(width 0)(type default))(uuid "f76ae73f-a1b2-439a-a9f4-63baaacd59a3"))
+(wire(pts(xy 518.160000 265.430000)(xy 505.460000 265.430000))(stroke(width 0)(type default))(uuid "a17cfae0-a243-4598-8b37-ddd934bd5077"))
+(wire(pts(xy 447.040000 265.430000)(xy 434.340000 265.430000))(stroke(width 0)(type default))(uuid "dafdbe98-c6d1-42a2-98cc-d212a0bbe49f"))
+(wire(pts(xy 495.300000 265.430000)(xy 482.600000 265.430000))(stroke(width 0)(type default))(uuid "d5f15754-5c37-4ef8-9bb4-4575a62fe50f"))
+
+(text "BLUE LOGO: see sheet11. Sixteen emitters, existing driver; no new GPIO or LED driver."(at 25.4 76.2 0)(effects(font(size 1.0 1.0))(justify left top))(uuid "cb512cf0-a919-4297-989a-8084f26b8193"))
+(text "PLAY_PAUSE"(at 270.51 69.85 0)(effects(font(size 1.27 1.27)))(uuid "e7d45e0f-1f72-4315-bcac-b1d4d5691b7b"))(text "DEBUG"(at 270.51 101.6 0)(effects(font(size 1.27 1.27)))(uuid "c84b5876-0c81-4915-9559-49c2bc5a2557"))(text "STOP"(at 459.74 69.85 0)(effects(font(size 1.27 1.27)))(uuid "73221596-2865-4872-8442-e58bdeeacc95"))(text "PAGE_ROWS"(at 459.74 101.6 0)(effects(font(size 1.27 1.27)))(uuid "72991b0d-963b-4de4-a899-310354e06a3f"))(text "LOCK"(at 459.74 134.62 0)(effects(font(size 1.27 1.27)))(uuid "b6d90602-2285-4b81-9c06-dda4b4539ac4"))(text "PAGE_CONFIG"(at 90.17 255.27 0)(effects(font(size 1.27 1.27)))(uuid "a923861f-503d-4826-babf-3232b9fff033"))(text "PAGE_SYSTEM"(at 90.17 287.02000000000004 0)(effects(font(size 1.27 1.27)))(uuid "3b8aa683-b0f3-40ad-8f29-a634daa6d035"))(text "PAGE_USER_A"(at 90.17 318.77000000000004 0)(effects(font(size 1.27 1.27)))(uuid "a2c97cca-3106-4b04-83b7-40d1f14c7435"))(text "PAGE_USER_B"(at 90.17 351.79 0)(effects(font(size 1.27 1.27)))(uuid "5f2b9c05-64a6-4cae-9fa8-158576a9c0ff")))
