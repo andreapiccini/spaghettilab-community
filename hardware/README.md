@@ -13,6 +13,10 @@ and production controls are maintained separately.
 The ignore rules do not provide confidentiality for files already published in Git
 history. They only prevent generated outputs from being added in future commits.
 
+## Backbone V3
+
+Open the [Backbone V3 KiCad project](backbone-v3/backbone-v3.kicad_pro) or the [interactive front panel preview](backbone-v3/anteprima-interattiva.html).
+
 ## KiCad library policy
 
 Each public schematic embeds the symbols it uses and each public PCB embeds its
