@@ -1667,7 +1667,7 @@
 
 (global_label "ESP_EN"(shape bidirectional)(at 87.63 77.47 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "b5f8b9c8-6c7b-4137-83a7-bbf349e447c6")(property "Descrizione" "Enable/reset ESP32, attivo basso"(at 87.630000 77.470000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
 
-(global_label "I2C_INT_SCL"(shape bidirectional)(at 87.63 95.25 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "7988771e-c918-4e99-9641-205826af4c95")(property "Descrizione" "Bus I2C interno per FCA9539Q, TCA9536 e IS31FL3731; SDA pad25 / SCL pad5; pull-up R302/R303 4,7k a3V3"(at 87.630000 95.250000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
+(global_label "I2C_INT_SCL"(shape bidirectional)(at 87.63 95.25 180.0)(effects(font(size 1.0 1.0))(justify right))(uuid "7988771e-c918-4e99-9641-205826af4c95")(property "Descrizione" "Bus I2C interno per FCA9539Q, BS8112A-3 e IS31FL3731; SDA pad25 / SCL pad5; pull-up R302/R303 4,7k a3V3"(at 87.630000 95.250000 0)(hide yes)(effects(font(size 0.95 0.95))(justify left))))
 
 
 (global_label "I2C_USER_SDA"(shape bidirectional)(at 87.63 120.65 180)(effects(font(size 1 1))(justify right))(uuid "1f415b47-97bf-438c-803b-7ff969ecb147"))

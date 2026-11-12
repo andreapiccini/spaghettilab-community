@@ -4,16 +4,16 @@ Aprire `backbone-v3.kicad_pro` in KiCad. Il progetto contiene lo schema gerarchi
 
 ## Touch
 
-Due Holtek BS812A-1 (LCSC C81747) alimentati a 3,3 V leggono due elettrodi ciascuno. I quattro elettrodi sono anulari e coperti da solder mask sul lato breadboard, con i LED sul lato opposto. I condensatori di taratura da 10 pF sono predisposti DNP. Le uscite attive basse sono lette dal TCA9536 (I²C interno, indirizzo 0x41). La lettura è digitale sia con ESP32-S3 sia con ESP32-S31 sul socket FlexyPin.
+Un Holtek BS8112A-3 (LCSC C91296), alimentato a 3,3 V con C944 da 100 nF, legge i quattro elettrodi anulari sotto la solder mask. Usa il bus I²C interno esistente, con indirizzo a 7 bit `0x50`. L’ESP32-S3 e l’ESP32-S31 condividono la stessa interfaccia. Gli ingressi inutilizzati e KEY12/IRQ restano aperti.
 
-| Bit | Comando |
-| --- | --- |
-| P0 | Play/Stop |
-| P1 | + |
-| P2 | Mode |
-| P3 | Load/Save |
+| Ingresso | Bit di KeyStatus0 | Comando |
+| --- | --- | --- |
+| KEY1 | 0 | Play/Stop |
+| KEY2 | 1 | + |
+| KEY3 | 2 | Mode |
+| KEY4 | 3 | Load/Save |
 
-Il firmware deve leggere il registro di ingresso 0x00, con P3 configurato come ingresso. Il comportamento dei comandi è simulato nell’anteprima. I tre segmenti della batteria sono indipendenti e attendono il dato di carica dal modulo batteria.
+Il firmware deve leggere `KeyStatus0` (`0x08`) in polling, interpretando 1 come tasto premuto. L’I²C va configurato a non più di 100 kbit/s con supporto al clock stretching e timeout. Le soglie dei quattro canali si impostano in software all’avvio entro la finestra indicata nel datasheet. Il comportamento dei comandi è simulato nell’anteprima. I tre segmenti della batteria sono indipendenti e attendono il dato di carica dal modulo batteria.
 
 ## Frontale e LED
 
@@ -23,7 +23,7 @@ Le finestre sono aperture nelle due solder mask con esclusione di rame sui quatt
 
 ## Verifica KiCad
 
-Lo schema ha superato l’ERC senza errori. Sono state confrontate 1.065 associazioni piazzola–rete tra schema e PCB. Il DRC non segnala cortocircuiti o piazzole nelle aree ottiche. Restano 499 connessioni da instradare e segnalazioni su courtyard, serigrafia e distanze del PCB, comprese quelle dei contatti magnetici al bordo.
+Lo schema ha superato l’ERC senza errori. Sono state confrontate 1.049 associazioni piazzola–rete tra schema e PCB. Il DRC non segnala cortocircuiti o piazzole nelle aree ottiche. Restano 499 connessioni da instradare e segnalazioni su courtyard, serigrafia e distanze del PCB, comprese quelle dei contatti magnetici al bordo.
 
 ## Variante RGB
 
