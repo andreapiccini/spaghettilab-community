@@ -1,17 +1,30 @@
 # Backbone V3
 
-Il progetto KiCad del Backbone V3 è in questa cartella. Il layout del frontale deriva dal commit `0977206`.
+Aprire `backbone-v3.kicad_pro` in KiCad. Il progetto contiene lo schema gerarchico e il PCB da **68,5 × 63,5 mm**. L’[anteprima interattiva](anteprima-interattiva.html) simula i quattro comandi, Play/Stop, il blocco e le quattro memorie. Le modalità delle righe sono 3.3V, GND, MCU e X (scollegata). I tasti in basso hanno solo le icone.
 
-Aprire `backbone-v3.kicad_pro` in KiCad e `anteprima-interattiva.html` nel browser. Contorno nominale **68,5 × 57,5 mm**. Il passo verticale delle righe è 2,54 mm. Le colonne Hanxia hanno passo orizzontale di 4,00 mm per banco e un’intercapedine centrale di 7,62 mm da foro a foro. Il foro Ø1,10 mm della colonna adiacente è a 0,35 mm dal bordo della piazzola SMD nominale. I due connettori magnetici e la USB seguono il bordo allargato di 3 mm per lato. I quattro indicatori di ogni riga sono a 45°, distanziati orizzontalmente di 1,75 mm. La X bianca indica OFF.
+## Touch
 
-I tratti dei quattro simboli di riga sono finestrelle su entrambe le facce della solder mask. Le aree di esclusione mantengono il rame libero sotto i tratti su tutti e quattro gli strati. In basso ci sono LOAD, +, MODE e SAVE. Le quattro memorie condividono una fila di numeri retroilluminati: 1 e 2 tra LOAD e +, 3 e 4 tra MODE e SAVE. I quattro numeri e le quattro icone sono allineati sulla stessa coordinata Y = 113,70 mm. Lo spazio visibile tra i bordi delle icone e dei numeri e tra i numeri adiacenti è 2,76 mm per entrambi i gruppi. Tra la USB e il connettore magnetico sinistro, la scritta retroilluminata VCC 3.3V identifica la tensione di alimentazione delle righe. Il logo originale e le cinque spie di stato si trovano in alto a destra. Nell’anteprima, premere LOAD o SAVE per scegliere l’operazione sulle quattro memorie. Con + cambiare memoria e con MODE confermare. Le configurazioni sono memorizzate localmente nel browser.
+Due Holtek BS812A-1 (LCSC C81747) alimentati a 3,3 V leggono due elettrodi ciascuno. I quattro elettrodi sono anulari e coperti da solder mask sul lato breadboard, con i LED sul lato opposto. I condensatori di taratura da 10 pF sono predisposti DNP. Le uscite attive basse sono lette dal TCA9536 (I²C interno, indirizzo 0x41). La lettura è digitale sia con ESP32-S3 sia con ESP32-S31 sul socket FlexyPin.
 
-## Verifica geometrica
+| Bit | Comando |
+| --- | --- |
+| P0 | Play/Stop |
+| P1 | + |
+| P2 | Mode |
+| P3 | Load/Save |
 
-Il PCB contiene 91 footprint LED_0402_1005Metric sul Top (F.Cu), ciascuno con due piazzole e modello 3D: 64 per le righe, 4 per gli slot, 2 per VCC 3.3V, 4 per i comandi, 5 per le spie e 12 per il logo. Le piazzole sono state verificate rispetto alle altre piazzole (0,15 mm) e alle finestre ottiche (0,035 mm). Alcuni emettitori sono decentrati per lasciare il rame fuori dalle aperture. Il campo Indicator associa ciascun LED alla relativa scritta o icona.
+Il firmware deve leggere il registro di ingresso 0x00, con P3 configurato come ingresso. Il comportamento dei comandi è simulato nell’anteprima. I tre segmenti della batteria sono indipendenti e attendono il dato di carica dal modulo batteria.
 
-I LED sono piazzati come componenti di studio, esclusi da distinta e file di montaggio finché non saranno collegati nello schema. I 0402 indicati emettono in direzione opposta al FR-4 nel montaggio standard. L’orientamento di montaggio per la retroilluminazione attraverso il laminato e la resa del logo richiedono una prova fisica. Nel PCB di studio il logo è spostato a sinistra di 1,60 mm e in alto di 1,40 mm dal lato breadboard. Le piazzole di J33, D6, U51 e U60 rimangono sotto parti dell’apertura del logo. Per le quattro memorie e la scritta VCC sono state tracciate finestre su entrambe le facce e aree senza rame. Per allineare le aperture, sono stati riposizionati il driver LED U70 e Q33. Le sagome di due elettrodi touch anulari per LOAD e SAVE sono su Cmts.User. La variante usa già tutti i GPIO touch nativi dell’ESP32-S3, quindi per cablare i due tasti serve riassegnare due GPIO o prevedere altri ingressi touch. Il firmware delle quattro memorie e il collegamento dei LED restano da implementare. Restano da controllare J4 e R300 rispetto a bordo e intagli. Lo schema e il routing di questo PCB sono ancora da integrare. I modelli 3D Hanxia e BOOMELE sono opzionali e provengono dalla cartella di lavoro del ramo di origine.
+## Frontale e LED
 
-## Prova RGB
+Il driver IS31FL3731 (I²C interno, 0x74) pilota 105 LED. La [mappa del frontale](layout.json) riporta le reti di anodo e catodo, il registro PWM e il codice LCSC per ciascun emettitore. Le 16 righe hanno 64 LED 0402 a ±45°. I 0603 sono stati usati dove le piazzole rispettano le aperture e lo spazio disponibile. In totale ci sono 86 LED 0402 e 19 LED 0603. Il logo usa 20 LED blu (16 da 0402 e 4 da 0603) distribuiti su simbolo e lettere.
 
-L’[anteprima RGB con MODE](anteprima-rgb-mode.html) simula un indicatore RGB per riga e le quattro modalità sul tasto. Il PCB di questa revisione usa gli indicatori 0402.
+Le finestre sono aperture nelle due solder mask con esclusione di rame sui quattro strati. Rimane FR-4 pieno. I LED sono componenti a emissione frontale, piazzati sul Top per la prova di montaggio rivolto verso il laminato. Servono un campione per verificare saldabilità, uniformità della luce e sensibilità degli elettrodi, e il routing del PCB prima della fabbricazione. J32 e J33 sono stati riposizionati per liberare le finestre.
+
+## Verifica KiCad
+
+Lo schema ha superato l’ERC senza errori. Sono state confrontate 1.065 associazioni piazzola–rete tra schema e PCB. Il DRC non segnala cortocircuiti o piazzole nelle aree ottiche. Restano 499 connessioni da instradare e segnalazioni su courtyard, serigrafia e distanze del PCB, comprese quelle dei contatti magnetici al bordo.
+
+## Variante RGB
+
+L’[anteprima RGB con MODE](anteprima-rgb-mode.html) conserva il confronto con la proposta precedente.
