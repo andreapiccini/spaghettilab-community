@@ -345,7 +345,7 @@
 		(uuid "dceff10d-cf9d-4502-81ba-26f2a0c4bdab")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/USB-C-SMD_HC-TYPE-C-16P-01A.wrl"
+	(model "${KIPRJMOD}/models/SpaghettiLAB.3dshapes/USB-C-SMD_HC-TYPE-C-16P-01A.wrl"
 		(offset
 			(xyz 0 0 0)
 		)
