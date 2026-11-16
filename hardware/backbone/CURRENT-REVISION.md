@@ -21,15 +21,17 @@ I collegamenti AUX GPIO35–37 restano DNP per i moduli a PSRAM Octal.
 - **Misura di corrente.** U14 pilota direttamente `MEAS_S0/S1/S2` e
   `MEAS_INHIBIT` sui pin 2–5. Le reti locali comandano U17/U18 e i
   relativi pull-up. R56–R61 restano in serie alle porte inferiori.
-- **Porte inferiori 5 e 6.** L'expander U71 è sul bus I²C esistente
-  all'indirizzo a 7 bit `0x21` (U25 resta a `0x20`). P00 e P01
-  pilotano `ESP_ISO4_N` e `ESP_ISO5_N` tramite i selettori di
-  proprietà esistenti. R402/R403 tengono alti i due segnali quando U71
-  è in ingresso, quindi all'accensione gli switch ESP sono aperti.
-  Il firmware ESP deve inizializzare U71 con uscite alte prima di
-  abilitare le porte e riconciliare la configurazione dopo ogni reset
-  dell'ESP a scheda alimentata, perché U71 conserva lo stato.
-  Configurare i bit I/O inutilizzati come uscite basse.
+- **Porte inferiori 5 e 6.** L'expander U71 è un PCF8574LQ/TR HGSEMI
+  (LCSC C51484079, QFN 3 × 3 mm) all'indirizzo I²C a 7 bit `0x21`
+  (U25 resta a `0x20`). P0 e P1 pilotano `ESP_ISO4_N` e
+  `ESP_ISO5_N` tramite i selettori esistenti. R402/R403 tengono alti i
+  segnali all'accensione, quando il PCF8574 rilascia le uscite, e gli
+  switch ESP partono aperti. Il firmware deve scrivere un singolo byte
+  per aggiornare U71, mantenendo alti i bit 2–7 e usando i bit 0–1
+  attivi bassi. Inizializzare con `0xFF` anche dopo un reset dell'ESP
+  a scheda alimentata, perché U71 conserva lo stato.
+- **I²C condiviso.** Per GPIO4/5, J4/Qwiic e J5 della mezzanina il
+  limite è 100 kHz. Lo SPI utente e i GPIO superiori restano disponibili.
 - **Rilevamento USB.** R110/R111 sono sulla mezzanina, alimentati dal
   VBUS grezzo su J11.51. J11.23 è riservato. Il ponte R401 sulla base
   conserva l'opzione per il ramo LED di espansione.

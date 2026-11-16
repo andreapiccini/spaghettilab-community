@@ -20529,7 +20529,36 @@
 			)
 			(embedded_fonts no)
 		)
-	)
+
+(symbol "LCSC_Ports:PCF8574LQ"
+  (exclude_from_sim no) (in_bom yes) (on_board yes)
+  (property "Reference" "U" (at 0 12.7 0) (effects (font (size 1.27 1.27))))
+  (property "Value" "PCF8574LQ/TR" (at 0 10.16 0) (effects (font (size 1.27 1.27))))
+  (property "Footprint" "Package_DFN_QFN:QFN-16-1EP_3x3mm_P0.5mm_EP1.45x1.45mm" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+  (property "Datasheet" "https://datasheet.lcsc.com/lcsc/2204131745_HGSEMI-PCF8574T-TR_C2987288.pdf" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+  (property "Description" "HGSEMI 8-bit 100 kHz I2C expander, QFN-16" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+  (symbol "PCF8574LQ_0_1"
+    (rectangle (start -7.62 10.16) (end 7.62 -11.43)
+      (stroke (width 0.254) (type default)) (fill (type background))))
+  (symbol "PCF8574LQ_1_1"
+    (pin bidirectional line (at -10.16 8.89 0) (length 2.54) (name "P0" (effects (font (size 1 1)))) (number "5" (effects (font (size 1 1)))))
+(pin bidirectional line (at -10.16 6.35 0) (length 2.54) (name "P1" (effects (font (size 1 1)))) (number "6" (effects (font (size 1 1)))))
+(pin bidirectional line (at -10.16 3.81 0) (length 2.54) (name "P2" (effects (font (size 1 1)))) (number "7" (effects (font (size 1 1)))))
+(pin bidirectional line (at -10.16 1.27 0) (length 2.54) (name "P3" (effects (font (size 1 1)))) (number "8" (effects (font (size 1 1)))))
+(pin bidirectional line (at -10.16 -1.27 0) (length 2.54) (name "P4" (effects (font (size 1 1)))) (number "10" (effects (font (size 1 1)))))
+(pin bidirectional line (at -10.16 -3.81 0) (length 2.54) (name "P5" (effects (font (size 1 1)))) (number "11" (effects (font (size 1 1)))))
+(pin bidirectional line (at -10.16 -6.35 0) (length 2.54) (name "P6" (effects (font (size 1 1)))) (number "12" (effects (font (size 1 1)))))
+(pin bidirectional line (at -10.16 -8.89 0) (length 2.54) (name "P7" (effects (font (size 1 1)))) (number "13" (effects (font (size 1 1)))))
+(pin power_in line (at 10.16 8.89 180) (length 2.54) (name "VDD" (effects (font (size 1 1)))) (number "1" (effects (font (size 1 1)))))
+(pin bidirectional line (at 10.16 6.35 180) (length 2.54) (name "SDA" (effects (font (size 1 1)))) (number "16" (effects (font (size 1 1)))))
+(pin input line (at 10.16 3.81 180) (length 2.54) (name "SCL" (effects (font (size 1 1)))) (number "15" (effects (font (size 1 1)))))
+(pin input line (at 10.16 1.27 180) (length 2.54) (name "A0" (effects (font (size 1 1)))) (number "2" (effects (font (size 1 1)))))
+(pin input line (at 10.16 -1.27 180) (length 2.54) (name "A1" (effects (font (size 1 1)))) (number "3" (effects (font (size 1 1)))))
+(pin input line (at 10.16 -3.81 180) (length 2.54) (name "A2" (effects (font (size 1 1)))) (number "4" (effects (font (size 1 1)))))
+(pin open_collector line (at 10.16 -6.35 180) (length 2.54) (name "~{INT}" (effects (font (size 1 1)))) (number "14" (effects (font (size 1 1)))))
+(pin power_in line (at 10.16 -8.89 180) (length 2.54) (name "VSS" (effects (font (size 1 1)))) (number "9" (effects (font (size 1 1)))))
+(pin passive line (at 0.00 -13.97 90) (length 2.54) (name "EP" (effects (font (size 1 1)))) (number "17" (effects (font (size 1 1)))))))
+)
 	(rectangle
 		(start 15 471.0687)
 		(end 223.3184 571.7572)
@@ -55957,9 +55986,9 @@
 
 (global_label "GPIO39_UPPER" (shape bidirectional) (at 92.71 304.8 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "ee1c9e91-fe64-4de1-98da-dff027603feb"))
 (global_label "GPIO40_UPPER" (shape bidirectional) (at 105.41 304.8 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "f82f1de3-064a-448d-bd83-7dbcbd6d96b3"))
-(text "U71 | ESP PORT 5/6 ISOLATION — I2C 0x21" (at 361.95 563.88 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "d57a83a6-b335-489c-a208-2de8cb717b5b"))
+(text "U71 | ESP PORT 5/6 ISOLATION — I2C 0x21 / 100 kHz" (at 361.95 563.88 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "d57a83a6-b335-489c-a208-2de8cb717b5b"))
 (symbol
-		(lib_id "LCSC_Ports:TCA9535PWR")
+		(lib_id "LCSC_Ports:PCF8574LQ")
 		(at 406.4000 590.5500 0)
 		(unit 1)
 		(body_style 1)
@@ -55970,7 +55999,7 @@
 		(dnp no)
 		(uuid "aa48ecd4-aecb-444c-8ae6-88ecadb97e20")
 		(property "Reference" "U71"
-			(at 406.4000 586.5500 0)
+			(at 406.4000 575.3100 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -55979,8 +56008,8 @@
 				)
 			)
 		)
-		(property "Value" "TCA9535PWR(UMW)"
-			(at 406.4000 589.0500 0)
+		(property "Value" "PCF8574LQ/TR"
+			(at 406.4000 577.8500 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -55989,7 +56018,7 @@
 				)
 			)
 		)
-		(property "Footprint" "LCSC_Ports:TSSOP-24_L7.8-W4.4-P0.65-LS6.4-BL"
+		(property "Footprint" "Package_DFN_QFN:QFN-16-1EP_3x3mm_P0.5mm_EP1.45x1.45mm"
 			(at 406.4000 590.5500 0)
 			(hide yes)
 			(show_name no)
@@ -56000,7 +56029,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://datasheet.lcsc.com/lcsc/2204131745_HGSEMI-PCF8574T-TR_C2987288.pdf"
 			(at 406.4000 590.5500 0)
 			(hide yes)
 			(show_name no)
@@ -56011,7 +56040,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "HGSEMI 8-bit 100 kHz I2C expander, QFN-16"
 			(at 406.4000 590.5500 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -56021,7 +56050,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C22396388"
+		(property "LCSC" "C51484079"
 			(at 406.4000 590.5500 0)
 			(hide yes)
 			(show_name no)
@@ -56043,78 +56072,30 @@
 				)
 			)
 		)
-		(pin "24"
-			(uuid "4cf9d765-924f-4dc5-bb83-2f6925aabe4f")
-		)
-		(pin "23"
-			(uuid "710f115d-218f-4e0f-ac9e-e0f59b2a0c2a")
-		)
-		(pin "22"
-			(uuid "bb24e0e8-3739-49a7-9b96-7c1d8db0f1db")
-		)
-		(pin "21"
-			(uuid "b6ed7ff7-bfd1-45dc-a854-7eeb61f93455")
-		)
-		(pin "20"
-			(uuid "c2703125-ce97-4dfd-bc20-2f903d7d71a8")
-		)
-		(pin "19"
-			(uuid "29f6be52-f066-43de-afad-3998cee79e0f")
-		)
-		(pin "18"
-			(uuid "5860a3e2-d561-4bcb-af11-7497a32f6933")
-		)
-		(pin "17"
-			(uuid "d7336f6f-257f-48a8-b26c-3fb30b5d1a0e")
-		)
-		(pin "16"
-			(uuid "c2c7e4be-84de-4219-b741-e6b8d720a0aa")
-		)
-		(pin "15"
-			(uuid "358da1bd-517b-45c6-a3f3-7af90e2cd0da")
-		)
-		(pin "14"
-			(uuid "a8e4feca-cb42-4411-86c4-bfb511bf82d1")
-		)
-		(pin "13"
-			(uuid "7518e461-0330-405f-bee1-85db70e160c1")
-		)
-		(pin "12"
-			(uuid "1e6884b3-9bc4-4c85-8a49-233d27be15f4")
-		)
-		(pin "11"
-			(uuid "29fa279b-4977-421c-909c-a019c854da5a")
-		)
-		(pin "10"
-			(uuid "92254649-c4f1-4505-934c-c74674a718f9")
-		)
-		(pin "9"
-			(uuid "061be9b5-88b3-424d-a1d8-874e59491826")
-		)
-		(pin "8"
-			(uuid "ad830a24-b48b-478d-8fb0-1024ff6fd014")
-		)
-		(pin "7"
-			(uuid "bdd986c6-cf97-4edb-bd1e-d68ae175af63")
-		)
-		(pin "6"
-			(uuid "7133b9e4-1ee1-40a2-97ef-618d8ff7536b")
-		)
-		(pin "5"
-			(uuid "9b03d51a-c79d-46b4-9b8c-306710bcff65")
-		)
-		(pin "4"
-			(uuid "f3814860-5501-4598-a0cd-b98e688fa3e1")
-		)
-		(pin "3"
-			(uuid "0efb2740-e5e1-47ed-af16-4c886a8dfc9a")
-		)
-		(pin "2"
-			(uuid "43cfbf69-342f-4674-9ab6-3b28a535c515")
-		)
-		(pin "1"
-			(uuid "ed2480fd-7fcb-4fef-91db-a24895732ba3")
-		)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		(instances
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
@@ -56123,7 +56104,25 @@
 				)
 			)
 		)
-	)
+
+(pin "5" (uuid "6a15d703-2fdc-4f11-be3e-fbff78db6176"))
+(pin "6" (uuid "f8c2b445-f869-4f41-8097-e577fdec21ff"))
+(pin "7" (uuid "6afaea69-cc09-4929-82f8-18cf5cbbeffd"))
+(pin "8" (uuid "d96e4acd-10f0-4a2e-992e-6fc9918fb1d0"))
+(pin "10" (uuid "4f9ab8c4-43f7-4f29-9525-68a8219d479f"))
+(pin "11" (uuid "66e866e9-bc6e-4d24-a144-000710555b38"))
+(pin "12" (uuid "fec7725e-75e8-4362-a554-8b44c404b657"))
+(pin "13" (uuid "d54cf8a4-f294-43e3-b4c0-13b2802215c7"))
+(pin "1" (uuid "04b1fd60-7ee8-4fb3-986c-750434c9a949"))
+(pin "16" (uuid "cd324b76-67ab-47cf-b8f3-210bc6cb9807"))
+(pin "15" (uuid "4ab12a2e-e02d-4f46-b4e2-ab3e83d11ac0"))
+(pin "2" (uuid "a8343ce4-4f93-44ab-ac95-cd1852949b2d"))
+(pin "3" (uuid "06bab78e-766a-4788-a737-8de7fdad688a"))
+(pin "4" (uuid "3cd33832-6bf7-4119-a7c9-6f49d9cbffa5"))
+(pin "14" (uuid "0fb57117-dbc7-40f8-9fc5-ed5b80200383"))
+(pin "9" (uuid "2af181a8-af53-4904-9f83-4c9aa6ab6146"))
+(pin "17" (uuid "41479905-da44-4c61-bb8a-8c91f2790efa"))
+)
 (symbol
 		(lib_id "Device:C")
 		(at 461.0100 590.5500 0)
@@ -56444,34 +56443,52 @@
 			)
 		)
 	)
-(no_connect (at 396.24 576.58) (uuid "c50e69fd-ae64-4e70-82cc-980c15108543"))
-(global_label "GND" (shape bidirectional) (at 396.24 579.12 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "ddb5642b-e0a4-4d84-9655-4785a03c0a04"))
-(global_label "GND" (shape bidirectional) (at 396.24 581.66 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "9c4193a0-338c-4115-8a47-86ae7281685a"))
-(global_label "ESP_ISO4_N" (shape bidirectional) (at 396.24 584.20 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "20627a85-870c-4762-a6cf-4dce337a2b2b"))
-(global_label "ESP_ISO5_N" (shape bidirectional) (at 396.24 586.74 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "ef0db85f-97df-4060-9e81-66ac20fb92df"))
-(no_connect (at 396.24 589.28) (uuid "40a077ce-1779-4445-9597-9da7fb1cf60b"))
-(no_connect (at 396.24 591.82) (uuid "8c7e5d66-9956-4566-a874-7fbdffc20ce7"))
-(no_connect (at 396.24 594.36) (uuid "1914e5ab-5664-4421-978c-c61e5041ea3a"))
-(no_connect (at 396.24 596.90) (uuid "ab34b4ff-c086-41a7-8132-52f0d97fa4ea"))
-(no_connect (at 396.24 599.44) (uuid "93b8454d-f556-4093-a6a0-093d22ee9dca"))
-(no_connect (at 396.24 601.98) (uuid "d819c136-17da-46ea-bdf8-d1aac28886f2"))
-(global_label "GND" (shape bidirectional) (at 396.24 604.52 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "3276a2d4-8493-4a48-b2e3-2630e58d3354"))
-(no_connect (at 416.56 604.52) (uuid "14fbd0ab-3546-43af-a514-14e4d14b8d00"))
-(no_connect (at 416.56 601.98) (uuid "da0317b6-ec43-4595-95d6-e920dc8739f2"))
-(no_connect (at 416.56 599.44) (uuid "29782770-9a16-408c-839f-e761e51176fa"))
-(no_connect (at 416.56 596.90) (uuid "59449b38-d781-4e73-9671-4db3251fee60"))
-(no_connect (at 416.56 594.36) (uuid "e6a803ed-394f-4ccd-bbd2-ca9293282ab4"))
-(no_connect (at 416.56 591.82) (uuid "c1364612-ac9c-4b35-a5d7-5bbe84953e2c"))
-(no_connect (at 416.56 589.28) (uuid "0ddc8b45-f115-4ba2-97b5-1173729512fe"))
-(no_connect (at 416.56 586.74) (uuid "9fe3c215-636c-4591-85b1-39705fb28502"))
-(global_label "VCORE" (shape bidirectional) (at 416.56 584.20 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "77708c5e-ffff-4634-8ab3-05cb029ca41d"))
-(global_label "IO5" (shape bidirectional) (at 416.56 581.66 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "8c48bd64-b8a6-4e64-852b-4e81dae6a42c"))
-(global_label "IO4" (shape bidirectional) (at 416.56 579.12 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "9c50854d-4eaf-4e93-8dc7-17620b39d58c"))
-(global_label "VCORE" (shape bidirectional) (at 416.56 576.58 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "725edc67-ee7c-4c3f-9c1a-6b585454b5c9"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (global_label "VCORE" (shape bidirectional) (at 461.01 570.23 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "dd0605fa-5b7a-434e-b7e6-4dcc7ef2eac2"))
 (global_label "ESP_ISO4_N" (shape bidirectional) (at 461.01 577.85 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "792ca1ea-12c8-4f7a-9435-0305458fcce5"))
 (global_label "VCORE" (shape bidirectional) (at 461.01 586.74 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "df0e2975-e67b-43c3-bc6c-347a6506ed5a"))
 (global_label "GND" (shape bidirectional) (at 461.01 594.36 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "628ec444-2d62-42a4-9043-475e1674c676"))
 (global_label "VCORE" (shape bidirectional) (at 461.01 603.25 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "b6e733b0-cd97-4fba-952c-5abf997a980a"))
 (global_label "ESP_ISO5_N" (shape bidirectional) (at 461.01 610.87 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "a70f20fe-3384-41e6-a138-3043a424f85c"))
+
+(global_label "ESP_ISO4_N" (shape bidirectional) (at 396.24 581.66 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "5ce9fa57-787e-4047-83d9-256139586cd7"))
+(global_label "ESP_ISO5_N" (shape bidirectional) (at 396.24 584.20 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "5c71f9dc-525b-4d7a-95bb-31950601d459"))
+(no_connect (at 396.24 586.74) (uuid "cfaaec0f-e7d6-4501-a21b-1852bef16f92"))
+(no_connect (at 396.24 589.28) (uuid "828111ff-baaf-40fb-a396-8307cf01ebf8"))
+(no_connect (at 396.24 591.82) (uuid "4c3f5cd6-24c2-4f99-a43b-2d6563a44283"))
+(no_connect (at 396.24 594.36) (uuid "d72be0d4-ccfa-450d-9bc4-e55cb4faf358"))
+(no_connect (at 396.24 596.90) (uuid "3c5619eb-10c7-41a6-b455-8356c7a11d73"))
+(no_connect (at 396.24 599.44) (uuid "41ad5745-c365-4eea-8acd-ddcc7cd912f4"))
+(global_label "VCORE" (shape bidirectional) (at 416.56 581.66 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "56e64682-7b62-4f6f-9051-afa57d45d6aa"))
+(global_label "IO4" (shape bidirectional) (at 416.56 584.20 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "75798125-e082-4276-aef3-1e9aeb812bc7"))
+(global_label "IO5" (shape bidirectional) (at 416.56 586.74 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "344b793f-3360-49a2-a116-e136c780058e"))
+(global_label "VCORE" (shape bidirectional) (at 416.56 589.28 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "bece5aca-0809-450a-bb43-93e3c7e6086e"))
+(global_label "GND" (shape bidirectional) (at 416.56 591.82 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "393c887f-8e0a-4835-94e8-e2a6504794ad"))
+(global_label "GND" (shape bidirectional) (at 416.56 594.36 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "4a650911-fa33-49fe-8c8d-2812da82eabd"))
+(no_connect (at 416.56 596.90) (uuid "8bf5cd14-b5c5-4c5e-b39a-88eb9f0ee36e"))
+(global_label "GND" (shape bidirectional) (at 416.56 599.44 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "507fd3e3-cc18-4ebe-9e00-350af378b8b0"))
+(no_connect (at 406.40 604.52) (uuid "dcdaa6f1-6af3-4439-ab18-d3c4d594195d"))
 )
