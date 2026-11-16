@@ -71,7 +71,7 @@
 					)
 				)
 			)
-			(property "Datasheet" ""
+			(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -281,8 +281,274 @@
 				)
 			)
 			(embedded_fonts no)
-		)
-(symbol "TCA9535RTWR_Compact"
+
+(property "MPN" "YC164-JR-07100KL" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+
+(property "Manufacturer" "Yageo" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+
+(property "LCSC" "C192933" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+)
+(symbol "R_Array_Isolated_4x4k7"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "RN"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "4x4.7k"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0603"
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_Array_Convex_4x0603"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "R_Array_Isolated_4x4k7_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_Array_Isolated_4x4k7_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+(symbol "R_Array_Isolated_4x4k7_2_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+(symbol "R_Array_Isolated_4x4k7_3_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+(symbol "R_Array_Isolated_4x4k7_4_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+
+(property "MPN" "YC164-JR-074K7L" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+
+(property "Manufacturer" "Yageo" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+
+(property "LCSC" "C327044" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+)
+(symbol "TCA9555RTWR_Compact"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -298,7 +564,7 @@
 					)
 				)
 			)
-			(property "Value" "TCA9535RTWR"
+			(property "Value" "TCA9555RTWR_Compact"
 				(at 0 -19.05 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -319,7 +585,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://www.lcsc.com/datasheet/C22396388.pdf"
+			(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/7935197bddb8deeea95201ae83ce3777.pdf?productCode=C42420609"
 				(at 0 -24.13 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -341,7 +607,7 @@
 					)
 				)
 			)
-			(property "Manufacturer" "UMW(友台半导体)"
+			(property "Manufacturer" "UMW"
 				(at 0 -26.67 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -352,7 +618,7 @@
 					)
 				)
 			)
-			(property "MPN" "TCA9535RTWR_Compact(UMW)"
+			(property "MPN" "TCA9555RTWR"
 				(at 0 -29.21 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -385,7 +651,7 @@
 					)
 				)
 			)
-			(symbol "TCA9535RTWR_Compact_0_1"
+			(symbol "TCA9555RTWR_Compact_0_1"
 				(rectangle
 					(start -7.62 17.02)
 					(end 7.62 -17.02)
@@ -855,5 +1121,7 @@
 (pin passive line (at -2.54 -20.32 90) (length 2.54) (name "EP" (effects (font (size 1 1)))) (number "25" (effects (font (size 1 1)))))
 )
 			(embedded_fonts no)
-		)
+
+(property "LCSC" "C42420609" (at 0 19.05 0) (hide yes) (effects (font (size 1 1))))
+)
 )

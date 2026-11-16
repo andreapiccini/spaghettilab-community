@@ -21135,7 +21135,7 @@
 					)
 				)
 			)
-			(property "Datasheet" ""
+			(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -21345,8 +21345,274 @@
 				)
 			)
 			(embedded_fonts no)
-		)
-(symbol "LCSC_Ports:TCA9535RTWR_Compact"
+
+(property "MPN" "YC164-JR-07100KL" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+
+(property "Manufacturer" "Yageo" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+
+(property "LCSC" "C192933" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+)
+(symbol "LCSC_Ports:R_Array_Isolated_4x4k7"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "RN"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "4x4.7k"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0603"
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_Array_Convex_4x0603"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "R_Array_Isolated_4x4k7_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_Array_Isolated_4x4k7_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+(symbol "R_Array_Isolated_4x4k7_2_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+(symbol "R_Array_Isolated_4x4k7_3_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+(symbol "R_Array_Isolated_4x4k7_4_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+
+(property "MPN" "YC164-JR-074K7L" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+
+(property "Manufacturer" "Yageo" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+
+(property "LCSC" "C327044" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+)
+(symbol "LCSC_Ports:TCA9555RTWR_Compact"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -21362,7 +21628,7 @@
 					)
 				)
 			)
-			(property "Value" "TCA9535RTWR"
+			(property "Value" "TCA9555RTWR_Compact"
 				(at 0 -19.05 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -21383,7 +21649,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://www.lcsc.com/datasheet/C22396388.pdf"
+			(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/7935197bddb8deeea95201ae83ce3777.pdf?productCode=C42420609"
 				(at 0 -24.13 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -21405,7 +21671,7 @@
 					)
 				)
 			)
-			(property "Manufacturer" "UMW(友台半导体)"
+			(property "Manufacturer" "UMW"
 				(at 0 -26.67 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -21416,7 +21682,7 @@
 					)
 				)
 			)
-			(property "MPN" "TCA9535RTWR_Compact(UMW)"
+			(property "MPN" "TCA9555RTWR"
 				(at 0 -29.21 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -21449,7 +21715,7 @@
 					)
 				)
 			)
-			(symbol "TCA9535RTWR_Compact_0_1"
+			(symbol "TCA9555RTWR_Compact_0_1"
 				(rectangle
 					(start -7.62 17.02)
 					(end 7.62 -17.02)
@@ -21919,7 +22185,9 @@
 (pin passive line (at -2.54 -20.32 90) (length 2.54) (name "EP" (effects (font (size 1 1)))) (number "25" (effects (font (size 1 1)))))
 )
 			(embedded_fonts no)
-		)
+
+(property "LCSC" "C42420609" (at 0 19.05 0) (hide yes) (effects (font (size 1 1))))
+)
 )
 	(rectangle
 		(start 15 471.0687)
@@ -29142,7 +29410,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 416.56 384.81 0)
 			(hide yes)
 			(show_name no)
@@ -29190,9 +29458,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 416.56 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 416.56 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 416.56 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 416.56 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 416.56 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 416.56 384.81 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "USBC_PD_mo-easyedapro:Power-VCC")
@@ -29353,7 +29621,7 @@
 		)
 	)
 	(symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 462.28 430.53 0)
 		(unit 3)
 		(body_style 1)
@@ -29373,7 +29641,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 469.9 429.26 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -29394,7 +29662,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 462.28 430.53 0)
 			(hide yes)
 			(show_name no)
@@ -29442,9 +29710,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 462.28 430.53 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 462.28 430.53 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 462.28 430.53 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 462.28 430.53 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 462.28 430.53 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 462.28 430.53 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "Connector:Conn_01x05_Socket")
@@ -31290,7 +31558,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 462.28 499.11 0)
 			(hide yes)
 			(show_name no)
@@ -31338,9 +31606,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 462.28 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 462.28 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 462.28 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 462.28 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 462.28 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 462.28 499.11 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "Mechanical:MountingHole")
@@ -31539,7 +31807,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 246.38 384.81 0)
 			(hide yes)
 			(show_name no)
@@ -31587,9 +31855,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 246.38 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 246.38 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 246.38 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 246.38 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 246.38 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 246.38 384.81 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "wazombi:R_Small")
@@ -32473,7 +32741,7 @@
 		)
 	)
 	(symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 31.75 434.34 0)
 		(unit 1)
 		(body_style 1)
@@ -32493,7 +32761,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 39.37 433.07 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -32514,7 +32782,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 31.75 434.34 0)
 			(hide yes)
 			(show_name no)
@@ -32562,9 +32830,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 31.75 434.34 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 31.75 434.34 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 31.75 434.34 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 31.75 434.34 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 31.75 434.34 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 31.75 434.34 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "power:+5V")
@@ -33092,7 +33360,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 632.46 499.11 0)
 			(hide yes)
 			(show_name no)
@@ -33140,9 +33408,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 632.46 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 632.46 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 632.46 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 632.46 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 632.46 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 632.46 499.11 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "Device:C")
@@ -33801,7 +34069,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 201.93 499.11 0)
 			(hide yes)
 			(show_name no)
@@ -33849,9 +34117,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 201.93 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 201.93 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 201.93 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 201.93 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 201.93 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 201.93 499.11 0) (hide yes) (effects (font (size 1 1))))
 )
 
 	(symbol
@@ -34561,7 +34829,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 632.46 384.81 0)
 			(hide yes)
 			(show_name no)
@@ -34609,9 +34877,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 632.46 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 632.46 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 632.46 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 632.46 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 632.46 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 632.46 384.81 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "power:+5V")
@@ -34692,7 +34960,7 @@
 		)
 	)
 	(symbol
-		(lib_id "LCSC_Ports:TCA9535RTWR_Compact")
+		(lib_id "LCSC_Ports:TCA9555RTWR_Compact")
 		(at 218.44 194.31 0)
 		(unit 1)
 		(body_style 1)
@@ -34712,7 +34980,7 @@
 				)
 			)
 		)
-		(property "Value" "TCA9535RTWR"
+		(property "Value" "TCA9555RTWR(UMW)"
 			(at 218.44 192.81 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -34733,7 +35001,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tca9535.pdf"
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/7935197bddb8deeea95201ae83ce3777.pdf?productCode=C42420609"
 			(at 218.44 194.31 0)
 			(hide yes)
 			(show_name no)
@@ -34848,8 +35116,10 @@
 
 (pin "25" (uuid "80075b50-67a5-4545-92b9-abf3dca430d7"))
 
-(property "MPN" "TCA9535RTWR" (at 218.44 194.31 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Texas Instruments" (at 218.44 194.31 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "TCA9555RTWR" (at 218.44 194.31 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "UMW" (at 218.44 194.31 0) (hide yes) (effects (font (size 1 1))))
+
+(property "LCSC" "C42420609" (at 218.44 194.31 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "Device:R")
@@ -35567,7 +35837,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 246.38 499.11 0)
 			(hide yes)
 			(show_name no)
@@ -35615,9 +35885,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 246.38 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 246.38 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 246.38 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 246.38 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 246.38 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 246.38 499.11 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "power:GND")
@@ -37242,7 +37512,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 416.56 499.11 0)
 			(hide yes)
 			(show_name no)
@@ -37290,9 +37560,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 416.56 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 416.56 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 416.56 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 416.56 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 416.56 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 416.56 499.11 0) (hide yes) (effects (font (size 1 1))))
 )
 
 	(symbol
@@ -38403,7 +38673,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 201.93 384.81 0)
 			(hide yes)
 			(show_name no)
@@ -38451,13 +38721,13 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 201.93 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 201.93 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 201.93 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 201.93 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 201.93 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 201.93 384.81 0) (hide yes) (effects (font (size 1 1))))
 )
 
 	(symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 246.38 430.53 0)
 		(unit 2)
 		(body_style 1)
@@ -38477,7 +38747,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 254 429.26 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -38498,7 +38768,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 246.38 430.53 0)
 			(hide yes)
 			(show_name no)
@@ -38546,9 +38816,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 246.38 430.53 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 246.38 430.53 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 246.38 430.53 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 246.38 430.53 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 246.38 430.53 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 246.38 430.53 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "power:GND")
@@ -39522,7 +39792,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 462.28 384.81 0)
 			(hide yes)
 			(show_name no)
@@ -39570,9 +39840,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 462.28 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 462.28 384.81 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 462.28 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 462.28 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 462.28 384.81 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 462.28 384.81 0) (hide yes) (effects (font (size 1 1))))
 )
 
 
@@ -39924,7 +40194,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 31.75 499.11 0)
 			(hide yes)
 			(show_name no)
@@ -39972,9 +40242,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 31.75 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 31.75 499.11 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 31.75 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 31.75 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 31.75 499.11 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 31.75 499.11 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "power:GND")
@@ -40838,7 +41108,7 @@
 		)
 	)
 	(symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 246.38 544.83 0)
 		(unit 1)
 		(body_style 1)
@@ -40858,7 +41128,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 254 543.56 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -40879,7 +41149,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 246.38 544.83 0)
 			(hide yes)
 			(show_name no)
@@ -40927,9 +41197,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 246.38 544.83 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 246.38 544.83 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 246.38 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 246.38 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 246.38 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 246.38 544.83 0) (hide yes) (effects (font (size 1 1))))
 )
 
 	(symbol
@@ -41069,7 +41339,7 @@
 		)
 	)
 	(symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 462.28 544.83 0)
 		(unit 2)
 		(body_style 1)
@@ -41089,7 +41359,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 469.9 543.56 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -41110,7 +41380,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 462.28 544.83 0)
 			(hide yes)
 			(show_name no)
@@ -41158,9 +41428,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 462.28 544.83 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 462.28 544.83 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 462.28 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 462.28 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 462.28 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 462.28 544.83 0) (hide yes) (effects (font (size 1 1))))
 )
 
 
@@ -41986,7 +42256,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 31.75 389.89 0)
 			(hide yes)
 			(show_name no)
@@ -42034,9 +42304,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 31.75 389.89 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 31.75 389.89 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 31.75 389.89 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 31.75 389.89 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 31.75 389.89 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 31.75 389.89 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "SpaghettiLABold:HC-TYPE-C-16P-01A")
@@ -43060,7 +43330,7 @@
 		)
 	)
 	(symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 31.75 544.83 0)
 		(unit 4)
 		(body_style 1)
@@ -43080,7 +43350,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 39.37 543.56 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -43101,7 +43371,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 31.75 544.83 0)
 			(hide yes)
 			(show_name no)
@@ -43149,9 +43419,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 31.75 544.83 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 31.75 544.83 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 31.75 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 31.75 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 31.75 544.83 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 31.75 544.83 0) (hide yes) (effects (font (size 1 1))))
 )
 	(symbol
 		(lib_id "power:GND")
@@ -44101,7 +44371,7 @@
 (global_label "GND" (shape bidirectional) (at 411.48 186.69 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "f43e626f-aafd-46fd-afea-b33acf5b82f3"))
 (global_label "VCORE" (shape bidirectional) (at 411.48 171.45 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "4c5b0d7e-0707-4934-a76b-384c681440fe"))
 (symbol
-		(lib_id "LCSC_Ports:TCA9535RTWR_Compact")
+		(lib_id "LCSC_Ports:TCA9555RTWR_Compact")
 		(at 261.62 111.76 0)
 		(unit 1)
 		(body_style 1)
@@ -44121,7 +44391,7 @@
 				)
 			)
 		)
-		(property "Value" "TCA9535RTWR"
+		(property "Value" "TCA9555RTWR(UMW)"
 			(at 261.62 110.26 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -44142,7 +44412,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tca9535.pdf"
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/7935197bddb8deeea95201ae83ce3777.pdf?productCode=C42420609"
 			(at 261.62 111.76 0)
 			(hide yes)
 			(show_name no)
@@ -44257,8 +44527,10 @@
 
 (pin "25" (uuid "33c40c7d-3776-4aa7-ad43-4be5348c447d"))
 
-(property "MPN" "TCA9535RTWR" (at 261.62 111.76 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Texas Instruments" (at 261.62 111.76 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "TCA9555RTWR" (at 261.62 111.76 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "UMW" (at 261.62 111.76 0) (hide yes) (effects (font (size 1 1))))
+
+(property "LCSC" "C42420609" (at 261.62 111.76 0) (hide yes) (effects (font (size 1 1))))
 )
 (no_connect (at 251.46 97.79) (uuid "9d178e81-c41c-4390-84c0-66564faffab7"))
 (global_label "VCORE" (shape bidirectional) (at 251.46 100.33 180) (effects (font (size 0.889 0.889)) (justify right)) (uuid "a66fe48b-40d3-44dd-ab50-bae175729d10"))
@@ -45163,7 +45435,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 781.0500 62.2300 0)
 			(hide yes)
 			(show_name no)
@@ -45211,9 +45483,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 62.23 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 62.23 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 62.23 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 781.05 62.23 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 62.23 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 781.05 62.23 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 71.12) (xy 781.05 71.12)) (stroke (width 0) (type default)) (uuid "c6d160e6-2534-4f24-ac9a-a7dacab80de2"))
 (wire (pts (xy 781.05 71.12) (xy 778.51 71.12)) (stroke (width 0) (type default)) (uuid "21dac3e0-0fba-49f4-a5e7-8b10825c0a11"))
@@ -45300,7 +45572,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 781.0500 95.2500 0)
 		(unit 1)
 		(body_style 1)
@@ -45320,7 +45592,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 788.6700 93.9800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -45341,7 +45613,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 781.0500 95.2500 0)
 			(hide yes)
 			(show_name no)
@@ -45389,9 +45661,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 95.25 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 95.25 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 95.25 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 781.05 95.25 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 95.25 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 781.05 95.25 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 86.36) (xy 781.05 86.36)) (stroke (width 0) (type default)) (uuid "c814f49a-0670-477a-824a-14f5bcb64115"))
 (wire (pts (xy 781.05 86.36) (xy 778.51 86.36)) (stroke (width 0) (type default)) (uuid "42a66c8e-1226-4cbe-964f-e693fba4fd28"))
@@ -45522,7 +45794,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 758.1900 97.7900 0)
 			(hide yes)
 			(show_name no)
@@ -45570,9 +45842,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 758.19 97.79 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 758.19 97.79 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 758.19 97.79 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 758.19 97.79 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 758.19 97.79 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 758.19 97.79 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 758.19 93.98) (xy 758.19 88.90)) (stroke (width 0) (type default)) (uuid "165d546e-fccf-4526-9b33-06b33f9bd4b7"))
 (wire (pts (xy 758.19 88.90) (xy 755.65 88.90)) (stroke (width 0) (type default)) (uuid "38618953-6376-4672-9daf-99cd4bd142a5"))
@@ -46332,7 +46604,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 875.0300 62.2300 0)
 			(hide yes)
 			(show_name no)
@@ -46380,9 +46652,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 62.23 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 62.23 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 62.23 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 875.03 62.23 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 62.23 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 875.03 62.23 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 71.12) (xy 875.03 71.12)) (stroke (width 0) (type default)) (uuid "99b089ed-92ba-4d4b-827a-0a1e7c4863c0"))
 (wire (pts (xy 875.03 71.12) (xy 872.49 71.12)) (stroke (width 0) (type default)) (uuid "bb91a329-276e-4c25-bd4d-083ebb95c95f"))
@@ -46469,7 +46741,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 875.0300 95.2500 0)
 		(unit 2)
 		(body_style 1)
@@ -46489,7 +46761,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 882.6500 93.9800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -46510,7 +46782,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 875.0300 95.2500 0)
 			(hide yes)
 			(show_name no)
@@ -46558,9 +46830,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 95.25 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 95.25 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 95.25 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 875.03 95.25 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 95.25 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 875.03 95.25 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 86.36) (xy 875.03 86.36)) (stroke (width 0) (type default)) (uuid "3a6e2162-c60f-425e-a234-f7eee81b6ec8"))
 (wire (pts (xy 875.03 86.36) (xy 872.49 86.36)) (stroke (width 0) (type default)) (uuid "8375e2c4-3f29-4665-a761-084fae83f69c"))
@@ -46691,7 +46963,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 852.1700 97.7900 0)
 			(hide yes)
 			(show_name no)
@@ -46739,9 +47011,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 852.17 97.79 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 852.17 97.79 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 852.17 97.79 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 852.17 97.79 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 852.17 97.79 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 852.17 97.79 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 852.17 93.98) (xy 852.17 88.90)) (stroke (width 0) (type default)) (uuid "544a9418-2d0d-436a-a70f-477c2d92daee"))
 (wire (pts (xy 852.17 88.90) (xy 849.63 88.90)) (stroke (width 0) (type default)) (uuid "b130e416-e41f-4b89-87e5-be36381eae30"))
@@ -47501,7 +47773,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 781.0500 125.7300 0)
 			(hide yes)
 			(show_name no)
@@ -47549,9 +47821,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 125.73 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 125.73 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 125.73 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 781.05 125.73 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 125.73 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 781.05 125.73 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 134.62) (xy 781.05 134.62)) (stroke (width 0) (type default)) (uuid "fc451732-eb37-4e7a-aa11-e36ed04c78b6"))
 (wire (pts (xy 781.05 134.62) (xy 778.51 134.62)) (stroke (width 0) (type default)) (uuid "da930ee7-14b9-4a5a-89ff-efa1f58f07e7"))
@@ -47638,7 +47910,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 781.0500 158.7500 0)
 		(unit 3)
 		(body_style 1)
@@ -47658,7 +47930,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 788.6700 157.4800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -47679,7 +47951,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 781.0500 158.7500 0)
 			(hide yes)
 			(show_name no)
@@ -47727,9 +47999,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 158.75 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 158.75 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 158.75 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 781.05 158.75 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 158.75 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 781.05 158.75 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 149.86) (xy 781.05 149.86)) (stroke (width 0) (type default)) (uuid "d3090165-f4c5-45ac-983a-eabf50df7ead"))
 (wire (pts (xy 781.05 149.86) (xy 778.51 149.86)) (stroke (width 0) (type default)) (uuid "0a315fc7-e448-47ea-b00c-4ec04052bdb6"))
@@ -47860,7 +48132,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 758.1900 161.2900 0)
 			(hide yes)
 			(show_name no)
@@ -47908,9 +48180,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 758.19 161.29 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 758.19 161.29 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 758.19 161.29 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 758.19 161.29 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 758.19 161.29 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 758.19 161.29 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 758.19 157.48) (xy 758.19 152.40)) (stroke (width 0) (type default)) (uuid "8a68affe-15b9-4337-beb7-df9baaef2f01"))
 (wire (pts (xy 758.19 152.40) (xy 755.65 152.40)) (stroke (width 0) (type default)) (uuid "13dca377-bf0f-4576-b99a-8fe5d166cb69"))
@@ -48670,7 +48942,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 875.0300 125.7300 0)
 			(hide yes)
 			(show_name no)
@@ -48718,9 +48990,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 125.73 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 125.73 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 125.73 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 875.03 125.73 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 125.73 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 875.03 125.73 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 134.62) (xy 875.03 134.62)) (stroke (width 0) (type default)) (uuid "08e3341a-43ae-47cc-b5d7-1d9c2ceff587"))
 (wire (pts (xy 875.03 134.62) (xy 872.49 134.62)) (stroke (width 0) (type default)) (uuid "aed6e73f-9678-4773-a1de-88245270c9af"))
@@ -48807,7 +49079,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 875.0300 158.7500 0)
 		(unit 4)
 		(body_style 1)
@@ -48827,7 +49099,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 882.6500 157.4800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -48848,7 +49120,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 875.0300 158.7500 0)
 			(hide yes)
 			(show_name no)
@@ -48896,9 +49168,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 158.75 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 158.75 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 158.75 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 875.03 158.75 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 158.75 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 875.03 158.75 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 149.86) (xy 875.03 149.86)) (stroke (width 0) (type default)) (uuid "f4eff450-f6c1-4425-8aeb-f3744c060efc"))
 (wire (pts (xy 875.03 149.86) (xy 872.49 149.86)) (stroke (width 0) (type default)) (uuid "055937f3-ad7a-489b-a376-be60c293b643"))
@@ -49029,7 +49301,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 852.1700 161.2900 0)
 			(hide yes)
 			(show_name no)
@@ -49077,9 +49349,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 852.17 161.29 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 852.17 161.29 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 852.17 161.29 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 852.17 161.29 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 852.17 161.29 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 852.17 161.29 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 852.17 157.48) (xy 852.17 152.40)) (stroke (width 0) (type default)) (uuid "8e8b0941-5049-43f3-b717-9a9029178f57"))
 (wire (pts (xy 852.17 152.40) (xy 849.63 152.40)) (stroke (width 0) (type default)) (uuid "c5be9328-7014-446f-802e-81ce0ca4d0e7"))
@@ -49839,7 +50111,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 781.0500 189.2300 0)
 			(hide yes)
 			(show_name no)
@@ -49887,9 +50159,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 189.23 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 189.23 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 189.23 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 781.05 189.23 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 189.23 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 781.05 189.23 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 198.12) (xy 781.05 198.12)) (stroke (width 0) (type default)) (uuid "f8e40ef8-bb2d-4adc-a5b3-e13bab5bcfa0"))
 (wire (pts (xy 781.05 198.12) (xy 778.51 198.12)) (stroke (width 0) (type default)) (uuid "38166605-df43-418f-ab07-3b23a239feb9"))
@@ -49976,7 +50248,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 781.0500 222.2500 0)
 		(unit 1)
 		(body_style 1)
@@ -49996,7 +50268,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 788.6700 220.9800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -50017,7 +50289,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 781.0500 222.2500 0)
 			(hide yes)
 			(show_name no)
@@ -50065,9 +50337,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 222.25 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 222.25 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 222.25 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 781.05 222.25 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 222.25 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 781.05 222.25 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 213.36) (xy 781.05 213.36)) (stroke (width 0) (type default)) (uuid "0a947f50-2df1-450d-8d86-20b5ef907499"))
 (wire (pts (xy 781.05 213.36) (xy 778.51 213.36)) (stroke (width 0) (type default)) (uuid "07ee3948-24cf-41c3-8c28-7150dfe01e37"))
@@ -50198,7 +50470,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 758.1900 224.7900 0)
 			(hide yes)
 			(show_name no)
@@ -50246,9 +50518,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 758.19 224.79 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 758.19 224.79 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 758.19 224.79 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 758.19 224.79 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 758.19 224.79 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 758.19 224.79 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 758.19 220.98) (xy 758.19 215.90)) (stroke (width 0) (type default)) (uuid "2f1efa25-f359-45cc-be01-a87582e6912e"))
 (wire (pts (xy 758.19 215.90) (xy 755.65 215.90)) (stroke (width 0) (type default)) (uuid "0484bfaf-b153-40fc-ac30-5cf2896887cc"))
@@ -51008,7 +51280,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 875.0300 189.2300 0)
 			(hide yes)
 			(show_name no)
@@ -51056,9 +51328,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 189.23 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 189.23 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 189.23 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 875.03 189.23 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 189.23 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 875.03 189.23 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 198.12) (xy 875.03 198.12)) (stroke (width 0) (type default)) (uuid "5e27f829-21ba-408a-bbf2-c148172612c7"))
 (wire (pts (xy 875.03 198.12) (xy 872.49 198.12)) (stroke (width 0) (type default)) (uuid "d4c5dc38-b702-4b50-96de-e38ad217b0ca"))
@@ -51145,7 +51417,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 875.0300 222.2500 0)
 		(unit 2)
 		(body_style 1)
@@ -51165,7 +51437,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 882.6500 220.9800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -51186,7 +51458,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 875.0300 222.2500 0)
 			(hide yes)
 			(show_name no)
@@ -51234,9 +51506,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 222.25 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 222.25 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 222.25 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 875.03 222.25 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 222.25 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 875.03 222.25 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 213.36) (xy 875.03 213.36)) (stroke (width 0) (type default)) (uuid "2f0c5f86-c7df-4954-bdf3-de90565b93e3"))
 (wire (pts (xy 875.03 213.36) (xy 872.49 213.36)) (stroke (width 0) (type default)) (uuid "1cced931-fbd0-487d-ae3c-9fd93723d1f0"))
@@ -51367,7 +51639,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 852.1700 224.7900 0)
 			(hide yes)
 			(show_name no)
@@ -51415,9 +51687,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 852.17 224.79 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 852.17 224.79 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 852.17 224.79 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 852.17 224.79 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 852.17 224.79 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 852.17 224.79 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 852.17 220.98) (xy 852.17 215.90)) (stroke (width 0) (type default)) (uuid "5de40ae0-bf69-4b98-8150-a82fdf000247"))
 (wire (pts (xy 852.17 215.90) (xy 849.63 215.90)) (stroke (width 0) (type default)) (uuid "475796b2-65d3-40cb-bb15-dbece98f4d69"))
@@ -52177,7 +52449,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 781.0500 252.7300 0)
 			(hide yes)
 			(show_name no)
@@ -52225,9 +52497,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 252.73 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 252.73 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 252.73 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 781.05 252.73 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 252.73 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 781.05 252.73 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 261.62) (xy 781.05 261.62)) (stroke (width 0) (type default)) (uuid "ffa11cbf-b068-4cd3-9c6a-3d8cb9fd5c25"))
 (wire (pts (xy 781.05 261.62) (xy 778.51 261.62)) (stroke (width 0) (type default)) (uuid "558f628e-540e-4b8c-a791-da8b91689d02"))
@@ -52314,7 +52586,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 781.0500 285.7500 0)
 		(unit 3)
 		(body_style 1)
@@ -52334,7 +52606,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 788.6700 284.4800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -52355,7 +52627,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 781.0500 285.7500 0)
 			(hide yes)
 			(show_name no)
@@ -52403,9 +52675,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 285.75 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 285.75 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 285.75 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 781.05 285.75 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 285.75 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 781.05 285.75 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 276.86) (xy 781.05 276.86)) (stroke (width 0) (type default)) (uuid "1225b0f7-d400-4d73-b694-b76947a8c25b"))
 (wire (pts (xy 781.05 276.86) (xy 778.51 276.86)) (stroke (width 0) (type default)) (uuid "9ae94670-6da9-4a06-a164-9cd1c1b770f7"))
@@ -52536,7 +52808,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 758.1900 288.2900 0)
 			(hide yes)
 			(show_name no)
@@ -52584,9 +52856,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 758.19 288.29 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 758.19 288.29 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 758.19 288.29 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 758.19 288.29 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 758.19 288.29 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 758.19 288.29 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 758.19 284.48) (xy 758.19 279.40)) (stroke (width 0) (type default)) (uuid "0f4986b1-aea9-4a41-be52-bd550da1cc64"))
 (wire (pts (xy 758.19 279.40) (xy 755.65 279.40)) (stroke (width 0) (type default)) (uuid "dfb57f28-a8d9-4015-b8d0-b2a76bbcaab0"))
@@ -53346,7 +53618,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 875.0300 252.7300 0)
 			(hide yes)
 			(show_name no)
@@ -53394,9 +53666,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 252.73 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 252.73 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 252.73 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 875.03 252.73 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 252.73 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 875.03 252.73 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 261.62) (xy 875.03 261.62)) (stroke (width 0) (type default)) (uuid "cccacbb5-817d-44f3-8fa4-bfb671f406cb"))
 (wire (pts (xy 875.03 261.62) (xy 872.49 261.62)) (stroke (width 0) (type default)) (uuid "efee06cd-2a44-48f8-a8dd-ce47bf9d3e25"))
@@ -53483,7 +53755,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 875.0300 285.7500 0)
 		(unit 4)
 		(body_style 1)
@@ -53503,7 +53775,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 882.6500 284.4800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -53524,7 +53796,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 875.0300 285.7500 0)
 			(hide yes)
 			(show_name no)
@@ -53572,9 +53844,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 285.75 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 285.75 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 285.75 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 875.03 285.75 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 285.75 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 875.03 285.75 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 276.86) (xy 875.03 276.86)) (stroke (width 0) (type default)) (uuid "8062b607-bf61-48a8-b935-99be3dbf45e5"))
 (wire (pts (xy 875.03 276.86) (xy 872.49 276.86)) (stroke (width 0) (type default)) (uuid "95d20664-ce3b-4dfe-9970-b9218df0155b"))
@@ -53705,7 +53977,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 852.1700 288.2900 0)
 			(hide yes)
 			(show_name no)
@@ -53753,9 +54025,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 852.17 288.29 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 852.17 288.29 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 852.17 288.29 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 852.17 288.29 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 852.17 288.29 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 852.17 288.29 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 852.17 284.48) (xy 852.17 279.40)) (stroke (width 0) (type default)) (uuid "cd8f78a4-3460-4a58-9362-8ea879a6abf3"))
 (wire (pts (xy 852.17 279.40) (xy 849.63 279.40)) (stroke (width 0) (type default)) (uuid "311a91e1-118d-40c6-a52b-b40ac5e839cd"))
@@ -54515,7 +54787,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 781.0500 341.6300 0)
 			(hide yes)
 			(show_name no)
@@ -54563,9 +54835,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 341.63 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 341.63 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 341.63 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 781.05 341.63 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 341.63 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 781.05 341.63 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 350.52) (xy 781.05 350.52)) (stroke (width 0) (type default)) (uuid "aa201f99-c61e-44c6-8189-21a58a4efcef"))
 (wire (pts (xy 781.05 350.52) (xy 778.51 350.52)) (stroke (width 0) (type default)) (uuid "a4eebd28-7b33-4c7f-a8a3-f7e354bfed90"))
@@ -54652,7 +54924,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 781.0500 374.6500 0)
 		(unit 3)
 		(body_style 1)
@@ -54672,7 +54944,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 788.6700 373.3800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -54693,7 +54965,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 781.0500 374.6500 0)
 			(hide yes)
 			(show_name no)
@@ -54741,9 +55013,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 781.05 374.65 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 781.05 374.65 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 781.05 374.65 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 781.05 374.65 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 781.05 374.65 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 781.05 374.65 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 787.40 365.76) (xy 781.05 365.76)) (stroke (width 0) (type default)) (uuid "ba520d0c-78d7-487c-baf4-e15d78ab3e9a"))
 (wire (pts (xy 781.05 365.76) (xy 778.51 365.76)) (stroke (width 0) (type default)) (uuid "ce070f52-3b12-42a8-99ef-38f95d4b0d32"))
@@ -54874,7 +55146,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 758.1900 377.1900 0)
 			(hide yes)
 			(show_name no)
@@ -54922,9 +55194,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 758.19 377.19 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 758.19 377.19 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 758.19 377.19 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 758.19 377.19 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 758.19 377.19 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 758.19 377.19 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 758.19 373.38) (xy 758.19 368.30)) (stroke (width 0) (type default)) (uuid "68fb59d9-f130-4aa3-a795-138a038d68ed"))
 (wire (pts (xy 758.19 368.30) (xy 755.65 368.30)) (stroke (width 0) (type default)) (uuid "9955fbf7-f82c-47b7-a503-288af9c6b2cf"))
@@ -55684,7 +55956,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 875.0300 341.6300 0)
 			(hide yes)
 			(show_name no)
@@ -55732,9 +56004,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 341.63 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 341.63 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 341.63 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 875.03 341.63 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 341.63 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 875.03 341.63 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 350.52) (xy 875.03 350.52)) (stroke (width 0) (type default)) (uuid "4971129b-5b01-4a7f-ac1a-30491954d3e3"))
 (wire (pts (xy 875.03 350.52) (xy 872.49 350.52)) (stroke (width 0) (type default)) (uuid "dd36b69a-53e3-45dc-b046-cfd326d68538"))
@@ -55821,7 +56093,7 @@
 		)
 	)
 (symbol
-		(lib_id "LCSC_Ports:R_Array_Isolated_4x100k")
+		(lib_id "LCSC_Ports:R_Array_Isolated_4x4k7")
 		(at 875.0300 374.6500 0)
 		(unit 4)
 		(body_style 1)
@@ -55841,7 +56113,7 @@
 				)
 			)
 		)
-		(property "Value" "4x100k"
+		(property "Value" "4x4.7k"
 			(at 882.6500 373.3800 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -55862,7 +56134,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
 			(at 875.0300 374.6500 0)
 			(hide yes)
 			(show_name no)
@@ -55910,9 +56182,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 875.03 374.65 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 875.03 374.65 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 875.03 374.65 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-074K7L" (at 875.03 374.65 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 875.03 374.65 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C327044" (at 875.03 374.65 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 881.38 365.76) (xy 875.03 365.76)) (stroke (width 0) (type default)) (uuid "c73c9bc7-eee2-4750-96a3-ecd33559eb3e"))
 (wire (pts (xy 875.03 365.76) (xy 872.49 365.76)) (stroke (width 0) (type default)) (uuid "c1f59f6a-8c29-4ced-b849-603e1f2d91bf"))
@@ -56043,7 +56315,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.bourns.com/docs/Product-Datasheets/CATCAY.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
 			(at 852.1700 377.1900 0)
 			(hide yes)
 			(show_name no)
@@ -56091,9 +56363,9 @@
 			)
 		)
 
-(property "MPN" "CAY16-104J4LF" (at 852.17 377.19 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Bourns" (at 852.17 377.19 0) (hide yes) (effects (font (size 1 1))))
-(property "LCSC" "C149100" (at 852.17 377.19 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "YC164-JR-07100KL" (at 852.17 377.19 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "Yageo" (at 852.17 377.19 0) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C192933" (at 852.17 377.19 0) (hide yes) (effects (font (size 1 1))))
 )
 (wire (pts (xy 852.17 373.38) (xy 852.17 368.30)) (stroke (width 0) (type default)) (uuid "9c4b71ad-e24d-4ebf-9b07-1a8bc74a8909"))
 (wire (pts (xy 852.17 368.30) (xy 849.63 368.30)) (stroke (width 0) (type default)) (uuid "0e604243-0c59-459a-91f8-04bd24462686"))
@@ -56753,7 +57025,7 @@
 (wire (pts (xy 271.78 107.95) (xy 276.86 107.95)) (stroke (width 0) (type default)) (uuid "1ecc800f-722f-43b8-b494-a05b8c6ea21d"))
 (global_label "UP8_NG" (shape bidirectional) (at 276.86 107.95 0) (effects (font (size 0.889 0.889)) (justify left)) (uuid "ed8ce4d6-b0ba-453b-820a-791866728624"))
 (symbol
-		(lib_id "LCSC_Ports:TCA9535RTWR_Compact")
+		(lib_id "LCSC_Ports:TCA9555RTWR_Compact")
 		(at 322.58 110.49 0)
 		(unit 1)
 		(body_style 1)
@@ -56773,7 +57045,7 @@
 				)
 			)
 		)
-		(property "Value" "TCA9535RTWR"
+		(property "Value" "TCA9555RTWR(UMW)"
 			(at 322.58 108.99 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -56794,7 +57066,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tca9535.pdf"
+		(property "Datasheet" "https://datasheet.lcsc.com/datasheet/pdf/7935197bddb8deeea95201ae83ce3777.pdf?productCode=C42420609"
 			(at 322.58 110.49 0)
 			(hide yes)
 			(show_name no)
@@ -56909,8 +57181,10 @@
 
 (pin "25" (uuid "545f52b4-6239-4b4c-bfb2-0cc4a8a9f477"))
 
-(property "MPN" "TCA9535RTWR" (at 322.58 110.49 0) (hide yes) (effects (font (size 1 1))))
-(property "Manufacturer" "Texas Instruments" (at 322.58 110.49 0) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "TCA9555RTWR" (at 322.58 110.49 0) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "UMW" (at 322.58 110.49 0) (hide yes) (effects (font (size 1 1))))
+
+(property "LCSC" "C42420609" (at 322.58 110.49 0) (hide yes) (effects (font (size 1 1))))
 )
 (no_connect (at 312.42 96.52) (uuid "1ec6d72f-8429-43a6-b29e-b6947477fb50"))
 (wire (pts (xy 312.42 99.06) (xy 307.34 99.06)) (stroke (width 0) (type default)) (uuid "fa911d2a-28ae-408e-983c-70cb8a3eaa08"))
