@@ -754,13 +754,21 @@
         "uuid": "9de6ddb4-2647-4876-90a9-c16e585eea03"
       }
     ],
-    "used_designators": "",
+    "used_designators": "#PWR38,#PWR1711-1719",
     "variants": []
   },
   "sheets": [
     [
       "9de6ddb4-2647-4876-90a9-c16e585eea03",
       "Principale"
+    ],
+    [
+      "3c64eedd-cf2f-4427-8511-3f7958be61bb",
+      "CAN termination"
+    ],
+    [
+      "f7d87298-c1e8-4cc4-b453-a36f298d9bce",
+      "Port indicators"
     ]
   ],
   "text_variables": {},

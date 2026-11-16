@@ -1,3 +1,51 @@
+# Backbone lunga — GPIO superiori e misure sulla mezzanina
+
+Questa revisione usa i progetti KiCad `backbone.kicad_pro` e
+`mezzanine/expansion/expansion.kicad_pro` come coppia. La tabella seguente
+sostituisce le assegnazioni storiche di J11 per questi contatti.
+
+| Segnale | Connettore superiore | ESP32-S3 | J11 | Espansione J5 |
+| --- | --- | --- | --- | --- |
+| GPIO6_UPPER | J17.3 | GPIO6 | 12 | 3 |
+| GPIO12_UPPER | J17.4 | GPIO12 | 13 | 5 |
+| GPIO41_UPPER | J17.5 | GPIO41 | 14 | 15 |
+| GPIO42_UPPER | J17.6 | GPIO42 | 11 | 16 |
+| GPIO39_UPPER | J20.1 | GPIO39 | 53 | — |
+| GPIO40_UPPER | J20.4 | GPIO40 | 54 | — |
+
+I sei segnali superiori sono GPIO da 3,3 V. Le porte inferiori usano
+`A0–A5` tramite gli switch esistenti. Il collegamento SPI verso
+l'AG32, inclusi CS e SCLK su GPIO13/14, conserva il pinout esistente.
+I collegamenti AUX GPIO35–37 restano DNP per i moduli a PSRAM Octal.
+
+- **Misura di corrente.** U14 pilota direttamente `MEAS_S0/S1/S2` e
+  `MEAS_INHIBIT` sui pin 2–5. Le reti locali comandano U17/U18 e i
+  relativi pull-up. R56–R61 restano in serie alle porte inferiori.
+- **Porte inferiori 5 e 6.** L'expander U71 è sul bus I²C esistente
+  all'indirizzo a 7 bit `0x21` (U25 resta a `0x20`). P00 e P01
+  pilotano `ESP_ISO4_N` e `ESP_ISO5_N` tramite i selettori di
+  proprietà esistenti. R402/R403 tengono alti i due segnali quando U71
+  è in ingresso, quindi all'accensione gli switch ESP sono aperti.
+  Il firmware ESP deve inizializzare U71 con uscite alte prima di
+  abilitare le porte e riconciliare la configurazione dopo ogni reset
+  dell'ESP a scheda alimentata, perché U71 conserva lo stato.
+  Configurare i bit I/O inutilizzati come uscite basse.
+- **Rilevamento USB.** R110/R111 sono sulla mezzanina, alimentati dal
+  VBUS grezzo su J11.51. J11.23 è riservato. Il ponte R401 sulla base
+  conserva l'opzione per il ramo LED di espansione.
+
+Usare insieme base e mezzanina di questa revisione. Le mezzanine
+precedenti usavano J11.11–14 per il comando di misura e possono alterare
+o essere alterate dai nuovi GPIO superiori.
+
+Gli schemi e le assegnazioni delle piazzole sono aggiornati. I PCB sono
+in fase di piazzamento, con sbroglio, verifiche di produzione e
+integrazione firmware da completare.
+
+---
+
+## Documentazione storica
+
 > **Assembly requirement:** all resistors and capacitors0603imperial/1608metric. See [PASSIVES-0603.md](PASSIVES-0603.md). No0402parts in the current carrier/Expansion R/CBOMs.
 
 ## Aggiornamento PCB mezzanina —31 ottobre2026
