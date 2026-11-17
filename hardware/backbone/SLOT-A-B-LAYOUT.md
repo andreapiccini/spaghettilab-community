@@ -1,6 +1,6 @@
 # Layout corrente: Slot A / Slot B
 
-Grafica delle file con raccordi B.SilkS a 45°: ogni gruppo di tre contatti prosegue in una linea laterale con quattro brevi diramazioni e piccoli nodi, uno accanto a ciascun indicatore. Nessuna cornice attorno ai simboli. Mantenute le asole attorno ai gruppi di tre contatti in parallelo. Ogni foro ha ora un anello B.SilkS r=0,78 mm, spessore 0,20 mm.
+Grafica delle file con raccordi B.SilkS a 45°: ogni gruppo di tre contatti prosegue in una linea laterale continua, spessore 0,24 mm, accanto ai quattro indicatori. Rimossi i piccoli nodi e le brevi diramazioni. Nessuna cornice attorno ai simboli. Mantenute le asole attorno ai gruppi di tre contatti in parallelo. Ogni foro ha ora un anello B.SilkS r=0,78 mm, spessore 0,20 mm.
 
 Numeri 1–8 presenti solo alle estremità interne, verso lo spazio tra SLOT A e SLOT B, con lo stile tipografico originale della V3, inclinati di 45° come richiesto. Banchi identificati SLOT A e SLOT B. Ordine degli indicatori inferiori: X, GND, MCU, VCC. LED e finestre senza rame sono spostati insieme; connessioni elettriche e significato dei LED invariati. Logo ridotto invariato.
 
