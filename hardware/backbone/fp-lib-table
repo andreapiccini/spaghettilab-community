@@ -1,4 +1,4 @@
-(fp_lib_table
+(fp_lib_table (version 7)
   (lib (name "SpaghettiLAB")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB.pretty")(options "")(descr "Community hardware footprints"))
   (lib (name "FlexyPin")(type "KiCad")(uri "${KIPRJMOD}/../libraries/flexypin/FlexyPin.pretty")(options "")(descr "Solder Party FlexyPin"))
 
@@ -6,4 +6,8 @@
 
 (lib (name "LCSC_Mezzanine")(type "KiCad")(uri "${KIPRJMOD}/../libraries/LCSC_Mezzanine.pretty")(options "")(descr "BergStak and USB selector LCSC CAD, manufacturer land-pattern corrections"))
   (lib (name "PortLED")(type "KiCad")(uri "${KIPRJMOD}/PortLED.pretty")(options "")(descr "Backbone V3 port indicators"))
+
+(lib (name "TouchUI")(type "KiCad")(uri "${KIPRJMOD}/TouchUI.pretty")(options "")(descr "Masked copper touch electrodes"))
+
+(lib (name "ExpansionCAN")(type "KiCad")(uri "${KIPRJMOD}/ExpansionCAN.pretty")(options "")(descr "Underside CAN expansion"))
 )

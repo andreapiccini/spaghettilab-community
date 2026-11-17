@@ -1,0 +1,1 @@
+Simplified dimensional visualization models for the XL-1608 family, 1.6 x 0.8 x 0.4 mm. Body, contacts and colored underside optical surface are modeled; these are not vendor-qualified mechanical models. Lens faces FR4 for prototype hand assembly. Local paths are used for all 80 LEDs.

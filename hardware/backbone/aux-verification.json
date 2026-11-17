@@ -1,0 +1,18 @@
+{
+  "DRC": 121,
+  "unconnected": 499,
+  "parity": 20,
+  "ERC": 196,
+  "new_electrical_or_clearance_errors": 0,
+  "old_pinmap_unchanged": true,
+  "aux_pinmap": [
+    "5V",
+    "CAN_H",
+    "CAN_L",
+    "GND"
+  ],
+  "aux_spacing_mm": 30,
+  "port_row_pitch_mm": 1.9,
+  "logo_led_rotation_deg": 45,
+  "board_outline_unchanged": true
+}

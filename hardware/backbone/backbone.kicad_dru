@@ -182,3 +182,51 @@
 (rule "Pad fanout U4.1" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_U4_1')") (constraint track_width (min 0.20mm) (opt 0.2mm)))
 (rule "Pad fanout U4.2" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_U4_2')") (constraint track_width (min 0.20mm) (opt 0.6mm)))
 (rule "Pad fanout U4.4" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_U4_4')") (constraint track_width (min 0.20mm) (opt 0.6mm)))
+
+(rule "RN1 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN1') && B.memberOfFootprint('RN1')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN2 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN2') && B.memberOfFootprint('RN2')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN3 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN3') && B.memberOfFootprint('RN3')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN4 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN4') && B.memberOfFootprint('RN4')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN5 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN5') && B.memberOfFootprint('RN5')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN6 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN6') && B.memberOfFootprint('RN6')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN7 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN7') && B.memberOfFootprint('RN7')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN8 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN8') && B.memberOfFootprint('RN8')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN9 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN9') && B.memberOfFootprint('RN9')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN10 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN10') && B.memberOfFootprint('RN10')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN11 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN11') && B.memberOfFootprint('RN11')")
+  (constraint clearance (min 0.15mm)))
+
+(rule "RN12 clearances between 0402 array pads"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN12') && B.memberOfFootprint('RN12')")
+  (constraint clearance (min 0.15mm)))

@@ -8,4 +8,8 @@
 (lib (name "SpaghettiLAB_Mezzanine")(type "KiCad")(uri "${KIPRJMOD}/../libraries/SpaghettiLAB_Mezzanine.kicad_sym")(options "")(descr "Mezzanine schematic USB switch and functional AG32 pin grouping"))
   (lib (name "PortLED")(type "KiCad")(uri "${KIPRJMOD}/PortLED.kicad_sym")(options "")(descr "Backbone V3 port indicators"))
   (lib (name "CanTermination")(type "KiCad")(uri "${KIPRJMOD}/CanTermination.kicad_sym")(options "")(descr "CAN neighbour detection symbols"))
+
+(lib (name "TouchUI")(type "KiCad")(uri "${KIPRJMOD}/TouchUI.kicad_sym")(options "")(descr "Four touch UI controls"))
+
+(lib (name "ExpansionCAN")(type "KiCad")(uri "${KIPRJMOD}/ExpansionCAN.kicad_sym")(options "")(descr "Underside CAN expansion"))
 )

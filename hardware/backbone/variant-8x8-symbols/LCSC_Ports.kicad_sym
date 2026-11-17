@@ -60,7 +60,7 @@
 					)
 				)
 			)
-			(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0603"
+			(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0402"
 				(at -1.778 0 90)
 				(show_name no)
 				(do_not_autoplace no)
@@ -71,7 +71,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://www.lcsc.com/datasheet/C192933.pdf"
+			(property "Datasheet" "https://www.lcsc.com/datasheet/C25724.pdf"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -104,7 +104,7 @@
 					)
 				)
 			)
-			(property "ki_fp_filters" "R_Array_Convex_4x0603"
+			(property "ki_fp_filters" "R_Array_Convex_4x0402"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -282,11 +282,11 @@
 			)
 			(embedded_fonts no)
 
-(property "MPN" "YC164-JR-07100KL" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "4D02WGJ0104TCE" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
 
-(property "Manufacturer" "Yageo" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "UNI-ROYAL" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
 
-(property "LCSC" "C192933" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C25724" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
 )
 (symbol "R_Array_Isolated_4x4k7"
 			(pin_numbers
@@ -320,7 +320,7 @@
 					)
 				)
 			)
-			(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0603"
+			(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0402"
 				(at -1.778 0 90)
 				(show_name no)
 				(do_not_autoplace no)
@@ -331,7 +331,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://www.lcsc.com/datasheet/C327044.pdf"
+			(property "Datasheet" "https://www.lcsc.com/datasheet/C29586.pdf"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -364,7 +364,7 @@
 					)
 				)
 			)
-			(property "ki_fp_filters" "R_Array_Convex_4x0603"
+			(property "ki_fp_filters" "R_Array_Convex_4x0402"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -542,11 +542,11 @@
 			)
 			(embedded_fonts no)
 
-(property "MPN" "YC164-JR-074K7L" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+(property "MPN" "4D02WGJ0472TCE" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
 
-(property "Manufacturer" "Yageo" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+(property "Manufacturer" "UNI-ROYAL" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
 
-(property "LCSC" "C327044" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
+(property "LCSC" "C29586" (at 2.032 0 90) (hide yes) (effects (font (size 1 1))))
 )
 (symbol "TCA9555RTWR_Compact"
 			(exclude_from_sim no)

@@ -1,0 +1,33 @@
+{
+  "source": "/Users/andreapiccini/.codex/worktrees/backbone-v3/spaghettilab-community/hardware/backbone-v3/backbone-v3.kicad_pcb",
+  "port_shapes": {
+    "3V3": 11,
+    "GND": 4,
+    "MCU": 12,
+    "Hi-Z": 2
+  },
+  "touch_shapes": {
+    "TE2": 6,
+    "TE3": 2,
+    "TE4": 17,
+    "TE1": 2
+  },
+  "touch_centers": {
+    "TE2": [
+      182.65,
+      108.75
+    ],
+    "TE3": [
+      152.5,
+      90.5
+    ],
+    "TE4": [
+      152.5,
+      108.75
+    ],
+    "TE1": [
+      182.65,
+      90.5
+    ]
+  }
+}

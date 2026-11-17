@@ -1,0 +1,6 @@
+#VRML V2.0 utf8
+# Simplified 1.6 x 0.8 x 0.4 mm package, optical lens facing FR4.
+Transform { translation 0 0 0.0984252 children [ Shape { appearance Appearance { material Material { diffuseColor .8 .8 .75 } } geometry Box { size 0.629921 0.314961 0.15748 } } ] }
+Transform { translation 0 0 0.0255906 children [ Shape { appearance Appearance { material Material { diffuseColor 1 .6 .04 } } geometry Box { size 0.314961 0.255906 0.023622 } } ] }
+Transform { translation -0.255906 0 0.0295276 children [ Shape { appearance Appearance { material Material { diffuseColor .7 .7 .7 } } geometry Box { size 0.11811 0.314961 0.0590551 } } ] }
+Transform { translation 0.255906 0 0.0295276 children [ Shape { appearance Appearance { material Material { diffuseColor .7 .7 .7 } } geometry Box { size 0.11811 0.314961 0.0590551 } } ] }

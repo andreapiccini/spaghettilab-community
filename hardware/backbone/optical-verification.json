@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-17",
+  "electrical_pinmap_unchanged": true,
+  "no_new_erc": true,
+  "no_new_drc": true,
+  "no_new_schematic_parity": true,
+  "led_models_resolved": 80,
+  "port_windows": 64,
+  "logo_contour_apertures": 51,
+  "logo_leds": 16,
+  "dip_pitch_mm": 7.62,
+  "board_dimensions_unchanged": true,
+  "source_sha256": "eb3ebf09fb295d1e2de9bec9853b101061583207df62c1f8caa04ca6200e2d9c",
+  "baseline_drc_count": 121,
+  "final_drc_count": 121,
+  "remaining_unrouted_report_entries": 499,
+  "port_layout": "four separate rows: VCC, GND, MCU, Hi-Z",
+  "rear_symbol_angle_deg": 45,
+  "symbol_linear_scale_vs_compact_approx": 1.7,
+  "logo_complete_including_original_lettering": true,
+  "logo_size_mm": [
+    10.9,
+    9.406
+  ],
+  "logo_grid": [
+    4,
+    4
+  ],
+  "logo_grid_pitch_mm": [
+    3,
+    2.3
+  ],
+  "logo_grid_angle_deg": 0,
+  "connector_shift_from_previous_y_mm": -1.6
+}

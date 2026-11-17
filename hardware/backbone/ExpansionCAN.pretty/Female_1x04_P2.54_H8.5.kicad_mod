@@ -1,0 +1,133 @@
+(footprint "Female_1x04_P2.54_H8.5"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -2.8 180)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "f57a95ab-41c1-481e-b8f4-9de9bb0dc670")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(property "Value" "Female_1x04_P2.54_H8.5"
+		(at 0 10.3 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "610c9a8c-9de7-4d8a-8d76-adf45b0d9c62")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "4441e72c-bfb5-45af-86db-2b4a6d9fc281")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "04e39722-de55-46fd-82bf-7cdac0facdec")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "LCSC" "C2905415"
+		(at 0 0 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "0e6fed3b-b1ac-47bc-a388-9e2082c4364c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify mirror)
+		)
+	)
+	(attr through_hole)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -1.75 -1.72)
+		(end 1.75 9.34)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "56180910-673d-41de-8f29-3964b63dc4c2")
+	)
+	(fp_rect
+		(start -1.5 -1.47)
+		(end 1.5 9.09)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "0f0b07aa-a5a4-409e-989c-e127dafb5ecd")
+	)
+	(pad "1" thru_hole rect
+		(at 0 0)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Mask" "F.Cu" "B.Cu" "In1.Cu" "In2.Cu")
+		(remove_unused_layers no)
+		(uuid "a1b86016-1eeb-4366-ac23-bc98c18efe9e")
+	)
+	(pad "2" thru_hole circle
+		(at 0 2.54)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Mask" "F.Cu" "B.Cu" "In1.Cu" "In2.Cu")
+		(remove_unused_layers no)
+		(uuid "97fb6313-0283-48c7-87f7-fec32d03661e")
+	)
+	(pad "3" thru_hole circle
+		(at 0 5.08)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Mask" "F.Cu" "B.Cu" "In1.Cu" "In2.Cu")
+		(remove_unused_layers no)
+		(uuid "cf1d32e8-35b2-43a9-acc8-59cd12c2c0f3")
+	)
+	(pad "4" thru_hole circle
+		(at 0 7.62)
+		(size 1.7 1.7)
+		(drill 1.02)
+		(layers "*.Mask" "F.Cu" "B.Cu" "In1.Cu" "In2.Cu")
+		(remove_unused_layers no)
+		(uuid "d5b5e536-89bf-4bd2-bebc-78aab7c60e00")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/ExpansionCAN.3dshapes/Female_1x04.wrl"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)
