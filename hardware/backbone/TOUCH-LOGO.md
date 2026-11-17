@@ -50,3 +50,7 @@ References:
 - https://www.lcsc.com/product-detail/C965808.html
 
 Historical indicative catalog pricing consulted 2026-11-17: C89208 about USD 0.69 each, MOQ 1; C965808 about USD 0.0049 each at MOQ 100 (about USD 0.49 for the lot; 16 LEDs about USD 0.08 per board). Prices exclude shipping, tax, PCB and assembly. Verify availability and checkout price before ordering.
+
+## Logo clearance update — 2026-11-18
+
+Reduced all 51 rear illuminated logo polygons, including SPAGHETTI LAB lettering, by a further 15% about their common centre. LED grid, copper exclusions, lens entrances and electrical connections are unchanged. This adds vertical clearance to the port status indicators without reducing LED mounting clearance.
