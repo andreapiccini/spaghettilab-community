@@ -7,7 +7,7 @@
     "cathode": "/Port indicators/CA1",
     "anode": "/Port indicators/CA2",
     "x": 158.86,
-    "y": 126.5,
+    "y": 132.2,
     "angle": 135
   },
   {
@@ -40,7 +40,7 @@
     "cathode": "/Port indicators/CA1",
     "anode": "/Port indicators/CA5",
     "x": 158.86,
-    "y": 132.2,
+    "y": 126.49999999999999,
     "angle": 135
   },
   {
@@ -51,7 +51,7 @@
     "cathode": "/Port indicators/CA1",
     "anode": "/Port indicators/CA6",
     "x": 161.4,
-    "y": 126.5,
+    "y": 132.2,
     "angle": 135
   },
   {
@@ -84,7 +84,7 @@
     "cathode": "/Port indicators/CA1",
     "anode": "/Port indicators/CA9",
     "x": 161.4,
-    "y": 132.2,
+    "y": 126.49999999999999,
     "angle": 135
   },
   {
@@ -95,7 +95,7 @@
     "cathode": "/Port indicators/CA2",
     "anode": "/Port indicators/CA1",
     "x": 163.94000000000003,
-    "y": 126.5,
+    "y": 132.2,
     "angle": 135
   },
   {
@@ -128,7 +128,7 @@
     "cathode": "/Port indicators/CA2",
     "anode": "/Port indicators/CA5",
     "x": 163.94000000000003,
-    "y": 132.2,
+    "y": 126.49999999999999,
     "angle": 135
   },
   {
@@ -139,7 +139,7 @@
     "cathode": "/Port indicators/CA2",
     "anode": "/Port indicators/CA6",
     "x": 166.48000000000002,
-    "y": 126.5,
+    "y": 132.2,
     "angle": 135
   },
   {
@@ -172,7 +172,7 @@
     "cathode": "/Port indicators/CA2",
     "anode": "/Port indicators/CA9",
     "x": 166.48000000000002,
-    "y": 132.2,
+    "y": 126.49999999999999,
     "angle": 135
   },
   {
@@ -183,7 +183,7 @@
     "cathode": "/Port indicators/CA3",
     "anode": "/Port indicators/CA1",
     "x": 169.02,
-    "y": 126.5,
+    "y": 132.2,
     "angle": 135
   },
   {
@@ -216,7 +216,7 @@
     "cathode": "/Port indicators/CA3",
     "anode": "/Port indicators/CA5",
     "x": 169.02,
-    "y": 132.2,
+    "y": 126.49999999999999,
     "angle": 135
   },
   {
@@ -227,7 +227,7 @@
     "cathode": "/Port indicators/CA3",
     "anode": "/Port indicators/CA6",
     "x": 171.56,
-    "y": 126.5,
+    "y": 132.2,
     "angle": 135
   },
   {
@@ -260,7 +260,7 @@
     "cathode": "/Port indicators/CA3",
     "anode": "/Port indicators/CA9",
     "x": 171.56,
-    "y": 132.2,
+    "y": 126.49999999999999,
     "angle": 135
   },
   {
@@ -271,7 +271,7 @@
     "cathode": "/Port indicators/CA4",
     "anode": "/Port indicators/CA1",
     "x": 174.10000000000002,
-    "y": 126.5,
+    "y": 132.2,
     "angle": 135
   },
   {
@@ -304,7 +304,7 @@
     "cathode": "/Port indicators/CA4",
     "anode": "/Port indicators/CA5",
     "x": 174.10000000000002,
-    "y": 132.2,
+    "y": 126.49999999999999,
     "angle": 135
   },
   {
@@ -315,7 +315,7 @@
     "cathode": "/Port indicators/CA4",
     "anode": "/Port indicators/CA6",
     "x": 176.64000000000001,
-    "y": 126.5,
+    "y": 132.2,
     "angle": 135
   },
   {
@@ -348,7 +348,7 @@
     "cathode": "/Port indicators/CA4",
     "anode": "/Port indicators/CA9",
     "x": 176.64000000000001,
-    "y": 132.2,
+    "y": 126.49999999999999,
     "angle": 135
   },
   {
