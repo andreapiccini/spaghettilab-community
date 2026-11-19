@@ -47,8 +47,8 @@
 46,ROW_R08,physical breadboard row
 47,GPIO41,"direct MCU alias,3.3V only"
 48,GND,shared service / return / supply
-49,GPIO16,"direct MCU alias,3.3V only"
-50,GPIO48,"direct MCU alias,3.3V only"
+49,NC_RESERVED,not connected; do not use
+50,NC_RESERVED,not connected; do not use
 51,GPIO44,"direct MCU alias,3.3V only"
 52,GPIO43,"direct MCU alias,3.3V only"
 53,I2C_USER_SDA,shared service / return / supply

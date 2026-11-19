@@ -18,7 +18,7 @@ J32 XUNPU FPC-05FB-60PH20 / C2856839, SMD sul lato componenti F.Cu; nessun pin s
 
 Asola arrotondata32,5×2mm, larghezza nastro nominale30,5mm. Riserva rame su tutti gli strati. Non usare il nastro come supporto meccanico; case e raggio di piega devono essere qualificati. La mezzanina/accessorio richiede il proprio fissaggio e circuito.
 
-Pin1..48:16triplette ROW/GPIO/GND. ROW è il nodo fisico; GPIO è prima dell'isolamento. **Non ponticellarli sull'accessorio.** Pin49..52:GPIO16/48/44/43, alias S3; consultare profilo S31. UART0 può emettere log all'avvio. Pin53/54:I2C_USER SDA/SCL;55/56:GND;57:3V3;58:EXP_RESET_N;59/60:5V. Mappa dettagliata in ffc60-pinout.csv. Nessuno shunt/ADC/DAC di precisione aggiunto sulla backbone.
+Pin1..48:16triplette ROW/GPIO/GND. ROW è il nodo fisico; GPIO è prima dell'isolamento. **Non ponticellarli sull'accessorio.** Pin49/50: NC riservati; pin51/52: GPIO44/43, alias S3; consultare profilo S31. UART0 può emettere log all'avvio. Pin53/54:I2C_USER SDA/SCL;55/56:GND;57:3V3;58:EXP_RESET_N;59/60:5V. Mappa dettagliata in ffc60-pinout.csv. Nessuno shunt/ADC/DAC di precisione aggiunto sulla backbone.
 
 Pin58 è uscita della backbone, ingresso dell'accessorio:LOW obbliga a disabilitare tutte le uscite dell'accessorio. Deve agire sull'hardware OE con default OFF anche quando un'alimentazione manca; non basta un messaggio firmware. L'accessorio deve impedire backfeed attraverso I/O non alimentati. STOP non può isolare una sorgente esterna che ignora questo contratto.
 

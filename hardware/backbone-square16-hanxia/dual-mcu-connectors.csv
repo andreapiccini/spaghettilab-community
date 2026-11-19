@@ -7,11 +7,11 @@ J25,5,I2C_USER_SDA,19,11,24,
 J25,6,I2C_USER_SCL,20,12,25,
 J25,7,NC_RESERVED,,,,not connected; do not use
 J25,8,NC_RESERVED,,,,not connected; do not use
-J25,9,GPIO16,9,16,1,
+J25,9,NC_RESERVED,,,,not connected; do not use
 J25,10,GPIO43,37,43,58,UART0 ROM output possible
 J25,11,GPIO44,36,44,59,
 J25,12,NC_RESERVED,,,,not connected; do not use
-J25,13,GPIO48,25,48,40,
+J25,13,NC_RESERVED,,,,not connected; do not use
 J25,14,GND,1,,,
 J25,15,I2C_USER_SDA,19,11,24,
 J25,16,I2C_USER_SCL,20,12,25,
@@ -40,7 +40,7 @@ J26,22,NC_RESERVED,,,,not connected; do not use
 J26,23,GND,1,,,
 J26,24,NC_RESERVED,,,,not connected; do not use
 J26,25,GND,1,,,
-J26,26,GPIO16,9,16,1,
+J26,26,NC_RESERVED,,,,not connected; do not use
 J26,27,GND,1,,,
 J26,28,I2C_USER_SDA,19,11,24,
 J26,29,GND,1,,,
@@ -70,7 +70,7 @@ J27,20,GPIO44,36,44,59,
 J27,21,GND,1,,,
 J27,22,NC_RESERVED,,,,not connected; do not use
 J27,23,GND,1,,,
-J27,24,GPIO48,25,48,40,
+J27,24,NC_RESERVED,,,,not connected; do not use
 J27,25,GND,1,,,
 J27,26,I2C_USER_SCL,20,12,25,
 J27,27,GND,1,,,
@@ -99,3 +99,9 @@ J29,5,5V,,,,
 J29,6,3V3,2,,,
 J29,7,I2C_USER_SDA,19,11,24,
 J29,8,I2C_USER_SCL,20,12,25,
+J33,1,GND,1,,,Accessory return
+J33,2,5V,,,,Fixed supply; independent of row VCC
+J33,3,I2C_USER_SDA,19,11,24,SDA or SPI CS active low
+J33,4,I2C_USER_SCL,20,12,25,SCL or SPI SCK
+J33,5,GPIO43,37,43,58,UART TX or SPI MOSI; ROM boot output possible
+J33,6,GPIO44,36,44,59,UART RX or SPI MISO

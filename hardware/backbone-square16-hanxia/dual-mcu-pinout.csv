@@ -7,7 +7,7 @@
 6,GPIO6,6,4,row,
 7,GPIO7,7,5,row,
 8,TOUCH_SYS_SDA,15,0,reserved_internal,
-9,GPIO16,16,1,aux,
+9,VCC_SENSE_S3,16,1,reserved_internal,ADC2 S3; on S31 input without pulls
 10,CAN_TX,17,6,reserved_internal,
 11,CAN_RX,18,7,reserved_internal,
 12,GPIO8,8,35,row,
@@ -23,7 +23,7 @@
 22,ROW_ARM_N,14,37,reserved_internal,
 23,TOUCH_SYS_SCL,21,38,reserved_internal,
 24,USB_VBUS_PRESENT,47,39,reserved_internal,
-25,GPIO48,48,40,aux,
+25,I2C_INT_SDA,48,40,reserved_internal,Internal bus SDA
 26,unconnected-(U1A-IO45-Pad26),45,60,reserved_internal,internal default bias only; do not add shared external pull
 27,ESP_BOOT,0,61,reserved_internal,
 28,GPIO35,35,42,row,S3 N8R2 required for pads28-30; octal PSRAM variants excluded
@@ -33,7 +33,7 @@
 32,GPIO39,39,46,row,
 33,GPIO40,40,47,row,
 34,GPIO41,41,54,row,
-35,I2C_INT_SDA,42,55,reserved_internal,I2C_INT_SDA: S3 GPIO42 / S31 GPIO55. No external pad JTAG on this pin.
+35,VCC_SENSE_S31,42,55,reserved_internal,ADC2 S31; on S3 input without pulls
 36,GPIO44,44,59,aux,
 37,GPIO43,43,58,aux,
 38,GPIO2,2,56,row,

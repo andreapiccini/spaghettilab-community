@@ -10,11 +10,11 @@ Riferimento: backbone-square16-hanxia salvato su disco. Questa revisione conserv
 
 Moduli previsti: ESP32-S3-WROOM-1-N8R2 e ESP32-S31-WROOM-1-N16R16V, antenna PCB, socket perimetrale a40contatti. Altre varianti richiedono revisione: in particolare S3 con PSRAM octal usa i pad28–30 e non garantisce le16righe. Nomi rete GPIOxx e pin del simbolo sono alias S3, non numeri S31. Usare dual-mcu-pinout.csv e dual-mcu-profiles.json.
 
-ADC sulle righe: S3 A1-A5 e B1-B4 (9 ADC1); S31 A1/A6-A8 e B1/B5-B8 (6 ADC1 + 3 ADC2). Comuni A1 e B1. Banco A: 5/4; banco B: 4/5 (S3/S31). DAC S31 su A3/A4. I2C_INT_SDA spostato al pad35 (S3 GPIO42 / S31 GPIO55); il pad4 diventa A5. Vedere dual-mcu-rows.csv. I GPIO delle derivazioni J26/J27 e FFC60 J32 seguono le nuove righe.
+ADC sulle righe: S3 A1-A5 e B1-B4 (9 ADC1); S31 A1/A6-A8 e B1/B5-B8 (6 ADC1 + 3 ADC2). Comuni A1 e B1. Banco A: 5/4; banco B: 4/5 (S3/S31). DAC S31 su A3/A4. I2C_INT_SDA sul pad25 (S3 GPIO48 / S31 GPIO40); il pad4 diventa A5. Vedere dual-mcu-rows.csv. I GPIO delle derivazioni J26/J27 e FFC60 J32 seguono le nuove righe.
 
 Correzioni: R201 diventa10k tra3V3 e pad21/STRAP_SPI_VOLTAGE; nessun pull esterno sul pad26, che segue i diversi default interni dei due moduli. U91 SDA passa al pad8, VBUS sense al pad24. ROW_ARM_N usa pad22 con nuovo pull-upR923 e pilota U60. BOOT pad27 non abilita più le righe. Non usare GPIO hold su ROW_ARM_N; rispettare almeno3ms dopo il rilascio EN prima di modificare gli strap.
 
-J25.7/.8/.12, J26.22/.24 e J27.22 sono NC riservati: rimosso l'accesso esterno a strap flash e segnali riservati. Restano quattroGPIO ausiliari sui pad9/25/36/37; TX UART0 può emettere log al boot. Connettori aggiornati in dual-mcu-connectors.csv. Non collegare mai direttamente GPIO eROW sulla mezzanina.
+J25.7/.8/.12, J26.22/.24 e J27.22 sono NC riservati: rimosso l'accesso esterno a strap flash e segnali riservati. Restano due GPIO ausiliari sui pad36/37; TX UART0 può emettere log al boot. Connettori aggiornati in dual-mcu-connectors.csv. Non collegare mai direttamente GPIO eROW sulla mezzanina.
 
 USB: programmazione e seriale/JTAG comuni sui pad13/14. USB OTG/host applicativo disponibile sul socket solo conS3; S31 High-Speed richiede pad54/55 inferiori non contattati. CAN resta classico con SN65HVD230; non attivare CAN-FD bitrate switching. I2C interno ed esterno restano separati; U91 resta su softwareI2C dedicato.
 

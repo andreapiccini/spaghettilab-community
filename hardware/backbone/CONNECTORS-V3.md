@@ -1,3 +1,7 @@
+# Pinout corrente dei magnetici
+
+J2/J9: 1=5V, 2=CAN_H, 3=CAN_L, 4=GND, 5=TERM_CTRL_IN (J2) / TERM_CTRL_OUT (J9). I pad 1–4 sono allungati e collegati ai fori J25/J24 delle femmine sul retro. Questo ordine sostituisce le tabelle storiche seguenti e richiede moduli con lo stesso nuovo pinout. Vedere CAN-EXPANSION.md.
+
 > Current consolidated CAD status (2026-10-29): see [CURRENT-REVISION.md](CURRENT-REVISION.md). Earlier coordinates, J3 ordering, cost and placement statements below are historical and may be superseded. No mezzanine is implemented.
 
 ## Current compact outline (2026-10-28)

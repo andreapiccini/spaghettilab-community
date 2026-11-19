@@ -100,7 +100,7 @@
       }
     ],
     "services": {
-      "I2C_INT_SDA": 42,
+      "I2C_INT_SDA": 48,
       "I2C_INT_SCL": 5,
       "TOUCH_SYS_SDA": 15,
       "CAN_TX": 17,
@@ -119,7 +119,14 @@
     "usb_otg_on_socket": true,
     "can_mode": "classic CAN through SN65HVD230; do not enable CAN FD data-rate switching",
     "strap_hold_min_ms": 3,
-    "firmware_status": "mapping contract only; not integrated into legacy firmware"
+    "firmware_status": "mapping contract only; not integrated into legacy firmware",
+    "vcc_sense": {
+      "gpio": 16,
+      "adc_unit": 2,
+      "adc_channel": 5,
+      "inactive_gpio": 42,
+      "before_wifi": true
+    }
   },
   "s31": {
     "module": "ESP32-S31-WROOM-1-N16R16V",
@@ -222,7 +229,7 @@
       }
     ],
     "services": {
-      "I2C_INT_SDA": 55,
+      "I2C_INT_SDA": 40,
       "I2C_INT_SCL": 3,
       "TOUCH_SYS_SDA": 0,
       "CAN_TX": 6,
@@ -241,6 +248,13 @@
     "usb_otg_on_socket": false,
     "can_mode": "classic CAN through SN65HVD230; do not enable CAN FD data-rate switching",
     "strap_hold_min_ms": 3,
-    "firmware_status": "mapping contract only; not integrated into legacy firmware"
+    "firmware_status": "mapping contract only; not integrated into legacy firmware",
+    "vcc_sense": {
+      "gpio": 55,
+      "adc_unit": 2,
+      "adc_channel": 2,
+      "inactive_gpio": 1,
+      "before_wifi": true
+    }
   }
 }
