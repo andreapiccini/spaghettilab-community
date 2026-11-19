@@ -754,7 +754,7 @@
         "uuid": "9de6ddb4-2647-4876-90a9-c16e585eea03"
       }
     ],
-    "used_designators": "",
+    "used_designators": "U5,#PWR39,#PWR194,#PWR866",
     "variants": []
   },
   "sheets": [
@@ -769,6 +769,14 @@
     [
       "f7d87298-c1e8-4cc4-b453-a36f298d9bce",
       "Port indicators"
+    ],
+    [
+      "dd8705a8-fa74-4ec4-b38e-d6a2e1d94e2f",
+      "Underside CAN expansion"
+    ],
+    [
+      "24127080-27ea-46fe-b91c-de25db424d90",
+      "Touch controls"
     ]
   ],
   "text_variables": {},

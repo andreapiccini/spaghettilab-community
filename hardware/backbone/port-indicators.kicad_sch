@@ -1206,6 +1206,17 @@
 			(embedded_fonts no)
 		)
 	)
+	(text "STATUS ICONS — D804 MASTER, D805 WI-FI, D806 BLUETOOTH, D807 LOCK (white, CB3 cathode)"
+		(exclude_from_sim no)
+		(at 58.42 354.33 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "12c99f58-370a-47e8-aabf-f4db7f695c20")
+	)
 	(text "GND"
 		(exclude_from_sim no)
 		(at 114.3 152.4 0)
@@ -1238,6 +1249,28 @@
 			(justify left)
 		)
 		(uuid "225867a1-068b-4dfd-8b8f-11c8b3e546ad")
+	)
+	(text "TOUCH BACKLIGHTS — same CB driver, four independent white LEDs"
+		(exclude_from_sim no)
+		(at 58.42 336.55 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "24a7967f-8022-4457-a4f4-77cad15267bc")
+	)
+	(text "MEMORY 1-4 LEDS — D810..D813 (white, CB4 cathode, anodes CB5..CB8), illuminated only"
+		(exclude_from_sim no)
+		(at 58.42 367.03 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "27409e2f-aa3e-4511-bb74-617bf8e38967")
 	)
 	(text "VCC"
 		(exclude_from_sim no)
@@ -1587,19 +1620,10 @@
 		(color 0 0 0 0)
 		(uuid "903024fd-bd36-44fd-ba02-67da8dff7d22")
 	)
-
-
-
-
-
-
 	(no_connect
 		(at 55.88 46.99)
 		(uuid "904fbf54-be8d-4018-9d99-db991df7493b")
 	)
-
-
-
 	(wire
 		(pts
 			(xy 175.26 55.88) (xy 175.26 58.42)
@@ -2490,6 +2514,16 @@
 		)
 		(uuid "05da7466-efc4-4f24-9b6a-9279de8cd663")
 	)
+	(label "CB3"
+		(at 307.34 361.95 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "0720f7ac-052f-4e3f-8431-1e15ace082c8")
+	)
 	(label "CA3"
 		(at 260.35 172.72 180)
 		(effects
@@ -2499,6 +2533,16 @@
 			(justify right bottom)
 		)
 		(uuid "09e96ad8-ba4d-433e-be54-bab6e7faaf29")
+	)
+	(label "CB3"
+		(at 154.94 349.25 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "0a6c9d97-0300-45b9-acaf-58280f220258")
 	)
 	(label "CA2"
 		(at 387.35 264.16 0)
@@ -2540,6 +2584,36 @@
 		)
 		(uuid "0fcc00bd-5b6e-44a2-b1da-47b9980e8d79")
 	)
+	(label "CB3"
+		(at 231.14 349.25 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "11233cfa-8330-4a64-a5a5-118419b7e5b6")
+	)
+	(label "CB4"
+		(at 187.96 365.76 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "11aadca4-d52c-4787-a30e-e94a204ce420")
+	)
+	(label "CB3"
+		(at 78.74 349.25 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "11fe87cd-7e7d-40c3-bfd0-133b8b310e8b")
+	)
 	(label "CA8"
 		(at 107.95 279.4 0)
 		(effects
@@ -2559,6 +2633,16 @@
 			(justify left bottom)
 		)
 		(uuid "154dc736-acf1-4369-8a41-683c8ab2845b")
+	)
+	(label "CB4"
+		(at 55.88 62.23 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "163c8f5c-f3f5-4fe6-be7a-55c1d9c984b3")
 	)
 	(label "CA7"
 		(at 81.28 67.31 0)
@@ -2589,6 +2673,26 @@
 			(justify right)
 		)
 		(uuid "1d4167ad-d12d-4816-b6c3-634eee036bb8")
+	)
+	(label "CB6"
+		(at 198.12 355.6 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "1f4a2519-28e7-41fe-bff2-0a5f17393753")
+	)
+	(label "CB4"
+		(at 187.96 355.6 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "227631a2-5055-4832-a72a-ef8afc7d7136")
 	)
 	(label "CA5"
 		(at 97.79 294.64 180)
@@ -2730,6 +2834,16 @@
 		)
 		(uuid "38ab1f2f-f296-4f3a-acf3-b5962be47184")
 	)
+	(label "CB4"
+		(at 187.96 346.71 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "3be927d5-df97-4c3f-b205-1d09f9f3832a")
+	)
 	(label "CA4"
 		(at 377.19 187.96 180)
 		(effects
@@ -2830,6 +2944,16 @@
 		)
 		(uuid "4d955238-07cc-49f8-b080-f666cf20a3c5")
 	)
+	(label "CB5"
+		(at 317.5 349.25 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "5088db77-4e05-4998-855d-507990bbb329")
+	)
 	(label "CA5"
 		(at 97.79 264.16 180)
 		(effects
@@ -2839,6 +2963,16 @@
 			(justify right)
 		)
 		(uuid "51e30545-8ee3-4263-a132-dba8e361c086")
+	)
+	(label "CB2"
+		(at 55.88 57.15 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "53daf18c-1f88-4769-8887-ced62ca8a3b7")
 	)
 	(label "CA5"
 		(at 387.35 187.96 0)
@@ -3000,6 +3134,16 @@
 		)
 		(uuid "687c25ad-f596-4d3e-b4e3-cf3f8deb65fd")
 	)
+	(label "CB2"
+		(at 165.1 349.25 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "690b3f62-0f63-4aca-95bf-27bdf8085665")
+	)
 	(label "CA7"
 		(at 107.95 264.16 0)
 		(effects
@@ -3039,6 +3183,16 @@
 			(justify left)
 		)
 		(uuid "6f5e1e52-bfe3-4ea6-b002-0fb2cde85d1b")
+	)
+	(label "CB1"
+		(at 55.88 54.61 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "7175d57e-69c0-441c-b68e-1b4486666cfa")
 	)
 	(label "CA5"
 		(at 41.91 294.64 180)
@@ -3090,6 +3244,16 @@
 		)
 		(uuid "7d3c7672-5197-4090-9139-e1b77af4b62c")
 	)
+	(label "CB8"
+		(at 198.12 375.92 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "81e13687-16bd-41a6-8758-7e51d527b67c")
+	)
 	(label "CA6"
 		(at 153.67 248.92 180)
 		(effects
@@ -3099,6 +3263,16 @@
 			(justify right)
 		)
 		(uuid "85242f1f-f95b-4a79-820f-7ed6e8185fbf")
+	)
+	(label "CB5"
+		(at 55.88 64.77 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "8542a5e5-0e43-4930-b629-06f56bdd6205")
 	)
 	(label "CA8"
 		(at 377.19 279.4 180)
@@ -3159,6 +3333,16 @@
 			(justify left bottom)
 		)
 		(uuid "8f62b8a5-6552-49b4-964c-84918cb34d47")
+	)
+	(label "CB7"
+		(at 198.12 365.76 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "909de926-a0fa-4168-b7c3-bbd7ae0843c6")
 	)
 	(label "CA1"
 		(at 92.71 172.72 180)
@@ -3229,6 +3413,16 @@
 			(justify left)
 		)
 		(uuid "9cc4b86b-8215-4836-ba25-a813c35699d4")
+	)
+	(label "CB6"
+		(at 55.88 67.31 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "9e0e00a9-75d7-43cf-9f82-787d0abe967f")
 	)
 	(label "CA7"
 		(at 113.03 157.48 0)
@@ -3350,6 +3544,46 @@
 		)
 		(uuid "abac67fd-5c77-452d-8aee-cf8d7cacc539")
 	)
+	(label "CB3"
+		(at 307.34 349.25 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "adc394cf-73f7-4ad9-b240-b9b01d0b4854")
+	)
+	(label "CB3"
+		(at 154.94 361.95 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "afacb4d2-087c-47d7-8863-237a5778c667")
+	)
+	(label "CB9"
+		(at 317.5 361.95 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "b063e2ff-1ad0-41e7-ba0e-563680649f29")
+	)
+	(label "CB8"
+		(at 55.88 72.39 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "b09f452d-dcf6-41cb-bc76-4f09aa952a0f")
+	)
 	(label "CA1"
 		(at 92.71 157.48 180)
 		(effects
@@ -3369,6 +3603,16 @@
 			(justify right)
 		)
 		(uuid "b351240d-6f88-4da0-a209-bbf7bacaea7c")
+	)
+	(label "CB3"
+		(at 55.88 59.69 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "b38a70fb-2ba0-4b72-9442-723882d3121b")
 	)
 	(label "CA8"
 		(at 377.19 264.16 180)
@@ -3390,6 +3634,16 @@
 		)
 		(uuid "b4d4ffd3-c1e7-4ed8-bccf-aa9187cfd963")
 	)
+	(label "CB5"
+		(at 198.12 346.71 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "b5479e36-3297-4e88-9336-78d903048dc3")
+	)
 	(label "CA1"
 		(at 280.67 142.24 0)
 		(effects
@@ -3400,6 +3654,16 @@
 		)
 		(uuid "b76b2b15-62b7-4098-b2a9-3ca55642db7f")
 	)
+	(label "CB3"
+		(at 231.14 361.95 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "b812fa0e-f89c-436c-b88b-7c98cc75323e")
+	)
 	(label "CA2"
 		(at 52.07 264.16 0)
 		(effects
@@ -3409,6 +3673,16 @@
 			(justify left)
 		)
 		(uuid "bc4b962d-2155-4d28-a572-785dc1435b61")
+	)
+	(label "CB3"
+		(at 78.74 361.95 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "bea1528c-2ad7-4edb-9145-a60c6b0b34fe")
 	)
 	(label "CA8"
 		(at 336.55 172.72 0)
@@ -3510,6 +3784,16 @@
 		)
 		(uuid "c8954753-467b-48aa-90b1-63838f966d5e")
 	)
+	(label "CB9"
+		(at 55.88 74.93 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "cb0978c5-c909-4142-980f-4de577934b46")
+	)
 	(label "CA5"
 		(at 280.67 187.96 0)
 		(effects
@@ -3549,6 +3833,16 @@
 			(justify left)
 		)
 		(uuid "cf9f3a66-def7-4658-be8f-ac37b9dfbb39")
+	)
+	(label "CB7"
+		(at 55.88 69.85 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "d1d71b6d-de62-4f33-88a9-f0b446b82c69")
 	)
 	(label "LED_FILTER"
 		(at 81.28 39.37 0)
@@ -3609,6 +3903,16 @@
 			(justify left bottom)
 		)
 		(uuid "d8172e68-c841-4520-9937-19e033809990")
+	)
+	(label "CB7"
+		(at 165.1 361.95 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "da1ea987-f26a-43fc-b2ac-1a6e9a71ee87")
 	)
 	(label "CA5"
 		(at 168.91 187.96 0)
@@ -3700,6 +4004,26 @@
 		)
 		(uuid "e1723316-5cd0-46ec-af02-58a837edb43a")
 	)
+	(label "CB1"
+		(at 88.9 349.25 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "e3310481-f8cd-4289-b26a-cf786c19c5e1")
+	)
+	(label "CB4"
+		(at 241.3 349.25 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "e507fbe1-9c32-469e-9a80-bbdaa58d3f1a")
+	)
 	(label "CA8"
 		(at 224.79 172.72 0)
 		(effects
@@ -3749,6 +4073,16 @@
 			(justify right)
 		)
 		(uuid "ef5c2cd4-02b2-477e-a625-56d828870632")
+	)
+	(label "CB6"
+		(at 88.9 361.95 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "efbf5cce-631c-485b-9c8e-fa3b983dc6e5")
 	)
 	(label "CA8"
 		(at 433.07 248.92 180)
@@ -3820,6 +4154,16 @@
 		)
 		(uuid "fc33ee01-5861-46fd-86a1-2c179d999b4a")
 	)
+	(label "CB4"
+		(at 187.96 375.92 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "fce9d6e2-e8a5-4a7e-9c07-6dc5792a573e")
+	)
 	(label "CA1"
 		(at 168.91 142.24 0)
 		(effects
@@ -3829,6 +4173,16 @@
 			(justify left bottom)
 		)
 		(uuid "fec38c63-8306-4d56-9ec8-ccbe4ad37436")
+	)
+	(label "CB8"
+		(at 241.3 361.95 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "ffe2e4d5-bf47-4675-bd03-474dc49e2ffb")
 	)
 	(global_label "I2C_CTRL_SDA"
 		(shape bidirectional)
@@ -4976,6 +5330,94 @@
 	)
 	(symbol
 		(lib_id "PortLED:LED")
+		(at 193.04 346.71 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "1b5da39d-89ad-4978-a448-b4c684b1db06")
+		(property "Reference" "D810"
+			(at 192.786 342.392 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "NUMBER1"
+			(at 192.786 343.662 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 193.04 346.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 193.04 346.71 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 193.04 346.71 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 193.04 346.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "4ae987d0-aa85-4fcc-b370-4e1ba0170e8c")
+		)
+		(pin "1"
+			(uuid "748f102c-16ec-4385-a63e-d3442b9af6f6")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D810")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
 		(at 46.99 294.64 0)
 		(unit 1)
 		(body_style 1)
@@ -5376,6 +5818,94 @@
 	)
 	(symbol
 		(lib_id "PortLED:LED")
+		(at 160.02 361.95 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2714c5e2-d163-42a1-a5e1-cba9edcbc301")
+		(property "Reference" "D805"
+			(at 160.02 357.124 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "WIFI"
+			(at 160.02 358.394 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 160.02 361.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 160.02 361.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 160.02 361.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 160.02 361.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "be2d14fc-44b9-4c95-a3fb-b8ef7af1889f")
+		)
+		(pin "1"
+			(uuid "3b3ed361-8c18-4201-a4f0-7e9d76e3f23c")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D805")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
 		(at 158.75 142.24 0)
 		(unit 1)
 		(body_style 1)
@@ -5769,6 +6299,94 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
 					(reference "D714")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
+		(at 236.22 361.95 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "305b6cbf-b745-4fa0-9e8e-bef0f61902bc")
+		(property "Reference" "D806"
+			(at 236.22 357.124 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "NUMBER2"
+			(at 236.22 358.394 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 236.22 361.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 236.22 361.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 236.22 361.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 236.22 361.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "b43e701a-0d17-4619-9bda-f1894e883cf1")
+		)
+		(pin "1"
+			(uuid "a09d0235-8bca-4fbf-8f22-f64cf2972b89")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D806")
 					(unit 1)
 				)
 			)
@@ -6571,6 +7189,94 @@
 		)
 	)
 	(symbol
+		(lib_id "PortLED:LED")
+		(at 312.42 361.95 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "53080eed-1107-491b-abfe-7c84716faf75")
+		(property "Reference" "D807"
+			(at 312.166 358.394 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "LOCK"
+			(at 312.42 359.664 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 312.42 361.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 312.42 361.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 312.42 361.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 312.42 361.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "88b2b994-3b50-4208-a0fd-681bbc691838")
+		)
+		(pin "1"
+			(uuid "63efae83-5188-474c-9035-a42fb0f61016")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D807")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 40.64 53.34 0)
 		(unit 1)
@@ -6839,6 +7545,94 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
 					(reference "D761")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
+		(at 193.04 365.76 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "5c1f56fa-8e70-4a21-bcb8-2bce21bd1f83")
+		(property "Reference" "D812"
+			(at 193.548 361.696 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "NUMBER3"
+			(at 193.548 362.966 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 193.04 365.76 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 193.04 365.76 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 193.04 365.76 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 193.04 365.76 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "f816329c-5d7d-4225-a3eb-7c16346923fb")
+		)
+		(pin "1"
+			(uuid "c6e6547f-ec13-4a43-83d0-ffc9a8cd9f2f")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D812")
 					(unit 1)
 				)
 			)
@@ -7546,6 +8340,94 @@
 	)
 	(symbol
 		(lib_id "PortLED:LED")
+		(at 193.04 355.6 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "74bede56-9bd1-4ba8-bc9e-05fb536e753e")
+		(property "Reference" "D811"
+			(at 193.04 350.774 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "NUMBER2"
+			(at 193.04 352.044 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 193.04 355.6 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 193.04 355.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 193.04 355.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 193.04 355.6 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "dd288eee-1e8d-4ec2-8d6c-b254d60754d5")
+		)
+		(pin "1"
+			(uuid "0f04525c-cd70-4f42-89ed-3740db9defdc")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D811")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
 		(at 270.51 172.72 0)
 		(unit 1)
 		(body_style 1)
@@ -7920,6 +8802,182 @@
 	)
 	(symbol
 		(lib_id "PortLED:LED")
+		(at 236.22 349.25 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "84a5052a-f3e6-49ff-a7c4-a09fe57326cd")
+		(property "Reference" "D802"
+			(at 236.22 344.678 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "PLAY/PAUSE"
+			(at 236.22 345.948 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 236.22 349.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 236.22 349.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 236.22 349.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 236.22 349.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "b33cb8cb-7516-4c15-8b87-f157d5a16b33")
+		)
+		(pin "1"
+			(uuid "1403bc6e-a2fc-4ca6-9951-ef2e89020c27")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D802")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
+		(at 83.82 349.25 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "850131fc-6dc9-42df-ba6f-618109e49bc2")
+		(property "Reference" "D800"
+			(at 83.82 345.186 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "PLUS"
+			(at 83.82 346.456 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 83.82 349.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 83.82 349.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 83.82 349.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 83.82 349.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "0e8f0345-2a74-411f-b262-a7f094c90ff5")
+		)
+		(pin "1"
+			(uuid "e0163d1e-c263-4abf-88c7-098d3cee7137")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D800")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
 		(at 214.63 142.24 0)
 		(unit 1)
 		(body_style 1)
@@ -8287,6 +9345,94 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
 					(reference "#PWR01712")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
+		(at 312.42 349.25 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9668884d-9098-4b1d-96ce-2c5d415de2de")
+		(property "Reference" "D803"
+			(at 312.166 344.678 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "SAVE/LOAD"
+			(at 311.912 346.456 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 312.42 349.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 312.42 349.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 312.42 349.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 312.42 349.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "c6f2609b-b6ec-4904-b0a0-b97a07937c73")
+		)
+		(pin "1"
+			(uuid "133ad288-b47c-4b86-8eb8-b3fc8a188c01")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D803")
 					(unit 1)
 				)
 			)
@@ -9867,6 +11013,94 @@
 		)
 	)
 	(symbol
+		(lib_id "PortLED:LED")
+		(at 160.02 349.25 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "b6358d04-6ae4-44a9-8b78-170d2a00cd0b")
+		(property "Reference" "D801"
+			(at 159.766 344.678 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "MODE"
+			(at 159.766 345.948 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 160.02 349.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 160.02 349.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 160.02 349.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 160.02 349.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "d579c584-f34e-43f0-bc8d-1493b7f0fe45")
+		)
+		(pin "1"
+			(uuid "0cfbd657-5de9-4865-8fc4-cd8d5f6b9347")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D801")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "PortLED:IS31FL3731")
 		(at 66.04 57.15 0)
 		(unit 1)
@@ -10431,6 +11665,94 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
 					(reference "D716")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PortLED:LED")
+		(at 83.82 361.95 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ce02d2a8-44dc-4c0b-a3a7-5dcf7d15e136")
+		(property "Reference" "D804"
+			(at 83.82 357.124 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "MASTER"
+			(at 84.074 358.902 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 83.82 361.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 83.82 361.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 83.82 361.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 83.82 361.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "d1858691-294f-4722-8478-ce2c425148e4")
+		)
+		(pin "1"
+			(uuid "d0966dfd-55c9-4b12-8041-5f0a8693a15e")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D804")
 					(unit 1)
 				)
 			)
@@ -11242,6 +12564,94 @@
 		)
 	)
 	(symbol
+		(lib_id "PortLED:LED")
+		(at 193.04 375.92 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f3d75a97-893c-434e-8c6e-2369721f973b")
+		(property "Reference" "D813"
+			(at 193.04 372.11 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Value" "NUMBER4"
+			(at 193.04 373.38 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
+			(at 193.04 375.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 193.04 375.92 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 193.04 375.92 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C965808"
+			(at 193.04 375.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.92 0.92)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "d0664d5f-1b32-4ea4-948a-133063288bc1")
+		)
+		(pin "1"
+			(uuid "73648cf5-1b2b-4d11-ad29-7219123a8fa5")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
+					(reference "D813")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "PortLED:C")
 		(at 175.26 63.5 0)
 		(unit 1)
@@ -11418,1110 +12828,4 @@
 			)
 		)
 	)
-
-(label "CB1"(at 55.88 54.61 0)(effects(font(size .889 .889))(justify left bottom))(uuid "7175d57e-69c0-441c-b68e-1b4486666cfa"))
-(label "CB2"(at 55.88 57.15 0)(effects(font(size .889 .889))(justify left bottom))(uuid "53daf18c-1f88-4769-8887-ced62ca8a3b7"))
-(label "CB3"(at 55.88 59.69 0)(effects(font(size .889 .889))(justify left bottom))(uuid "b38a70fb-2ba0-4b72-9442-723882d3121b"))
-(label "CB4"(at 55.88 62.23 0)(effects(font(size .889 .889))(justify left bottom))(uuid "163c8f5c-f3f5-4fe6-be7a-55c1d9c984b3"))
-(label "CB5"(at 55.88 64.77 0)(effects(font(size .889 .889))(justify left bottom))(uuid "8542a5e5-0e43-4930-b629-06f56bdd6205"))
-(label "CB6"(at 55.88 67.31 0)(effects(font(size .889 .889))(justify left bottom))(uuid "9e0e00a9-75d7-43cf-9f82-787d0abe967f"))
-(label "CB7"(at 55.88 69.85 0)(effects(font(size .889 .889))(justify left bottom))(uuid "d1d71b6d-de62-4f33-88a9-f0b446b82c69"))
-(label "CB8"(at 55.88 72.39 0)(effects(font(size .889 .889))(justify left bottom))(uuid "b09f452d-dcf6-41cb-bc76-4f09aa952a0f"))
-(label "CB9"(at 55.88 74.93 0)(effects(font(size .889 .889))(justify left bottom))(uuid "cb0978c5-c909-4142-980f-4de577934b46"))
-
-(symbol
-		(lib_id "PortLED:LED")
-		(at 50.800000 411.480000 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "850131fc-6dc9-42df-ba6f-618109e49bc2")
-		(property "Reference" "D800"
-			(at 50.800000 401.320000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 50.800000 402.590000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 50.800000 411.480000 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 50.800000 411.480000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 50.800000 411.480000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 50.800000 411.480000 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "0e8f0345-2a74-411f-b262-a7f094c90ff5")
-		)
-		(pin "1"
-			(uuid "e0163d1e-c263-4abf-88c7-098d3cee7137")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D800")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB3"(at 45.72 411.48 0)(effects(font(size .889 .889))(justify left bottom))(uuid "11fe87cd-7e7d-40c3-bfd0-133b8b310e8b"))
-(label "CB1"(at 55.879999999999995 411.48 0)(effects(font(size .889 .889))(justify left bottom))(uuid "e3310481-f8cd-4289-b26a-cf786c19c5e1"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 127.000000 411.480000 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "b6358d04-6ae4-44a9-8b78-170d2a00cd0b")
-		(property "Reference" "D801"
-			(at 127.000000 401.320000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 127.000000 402.590000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 127.000000 411.480000 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 127.000000 411.480000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 127.000000 411.480000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 127.000000 411.480000 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "d579c584-f34e-43f0-bc8d-1493b7f0fe45")
-		)
-		(pin "1"
-			(uuid "0cfbd657-5de9-4865-8fc4-cd8d5f6b9347")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D801")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB3"(at 121.92 411.48 0)(effects(font(size .889 .889))(justify left bottom))(uuid "0a6c9d97-0300-45b9-acaf-58280f220258"))
-(label "CB2"(at 132.08 411.48 0)(effects(font(size .889 .889))(justify left bottom))(uuid "690b3f62-0f63-4aca-95bf-27bdf8085665"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 203.200000 411.480000 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "84a5052a-f3e6-49ff-a7c4-a09fe57326cd")
-		(property "Reference" "D802"
-			(at 203.200000 401.320000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 203.200000 402.590000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 203.200000 411.480000 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 203.200000 411.480000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 203.200000 411.480000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 203.200000 411.480000 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "b33cb8cb-7516-4c15-8b87-f157d5a16b33")
-		)
-		(pin "1"
-			(uuid "1403bc6e-a2fc-4ca6-9951-ef2e89020c27")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D802")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB3"(at 198.11999999999998 411.48 0)(effects(font(size .889 .889))(justify left bottom))(uuid "11233cfa-8330-4a64-a5a5-118419b7e5b6"))
-(label "CB4"(at 208.28 411.48 0)(effects(font(size .889 .889))(justify left bottom))(uuid "e507fbe1-9c32-469e-9a80-bbdaa58d3f1a"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 279.400000 411.480000 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "9668884d-9098-4b1d-96ce-2c5d415de2de")
-		(property "Reference" "D803"
-			(at 279.400000 401.320000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 279.400000 402.590000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 279.400000 411.480000 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 279.400000 411.480000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 279.400000 411.480000 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 279.400000 411.480000 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "c6f2609b-b6ec-4904-b0a0-b97a07937c73")
-		)
-		(pin "1"
-			(uuid "133ad288-b47c-4b86-8eb8-b3fc8a188c01")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D803")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB3"(at 274.32000000000005 411.48 0)(effects(font(size .889 .889))(justify left bottom))(uuid "adc394cf-73f7-4ad9-b240-b9b01d0b4854"))
-(label "CB5"(at 284.48 411.48 0)(effects(font(size .889 .889))(justify left bottom))(uuid "5088db77-4e05-4998-855d-507990bbb329"))
-(text "TOUCH BACKLIGHTS — same CB driver, four independent white LEDs" (at 25.4 398.78 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "24a7967f-8022-4457-a4f4-77cad15267bc"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 50.8 424.18 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "ce02d2a8-44dc-4c0b-a3a7-5dcf7d15e136")
-		(property "Reference" "D804"
-			(at 50.8 414.02 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 50.8 415.29 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 50.8 424.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 50.8 424.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 50.8 424.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 50.8 424.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "d1858691-294f-4722-8478-ce2c425148e4")
-		)
-		(pin "1"
-			(uuid "d0966dfd-55c9-4b12-8041-5f0a8693a15e")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D804")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB3"(at 45.72 424.18 0)(effects(font(size .889 .889))(justify left bottom))(uuid "bea1528c-2ad7-4edb-9145-a60c6b0b34fe"))
-(label "CB6"(at 55.88 424.18 0)(effects(font(size .889 .889))(justify left bottom))(uuid "efbf5cce-631c-485b-9c8e-fa3b983dc6e5"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 127 424.18 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "2714c5e2-d163-42a1-a5e1-cba9edcbc301")
-		(property "Reference" "D805"
-			(at 127 414.02 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 127 415.29 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 127 424.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 127 424.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 127 424.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 127 424.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "be2d14fc-44b9-4c95-a3fb-b8ef7af1889f")
-		)
-		(pin "1"
-			(uuid "3b3ed361-8c18-4201-a4f0-7e9d76e3f23c")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D805")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB3"(at 121.92 424.18 0)(effects(font(size .889 .889))(justify left bottom))(uuid "afacb4d2-087c-47d7-8863-237a5778c667"))
-(label "CB7"(at 132.08 424.18 0)(effects(font(size .889 .889))(justify left bottom))(uuid "da1ea987-f26a-43fc-b2ac-1a6e9a71ee87"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 203.2 424.18 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "305b6cbf-b745-4fa0-9e8e-bef0f61902bc")
-		(property "Reference" "D806"
-			(at 203.2 414.02 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 203.2 415.29 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 203.2 424.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 203.2 424.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 203.2 424.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 203.2 424.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "b43e701a-0d17-4619-9bda-f1894e883cf1")
-		)
-		(pin "1"
-			(uuid "a09d0235-8bca-4fbf-8f22-f64cf2972b89")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D806")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB3"(at 198.12 424.18 0)(effects(font(size .889 .889))(justify left bottom))(uuid "b812fa0e-f89c-436c-b88b-7c98cc75323e"))
-(label "CB8"(at 208.28 424.18 0)(effects(font(size .889 .889))(justify left bottom))(uuid "ffe2e4d5-bf47-4675-bd03-474dc49e2ffb"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 279.4 424.18 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "53080eed-1107-491b-abfe-7c84716faf75")
-		(property "Reference" "D807"
-			(at 279.4 414.02 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 279.4 415.29 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 279.4 424.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 279.4 424.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 279.4 424.18 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 279.4 424.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "88b2b994-3b50-4208-a0fd-681bbc691838")
-		)
-		(pin "1"
-			(uuid "63efae83-5188-474c-9035-a42fb0f61016")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D807")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB3"(at 274.32 424.18 0)(effects(font(size .889 .889))(justify left bottom))(uuid "0720f7ac-052f-4e3f-8431-1e15ace082c8"))
-(label "CB9"(at 284.48 424.18 0)(effects(font(size .889 .889))(justify left bottom))(uuid "b063e2ff-1ad0-41e7-ba0e-563680649f29"))
-(text "STATUS ICONS — D804 MASTER, D805 WI-FI, D806 BLUETOOTH, D807 LOCK (white, CB3 cathode)" (at 25.4 416.56 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "12c99f58-370a-47e8-aabf-f4db7f695c20"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 50.8 436.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "1b5da39d-89ad-4978-a448-b4c684b1db06")
-		(property "Reference" "D810"
-			(at 50.8 426.72 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 50.8 427.99 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 50.8 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 50.8 436.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 50.8 436.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 50.8 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "4ae987d0-aa85-4fcc-b370-4e1ba0170e8c")
-		)
-		(pin "1"
-			(uuid "748f102c-16ec-4385-a63e-d3442b9af6f6")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D810")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB4"(at 45.72 436.88 0)(effects(font(size .889 .889))(justify left bottom))(uuid "3be927d5-df97-4c3f-b205-1d09f9f3832a"))
-(label "CB5"(at 55.88 436.88 0)(effects(font(size .889 .889))(justify left bottom))(uuid "b5479e36-3297-4e88-9336-78d903048dc3"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 127 436.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "74bede56-9bd1-4ba8-bc9e-05fb536e753e")
-		(property "Reference" "D811"
-			(at 127 426.72 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 127 427.99 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 127 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 127 436.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 127 436.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 127 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "dd288eee-1e8d-4ec2-8d6c-b254d60754d5")
-		)
-		(pin "1"
-			(uuid "0f04525c-cd70-4f42-89ed-3740db9defdc")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D811")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB4"(at 121.92 436.88 0)(effects(font(size .889 .889))(justify left bottom))(uuid "227631a2-5055-4832-a72a-ef8afc7d7136"))
-(label "CB6"(at 132.08 436.88 0)(effects(font(size .889 .889))(justify left bottom))(uuid "1f4a2519-28e7-41fe-bff2-0a5f17393753"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 203.2 436.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "5c1f56fa-8e70-4a21-bcb8-2bce21bd1f83")
-		(property "Reference" "D812"
-			(at 203.2 426.72 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 203.2 427.99 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 203.2 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 203.2 436.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 203.2 436.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 203.2 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "f816329c-5d7d-4225-a3eb-7c16346923fb")
-		)
-		(pin "1"
-			(uuid "c6e6547f-ec13-4a43-83d0-ffc9a8cd9f2f")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D812")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB4"(at 198.12 436.88 0)(effects(font(size .889 .889))(justify left bottom))(uuid "11aadca4-d52c-4787-a30e-e94a204ce420"))
-(label "CB7"(at 208.28 436.88 0)(effects(font(size .889 .889))(justify left bottom))(uuid "909de926-a0fa-4168-b7c3-bbd7ae0843c6"))
-(symbol
-		(lib_id "PortLED:LED")
-		(at 279.4 436.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "f3d75a97-893c-434e-8c6e-2369721f973b")
-		(property "Reference" "D813"
-			(at 279.4 426.72 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Value" "XL-1608UWC-04"
-			(at 279.4 427.99 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Footprint" "TouchUI:LED_0603_Logo_Optical"
-			(at 279.4 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 279.4 436.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 279.4 436.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part" "C965808"
-			(at 279.4 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.92 0.92)
-				)
-			)
-		)
-
-		(pin "2"
-			(uuid "d0664d5f-1b32-4ea4-948a-133063288bc1")
-		)
-		(pin "1"
-			(uuid "73648cf5-1b2b-4d11-ad29-7219123a8fa5")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/f7d87298-c1e8-4cc4-b453-a36f298d9bce"
-					(reference "D813")
-					(unit 1)
-				)
-			)
-		)
-	)
-(label "CB4"(at 274.32 436.88 0)(effects(font(size .889 .889))(justify left bottom))(uuid "fce9d6e2-e8a5-4a7e-9c07-6dc5792a573e"))
-(label "CB8"(at 284.48 436.88 0)(effects(font(size .889 .889))(justify left bottom))(uuid "81e13687-16bd-41a6-8758-7e51d527b67c"))
-(text "MEMORY 1-4 LEDS — D810..D813 (white, CB4 cathode, anodes CB5..CB8), illuminated only" (at 25.4 429.26 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid "27409e2f-aa3e-4511-bb74-617bf8e38967"))
 )
