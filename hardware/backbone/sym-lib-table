@@ -12,4 +12,5 @@
 (lib (name "TouchUI")(type "KiCad")(uri "${KIPRJMOD}/TouchUI.kicad_sym")(options "")(descr "Four touch UI controls"))
 
 (lib (name "ExpansionCAN")(type "KiCad")(uri "${KIPRJMOD}/ExpansionCAN.kicad_sym")(options "")(descr "Underside CAN expansion"))
+  (lib (name "ESP32Module")(type "KiCad")(uri "${KIPRJMOD}/ESP32Module.kicad_sym")(options "")(descr "ESP32-S3-MINI-1-N4R2 soldered module"))
 )

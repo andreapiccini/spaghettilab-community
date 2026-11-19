@@ -10,4 +10,5 @@
 (lib (name "TouchUI")(type "KiCad")(uri "${KIPRJMOD}/TouchUI.pretty")(options "")(descr "Masked copper touch electrodes"))
 
 (lib (name "ExpansionCAN")(type "KiCad")(uri "${KIPRJMOD}/ExpansionCAN.pretty")(options "")(descr "Underside CAN expansion"))
+  (lib (name "ESP32Module")(type "KiCad")(uri "${KIPRJMOD}/ESP32Module.pretty")(options "")(descr "ESP32-S3-MINI-1 land pattern with Backbone antenna keepout"))
 )
