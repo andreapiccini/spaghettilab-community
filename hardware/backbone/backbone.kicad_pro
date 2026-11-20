@@ -767,16 +767,12 @@
       "CAN termination"
     ],
     [
-      "f7d87298-c1e8-4cc4-b453-a36f298d9bce",
-      "Port indicators"
-    ],
-    [
       "dd8705a8-fa74-4ec4-b38e-d6a2e1d94e2f",
       "Underside CAN expansion"
     ],
     [
-      "24127080-27ea-46fe-b91c-de25db424d90",
-      "Touch controls"
+      "b598a8b5-44e5-4dff-bf28-c60015601e2b",
+      "Port RGB"
     ]
   ],
   "text_variables": {},

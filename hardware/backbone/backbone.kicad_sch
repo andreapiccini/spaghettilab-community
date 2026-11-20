@@ -24682,10 +24682,6 @@
 		(uuid "3ea53422-e347-45c1-b99c-ca20f56f4e86")
 	)
 	(no_connect
-		(at 105.41 102.87)
-		(uuid "55c33aee-3b53-485b-bff3-4676d513733c")
-	)
-	(no_connect
 		(at 208.28 180.34)
 		(uuid "99d657df-6585-4dfa-bc83-e31456b4e489")
 	)
@@ -67655,7 +67651,7 @@
 		)
 	)
 	(sheet
-		(at 830.58 630)
+		(at 609.6 186.69)
 		(size 63.5 11.43)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -67668,9 +67664,9 @@
 		(fill
 			(color 0 0 0 0)
 		)
-		(uuid "24127080-27ea-46fe-b91c-de25db424d90")
-		(property "Sheetname" "Touch controls"
-			(at 830.58 627.71 0)
+		(uuid "b598a8b5-44e5-4dff-bf28-c60015601e2b")
+		(property "Sheetname" "Port RGB"
+			(at 609.6 184.4 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -67680,8 +67676,8 @@
 				(justify left)
 			)
 		)
-		(property "Sheetfile" "touch-controls.kicad_sch"
-			(at 830.58 643.71 0)
+		(property "Sheetfile" "port-rgb.kicad_sch"
+			(at 609.6 200.4 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -67692,6 +67688,29 @@
 			)
 		)
 	)
+	(global_label "RGB_DIN_3V3"
+		(shape output)
+		(at 105.41 102.87 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7c0bb75f-ee2a-4fe4-a9fd-4157d7dde9b6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 105.41 102.87 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	
 	(sheet
 		(at 529.59 215.9)
 		(size 56.515 10.16)
@@ -67768,44 +67787,7 @@
 			)
 		)
 	)
-	(sheet
-		(at 609.6 186.69)
-		(size 63.5 11.43)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(stroke
-			(width 0.254)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "f7d87298-c1e8-4cc4-b453-a36f298d9bce")
-		(property "Sheetname" "Port indicators"
-			(at 609.6 184.4 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Sheetfile" "port-indicators.kicad_sch"
-			(at 609.6 200.4 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-	)
+	
 	(sheet_instances
 		(path "/"
 			(page "1")

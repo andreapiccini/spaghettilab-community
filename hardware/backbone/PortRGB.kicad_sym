@@ -1,0 +1,286 @@
+(kicad_symbol_lib
+	(version 20251024)
+	(generator "claude_portrgb")
+	(generator_version "10.0")
+(symbol "XL-1615RGBC-WS2812B"
+	(pin_names (offset 0.762))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "D"
+	(at 0 7 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "XL-1615RGBC-WS2812B"
+	(at 0 -7 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" "PortRGB:XL-1615RGBC-WS2812B"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" "https://www.lcsc.com/product-detail/C5349954.html"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Addressable RGB LED 1.6x1.5mm, WS2812B protocol (XINGLIGHT)"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" "C5349954"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "XL-1615RGBC-WS2812B_0_1"
+		(rectangle (start -5.08 5.08) (end 5.08 -5.08) (stroke (width 0.254) (type default)) (fill (type background)))
+	)
+	(symbol "XL-1615RGBC-WS2812B_1_1"
+		(pin input line
+	(at -7.62 2.54 0)
+	(length 2.54)
+	(name "DIN" (effects (font (size 1 1))))
+	(number "4" (effects (font (size 1 1))))
+) (pin output line
+	(at 7.62 2.54 180)
+	(length 2.54)
+	(name "DOUT" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+) (pin power_in line
+	(at 0 7.62 270)
+	(length 2.54)
+	(name "VDD" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+) (pin power_in line
+	(at 0 -7.62 90)
+	(length 2.54)
+	(name "GND" (effects (font (size 1 1))))
+	(number "3" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+(symbol "SN74AHCT1G125"
+	(pin_names (offset 0.762))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "U"
+	(at 0 7 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "SN74AHCT1G125DBVR"
+	(at 0 -7 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74ahct1g125.pdf"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Single buffer, TTL-level input: 3.3V GPIO to 5V WS2812 data"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" "C7484"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "SN74AHCT1G125_0_1"
+		(rectangle (start -5.08 5.08) (end 5.08 -5.08) (stroke (width 0.254) (type default)) (fill (type background)))
+	)
+	(symbol "SN74AHCT1G125_1_1"
+		(pin input line
+	(at -7.62 2.54 0)
+	(length 2.54)
+	(name "A" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+) (pin input line
+	(at -7.62 -2.54 0)
+	(length 2.54)
+	(name "~{OE}" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+) (pin output line
+	(at 7.62 2.54 180)
+	(length 2.54)
+	(name "Y" (effects (font (size 1 1))))
+	(number "4" (effects (font (size 1 1))))
+) (pin power_in line
+	(at 0 7.62 270)
+	(length 2.54)
+	(name "VCC" (effects (font (size 1 1))))
+	(number "5" (effects (font (size 1 1))))
+) (pin power_in line
+	(at 0 -7.62 90)
+	(length 2.54)
+	(name "GND" (effects (font (size 1 1))))
+	(number "3" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+(symbol "C"
+	(pin_names (offset 0.762) (hide yes))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "C"
+	(at 0 7 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "C"
+	(at 0 -7 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Capacitor"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "C_0_1"
+		(polyline (pts (xy -1.524 0.508) (xy 1.524 0.508)) (stroke (width 0.3) (type default)) (fill (type none))) (polyline (pts (xy -1.524 -0.508) (xy 1.524 -0.508)) (stroke (width 0.3) (type default)) (fill (type none)))
+	)
+	(symbol "C_1_1"
+		(pin passive line
+	(at 0 2.54 270)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -2.54 90)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+(symbol "R"
+	(pin_names (offset 0.762) (hide yes))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "R"
+	(at 0 7 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "R"
+	(at 0 -7 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Resistor"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "R_0_1"
+		(rectangle (start -0.762 1.778) (end 0.762 -1.778) (stroke (width 0.254) (type default)) (fill (type none)))
+	)
+	(symbol "R_1_1"
+		(pin passive line
+	(at 0 3.81 270)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -3.81 90)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+)
