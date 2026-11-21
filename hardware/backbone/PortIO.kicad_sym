@@ -1,0 +1,501 @@
+(kicad_symbol_lib
+	(version 20251024)
+	(generator "claude_portio")
+	(generator_version "10.0")
+(symbol "BAT54SDW"
+	(pin_names (offset 0.762))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "D"
+	(at 0 8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "BAT54SDW"
+	(at 0 -8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" "Package_TO_SOT_SMD:SOT-363_SC-70-6"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" "https://www.lcsc.com/datasheet/C2919793.pdf"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Dual series Schottky pairs (SOT-363, CBI): pair A 1=anode 6=common 2=cathode, pair B 4=anode 3=common 5=cathode. GPIO clamp to VCORE/GND"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" "C2919793"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "BAT54SDW_0_1"
+		(rectangle (start -3.81 3.81) (end 3.81 -3.81) (stroke (width 0.254) (type default)) (fill (type background)))
+	)
+	(symbol "BAT54SDW_1_1"
+		(pin passive line
+	(at -6.35 0 0)
+	(length 2.54)
+	(name "COM" (effects (font (size 1 1))))
+	(number "6" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 6.35 270)
+	(length 2.54)
+	(name "K" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -6.35 90)
+	(length 2.54)
+	(name "A" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+)
+	)
+	(symbol "BAT54SDW_2_1"
+		(pin passive line
+	(at -6.35 0 0)
+	(length 2.54)
+	(name "COM" (effects (font (size 1 1))))
+	(number "3" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 6.35 270)
+	(length 2.54)
+	(name "K" (effects (font (size 1 1))))
+	(number "5" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -6.35 90)
+	(length 2.54)
+	(name "A" (effects (font (size 1 1))))
+	(number "4" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+(symbol "2N7002KDW"
+	(pin_names (offset 0.762))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "Q"
+	(at 0 8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "2N7002KDW"
+	(at 0 -8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" "Package_TO_SOT_SMD:SOT-363_SC-70-6"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" "https://www.lcsc.com/datasheet/C106992.pdf"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Dual N-MOSFET 60V SOT-363 (1 S1, 2 G1, 6 D1, 4 S2, 5 G2, 3 D2). Bidirectional I2C level shifter 3.3V<->5V"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" "C106992"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "2N7002KDW_0_1"
+		(rectangle (start -5.08 6.35) (end 5.08 -6.35) (stroke (width 0.254) (type default)) (fill (type background)))
+	)
+	(symbol "2N7002KDW_1_1"
+		(pin passive line
+	(at -7.62 3.81 0)
+	(length 2.54)
+	(name "S1" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+) (pin input line
+	(at 0 8.89 270)
+	(length 2.54)
+	(name "G1" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+) (pin passive line
+	(at 7.62 3.81 180)
+	(length 2.54)
+	(name "D1" (effects (font (size 1 1))))
+	(number "6" (effects (font (size 1 1))))
+) (pin passive line
+	(at -7.62 -3.81 0)
+	(length 2.54)
+	(name "S2" (effects (font (size 1 1))))
+	(number "4" (effects (font (size 1 1))))
+) (pin input line
+	(at 0 -8.89 90)
+	(length 2.54)
+	(name "G2" (effects (font (size 1 1))))
+	(number "5" (effects (font (size 1 1))))
+) (pin passive line
+	(at 7.62 -3.81 180)
+	(length 2.54)
+	(name "D2" (effects (font (size 1 1))))
+	(number "3" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+(symbol "TPS2116"
+	(pin_names (offset 0.762))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "U"
+	(at 0 8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "TPS2116DRLR"
+	(at 0 -8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" "LCSC_Ports:SOT-583-8_L2.1-W1.6-P0.50-LS1.6-BL"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" "https://www.ti.com/product/TPS2116"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Power mux 1.6-5.5V 2.5A, manual mode (MODE high): PR1 high = VIN1 (5V), PR1 low = VIN2 (3.3V)"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" "C3235557"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "TPS2116_0_1"
+		(rectangle (start -7.62 6.35) (end 7.62 -6.35) (stroke (width 0.254) (type default)) (fill (type background)))
+	)
+	(symbol "TPS2116_1_1"
+		(pin power_in line
+	(at -10.16 3.81 0)
+	(length 2.54)
+	(name "VIN1" (effects (font (size 1 1))))
+	(number "3" (effects (font (size 1 1))))
+) (pin power_in line
+	(at -10.16 1.27 0)
+	(length 2.54)
+	(name "VIN2" (effects (font (size 1 1))))
+	(number "6" (effects (font (size 1 1))))
+) (pin input line
+	(at -10.16 -1.27 0)
+	(length 2.54)
+	(name "PR1" (effects (font (size 1 1))))
+	(number "4" (effects (font (size 1 1))))
+) (pin input line
+	(at -10.16 -3.81 0)
+	(length 2.54)
+	(name "MODE" (effects (font (size 1 1))))
+	(number "5" (effects (font (size 1 1))))
+) (pin power_out line
+	(at 10.16 3.81 180)
+	(length 2.54)
+	(name "VOUT" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+) (pin passive line
+	(at 10.16 1.27 180)
+	(length 2.54)
+	(name "VOUT" (effects (font (size 1 1))))
+	(number "7" (effects (font (size 1 1))))
+) (pin open_collector line
+	(at 10.16 -3.81 180)
+	(length 2.54)
+	(name "ST" (effects (font (size 1 1))))
+	(number "8" (effects (font (size 1 1))))
+) (pin power_in line
+	(at 0 -8.89 90)
+	(length 2.54)
+	(name "GND" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+(symbol "C"
+	(pin_names (offset 0.762) (hide yes))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "C"
+	(at 0 8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "C"
+	(at 0 -8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Capacitor"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "C_0_1"
+		(polyline (pts (xy -1.524 0.508) (xy 1.524 0.508)) (stroke (width 0.3) (type default)) (fill (type none))) (polyline (pts (xy -1.524 -0.508) (xy 1.524 -0.508)) (stroke (width 0.3) (type default)) (fill (type none)))
+	)
+	(symbol "C_1_1"
+		(pin passive line
+	(at 0 2.54 270)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -2.54 90)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+(symbol "R"
+	(pin_names (offset 0.762) (hide yes))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "R"
+	(at 0 8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "R"
+	(at 0 -8.5 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "Resistor"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" ""
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "R_0_1"
+		(rectangle (start -0.762 1.778) (end 0.762 -1.778) (stroke (width 0.254) (type default)) (fill (type none)))
+	)
+	(symbol "R_1_1"
+		(pin passive line
+	(at 0 3.81 270)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -3.81 90)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+(symbol "R_Array_4x"
+	(pin_names (offset 0.762) (hide yes))
+	(exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+	(duplicate_pin_numbers_are_jumpers no)
+	(property "Reference" "RN"
+	(at 2.54 0 0)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Value" "4x330"
+	(at 0 0 90)
+	
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0402"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Datasheet" "https://www.lcsc.com/datasheet/C43557.pdf"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "Description" "4x isolated resistor array 0402x4 (convex)"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(property "LCSC" "C43557"
+	(at 0 0 0)
+	(hide yes)
+	(show_name no)
+	(do_not_autoplace no)
+	(effects (font (size 1.27 1.27)))
+)
+	(symbol "R_Array_4x_0_1"
+		(rectangle (start -0.762 1.778) (end 0.762 -1.778) (stroke (width 0.254) (type default)) (fill (type none)))
+	)
+	(symbol "R_Array_4x_1_1"
+		(pin passive line
+	(at 0 3.81 270)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "1" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -3.81 90)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "8" (effects (font (size 1 1))))
+)
+	)
+	(symbol "R_Array_4x_2_1"
+		(pin passive line
+	(at 0 3.81 270)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "2" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -3.81 90)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "7" (effects (font (size 1 1))))
+)
+	)
+	(symbol "R_Array_4x_3_1"
+		(pin passive line
+	(at 0 3.81 270)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "3" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -3.81 90)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "6" (effects (font (size 1 1))))
+)
+	)
+	(symbol "R_Array_4x_4_1"
+		(pin passive line
+	(at 0 3.81 270)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "4" (effects (font (size 1 1))))
+) (pin passive line
+	(at 0 -3.81 90)
+	(length 2.032)
+	(name "~" (effects (font (size 1 1))))
+	(number "5" (effects (font (size 1 1))))
+)
+	)
+	(embedded_fonts no)
+)
+)

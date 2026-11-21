@@ -156,6 +156,175 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "ExpansionCAN:Socket5"
+			(pin_names
+				(offset 0.5)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 5 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Value" "KH-2.54FH-1X5P-H8.5"
+				(at 0 7 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Socket5_0_1"
+				(rectangle
+					(start -2 4)
+					(end 2 -8.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "Socket5_1_1"
+				(pin passive line
+					(at -5.08 2.54 0)
+					(length 3.08)
+					(name "5V"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 3.08)
+					(name "CAN_H"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -2.54 0)
+					(length 3.08)
+					(name "CAN_L"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -5.08 0)
+					(length 3.08)
+					(name "GND"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -7.62 0)
+					(length 3.08)
+					(name "TERM"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 0.8 0.8)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "power:+5V"
 			(power global)
 			(pin_numbers
@@ -568,6 +737,29 @@
 			)
 		)
 	)
+	(global_label "TERM_CTRL_IN"
+		(shape bidirectional)
+		(at 121.92 71.12 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right)
+		)
+		(uuid "899a545b-e7e9-4f88-a18e-ca11be3e4c9f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 121.92 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+	)
 	(global_label "CAN_H"
 		(shape bidirectional)
 		(at 111.76 63.5 180)
@@ -612,8 +804,31 @@
 			)
 		)
 	)
+	(global_label "TERM_CTRL_OUT"
+		(shape bidirectional)
+		(at 71.12 71.12 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right)
+		)
+		(uuid "ef024366-2210-401d-8d0f-1c9bed560cdf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 71.12 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+	)
 	(symbol
-		(lib_id "ExpansionCAN:Socket4")
+		(lib_id "ExpansionCAN:Socket5")
 		(at 127 63.5 0)
 		(unit 1)
 		(body_style 1)
@@ -633,7 +848,7 @@
 				)
 			)
 		)
-		(property "Value" "KH-2.54FH-1X4P-H8.5"
+		(property "Value" "KH-2.54FH-1X5P-H8.5"
 			(at 127 56.5 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -643,7 +858,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ExpansionCAN:Female_1x04_P2.54_H8.5"
+		(property "Footprint" "ExpansionCAN:Female_1x05_P2.54_H8.5"
 			(at 127 58.5 0)
 			(hide yes)
 			(show_name no)
@@ -674,7 +889,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C2905415"
+		(property "LCSC" "C2932671"
 			(at 127 58.5 0)
 			(hide yes)
 			(show_name no)
@@ -696,6 +911,9 @@
 		)
 		(pin "4"
 			(uuid "3c7f7ba9-ade6-4651-bf36-ae066f77214e")
+		)
+		(pin "5"
+			(uuid "88ae78a7-9c35-4bdd-b94a-2cd977b0e6f5")
 		)
 		(instances
 			(project "backbone"
@@ -1017,7 +1235,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ExpansionCAN:Socket4")
+		(lib_id "ExpansionCAN:Socket5")
 		(at 76.2 63.5 0)
 		(unit 1)
 		(body_style 1)
@@ -1037,7 +1255,7 @@
 				)
 			)
 		)
-		(property "Value" "KH-2.54FH-1X4P-H8.5"
+		(property "Value" "KH-2.54FH-1X5P-H8.5"
 			(at 76.2 56.5 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1047,7 +1265,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ExpansionCAN:Female_1x04_P2.54_H8.5"
+		(property "Footprint" "ExpansionCAN:Female_1x05_P2.54_H8.5"
 			(at 76.2 58.5 0)
 			(hide yes)
 			(show_name no)
@@ -1078,7 +1296,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C2905415"
+		(property "LCSC" "C2932671"
 			(at 76.2 58.5 0)
 			(hide yes)
 			(show_name no)
@@ -1100,6 +1318,9 @@
 		)
 		(pin "4"
 			(uuid "eafa99dd-5784-48bf-831d-9641b0bdee1e")
+		)
+		(pin "5"
+			(uuid "8baf375e-a622-474c-adb4-4799da8a0a51")
 		)
 		(instances
 			(project "backbone"

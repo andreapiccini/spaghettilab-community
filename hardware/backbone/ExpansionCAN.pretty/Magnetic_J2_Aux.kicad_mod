@@ -233,14 +233,14 @@
 		(uuid "addc1226-7455-419d-9fc5-462ebc6b9beb")
 	)
 	(pad "5" smd oval
-		(at -0.38 10.16)
-		(size 2.56 1.6)
+		(at 0.59 10.16)
+		(size 4.5 1.6)
 		(layers "F.Cu" "F.Mask")
 		(uuid "9b6301ff-6a66-4bb4-a36f-dc4110fe5f91")
 	)
 	(pad "5" smd oval
-		(at -0.38 10.16)
-		(size 2.56 1.6)
+		(at 0.59 10.16)
+		(size 4.5 1.6)
 		(layers "B.Cu" "B.Mask")
 		(uuid "4d834aee-de3f-40a8-b66c-126993768287")
 	)

@@ -12,4 +12,5 @@
 (lib (name "ExpansionCAN")(type "KiCad")(uri "${KIPRJMOD}/ExpansionCAN.pretty")(options "")(descr "Underside CAN expansion"))
   (lib (name "ESP32Module")(type "KiCad")(uri "${KIPRJMOD}/ESP32Module.pretty")(options "")(descr "ESP32-S3-MINI-1 land pattern with Backbone antenna keepout"))
   (lib (name "PortRGB")(type "KiCad")(uri "${KIPRJMOD}/PortRGB.pretty")(options "")(descr "Port RGB indicators (provisional XL-1615 land pattern)"))
+  (lib (name "PortIO")(type "KiCad")(uri "${KIPRJMOD}/PortIO.pretty")(options "")(descr "Port protection (provisional TPS2116 SOT-583)"))
 )
