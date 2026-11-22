@@ -580,6 +580,18 @@
 			(embedded_fonts no)
 		)
 	)
+	(rectangle
+		(start 35 22)
+		(end 155 96)
+		(stroke
+			(width 0.3)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "5da6029a-8c9d-4d1f-aa10-0196ee3da836")
+	)
 	(text "1: 5V   2: CAN-H   3: CAN-L   4: GND"
 		(exclude_from_sim no)
 		(at 45 42 0)
@@ -612,6 +624,17 @@
 			(justify left)
 		)
 		(uuid "3af6fdbe-10f0-4c6d-ad5f-0f69460a67bd")
+	)
+	(text "J24 / J25 | UNDERSIDE CAN EXPANSION"
+		(exclude_from_sim no)
+		(at 40 27 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left)
+		)
+		(uuid "e3f1aa10-5245-4c00-a82e-86603eb2eff0")
 	)
 	(wire
 		(pts

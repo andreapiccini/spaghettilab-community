@@ -23,7 +23,7 @@
 	(fp_line (start -0.80 -0.75) (end -0.80 0.75) (layer F.CrtYd) (width 0.05))
 	(fp_line (start -0.80 0.75) (end 0.80 0.75) (layer F.CrtYd) (width 0.05))
 	(fp_poly (pts (xy 0.129134 0.129972) (xy 0.129134 -0.124028) (xy 0.002134 -0.251028) (xy -0.378866 0.002972) (xy 0.002134 0.256972) (xy 0.129134 0.129972)) (stroke (width 0) (type solid)) (fill solid) (layer "F.SilkS"))
-	(model "/Users/andreapiccini/dev/spaghettilab-community/hardware/libraries/LCSC_Ports.3dshapes/LED-SMD_4P-L1.6-W1.5_XL-1615RGBC-WS2812B-1.wrl"
+	(model "${KIPRJMOD}/../libraries/LCSC_Ports.3dshapes/LED-SMD_4P-L1.6-W1.5_XL-1615RGBC-WS2812B-1.wrl"
 		(offset (xyz 0.000 0.000 0.000))
 		(scale (xyz 1 1 1))
 		(rotate (xyz 0 0 0))

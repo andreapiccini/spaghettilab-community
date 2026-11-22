@@ -196,6 +196,14 @@
 		(layers "B.Cu" "B.Mask")
 		(uuid "d7fad840-c967-4718-b865-08aa1fa802ee")
 	)
+	(pad "1" thru_hole rect
+		(at -1.66 0)
+		(size 1.6 1.6)
+		(drill 1.0)
+		(property pad_prop_castellated)
+		(layers "*.Cu" "*.Mask")
+		(uuid "203820ba-d7b4-4e6e-ad0b-e8783957b52e")
+	)
 	(pad "2" smd oval
 		(at 0.59 2.54)
 		(size 4.5 1.6)
@@ -207,6 +215,14 @@
 		(size 4.5 1.6)
 		(layers "B.Cu" "B.Mask")
 		(uuid "1592b875-5ef0-4c04-b1ab-8e7efa08deb9")
+	)
+	(pad "2" thru_hole rect
+		(at -1.66 2.54)
+		(size 1.6 1.6)
+		(drill 1.0)
+		(property pad_prop_castellated)
+		(layers "*.Cu" "*.Mask")
+		(uuid "793dd506-f276-4197-9b51-c131c2e1cae2")
 	)
 	(pad "3" smd oval
 		(at 0.59 5.08)
@@ -220,6 +236,14 @@
 		(layers "B.Cu" "B.Mask")
 		(uuid "dce5aa54-d5a8-4cfe-9a65-b01e94c82200")
 	)
+	(pad "3" thru_hole rect
+		(at -1.66 5.08)
+		(size 1.6 1.6)
+		(drill 1.0)
+		(property pad_prop_castellated)
+		(layers "*.Cu" "*.Mask")
+		(uuid "6325c4e6-60d6-4064-9454-fbbe5007a7b6")
+	)
 	(pad "4" smd oval
 		(at 0.59 7.62)
 		(size 4.5 1.6)
@@ -232,6 +256,14 @@
 		(layers "B.Cu" "B.Mask")
 		(uuid "addc1226-7455-419d-9fc5-462ebc6b9beb")
 	)
+	(pad "4" thru_hole rect
+		(at -1.66 7.62)
+		(size 1.6 1.6)
+		(drill 1.0)
+		(property pad_prop_castellated)
+		(layers "*.Cu" "*.Mask")
+		(uuid "e2092055-3699-4c5b-8a85-a02b09fd180f")
+	)
 	(pad "5" smd oval
 		(at 0.59 10.16)
 		(size 4.5 1.6)
@@ -243,6 +275,14 @@
 		(size 4.5 1.6)
 		(layers "B.Cu" "B.Mask")
 		(uuid "4d834aee-de3f-40a8-b66c-126993768287")
+	)
+	(pad "5" thru_hole rect
+		(at -1.66 10.16)
+		(size 1.6 1.6)
+		(drill 1.0)
+		(property pad_prop_castellated)
+		(layers "*.Cu" "*.Mask")
+		(uuid "ec9171b0-4fdf-4175-83d2-8b9192255f65")
 	)
 	(embedded_fonts no)
 	(model "${KIPRJMOD}/../libraries/SpaghettiLAB.3dshapes/PR5L4015-5P-C-F_Horizontal_J2.wrl"

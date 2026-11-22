@@ -873,6 +873,42 @@
 			(embedded_fonts no)
 		)
 	)
+	(rectangle
+		(start 18 74)
+		(end 265 112)
+		(stroke
+			(width 0.3)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "84ec53e5-167a-4f6e-92ed-09a80f6753fd")
+	)
+	(rectangle
+		(start 18 118)
+		(end 265 152)
+		(stroke
+			(width 0.3)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "a34460fe-cc55-4064-89c5-407aa6f9112b")
+	)
+	(rectangle
+		(start 22 20)
+		(end 95 64)
+		(stroke
+			(width 0.3)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "ebc2289f-06a0-4ce3-802f-fb68b76deb56")
+	)
 	(text "UP5"
 		(exclude_from_sim no)
 		(at 148.59 107.95 0)
@@ -927,6 +963,17 @@
 			(justify left)
 		)
 		(uuid "3abdf664-ed56-4f67-911d-a77ba215b935")
+	)
+	(text "U80 | RGB DATA LEVEL SHIFT 3.3 V -> 5 V"
+		(exclude_from_sim no)
+		(at 27 25 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left)
+		)
+		(uuid "40c1511e-8d96-4c63-994f-6327073bd04c")
 	)
 	(text "UP2"
 		(exclude_from_sim no)
@@ -1005,6 +1052,17 @@
 		)
 		(uuid "b5e0bdba-9380-4680-a2f9-a0725748c72d")
 	)
+	(text "D909-D916 | LOWER PORT LEDs (PORT_A7-PORT_A0)"
+		(exclude_from_sim no)
+		(at 23 123 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left)
+		)
+		(uuid "b7c97b73-781f-47e7-aa0f-83d10bcabb34")
+	)
 	(text "UP6"
 		(exclude_from_sim no)
 		(at 179.07 107.95 0)
@@ -1026,6 +1084,17 @@
 			(justify left)
 		)
 		(uuid "de1bf480-b5a7-4b8e-9fec-00ff2e296ab6")
+	)
+	(text "D901-D908 | UPPER PORT LEDs (UP1-UP8)"
+		(exclude_from_sim no)
+		(at 23 79 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left)
+		)
+		(uuid "e9413196-4bf1-4b34-9845-df8eef1486b0")
 	)
 	(text "UP4"
 		(exclude_from_sim no)
@@ -4392,7 +4461,7 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C19702"
 			(at 78.74 48.26 0)
 			(hide yes)
 			(show_name no)
@@ -6691,7 +6760,7 @@
 				)
 			)
 		)
-		(property "LCSC" ""
+		(property "LCSC" "C25105"
 			(at 63.5 52.07 0)
 			(hide yes)
 			(show_name no)

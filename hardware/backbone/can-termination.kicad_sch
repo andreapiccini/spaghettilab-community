@@ -1392,6 +1392,30 @@
 			(embedded_fonts no)
 		)
 	)
+	(rectangle
+		(start 18 18)
+		(end 135 152)
+		(stroke
+			(width 0.3)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "1b8359a4-3e1d-4de1-97f6-2cf20d7c4480")
+	)
+	(rectangle
+		(start 138 18)
+		(end 362 212)
+		(stroke
+			(width 0.3)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "395814fe-43ed-4fbf-8b98-ec2d7e7e3a9f")
+	)
 	(text "Q9 (PNP)"
 		(exclude_from_sim no)
 		(at 107.95 129.54 0)

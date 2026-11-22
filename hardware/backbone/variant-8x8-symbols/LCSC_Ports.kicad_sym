@@ -1124,4 +1124,848 @@
 
 (property "LCSC" "C42420609" (at 0 19.05 0) (hide yes) (effects (font (size 1 1))))
 )
+	(symbol "R_Array_Isolated_4x100k_Pkg"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "RN"
+			(at 0 6.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "4x100k"
+			(at 0 -6.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0402"
+			(at -1.778 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C25724.pdf"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "4D02WGJ0104TCE"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "LCSC" "C25724"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "R_Array_Convex_4x0402"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "R_Array_Isolated_4x100k_Pkg_0_1"
+		(rectangle
+			(start -2.54 5.08)
+			(end 2.54 -5.08)
+			(stroke
+				(width 0.1524)
+				(type dash)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(rectangle
+			(start -1.524 4.318)
+			(end 1.524 3.302)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy -2.54 3.81) (xy -1.524 3.81)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy 1.524 3.81) (xy 2.54 3.81)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(rectangle
+			(start -1.524 1.778)
+			(end 1.524 0.762)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy -2.54 1.27) (xy -1.524 1.27)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy 1.524 1.27) (xy 2.54 1.27)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(rectangle
+			(start -1.524 -0.762)
+			(end 1.524 -1.778)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy -2.54 -1.27) (xy -1.524 -1.27)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy 1.524 -1.27) (xy 2.54 -1.27)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(rectangle
+			(start -1.524 -3.302)
+			(end 1.524 -4.318)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy -2.54 -3.81) (xy -1.524 -3.81)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy 1.524 -3.81) (xy 2.54 -3.81)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		)
+		(symbol "R_Array_Isolated_4x100k_Pkg_1_1"
+		(pin passive line
+			(at -5.08 3.81 0)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "1"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at -5.08 1.27 0)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "2"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at -5.08 -1.27 0)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "3"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at -5.08 -3.81 0)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "4"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at 5.08 3.81 180)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "8"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at 5.08 1.27 180)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "7"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at 5.08 -1.27 180)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "6"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at 5.08 -3.81 180)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "5"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		)
+		(embedded_fonts no)
+	)
+	(symbol "R_Array_Isolated_4x4k7_Pkg"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "RN"
+			(at 0 6.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "4x4.7k"
+			(at 0 -6.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0402"
+			(at -1.778 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C29586.pdf"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "4D02WGJ0472TCE"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "LCSC" "C29586"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "R_Array_Convex_4x0402"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "R_Array_Isolated_4x4k7_Pkg_0_1"
+		(rectangle
+			(start -2.54 5.08)
+			(end 2.54 -5.08)
+			(stroke
+				(width 0.1524)
+				(type dash)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(rectangle
+			(start -1.524 4.318)
+			(end 1.524 3.302)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy -2.54 3.81) (xy -1.524 3.81)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy 1.524 3.81) (xy 2.54 3.81)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(rectangle
+			(start -1.524 1.778)
+			(end 1.524 0.762)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy -2.54 1.27) (xy -1.524 1.27)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy 1.524 1.27) (xy 2.54 1.27)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(rectangle
+			(start -1.524 -0.762)
+			(end 1.524 -1.778)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy -2.54 -1.27) (xy -1.524 -1.27)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy 1.524 -1.27) (xy 2.54 -1.27)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(rectangle
+			(start -1.524 -3.302)
+			(end 1.524 -4.318)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy -2.54 -3.81) (xy -1.524 -3.81)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		(polyline
+			(pts
+				(xy 1.524 -3.81) (xy 2.54 -3.81)
+			)
+			(stroke
+				(width 0.254)
+				(type default)
+			)
+			(fill
+				(type none)
+			)
+		)
+		)
+		(symbol "R_Array_Isolated_4x4k7_Pkg_1_1"
+		(pin passive line
+			(at -5.08 3.81 0)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "1"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at -5.08 1.27 0)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "2"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at -5.08 -1.27 0)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "3"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at -5.08 -3.81 0)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "4"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at 5.08 3.81 180)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "8"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at 5.08 1.27 180)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "7"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at 5.08 -1.27 180)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "6"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		(pin passive line
+			(at 5.08 -3.81 180)
+			(length 2.54)
+			(name "~"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(number "5"
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+		)
+		)
+		(embedded_fonts no)
+	)
 )

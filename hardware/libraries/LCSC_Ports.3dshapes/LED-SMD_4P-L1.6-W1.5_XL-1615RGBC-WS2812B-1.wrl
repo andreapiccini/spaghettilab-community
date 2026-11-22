@@ -1,0 +1,8 @@
+#VRML V2.0 utf8
+# XL-1615RGBC-2812B approx body 1.6x1.5x0.6 mm (generated)
+Transform { translation 0.0000 0.0000 0.0689 children [ Shape { appearance Appearance { material Material { diffuseColor 0.92 0.92 0.88 specularColor 0.3 0.3 0.3 shininess 0.20 transparency 0.00 } } geometry Box { size 0.6299 0.5906 0.1378 } } ] }
+Transform { translation 0.0000 0.0000 0.1870 children [ Shape { appearance Appearance { material Material { diffuseColor 0.95 0.95 1.0 specularColor 0.3 0.3 0.3 shininess 0.80 transparency 0.45 } } geometry Box { size 0.5906 0.5512 0.0984 } } ] }
+Transform { translation -0.2756 -0.1772 0.0472 children [ Shape { appearance Appearance { material Material { diffuseColor 0.75 0.75 0.78 specularColor 0.3 0.3 0.3 shininess 0.60 transparency 0.00 } } geometry Box { size 0.0984 0.1772 0.0945 } } ] }
+Transform { translation -0.2756 0.1772 0.0472 children [ Shape { appearance Appearance { material Material { diffuseColor 0.75 0.75 0.78 specularColor 0.3 0.3 0.3 shininess 0.60 transparency 0.00 } } geometry Box { size 0.0984 0.1772 0.0945 } } ] }
+Transform { translation 0.2756 -0.1772 0.0472 children [ Shape { appearance Appearance { material Material { diffuseColor 0.75 0.75 0.78 specularColor 0.3 0.3 0.3 shininess 0.60 transparency 0.00 } } geometry Box { size 0.0984 0.1772 0.0945 } } ] }
+Transform { translation 0.2756 0.1772 0.0472 children [ Shape { appearance Appearance { material Material { diffuseColor 0.75 0.75 0.78 specularColor 0.3 0.3 0.3 shininess 0.60 transparency 0.00 } } geometry Box { size 0.0984 0.1772 0.0945 } } ] }
