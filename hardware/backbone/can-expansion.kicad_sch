@@ -716,7 +716,7 @@
 		)
 		(uuid "e7033ce8-553c-4ff5-8b37-c97ba182978d")
 	)
-	(global_label "CAN_L"
+	(global_label "CAN_N"
 		(shape bidirectional)
 		(at 60.96 66.04 180)
 		(effects
@@ -738,7 +738,7 @@
 			)
 		)
 	)
-	(global_label "CAN_H"
+	(global_label "CAN_P"
 		(shape bidirectional)
 		(at 60.96 63.5 180)
 		(effects
@@ -783,7 +783,7 @@
 			)
 		)
 	)
-	(global_label "CAN_H"
+	(global_label "CAN_P"
 		(shape bidirectional)
 		(at 111.76 63.5 180)
 		(effects
@@ -805,7 +805,7 @@
 			)
 		)
 	)
-	(global_label "CAN_L"
+	(global_label "CAN_N"
 		(shape bidirectional)
 		(at 111.76 66.04 180)
 		(effects

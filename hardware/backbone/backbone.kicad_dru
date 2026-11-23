@@ -1,20 +1,31 @@
 (version 1)
-# All values in mm. Four-layer nominal FR4 stackup; USB geometry requires fab confirmation.
+# All values in mm. Stackup SIG/GND/PWR(5V)/SIG, JLC04161H-7628 (prepreg 0.2104 er4.4, core 1.065). Impedance from IPC-2141: confirm with JLC calculator.
 (rule "General routing width" (constraint track_width (min 0.12mm)))
 (rule "Standard through vias" (condition "A.Type == 'Via'") (constraint via_diameter (min 0.60mm)) (constraint hole_size (min 0.30mm)))
-(rule "5V backbone trunk" (condition "A.hasNetclass('POWER_5V')") (constraint track_width (min 0.25mm) (opt 2.0mm)))
-(rule "3V3 and ground feeders" (condition "A.hasNetclass('POWER_3V3')") (constraint track_width (min 0.15mm) (opt 1.20mm)))
-(rule "USB VBUS feed" (condition "A.hasNetclass('USB_VBUS')") (constraint track_width (min 0.25mm) (opt 2.0mm)))
+(rule "5V backbone trunk" (condition "A.hasNetclass('POWER_5V')") (constraint track_width (min 0.25mm) (opt 1.20mm)))
+(rule "3V3 and ground feeders" (condition "A.hasNetclass('POWER_3V3')") (constraint track_width (min 0.15mm) (opt 0.80mm)))
+(rule "USB VBUS feed" (condition "A.hasNetclass('USB_VBUS')") (constraint track_width (min 0.25mm) (opt 1.20mm)))
 (rule "Universal port conductors" (condition "A.hasNetclass('PORT_IO_POWER')") (constraint track_width (min 0.15mm) (opt 0.50mm)))
+(rule "Port supply and expansion rails" (condition "A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_5V_EXP')") (constraint track_width (min 0.25mm) (opt 0.80mm)))
+
+# 2026-11-23: generic escape. Power/port trunks narrow to 0.30 mm only inside the courtyard of small parts
+# (R, C, RN, U, Q, D), then return to the class width. Specific escapes below take precedence (later rules win).
+(rule "Generic power escape at small pads"
+  (condition "(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS') || A.hasNetclass('POWER_5V_EXP') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_3V3') || A.hasNetclass('GND') || A.hasNetclass('PORT_IO_POWER') || A.hasNetclass('BUCK_SWITCH')) && (A.intersectsCourtyard('R*') || A.intersectsCourtyard('C*') || A.intersectsCourtyard('RN*') || A.intersectsCourtyard('U*') || A.intersectsCourtyard('Q*') || A.intersectsCourtyard('D*'))")
+  (constraint track_width (min 0.15mm) (opt 0.30mm)))
 (rule "Buck switch short wide copper" (condition "A.hasNetclass('BUCK_SWITCH')") (constraint track_width (min 0.25mm) (opt 0.80mm)))
-(rule "USB differential geometry - preliminary 90 ohm target" (condition "A.hasNetclass('USB_DIFF')") (constraint track_width (min 0.15mm) (opt 0.18mm) (max 0.22mm)) (constraint diff_pair_gap (min 0.12mm) (opt 0.15mm) (max 0.20mm)) (constraint diff_pair_uncoupled (max 5mm)) (constraint skew (max 0.50mm)))
+(rule "USB differential geometry - 90 ohm target JLC7628" (condition "A.hasNetclass('USB_DIFF')") (constraint track_width (min 0.20mm) (opt 0.25mm) (max 0.30mm)) (constraint diff_pair_gap (min 0.12mm) (opt 0.15mm) (max 0.22mm)) (constraint diff_pair_uncoupled (max 5mm)) (constraint skew (max 0.50mm)))
 (rule "USB pair internal spacing" (condition "A.hasNetclass('USB_DIFF') && AB.isCoupledDiffPair()") (constraint clearance (min 0.12mm)))
-(rule "CAN conductors - co-route H and L" (condition "A.hasNetclass('CAN_BUS')") (constraint track_width (min 0.18mm) (opt 0.25mm)))
+(rule "CAN conductors - CAN_P/CAN_N pair" (condition "A.hasNetclass('CAN_BUS')") (constraint track_width (min 0.18mm) (opt 0.20mm)))
+(rule "CAN differential ~120 ohm" (condition "A.hasNetclass('CAN_BUS') && AB.isCoupledDiffPair()") (constraint diff_pair_gap (min 0.20mm) (opt 0.35mm) (max 0.50mm)) (constraint diff_pair_uncoupled (max 10mm)))
 (rule "Sensitive analog away from switch node" (condition "(A.hasNetclass('ANALOG_SENSE') || A.hasNetclass('KELVIN_SENSE') || A.hasNetclass('BUCK_FEEDBACK')) && B.NetName == '/BUCK_SW'") (constraint clearance (min 0.50mm)))
 # RF area exists on all copper layers. No net-specific bypass exceptions.
 (rule "No routing in ESP antenna area" (condition "A.intersectsArea('ESP_ANTENNA_RF')") (constraint disallow track via))
 
 (rule "L2 is a reference plane" (layer "In1.Cu") (constraint disallow track))
+(rule "L3 is the 5V plane - power feeders only" (layer "In2.Cu")
+  (condition "!(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS') || A.hasNetclass('POWER_5V_EXP') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_3V3'))")
+  (constraint disallow track))
 (rule "USB on outer signal layers" (layer inner) (condition "A.hasNetclass('USB_DIFF')") (constraint disallow track))
 (rule "Standard low-cost through-via technology" (constraint disallow micro_via blind_via buried_via))
 
