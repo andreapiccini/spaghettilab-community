@@ -718,16 +718,16 @@
 	)
 	(global_label "CAN_N"
 		(shape bidirectional)
-		(at 60.96 66.04 180)
+		(at 60.96 63.5 180)
 		(effects
 			(font
 				(size 0.889 0.889)
 			)
 			(justify right)
 		)
-		(uuid "2e6e8bd3-ddaa-4f98-9ba0-abf112cc9ce3")
+		(uuid "003da6f0-5ae8-4150-91b4-0632254e56b8")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 60.96 66.04 0)
+			(at 60.96 63.5 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -740,16 +740,16 @@
 	)
 	(global_label "CAN_P"
 		(shape bidirectional)
-		(at 60.96 63.5 180)
+		(at 111.76 66.04 180)
 		(effects
 			(font
 				(size 0.889 0.889)
 			)
 			(justify right)
 		)
-		(uuid "748effe7-26a1-440c-8eb1-49e9a16f5f7f")
+		(uuid "0faacec3-3b4b-4c5c-933c-912c42815d27")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 60.96 63.5 0)
+			(at 111.76 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -783,7 +783,7 @@
 			)
 		)
 	)
-	(global_label "CAN_P"
+	(global_label "CAN_N"
 		(shape bidirectional)
 		(at 111.76 63.5 180)
 		(effects
@@ -792,31 +792,9 @@
 			)
 			(justify right)
 		)
-		(uuid "9832aae2-2dcc-4123-8b44-9fed2918deb8")
+		(uuid "e562a6f9-9379-4398-87d3-8f9493ea9223")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 111.76 63.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "CAN_N"
-		(shape bidirectional)
-		(at 111.76 66.04 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "d7e89d91-1cc8-49fa-a1fa-6c8e2da73b9c")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 111.76 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -846,6 +824,28 @@
 			(effects
 				(font
 					(size 1 1)
+				)
+			)
+		)
+	)
+	(global_label "CAN_P"
+		(shape bidirectional)
+		(at 60.96 66.04 180)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify right)
+		)
+		(uuid "f860d5ba-be25-4abe-93da-fa8106edc591")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 60.96 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
 				)
 			)
 		)
