@@ -7389,7 +7389,7 @@
 	)
 	(symbol
 		(lib_id "PortIO:C")
-		(at 205.74 231.14 0)
+		(at 294.64 224.79 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -7399,7 +7399,7 @@
 		(dnp no)
 		(uuid "7cadf3e9-0214-4fa9-aeef-3da28faeaa36")
 		(property "Reference" "C922"
-			(at 208.28 221.64 0)
+			(at 297.18 215.29 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7409,7 +7409,7 @@
 			)
 		)
 		(property "Value" "10uF"
-			(at 208.28 240.64 0)
+			(at 297.18 234.29 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7419,7 +7419,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 205.74 231.14 0)
+			(at 294.64 224.79 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7430,7 +7430,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 205.74 231.14 0)
+			(at 294.64 224.79 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7441,7 +7441,7 @@
 			)
 		)
 		(property "Description" "Capacitor"
-			(at 205.74 231.14 0)
+			(at 294.64 224.79 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7452,7 +7452,7 @@
 			)
 		)
 		(property "LCSC" "C19702"
-			(at 205.74 231.14 0)
+			(at 294.64 224.79 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7995,7 +7995,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 205.74 233.68 0)
+		(at 294.64 227.33 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -8005,7 +8005,7 @@
 		(dnp no)
 		(uuid "8b017acc-e2c7-4fab-93d8-667f47e1bfc3")
 		(property "Reference" "#PWR9547"
-			(at 205.74 233.68 0)
+			(at 294.64 227.33 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8016,7 +8016,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 205.74 236.68 0)
+			(at 294.64 230.33 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8026,7 +8026,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 205.74 233.68 0)
+			(at 294.64 227.33 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8037,7 +8037,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 205.74 233.68 0)
+			(at 294.64 227.33 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8048,7 +8048,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 205.74 233.68 0)
+			(at 294.64 227.33 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10637,7 +10637,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 205.74 228.6 0)
+		(at 294.64 222.25 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -10647,7 +10647,7 @@
 		(dnp no)
 		(uuid "eb4c0ff5-31e0-43b0-8683-503d9dabe720")
 		(property "Reference" "#PWR9546"
-			(at 205.74 228.6 0)
+			(at 294.64 222.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10658,7 +10658,7 @@
 			)
 		)
 		(property "Value" "VPORT"
-			(at 205.74 225.6 0)
+			(at 294.64 219.25 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10668,7 +10668,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 205.74 228.6 0)
+			(at 294.64 222.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10679,7 +10679,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 205.74 228.6 0)
+			(at 294.64 222.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10690,7 +10690,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 205.74 228.6 0)
+			(at 294.64 222.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
