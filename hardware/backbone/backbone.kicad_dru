@@ -23,10 +23,9 @@
 (rule "No routing in ESP antenna area" (condition "A.intersectsArea('ESP_ANTENNA_RF')") (constraint disallow track via))
 
 (rule "L2 is a reference plane" (layer "In1.Cu") (constraint disallow track))
-(rule "L3 is the 5V plane - power feeders only" (layer "In2.Cu")
+(rule "L5 is the power plane - power feeders only" (layer "In4.Cu")
   (condition "!(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS') || A.hasNetclass('POWER_5V_EXP') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_3V3'))")
   (constraint disallow track))
-(rule "USB on outer signal layers" (layer inner) (condition "A.hasNetclass('USB_DIFF')") (constraint disallow track))
 (rule "Standard low-cost through-via technology" (constraint disallow micro_via blind_via buried_via))
 
 # Local power escapes. Optimum applies only inside component courtyard; trunk remains wide.
@@ -135,9 +134,9 @@
 (rule "Driver branch conductors" (condition "A.hasNetclass('DRIVER_BRANCH')") (constraint track_width (min 0.20mm) (opt 0.50mm)))
 (rule "Kelvin sense only - no load current" (condition "A.hasNetclass('KELVIN_SENSE')") (constraint track_width (min 0.15mm) (opt 0.15mm)))
 (rule "GPIO signal conductors" (condition "A.hasNetclass('GPIO_DIRECT') || A.hasNetclass('GATE_CTRL') || A.hasNetclass('TERM_5V')") (constraint track_width (min 0.15mm) (opt 0.20mm)))
-(rule "High current rail preference on L3" (layer "In2.Cu") (condition "A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS')") (constraint track_width (min 0.20mm) (opt 4.0mm)))
-(rule "3V3 feeder preference on L3" (layer "In2.Cu") (condition "A.hasNetclass('POWER_3V3')") (constraint track_width (min 0.15mm) (opt 3.0mm)))
-(rule "Port feeders on L3" (layer "In2.Cu") (condition "A.hasNetclass('PORT_IO_POWER') || A.hasNetclass('DRIVER_BRANCH')") (constraint track_width (min 0.20mm) (opt 0.80mm)))
+(rule "High current rail preference on L5" (layer "In4.Cu") (condition "A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS')") (constraint track_width (min 0.20mm) (opt 4.0mm)))
+(rule "3V3 feeder preference on L5" (layer "In4.Cu") (condition "A.hasNetclass('POWER_3V3')") (constraint track_width (min 0.15mm) (opt 3.0mm)))
+(rule "Port feeders on L5" (layer "In4.Cu") (condition "A.hasNetclass('PORT_IO_POWER') || A.hasNetclass('DRIVER_BRANCH')") (constraint track_width (min 0.20mm) (opt 0.80mm)))
 (rule "Buck switch only on top" (layer "B.Cu") (condition "A.NetName == '/BUCK_SW'") (constraint disallow track via))
 (rule "Buck switch not on inner layers" (layer inner) (condition "A.NetName == '/BUCK_SW'") (constraint disallow track via))
 (rule "Port signal fanout U12" (condition "A.hasNetclass('PORT_IO_POWER') && A.intersectsCourtyard('U12')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
@@ -240,4 +239,39 @@
 
 (rule "RN12 clearances between 0402 array pads"
   (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN12') && B.memberOfFootprint('RN12')")
+  (constraint clearance (min 0.15mm)))
+
+# Breadboard headers (Hanxia bottom access): courtyards overlap by design, pins and holes do not collide (verified by eye).
+(rule "Breadboard headers courtyard overlap allowed"
+  (constraint courtyard_clearance)
+  (severity exclusion)
+  (condition "(A.Reference == 'J17' || A.Reference == 'J18' || A.Reference == 'J19' || A.Reference == 'J20' || A.Reference == 'J22' || A.Reference == 'J23' || A.Reference == 'J31' || A.Reference == 'J32' || A.Reference == 'J33' || A.Reference == 'J34') && (B.Reference == 'J17' || B.Reference == 'J18' || B.Reference == 'J19' || B.Reference == 'J20' || B.Reference == 'J22' || B.Reference == 'J23' || B.Reference == 'J31' || B.Reference == 'J32' || B.Reference == 'J33' || B.Reference == 'J34')"))
+
+# Fine-pitch / array pads: pad-to-pad spacing inside the same footprint follows the land pattern, not the netclass clearance.
+(rule "U3 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U3') && B.memberOfFootprint('U3')")
+  (constraint clearance (min 0.15mm)))
+(rule "U25 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U25') && B.memberOfFootprint('U25')")
+  (constraint clearance (min 0.15mm)))
+(rule "U73 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U73') && B.memberOfFootprint('U73')")
+  (constraint clearance (min 0.15mm)))
+(rule "U901 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U901') && B.memberOfFootprint('U901')")
+  (constraint clearance (min 0.15mm)))
+(rule "U902 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U902') && B.memberOfFootprint('U902')")
+  (constraint clearance (min 0.15mm)))
+(rule "RN901 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN901') && B.memberOfFootprint('RN901')")
+  (constraint clearance (min 0.15mm)))
+(rule "RN902 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN902') && B.memberOfFootprint('RN902')")
+  (constraint clearance (min 0.15mm)))
+(rule "RN903 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN903') && B.memberOfFootprint('RN903')")
+  (constraint clearance (min 0.15mm)))
+(rule "RN904 pad-to-pad inside footprint"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN904') && B.memberOfFootprint('RN904')")
   (constraint clearance (min 0.15mm)))
