@@ -7782,7 +7782,7 @@
 			)
 		)
 		(property "Value" "VPORT_RAW"
-			(at 261.41 200.66 0)
+			(at 261.366 189.23 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9624,7 +9624,7 @@
 			)
 		)
 		(property "Value" "VPORT_MUX"
-			(at 238.97 200.66 0)
+			(at 239.014 189.738 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects

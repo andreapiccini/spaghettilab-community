@@ -6345,186 +6345,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "ExpansionCAN:SY6280AAAC"
-			(pin_names
-				(offset 0.5)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "U"
-				(at 0 6.35 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Value" "SY6280AAAC"
-				(at 0 -6.35 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Datasheet" "https://www.lcsc.com/product-detail/C207620.html"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Description" "2A current-limited power switch, ILIM = 6800/RSET"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "LCSC" "C207620"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(symbol "SY6280AAAC_0_1"
-				(rectangle
-					(start -5.08 3.81)
-					(end 5.08 -3.81)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "SY6280AAAC_1_1"
-				(pin passive line
-					(at 7.62 2.54 180)
-					(length 2.54)
-					(name "OUT"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -2.54 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -2.54 180)
-					(length 2.54)
-					(name "ISET"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 0 0)
-					(length 2.54)
-					(name "EN"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 2.54 0)
-					(length 2.54)
-					(name "IN"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "ExpansionCAN:Socket_2x07_P2.54"
 			(pin_names
 				(offset 0.5)
@@ -30944,7 +30764,7 @@
 			)
 		)
 	)
-	(global_label "IO35"
+	(global_label "TWI_SCL"
 		(shape bidirectional)
 		(at 105.41 105.41 0)
 		(effects
@@ -31098,7 +30918,7 @@
 			)
 		)
 	)
-	(global_label "TWI_SDA"
+	(global_label "IO41"
 		(shape bidirectional)
 		(at 105.41 120.65 0)
 		(effects
@@ -31384,7 +31204,7 @@
 			)
 		)
 	)
-	(global_label "EXP_SPI_CS_N"
+	(global_label "CAN_TX"
 		(shape bidirectional)
 		(at 105.41 115.57 0)
 		(effects
@@ -31516,7 +31336,7 @@
 			)
 		)
 	)
-	(global_label "ESP_UP5"
+	(global_label "ESP_UP8"
 		(shape bidirectional)
 		(at 74.93 125.73 180)
 		(effects
@@ -31736,7 +31556,7 @@
 			)
 		)
 	)
-	(global_label "ESP_UP7"
+	(global_label "ESP_UP5"
 		(shape bidirectional)
 		(at 74.93 130.81 180)
 		(effects
@@ -32112,7 +31932,7 @@
 			)
 		)
 	)
-	(global_label "ESP_UP6"
+	(global_label "ESP_UP7"
 		(shape bidirectional)
 		(at 74.93 128.27 180)
 		(effects
@@ -32378,28 +32198,6 @@
 			)
 		)
 	)
-	(global_label "ILIM_EXP"
-		(shape bidirectional)
-		(at 668.02 299.72 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "3af9ece6-d723-46f8-ae6a-11da676ecd15")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 668.02 299.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "UP1"
 		(shape bidirectional)
 		(at 576.58 129.54 0)
@@ -32488,7 +32286,7 @@
 			)
 		)
 	)
-	(global_label "IO33"
+	(global_label "EXP_SPI_CS_N"
 		(shape bidirectional)
 		(at 82.55 82.55 90)
 		(effects
@@ -32620,7 +32418,7 @@
 			)
 		)
 	)
-	(global_label "IO37"
+	(global_label "TWI_SDA"
 		(shape bidirectional)
 		(at 105.41 110.49 0)
 		(effects
@@ -32994,28 +32792,6 @@
 			)
 		)
 	)
-	(global_label "IO37"
-		(shape bidirectional)
-		(at 640.08 317.5 270)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "54e3d5c9-fec8-450f-8bbc-cf0fab7867b0")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 640.08 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "UP6_NG"
 		(shape bidirectional)
 		(at 872.49 213.36 180)
@@ -33346,7 +33122,7 @@
 			)
 		)
 	)
-	(global_label "SPI_SCLK"
+	(global_label "CAN_RX"
 		(shape bidirectional)
 		(at 105.41 113.03 0)
 		(effects
@@ -33434,7 +33210,7 @@
 			)
 		)
 	)
-	(global_label "ESP_UP3"
+	(global_label "IO11"
 		(shape bidirectional)
 		(at 74.93 120.65 180)
 		(effects
@@ -33544,7 +33320,7 @@
 			)
 		)
 	)
-	(global_label "I2C_CTRL_SCL"
+	(global_label "RGB_DIN_3V3"
 		(shape bidirectional)
 		(at 115.57 133.35 0)
 		(effects
@@ -33874,7 +33650,7 @@
 			)
 		)
 	)
-	(global_label "VPORT_SEL"
+	(global_label "IO40"
 		(shape bidirectional)
 		(at 105.41 118.11 0)
 		(effects
@@ -33896,7 +33672,7 @@
 			)
 		)
 	)
-	(global_label "RGB_DIN_3V3"
+	(global_label "I2C_CTRL_SDA"
 		(shape output)
 		(at 105.41 102.87 0)
 		(effects
@@ -34226,7 +34002,7 @@
 			)
 		)
 	)
-	(global_label "I2C_CTRL_SDA"
+	(global_label "I2C_CTRL_SCL"
 		(shape bidirectional)
 		(at 115.57 130.81 0)
 		(effects
@@ -34336,7 +34112,7 @@
 			)
 		)
 	)
-	(global_label "ESP_UP8"
+	(global_label "ESP_UP6"
 		(shape bidirectional)
 		(at 64.77 133.35 180)
 		(effects
@@ -34402,7 +34178,7 @@
 			)
 		)
 	)
-	(global_label "A3"
+	(global_label "A2"
 		(shape passive)
 		(at 74.93 118.11 180)
 		(effects
@@ -34656,28 +34432,6 @@
 		(uuid "a3c745b0-d04e-42e7-88a4-cd045abee622")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 875.03 256.54 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "IO37"
-		(shape bidirectional)
-		(at 652.78 297.18 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "a42edd7f-9997-44ec-b2ec-db111cd6d044")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 652.78 297.18 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -35634,7 +35388,7 @@
 			)
 		)
 	)
-	(global_label "CAN_RX"
+	(global_label "ESP_UP4"
 		(shape bidirectional)
 		(at 105.41 95.25 0)
 		(effects
@@ -35767,28 +35521,6 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
-			)
-		)
-	)
-	(global_label "ILIM_EXP"
-		(shape bidirectional)
-		(at 683.26 309.88 90)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "d53e2b92-cced-4508-b1bc-0136aabc1620")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 683.26 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
 			)
 		)
 	)
@@ -36166,7 +35898,7 @@
 			)
 		)
 	)
-	(global_label "A2"
+	(global_label "A3"
 		(shape passive)
 		(at 74.93 115.57 180)
 		(effects
@@ -36188,7 +35920,7 @@
 			)
 		)
 	)
-	(global_label "ESP_UP4"
+	(global_label "VPORT_SEL"
 		(shape bidirectional)
 		(at 74.93 123.19 180)
 		(effects
@@ -36254,7 +35986,7 @@
 			)
 		)
 	)
-	(global_label "TWI_SCL"
+	(global_label "SPI_SCLK"
 		(shape bidirectional)
 		(at 105.41 123.19 0)
 		(effects
@@ -36716,7 +36448,7 @@
 			)
 		)
 	)
-	(global_label "CAN_TX"
+	(global_label "ESP_UP3"
 		(shape bidirectional)
 		(at 105.41 92.71 0)
 		(effects
@@ -38323,85 +38055,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 683.26 317.5 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "1a4b430a-8c7c-488f-ad1d-c50fb02dc9a2")
-		(property "Reference" "#PWR9967"
-			(at 683.26 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 683.26 321.1 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 683.26 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 683.26 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1303.02 241.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "94d30b49-9dce-4533-84ba-2a91fd60e551")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9967")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+5V")
 		(at 294.64 276.86 0)
 		(unit 1)
@@ -39812,84 +39465,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+5V")
-		(at 668.02 294.64 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "2b476cb7-1229-4771-8852-af1cf9ef1c89")
-		(property "Reference" "#PWR9966"
-			(at 668.02 294.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V_EXP"
-			(at 671.62 294.64 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 668.02 294.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 668.02 294.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 963.93 16.51 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "c3f0fb9f-0635-40b3-ba75-e74828835a4f")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9966")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:PWR_FLAG")
 		(at 458.47 59.69 0)
 		(unit 1)
@@ -40465,132 +40040,6 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R27")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 703.58 313.69 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "311fd781-066c-46b5-b99d-cd72d7461e7b")
-		(property "Reference" "C4"
-			(at 707.39 312.4199 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "10uF"
-			(at 707.39 314.9599 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "SpaghettiLAB:C0603"
-			(at 704.5452 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 703.58 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 703.58 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MFGR" "generic"
-			(at 703.58 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "CL10A106KP8NNNC"
-			(at 703.58 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part Name" "C19702"
-			(at 703.58 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C19702"
-			(at 703.58 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "fde15933-c820-4899-b097-bf944754a511")
-		)
-		(pin "2"
-			(uuid "74a966c6-b307-49f5-90cd-691a4fbdb057")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "C4")
 					(unit 1)
 				)
 			)
@@ -44089,85 +43538,6 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 652.78 299.72 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "5c462594-0758-4529-a81e-dc6203931527")
-		(property "Reference" "#PWR9965"
-			(at 652.78 299.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 649.18 299.72 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 652.78 299.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 652.78 299.72 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1303.02 241.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b9313adb-cdbc-4486-a979-32ee24c6a9b8")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9965")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
 		(at 713.74 260.35 0)
 		(unit 1)
 		(body_style 1)
@@ -45620,107 +44990,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 683.26 313.69 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "6c5739a6-3fb7-451a-8003-f45e60b52777")
-		(property "Reference" "R40"
-			(at 690.88 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Value" "3.6k"
-			(at 690.88 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 683.26 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 683.26 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 683.26 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Assembly" "COMMON"
-			(at 683.26 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C25891"
-			(at 683.26 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "7a7eb4e4-5631-469d-8a4a-ef1eb6fa54ef")
-		)
-		(pin "1"
-			(uuid "1a27e558-9d78-4e99-912c-27e77b7739a8")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "R40")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "SpaghettiLAB:SS54_C22452")
 		(at 448.31 67.31 0)
 		(unit 1)
@@ -46678,85 +45947,6 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 693.42 317.5 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "7ac800a7-9519-4c00-a4b0-3ef668b1b681")
-		(property "Reference" "#PWR9970"
-			(at 693.42 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 693.42 321.1 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 693.42 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 693.42 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1303.02 241.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "47cf8e3f-687d-43ae-a31b-b93a2c58f37c")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9970")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
 		(at 783.59 495.3 90)
 		(unit 1)
 		(body_style 1)
@@ -47196,83 +46386,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+5V")
-		(at 703.58 309.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "83beaf4e-bcb6-4401-ac09-f6334b6093a3")
-		(property "Reference" "#PWR9971"
-			(at 703.58 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V_EXP"
-			(at 703.58 306.28 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 703.58 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 703.58 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 963.93 16.51 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "69377b5d-4d4a-4a9a-95aa-4a62d8cc3184")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9971")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 480.06 553.72 0)
 		(unit 1)
@@ -47634,83 +46747,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+5V")
-		(at 693.42 309.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "88cb50ad-369d-4dbd-8d43-4fb761b906e7")
-		(property "Reference" "#PWR9969"
-			(at 693.42 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V"
-			(at 693.42 306.28 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 693.42 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 693.42 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 963.93 16.51 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "5793c855-19a1-47d7-9e33-ab5fed7a7fe1")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9969")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "SpaghettiLAB:AO6604_Dual_D3048")
 		(at 46.99 506.73 0)
 		(mirror x)
@@ -47865,84 +46901,6 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q6")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 652.78 294.64 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "8a21ca33-2585-4c93-8aa4-85a8b802a3ce")
-		(property "Reference" "#PWR9964"
-			(at 652.78 294.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V"
-			(at 649.18 294.64 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 652.78 294.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 652.78 294.64 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 963.93 16.51 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "52727199-3af4-4c1b-9617-97e03bab6593")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9964")
 					(unit 1)
 				)
 			)
@@ -48335,132 +47293,6 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10064")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 693.42 313.69 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "8ef79b99-cded-4f52-96ba-08b1abc2499d")
-		(property "Reference" "C3"
-			(at 697.23 312.4199 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "10uF"
-			(at 697.23 314.9599 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "SpaghettiLAB:C0603"
-			(at 694.3852 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 693.42 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 693.42 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MFGR" "generic"
-			(at 693.42 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "CL10A106KP8NNNC"
-			(at 693.42 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC Part Name" "C19702"
-			(at 693.42 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C19702"
-			(at 693.42 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "054faab5-71f8-42f3-bab5-ed9ee511292f")
-		)
-		(pin "2"
-			(uuid "4935272f-0506-4196-aaea-ecf37aa7c8c5")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "C3")
 					(unit 1)
 				)
 			)
@@ -53770,116 +52602,6 @@
 		)
 	)
 	(symbol
-		(lib_id "ExpansionCAN:SY6280AAAC")
-		(at 660.4 297.18 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "cbc8fc66-b193-49e8-9e17-506ff5e2bfcf")
-		(property "Reference" "U5"
-			(at 668.02 293.37 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Value" "SY6280AAAC"
-			(at 668.02 295.91 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-5"
-			(at 660.4 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C207620.html"
-			(at 660.4 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 660.4 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Assembly" "COMMON"
-			(at 660.4 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C207620"
-			(at 660.4 297.18 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "e227862f-0448-4a18-9439-d85ce566b36e")
-		)
-		(pin "2"
-			(uuid "a38371d9-4531-497d-9bfe-7b2785468f52")
-		)
-		(pin "3"
-			(uuid "8ef4bab8-7249-4cb0-aa7d-414b085389e8")
-		)
-		(pin "4"
-			(uuid "7df97bb5-a73c-4b51-84b7-5bd4b6675834")
-		)
-		(pin "5"
-			(uuid "b29397db-efad-44cb-9264-3f7d605bd80c")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "U5")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+5V")
 		(at 251.46 72.39 90)
 		(unit 1)
@@ -54710,83 +53432,6 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0822")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 640.08 309.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "d7c2a1e7-90be-4c5e-80d0-52b2a2d9630c")
-		(property "Reference" "#PWR9968"
-			(at 640.08 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "VCORE"
-			(at 640.08 306.28 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 640.08 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 640.08 309.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 963.93 16.51 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "2089c271-543e-4e03-a6c4-02de7479939a")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9968")
 					(unit 1)
 				)
 			)
@@ -58253,186 +56898,6 @@
 			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10062")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 640.08 313.69 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "eb26d1ad-9c62-48db-9578-245505c4b7f1")
-		(property "Reference" "R41"
-			(at 647.7 309.88 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Value" "100k"
-			(at 647.7 312.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 640.08 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 640.08 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 640.08 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Assembly" "COMMON"
-			(at 640.08 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C25741"
-			(at 640.08 313.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "fc1fedf6-40ae-4772-a9be-a0541d601c5d")
-		)
-		(pin "1"
-			(uuid "85a42b59-fcab-4885-9e1f-1e26d093852f")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "R41")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 703.58 317.5 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "ebea81f3-a3e1-4039-9a76-d4d10e0519b1")
-		(property "Reference" "#PWR9972"
-			(at 703.58 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 703.58 321.1 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 703.58 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 703.58 317.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1303.02 241.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "f3696493-d7b5-467a-82d9-b0995308987f")
-		)
-		(instances
-			(project "backbone"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9972")
 					(unit 1)
 				)
 			)
