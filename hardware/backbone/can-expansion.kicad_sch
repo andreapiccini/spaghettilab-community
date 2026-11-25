@@ -939,7 +939,7 @@
 			(uuid "88ae78a7-9c35-4bdd-b94a-2cd977b0e6f5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/dd8705a8-fa74-4ec4-b38e-d6a2e1d94e2f"
 					(reference "J25")
 					(unit 1)
@@ -1016,7 +1016,7 @@
 			(uuid "1daf38ab-b039-48c5-b9b8-98ed24ec7f5b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/dd8705a8-fa74-4ec4-b38e-d6a2e1d94e2f"
 					(reference "#PWR0150")
 					(unit 1)
@@ -1094,7 +1094,7 @@
 			(uuid "4e245c05-69fb-4679-bfc9-f1b765685a01")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/dd8705a8-fa74-4ec4-b38e-d6a2e1d94e2f"
 					(reference "#PWR0190")
 					(unit 1)
@@ -1172,7 +1172,7 @@
 			(uuid "f0a92d8a-38b6-45cb-9756-4f619345d643")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/dd8705a8-fa74-4ec4-b38e-d6a2e1d94e2f"
 					(reference "#PWR0191")
 					(unit 1)
@@ -1249,7 +1249,7 @@
 			(uuid "d3efdf9a-4873-4184-9211-9a5ba7dd318f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/dd8705a8-fa74-4ec4-b38e-d6a2e1d94e2f"
 					(reference "#PWR0151")
 					(unit 1)
@@ -1346,7 +1346,7 @@
 			(uuid "8baf375e-a622-474c-adb4-4799da8a0a51")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/dd8705a8-fa74-4ec4-b38e-d6a2e1d94e2f"
 					(reference "J24")
 					(unit 1)

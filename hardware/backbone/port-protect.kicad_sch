@@ -3768,7 +3768,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 285.75 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -3801,7 +3801,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1525"
 			(at 285.75 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -3819,7 +3819,7 @@
 			(uuid "4803b0b5-aea6-45f2-9c93-0f1cd6727d7c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "C923")
 					(unit 1)
@@ -3896,7 +3896,7 @@
 			(uuid "bd5c67dd-ba71-44d1-9a0c-875e56f202be")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9533")
 					(unit 1)
@@ -3973,7 +3973,7 @@
 			(uuid "0630abec-30e2-4882-9592-8901750f6b3f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9537")
 					(unit 1)
@@ -4051,7 +4051,7 @@
 			(uuid "ac047f55-1bd7-49f8-95f0-fda1e05afc1d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9993")
 					(unit 1)
@@ -4090,7 +4090,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 96.52 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -4123,7 +4123,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C23162"
+		(property "LCSC" "C25900"
 			(at 96.52 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -4141,7 +4141,7 @@
 			(uuid "c1af831b-d0b1-403b-a0fa-f2511a4165fe")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "R903")
 					(unit 1)
@@ -4219,7 +4219,7 @@
 			(uuid "10a9ba6f-8386-4ddc-829e-df326d2d3d54")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10010")
 					(unit 1)
@@ -4297,7 +4297,7 @@
 			(uuid "2f6389f6-ceaf-4d8d-ba1d-e68cd3b40492")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10007")
 					(unit 1)
@@ -4375,7 +4375,7 @@
 			(uuid "0d062b0a-6634-413e-9177-180ae903e80a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9982")
 					(unit 1)
@@ -4453,7 +4453,7 @@
 			(uuid "41310a3d-dedf-4e98-94c4-853475d151be")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10012")
 					(unit 1)
@@ -4531,7 +4531,7 @@
 			(uuid "4a11e9a7-4180-408c-b2af-7c724f31d2b1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9999")
 					(unit 1)
@@ -4609,7 +4609,7 @@
 			(uuid "1ed83fc4-ed9c-4b11-88c5-ced4e011e3f8")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10017")
 					(unit 1)
@@ -4687,7 +4687,7 @@
 			(uuid "e9d52fac-13fc-4949-aa4c-f786b9f9f9f9")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9984")
 					(unit 1)
@@ -4765,7 +4765,7 @@
 			(uuid "02cfb78c-8760-4ce9-af8b-5d35cbdbe6d1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10022")
 					(unit 1)
@@ -4843,7 +4843,7 @@
 			(uuid "40308fd1-acb5-4758-b32d-d9d0c98b0af1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10013")
 					(unit 1)
@@ -4921,7 +4921,7 @@
 			(uuid "76106d0a-5097-4d31-a3bc-dbfa935002aa")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10003")
 					(unit 1)
@@ -4999,7 +4999,7 @@
 			(uuid "9cf5e6db-3a4d-4a3a-9d77-033d908492a7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10027")
 					(unit 1)
@@ -5076,7 +5076,7 @@
 			(uuid "df23cdbe-8f99-4e89-b588-dbd7d3997ab6")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9544")
 					(unit 1)
@@ -5153,7 +5153,7 @@
 			(uuid "912518ef-61fa-4af1-b921-22e960a969ae")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9541")
 					(unit 1)
@@ -5231,7 +5231,7 @@
 			(uuid "2c896b98-f77d-4dec-ab23-30ca184d2f99")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10005")
 					(unit 1)
@@ -5309,7 +5309,7 @@
 			(uuid "34e14f95-a9e4-4c2d-8cdc-7e35bb321006")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10001")
 					(unit 1)
@@ -5386,7 +5386,7 @@
 			(uuid "bb34a91f-4422-4b02-a48b-a6fbfc1d2405")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9534")
 					(unit 1)
@@ -5488,7 +5488,7 @@
 			(uuid "7147a582-ba69-487f-9c09-a76ba31ab341")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "Q901")
 					(unit 1)
@@ -5596,7 +5596,7 @@
 			(uuid "f5bd6819-5d94-4396-b05c-8cf62d433d0a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "U901")
 					(unit 1)
@@ -5686,7 +5686,7 @@
 			(uuid "1ab7172f-9a9f-45c9-90a0-7f0245d540f6")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "R905")
 					(unit 1)
@@ -5725,7 +5725,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 226.06 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -5758,7 +5758,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25804"
+		(property "LCSC" "C25744"
 			(at 226.06 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -5776,7 +5776,7 @@
 			(uuid "28c7e00a-b8fa-4fc2-b9fb-efd89316de68")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "R906")
 					(unit 1)
@@ -5895,7 +5895,7 @@
 			(uuid "a21e04d1-ff2f-4f6a-b2ca-4803384442aa")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "RN904")
 					(unit 1)
@@ -5973,7 +5973,7 @@
 			(uuid "c91fee51-519a-4528-a4b6-d174cc368173")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10019")
 					(unit 1)
@@ -6051,7 +6051,7 @@
 			(uuid "02f0b8bd-c3da-409c-b7d3-d493ffae349b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10025")
 					(unit 1)
@@ -6129,7 +6129,7 @@
 			(uuid "e38e50e0-b874-4809-817e-d59cb5b6a150")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10002")
 					(unit 1)
@@ -6231,7 +6231,7 @@
 			(uuid "efabc287-61a0-4f45-be25-5c6d6f02da47")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "D927")
 					(unit 1)
@@ -6270,7 +6270,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 137.16 236.22 0)
 			(hide yes)
 			(show_name no)
@@ -6303,7 +6303,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25803"
+		(property "LCSC" "C25741"
 			(at 137.16 236.22 0)
 			(hide yes)
 			(show_name no)
@@ -6321,7 +6321,7 @@
 			(uuid "2e9e3727-c13c-4408-a753-4335d9cb57ea")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "R904")
 					(unit 1)
@@ -6398,7 +6398,7 @@
 			(uuid "13f6f772-df0b-40e2-9029-2d28e20cceb7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9538")
 					(unit 1)
@@ -6475,7 +6475,7 @@
 			(uuid "9a491d78-3b9b-4958-b965-5fc169bd8e8d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9535")
 					(unit 1)
@@ -6577,7 +6577,7 @@
 			(uuid "e355f407-9f1d-40f7-9d89-60831f5b15ee")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "D923")
 					(unit 1)
@@ -6655,7 +6655,7 @@
 			(uuid "d4151751-a275-40e0-9a16-6bc93c27db95")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10008")
 					(unit 1)
@@ -6733,7 +6733,7 @@
 			(uuid "2e00a1d7-704d-41ba-9e2c-660a688f8d30")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10014")
 					(unit 1)
@@ -6811,7 +6811,7 @@
 			(uuid "3bdb79b8-9ad8-4be2-adee-cead15a44cb7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10011")
 					(unit 1)
@@ -6889,7 +6889,7 @@
 			(uuid "3bfac722-8630-4274-835f-20b207d1740a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10024")
 					(unit 1)
@@ -6966,7 +6966,7 @@
 			(uuid "1748a37d-c4f6-4dc3-b778-b124d9b604cf")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9988")
 					(unit 1)
@@ -7056,7 +7056,7 @@
 			(uuid "397e94cd-c590-4cff-a168-4dad62e65244")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "C924")
 					(unit 1)
@@ -7095,7 +7095,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 86.36 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -7128,7 +7128,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C23162"
+		(property "LCSC" "C25900"
 			(at 86.36 226.06 0)
 			(hide yes)
 			(show_name no)
@@ -7146,7 +7146,7 @@
 			(uuid "8584a538-504f-42f2-aadc-5489e1c49856")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "R902")
 					(unit 1)
@@ -7224,7 +7224,7 @@
 			(uuid "6da20a7f-c19e-421f-b0f2-f74259833a9d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9980")
 					(unit 1)
@@ -7302,7 +7302,7 @@
 			(uuid "e1c8bcff-95f6-436f-85ea-d4799a3cf5e0")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9983")
 					(unit 1)
@@ -7379,7 +7379,7 @@
 			(uuid "abaa4572-cde4-48cf-be68-95300381b8ec")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9998")
 					(unit 1)
@@ -7469,7 +7469,7 @@
 			(uuid "a532a20a-7967-4d25-844f-a694b1a76331")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "C922")
 					(unit 1)
@@ -7547,7 +7547,7 @@
 			(uuid "f3fec89d-d30c-4d52-a37a-1537c40d03b3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10009")
 					(unit 1)
@@ -7586,7 +7586,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 195.58 231.14 0)
 			(hide yes)
 			(show_name no)
@@ -7619,7 +7619,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C15849"
+		(property "LCSC" "C52923"
 			(at 195.58 231.14 0)
 			(hide yes)
 			(show_name no)
@@ -7637,7 +7637,7 @@
 			(uuid "66005560-91b5-46ff-99ce-9498aa7fa366")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "C921")
 					(unit 1)
@@ -7751,7 +7751,7 @@
 			(uuid "73f00c7d-530c-4862-9e59-8745b7c1b823")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "U902")
 					(unit 1)
@@ -7829,7 +7829,7 @@
 			(uuid "27994864-56d0-4aa9-b8f0-b81bb4af070a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9994")
 					(unit 1)
@@ -7907,7 +7907,7 @@
 			(uuid "c9cee87b-c07f-4c03-b7be-ad17e6ef9445")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10000")
 					(unit 1)
@@ -7985,7 +7985,7 @@
 			(uuid "211a203e-7fba-4e82-800d-976ab9bceb06")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10029")
 					(unit 1)
@@ -8062,7 +8062,7 @@
 			(uuid "6cf42419-7a4c-404b-97bc-e2a9556f7663")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9547")
 					(unit 1)
@@ -8164,7 +8164,7 @@
 			(uuid "11660309-aaa1-4b6b-a39a-09044a05364e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "D928")
 					(unit 1)
@@ -8242,7 +8242,7 @@
 			(uuid "65b88db5-eb84-4718-a1e3-974ab320a13c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10020")
 					(unit 1)
@@ -8320,7 +8320,7 @@
 			(uuid "733156a2-d385-484a-adac-5c6f970324ba")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10023")
 					(unit 1)
@@ -8422,7 +8422,7 @@
 			(uuid "f40cbbcb-c196-4a40-a9c8-4c164b3e9b19")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "D924")
 					(unit 1)
@@ -8500,7 +8500,7 @@
 			(uuid "bb23a329-566a-41a5-989d-abedecf565d3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10018")
 					(unit 1)
@@ -8578,7 +8578,7 @@
 			(uuid "c486ca46-379c-43b6-b90c-fee56241c448")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9986")
 					(unit 1)
@@ -8655,7 +8655,7 @@
 			(uuid "f4fa5f94-5426-4a08-bf9c-9a66c1b58720")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9990")
 					(unit 1)
@@ -8732,7 +8732,7 @@
 			(uuid "fd10f6f0-ab94-4466-9f02-8d7e42e4a108")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9996")
 					(unit 1)
@@ -8831,7 +8831,7 @@
 			(uuid "2003ecf1-18a1-4a71-b048-2b01b79d6766")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "U903")
 					(unit 1)
@@ -8908,7 +8908,7 @@
 			(uuid "35ba62c8-ecb4-4097-9658-b932120d2477")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9995")
 					(unit 1)
@@ -8985,7 +8985,7 @@
 			(uuid "d95d9f43-e6dc-46cd-8702-04d04b1b80d4")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9536")
 					(unit 1)
@@ -9062,7 +9062,7 @@
 			(uuid "4c8e14ea-db90-4182-9b88-d2077d75bc20")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9545")
 					(unit 1)
@@ -9140,7 +9140,7 @@
 			(uuid "12ca844f-f8ff-4ec2-8c6b-81e737b92666")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10021")
 					(unit 1)
@@ -9259,7 +9259,7 @@
 			(uuid "b42d1307-82c3-45f9-b737-37af19b3448c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "RN901")
 					(unit 1)
@@ -9336,7 +9336,7 @@
 			(uuid "839477bd-08dd-43cf-bb42-02824efb9629")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9542")
 					(unit 1)
@@ -9414,7 +9414,7 @@
 			(uuid "2d02c356-b803-472d-875a-731b954a3cc6")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9985")
 					(unit 1)
@@ -9516,7 +9516,7 @@
 			(uuid "f71bd4d9-6242-41fb-9bb9-78ba2f397b80")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "D926")
 					(unit 1)
@@ -9593,7 +9593,7 @@
 			(uuid "e77f0ade-4332-4751-94f0-dbe1efc98676")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9991")
 					(unit 1)
@@ -9671,7 +9671,7 @@
 			(uuid "b8c512a1-7edd-44c0-8eb3-2d7608fe3fcc")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9992")
 					(unit 1)
@@ -9710,7 +9710,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 228.6 198.12 0)
 			(hide yes)
 			(show_name no)
@@ -9743,7 +9743,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25803"
+		(property "LCSC" "C25741"
 			(at 228.6 198.12 0)
 			(hide yes)
 			(show_name no)
@@ -9761,7 +9761,7 @@
 			(uuid "a8aacab6-1f9a-4027-ab26-62526bf419dd")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "R908")
 					(unit 1)
@@ -9863,7 +9863,7 @@
 			(uuid "31c41341-af4b-4ab8-afc8-da37e83ec64d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "D921")
 					(unit 1)
@@ -9940,7 +9940,7 @@
 			(uuid "a78708da-3d63-4225-beb7-96f617dbaf6d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9987")
 					(unit 1)
@@ -10017,7 +10017,7 @@
 			(uuid "97333653-746a-4c08-8e84-0d1749dfaae0")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9540")
 					(unit 1)
@@ -10095,7 +10095,7 @@
 			(uuid "4abc6467-8133-4194-9c3b-4d8f3c3d2bec")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9979")
 					(unit 1)
@@ -10173,7 +10173,7 @@
 			(uuid "23e37f0a-03b2-495a-beff-16d2f054f0fe")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10015")
 					(unit 1)
@@ -10275,7 +10275,7 @@
 			(uuid "fde4bbaf-b937-44b1-a7a1-8f8911c73d2d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "D925")
 					(unit 1)
@@ -10353,7 +10353,7 @@
 			(uuid "9e970036-bbfc-40e1-90be-282c7f90d861")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9981")
 					(unit 1)
@@ -10430,7 +10430,7 @@
 			(uuid "55f0e8b9-3afb-43fa-b18f-47f73bb462e2")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9543")
 					(unit 1)
@@ -10508,7 +10508,7 @@
 			(uuid "ed670c90-10b4-4fa2-ae4f-2343a6d2894c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10004")
 					(unit 1)
@@ -10627,7 +10627,7 @@
 			(uuid "2ce185fa-1f9e-49a3-9702-c717187237a8")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "RN902")
 					(unit 1)
@@ -10704,7 +10704,7 @@
 			(uuid "5a4dcd9e-4d43-4827-990a-e435c57afd56")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9546")
 					(unit 1)
@@ -10743,7 +10743,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 257.81 209.55 0)
 			(hide yes)
 			(show_name no)
@@ -10776,7 +10776,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C304740"
+		(property "LCSC" "C25891"
 			(at 257.81 209.55 0)
 			(hide yes)
 			(show_name no)
@@ -10794,7 +10794,7 @@
 			(uuid "b6ffc405-c7c6-4ef0-a6ce-1be75291b426")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "R907")
 					(unit 1)
@@ -10872,7 +10872,7 @@
 			(uuid "def4938d-0364-4b8e-9f3c-b147903139bc")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10016")
 					(unit 1)
@@ -10950,7 +10950,7 @@
 			(uuid "8f339a90-ec5a-4abf-aa0d-c750930fee0d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10028")
 					(unit 1)
@@ -11027,7 +11027,7 @@
 			(uuid "2fe9255d-35ed-4213-bac3-72aef468c8b1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9989")
 					(unit 1)
@@ -11105,7 +11105,7 @@
 			(uuid "d94cfad5-bd22-4aec-bc6c-1027fc904a0b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10006")
 					(unit 1)
@@ -11183,7 +11183,7 @@
 			(uuid "3d9d17df-0d97-42f9-9c12-e391e93730e6")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10030")
 					(unit 1)
@@ -11285,7 +11285,7 @@
 			(uuid "59d4200c-60e9-4bfb-a1f1-76794b0e1ef9")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "D922")
 					(unit 1)
@@ -11362,7 +11362,7 @@
 			(uuid "3c808ea3-a121-48fe-af36-a8c7c213fd2b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR9997")
 					(unit 1)
@@ -11440,7 +11440,7 @@
 			(uuid "f5a62120-7950-45ab-9719-0251d2812fb3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "#PWR10026")
 					(unit 1)
@@ -11559,7 +11559,7 @@
 			(uuid "49a36748-4625-4743-a18c-f94c3fe82fb7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "RN903")
 					(unit 1)
@@ -11598,7 +11598,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 185.42 231.14 0)
 			(hide yes)
 			(show_name no)
@@ -11631,7 +11631,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C15849"
+		(property "LCSC" "C52923"
 			(at 185.42 231.14 0)
 			(hide yes)
 			(show_name no)
@@ -11649,7 +11649,7 @@
 			(uuid "9646b9f0-e07c-40e6-89f4-5fd6799f3ecb")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/d553162c-8b20-43a2-9044-69e59f8d7945"
 					(reference "C920")
 					(unit 1)

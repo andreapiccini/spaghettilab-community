@@ -5586,6 +5586,222 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "ExpansionCAN:GH_SM06B"
+			(pin_names
+				(offset 0.5)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 10.16 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Value" "SM06B-GHS-TB"
+				(at 0 -13.97 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Footprint" "Connector_JST:JST_GH_SM06B-GHS-TB_1x10-1MP_P1.25mm_Horizontal"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eGH.pdf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "Description" "JST GH 1.25 mm side entry, 6 pos"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(property "LCSC" "C133065"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1 1)
+					)
+				)
+			)
+			(symbol "GH_SM06B_0_1"
+				(rectangle
+					(start -5.08 8.89)
+					(end 5.08 -8.89)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "GH_SM06B_1_1"
+				(pin passive line
+					(at -7.62 6.35 0)
+					(length 2.54)
+					(name "5V"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 3.81 0)
+					(length 2.54)
+					(name "CAN_H"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 1.27 0)
+					(length 2.54)
+					(name "CAN_L"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 -1.27 0)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 -3.81 0)
+					(length 2.54)
+					(name "TERM"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 -6.35 0)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -11.43 90)
+					(length 2.54)
+					(name "MP"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "MP"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "ExpansionCAN:GH_SM08B"
 			(pin_names
 				(offset 0.5)
@@ -5819,294 +6035,6 @@
 				)
 				(pin passive line
 					(at 0 -13.97 90)
-					(length 2.54)
-					(name "MP"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "MP"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-		(symbol "ExpansionCAN:GH_SM10B"
-			(pin_names
-				(offset 0.5)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "J"
-				(at 0 15.24 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Value" "SM10B-GHS-TB"
-				(at 0 -17.78 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Footprint" "Connector_JST:JST_GH_SM10B-GHS-TB_1x10-1MP_P1.25mm_Horizontal"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eGH.pdf"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Description" "JST GH 1.25 mm side entry, 10 pos"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "LCSC" "C2683602"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(symbol "GH_SM10B_0_1"
-				(rectangle
-					(start -5.08 13.97)
-					(end 5.08 -13.97)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "GH_SM10B_1_1"
-				(pin passive line
-					(at -7.62 11.43 0)
-					(length 2.54)
-					(name "5V"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 8.89 0)
-					(length 2.54)
-					(name "5V"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 6.35 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 3.81 0)
-					(length 2.54)
-					(name "CAN_H"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 1.27 0)
-					(length 2.54)
-					(name "CAN_L"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -1.27 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -3.81 0)
-					(length 2.54)
-					(name "TERM_IN"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -6.35 0)
-					(length 2.54)
-					(name "TERM_OUT"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "8"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -8.89 0)
-					(length 2.54)
-					(name "IO35"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "9"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -11.43 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "10"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -16.51 90)
 					(length 2.54)
 					(name "MP"
 						(effects
@@ -6587,546 +6515,6 @@
 						)
 					)
 					(number "5"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-		(symbol "ExpansionCAN:Socket_2x05_CAN_RA"
-			(pin_names
-				(offset 0.5)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "J"
-				(at 0 8.89 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Value" "PM254-2-05-W-8.5"
-				(at 0 -8.89 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x05_P2.54mm_Horizontal"
-				(at 0 -11.43 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Datasheet" "https://www.lcsc.com/product-detail/C2897425.html"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Description" "Socket femmina 2x5 2,54 mm ad angolo retto THT (alternativo al GH SM10B)"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "LCSC" "C2897425"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(symbol "Socket_2x05_CAN_RA_0_1"
-				(rectangle
-					(start -5.08 7.62)
-					(end 5.08 -7.62)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "Socket_2x05_CAN_RA_1_1"
-				(pin passive line
-					(at -7.62 5.08 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 5.08 180)
-					(length 2.54)
-					(name "CAN_H"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 2.54 0)
-					(length 2.54)
-					(name "TERM_IN"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 2.54 180)
-					(length 2.54)
-					(name "CAN_L"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 0 0)
-					(length 2.54)
-					(name "5V"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 0 180)
-					(length 2.54)
-					(name "5V"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -2.54 0)
-					(length 2.54)
-					(name "IO35"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -2.54 180)
-					(length 2.54)
-					(name "TERM_OUT"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "8"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -5.08 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "9"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -5.08 180)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "10"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-		(symbol "ExpansionCAN:Socket_2x05_SPI_RA"
-			(pin_names
-				(offset 0.5)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "J"
-				(at 0 8.89 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Value" "PM254-2-05-W-8.5"
-				(at 0 -8.89 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x05_P2.54mm_Horizontal"
-				(at 0 -11.43 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Datasheet" "https://www.lcsc.com/product-detail/C2897425.html"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "Description" "Socket femmina 2x5 2,54 mm ad angolo retto THT (alternativo al GH SM10B)"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(property "LCSC" "C2897425"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1 1)
-					)
-				)
-			)
-			(symbol "Socket_2x05_SPI_RA_0_1"
-				(rectangle
-					(start -5.08 7.62)
-					(end 5.08 -7.62)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "Socket_2x05_SPI_RA_1_1"
-				(pin passive line
-					(at -7.62 5.08 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 5.08 180)
-					(length 2.54)
-					(name "3V3"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 2.54 0)
-					(length 2.54)
-					(name "SCK"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 2.54 180)
-					(length 2.54)
-					(name "MOSI"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 0 0)
-					(length 2.54)
-					(name "5V"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 0 180)
-					(length 2.54)
-					(name "5V"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -2.54 0)
-					(length 2.54)
-					(name "MISO"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -2.54 180)
-					(length 2.54)
-					(name "CS"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "8"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -7.62 -5.08 0)
-					(length 2.54)
-					(name "IO33"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "9"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 7.62 -5.08 180)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "10"
 						(effects
 							(font
 								(size 1 1)
@@ -26289,7 +25677,7 @@
 		)
 		(uuid "75b59f90-5d9c-451f-8db2-96c5a7fb9704")
 	)
-	(text "J26 / J27 | GH EXPANSION PORTS"
+	(text "J26 | GH EXPANSION PORT"
 		(exclude_from_sim no)
 		(at 606.6526 168.5817 0)
 		(effects
@@ -32216,6 +31604,28 @@
 			)
 		)
 	)
+	(global_label "CAN_P"
+		(shape bidirectional)
+		(at 706.12 245.11 180)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify right)
+		)
+		(uuid "1a2886d6-6e41-490f-985c-a73ab8045078")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 706.12 245.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
 	(global_label "UP7_NG"
 		(shape bidirectional)
 		(at 781.05 281.94 270)
@@ -32316,50 +31726,6 @@
 		(uuid "1e2751d9-f03b-4751-a943-96fc59b1a726")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 725.17 436.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "SPI_MOSI"
-		(shape bidirectional)
-		(at 632.46 201.93 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "1f4d8bab-3247-4f8a-b535-a96e04644b02")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 201.93 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "GND"
-		(shape bidirectional)
-		(at 722.63 195.58 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "1f8ad475-b81d-4f12-837f-01fae1d445a2")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 195.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -32536,28 +31902,6 @@
 		(uuid "25a7deef-b61e-4a9f-a9d5-d738053c6e9f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 151.13 610.87 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "CAN_P"
-		(shape bidirectional)
-		(at 632.46 245.11 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "26219e59-bbd8-45d6-b5af-f741a29c54f5")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 245.11 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -32878,28 +32222,6 @@
 			)
 		)
 	)
-	(global_label "EXP_SPI_CS_N"
-		(shape bidirectional)
-		(at 737.87 203.2 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "32721456-5435-40e0-b057-623dcb0f6118")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 203.2 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "PORT_A0"
 		(shape bidirectional)
 		(at 88.9 411.48 0)
@@ -33056,28 +32378,6 @@
 			)
 		)
 	)
-	(global_label "SPI_MISO"
-		(shape bidirectional)
-		(at 632.46 204.47 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "3ab3a2b2-c82c-4379-beda-711260d34c9b")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 204.47 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "ILIM_EXP"
 		(shape bidirectional)
 		(at 668.02 299.72 0)
@@ -33112,28 +32412,6 @@
 		(uuid "3c80f332-de6f-4d93-8f38-0165f5d84db7")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 576.58 129.54 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "SPI_SCLK"
-		(shape bidirectional)
-		(at 632.46 199.39 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "3ebbccca-1a81-4b46-bac3-985283069f25")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 199.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -33298,28 +32576,6 @@
 			)
 		)
 	)
-	(global_label "TERM_CTRL_IN"
-		(shape bidirectional)
-		(at 632.46 252.73 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "41f9fef9-ace2-4fff-a56d-9f8d84190130")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 252.73 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "PORT_A5"
 		(shape bidirectional)
 		(at 519.43 521.97 0)
@@ -33354,28 +32610,6 @@
 		(uuid "42959fa2-ec1a-4513-82ca-d57fb150df7c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 783.5 436.19 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "5V_EXP"
-		(shape bidirectional)
-		(at 737.87 248.92 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "437ea05c-b1ac-4616-8bec-236b9e27fe79")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 248.92 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -33486,28 +32720,6 @@
 		(uuid "479db929-9623-4f52-9e28-cb71ec6e64a7")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 875.03 129.54 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "5V_EXP"
-		(shape bidirectional)
-		(at 722.63 248.92 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "490d8263-b118-4e3f-a95e-688de372248a")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 248.92 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -33848,28 +33060,6 @@
 			)
 		)
 	)
-	(global_label "TERM_CTRL_OUT"
-		(shape bidirectional)
-		(at 632.46 255.27 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "563a1f14-2eb7-4c72-bedb-b37cc7734a24")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 255.27 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "P_GATE_2"
 		(shape bidirectional)
 		(at 462.28 388.62 90)
@@ -34002,28 +33192,6 @@
 			)
 		)
 	)
-	(global_label "CAN_N"
-		(shape bidirectional)
-		(at 632.46 247.65 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "5e5a0376-544f-4a97-b276-5f5343f9843d")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 247.65 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "UP5_PG"
 		(shape bidirectional)
 		(at 781.05 193.04 90)
@@ -34090,28 +33258,6 @@
 			)
 		)
 	)
-	(global_label "SPI_MOSI"
-		(shape bidirectional)
-		(at 737.87 198.12 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "64ed887a-898a-450f-ab31-67771d13c173")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 198.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "PORT_A7_PG"
 		(shape bidirectional)
 		(at 339.09 82.55 0)
@@ -34146,6 +33292,28 @@
 		(uuid "662c2b88-d2dd-41e4-b417-cefd6eafc43b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 236.22 614.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "CAN_P"
+		(shape bidirectional)
+		(at 675.64 245.11 180)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify right)
+		)
+		(uuid "6678cf4a-fccf-4cf8-b20e-ce6ba5db130a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 675.64 245.11 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -34420,28 +33588,6 @@
 			)
 		)
 	)
-	(global_label "GND"
-		(shape bidirectional)
-		(at 737.87 254 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "6e79ef9a-9f82-4b05-810f-3b73b86b19c7")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 254 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "UP3"
 		(shape bidirectional)
 		(at 800.1 144.78 0)
@@ -34618,50 +33764,6 @@
 			)
 		)
 	)
-	(global_label "5V_EXP"
-		(shape bidirectional)
-		(at 737.87 200.66 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "77b2b7ec-7b53-44f7-910d-2a59ac5cb355")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "GND"
-		(shape bidirectional)
-		(at 737.87 205.74 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "77e8fa4e-1222-4aa1-b2a6-5d498bcddcf0")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 205.74 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "UP3_NG"
 		(shape bidirectional)
 		(at 897.89 492.76 0)
@@ -34750,6 +33852,28 @@
 			)
 		)
 	)
+	(global_label "CAN_N"
+		(shape bidirectional)
+		(at 675.64 247.65 180)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify right)
+		)
+		(uuid "7a0bb82a-fb5c-455b-9e8d-e771de340802")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 675.64 247.65 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
 	(global_label "VPORT_SEL"
 		(shape bidirectional)
 		(at 105.41 118.11 0)
@@ -34806,28 +33930,6 @@
 		(uuid "7c940410-1e52-41f1-954a-09fb43812f57")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 800.1 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "IO35"
-		(shape bidirectional)
-		(at 632.46 257.81 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "7d02baf5-485a-4c8e-9c01-51494677577e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 257.81 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -35036,28 +34138,6 @@
 			)
 		)
 	)
-	(global_label "CAN_P"
-		(shape bidirectional)
-		(at 737.87 243.84 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "8acfc370-f08d-446b-8bf8-de5a273f80ee")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 243.84 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "PORT_A3"
 		(shape bidirectional)
 		(at 415.29 618.49 180)
@@ -35080,18 +34160,18 @@
 			)
 		)
 	)
-	(global_label "IO35"
+	(global_label "TERM_CTRL_OUT"
 		(shape bidirectional)
-		(at 722.63 251.46 180)
+		(at 706.12 252.73 180)
 		(effects
 			(font
 				(size 0.889 0.889)
 			)
 			(justify right)
 		)
-		(uuid "8d612b1b-d714-462f-9485-b9e8e3cc2de8")
+		(uuid "8e6348bc-4216-488a-bf26-393d6c7a8d16")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 251.46 0)
+			(at 706.12 252.73 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -35344,50 +34424,6 @@
 			)
 		)
 	)
-	(global_label "VCORE"
-		(shape bidirectional)
-		(at 737.87 195.58 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "961675a7-0190-4efe-acdd-ee60b0fb7e30")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 195.58 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "EXP_SPI_CS_N"
-		(shape bidirectional)
-		(at 632.46 207.01 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "9734624c-c79e-4376-9cd1-20ab2ca5ce0b")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 207.01 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "PORT_A7_NG"
 		(shape bidirectional)
 		(at 773.43 487.68 180)
@@ -35444,28 +34480,6 @@
 		(uuid "9aaab1b3-8a50-4e48-949a-8f6318be56db")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 725.17 487.68 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "TERM_CTRL_OUT"
-		(shape bidirectional)
-		(at 737.87 251.46 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "9d23239c-2e4d-4b6a-8903-087b2829cbb1")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 251.46 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -35586,18 +34600,18 @@
 			)
 		)
 	)
-	(global_label "GND"
+	(global_label "TERM_CTRL_IN"
 		(shape bidirectional)
-		(at 722.63 254 180)
+		(at 675.64 252.73 180)
 		(effects
 			(font
 				(size 0.889 0.889)
 			)
 			(justify right)
 		)
-		(uuid "a17ff729-b87e-439c-9ada-98af42660f80")
+		(uuid "a2866c85-c3c9-424f-b6ad-5aabaadcd2c6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 254 0)
+			(at 675.64 252.73 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -36136,28 +35150,6 @@
 			)
 		)
 	)
-	(global_label "TERM_CTRL_IN"
-		(shape bidirectional)
-		(at 722.63 246.38 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "bb32da32-1120-44c2-87e6-d3d0fe63e396")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 246.38 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "UP2_PG"
 		(shape bidirectional)
 		(at 872.49 71.12 180)
@@ -36422,28 +35414,6 @@
 			)
 		)
 	)
-	(global_label "IO33"
-		(shape bidirectional)
-		(at 632.46 209.55 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "c8583088-06e4-4e17-a76c-92c70dc16f59")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 632.46 209.55 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "PORT_A1"
 		(shape bidirectional)
 		(at 637.54 132.08 0)
@@ -36554,28 +35524,6 @@
 			)
 		)
 	)
-	(global_label "SPI_SCLK"
-		(shape bidirectional)
-		(at 722.63 198.12 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "cc32b7ca-554c-43ac-8c99-6c4819736b96")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 198.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "PORT_A7_PG"
 		(shape bidirectional)
 		(at 872.49 350.52 180)
@@ -36632,28 +35580,6 @@
 		(uuid "cf40e467-a620-4d8e-85fb-5673536b89e3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 345.44 614.68 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "CAN_N"
-		(shape bidirectional)
-		(at 737.87 246.38 0)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify left)
-		)
-		(uuid "cfb870be-20af-437c-966c-a41d64183c36")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 737.87 246.38 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -37064,28 +35990,6 @@
 			)
 		)
 	)
-	(global_label "5V_EXP"
-		(shape bidirectional)
-		(at 722.63 200.66 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "dbc96ff3-3531-4be7-ba8b-b7f3ff5bbe7c")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "UP5_NG"
 		(shape bidirectional)
 		(at 829.31 444.5 180)
@@ -37152,28 +36056,6 @@
 			)
 		)
 	)
-	(global_label "IO33"
-		(shape bidirectional)
-		(at 722.63 205.74 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "de4d9dd5-cab6-4aa0-8a3a-3b24e07261f7")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 205.74 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
 	(global_label "UP6_NG"
 		(shape bidirectional)
 		(at 271.78 90.17 0)
@@ -37186,28 +36068,6 @@
 		(uuid "ded9fffc-7dfa-4bb2-8598-6d34e092833c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 271.78 90.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "SPI_MISO"
-		(shape bidirectional)
-		(at 722.63 203.2 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "df9a7ebb-d008-4843-971f-95aaa76ca334")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 203.2 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -37274,6 +36134,28 @@
 		(uuid "e135216e-df51-48c3-a789-d556a82080c7")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 778.51 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "CAN_N"
+		(shape bidirectional)
+		(at 706.12 247.65 180)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify right)
+		)
+		(uuid "e1627f5e-0a75-4bdf-8cfa-120ca2671abd")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 706.12 247.65 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -37516,28 +36398,6 @@
 		(uuid "ed3ffc2a-c77d-48b4-8706-fc0286a6d43f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 452.12 77.47 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "GND"
-		(shape bidirectional)
-		(at 722.63 243.84 180)
-		(effects
-			(font
-				(size 0.889 0.889)
-			)
-			(justify right)
-		)
-		(uuid "ed8a549a-cb12-46f2-a8ec-ba5720a9fd86")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 722.63 243.84 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -37976,7 +36836,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:C0603"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 86.36 62.5348 0)
 			(hide yes)
 			(show_name no)
@@ -38009,7 +36869,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C1591"
+		(property "LCSC Part" "C1525"
 			(at 82.55 63.5 90)
 			(hide yes)
 			(show_name no)
@@ -38027,7 +36887,7 @@
 			(uuid "93c4479b-327b-4339-8260-ba0aa9458294")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C74")
 					(unit 1)
@@ -38157,7 +37017,7 @@
 			(uuid "51939243-51a5-4d41-ac02-24e6024af3d9")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J34")
 					(unit 1)
@@ -38235,7 +37095,7 @@
 			(uuid "50b23f2e-cad2-48cb-8d4f-90d18f4798de")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR038")
 					(unit 1)
@@ -38313,7 +37173,7 @@
 			(uuid "e924d1c3-d3cf-4352-a11b-bdf31c80d975")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10046")
 					(unit 1)
@@ -38392,7 +37252,7 @@
 			(uuid "e656d6b5-3f6f-4b97-b680-4a827daab7a8")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0832")
 					(unit 1)
@@ -38471,7 +37331,7 @@
 			(uuid "85ac7bf4-859a-476d-a655-8001c285cfdc")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10054")
 					(unit 1)
@@ -38548,7 +37408,7 @@
 			(uuid "3637d9d8-db03-4b0e-8188-1ef13670661c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0189")
 					(unit 1)
@@ -38627,7 +37487,7 @@
 			(uuid "56711cb8-b17e-47ad-a640-2374aeae7189")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10056")
 					(unit 1)
@@ -38705,7 +37565,7 @@
 			(uuid "97824b00-f6bd-4376-b3dc-ada1643394da")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0826")
 					(unit 1)
@@ -38795,87 +37655,9 @@
 			(uuid "f5ee8e8b-a4b3-4188-b4e8-dd05eeaeed38")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 632.46 237.49 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "114a1a40-9647-4776-9cbd-9c1550289b9f")
-		(property "Reference" "#PWR9958"
-			(at 632.46 237.49 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V_EXP"
-			(at 628.86 237.49 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 237.49 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 237.49 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 989.33 -73.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "9e44d9e6-160c-4037-9b5e-9c214c735852")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9958")
 					(unit 1)
 				)
 			)
@@ -38952,7 +37734,7 @@
 			(uuid "fa297ab6-a4a1-4905-913e-bbc67fdede89")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0613")
 					(unit 1)
@@ -39043,7 +37825,7 @@
 			(uuid "751c23ba-e3b3-420c-b3fc-c4a0960088e1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J9")
 					(unit 1)
@@ -39121,88 +37903,9 @@
 			(uuid "6bf711b9-149e-4183-89f6-8e074433b12c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR044")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 632.46 250.19 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "15241ceb-ebf7-45ff-9a05-537245f66431")
-		(property "Reference" "#PWR9961"
-			(at 632.46 250.19 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 628.86 250.19 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 250.19 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 250.19 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1328.42 151.13 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "aba96fc1-526a-4c0e-8133-81a3f66fcf08")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9961")
 					(unit 1)
 				)
 			)
@@ -39278,7 +37981,7 @@
 			(uuid "51928ed1-b460-4069-94b2-7cab8ea3edfb")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR010036")
 					(unit 1)
@@ -39357,7 +38060,7 @@
 			(uuid "a0a50b1e-05b4-4a9c-b245-d4a7f93abbec")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0807")
 					(unit 1)
@@ -39455,7 +38158,7 @@
 			(uuid "b65e19ba-f9da-420b-9181-0aeaf0006c0d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR09064")
 					(unit 1)
@@ -39533,7 +38236,7 @@
 			(uuid "92c26e8d-18be-4a50-86aa-314c9e866d0c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR7000")
 					(unit 1)
@@ -39611,7 +38314,7 @@
 			(uuid "ef4ca2fb-9dcd-4fd9-88e6-3ccfccd6c914")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0816")
 					(unit 1)
@@ -39690,7 +38393,7 @@
 			(uuid "94d30b49-9dce-4533-84ba-2a91fd60e551")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9967")
 					(unit 1)
@@ -39767,7 +38470,7 @@
 			(uuid "f4f32fc6-9aa1-4092-b0ec-b2a9cb7b5cbe")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0401")
 					(unit 1)
@@ -39843,7 +38546,7 @@
 			)
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "H4")
 					(unit 1)
@@ -39920,145 +38623,9 @@
 			(uuid "bc48cd91-ce45-4a72-9de0-ab3c8e49cd5e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0606")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "ExpansionCAN:Socket_2x05_SPI_RA")
-		(at 730.25 200.66 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp yes)
-		(uuid "1e6ed3cf-a9b6-4b45-9486-9c6cfc822ca7")
-		(property "Reference" "J28"
-			(at 730.25 190.5 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Value" "PM254-2-05-W-8.5"
-			(at 730.25 210.82 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x05_P2.54mm_Horizontal"
-			(at 730.25 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C2897425.html"
-			(at 730.25 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Description" "Alternativa a J26: socket 2x5 2,54 mm 90 gradi THT (versione commerciale)"
-			(at 730.25 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Manufacturer" "HCTL"
-			(at 730.25 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "MPN" "PM254-2-05-W-8.5"
-			(at 730.25 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "LCSC" "C2897425"
-			(at 730.25 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "a820eb92-07d0-4698-bd25-9e37acf295db")
-		)
-		(pin "2"
-			(uuid "939ad1a2-59dd-4192-bca2-239a65b4df2c")
-		)
-		(pin "3"
-			(uuid "75dfc794-dd03-441e-81f3-e808b56b068d")
-		)
-		(pin "4"
-			(uuid "804e8f57-6ecb-4538-839b-e28fd75901bf")
-		)
-		(pin "5"
-			(uuid "7902976d-5222-403d-b01b-4adc4e4f1a2c")
-		)
-		(pin "6"
-			(uuid "1a85f007-ab86-43cc-95cb-3525a8bee205")
-		)
-		(pin "7"
-			(uuid "8e1c230f-eaf3-4604-adb1-9767fadf61c6")
-		)
-		(pin "8"
-			(uuid "5d3f946d-1113-4f46-b61c-fc7f244a408b")
-		)
-		(pin "9"
-			(uuid "34abae4d-3dae-4d4a-b01f-22c821cf043f")
-		)
-		(pin "10"
-			(uuid "a7059e3a-7a39-40e6-9a49-186995fde028")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "J28")
 					(unit 1)
 				)
 			)
@@ -40186,7 +38753,7 @@
 			(uuid "a68b66b4-348c-4dd6-a2da-0c3c1fe36843")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J17")
 					(unit 1)
@@ -40315,7 +38882,7 @@
 			(uuid "48912c0e-177e-43f3-aa44-776a1c3f5e51")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J20")
 					(unit 1)
@@ -40393,7 +38960,7 @@
 			(uuid "5e994611-c8f0-47d6-8703-996f9f5243b4")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10057")
 					(unit 1)
@@ -40470,7 +39037,7 @@
 			(uuid "b22b4e13-c813-4380-850d-ff8c53d068c5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10037")
 					(unit 1)
@@ -40546,7 +39113,7 @@
 			)
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "H1")
 					(unit 1)
@@ -40675,147 +39242,9 @@
 			(uuid "6a82fa9b-dfa3-46d5-a376-86c2aa7cd823")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J23")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "ExpansionCAN:GH_SM10B")
-		(at 640.08 200.66 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "24c43246-681c-4fe6-a961-a770e4fdbbca")
-		(property "Reference" "J26"
-			(at 640.08 185.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Value" "SM10B-GHS-TB"
-			(at 642.62 219.71 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_GH_SM10B-GHS-TB_1x10-1MP_P1.25mm_Horizontal"
-			(at 640.08 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eGH.pdf"
-			(at 640.08 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 640.08 200.66 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "JST"
-			(at 640.08 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "MPN" "SM10B-GHS-TB(LF)(SN)"
-			(at 640.08 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "LCSC" "C2683602"
-			(at 640.08 200.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "955f1c67-a083-4638-b8b0-eed3c3527b2f")
-		)
-		(pin "2"
-			(uuid "695ee3f2-2ced-40c9-9120-096944c9cf52")
-		)
-		(pin "3"
-			(uuid "85415582-328b-4d99-addd-a199a918bf03")
-		)
-		(pin "4"
-			(uuid "68dc89ed-e355-41c0-8e3a-e1eed0e7fb67")
-		)
-		(pin "5"
-			(uuid "2c958aeb-6792-4107-a3af-54397607952d")
-		)
-		(pin "6"
-			(uuid "4290a8c8-621f-460b-8881-0f6ddd528b89")
-		)
-		(pin "7"
-			(uuid "bba0296a-2d60-46e2-a10b-f702aa14c633")
-		)
-		(pin "8"
-			(uuid "aeaea4ea-3a11-4358-a42f-9904ab5db327")
-		)
-		(pin "9"
-			(uuid "21aa1ead-53de-4e08-8970-edd1b3b8d18f")
-		)
-		(pin "10"
-			(uuid "863bd83f-3d30-4f29-8e4b-8c2d69af5cc9")
-		)
-		(pin "MP"
-			(uuid "d6b6e8a5-dc8c-43b2-80d7-a865167693c4")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "J26")
 					(unit 1)
 				)
 			)
@@ -40891,7 +39320,7 @@
 			(uuid "e255158d-9eda-42b0-9bbd-b7b47452611c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#FLG0101")
 					(unit 1)
@@ -40969,88 +39398,9 @@
 			(uuid "527aa377-4d10-402f-9b0a-cfac300da841")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR03")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 640.08 265.43 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "263cf92d-b30f-4a82-8360-fff370b0d020")
-		(property "Reference" "#PWR9963"
-			(at 640.08 265.43 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 640.08 269.03 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 640.08 265.43 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 640.08 265.43 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1328.42 151.13 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "7b2a58f5-1148-4d83-9698-7eac81505f5c")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9963")
 					(unit 1)
 				)
 			)
@@ -41125,7 +39475,7 @@
 			(uuid "ab1edbc4-f45a-4457-9d36-6c62b1a2872d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0176")
 					(unit 1)
@@ -41226,7 +39576,7 @@
 			(uuid "7db0a35a-5922-48c7-a25a-fd64ff5c67b3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "L1")
 					(unit 1)
@@ -41265,7 +39615,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 700.04 205.74 0)
 			(hide yes)
 			(show_name no)
@@ -41309,7 +39659,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25804"
+		(property "LCSC" "C25744"
 			(at 700.04 205.74 0)
 			(hide yes)
 			(show_name no)
@@ -41327,9 +39677,135 @@
 			(uuid "ed0b05af-65bc-43c6-83a3-bf7309e1dff5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R443")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "ExpansionCAN:GH_SM06B")
+		(at 713.74 248.92 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2b0b1f5b-fc4f-47c2-9285-fd39839e07d8")
+		(property "Reference" "J35"
+			(at 713.74 238.76 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Value" "SM06B-GHS-TB"
+			(at 713.74 262.89 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_GH_SM06B-GHS-TB_1x06-1MP_P1.25mm_Horizontal"
+			(at 713.74 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eGH.pdf"
+			(at 713.74 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Description" "JST GH 6 pin, alternativa ai pin magnetici J9"
+			(at 698.5 234.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "JST"
+			(at 713.74 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "MPN" "SM06B-GHS-TB(LF)(SN)"
+			(at 713.74 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "LCSC" "C133065"
+			(at 713.74 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "7d119ddd-c976-4b58-ba53-e557d35d66d0")
+		)
+		(pin "2"
+			(uuid "10a0bcc7-c3a1-41f1-92d6-c7ed31ef0076")
+		)
+		(pin "3"
+			(uuid "b826c1ba-ca68-4e42-8726-bfbf8399cc6a")
+		)
+		(pin "4"
+			(uuid "c33a09c6-513f-4daa-916a-e70306a9c1db")
+		)
+		(pin "5"
+			(uuid "b4d87359-20b2-4b7b-8eb8-31aa2e277fcd")
+		)
+		(pin "6"
+			(uuid "5598ff0c-2d6c-41cf-859a-95dc6eb5743d")
+		)
+		(pin "MP"
+			(uuid "722eb679-32c4-4db7-a961-71918bf0e01d")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "J35")
 					(unit 1)
 				)
 			)
@@ -41405,7 +39881,7 @@
 			(uuid "c3f0fb9f-0635-40b3-ba75-e74828835a4f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9966")
 					(unit 1)
@@ -41483,7 +39959,7 @@
 			(uuid "72b5d50f-c3bd-40be-821a-f4b54cea382a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#FLG0107")
 					(unit 1)
@@ -41522,7 +39998,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 383.54 76.2 0)
 			(hide yes)
 			(show_name no)
@@ -41566,7 +40042,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C23162"
+		(property "LCSC" "C25900"
 			(at 383.54 76.2 0)
 			(hide yes)
 			(show_name no)
@@ -41584,7 +40060,7 @@
 			(uuid "6943b6c0-2547-4cdc-9d9a-ad79b887cb9d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R440")
 					(unit 1)
@@ -41663,7 +40139,7 @@
 			(uuid "081af673-9153-47ce-9d67-d4883898d4a3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0802")
 					(unit 1)
@@ -41740,7 +40216,7 @@
 			(uuid "9486444f-e291-41ee-804b-9974446aae4e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0141")
 					(unit 1)
@@ -41819,7 +40295,7 @@
 			(uuid "9f07f778-05d1-492a-a699-dd9d1477394f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10060")
 					(unit 1)
@@ -41896,7 +40372,7 @@
 			(uuid "6b391910-61cb-4c6d-af88-563e21f6138d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0140")
 					(unit 1)
@@ -41935,7 +40411,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 487.68 131.318 90)
 			(hide yes)
 			(show_name no)
@@ -41968,7 +40444,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C2907044"
+		(property "LCSC Part" "C25905"
 			(at 487.68 129.54 90)
 			(hide yes)
 			(show_name no)
@@ -41986,7 +40462,7 @@
 			(uuid "b2c77aef-837a-4421-b861-90cd5f48182f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R27")
 					(unit 1)
@@ -42112,7 +40588,7 @@
 			(uuid "74a966c6-b307-49f5-90cd-691a4fbdb057")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C4")
 					(unit 1)
@@ -42191,7 +40667,7 @@
 			(uuid "d68984e3-1f06-47d1-bb47-f03ab8470312")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10072")
 					(unit 1)
@@ -42270,7 +40746,7 @@
 			(uuid "0346a810-b6cd-4b4a-9be9-ba04cf3d5739")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9954")
 					(unit 1)
@@ -42349,7 +40825,7 @@
 			(uuid "0e6df3c8-a586-47ca-975d-389e06815b44")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10052")
 					(unit 1)
@@ -42427,7 +40903,7 @@
 			(uuid "92c26e8d-18be-4a50-86aa-314c9e866d0b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR6999")
 					(unit 1)
@@ -42506,7 +40982,7 @@
 			(uuid "2f65db45-95b9-41b1-8224-3eddc56d3098")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0842")
 					(unit 1)
@@ -42545,7 +41021,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 398.78 76.2 0)
 			(hide yes)
 			(show_name no)
@@ -42589,7 +41065,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C23162"
+		(property "LCSC" "C25900"
 			(at 398.78 76.2 0)
 			(hide yes)
 			(show_name no)
@@ -42607,7 +41083,7 @@
 			(uuid "433a5150-0f72-4ad4-8635-1c20eb859faa")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R441")
 					(unit 1)
@@ -42685,7 +41161,7 @@
 			(uuid "13ddbd16-1000-4ade-98cb-6522b8caeb50")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0831")
 					(unit 1)
@@ -42724,7 +41200,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 450.85 201.93 0)
 			(hide yes)
 			(show_name no)
@@ -42768,7 +41244,7 @@
 				)
 			)
 		)
-		(property "MPN" "0603WAF4700T5E"
+		(property "MPN" "0402WGF4700TCE"
 			(at 450.85 201.93 0)
 			(hide yes)
 			(show_name no)
@@ -42790,7 +41266,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C23179"
+		(property "LCSC" "C25117"
 			(at 450.85 201.93 0)
 			(hide yes)
 			(show_name no)
@@ -42808,7 +41284,7 @@
 			(uuid "a80613b8-fc2d-4f6c-8cec-1957030cffec")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R5")
 					(unit 1)
@@ -42886,7 +41362,7 @@
 			(uuid "3504c930-0ce4-4049-95b6-0355aad7b05c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10082")
 					(unit 1)
@@ -42964,7 +41440,7 @@
 			(uuid "cae7955f-c211-41e9-bd1d-fc27432ce183")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0821")
 					(unit 1)
@@ -43003,7 +41479,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 455.93 116.332 90)
 			(hide yes)
 			(show_name no)
@@ -43036,7 +41512,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C2907044"
+		(property "LCSC Part" "C25905"
 			(at 455.93 118.11 90)
 			(hide yes)
 			(show_name no)
@@ -43054,7 +41530,7 @@
 			(uuid "5a3bae42-a7dd-4332-9a22-0d363d402a7e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R22")
 					(unit 1)
@@ -43131,7 +41607,7 @@
 			(uuid "32a3517e-d07a-4227-b4a7-44adc865e5ff")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR031")
 					(unit 1)
@@ -43229,7 +41705,7 @@
 			(uuid "35acd941-6ef3-4588-b0ad-8a804ce03f70")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9066")
 					(unit 1)
@@ -43306,7 +41782,7 @@
 			(uuid "a0455701-09be-4022-894d-136b3100815d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10031")
 					(unit 1)
@@ -43436,7 +41912,7 @@
 			(uuid "bc586a09-055a-471c-b290-8d4096865950")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J33")
 					(unit 1)
@@ -43581,7 +42057,7 @@
 			(uuid "5d688ec1-cc08-40c5-a683-3bcd9c6fa74a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "U2")
 					(unit 1)
@@ -43679,7 +42155,7 @@
 			(uuid "4564073f-3fd8-45ef-baf8-8b4dd6a22a1e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9065")
 					(unit 1)
@@ -43757,7 +42233,7 @@
 			(uuid "67a044ef-4c64-4898-8831-b1146e3e1500")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10068")
 					(unit 1)
@@ -43854,7 +42330,7 @@
 			(uuid "cde2e7db-c12e-434a-824e-b86d29fde5de")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR09950")
 					(unit 1)
@@ -43933,7 +42409,7 @@
 			(uuid "8acce9ab-de8b-4db5-90b0-c09b0c46f135")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0610")
 					(unit 1)
@@ -44031,9 +42507,88 @@
 			(uuid "f90db526-cfe8-476e-9797-9dfa2917b392")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9067")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 706.12 255.27 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "496f21cc-d277-462e-8d22-ceaed71b946e")
+		(property "Reference" "#PWR20006"
+			(at 706.12 255.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 702.52 255.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.8 0.8)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 706.12 255.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 706.12 255.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 1402.08 163.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "598e9611-024e-4c18-9fc7-adbcf80bf932")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "#PWR20006")
 					(unit 1)
 				)
 			)
@@ -44110,7 +42665,7 @@
 			(uuid "d1540541-ecc4-4efb-a4b7-e4857b3d20b9")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0837")
 					(unit 1)
@@ -44270,87 +42825,9 @@
 			(uuid "912a4a41-71da-49db-b62f-0f9028a3b215")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q27")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 632.46 189.23 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "5100ac66-14fb-45b0-9199-db8f019575cf")
-		(property "Reference" "#PWR9973"
-			(at 632.46 189.23 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V_EXP"
-			(at 628.86 189.23 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 189.23 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 189.23 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 989.33 -80.01 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b0deb209-f17e-4214-9b4d-05a79fd53d2e")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9973")
 					(unit 1)
 				)
 			)
@@ -44427,7 +42904,7 @@
 			(uuid "b41cb33a-91c3-45d8-a61f-95f295ec0792")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0863")
 					(unit 1)
@@ -44505,7 +42982,7 @@
 			(uuid "e32eaf88-12de-4b6e-bee1-01da0a3fed88")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10080")
 					(unit 1)
@@ -44584,7 +43061,7 @@
 			(uuid "fb6ac462-aa50-4b7c-a3f0-eb5fef9ed302")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0847")
 					(unit 1)
@@ -44625,7 +43102,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 289.56 77.47 0)
 			(hide yes)
 			(show_name no)
@@ -44636,7 +43113,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C1525.pdf"
 			(at 289.56 77.47 0)
 			(hide yes)
 			(show_name no)
@@ -44669,7 +43146,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1525"
 			(at 289.56 77.47 0)
 			(hide yes)
 			(show_name no)
@@ -44687,7 +43164,7 @@
 			(uuid "ed189ee1-daad-462a-908d-78fe53d4a052")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C410")
 					(unit 1)
@@ -44847,7 +43324,7 @@
 			(uuid "ba4029ea-412f-4387-a94e-f634e5ba24a6")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q26")
 					(unit 1)
@@ -44926,7 +43403,7 @@
 			(uuid "bb8bc88e-8b73-49b8-ac83-3dfe433890e2")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9955")
 					(unit 1)
@@ -45005,7 +43482,7 @@
 			(uuid "54ca68e2-5c39-4e20-a1f3-bb769af86ed0")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0827")
 					(unit 1)
@@ -45146,88 +43623,9 @@
 			(uuid "a866625e-c9ce-40ec-ac4e-d1786528398b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "RN7")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 640.08 217.17 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "578030ce-c24b-497c-b1a3-e5db3f5db3dc")
-		(property "Reference" "#PWR9978"
-			(at 640.08 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 640.08 220.77 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 640.08 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 640.08 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1328.42 144.78 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "e25bdb26-4bcf-445d-b21e-de566f3fddd4")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9978")
 					(unit 1)
 				)
 			)
@@ -45301,7 +43699,7 @@
 			)
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "H2")
 					(unit 1)
@@ -45340,7 +43738,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 210.82 297.18 0)
 			(hide yes)
 			(show_name no)
@@ -45373,7 +43771,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL05B104KB54PNC"
 			(at 210.82 297.18 0)
 			(hide yes)
 			(show_name no)
@@ -45384,7 +43782,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C307331"
 			(at 210.82 297.18 0)
 			(hide yes)
 			(show_name no)
@@ -45402,7 +43800,7 @@
 			(uuid "81df9c8f-67a1-4f32-9f50-994a6fdcc7e1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C85")
 					(unit 1)
@@ -45480,7 +43878,7 @@
 			(uuid "fdd418ed-9fc5-463f-959b-9555f4bad4d5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10071")
 					(unit 1)
@@ -45519,7 +43917,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 441.96 199.39 0)
 			(hide yes)
 			(show_name no)
@@ -45563,7 +43961,7 @@
 				)
 			)
 		)
-		(property "MPN" "0603WAF1002T5E"
+		(property "MPN" "0402WGF1002TCE"
 			(at 441.96 199.39 0)
 			(hide yes)
 			(show_name no)
@@ -45585,7 +43983,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25804"
+		(property "LCSC" "C25744"
 			(at 441.96 199.39 0)
 			(hide yes)
 			(show_name no)
@@ -45603,7 +44001,7 @@
 			(uuid "5c6ae8c8-bc0a-4b80-87ac-a68e779f6c3c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R4")
 					(unit 1)
@@ -45681,7 +44079,7 @@
 			(uuid "35a49a36-49ba-4b42-9e8b-a4f061a02cb5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10066")
 					(unit 1)
@@ -45760,9 +44158,88 @@
 			(uuid "b9313adb-cdbc-4486-a979-32ee24c6a9b8")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9965")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 713.74 260.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5d8010ac-4d8b-4d19-b821-0646a20c69bc")
+		(property "Reference" "#PWR20007"
+			(at 713.74 260.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 713.74 263.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.8 0.8)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 713.74 260.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 713.74 260.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 1402.08 146.05 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2c812aa1-d135-48d5-8864-39f7236a22a0")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "#PWR20007")
 					(unit 1)
 				)
 			)
@@ -45838,7 +44315,7 @@
 			(uuid "883627dc-1135-47c1-93e8-ad3444604a26")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR028")
 					(unit 1)
@@ -45877,7 +44354,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 241.3 271.78 0)
 			(hide yes)
 			(show_name no)
@@ -45910,7 +44387,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL05B104KB54PNC"
 			(at 241.3 271.78 0)
 			(hide yes)
 			(show_name no)
@@ -45921,7 +44398,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C307331"
 			(at 241.3 271.78 0)
 			(hide yes)
 			(show_name no)
@@ -45939,7 +44416,7 @@
 			(uuid "e95f6b90-61c6-48d2-aea4-5a74a6473ac5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C84")
 					(unit 1)
@@ -46016,7 +44493,7 @@
 			(uuid "9e381ae7-b8ef-4b1f-a82e-18be4aa8a1b0")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0605")
 					(unit 1)
@@ -46113,88 +44590,9 @@
 			(uuid "e878c366-aae2-4a3f-80ac-512bceaa42f1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR09922")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 632.46 212.09 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "6430ef72-b0b2-464b-b829-6d58a0958dbf")
-		(property "Reference" "#PWR9977"
-			(at 632.46 212.09 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 628.86 212.09 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 212.09 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 212.09 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1328.42 144.78 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "6fa15e04-f1a2-4e5a-92d5-a06d03898385")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9977")
 					(unit 1)
 				)
 			)
@@ -46270,7 +44668,7 @@
 			(uuid "a53bb44d-73ee-45ed-ad00-c2aaa54a3f37")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR010032")
 					(unit 1)
@@ -46349,7 +44747,7 @@
 			(uuid "da2498c6-f690-42ef-9475-1815c19b852d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR010094")
 					(unit 1)
@@ -46428,7 +44826,7 @@
 			(uuid "1989924a-cf46-4ec8-9e74-37a53f3ac2fc")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10076")
 					(unit 1)
@@ -46506,7 +44904,7 @@
 			(uuid "9433fb3d-0e31-415e-804d-1ebc58028897")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9923")
 					(unit 1)
@@ -46545,7 +44943,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 494.03 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -46578,7 +44976,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C23162"
+		(property "LCSC" "C25900"
 			(at 494.03 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -46596,7 +44994,7 @@
 			(uuid "299fcef2-eadf-43ab-8cff-be18c8247be8")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R24")
 					(unit 1)
@@ -46674,7 +45072,7 @@
 			(uuid "f49e0e24-4060-4585-87eb-013ff151cb64")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0400")
 					(unit 1)
@@ -46865,7 +45263,7 @@
 			(uuid "80075b50-67a5-4545-92b9-abf3dca430d7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "U25")
 					(unit 1)
@@ -46944,7 +45342,7 @@
 			(uuid "a5d3dc1d-3681-4b72-9282-ad8d35b9f07c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10050")
 					(unit 1)
@@ -46983,7 +45381,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 271.78 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -47016,7 +45414,7 @@
 				)
 			)
 		)
-		(property "MPN" "0603WAF3302T5E"
+		(property "MPN" "0402WGF3302TCE"
 			(at 271.78 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -47027,7 +45425,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C4216"
+		(property "LCSC Part" "C25779"
 			(at 271.78 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -47045,7 +45443,7 @@
 			(uuid "ab56b38e-276e-4163-ab4e-1472d39b9dd7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R36")
 					(unit 1)
@@ -47123,7 +45521,7 @@
 			(uuid "3fcb3119-f0e3-49da-89c4-090984c44603")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0600")
 					(unit 1)
@@ -47162,7 +45560,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 511.81 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -47195,7 +45593,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C23162"
+		(property "LCSC" "C25900"
 			(at 511.81 294.64 0)
 			(hide yes)
 			(show_name no)
@@ -47213,7 +45611,7 @@
 			(uuid "09a12701-b983-4b70-99de-8d4245b71ac1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R25")
 					(unit 1)
@@ -47252,7 +45650,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 683.26 313.69 0)
 			(hide yes)
 			(show_name no)
@@ -47296,7 +45694,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C304740"
+		(property "LCSC" "C25891"
 			(at 683.26 313.69 0)
 			(hide yes)
 			(show_name no)
@@ -47314,7 +45712,7 @@
 			(uuid "1a27e558-9d78-4e99-912c-27e77b7739a8")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R40")
 					(unit 1)
@@ -47426,7 +45824,7 @@
 			(uuid "fadd5f73-edfc-45d3-968d-e586c8205623")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "D6")
 					(unit 1)
@@ -47504,147 +45902,9 @@
 			(uuid "2c943b42-3b4b-4458-a78e-4d479007ab47")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10044")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "ExpansionCAN:GH_SM10B")
-		(at 640.08 248.92 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "6ec6822c-c3d3-464b-b50c-70d8dfb56831")
-		(property "Reference" "J27"
-			(at 640.08 237.49 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Value" "SM10B-GHS-TB"
-			(at 640.08 260.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_GH_SM10B-GHS-TB_1x10-1MP_P1.25mm_Horizontal"
-			(at 640.08 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eGH.pdf"
-			(at 640.08 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 640.08 248.92 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "JST"
-			(at 640.08 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "MPN" "SM10B-GHS-TB(LF)(SN)"
-			(at 640.08 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "LCSC" "C2683602"
-			(at 640.08 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "ee87111e-eebf-4f36-ace3-af83ba18f28e")
-		)
-		(pin "2"
-			(uuid "fac3147d-56a6-45fd-b084-7605419db1e5")
-		)
-		(pin "3"
-			(uuid "40aa04a2-39fd-4215-8a96-d6313d539b51")
-		)
-		(pin "4"
-			(uuid "3f19f65b-b53a-4c19-8a09-d799a4c87e8e")
-		)
-		(pin "5"
-			(uuid "77ea78ba-1707-4b1e-93f1-c8d21545bc52")
-		)
-		(pin "6"
-			(uuid "3c80c202-d93d-45a4-9fb1-761b65ac9028")
-		)
-		(pin "7"
-			(uuid "06cb15ef-3e50-4e14-95b4-f69800018049")
-		)
-		(pin "8"
-			(uuid "9dee0c29-3dc1-438a-a9bc-7ba626756427")
-		)
-		(pin "9"
-			(uuid "d4e2109d-58a4-4e25-934d-4d60a26a9f84")
-		)
-		(pin "10"
-			(uuid "efe670e6-5554-47b1-a9b2-a9001a50a1dd")
-		)
-		(pin "MP"
-			(uuid "0d0cd785-3bb9-4015-89e1-deac32092fef")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "J27")
 					(unit 1)
 				)
 			)
@@ -47681,7 +45941,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 485.14 217.17 0)
 			(hide yes)
 			(show_name no)
@@ -47725,7 +45985,7 @@
 				)
 			)
 		)
-		(property "MPN" "0603WAF1200T5E"
+		(property "MPN" "0402WGF1200TCE"
 			(at 485.14 217.17 0)
 			(hide yes)
 			(show_name no)
@@ -47747,7 +46007,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C22787"
+		(property "LCSC" "C25079"
 			(at 485.14 217.17 0)
 			(hide yes)
 			(show_name no)
@@ -47765,7 +46025,7 @@
 			(uuid "2992e9cb-c6e2-4d9b-b269-5bd651637891")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R8")
 					(unit 1)
@@ -47843,7 +46103,7 @@
 			(uuid "3506cb93-478c-4863-89e4-32270ec18b2c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0811")
 					(unit 1)
@@ -47956,7 +46216,7 @@
 			(uuid "349380b2-1ebd-4064-98bc-0df536fc1c2d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "U4")
 					(unit 1)
@@ -48035,7 +46295,7 @@
 			(uuid "6fa85889-90be-4c48-9731-8c3668353188")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10058")
 					(unit 1)
@@ -48176,7 +46436,7 @@
 			(uuid "b8bb4723-954d-48be-977a-274bab2e625a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "RN4")
 					(unit 1)
@@ -48253,7 +46513,7 @@
 			(uuid "dcf9cfae-f7f7-472f-b8ba-521b5ad5bc5e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0138")
 					(unit 1)
@@ -48331,7 +46591,7 @@
 			(uuid "d79ebe18-ed17-404f-80be-4653eef95c42")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9957")
 					(unit 1)
@@ -48408,7 +46668,7 @@
 			(uuid "99fb3c6d-5aba-4ba7-906d-c78559982d80")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0603")
 					(unit 1)
@@ -48487,7 +46747,7 @@
 			(uuid "47cf8e3f-687d-43ae-a31b-b93a2c58f37c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9970")
 					(unit 1)
@@ -48566,7 +46826,7 @@
 			(uuid "83cb8c36-0c31-4696-81ba-b4bd284710ed")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10078")
 					(unit 1)
@@ -48608,7 +46868,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 52.832 81.28 90)
 			(hide yes)
 			(show_name no)
@@ -48641,7 +46901,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C99782"
+		(property "LCSC Part" "C25744"
 			(at 54.61 81.28 0)
 			(hide yes)
 			(show_name no)
@@ -48652,7 +46912,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25804"
+		(property "LCSC" "C25744"
 			(at -16.51 -107.95 0)
 			(hide yes)
 			(show_name no)
@@ -48670,7 +46930,7 @@
 			(uuid "8211d876-4f7d-415d-ae4f-25365f0b3671")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R15")
 					(unit 1)
@@ -48709,7 +46969,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 120.65 98.552 90)
 			(hide yes)
 			(show_name no)
@@ -48742,7 +47002,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C2909394"
+		(property "LCSC Part" "C25105"
 			(at 120.65 100.33 90)
 			(hide yes)
 			(show_name no)
@@ -48771,7 +47031,7 @@
 			(uuid "fc6c7163-bcc7-47f0-af08-3aff40e445ab")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R17")
 					(unit 1)
@@ -48849,7 +47109,7 @@
 			(uuid "337f8a7b-a713-4705-a977-4a6344d861e5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10042")
 					(unit 1)
@@ -48927,7 +47187,7 @@
 			(uuid "e53d53aa-5629-4c38-8962-f5afc15ae039")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10073")
 					(unit 1)
@@ -49004,7 +47264,7 @@
 			(uuid "69377b5d-4d4a-4a9a-95aa-4a62d8cc3184")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9971")
 					(unit 1)
@@ -49083,7 +47343,7 @@
 			(uuid "ae2428ad-3dfc-4666-85c9-e39eebb8c9a2")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0608")
 					(unit 1)
@@ -49128,7 +47388,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:C0603"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 35.2552 96.52 0)
 			(hide yes)
 			(show_name no)
@@ -49172,7 +47432,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C15849"
+		(property "LCSC" "C52923"
 			(at 34.29 100.33 0)
 			(hide yes)
 			(show_name no)
@@ -49190,7 +47450,7 @@
 			(uuid "3084befa-77ed-43ca-a57c-0e185a5f6b68")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C11")
 					(unit 1)
@@ -49268,7 +47528,7 @@
 			(uuid "75a029c8-e1b0-4b4f-85d4-59f12abf46ff")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10055")
 					(unit 1)
@@ -49365,7 +47625,7 @@
 			(uuid "39f9e79d-a7ff-44c5-bc23-50737d00124c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR08008")
 					(unit 1)
@@ -49442,7 +47702,7 @@
 			(uuid "5793c855-19a1-47d7-9e33-ab5fed7a7fe1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9969")
 					(unit 1)
@@ -49602,7 +47862,7 @@
 			(uuid "298d041f-fd7d-4021-b130-ecd0dcbf1c72")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q6")
 					(unit 1)
@@ -49680,7 +47940,7 @@
 			(uuid "52727199-3af4-4c1b-9617-97e03bab6593")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9964")
 					(unit 1)
@@ -49758,7 +48018,7 @@
 			(uuid "9fb8bf24-7a5b-4723-abf7-2c009f00372b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0846")
 					(unit 1)
@@ -49837,7 +48097,7 @@
 			(uuid "b921dc60-7675-466c-877f-3d0b15db9f17")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR010090")
 					(unit 1)
@@ -49915,7 +48175,7 @@
 			(uuid "b06d1595-d0b9-4c86-b897-b1e7fb73f4c4")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0402")
 					(unit 1)
@@ -49994,7 +48254,7 @@
 			(uuid "f4274463-f699-4164-83b9-554ca4622b4c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR010088")
 					(unit 1)
@@ -50072,7 +48332,7 @@
 			(uuid "4d2a9ac7-6791-4567-b0b9-522f63bb269f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10064")
 					(unit 1)
@@ -50198,7 +48458,7 @@
 			(uuid "4935272f-0506-4196-aaea-ecf37aa7c8c5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C3")
 					(unit 1)
@@ -50276,7 +48536,7 @@
 			(uuid "950528dc-a0ec-4151-8725-d040db4548aa")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0806")
 					(unit 1)
@@ -50318,7 +48578,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 61.722 81.28 90)
 			(hide yes)
 			(show_name no)
@@ -50351,7 +48611,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C99782"
+		(property "LCSC Part" "C25744"
 			(at 63.5 81.28 0)
 			(hide yes)
 			(show_name no)
@@ -50362,7 +48622,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25804"
+		(property "LCSC" "C25744"
 			(at -16.51 -107.95 0)
 			(hide yes)
 			(show_name no)
@@ -50380,7 +48640,7 @@
 			(uuid "8f83f6fc-4812-4fd5-8a10-f20abba090fc")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R16")
 					(unit 1)
@@ -50458,7 +48718,7 @@
 			(uuid "3c3ba805-5389-4081-aa49-bcb74889d2ad")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0858")
 					(unit 1)
@@ -50588,9 +48848,87 @@
 			(uuid "7c565b29-efcc-446b-a23f-16443a230aad")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J22")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+5V")
+		(at 675.64 242.57 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "92af58f6-1d37-46e4-af8a-c8dd173fa29f")
+		(property "Reference" "#PWR20000"
+			(at 675.64 242.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "5V"
+			(at 672.04 242.57 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.8 0.8)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 675.64 242.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 675.64 242.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 1032.51 -68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2bf8fecc-278c-45a7-b7c1-9e5230f6238b")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "#PWR20000")
 					(unit 1)
 				)
 			)
@@ -50666,7 +49004,7 @@
 			(uuid "8587ad5e-2475-42c8-8291-8f724e9c8660")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10070")
 					(unit 1)
@@ -50743,7 +49081,7 @@
 			(uuid "b63aeb0e-582c-405f-a9ef-be3fab077dd7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR01")
 					(unit 1)
@@ -50855,7 +49193,7 @@
 			(uuid "ec82eea0-3ff7-4d82-9f9b-1ecf80fc02bd")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C5")
 					(unit 1)
@@ -50896,7 +49234,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at -633.73 -365.76 0)
 			(hide yes)
 			(show_name no)
@@ -50907,7 +49245,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C25819.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C25792.pdf"
 			(at 411.48 284.48 0)
 			(hide yes)
 			(show_name no)
@@ -50929,7 +49267,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25819"
+		(property "LCSC" "C25792"
 			(at -633.73 -365.76 0)
 			(hide yes)
 			(show_name no)
@@ -50951,7 +49289,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C25819"
+		(property "LCSC Part" "C25792"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -50962,7 +49300,7 @@
 				)
 			)
 		)
-		(property "MPN" "0603WAF4702T5E"
+		(property "MPN" "0402WGF4702TCE"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -50991,7 +49329,7 @@
 			(uuid "7030df65-0efb-46d3-a5cd-1ca7177c7d4f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R104")
 					(unit 1)
@@ -51068,7 +49406,7 @@
 			(uuid "91f19d11-a046-4404-a7c1-fa7d7e199e87")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10033")
 					(unit 1)
@@ -51146,7 +49484,7 @@
 			(uuid "9240677b-ecd2-4f2a-9e21-d5a47e8b3348")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0801")
 					(unit 1)
@@ -51224,7 +49562,7 @@
 			(uuid "59b7cba0-f01c-4fa7-b73c-e88f207ceaba")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0857")
 					(unit 1)
@@ -51301,7 +49639,7 @@
 			(uuid "3d243169-2612-4f8b-aba2-7b963c0846a4")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0604")
 					(unit 1)
@@ -51378,7 +49716,7 @@
 			(uuid "3ca6d91c-0c14-43e9-be7f-a4f16432f78c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0149")
 					(unit 1)
@@ -51417,7 +49755,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 271.78 309.88 0)
 			(hide yes)
 			(show_name no)
@@ -51450,7 +49788,7 @@
 				)
 			)
 		)
-		(property "MPN" "0603WAF1002T5E"
+		(property "MPN" "0402WGF1002TCE"
 			(at 271.78 309.88 0)
 			(hide yes)
 			(show_name no)
@@ -51461,7 +49799,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C25804"
+		(property "LCSC Part" "C25744"
 			(at 271.78 309.88 0)
 			(hide yes)
 			(show_name no)
@@ -51479,7 +49817,7 @@
 			(uuid "bdc42431-433a-4b12-a664-1ceb67b44f70")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R37")
 					(unit 1)
@@ -51556,7 +49894,7 @@
 			(uuid "a9cdf675-d98d-4a2a-bc97-f42336b4f7e3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10063")
 					(unit 1)
@@ -51635,88 +49973,9 @@
 			(uuid "700b7c44-337a-4a89-8d8d-49b02b6ac431")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR010092")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 632.46 242.57 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "a49d2482-2c61-4ff4-87f8-92355840159c")
-		(property "Reference" "#PWR9960"
-			(at 632.46 242.57 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 628.86 242.57 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 242.57 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 242.57 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1328.42 151.13 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "87c3f677-d9fb-4aad-8114-16bed32b6634")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9960")
 					(unit 1)
 				)
 			)
@@ -51843,7 +50102,7 @@
 			(uuid "2dd72feb-cf66-4f86-bd9c-59962e36d174")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J19")
 					(unit 1)
@@ -51984,7 +50243,7 @@
 			(uuid "10502651-bb8a-4871-abe7-19c4c8919716")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "RN2")
 					(unit 1)
@@ -52062,7 +50321,7 @@
 			(uuid "2575109c-f8c8-4192-9623-3a84a2ec6bb3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0188")
 					(unit 1)
@@ -52140,7 +50399,7 @@
 			(uuid "fd7382fe-90f6-4af9-b2ce-8ae7e72796e8")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10040")
 					(unit 1)
@@ -52218,7 +50477,7 @@
 			(uuid "fd2b40f0-4982-401f-bdef-c6b239c3deac")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10086")
 					(unit 1)
@@ -52296,7 +50555,7 @@
 			(uuid "7baeefde-32b0-42f3-8138-d0fd5cdd89ee")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR010038")
 					(unit 1)
@@ -52415,7 +50674,7 @@
 			(uuid "2eb38927-c699-4860-a268-b1b887392e48")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J4")
 					(unit 1)
@@ -52606,7 +50865,7 @@
 			(uuid "33c40c7d-3776-4aa7-ad43-4be5348c447d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "U73")
 					(unit 1)
@@ -52685,7 +50944,7 @@
 			(uuid "c464db9c-599a-46bf-9f77-e13ecb18b8d3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0609")
 					(unit 1)
@@ -52815,7 +51074,7 @@
 			(uuid "f5fb4088-3c4c-45e6-8860-c6dddfaa8cab")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J31")
 					(unit 1)
@@ -52945,7 +51204,7 @@
 			(uuid "b969db66-6f0f-4525-bad5-491174a967c7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "U8")
 					(unit 1)
@@ -53105,7 +51364,7 @@
 			(uuid "c6756c1f-9809-4683-8222-d45f9c5e27dd")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q21")
 					(unit 1)
@@ -53183,87 +51442,9 @@
 			(uuid "c8e3a1d2-6137-4a4d-9e42-c75d72b9c449")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0187")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 632.46 196.85 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "b4ac5049-7a99-4188-862c-dedb63c779d2")
-		(property "Reference" "#PWR9976"
-			(at 632.46 196.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "VCORE"
-			(at 628.86 196.85 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 196.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 196.85 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 989.33 -80.01 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "748b78d1-5f5a-4cd9-9f9c-fb536724a53e")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9976")
 					(unit 1)
 				)
 			)
@@ -53340,7 +51521,7 @@
 			(uuid "d7caa6c7-ca52-4e80-abca-e009e8d08869")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0143")
 					(unit 1)
@@ -53379,7 +51560,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:R0603"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 120.65 96.012 90)
 			(hide yes)
 			(show_name no)
@@ -53412,7 +51593,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C2909394"
+		(property "LCSC Part" "C25105"
 			(at 120.65 97.79 90)
 			(hide yes)
 			(show_name no)
@@ -53441,7 +51622,7 @@
 			(uuid "ae2f773b-6ec3-42e2-8183-8cb321b63bc9")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R18")
 					(unit 1)
@@ -53553,9 +51734,88 @@
 			(uuid "d7a3da60-b0ec-4810-a952-73a808b542af")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C86")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 675.64 255.27 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b615e54d-d1fc-41c5-899c-9e0f6801e756")
+		(property "Reference" "#PWR20002"
+			(at 675.64 255.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 672.04 255.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.8 0.8)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 675.64 255.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 675.64 255.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 1371.6 163.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b6f23b64-b9c0-48c8-b298-3d64a23647b7")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "#PWR20002")
 					(unit 1)
 				)
 			)
@@ -53632,7 +51892,7 @@
 			(uuid "cd96b9ab-b765-42d3-9db5-d634ff3c0b21")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10048")
 					(unit 1)
@@ -53773,7 +52033,7 @@
 			(uuid "8cdff5cf-cda9-454d-8014-32be50989e34")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "RN8")
 					(unit 1)
@@ -53851,7 +52111,7 @@
 			(uuid "c4194a20-5fae-4309-b3d7-b951b8ae812d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10084")
 					(unit 1)
@@ -53929,7 +52189,7 @@
 			(uuid "78900aba-4148-45f6-9904-6b3d58d60c7d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR09952")
 					(unit 1)
@@ -54005,7 +52265,7 @@
 			)
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "H3")
 					(unit 1)
@@ -54083,7 +52343,7 @@
 			(uuid "3c6dd2ba-b7e6-474b-a714-8953c12253d3")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#FLG0103")
 					(unit 1)
@@ -54160,9 +52420,135 @@
 			(uuid "c3747a86-60a6-41f7-aa9d-f592a574ac84")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR015")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "ExpansionCAN:GH_SM06B")
+		(at 683.26 248.92 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "bf4f9287-e1cf-4d2e-9396-88745741700b")
+		(property "Reference" "J30"
+			(at 683.26 238.76 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Value" "SM06B-GHS-TB"
+			(at 683.26 262.89 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_GH_SM06B-GHS-TB_1x06-1MP_P1.25mm_Horizontal"
+			(at 683.26 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eGH.pdf"
+			(at 683.26 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "Description" "JST GH 6 pin, alternativa ai pin magnetici J2"
+			(at 683.26 248.92 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "JST"
+			(at 683.26 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "MPN" "SM06B-GHS-TB(LF)(SN)"
+			(at 683.26 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(property "LCSC" "C133065"
+			(at 683.26 248.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1 1)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "bde927a9-8159-43b4-97a9-52144d0c4359")
+		)
+		(pin "2"
+			(uuid "541fc6d6-4b1b-4344-a715-6ff823872665")
+		)
+		(pin "3"
+			(uuid "94807ef0-b513-4b18-a2fc-f79dcafb8cd8")
+		)
+		(pin "4"
+			(uuid "ed4f245b-acf9-44ff-94c8-a2b04ae3f168")
+		)
+		(pin "5"
+			(uuid "1a58daaa-72b8-428a-99c9-6c8c632c84f4")
+		)
+		(pin "6"
+			(uuid "fc3dbb60-9906-4a10-a199-d0998f9bb0db")
+		)
+		(pin "MP"
+			(uuid "24b58089-6180-46f3-8037-d75cc99261c9")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "J30")
 					(unit 1)
 				)
 			)
@@ -54320,7 +52706,7 @@
 			(uuid "6cdfd81e-3c65-4338-b206-ee523f729fd1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q29")
 					(unit 1)
@@ -54362,7 +52748,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:C0603"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 445.4652 304.8 0)
 			(hide yes)
 			(show_name no)
@@ -54406,7 +52792,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL05B104KO5NNNC"
 			(at 444.5 300.99 0)
 			(hide yes)
 			(show_name no)
@@ -54428,7 +52814,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1525"
 			(at 444.5 300.99 0)
 			(hide yes)
 			(show_name no)
@@ -54446,7 +52832,7 @@
 			(uuid "5fc664a1-cb85-4f84-a8cf-8976057da38e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C2")
 					(unit 1)
@@ -54587,7 +52973,7 @@
 			(uuid "66f93645-e8cd-4aaa-82e3-1c1445b7b62b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "RN10")
 					(unit 1)
@@ -54664,7 +53050,7 @@
 			(uuid "3f0b8b47-4e8e-4bf2-9ba4-3e18da4a55b1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10065")
 					(unit 1)
@@ -54743,7 +53129,7 @@
 			(uuid "f063e559-4a3c-4d4e-a727-a9f44fe4109b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9953")
 					(unit 1)
@@ -54820,7 +53206,7 @@
 			(uuid "8a464f9e-0fa8-41c0-b116-fa13e51a68c9")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0607")
 					(unit 1)
@@ -54980,7 +53366,7 @@
 			(uuid "ae310fab-d9d5-4ca0-aa1e-018280ab305d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q3")
 					(unit 1)
@@ -55058,7 +53444,7 @@
 			(uuid "c2d4c974-39af-465e-ab96-ee78fdbf0721")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR029")
 					(unit 1)
@@ -55137,88 +53523,9 @@
 			(uuid "f8666abb-9f3c-4a13-a4ac-d1755fdbfeed")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0612")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 632.46 194.31 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "c70d3f84-6f78-421a-a17e-784c301c6576")
-		(property "Reference" "#PWR9975"
-			(at 632.46 194.31 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 628.86 194.31 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 194.31 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 194.31 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1328.42 144.78 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "7b8a009f-ca99-4723-a1c6-93fd5eae9f79")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9975")
 					(unit 1)
 				)
 			)
@@ -55376,7 +53683,7 @@
 			(uuid "df1a2270-b85d-4833-a0ef-b354d9d6a01e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q28")
 					(unit 1)
@@ -55454,7 +53761,7 @@
 			(uuid "d52ac7bc-58ff-40fe-96a6-40afd173f4c7")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0841")
 					(unit 1)
@@ -55564,87 +53871,9 @@
 			(uuid "b29397db-efad-44cb-9264-3f7d605bd80c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "U5")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 632.46 191.77 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "cbed6aee-8cdc-48b3-9b40-e3c59c69f3d5")
-		(property "Reference" "#PWR9974"
-			(at 632.46 191.77 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V_EXP"
-			(at 628.86 191.77 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 191.77 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 191.77 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 989.33 -80.01 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "dd99734f-39e5-4e2e-9c44-0723532e79d3")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9974")
 					(unit 1)
 				)
 			)
@@ -55720,7 +53949,7 @@
 			(uuid "e09c5066-2a36-4320-a8d5-38f0c14b9ae9")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9956")
 					(unit 1)
@@ -55797,7 +54026,7 @@
 			(uuid "e3f3fa1c-9167-4292-b937-d544a9e92d6d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR09002")
 					(unit 1)
@@ -55875,7 +54104,7 @@
 			(uuid "96a8d121-ca56-43ef-88ee-20e5dcbc573b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR037")
 					(unit 1)
@@ -56005,9 +54234,166 @@
 			(uuid "c88aac5f-a10f-461b-9730-ed6d28822a62")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J18")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 706.12 250.19 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "cf521b7d-0eb1-4f9f-8d83-fe7447848ce4")
+		(property "Reference" "#PWR20005"
+			(at 706.12 250.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 702.52 250.19 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.8 0.8)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 706.12 250.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 706.12 250.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 1402.08 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "87863b5c-c5ae-4f67-9690-96b3f7a5ffcc")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "#PWR20005")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+5V")
+		(at 706.12 242.57 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "d257140e-114a-4ddc-916c-6cc0ee5b956f")
+		(property "Reference" "#PWR20004"
+			(at 706.12 242.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "5V"
+			(at 702.52 242.57 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.8 0.8)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 706.12 242.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 706.12 242.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 1062.99 -68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "83b8b4a9-2221-475c-9b3c-d3bb6208296d")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "#PWR20004")
 					(unit 1)
 				)
 			)
@@ -56082,7 +54468,7 @@
 			(uuid "6e3ceb8c-351c-4ef2-8756-b003767cb5b6")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10035")
 					(unit 1)
@@ -56242,7 +54628,7 @@
 			(uuid "63e84e36-88f8-4849-b86d-7b73c7c435fa")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q24")
 					(unit 1)
@@ -56321,7 +54707,7 @@
 			(uuid "cbb77a5e-8ad7-4a77-847e-ff810c54c42f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0822")
 					(unit 1)
@@ -56398,7 +54784,7 @@
 			(uuid "2089c271-543e-4e03-a6c4-02de7479939a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9968")
 					(unit 1)
@@ -56558,7 +54944,7 @@
 			(uuid "c17f6001-b70e-418d-93a6-f144e959af77")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q30")
 					(unit 1)
@@ -56599,7 +54985,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at -956.31 -499.11 0)
 			(hide yes)
 			(show_name no)
@@ -56610,7 +54996,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/C14663.pdf"
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C1525.pdf"
 			(at 414.02 115.57 0)
 			(hide yes)
 			(show_name no)
@@ -56632,7 +55018,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1525"
 			(at -956.31 -499.11 0)
 			(hide yes)
 			(show_name no)
@@ -56654,7 +55040,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C14663"
+		(property "LCSC Part" "C1525"
 			(at 109.22 -104.14 0)
 			(hide yes)
 			(show_name no)
@@ -56665,7 +55051,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL05B104KO5NNNC"
 			(at 109.22 -104.14 0)
 			(hide yes)
 			(show_name no)
@@ -56694,7 +55080,7 @@
 			(uuid "b0bb14bd-b3d7-4cb9-bb75-88cbb4002e81")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C129")
 					(unit 1)
@@ -56772,7 +55158,7 @@
 			(uuid "6540d844-9e6a-4324-8425-8420a8e48f10")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR09951")
 					(unit 1)
@@ -56851,7 +55237,7 @@
 			(uuid "beada8f4-effa-404b-baf0-c1a27a81e7f4")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0860")
 					(unit 1)
@@ -56992,7 +55378,7 @@
 			(uuid "3141e456-1668-4aba-b500-63f7cbfaa33e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "RN5")
 					(unit 1)
@@ -57069,7 +55455,7 @@
 			(uuid "6e55f80c-1a5e-41e7-90ed-ddfbbc68db36")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0139")
 					(unit 1)
@@ -57229,9 +55615,88 @@
 			(uuid "eedf64a0-cba8-40eb-8a78-b7af93c56a43")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 683.26 260.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ddb49070-3c02-47f9-b888-073f7c9f321c")
+		(property "Reference" "#PWR20003"
+			(at 683.26 260.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 683.26 263.95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.8 0.8)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 683.26 260.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 683.26 260.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 1371.6 146.05 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "40bc3d35-47ce-4ee7-9e7b-eae440a48878")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "#PWR20003")
 					(unit 1)
 				)
 			)
@@ -57271,7 +55736,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "SpaghettiLAB:C0603"
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
 			(at 394.6652 306.07 0)
 			(hide yes)
 			(show_name no)
@@ -57315,7 +55780,7 @@
 				)
 			)
 		)
-		(property "MPN" "CC0603KRX7R9BB104"
+		(property "MPN" "CL05B104KO5NNNC"
 			(at 393.7 302.26 0)
 			(hide yes)
 			(show_name no)
@@ -57337,7 +55802,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14663"
+		(property "LCSC" "C1525"
 			(at 393.7 302.26 0)
 			(hide yes)
 			(show_name no)
@@ -57355,7 +55820,7 @@
 			(uuid "2114791f-ca6c-4236-8fa5-ea7538aacd86")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C1")
 					(unit 1)
@@ -57432,7 +55897,7 @@
 			(uuid "91333fb4-64ea-4d43-bc10-7e3df3257872")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0175")
 					(unit 1)
@@ -57544,9 +56009,88 @@
 			(uuid "28e153d2-8baa-403d-a197-951541d28084")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "C9")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 675.64 250.19 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "df737f74-3a0b-4265-9e17-15f223578f9a")
+		(property "Reference" "#PWR20001"
+			(at 675.64 250.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 672.04 250.19 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 0.8 0.8)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 675.64 250.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 675.64 250.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 1371.6 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "436f53d4-f64d-4586-9b4f-54dc381820c2")
+		)
+		(instances
+			(project "backbone"
+				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
+					(reference "#PWR20001")
 					(unit 1)
 				)
 			)
@@ -57704,7 +56248,7 @@
 			(uuid "f6ba520c-a500-4cd3-bca7-a938da15c630")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q5")
 					(unit 1)
@@ -57845,7 +56389,7 @@
 			(uuid "16aebe07-ec7c-409f-9f6e-a91d609db61b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "RN11")
 					(unit 1)
@@ -57986,7 +56530,7 @@
 			(uuid "1b374873-4a91-4ec9-bb05-bab40418b4a5")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "RN1")
 					(unit 1)
@@ -58141,7 +56685,7 @@
 			(uuid "1bd1745f-cbdd-4b62-b576-e7bd3e1c7582")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "U3")
 					(unit 1)
@@ -58218,7 +56762,7 @@
 			(uuid "f297970c-f799-4497-9759-b1f4291a3326")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR036")
 					(unit 1)
@@ -58522,7 +57066,7 @@
 			(uuid "04bd3bac-5ee1-4759-b2a2-d6f50d862c3d")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "U1")
 					(unit 1)
@@ -58682,7 +57226,7 @@
 			(uuid "71d9098a-d415-4b27-9b51-731d688fcd59")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q4")
 					(unit 1)
@@ -58842,7 +57386,7 @@
 			(uuid "c0564863-b0aa-4f7c-83db-c04d40a398c1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q25")
 					(unit 1)
@@ -58921,7 +57465,7 @@
 			(uuid "71e3b21b-a5c4-4e68-a743-d16f51a5047c")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0611")
 					(unit 1)
@@ -59019,7 +57563,7 @@
 			(uuid "1bdc530d-1891-4d24-b80a-a2711e56244b")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9068")
 					(unit 1)
@@ -59149,7 +57693,7 @@
 			(uuid "d03df465-5732-4c82-9eaa-82c745cc5d87")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "J32")
 					(unit 1)
@@ -59228,7 +57772,7 @@
 			(uuid "01b20f49-32e4-4521-8b03-da659dcf6097")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0861")
 					(unit 1)
@@ -59388,7 +57932,7 @@
 			(uuid "54a95bdf-ada0-459e-ba7d-80baf92a7dc1")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q23")
 					(unit 1)
@@ -59548,7 +58092,7 @@
 			(uuid "605c792e-f527-47c4-b3d2-e3d9e6b3f4ae")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q8")
 					(unit 1)
@@ -59627,7 +58171,7 @@
 			(uuid "d9e3191d-aa63-4cb9-81ee-ffca26dd5c0a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0812")
 					(unit 1)
@@ -59706,7 +58250,7 @@
 			(uuid "b62330c9-4a78-45dd-b767-a1b857ec4088")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10062")
 					(unit 1)
@@ -59745,7 +58289,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
 			(at 640.08 313.69 0)
 			(hide yes)
 			(show_name no)
@@ -59789,7 +58333,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25803"
+		(property "LCSC" "C25741"
 			(at 640.08 313.69 0)
 			(hide yes)
 			(show_name no)
@@ -59807,7 +58351,7 @@
 			(uuid "85a42b59-fcab-4885-9e1f-1e26d093852f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "R41")
 					(unit 1)
@@ -59886,7 +58430,7 @@
 			(uuid "f3696493-d7b5-467a-82d9-b0995308987f")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR9972")
 					(unit 1)
@@ -59965,166 +58509,9 @@
 			(uuid "2940389a-7f90-43ea-9025-a359ad1e8f97")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10074")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 632.46 240.03 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "ec266081-661b-42ab-a81b-ada90839d554")
-		(property "Reference" "#PWR9959"
-			(at 632.46 240.03 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "5V_EXP"
-			(at 628.86 240.03 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 240.03 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 240.03 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 989.33 -73.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "3e8635f9-89e4-4b13-be85-a058cf0711d0")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9959")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 632.46 260.35 270)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "ec83cfeb-e721-469b-8e12-fb25ef101a06")
-		(property "Reference" "#PWR9962"
-			(at 632.46 260.35 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 628.86 260.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 0.8 0.8)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 632.46 260.35 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 632.46 260.35 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 1328.42 151.13 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "06cb395c-1eee-4e50-a39d-90715452278e")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "#PWR9962")
 					(unit 1)
 				)
 			)
@@ -60200,7 +58587,7 @@
 			(uuid "c92b224f-88a5-4eb6-83b4-538c71436a78")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10059")
 					(unit 1)
@@ -60278,145 +58665,9 @@
 			(uuid "036c6370-e584-4bef-a304-fea8219cec23")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR018")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "ExpansionCAN:Socket_2x05_CAN_RA")
-		(at 730.25 248.92 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp yes)
-		(uuid "f1499714-37f9-49ac-8d40-0f57ef8e8bb7")
-		(property "Reference" "J29"
-			(at 730.25 238.76 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Value" "PM254-2-05-W-8.5"
-			(at 730.25 259.08 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x05_P2.54mm_Horizontal"
-			(at 730.25 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C2897425.html"
-			(at 730.25 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Description" "Alternativa a J27: socket 2x5 2,54 mm 90 gradi THT (versione commerciale)"
-			(at 730.25 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "Manufacturer" "HCTL"
-			(at 730.25 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "MPN" "PM254-2-05-W-8.5"
-			(at 730.25 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(property "LCSC" "C2897425"
-			(at 730.25 248.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1 1)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "1114765e-159d-45cb-9279-69e2e6e2dbac")
-		)
-		(pin "2"
-			(uuid "513174c6-2ac8-4009-848a-81bf23e9710a")
-		)
-		(pin "3"
-			(uuid "6fdb52f5-22e0-41b8-9172-ce889c1bb2f7")
-		)
-		(pin "4"
-			(uuid "3d534446-fc2b-4c65-9b3d-4cb0adfe9d10")
-		)
-		(pin "5"
-			(uuid "85b5a068-1561-4f4b-aa3b-a570f97ee144")
-		)
-		(pin "6"
-			(uuid "ce90f27c-61c7-4314-a826-fcdf19810729")
-		)
-		(pin "7"
-			(uuid "b683fcc8-f8d8-4995-8928-4cf612d7dde9")
-		)
-		(pin "8"
-			(uuid "322c2b3c-4b60-40cc-b2bf-3999f65465b3")
-		)
-		(pin "9"
-			(uuid "20f279b2-6ad6-4e53-bb3e-7dd3289e58c4")
-		)
-		(pin "10"
-			(uuid "79e56c52-cb4d-4054-a24e-9ca729bac531")
-		)
-		(instances
-			(project "pinout_board_lat_c82v"
-				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
-					(reference "J29")
 					(unit 1)
 				)
 			)
@@ -60492,7 +58743,7 @@
 			(uuid "cc3e7c90-80d6-4dcf-b480-b7e886cf5681")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0836")
 					(unit 1)
@@ -60570,7 +58821,7 @@
 			(uuid "42fccf17-d225-4988-94d2-3a41f28b9e89")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#FLG0102")
 					(unit 1)
@@ -60649,7 +58900,7 @@
 			(uuid "32355307-a371-4f75-9b75-a7c7ab1dd26a")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0817")
 					(unit 1)
@@ -60727,7 +58978,7 @@
 			(uuid "8e628a56-c115-4dff-9fa6-57acb6f8983e")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR0142")
 					(unit 1)
@@ -60856,7 +59107,7 @@
 			(uuid "ae88eb04-f3af-4fe8-a135-77534c041618")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q2")
 					(unit 1)
@@ -60934,7 +59185,7 @@
 			(uuid "8ddd28e9-c8d2-4961-8053-4926df496284")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR10061")
 					(unit 1)
@@ -61094,7 +59345,7 @@
 			(uuid "42e41e02-7882-4ca2-b59a-1f363b5ac455")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "Q22")
 					(unit 1)
@@ -61172,7 +59423,7 @@
 			(uuid "8ad38d05-1f74-4fb4-b9ae-67cb66131894")
 		)
 		(instances
-			(project "pinout_board_lat_c82v"
+			(project "backbone"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03"
 					(reference "#PWR010034")
 					(unit 1)
@@ -61257,7 +59508,7 @@
 		)
 	)
 	(sheet
-		(at 654.05 247.015)
+		(at 609.6 226.695)
 		(size 63.5 11.43)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -61272,7 +59523,7 @@
 		)
 		(uuid "d553162c-8b20-43a2-9044-69e59f8d7945")
 		(property "Sheetname" "Port protection"
-			(at 654.05 244.725 0)
+			(at 609.6 224.405 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -61283,7 +59534,7 @@
 			)
 		)
 		(property "Sheetfile" "port-protect.kicad_sch"
-			(at 654.05 260.725 0)
+			(at 609.6 240.405 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
