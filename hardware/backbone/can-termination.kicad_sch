@@ -2289,7 +2289,7 @@
 			(uuid "506a0a16-bf4e-4d2b-b050-9a3a8e320c0d")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01704")
 					(unit 1)
@@ -2419,7 +2419,7 @@
 			(uuid "a57e6f96-f697-4442-bcec-b9959c6784a0")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "C139")
 					(unit 1)
@@ -2493,7 +2493,7 @@
 			(uuid "b50d3277-97a5-4156-85bd-6daa925ec3a4")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01706")
 					(unit 1)
@@ -2623,7 +2623,7 @@
 			(uuid "1606ddb4-5cdd-4319-b5f4-d5682c23fc69")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R123")
 					(unit 1)
@@ -2765,7 +2765,7 @@
 			(uuid "e59dc375-52c6-4831-81b4-a56d36aee03d")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "Q9")
 					(unit 1)
@@ -2895,7 +2895,7 @@
 			(uuid "a9474056-29a6-4346-a33c-3bca580adbb8")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R124")
 					(unit 1)
@@ -2969,7 +2969,7 @@
 			(uuid "c5b0ec3f-6376-4367-af95-7e3b6b466905")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01705")
 					(unit 1)
@@ -3099,7 +3099,7 @@
 			(uuid "f96d5cf2-8dbb-460f-827b-809117c7aa8d")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R130")
 					(unit 1)
@@ -3229,7 +3229,7 @@
 			(uuid "8b55b9d0-afee-40bc-b90f-77d5c04ccadd")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R128")
 					(unit 1)
@@ -3371,7 +3371,7 @@
 			(uuid "df01ccde-cbe8-4847-959a-726050c2cf78")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "Q10")
 					(unit 1)
@@ -3501,7 +3501,7 @@
 			(uuid "0e1a8120-7f96-47c8-ab53-1d326a488451")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R129")
 					(unit 1)
@@ -3575,7 +3575,7 @@
 			(uuid "d52ec192-3402-4176-841a-177cd6cedfe4")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01703")
 					(unit 1)
@@ -3705,7 +3705,7 @@
 			(uuid "aa8cc002-e25e-4272-b0b7-457f251529a9")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R131")
 					(unit 1)
@@ -3835,7 +3835,7 @@
 			(uuid "cb780ec7-4f30-4f4c-adac-c2e5b4d605ca")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R126")
 					(unit 1)
@@ -3965,7 +3965,7 @@
 			(uuid "568891f3-eb67-4600-aca7-629f8650bdef")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R125")
 					(unit 1)
@@ -4039,7 +4039,7 @@
 			(uuid "c803bf7f-0b0d-48f8-9550-65493ce75018")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01707")
 					(unit 1)
@@ -4169,7 +4169,7 @@
 			(uuid "30612b9c-88ec-4423-8ce8-f4044bae3d4d")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R127")
 					(unit 1)
@@ -4243,7 +4243,7 @@
 			(uuid "152a9ddd-5f71-4086-814d-48cfb51cd0d5")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01708")
 					(unit 1)
@@ -4376,7 +4376,7 @@
 			(uuid "fc941486-7b0c-48ce-957d-788ba2a0573f")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "D7")
 					(unit 1)
@@ -4450,7 +4450,7 @@
 			(uuid "60b17fff-b1f3-4a50-9531-5eae2062e413")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01701")
 					(unit 1)
@@ -4580,7 +4580,7 @@
 			(uuid "cba366e0-a536-4caa-b299-854bed304d08")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "R132")
 					(unit 1)
@@ -4654,7 +4654,7 @@
 			(uuid "839a59fb-f52d-4fda-8914-fe8f7516c2cf")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01702")
 					(unit 1)
@@ -4728,7 +4728,7 @@
 			(uuid "0244beac-91dd-4985-9415-9ede963700eb")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01709")
 					(unit 1)
@@ -4802,7 +4802,7 @@
 			(uuid "24579498-21e0-4d8e-beed-490c84c7058d")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "#PWR01710")
 					(unit 1)
@@ -4932,7 +4932,7 @@
 			(uuid "b5f79a14-375a-4735-a317-b67572aaec15")
 		)
 		(instances
-			(project "backbone"
+			(project "pinout_board_lat_c82v"
 				(path "/9de6ddb4-2647-4876-90a9-c16e585eea03/3c64eedd-cf2f-4427-8511-3f7958be61bb"
 					(reference "C140")
 					(unit 1)
