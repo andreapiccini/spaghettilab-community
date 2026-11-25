@@ -1,245 +1,64 @@
 (version 1)
-# All values in mm. Stackup SIG/GND/PWR(5V)/SIG, JLC04161H-7628 (prepreg 0.2104 er4.4, core 1.065). Impedance from IPC-2141: confirm with JLC calculator.
-(rule "General routing width" (constraint track_width (min 0.12mm)))
-(rule "Standard through vias" (condition "A.Type == 'Via'") (constraint via_diameter (min 0.60mm)) (constraint hole_size (min 0.30mm)))
-(rule "5V backbone trunk" (condition "A.hasNetclass('POWER_5V')") (constraint track_width (min 0.25mm) (opt 1.20mm)))
-(rule "3V3 and ground feeders" (condition "A.hasNetclass('POWER_3V3')") (constraint track_width (min 0.15mm) (opt 0.80mm)))
-(rule "USB VBUS feed" (condition "A.hasNetclass('USB_VBUS')") (constraint track_width (min 0.25mm) (opt 1.20mm)))
-(rule "Universal port conductors" (condition "A.hasNetclass('PORT_IO_POWER')") (constraint track_width (min 0.15mm) (opt 0.50mm)))
-(rule "Port supply and expansion rails" (condition "A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_5V_EXP')") (constraint track_width (min 0.25mm) (opt 0.80mm)))
+# =====================================================================
+# Backbone 6 strati - regole JLCPCB (multistrato 4-6 layer), 2026-11-25
+# Stackup: F.Cu | In1 GND | In2 SIG | In3 SIG | In4 PWR (5V/VCORE) | B.Cu
+# Rame: esterni 1 oz (35 um), interni 0,5 oz (17,5 um) = default JLC.
+# Limiti JLC (tabella capabilities): pista/spazio 0,09 mm; via min 0,45/0,20 mm
+# (multistrato, senza sovrapprezzo); foro-foro reti diverse 0,5 mm, stessa rete 0,254 mm;
+# via-pista 0,254 mm, PTH-pista 0,33 mm, NPTH-pista 0,254 mm (misurati dal foro);
+# pad-pista 0,2 mm; pad-pad SMD 0,127 mm; pad-pad con foro 0,5 mm; pista-bordo 0,2 mm.
+# Larghezze di corrente: IPC-2221, dT 10 C, +20% tolleranza incisione, arrotondate a 0,05 mm.
+# Le regole di corrente sono WARNING (il DRC non conosce la corrente reale di ogni tratto);
+# le regole JLC sono ERRORI.
+# =====================================================================
 
-# 2026-11-23: generic escape. Power/port trunks narrow to 0.30 mm only inside the courtyard of small parts
-# (R, C, RN, U, Q, D), then return to the class width. Specific escapes below take precedence (later rules win).
-(rule "Generic power escape at small pads"
-  (condition "(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS') || A.hasNetclass('POWER_5V_EXP') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_3V3') || A.hasNetclass('GND') || A.hasNetclass('PORT_IO_POWER') || A.hasNetclass('BUCK_SWITCH')) && (A.intersectsCourtyard('R*') || A.intersectsCourtyard('C*') || A.intersectsCourtyard('RN*') || A.intersectsCourtyard('U*') || A.intersectsCourtyard('Q*') || A.intersectsCourtyard('D*'))")
-  (constraint track_width (min 0.15mm) (opt 0.30mm)))
-(rule "Buck switch short wide copper" (condition "A.hasNetclass('BUCK_SWITCH')") (constraint track_width (min 0.25mm) (opt 0.80mm)))
-(rule "USB differential geometry - 90 ohm target JLC7628" (condition "A.hasNetclass('USB_DIFF')") (constraint track_width (min 0.20mm) (opt 0.25mm) (max 0.30mm)) (constraint diff_pair_gap (min 0.12mm) (opt 0.15mm) (max 0.22mm)) (constraint diff_pair_uncoupled (max 5mm)) (constraint skew (max 0.50mm)))
-(rule "USB pair internal spacing" (condition "A.hasNetclass('USB_DIFF') && AB.isCoupledDiffPair()") (constraint clearance (min 0.12mm)))
-(rule "CAN conductors - CAN_P/CAN_N pair" (condition "A.hasNetclass('CAN_BUS')") (constraint track_width (min 0.18mm) (opt 0.20mm)))
-(rule "CAN differential ~120 ohm" (condition "A.hasNetclass('CAN_BUS') && AB.isCoupledDiffPair()") (constraint diff_pair_gap (min 0.20mm) (opt 0.35mm) (max 0.50mm)) (constraint diff_pair_uncoupled (max 10mm)))
-(rule "Sensitive analog away from switch node" (condition "(A.hasNetclass('ANALOG_SENSE') || A.hasNetclass('KELVIN_SENSE') || A.hasNetclass('BUCK_FEEDBACK')) && B.NetName == '/BUCK_SW'") (constraint clearance (min 0.50mm)))
-# RF area exists on all copper layers. No net-specific bypass exceptions.
+# ---------- Limiti di fabbricazione JLC (errori) ----------
+(rule "JLC via 0.45/0.20" (condition "A.Type == 'Via'")
+  (constraint via_diameter (min 0.45mm)) (constraint hole_size (min 0.20mm)) (constraint annular_width (min 0.125mm)))
+(rule "JLC hole to copper (via/NPTH)" (constraint hole_clearance (min 0.254mm)))
+(rule "JLC PTH to track" (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && (B.Type == 'Track' || B.Type == 'Arc')")
+  (constraint hole_clearance (min 0.33mm)))
+(rule "JLC hole to hole same net" (constraint hole_to_hole (min 0.254mm)))
+(rule "JLC hole to hole different nets" (condition "A.NetName != B.NetName") (constraint hole_to_hole (min 0.50mm)))
+(rule "JLC pad to track" (condition "A.Type == 'Pad' && (B.Type == 'Track' || B.Type == 'Arc')") (constraint clearance (min 0.20mm)))
+(rule "JLC SMD pad to pad" (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Pad_Type == 'SMD' && B.Pad_Type == 'SMD'") (constraint clearance (min 0.127mm)))
+(rule "JLC PTH pad to pad" (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Pad_Type == 'Through-hole' && B.Pad_Type == 'Through-hole'") (constraint clearance (min 0.50mm)))
+(rule "Standard low-cost through-via technology" (constraint disallow micro_via blind_via buried_via))
+
+# ---------- Larghezze minime per corrente (warning) ----------
+# 0,5 A per ramo porta: esterno 0,15 mm, interno (0,5 oz) 0,75 mm
+(rule "Port branch 0.5A outer" (severity warning) (layer outer) (condition "A.hasNetclass('PORT_IO_POWER') && !A.intersectsCourtyard('*')") (constraint track_width (min 0.15mm)))
+(rule "Port branch 0.5A inner" (severity warning) (layer inner) (condition "A.hasNetclass('PORT_IO_POWER') && !A.intersectsCourtyard('*')") (constraint track_width (min 0.75mm)))
+# 2 A (VCORE, VPORT* dopo/prima del limitatore SY6280 ~1,9 A, 5V_EXP limitato ~1,9 A, BUCK_SW)
+(rule "2A rails outer" (severity warning) (layer outer) (condition "(A.hasNetclass('POWER_3V3') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_5V_EXP') || A.hasNetclass('BUCK_SWITCH')) && !A.intersectsCourtyard('*')") (constraint track_width (min 0.95mm)))
+(rule "2A rails inner" (severity warning) (layer inner) (condition "(A.hasNetclass('POWER_3V3') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_5V_EXP')) && !A.intersectsCourtyard('*')") (constraint track_width (min 4.90mm)))
+# 3 A (5V dorsale e VBUS USB): sugli interni usare la zona In4, non piste
+(rule "3A rails outer" (severity warning) (layer outer) (condition "(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS')) && !A.intersectsCourtyard('*')") (constraint track_width (min 1.65mm)))
+(rule "3A rails inner" (severity warning) (layer inner) (condition "(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS')) && !A.intersectsCourtyard('*')") (constraint track_width (min 8.55mm)))
+# Uscita dai pad: dentro il courtyard di un componente le alimentazioni possono stringersi (tratti corti)
+(rule "Power neck-down inside courtyards" (condition "(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS') || A.hasNetclass('POWER_5V_EXP') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_3V3') || A.hasNetclass('PORT_IO_POWER') || A.hasNetclass('BUCK_SWITCH') || A.hasNetclass('GND')) && A.intersectsCourtyard('*')")
+  (constraint track_width (min 0.10mm)))
+
+# ---------- Coppie differenziali ----------
+# USB full-speed: 0,15/0,15 su esterno con GND (In1) a 0,1 mm -> circa 90 ohm (stima IPC-2141, verificare con calcolatore JLC)
+(rule "USB differential pair" (condition "A.hasNetclass('USB_DIFF')")
+  (constraint track_width (min 0.13mm) (opt 0.15mm) (max 0.18mm))
+  (constraint diff_pair_gap (min 0.13mm) (opt 0.15mm) (max 0.20mm))
+  (constraint diff_pair_uncoupled (max 5mm)) (constraint skew (max 0.5mm)))
+# CAN: 0,10/0,30 su esterno -> circa 120 ohm (stima); a 1 Mbit/s l'impedenza non e critica
+(rule "CAN differential pair" (condition "A.hasNetclass('CAN_BUS') && A.NetName != '/TERM_R'")
+  (constraint diff_pair_gap (min 0.15mm) (opt 0.30mm) (max 0.50mm))
+  (constraint diff_pair_uncoupled (max 10mm)))
+
+# ---------- Vincoli funzionali (invariati) ----------
+(rule "Sensitive analog away from switch node" (condition "(A.hasNetclass('ANALOG_SENSE') || A.hasNetclass('BUCK_FEEDBACK')) && B.NetName == '/BUCK_SW'") (constraint clearance (min 0.50mm)))
 (rule "No routing in ESP antenna area" (condition "A.intersectsArea('ESP_ANTENNA_RF')") (constraint disallow track via))
-
 (rule "L2 is a reference plane" (layer "In1.Cu") (constraint disallow track))
 (rule "L5 is the power plane - power feeders only" (layer "In4.Cu")
   (condition "!(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS') || A.hasNetclass('POWER_5V_EXP') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_3V3'))")
   (constraint disallow track))
-(rule "Standard low-cost through-via technology" (constraint disallow micro_via blind_via buried_via))
-
-# Local power escapes. Optimum applies only inside component courtyard; trunk remains wide.
-# Escape minimums are not continuous-current ratings. Short escapes only.
-(rule "Escape C5 5V" (condition "A.NetName == '5V' && A.intersectsCourtyard('C5')") (constraint track_width (min 0.15mm) (opt 0.8mm)))
-(rule "Escape C85 5V" (condition "A.NetName == '5V' && A.intersectsCourtyard('C85')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape D6 5V" (condition "A.NetName == '5V' && A.intersectsCourtyard('D6')") (constraint track_width (min 0.25mm) (opt 0.8mm)))
-(rule "Escape J2 5V" (condition "A.NetName == '5V' && A.intersectsCourtyard('J2')") (constraint track_width (min 0.25mm) (opt 0.6mm)))
-(rule "Escape J9 5V" (condition "A.NetName == '5V' && A.intersectsCourtyard('J9')") (constraint track_width (min 0.25mm) (opt 0.6mm)))
-(rule "Escape Q2 5V" (condition "A.NetName == '5V' && A.intersectsCourtyard('Q2')") (constraint track_width (min 0.15mm) (opt 0.4mm)))
-(rule "Escape U4 5V" (condition "A.NetName == '5V' && A.intersectsCourtyard('U4')") (constraint track_width (min 0.25mm) (opt 0.6mm)))
-(rule "Escape C1 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C1')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C125 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C125')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C126 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C126')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C127 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C127')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C128 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C128')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C129 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C129')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C130 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C130')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C132 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C132')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C133 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C133')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C134 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C134')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C135 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C135')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C136 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C136')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C137 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C137')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C74 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C74')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C86 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C86')") (constraint track_width (min 0.25mm) (opt 0.8mm)))
-(rule "Escape C88 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C88')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C89 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C89')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape C9 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('C9')") (constraint track_width (min 0.25mm) (opt 0.8mm)))
-(rule "Escape J17 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('J17')") (constraint track_width (min 0.15mm) (opt 0.6mm)))
-(rule "Escape J20 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('J20')") (constraint track_width (min 0.15mm) (opt 0.6mm)))
-(rule "Escape J3 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('J3')") (constraint track_width (min 0.15mm) (opt 0.6mm)))
-(rule "Escape J4 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('J4')") (constraint track_width (min 0.15mm) (opt 0.6mm)))
-(rule "Escape L1 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('L1')") (constraint track_width (min 0.25mm) (opt 0.8mm)))
-(rule "Escape LED1 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('LED1')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape LED2 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('LED2')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape LED3 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('LED3')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape LED4 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('LED4')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape LED5 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('LED5')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape LED6 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('LED6')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape Q3 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('Q3')") (constraint track_width (min 0.15mm) (opt 0.4mm)))
-(rule "Escape Q4 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('Q4')") (constraint track_width (min 0.15mm) (opt 0.4mm)))
-(rule "Escape Q5 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('Q5')") (constraint track_width (min 0.15mm) (opt 0.4mm)))
-(rule "Escape Q6 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('Q6')") (constraint track_width (min 0.15mm) (opt 0.4mm)))
-(rule "Escape Q7 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('Q7')") (constraint track_width (min 0.15mm) (opt 0.4mm)))
-(rule "Escape Q8 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('Q8')") (constraint track_width (min 0.15mm) (opt 0.4mm)))
-(rule "Escape R104 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R104')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R115 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R115')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R15 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R15')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R16 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R16')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R24 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R24')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R25 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R25')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R36 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R36')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R38 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R38')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R40 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R40')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R42 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R42')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R44 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R44')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R46 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R46')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R48 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R48')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R50 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R50')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R51 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R51')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R52 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R52')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R53 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R53')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R54 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R54')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R55 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('R55')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape TP15 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('TP15')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape U12 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U12')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U13 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U13')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U2 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U2')") (constraint track_width (min 0.15mm) (opt 0.3mm)))
-(rule "Escape U25 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U25')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U26 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U26')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U27 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U27')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U28 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U28')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U29 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U29')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U31 VCORE" (condition "A.NetName == 'VCORE' && A.intersectsCourtyard('U31')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape D6 VBUS" (condition "A.NetName == 'VBUS' && A.intersectsCourtyard('D6')") (constraint track_width (min 0.25mm) (opt 0.8mm)))
-(rule "Escape R110 VBUS" (condition "A.NetName == 'VBUS' && A.intersectsCourtyard('R110')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U3 VBUS" (condition "A.NetName == 'VBUS' && A.intersectsCourtyard('U3')") (constraint track_width (min 0.25mm) (opt 0.6mm)))
-(rule "Escape R103 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R103')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R105 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R105')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R111 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R111')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R22 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R22')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R27 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R27')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R37 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R37')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R39 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R39')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R4 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R4')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R41 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R41')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R43 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R43')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R45 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R45')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R47 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R47')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape R49 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('R49')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U12 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('U12')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U13 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('U13')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U25 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('U25')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U26 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('U26')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U27 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('U27')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U28 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('U28')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U29 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('U29')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U31 GND" (condition "A.NetName == 'GND' && A.intersectsCourtyard('U31')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Escape U4 /BUCK_SW" (condition "A.NetName == '/BUCK_SW' && A.intersectsCourtyard('U4')") (constraint track_width (min 0.15mm) (opt 0.6mm)))
-(rule "Escape U1 pad 1" (condition "A.NetName == 'GND' && A.intersectsArea('ESC_U1_1')") (constraint track_width (min 0.15mm) (opt 0.6mm)))
-(rule "Escape U1 pad 2" (condition "A.NetName == 'VCORE' && A.intersectsArea('ESC_U1_2')") (constraint track_width (min 0.15mm) (opt 0.6mm)))
-(rule "Escape U1 pad 40" (condition "A.NetName == 'GND' && A.intersectsArea('ESC_U1_40')") (constraint track_width (min 0.15mm) (opt 0.6mm)))
-
-# Final review 2026-11-04: design envelopes, see PRE-ROUTING-REVIEW.md.
-(rule "Driver branch conductors" (condition "A.hasNetclass('DRIVER_BRANCH')") (constraint track_width (min 0.20mm) (opt 0.50mm)))
-(rule "Kelvin sense only - no load current" (condition "A.hasNetclass('KELVIN_SENSE')") (constraint track_width (min 0.15mm) (opt 0.15mm)))
-(rule "GPIO signal conductors" (condition "A.hasNetclass('GPIO_DIRECT') || A.hasNetclass('GATE_CTRL') || A.hasNetclass('TERM_5V')") (constraint track_width (min 0.15mm) (opt 0.20mm)))
-(rule "High current rail preference on L5" (layer "In4.Cu") (condition "A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS')") (constraint track_width (min 0.20mm) (opt 4.0mm)))
-(rule "3V3 feeder preference on L5" (layer "In4.Cu") (condition "A.hasNetclass('POWER_3V3')") (constraint track_width (min 0.15mm) (opt 3.0mm)))
-(rule "Port feeders on L5" (layer "In4.Cu") (condition "A.hasNetclass('PORT_IO_POWER') || A.hasNetclass('DRIVER_BRANCH')") (constraint track_width (min 0.20mm) (opt 0.80mm)))
 (rule "Buck switch only on top" (layer "B.Cu") (condition "A.NetName == '/BUCK_SW'") (constraint disallow track via))
 (rule "Buck switch not on inner layers" (layer inner) (condition "A.NetName == '/BUCK_SW'") (constraint disallow track via))
-(rule "Port signal fanout U12" (condition "A.hasNetclass('PORT_IO_POWER') && A.intersectsCourtyard('U12')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Port signal fanout U13" (condition "A.hasNetclass('PORT_IO_POWER') && A.intersectsCourtyard('U13')") (constraint track_width (min 0.15mm) (opt 0.2mm)))
-(rule "Driver pad fanout Q3" (condition "A.hasNetclass('DRIVER_BRANCH') && A.intersectsCourtyard('Q3')") (constraint track_width (min 0.25mm) (opt 0.4mm)))
-(rule "Driver pad fanout Q4" (condition "A.hasNetclass('DRIVER_BRANCH') && A.intersectsCourtyard('Q4')") (constraint track_width (min 0.25mm) (opt 0.4mm)))
-(rule "Driver pad fanout Q5" (condition "A.hasNetclass('DRIVER_BRANCH') && A.intersectsCourtyard('Q5')") (constraint track_width (min 0.25mm) (opt 0.4mm)))
-(rule "Driver pad fanout Q6" (condition "A.hasNetclass('DRIVER_BRANCH') && A.intersectsCourtyard('Q6')") (constraint track_width (min 0.25mm) (opt 0.4mm)))
-(rule "Driver pad fanout Q7" (condition "A.hasNetclass('DRIVER_BRANCH') && A.intersectsCourtyard('Q7')") (constraint track_width (min 0.25mm) (opt 0.4mm)))
-(rule "Driver pad fanout Q8" (condition "A.hasNetclass('DRIVER_BRANCH') && A.intersectsCourtyard('Q8')") (constraint track_width (min 0.25mm) (opt 0.4mm)))
-(rule "Pad fanout J10.1" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_J10_1')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.2" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_J10_2')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.3" (condition "A.NetName == 'VCORE' && A.intersectsArea('FANOUT_J10_3')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.4" (condition "A.NetName == 'VCORE' && A.intersectsArea('FANOUT_J10_4')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.5" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_J10_5')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.7" (condition "A.NetName == 'N_A0' && A.intersectsArea('FANOUT_J10_7')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.8" (condition "A.NetName == 'PORT_A0' && A.intersectsArea('FANOUT_J10_8')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.10" (condition "A.NetName == 'VCORE' && A.intersectsArea('FANOUT_J10_10')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.11" (condition "A.NetName == 'N_A1' && A.intersectsArea('FANOUT_J10_11')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.12" (condition "A.NetName == 'PORT_A1' && A.intersectsArea('FANOUT_J10_12')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.14" (condition "A.NetName == 'N_A2' && A.intersectsArea('FANOUT_J10_14')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.15" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_15')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.16" (condition "A.NetName == 'PORT_A2' && A.intersectsArea('FANOUT_J10_16')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.18" (condition "A.NetName == 'N_A3' && A.intersectsArea('FANOUT_J10_18')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.19" (condition "A.NetName == 'PORT_A3' && A.intersectsArea('FANOUT_J10_19')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.20" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_20')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.22" (condition "A.NetName == 'N_A4' && A.intersectsArea('FANOUT_J10_22')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.23" (condition "A.NetName == 'PORT_A4' && A.intersectsArea('FANOUT_J10_23')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.25" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_25')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.26" (condition "A.NetName == 'N_A5' && A.intersectsArea('FANOUT_J10_26')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.27" (condition "A.NetName == 'PORT_A5' && A.intersectsArea('FANOUT_J10_27')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.30" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_30')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.35" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_35')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.40" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_40')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.45" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_45')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.50" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_50')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J10.55" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J10_55')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.1" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_J11_1')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.2" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_J11_2')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.3" (condition "A.NetName == 'VCORE' && A.intersectsArea('FANOUT_J11_3')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.4" (condition "A.NetName == 'VCORE' && A.intersectsArea('FANOUT_J11_4')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.5" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_J11_5')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.10" (condition "A.NetName == 'VCORE' && A.intersectsArea('FANOUT_J11_10')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.15" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J11_15')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.20" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J11_20')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.25" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J11_25')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.30" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J11_30')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.35" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J11_35')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.40" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J11_40')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.45" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J11_45')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.50" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_J11_50')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout J11.51" (condition "A.NetName == 'VBUS' && A.intersectsArea('FANOUT_J11_51')") (constraint track_width (min 0.2mm) (opt 0.4mm)))
-(rule "Pad fanout U4.1" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_U4_1')") (constraint track_width (min 0.20mm) (opt 0.2mm)))
-(rule "Pad fanout U4.2" (condition "A.NetName == 'GND' && A.intersectsArea('FANOUT_U4_2')") (constraint track_width (min 0.20mm) (opt 0.6mm)))
-(rule "Pad fanout U4.4" (condition "A.NetName == '5V' && A.intersectsArea('FANOUT_U4_4')") (constraint track_width (min 0.20mm) (opt 0.6mm)))
-
-(rule "RN1 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN1') && B.memberOfFootprint('RN1')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN2 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN2') && B.memberOfFootprint('RN2')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN3 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN3') && B.memberOfFootprint('RN3')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN4 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN4') && B.memberOfFootprint('RN4')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN5 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN5') && B.memberOfFootprint('RN5')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN6 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN6') && B.memberOfFootprint('RN6')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN7 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN7') && B.memberOfFootprint('RN7')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN8 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN8') && B.memberOfFootprint('RN8')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN9 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN9') && B.memberOfFootprint('RN9')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN10 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN10') && B.memberOfFootprint('RN10')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN11 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN11') && B.memberOfFootprint('RN11')")
-  (constraint clearance (min 0.15mm)))
-
-(rule "RN12 clearances between 0402 array pads"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN12') && B.memberOfFootprint('RN12')")
-  (constraint clearance (min 0.15mm)))
 
 # Breadboard headers (Hanxia bottom access): courtyards overlap by design, pins and holes do not collide (verified by eye).
 (rule "Breadboard headers courtyard overlap allowed"
@@ -247,31 +66,3 @@
   (severity exclusion)
   (condition "(A.Reference == 'J17' || A.Reference == 'J18' || A.Reference == 'J19' || A.Reference == 'J20' || A.Reference == 'J22' || A.Reference == 'J23' || A.Reference == 'J31' || A.Reference == 'J32' || A.Reference == 'J33' || A.Reference == 'J34') && (B.Reference == 'J17' || B.Reference == 'J18' || B.Reference == 'J19' || B.Reference == 'J20' || B.Reference == 'J22' || B.Reference == 'J23' || B.Reference == 'J31' || B.Reference == 'J32' || B.Reference == 'J33' || B.Reference == 'J34')"))
 
-# Fine-pitch / array pads: pad-to-pad spacing inside the same footprint follows the land pattern, not the netclass clearance.
-(rule "U3 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U3') && B.memberOfFootprint('U3')")
-  (constraint clearance (min 0.15mm)))
-(rule "U25 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U25') && B.memberOfFootprint('U25')")
-  (constraint clearance (min 0.15mm)))
-(rule "U73 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U73') && B.memberOfFootprint('U73')")
-  (constraint clearance (min 0.15mm)))
-(rule "U901 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U901') && B.memberOfFootprint('U901')")
-  (constraint clearance (min 0.15mm)))
-(rule "U902 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('U902') && B.memberOfFootprint('U902')")
-  (constraint clearance (min 0.15mm)))
-(rule "RN901 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN901') && B.memberOfFootprint('RN901')")
-  (constraint clearance (min 0.15mm)))
-(rule "RN902 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN902') && B.memberOfFootprint('RN902')")
-  (constraint clearance (min 0.15mm)))
-(rule "RN903 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN903') && B.memberOfFootprint('RN903')")
-  (constraint clearance (min 0.15mm)))
-(rule "RN904 pad-to-pad inside footprint"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('RN904') && B.memberOfFootprint('RN904')")
-  (constraint clearance (min 0.15mm)))
