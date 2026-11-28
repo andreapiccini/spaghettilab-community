@@ -5625,7 +5625,7 @@
 				)
 			)
 		)
-		(property "Value" "0.05R 1% 1W"
+		(property "Value" "0.04R 1% 1W"
 			(at 218.44 227.33 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5668,7 +5668,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C46961736"
+		(property "LCSC" "C5375400"
 			(at 215.9 226.06 0)
 			(hide yes)
 			(show_name no)

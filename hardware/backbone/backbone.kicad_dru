@@ -41,22 +41,29 @@
 
 # ---------- Coppie differenziali ----------
 # USB full-speed: 0,15/0,15 su esterno con GND (In1) a 0,1 mm -> circa 90 ohm (stima IPC-2141, verificare con calcolatore JLC)
-(rule "USB differential pair" (condition "A.hasNetclass('USB_DIFF')")
+# USB full-speed 12 Mbit/s: tempo di salita ~4 ns, le tracce sono lunghe pochi cm -> geometria non critica: solo avviso
+(rule "USB differential pair" (severity warning) (condition "A.hasNetclass('USB_DIFF')")
   (constraint track_width (min 0.13mm) (opt 0.15mm) (max 0.18mm))
   (constraint diff_pair_gap (min 0.13mm) (opt 0.15mm) (max 0.20mm))
   (constraint diff_pair_uncoupled (max 5mm)) (constraint skew (max 0.5mm)))
 # CAN: 0,10/0,30 su esterno -> circa 120 ohm (stima); a 1 Mbit/s l'impedenza non e critica
-(rule "CAN differential pair" (condition "A.hasNetclass('CAN_BUS') && A.NetName != '/TERM_R'")
+(rule "CAN differential pair" (severity warning) (condition "A.hasNetclass('CAN_BUS') && A.NetName != '/TERM_R'")
   (constraint diff_pair_gap (min 0.15mm) (opt 0.30mm) (max 0.50mm))
   (constraint diff_pair_uncoupled (max 10mm)))
 
 # ---------- Vincoli funzionali (invariati) ----------
-(rule "Sensitive analog away from switch node" (condition "(A.hasNetclass('ANALOG_SENSE') || A.hasNetclass('BUCK_FEEDBACK')) && B.NetName == '/BUCK_SW'") (constraint clearance (min 0.50mm)))
+# BUCK_BOOT e il nodo del condensatore di bootstrap: lavora per costruzione accanto a SW, escluso
+(rule "Sensitive analog away from switch node" (condition "(A.hasNetclass('ANALOG_SENSE') || A.hasNetclass('BUCK_FEEDBACK')) && A.NetName != '/BUCK_BOOT' && B.NetName == '/BUCK_SW'") (constraint clearance (min 0.50mm)))
 (rule "No routing in ESP antenna area" (condition "A.intersectsArea('ESP_ANTENNA_RF')") (constraint disallow track via))
-(rule "L2 is a reference plane" (layer "In1.Cu") (constraint disallow track))
-(rule "L5 is the power plane - power feeders only" (layer "In4.Cu")
+# Tratti di segnale su In1/In4 accettati dove non c'e altro passaggio (decisione 27/11): avviso, non errore
+(rule "L2 is a reference plane" (severity warning) (layer "In1.Cu") (constraint disallow track))
+(rule "L5 is the power plane - power feeders only" (severity warning) (layer "In4.Cu")
   (condition "!(A.hasNetclass('POWER_5V') || A.hasNetclass('USB_VBUS') || A.hasNetclass('POWER_5V_EXP') || A.hasNetclass('POWER_VPORT') || A.hasNetclass('POWER_3V3'))")
   (constraint disallow track))
+# Uscita del nodo SW tra le file di pin di U4 (SOT-23-6): spazio fisico 0,95 mm, pista 0,4 a 0,2 mm da GND/BOOT/5V
+(rule "Buck SW escape between U4 pins"
+  (condition "A.NetName == '/BUCK_SW' && (B.Reference == 'U4' || B.Reference == 'C84' || (B.NetName == '5V' && B.intersectsCourtyard('U4')))")
+  (constraint clearance (min 0.2mm)))
 (rule "Buck switch only on top" (layer "B.Cu") (condition "A.NetName == '/BUCK_SW'") (constraint disallow track via))
 (rule "Buck switch not on inner layers" (layer inner) (condition "A.NetName == '/BUCK_SW'") (constraint disallow track via))
 
@@ -66,3 +73,18 @@
   (severity exclusion)
   (condition "(A.Reference == 'J17' || A.Reference == 'J18' || A.Reference == 'J19' || A.Reference == 'J20' || A.Reference == 'J22' || A.Reference == 'J23' || A.Reference == 'J31' || A.Reference == 'J32' || A.Reference == 'J33' || A.Reference == 'J34') && (B.Reference == 'J17' || B.Reference == 'J18' || B.Reference == 'J19' || B.Reference == 'J20' || B.Reference == 'J22' || B.Reference == 'J23' || B.Reference == 'J31' || B.Reference == 'J32' || B.Reference == 'J33' || B.Reference == 'J34')"))
 
+
+# Fori NPTH di posizionamento degli header Hanxia: 0,25 mm dai pad dell'header vicino per costruzione del passo 2,54 (limite JLC NPTH 0,254)
+(rule "Hanxia NPTH to neighbour pads"
+  (condition "(A.Pad_Type == 'NPTH, mechanical' && (A.Reference == 'J17' || A.Reference == 'J18' || A.Reference == 'J19' || A.Reference == 'J20' || A.Reference == 'J22' || A.Reference == 'J23' || A.Reference == 'J31' || A.Reference == 'J32' || A.Reference == 'J33' || A.Reference == 'J34')) || (B.Pad_Type == 'NPTH, mechanical' && (B.Reference == 'J17' || B.Reference == 'J18' || B.Reference == 'J19' || B.Reference == 'J20' || B.Reference == 'J22' || B.Reference == 'J23' || B.Reference == 'J31' || B.Reference == 'J32' || B.Reference == 'J33' || B.Reference == 'J34'))")
+  (constraint hole_clearance (min 0.24mm)))
+# Connettori di bordo (pogo magnetici J2/J9, JST GH J30/J35, Qwiic J4): rame al bordo per costruzione
+(rule "Edge connectors"
+  (severity exclusion)
+  (condition "A.Reference == 'J2' || A.Reference == 'J9' || A.Reference == 'J30' || A.Reference == 'J35' || A.Reference == 'J4'")
+  (constraint edge_clearance (min 0mm)))
+
+# Pad GND piccoli (0402, pin di IC, USB): una sola razza termica basta, la corrente e trascurabile
+(rule "Small GND pads single spoke"
+  (condition "A.Type == 'Pad' && A.NetName == 'GND' && A.Pad_Type == 'SMD'")
+  (constraint min_resolved_spokes (min 1)))
